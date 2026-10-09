@@ -89,6 +89,8 @@ const LEAD_DELIMITER = /\s+[-–—]\s*|\s*[-–—]\s+|:\s|\s\|\s|\s\/\s|\s\+\s
 interface VenueFeatures {
   /** Ortsname statt Venue („Wien", „Österreich", „Linz"), leer oder fehlend. */
   townLabel: boolean;
+  /** Straße und Hausnummer statt Venue („Karlingerstraße 6"). */
+  isAddress: boolean;
   /** Wörter ohne Stoppwörter und ohne den eigenen Gemeindenamen. */
   tokens: string[];
   compact: string;
@@ -441,6 +443,19 @@ const BUNDESLAENDER = new Set([
   'burgenland', 'oesterreich', 'austria',
 ]);
 
+/** Nur Straße und Hausnummer („Karlingerstraße 6", „Hauptplatz 12a"). */
+const ADDRESS_LINE = /^[\p{L}][\p{L}.\- ]*(?:stra(?:ss|ß)e|str\.|gasse|weg|platz|allee|ring|zeile|ufer|kai|steig|promenade)\s*\d+\s*[a-z]?(?:\s*[/-]\s*\d+)?\s*$/iu;
+
+/** Straße + Hausnummer zum Vergleich, aus `address` oder einer Adresse als Ortsname. */
+function addressKey(e: EventRow): string[] {
+  const keys: string[] = [];
+  for (const raw of [e.address, ADDRESS_LINE.test((e.location_name ?? '').trim()) ? e.location_name : null]) {
+    const k = foldText((raw ?? '').split(',')[0]).replace(/strasse|str\./g, 'str').replace(/[^a-z0-9]+/g, '');
+    if (/\d/.test(k) && k.length >= 5) keys.push(k);
+  }
+  return keys;
+}
+
 function venueFeatures(name: string | null | undefined, plz: string | null): VenueFeatures {
   const raw = (name ?? '').trim();
   const folded = foldText(raw);
@@ -465,6 +480,7 @@ function venueFeatures(name: string | null | undefined, plz: string | null): Ven
   const isTown = !!head && !(BUNDESLAENDER.has(head.replace(/[^a-z]/g, '')) && head !== 'wien') && isKnownAustrianPlaceName(head);
   return {
     townLabel,
+    isAddress: ADDRESS_LINE.test(raw),
     tokens,
     compact: tokens.join(''),
     core: new Set(tokens.filter(t => !GENERIC_VENUE.has(t))),
@@ -523,6 +539,8 @@ function venueRelation(rawA: VenueFeatures, rawB: VenueFeatures): VenueRelation 
   const va = stripTowns(rawA, rawB.townWords);
   const vb = stripTowns(rawB, rawA.townWords);
   if (va.townLabel || vb.townLabel || !va.compact || !vb.compact) return 'unknown';
+  // Eine Adresse als Ortsname sagt nichts über den Venue-Namen der anderen Zeile.
+  if (va.isAddress !== vb.isAddress) return 'unknown';
   // Nur Gattungswörter („Pfarrkirche"), außer beide nennen denselben Ort
   // („Hauptplatz Haugsdorf").
   const same: VenueRelation = va.core.size === 0 && vb.core.size === 0 && !sameTown ? 'generic' : 'same';
@@ -608,6 +626,12 @@ export function placeEvidence(a: EventRow, b: EventRow, opts: PlaceOptions = {})
   const venue = venueRelation(fa.venue, fb.venue);
   const samePlz = !!fa.plz && fa.plz === fb.plz;
 
+  // Dieselbe Straße mit Hausnummer in derselben (oder unbekannter) PLZ ist
+  // derselbe Ort, auch wenn eine Quelle die Adresse als Ortsnamen führt
+  // („Arthofer Arena" / „Karlingerstraße 6", Stichprobe 2026-10-09).
+  const addrB = new Set(addressKey(b));
+  if ((samePlz || !fa.plz || !fb.plz) && addressKey(a).some(k => addrB.has(k))) return { relation: 'same', reason: 'address' };
+
   if (bothPrecise) {
     if (venue === 'differs') return { relation: 'conflict', reason: 'different_venue' };
     if (dist! <= SAME_PLACE_M) return { relation: 'same', reason: 'coords' };
@@ -663,7 +687,9 @@ export function placeEvidence(a: EventRow, b: EventRow, opts: PlaceOptions = {})
   if (sameGemeinde) return { relation: 'town', reason: 'gemeinde' };
   if (townA && townA === townB) return { relation: 'town', reason: 'town_name' };
   if (resolvedDist !== null && resolvedDist <= 3000) return { relation: 'town', reason: 'coords_town' };
-  if (fa.district && fa.district === fb.district) return { relation: 'town', reason: 'district' };
+  // Der Bezirk ist ein Etikett; ohne Etiketten belegt er keinen gemeinsamen Ort
+  // (Halloween-Party Pfaffenhofen ≠ Telfs, Stichprobe 2026-10-09).
+  if (!opts.ignoreLabels && fa.district && fa.district === fb.district) return { relation: 'town', reason: 'district' };
   if (venue === 'related') return { relation: 'town', reason: 'venue_related' };
   return { relation: 'unknown', reason: 'none' };
 }

@@ -326,6 +326,20 @@ describe('dedup-scorer / scorePair', () => {
     expect(scorePair(a, b)).toMatchObject({ decision: 'merge', reason: 'same_ticket_url' });
   });
 
+  it('gleiche Quelle, eine Minute Versatz ist dieselbe Vorstellung (Zeitfenster haben 10 Minuten)', () => {
+    const at = { title: 'Christine Prayon - Abschiedstour', source_name: 'Eventim', location_name: 'Stadtsaal', postal_code: '1060' };
+    const a = makeEvent({ id: 'aaa', source_id: '19157929', start_date: '2026-11-25T19:01:00Z', ...at });
+    const b = makeEvent({ id: 'bbb', source_id: '20688862', start_date: '2026-11-25T19:00:00Z', ...at });
+    expect(scorePair(a, b).decision).toBe('merge');
+  });
+
+  it('Basis- und Terminzeile derselben Serie am selben Tag: Absage-Vermerk einer Zeile trennt sie nicht', () => {
+    const at = { source_name: 'feratel-deskline', start_date: '2026-10-16T14:00:00Z', location_name: 'Turnsaal', postal_code: '6200' };
+    const base = makeEvent({ id: 'aaa', source_id: 'feratel-93f04ffc', title: 'Konga 4 Tweens', ...at });
+    const dated = makeEvent({ id: 'bbb', source_id: 'feratel-93f04ffc:2026-10-16', title: 'ABGESAGT: Konga 4 Tweens', ...at });
+    expect(scorePair(base, dated).decision).toBe('merge');
+  });
+
   it('completely different events => distinct', () => {
     const a = makeEvent({
       id: 'aaa',

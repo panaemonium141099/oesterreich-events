@@ -22,6 +22,7 @@ import { dedupDay, pairKey } from '@/lib/pipeline/dedup-engine';
 import { planDedup, releaseStatus, checkSafetyValve, dropDependentsOfFailedReleases, type DedupPlan } from '@/lib/pipeline/dedup-plan';
 import { isPlausibleEventDay, planningStartDay, viennaDayBoundsUtc, viennaDayOf } from '@/lib/pipeline/dedup-evidence';
 import { isGarbageRow, namedPageKey, type GarbageRowInput } from '@/lib/pipeline/garbage-filter';
+import { staleVersionIds } from '@/lib/pipeline/dedup-cluster';
 import { fetchAllRows, forEachPage } from '@/lib/db/fetch-all';
 import { reportStepReason } from '@/lib/pipeline/step-reason';
 import type { DedupScoreBreakdown, EventRow } from '@/lib/pipeline/types';
@@ -96,18 +97,20 @@ const EVENT_SELECT = 'id,title,description,start_date,end_date,is_all_day,locati
  *  (auch verborgene Duplikate). Ein Titel ohne Namen auf so einer Seite ist
  *  ein Kachelteil, sonst ein echtes Event mit kaputtem Titel (isGarbageRow). */
 const NAMED_PAGES = new Set<string>();
+/** Ältere Fassungen einer Seite mit genau einem Event (staleVersionIds). */
+let STALE_IDS = new Set<string>();
 const isGarbage = (e: GarbageRowInput) => isGarbageRow(e, NAMED_PAGES);
 
 /** Sichtbare Müll-Zeilen finden. Geschrieben wird erst nach dem
  *  Sicherheitsventil (suppressGarbage). */
 async function scanGarbage(): Promise<string[]> {
   console.log('\n--- Phase 1: Garbage-Scan ---');
-  type Row = GarbageRowInput & { id: string; publish_status: string | null };
+  type Row = GarbageRowInput & { id: string; publish_status: string | null; source_id: string | null; last_seen_at: string | null };
   const rows: Row[] = [];
   await forEachPage<Row>(
     (from, to) => supabase
       .from('events')
-      .select('id,title,source_name,source_url,ticket_url,start_date,publish_status')
+      .select('id,title,source_name,source_id,source_url,ticket_url,start_date,last_seen_at,publish_status')
       .gte('start_date', viennaDayBoundsUtc(START_DAY)[0])
       .neq('publish_status', 'suppressed')
       .order('id')
@@ -120,6 +123,8 @@ async function scanGarbage(): Promise<string[]> {
     if (key) NAMED_PAGES.add(key);
   }
   const garbageIds = rows.filter(r => r.publish_status !== 'duplicate' && isGarbage(r)).map(r => r.id);
+  STALE_IDS = staleVersionIds(rows as unknown as EventRow[]);
+  console.log(`  ${STALE_IDS.size} ältere Fassungen von Event-Seiten (gelten wie verwaist)`);
   console.log(`  Found ${garbageIds.length} garbage events`);
   return garbageIds;
 }
@@ -394,9 +399,10 @@ async function main(): Promise<void> {
     scanned += events.length;
     if (events.length === 0) continue;
 
-    const result = dedupDay(events, { manualMerges: manual.merges, manualSplits: manual.splits, sourceLastSeen });
+    const result = dedupDay(events, { manualMerges: manual.merges, manualSplits: manual.splits, sourceLastSeen, staleIds: STALE_IDS });
     const dayPlan = planDedup(events, result.clusters, {
       sourceLastSeen,
+      staleIds: STALE_IDS,
       manualSplits: manual.splits,
       externalPrimaries: await loadExternalPrimaries(events),
     });

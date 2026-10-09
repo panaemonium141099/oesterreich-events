@@ -21,6 +21,7 @@ import {
   titleRelation,
   titleTokensOf,
 } from './dedup-evidence';
+import { sameSeries } from './dedup-cluster';
 import type { EventRow, DedupScoreBreakdown } from './types';
 
 export { normalizeUrlForDedup };
@@ -233,7 +234,9 @@ function decide(a: EventRow, b: EventRow, opts: ScoreOptions = {}): Verdict {
   // beiden Aussagen verschwinden (Prod 2026-10-08: „ABGESAGT: …" verborgen
   // unter der aktiven Zeile). Beide bleiben sichtbar; die veraltete Zeile
   // zieht der Rückzug (abgelöst) zurück.
-  if (hasCancelMarker(a) !== hasCancelMarker(b)) return distinct('cancellation_marker');
+  // Basis- und Terminzeile derselben Serie am selben Tag sind ein Termin; ein
+  // Absage-Vermerk aus der Beschreibung eines anderen Termins trennt sie nicht.
+  if (hasCancelMarker(a) !== hasCancelMarker(b) && !sameSeries(a, b)) return distinct('cancellation_marker');
 
   // Altdaten (verwaiste Zeilen) tragen oft falsche Bezirks-/PLZ-Etiketten;
   // dort zählt nur, was Venue, Pin und Ortsname belegen.
@@ -254,7 +257,9 @@ function decide(a: EventRow, b: EventRow, opts: ScoreOptions = {}): Verdict {
   const sameSourceOtherId = !!a.source_name && a.source_name === b.source_name && a.source_id !== b.source_id;
   const ta = knownStartMs(a);
   const tb = knownStartMs(b);
-  if (sameSourceOtherId && ta !== null && tb !== null && ta !== tb) return distinct('same_source_other_time');
+  // Ein, zwei Minuten Versatz sind Eingabefehler derselben Vorstellung
+  // (Prayon 20:00 / 20:01); echte Zeitfenster liegen 10 Minuten auseinander.
+  if (sameSourceOtherId && ta !== null && tb !== null && Math.abs(ta - tb) >= 5 * 60_000) return distinct('same_source_other_time');
 
   // Verschiedene Titel derselben Quelle sind verschiedene Programmpunkte
   // („Kaiser Wiesn – Dirndl Rocker" / „– Die Lauser"). Verschachtelte Titel

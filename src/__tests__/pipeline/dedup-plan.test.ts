@@ -80,6 +80,14 @@ describe('planDedup: Freigabe nur mit Gegenbeleg', () => {
   const primary = (o: Partial<EventRow> = {}) =>
     ev({ last_seen_at: SEEN, ...o, id: 'b', source_name: 'Eventim' });
 
+  it('ältere Fassung einer Seite (staleIds) bleibt verborgen wie eine verwaiste Zeile', () => {
+    const events = [dup({ title: 'Ganz anderes Event' }), primary()];
+    const stale = new Set(['a']);
+    const p = planDedup(events, dedupDay(events, { sourceLastSeen: lastSeen, staleIds: stale }).clusters,
+      { newClusterId: newId, sourceLastSeen: lastSeen, staleIds: stale });
+    expect(p.release).toEqual([]);
+  });
+
   it('ganz anderer Titel am selben Ort: zwei Events, freigeben', () => {
     const p = planWith([dup({ title: 'Ganz anderes Event' }), primary()]);
     expect(p.release).toEqual([expect.objectContaining({ id: 'a', reason: 'different_title' })]);
@@ -223,6 +231,30 @@ describe('planDedup: Freigabe nur mit Gegenbeleg', () => {
       { newClusterId: newId, sourceLastSeen: lastSeen, externalPrimaries: new Map([['b', stale]]) });
     expect(p.release).toEqual([]);
     expect(p.markDuplicate).toEqual([expect.objectContaining({ id: 'a', primaryId: 't', isNew: false })]);
+  });
+
+  // Stichprobe 2026-10-09 (Runde 2): 52 von 225 Freigaben ließen die sichtbare
+  // Altzeile derselben Quelle am selben Tag stehen (Cäciliakonzert +1 h,
+  // falscher Bezirk).
+  it('verwaister sichtbarer Primary derselben Quelle: frische Zeile frei, Altzeile wird ihr Duplikat', () => {
+    const p = planWith([
+      ev({ id: 'a', source_name: 'q', title: 'Cäciliakonzert', start_date: '2026-10-07T14:00:00Z', last_seen_at: SEEN, district: 'salzburg-umgebung',
+        publish_status: 'duplicate', duplicate_of: 'b' }),
+      ev({ id: 'b', source_name: 'q', title: 'Cäciliakonzert', start_date: '2026-10-07T15:00:00Z', last_seen_at: ORPHAN_SEEN, district: 'zell am see' }),
+    ]);
+    expect(p.release).toEqual([expect.objectContaining({ id: 'a' })]);
+    expect(p.markDuplicate).toEqual([expect.objectContaining({ id: 'b', primaryId: 'a' })]);
+  });
+
+  it('Etiketten-Widerspruch, aber dieselbe Detailseite derselben Quelle: kein Gegenbeleg (falsch konfigurierte Gemeinde)', () => {
+    const url = 'https://www.gemeinde-buch.at/system/web/veranstaltung.aspx?detailonr=225448128-2551';
+    const p = planWith([
+      ev({ id: 'a', source_name: 'q', source_url: url, postal_code: '6220', latitude: null, longitude: null, location_precision: null,
+        location_name: 'Dorfplatz', last_seen_at: SEEN, publish_status: 'duplicate', duplicate_of: 'b' }),
+      ev({ id: 'b', source_name: 'q', source_url: url, postal_code: '6960', latitude: null, longitude: null, location_precision: null,
+        location_name: 'Dorfplatz', last_seen_at: SEEN }),
+    ]);
+    expect(p.release).toEqual([]);
   });
 
   it('verwaister Primary an einem anderen Tag (schon vorbei): frische Zeile wird freigegeben', () => {
@@ -377,6 +409,14 @@ describe('checkSafetyValve', () => {
     expect(checkSafetyValve(p, { maxNewDuplicates: 10, maxReleases: 5 })).toHaveLength(1);
     expect(checkSafetyValve(p, { maxNewDuplicates: 20, maxReleases: 0 })).toHaveLength(1);
     expect(checkSafetyValve(p, { maxNewDuplicates: 20, maxReleases: 5 })).toHaveLength(0);
+  });
+
+  it('Freigaben, die verborgen bleiben (Quarantäne, Ortskonflikt), zählen nicht', () => {
+    const p = { markDuplicate: [], primaries: [], release: [
+      { id: 'r1', previousPrimaryId: 'p', reason: 'different_title', visible: false },
+      { id: 'r2', previousPrimaryId: 'p', reason: 'different_title', visible: true },
+    ] };
+    expect(checkSafetyValve(p, { maxNewDuplicates: 10, maxReleases: 1 })).toHaveLength(0);
   });
 
   it('zählt die Müll-Unterdrückung mit (Prod 2026-10-05: Ufo361 samt Eventim versteckt, ohne Grenze)', () => {

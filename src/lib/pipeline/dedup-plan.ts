@@ -21,6 +21,7 @@ import { isGarbageTitle } from './garbage-filter';
 import { newClusterId as defaultClusterId, pairKey, type ClusterResult } from './dedup-engine';
 import { isOrphanRow, knownStartMs, placeEvidence, titleRelation, titleTokensOf } from './dedup-evidence';
 import { LABEL_CONFLICTS, scorePair } from './dedup-scorer';
+import { isEventSpecificUrl, normalizeUrlForDedup } from './event-url';
 import type { PublishStatus } from '@/lib/quality/score-event';
 import type { EventRow } from './types';
 
@@ -38,6 +39,8 @@ export interface Release {
   previousPrimaryId: string | null;
   /** Gegenbeleg, z. B. 'different_showtime' oder 'primary_of_cluster'. */
   reason: string;
+  /** Wird die Zeile dadurch sichtbar? (Quarantäne/Ortskonflikt bleiben verborgen.) */
+  visible?: boolean;
 }
 
 export interface PrimaryUpdate {
@@ -54,6 +57,8 @@ export interface DedupPlan {
 
 export interface PlanOptions {
   newClusterId?: () => string;
+  /** Ältere Fassungen einer Seite (staleVersionIds): gelten wie verwaist. */
+  staleIds?: ReadonlySet<string>;
   /** Jüngstes last_seen_at je Quelle (verwaiste Zeilen, isOrphanRow). */
   sourceLastSeen?: Map<string, string>;
   /** Bisherige Primaries, die nicht im Tagessatz liegen (anderer Tag). */
@@ -117,6 +122,7 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
   // Recht versteckt hatten, als Phantome wieder auf (Probelauf 2026-10-07:
   // 11.837 Freigaben, überwiegend verwaiste Zeilen aus behobenen Scraper-Fehlern).
   const clusterPrimaries = new Set(clusters.map(c => c.primaryId));
+  const isStale = (r: EventRow) => isOrphanRow(r, opts.sourceLastSeen) || !!opts.staleIds?.has(r.id);
   const VISIBLE = new Set(['published', 'published_low_confidence']);
   const seenMs = (r: EventRow) => (r.last_seen_at ? Date.parse(r.last_seen_at) : NaN);
 
@@ -126,7 +132,7 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
     let best: { row: EventRow; score: number; rank: number } | null = null;
     for (const r of events) {
       if (r.id === e.id || !VISIBLE.has(r.publish_status ?? '') || desiredDuplicate.has(r.id)) continue;
-      if (isOrphanRow(r, opts.sourceLastSeen)) continue;
+      if (isStale(r)) continue;
       const t = titleRelation(e, r);
       if (t !== 'equal' && t !== 'near' && t !== 'contains') continue;
       if (opts.manualSplits?.has(pairKey(e.id, r.id))) continue;
@@ -138,13 +144,17 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
     return best;
   };
 
+  const pushRelease = (e: EventRow, previousPrimaryId: string | null, reason: string) => {
+    plan.release.push({ id: e.id, previousPrimaryId, reason, visible: VISIBLE.has(underlyingStatus(e)) });
+  };
+
   /** Bisheriger Primary weg oder veraltet: an einen sichtbaren Zwilling
    *  hängen statt eine zweite sichtbare Zeile zu erzeugen (Stichprobe
    *  2026-10-09: Weyer, Ebensee, Schwarzenberg doppelt sichtbar). */
   const releaseOrAttach = (e: EventRow, previousPrimaryId: string | null, reason: string) => {
     const twin = visibleTwin(e);
     if (!twin) {
-      plan.release.push({ id: e.id, previousPrimaryId, reason });
+      pushRelease(e, previousPrimaryId, reason);
       return;
     }
     const existing = plan.primaries.find(p => p.id === twin.row.id);
@@ -157,12 +167,12 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
     if (e.publish_status !== 'duplicate' || desiredDuplicate.has(e.id)) continue;
     const previousPrimaryId = e.duplicate_of ?? null;
     if (clusterPrimaries.has(e.id)) {
-      plan.release.push({ id: e.id, previousPrimaryId, reason: 'primary_of_cluster' });
+      pushRelease(e, previousPrimaryId, 'primary_of_cluster');
       continue;
     }
     // Altzeilen, Datums- und Müll-Titel bleiben verborgen, egal was mit
     // ihrem Primary ist.
-    if (isOrphanRow(e, opts.sourceLastSeen) || isDateOnlyTitle(e.title) ||
+    if (isStale(e) || isDateOnlyTitle(e.title) ||
         isGarbageTitle(e.title, { sourceName: e.source_name, ticketUrl: e.ticket_url })) continue;
     // Ältere Fassung derselben Seite (die Quelle liefert die URL inzwischen als
     // andere Zeile): bleibt verborgen, der Rückzug löst sie ab.
@@ -187,8 +197,21 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
     // Verbindung nicht bestätigt (sonst wäre die frische Zeile jetzt Primary,
     // dedup-engine 1c): Gegenbeleg, Mehrdeutigkeit oder anderer Tag. Die
     // frische Zeile bleibt sonst für immer hinter veralteten Daten verborgen.
-    if (isOrphanRow(p, opts.sourceLastSeen)) {
+    if (isStale(p)) {
       releaseOrAttach(e, previousPrimaryId, 'primary_orphaned');
+      // Die Altzeile derselben Quelle steht am selben Tag noch sichtbar da
+      // (alter Zeitzonen-Versatz, falsches Etikett): sie wird Duplikat der
+      // frischen Zeile, sonst ist das Event doppelt sichtbar (Stichprobe
+      // 2026-10-09: 52 von 225 Fällen).
+      const t = titleRelation(e, p);
+      if (byId.has(p.id) && VISIBLE.has(p.publish_status ?? '') && p.source_name === e.source_name &&
+          (t === 'equal' || t === 'near' || t === 'contains') && !desiredDuplicate.has(p.id) && !clusterPrimaries.has(p.id) &&
+          plan.release.some(r => r.id === e.id)) {
+        const clusterId = e.dedup_cluster_id ?? p.dedup_cluster_id ?? nextId();
+        plan.primaries.push({ id: e.id, clusterId, enrichments: {} });
+        plan.markDuplicate.push({ id: p.id, primaryId: e.id, clusterId, score: scorePair(p, e).overallScore, isNew: true });
+        desiredDuplicate.add(p.id);
+      }
       continue;
     }
     const verdict = opts.manualSplits?.has(pairKey(e.id, p.id))
@@ -197,7 +220,7 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
     if (verdict.decision !== 'distinct' || !verdict.reason) continue;
     if (!isCounterEvidence(e, p, verdict.reason)) continue;
     if (verdict.reason === 'different_day') releaseOrAttach(e, previousPrimaryId, 'different_day');
-    else plan.release.push({ id: e.id, previousPrimaryId, reason: verdict.reason });
+    else pushRelease(e, previousPrimaryId, verdict.reason);
   }
   return plan;
 }
@@ -216,6 +239,11 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
  */
 function isCounterEvidence(e: EventRow, p: EventRow, reason: string): boolean {
   if (LABEL_CONFLICTS.has(reason)) {
+    // Dieselbe Detailseite derselben Quelle ist dasselbe Event, auch wenn ein
+    // falsch konfigurierter Gemeinde-Kalender eine fremde PLZ setzt („Buch in
+    // Tirol" liest gemeinde-buch.at, Buch in Vorarlberg).
+    const ue = normalizeUrlForDedup(e.source_url);
+    if (e.source_name === p.source_name && ue && isEventSpecificUrl(ue) && ue === normalizeUrlForDedup(p.source_url)) return false;
     return !['same', 'town'].includes(placeEvidence(e, p, { ignoreLabels: true }).relation);
   }
   if (!RELEASE_REASONS.has(reason)) return false;
@@ -300,8 +328,11 @@ export function checkSafetyValve(plan: DedupPlan, limits: SafetyLimits, garbage 
   if (newDuplicates > limits.maxNewDuplicates) {
     violations.push(`${newDuplicates} neue Duplikate > Grenze ${limits.maxNewDuplicates}`);
   }
-  if (plan.release.length > limits.maxReleases) {
-    violations.push(`${plan.release.length} Freigaben > Grenze ${limits.maxReleases}`);
+  // Nur Freigaben, die etwas sichtbar machen; zurückgehaltene Zeilen bleiben
+  // verborgen und ändern an der Seite nichts.
+  const releases = plan.release.filter(r => r.visible !== false).length;
+  if (releases > limits.maxReleases) {
+    violations.push(`${releases} Freigaben > Grenze ${limits.maxReleases}`);
   }
   return violations;
 }

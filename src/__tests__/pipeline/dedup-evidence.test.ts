@@ -2,6 +2,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { titleRelation, timeRelation, placeRelation, placeEvidence, viennaDayOf, viennaDayBoundsUtc, isPlausibleEventDay, isOrphanRow, planningStartDay, hasCancelMarker } from '@/lib/pipeline/dedup-evidence';
+import { staleVersionIds } from '@/lib/pipeline/dedup-cluster';
 import type { EventRow } from '@/lib/pipeline/types';
 
 const e = (o: Partial<EventRow>): EventRow => ({ id: 'x', title: '', start_date: '2026-10-07T17:30:00Z', ...o }) as EventRow;
@@ -273,7 +274,37 @@ describe('hasCancelMarker', () => {
   });
 });
 
+describe('staleVersionIds', () => {
+  // Stichprobe 2026-10-09: „Radlgruten Challenge" verschob die Quelle vom
+  // 10.10. auf den 17.10.; die alte Zeile derselben Seite wurde freigegeben.
+  const row = (o: Partial<EventRow>) => ({ id: 'x', source_name: 'q', source_id: 'x', title: 'Radlgruten Challenge',
+    source_url: 'https://www.oberdrauburg.at/veranstaltung/radlgruten', last_seen_at: '2026-10-08T07:00:00Z', ...o }) as EventRow;
+  it('ältere Zeile einer Seite mit nur einem Event ist veraltet, auch an einem anderen Tag', () => {
+    const ids = staleVersionIds([row({ id: 'alt', source_id: 'alt', last_seen_at: '2026-09-21T07:00:00Z', start_date: '2026-10-10T08:00:00Z' }),
+      row({ id: 'neu', source_id: 'neu', start_date: '2026-10-17T08:00:00Z' })]);
+    expect([...ids]).toEqual(['alt']);
+  });
+  it('Seite mit mehreren Events (Veranstalter-Website) und Serienzeilen: nichts veraltet', () => {
+    expect(staleVersionIds([row({ id: 'a', source_id: 'a', title: 'Konzert A', last_seen_at: '2026-09-21T07:00:00Z' }),
+      row({ id: 'b', source_id: 'b', title: 'Konzert B' }), row({ id: 'c', source_id: 'c', title: 'Konzert C' })]).size).toBe(0);
+    expect(staleVersionIds([row({ id: 'base', source_id: 'feratel-1', last_seen_at: '2026-10-08T07:00:00Z' }),
+      row({ id: 'dated', source_id: 'feratel-1:2026-10-17', last_seen_at: '2026-09-21T07:00:00Z' })]).size).toBe(0);
+  });
+});
+
 describe('placeEvidence ohne Etiketten', () => {
+  it('der Bezirk allein belegt keinen gemeinsamen Ort (Halloween-Party Pfaffenhofen ≠ Telfs)', () => {
+    const a = e({ district: 'innsbruck-land' } as Partial<EventRow>);
+    const b = e({ district: 'innsbruck-land' } as Partial<EventRow>);
+    expect(placeEvidence(a, b, { ignoreLabels: true }).relation).not.toBe('town');
+  });
+
+  it('Adresse als Ortsname ist kein anderer Venue; gleiche Adresse ist derselbe Ort', () => {
+    const a = e({ location_name: 'Arthofer Arena - Sportplatz Hartkirchen', address: 'Karlingerstraße 6', postal_code: '4081' } as Partial<EventRow>);
+    const b = e({ location_name: 'Karlingerstraße 6', address: 'Karlingerstraße 6', postal_code: '4081' } as Partial<EventRow>);
+    expect(placeRelation(a, b)).toBe('same');
+  });
+
   it('Gemeinde-Mittelpunkte aus falschen Etiketten widersprechen nicht (gleicher Venue-Name)', () => {
     const a = e({ location_name: 'Gemeindesaal Buch', postal_code: '6220', latitude: 47.38, longitude: 11.77, location_precision: 'municipality' } as Partial<EventRow>);
     const b = e({ location_name: 'Gemeindesaal Buch', postal_code: '6960', latitude: 47.52, longitude: 9.81, location_precision: 'municipality' } as Partial<EventRow>);

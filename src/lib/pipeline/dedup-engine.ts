@@ -28,6 +28,8 @@ export interface EngineOptions {
   manualSplits?: Set<string>;
   /** Jüngstes last_seen_at je Quelle (für verwaiste Zeilen, siehe isOrphanRow). */
   sourceLastSeen?: Map<string, string>;
+  /** Ältere Fassungen einer Seite (staleVersionIds): gelten wie verwaist. */
+  staleIds?: ReadonlySet<string>;
 }
 
 export interface ClusterResult {
@@ -194,7 +196,7 @@ export function dedupDay(events: EventRow[], opts: EngineOptions = {}): DayResul
   const byId = new Map(events.map(e => [e.id, e]));
   // Verwaiste Altzeilen sind kein Gegenbeleg: sie machen weder Einträge
   // mehrdeutig noch blockieren sie einen Cluster (dürfen aber hinein).
-  const orphans = new Set(events.filter(e => isOrphanRow(e, opts.sourceLastSeen)).map(e => e.id));
+  const orphans = new Set(events.filter(e => isOrphanRow(e, opts.sourceLastSeen) || !!opts.staleIds?.has(e.id)).map(e => e.id));
   const conflicting = (x: string, y: string) =>
     !orphans.has(x) && !orphans.has(y) && isHardDistinct(decide(byId.get(x)!, byId.get(y)!));
   const stats: DayStats = { candidatePairs: 0, merge: 0, uncertain: 0, ambiguousDropped: 0, blockedByConflict: 0 };

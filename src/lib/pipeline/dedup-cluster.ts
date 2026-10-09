@@ -35,6 +35,58 @@ export function wouldBeVisible(e: EventRow): boolean {
   return e.publish_status !== 'needs_review' && e.publish_status !== 'suppressed';
 }
 
+/** Uhrzeit-Spanne vor dem Titel („10:00 Uhr - 16:00 Uhr…"). */
+const LEADING_TIME = /^\s*\d{1,2}[:.]\d{2}\s*(?:uhr)?\s*(?:-|–|bis)\s*\d{1,2}[:.]\d{2}/i;
+
+/** `long` ist `short` mit angeklebtem Text ohne Trennzeichen. */
+function gluedOnto(long: string | null | undefined, short: string | null | undefined): boolean {
+  const l = (long ?? '').trim();
+  const s = (short ?? '').trim();
+  if (s.length < 8 || l.length <= s.length || !l.toLowerCase().startsWith(s.toLowerCase())) return false;
+  return /^[\p{L}\p{N}"„“]/u.test(l.slice(s.length));
+}
+
+/** Basis- und Terminzeile derselben Serie („id" / „id:2026-10-14"). */
+export function sameSeries(a: EventRow, b: EventRow): boolean {
+  const family = (e: EventRow) => (e.source_id ?? '').replace(/:\d{4}-\d{2}-\d{2}$/, '');
+  return !!a.source_name && a.source_name === b.source_name && a.source_id !== b.source_id &&
+    !!a.source_id && family(a) === family(b);
+}
+
+/**
+ * Ältere Fassungen einer Seite, die genau ein Event zeigt: die Quelle liefert
+ * dieselbe Detailseite inzwischen als andere Zeile (Titel korrigiert, Termin
+ * verschoben: „Radlgruten Challenge" 10.10. → 17.10., Stichprobe 2026-10-09).
+ * Solche Zeilen gelten im Dedup wie verwaiste: nie Primary, nie Gegenbeleg,
+ * nie freigegeben. Nicht bei Seiten mit mehreren Events (im letzten Besuch
+ * mehr als ein Titel, z. B. Veranstalter-Websites) und nicht zwischen Basis-
+ * und Terminzeilen einer Serie.
+ */
+export function staleVersionIds(rows: EventRow[]): Set<string> {
+  const DAY = 86_400_000;
+  const seen = (e: EventRow) => (e.last_seen_at ? Date.parse(e.last_seen_at) : NaN);
+  const pages = new Map<string, EventRow[]>();
+  for (const r of rows) {
+    if (!r.source_url || !r.source_name || isNaN(seen(r))) continue;
+    const key = `${r.source_name}|${r.source_url}`;
+    pages.set(key, [...(pages.get(key) ?? []), r]);
+  }
+  const out = new Set<string>();
+  for (const list of pages.values()) {
+    if (list.length < 2) continue;
+    const newest = Math.max(...list.map(seen));
+    const lastVisit = list.filter(r => seen(r) >= newest - 12 * 3_600_000);
+    const titles = new Set(lastVisit.map(r => (r.title ?? '').trim().toLowerCase()));
+    if (titles.size !== 1) continue;
+    for (const r of list) {
+      if (seen(r) >= newest - DAY) continue;
+      if (lastVisit.some(n => sameSeries(n, r))) continue;
+      out.add(r.id);
+    }
+  }
+  return out;
+}
+
 /** Zusatzprodukte einer Show (Eventim führt sie als eigene Produkte). */
 const ADD_ON = /\b(?:vip|package|packages|upgrade|paket|camping|caravan|parken|parking|hotelpaket|fanpaket)\b/i;
 
@@ -89,10 +141,19 @@ export function selectPrimary(events: EventRow[], isOrphan: (id: string) => bool
   // Ältere Fassung derselben Seite: die Quelle liefert dieselbe URL
   // inzwischen als andere Zeile (neuer Titel, neue Kennung). Die zuletzt
   // gesehene ist die aktuelle (Prod 2026-10-08: Absagen und Titelkorrekturen).
+  // Basis- und Terminzeilen einer Serie (Feratel „id" / „id:2026-10-14")
+  // sind verschiedene Termine, keine Fassungen (gemeinsame Veranstalter-URL).
   const seen = (e: EventRow) => (e.last_seen_at ? Date.parse(e.last_seen_at) : NaN);
   const isOlderVersion = (e: EventRow) => (events.some(n =>
     n !== e && !!n.source_url && n.source_url === e.source_url && n.source_name === e.source_name &&
-    seen(n) - seen(e) > 86_400_000 && (wouldBeVisible(n) || !wouldBeVisible(e))) ? 1 : 0);
+    !sameSeries(n, e) && seen(n) - seen(e) > 86_400_000 && (wouldBeVisible(n) || !wouldBeVisible(e))) ? 1 : 0);
+  // Ohne Koordinaten fehlt ein Event in Liste und Karte (/api/events,
+  // event_map_points filtern auf lat/lng; Stichprobe 2026-10-09).
+  const hasPin = (e: EventRow) => (e.latitude != null && e.longitude != null ? 1 : 0);
+  // Listen-Text am Titel: angeklebter Zusatz ohne Trennzeichen („…„Der
+  // Kasperl kommt“Buch & Co.") oder Uhrzeit davor („10:00 Uhr - 16:00 Uhr…").
+  const isUnclean = (e: EventRow) => (LEADING_TIME.test(e.title ?? '') ||
+    events.some(n => n !== e && gluedOnto(e.title, n.title)) ? 1 : 0);
 
   // Serien-Basiszeile: dieselbe Quelle führt für den Termin eine eigene Zeile
   // mit dem Datum in der Kennung (Feratel „…:2026-10-14"). Die Basiszeile
@@ -108,6 +169,8 @@ export function selectPrimary(events: EventRow[], isOrphan: (id: string) => bool
     const freshA = isOrphan(a.id) ? 0 : 1;
     const freshB = isOrphan(b.id) ? 0 : 1;
     if (freshA !== freshB) return freshB - freshA;
+    if (hasPin(a) !== hasPin(b)) return hasPin(b) - hasPin(a);
+    if (isUnclean(a) !== isUnclean(b)) return isUnclean(a) - isUnclean(b);
     if (isOlderVersion(a) !== isOlderVersion(b)) return isOlderVersion(a) - isOlderVersion(b);
     if (isWanderingBase(a) !== isWanderingBase(b)) return isWanderingBase(a) - isWanderingBase(b);
     // Ein „Titel" nur aus Datum/Uhrzeit (Scraper-Artefakt) wird nicht angezeigt.

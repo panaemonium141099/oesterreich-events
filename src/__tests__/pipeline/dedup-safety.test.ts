@@ -205,6 +205,41 @@ describe('Primary-Wahl', () => {
     expect(cluster.primaryId).toBe('s');
   });
 
+  // Stichprobe 2026-10-09 (Runde 2): eine Zeile ohne Koordinaten wurde
+  // Primary, die Feratel-Zeilen mit Gebäude-Pin verschwanden; ohne Pin fehlt
+  // ein Event in Liste und Karte.
+  it('Zeile mit Koordinaten schlägt Zeile ohne, auch gegen den bisherigen Primary', () => {
+    const noPin = ev({ id: 'n', title: 'Herbstkonzert', start_date: '2026-10-24T17:00:00Z', source_name: 'q1', quality_score: 95,
+      latitude: null, longitude: null, location_precision: null } as Partial<EventRow> & { id: string; title: string; start_date: string; source_name: string });
+    const pin = ev({ id: 'p', title: 'Herbstkonzert', start_date: '2026-10-24T17:00:00Z', source_name: 'q2', quality_score: 60,
+      publish_status: 'duplicate', duplicate_of: 'n' });
+    const [cluster] = dedupDay([noPin, pin]).clusters;
+    expect(cluster.primaryId).toBe('p');
+  });
+
+  it('Feratel-Terminzeile und ihre Basiszeile sind keine Fassungen voneinander (gemeinsame Veranstalter-URL)', () => {
+    const url = 'https://www.wels.at/kulturinwels';
+    const dated = ev({ id: 'd', title: 'Konzert X', start_date: '2026-10-24T17:00:00Z', source_name: 'feratel-deskline', source_id: 'feratel-abc:2026-10-24',
+      source_url: url, last_seen_at: '2026-09-21T03:00:00Z', quality_score: 70 });
+    const base = ev({ id: 'b', title: 'Konzert X', start_date: '2026-10-24T17:00:00Z', source_name: 'feratel-deskline', source_id: 'feratel-abc',
+      source_url: url, last_seen_at: '2026-10-09T03:00:00Z', publish_status: 'duplicate', duplicate_of: 'd', quality_score: 70 });
+    const [cluster] = dedupDay([dated, base]).clusters;
+    expect(cluster.primaryId).toBe('d');
+  });
+
+  it('angeklebter Zusatz oder Uhrzeit vor dem Titel verliert gegen den sauberen Titel derselben Seite', () => {
+    const at = { source_name: 'q1', start_date: '2026-10-20T08:00:00Z' };
+    const clean = ev({ id: 'c', title: 'Frohnleitner Literaturherbst 2026 „Der Kasperl kommt“', ...at, last_seen_at: '2026-10-06T03:00:00Z',
+      source_url: 'https://www.frohnleiten.com/lit', publish_status: 'duplicate', duplicate_of: 'g', quality_score: 70 });
+    const glued = ev({ id: 'g', title: 'Frohnleitner Literaturherbst 2026 „Der Kasperl kommt“Buch & Co. - Bücherei Frohnleiten', ...at,
+      last_seen_at: '2026-10-09T03:00:00Z', source_url: 'https://www.frohnleiten.com/lit', quality_score: 70 });
+    expect(dedupDay([clean, glued]).clusters[0].primaryId).toBe('c');
+    const timed = ev({ id: 't', title: '10:00 Uhr - 16:00 Uhr"Stress lass nach" - Ein Tag für mehr Ruhe', source_name: 'q2', start_date: '2026-10-20T08:00:00Z' });
+    const plain = ev({ id: 'p', title: '"Stress lass nach" - Ein Tag für mehr Ruhe', source_name: 'q3', start_date: '2026-10-20T08:00:00Z',
+      publish_status: 'duplicate', duplicate_of: 't', quality_score: 10 });
+    expect(dedupDay([timed, { ...plain, quality_score: 70 }]).clusters[0].primaryId).toBe('p');
+  });
+
   it('Titel ohne eingebautes Datum wird angezeigt (Prod: „Biodiversitätszentrum … 19.11.2026")', () => {
     const ticket = { ticket_url: 'https://www.ooe.gv.at/v/123' };
     const dated = ev({ id: 'd', title: 'Biodiversitätszentrum Oberösterreich 19.11.2026', start_date: '2026-11-19T17:00:00Z', source_name: 'q1', quality_score: 95, ...ticket });
