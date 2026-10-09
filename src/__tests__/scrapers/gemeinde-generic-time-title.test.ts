@@ -17,7 +17,8 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import * as cheerio from 'cheerio';
-import { GenericGemeindeScraper, extractTimeOfDay } from '../../lib/scrapers/GenericGemeindeScraper';
+import { GenericGemeindeScraper } from '../../lib/scrapers/GenericGemeindeScraper';
+import { extractTimeOfDay } from '../../lib/scrapers/time-of-day';
 
 const fixture = (name: string) =>
   readFileSync(join(__dirname, 'fixtures', name), 'utf8');
