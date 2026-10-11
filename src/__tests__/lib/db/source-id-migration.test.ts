@@ -74,6 +74,26 @@ describe('planSourceIdMigrations', () => {
     expect(planSourceIdMigrations(events, legacy, new Set()).map((m) => m.id)).toEqual(['e1']);
   });
 
+  it('nimmt am selben Tag den Termin mit derselben Uhrzeit', () => {
+    // Zwei Führungen am 18.10. unter einer alten ID, die Zeile steht auf 14:00 Wien.
+    const events = [ev('fuehrung-10', '2026-10-18T08:00:00.000Z', 'alt'), ev('fuehrung-14', '2026-10-18T12:00:00.000Z', 'alt')];
+    const legacy = [row('e1', 'alt', '2026-10-18T12:00:00+00:00')];
+    expect(planSourceIdMigrations(events, legacy, new Set()).map((m) => m.to)).toEqual(['fuehrung-14']);
+  });
+
+  it('gibt eine Zeile nie an einen Termin einer anderen Website', () => {
+    // Gekürzte Registry-IDs teilten sich Gemeinden (Prod 2026-10-11: 538
+    // von 13.099). Ohne Termin der eigenen Seite bleibt die Zeile stehen.
+    const now = new Date('2026-10-01T10:00:00Z');
+    const site = (url: string, id: string, start: string) => ({ ...ev(id, start, 'alt'), source_url: url }) as ScrapedEvent;
+    const legacy = [{ ...row('e1', 'alt', '2026-10-10T00:00:00+00:00'), source_url: 'https://www.brunn-wild.gv.at/jobmesse' }];
+    const elsewhere = [site('https://www.irnfritz.at/jobmesse', 'irnfritz-10', '2026-10-10'), site('https://irnfritz.at/x', 'irnfritz-11', '2026-10-11')];
+    expect(planSourceIdMigrations(elsewhere, legacy, new Set(), now)).toEqual([]);
+    // Dieselbe Website, auch ohne www und über http.
+    const own = [...elsewhere, site('http://brunn-wild.gv.at/jobmesse-2', 'brunn-10', '2026-10-10')];
+    expect(planSourceIdMigrations(own, legacy, new Set(), now).map((m) => m.to)).toEqual(['brunn-10']);
+  });
+
   it('bleibt in der eigenen Quelle und ignoriert Events ohne alte ID', () => {
     const events = [ev('neu', '2026-10-10', 'alt'), ev('x', '2026-10-10'), ev('y', '2026-10-10', 'y')];
     const legacy = [row('e1', 'alt', '2026-10-10T00:00:00+00:00', 'gemeinde-registry')];

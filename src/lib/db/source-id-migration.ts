@@ -23,6 +23,7 @@ export interface LegacyRow {
   source_name: string;
   source_id: string;
   start_date: string;
+  source_url?: string | null;
 }
 
 export interface SourceIdMove {
@@ -32,10 +33,21 @@ export interface SourceIdMove {
   to: string;
 }
 
-type MigrationInput = Pick<ScrapedEvent, 'source_name' | 'source_id' | 'previous_source_id' | 'start_date'>;
+type MigrationInput = Pick<ScrapedEvent, 'source_name' | 'source_id' | 'previous_source_id' | 'start_date'> &
+  Partial<Pick<ScrapedEvent, 'source_url'>>;
 
 const key = (sourceName: string, sourceId: string) => `${sourceName}::${sourceId}`;
 const viennaDay = (iso: string) => toViennaDate(new Date(iso));
+
+/** Host ohne www, sonst null (fehlende oder kaputte URL). */
+function site(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).hostname.toLowerCase().replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+}
 
 const withPrevious = <T extends MigrationInput>(events: readonly T[]) =>
   events.filter((e) => e.previous_source_id && e.previous_source_id !== e.source_id);
@@ -44,12 +56,16 @@ const withPrevious = <T extends MigrationInput>(events: readonly T[]) =>
  * Rein: welche alte Zeile bekommt welche neue ID. `existingKeys` sind die
  * neuen IDs (`source_name::source_id`), die schon eine Zeile haben.
  *
- * Erst bekommt jede Zeile den Termin an ihrem Tag. Danach geht eine
- * künftige Zeile ohne solchen Termin an den nächstgelegenen freien Termin
- * derselben alten ID: der alte Parser las das Datum teils aus Kurztext oder
- * Titel (Trockenlauf 2026-10-07: 7 von 553 Zeilen), die Zeile bliebe sonst
- * mit falschem Datum neben dem richtigen Termin stehen. Vergangene Zeilen
- * bleiben, was sie sind.
+ * Erst bekommt jede Zeile den Termin an ihrem Tag, bei mehreren den mit
+ * ihrer Uhrzeit. Danach geht eine künftige Zeile ohne solchen Termin an
+ * den nächstgelegenen freien Termin derselben alten ID: der alte Parser las
+ * das Datum teils aus Kurztext oder Titel (Trockenlauf 2026-10-07: 7 von
+ * 553 Zeilen), die Zeile bliebe sonst mit falschem Datum neben dem
+ * richtigen Termin stehen. Vergangene Zeilen bleiben, was sie sind.
+ *
+ * Eine Zeile wechselt nie die Website: gekürzte gemeinde-registry-IDs
+ * teilten sich Gemeinden (Prod 2026-10-11: 538 von 13.099 alten IDs unter
+ * mehreren Websites), die Zeile gehört dem Termin ihrer eigenen Seite.
  */
 export function planSourceIdMigrations(
   events: readonly MigrationInput[],
@@ -64,8 +80,14 @@ export function planSourceIdMigrations(
   }
   const claimed = new Set(existingKeys);
   const moves: SourceIdMove[] = [];
-  const free = (row: LegacyRow) =>
-    (byPrevious.get(key(row.source_name, row.source_id)) ?? []).filter((e) => !claimed.has(key(e.source_name, e.source_id)));
+  const free = (row: LegacyRow) => {
+    const rowSite = site(row.source_url);
+    return (byPrevious.get(key(row.source_name, row.source_id)) ?? []).filter((e) => {
+      if (claimed.has(key(e.source_name, e.source_id))) return false;
+      const eventSite = site(e.source_url);
+      return !rowSite || !eventSite || rowSite === eventSite;
+    });
+  };
   const take = (row: LegacyRow, target: MigrationInput) => {
     claimed.add(key(target.source_name, target.source_id));
     moves.push({ id: row.id, source_name: row.source_name, from: row.source_id, to: target.source_id });
@@ -74,7 +96,9 @@ export function planSourceIdMigrations(
   const unmatched: LegacyRow[] = [];
   for (const row of legacyRows) {
     const day = viennaDay(row.start_date);
-    const target = free(row).find((e) => viennaDay(e.start_date) === day);
+    const sameDay = free(row).filter((e) => viennaDay(e.start_date) === day);
+    const at = new Date(row.start_date).getTime();
+    const target = sameDay.find((e) => new Date(e.start_date).getTime() === at) ?? sameDay[0];
     if (target) take(row, target);
     else unmatched.push(row);
   }
@@ -99,7 +123,7 @@ async function loadRows(supabase: SupabaseClient, sourceName: string, ids: strin
   for (let i = 0; i < unique.length; i += CHUNK) {
     const { data, error } = await supabase
       .from('events')
-      .select('id, source_name, source_id, start_date')
+      .select('id, source_name, source_id, start_date, source_url')
       .eq('source_name', sourceName)
       .in('source_id', unique.slice(i, i + CHUNK));
     if (error) throw new Error(`source-id-migration: ${error.message}`);
