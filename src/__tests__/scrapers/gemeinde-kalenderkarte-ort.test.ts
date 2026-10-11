@@ -22,7 +22,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import * as cheerio from 'cheerio';
 import { GenericGemeindeScraper } from '../../lib/scrapers/GenericGemeindeScraper';
-import { GemeindeRegistryScraper } from '../../lib/scrapers/GemeindeRegistryScraper';
+import { GemeindeRegistryScraper, registryEventId } from '../../lib/scrapers/GemeindeRegistryScraper';
 import { parseCalendarizeTerm, readCalendarizeCard, usesPlaceSuffix } from '../../lib/scrapers/calendarize-card';
 
 const fixture = (name: string) => readFileSync(join(__dirname, 'fixtures', name), 'utf8');
@@ -206,7 +206,6 @@ describe('gemeinde-registry: Kalenderkarten (oberpullendorf)', () => {
     lat: 47.5, lng: 16.5, strategy: 'generic-dates', status: 'active', eventUrl: URL,
   };
   const events: Ev[] = (new GemeindeRegistryScraper() as any).parsePage(oberpullendorf, entry);
-  const id = (t: string, start: string) => `registry-gen-${Buffer.from(t + start).toString('base64').substring(0, 24)}`;
 
   it('liest Titel ohne Ort, den Ort und das Ende', () => {
     const [halloween] = events.filter(e => e.title === 'Halloween im Garten');
@@ -217,9 +216,9 @@ describe('gemeinde-registry: Kalenderkarten (oberpullendorf)', () => {
 
   it('behält die source_id aus der Überschrift', () => {
     const [halloween] = events.filter(e => e.title === 'Halloween im Garten');
-    expect(halloween.source_id).toBe(id('Halloween im Garten | Hauptplatz 10', '2026-10-31T16:00:00'));
-    expect(halloween.source_id).toBe('registry-gen-SGFsbG93ZWVuIGltIEdhcnRl');
-    expect(events.every(e => e.previous_source_id === undefined)).toBe(true);
+    expect(halloween).toMatchObject(registryEventId('gen', 'Halloween im Garten | Hauptplatz 10', '2026-10-31T16:00:00'));
+    // Alte, gekürzte ID der bestehenden Zeile (gemeinde-registry-source-id.test.ts).
+    expect(halloween.previous_source_id).toBe('registry-gen-SGFsbG93ZWVuIGltIEdhcnRl');
   });
 
   it('liest die künftigen Karten', () => {

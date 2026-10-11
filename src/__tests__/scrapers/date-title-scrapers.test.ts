@@ -49,9 +49,11 @@ describe('gemeinde-registry: Datums-Überschrift vor dem Titel (ottenschlag)', (
       ['Pfarre Ottenschlag: Begegnungstage mit dem Bischofsvikar', '2026-10-11'],
       ['Oktoberfest vom Hilfswerk Ottenschlag', '2026-10-11T10:00:00'],
     ]);
-    // Alte ID aus "Ganztägig" bzw. "10:00 - 18:00": der Sync übernimmt die Zeile.
+    // Alte ID ist seit 2026-10-11 die gekürzte aus dem Titel: auf sie hat
+    // der Sync die Zeilen aus "Ganztägig" bzw. "10:00 - 18:00" ab 09.10.
+    // umgeschlüsselt (gemeinde-registry-source-id.test.ts).
     expect(events[1].previous_source_id).toBe(
-      `registry-gen-${Buffer.from('10:00 - 18:00' + '2026-10-11T10:00:00').toString('base64').substring(0, 24)}`,
+      `registry-gen-${Buffer.from('Oktoberfest vom Hilfswerk Ottenschlag' + '2026-10-11T10:00:00').toString('base64').substring(0, 24)}`,
     );
   });
 });

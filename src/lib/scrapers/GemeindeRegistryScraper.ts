@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import * as vm from 'vm';
+import { createHash } from 'crypto';
 import { readFileSync, readdirSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { BaseScraper } from './BaseScraper';
@@ -25,6 +26,25 @@ export interface PaginationLogEntry {
   failedNextUrl?: string;
   eventsPage1: number;
   eventsTotal: number;
+}
+
+/**
+ * source_id eines Termins: Hash aus vollem Titel und Beginn, dazu der Tag.
+ *
+ * Bis 2026-10 war die ID `titel + beginn` als Base64, gekürzt auf 24
+ * Zeichen, also nur die ersten 18 Byte: ab 18 Byte Titel fiel das Datum
+ * weg (Prod 2026-10-11: 8.799 von 9.107 künftigen Zeilen). Alle Termine
+ * eines Titels teilten eine Zeile, die jede Nacht zum nächsten Termin
+ * wanderte und als alte Zeile im Dedup Primary blieb. Die alte ID geht als
+ * previous_source_id mit; der Sync gibt die Zeile an den Termin an ihrem
+ * Tag (source-id-migration.ts), die übrigen bekommen eigene Zeilen.
+ */
+export function registryEventId(form: string, title: string, start: string): Pick<ScrapedEvent, 'source_id' | 'previous_source_id'> {
+  const key = title + start;
+  return {
+    source_id: `registry-${form}-${createHash('sha256').update(key).digest('hex').slice(0, 16)}-${start.slice(0, 10)}`,
+    previous_source_id: `registry-${form}-${Buffer.from(key).toString('base64').substring(0, 24)}`,
+  };
 }
 
 /**
@@ -504,7 +524,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
           }
 
           events.push({
-            source_id: `registry-jsonld-${Buffer.from(item.name + startDate).toString('base64').substring(0, 24)}`,
+            ...registryEventId('jsonld', item.name, startDate),
             source_name: this.name,
             source_url: item.url || entry.eventUrl!,
             title: this.stripHtml(item.name).trim(),
@@ -602,7 +622,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         const locationText = $el.find('.mec-event-loc-place, .mec-event-location').text().trim();
 
         events.push({
-          source_id: `registry-mec-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
+          ...registryEventId('mec', title, startDate),
           source_name: this.name,
           source_url: link.startsWith('http') ? link : new URL(link, entry.eventUrl!).href,
           title,
@@ -695,7 +715,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         );
 
         events.push({
-          source_id: `registry-tribe-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
+          ...registryEventId('tribe', title, startDate),
           source_name: this.name,
           source_url: link.startsWith('http') ? link : new URL(link, entry.eventUrl!).href,
           title,
@@ -755,7 +775,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         const category = $el.find('.bemHeaderContainer small.text-muted').text().trim();
 
         events.push({
-          source_id: `registry-gem2go-${Buffer.from(title + fullDate).toString('base64').substring(0, 24)}`,
+          ...registryEventId('gem2go', title, fullDate),
           source_name: this.name,
           source_url: sourceUrl,
           title,
@@ -799,7 +819,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         const addressLi = $el.find('li:contains("Adresse")').text().replace('Adresse', '').trim();
 
         events.push({
-          source_id: `registry-gem2go-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
+          ...registryEventId('gem2go', title, startDate),
           source_name: this.name,
           source_url: sourceUrl,
           title,
@@ -843,7 +863,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         );
 
         events.push({
-          source_id: `registry-gem2go-${Buffer.from(titleCell + startDate).toString('base64').substring(0, 24)}`,
+          ...registryEventId('gem2go', titleCell, startDate),
           source_name: this.name,
           source_url: sourceUrl,
           title: titleCell,
@@ -897,7 +917,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
           const categorySpan = spans.length >= 3 ? $(spans[2]).text().trim() : '';
 
           events.push({
-            source_id: `registry-gem2go-${Buffer.from(title + fullDate).toString('base64').substring(0, 24)}`,
+            ...registryEventId('gem2go', title, fullDate),
             source_name: this.name,
             source_url: sourceUrl,
             title,
@@ -936,7 +956,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
           const imageInfo = this.imageFromElement($el.find('img').first(), entry.eventUrl!);
 
           events.push({
-            source_id: `registry-gem2go-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
+            ...registryEventId('gem2go', title, startDate),
             source_name: this.name,
             source_url: entry.eventUrl!,
             title,
@@ -992,7 +1012,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         const imageInfo = this.imageFromElement($el.find('img').first(), entry.eventUrl!);
 
         events.push({
-          source_id: `registry-g24-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
+          ...registryEventId('g24', title, startDate),
           source_name: this.name,
           source_url: sourceUrl,
           title: this.cleanTitle(title),
@@ -1050,8 +1070,6 @@ export class GemeindeRegistryScraper extends BaseScraper {
 
         const title = this.blockTitle($el, isEventList($el) ? () => true : isTitleCandidate);
         if (!title || title.length < 3 || title.length > 200 || isNamelessTitle(title)) return;
-        const id = (t: string) => `registry-gen-${Buffer.from(t + startDate).toString('base64').substring(0, 24)}`;
-        const legacyTitle = this.blockTitle($el, () => true);
 
         const dedupeKey = `${startDate}-${title.substring(0, 30)}`;
         if (seen.has(dedupeKey)) return;
@@ -1074,10 +1092,11 @@ export class GemeindeRegistryScraper extends BaseScraper {
         const name = (fromCard && this.cleanTitle(fromCard.title)) || title;
 
         events.push({
-          source_id: id(title),
-          // Alte ID aus der Titelwahl vor 2026-10: der Sync übernimmt die
-          // Zeile (source-id-migration.ts).
-          ...(legacyTitle && id(legacyTitle) !== id(title) ? { previous_source_id: id(legacyTitle) } : {}),
+          // Alte ID ist die gekürzte aus diesem Titel: Zeilen aus der
+          // Titelwahl vor 2026-10 hat der Sync seit 09.10. auf ihn
+          // umgeschlüsselt (Prod 2026-10-11: keine gelieferte Zeile mehr
+          // mit Datum als Titel).
+          ...registryEventId('gen', title, startDate),
           source_name: this.name,
           source_url: sourceUrl,
           title: name,
@@ -1140,7 +1159,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         const endDate = fc.end ? (this.parseIsoDate(fc.end) || fc.end) : undefined;
 
         events.push({
-          source_id: `registry-fc-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
+          ...registryEventId('fc', title, startDate),
           source_name: this.name,
           source_url: fc.url || entry.eventUrl!,
           title,
@@ -1201,7 +1220,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         const sourceUrl = href.startsWith('http') ? href : new URL(href, entry.eventUrl!).href;
 
         events.push({
-          source_id: `registry-cal-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
+          ...registryEventId('cal', title, startDate),
           source_name: this.name,
           source_url: sourceUrl,
           title,
