@@ -156,6 +156,8 @@ import { post as jazzGrooveFestivalJazzForKids2026 } from './posts/jazz-groove-f
 import { post as cafeDelMundoGuitarizeTheWorldTour20262026 } from './posts/cafe-del-mundo-guitarize-the-world-tour-2026-2026';
 import { post as viktorFranklUndDerTod2026 } from './posts/viktor-frankl-und-der-tod-2026';
 import { post as salonSpontanEinImproMusicalFuerAlle62026 } from './posts/salon-spontan-ein-impro-musical-fuer-alle-6-2026';
+import { post as atseGrazWienerEislaufverein2026 } from './posts/atse-graz-wiener-eislaufverein-2026';
+import { post as gospelProjectWeihnachtskonzertEmmanuel2026 } from './posts/gospel-project-weihnachtskonzert-emmanuel-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -322,6 +324,8 @@ export const ALL_POSTS: FestivalPost[] = [
   cafeDelMundoGuitarizeTheWorldTour20262026,
   viktorFranklUndDerTod2026,
   salonSpontanEinImproMusicalFuerAlle62026,
+  atseGrazWienerEislaufverein2026,
+  gospelProjectWeihnachtskonzertEmmanuel2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
