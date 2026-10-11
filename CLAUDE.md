@@ -219,12 +219,14 @@ node / next.js
   Tag), bis der Scraper den Namen liest; Listen-Beschriftungen und
   Nicht-Event-Seiten (Kontakt, Kalender, „Alle Termine") nie.
   Der Dedup unterdrückt Altbestand erst nach dem Sicherheitsventil (Grenzen:
-  1.500 neue Duplikate, 300 sichtbar machende Freigaben, 1.000 Müll; per
-  workflow_dispatch freigebbar, Plan als Artefakt). Das Ventil zählt nur
-  neue Duplikate am Bestand (`countsForValve`): Zulauf seit dem Beginn des
-  letzten geschriebenen Laufs (Tabelle `dedup_runs`, jeder Live-Lauf trägt
-  sich ein) und Basis-/Terminzeile derselben Serie zählen nicht, sonst
-  blockiert es sich nach einem Stopp selbst. Golden-Sets aus echten
+  800 neue Duplikate am Bestand, 4.000 im Zulauf, 300 sichtbar machende
+  Freigaben, 1.000 Müll; per workflow_dispatch freigebbar, Plan als
+  Artefakt). `valveClass` teilt neue Duplikate ein: Zulauf (seit dem Beginn
+  des letzten geschriebenen Laufs, Tabelle `dedup_runs`, höchstens 72 h
+  zurück) und die Basiszeile hinter der Terminzeile ihres eigenen Tages
+  zählen nicht als Bestand, sonst blockiert sich das Ventil nach einem
+  Stopp selbst. Jeder Live-Lauf trägt sich als 'running' ein (Datenbank-
+  Uhr) und endet als written / valve_stopped / write_failed. Golden-Sets aus echten
   Prod-Fällen: `src/__tests__/pipeline/dedup-golden*.test.ts`; neue
   Fehlerfälle dort ergänzen, keine Quellen-Sonderregeln. Vor Regeländerungen
   `npm run dedup -- --dry-run --report r.json` gegen Prod.
