@@ -24,6 +24,7 @@ export interface LegacyRow {
   source_id: string;
   start_date: string;
   source_url?: string | null;
+  title?: string | null;
 }
 
 export interface SourceIdMove {
@@ -34,10 +35,15 @@ export interface SourceIdMove {
 }
 
 type MigrationInput = Pick<ScrapedEvent, 'source_name' | 'source_id' | 'previous_source_id' | 'start_date'> &
-  Partial<Pick<ScrapedEvent, 'source_url'>>;
+  Partial<Pick<ScrapedEvent, 'source_url' | 'title'>>;
 
 const key = (sourceName: string, sourceId: string) => `${sourceName}::${sourceId}`;
 const viennaDay = (iso: string) => toViennaDate(new Date(iso));
+const normTitle = (t: string | null | undefined) => (t ?? '').replace(/\s+/g, ' ').trim().toLowerCase();
+/** Beide Titel bekannt und gleich. */
+const sameTitle = (row: LegacyRow, e: MigrationInput) => !!row.title && !!e.title && normTitle(row.title) === normTitle(e.title);
+/** Kein Widerspruch im Titel (einer unbekannt oder beide gleich). */
+const titleFits = (row: LegacyRow, e: MigrationInput) => !row.title || !e.title || sameTitle(row, e);
 
 /** Host ohne www, sonst null (fehlende oder kaputte URL). */
 function site(url: string | null | undefined): string | null {
@@ -56,16 +62,20 @@ const withPrevious = <T extends MigrationInput>(events: readonly T[]) =>
  * Rein: welche alte Zeile bekommt welche neue ID. `existingKeys` sind die
  * neuen IDs (`source_name::source_id`), die schon eine Zeile haben.
  *
- * Erst bekommt jede Zeile den Termin an ihrem Tag, bei mehreren den mit
- * ihrer Uhrzeit. Danach geht eine künftige Zeile ohne solchen Termin an
- * den nächstgelegenen freien Termin derselben alten ID: der alte Parser las
- * das Datum teils aus Kurztext oder Titel (Trockenlauf 2026-10-07: 7 von
- * 553 Zeilen), die Zeile bliebe sonst mit falschem Datum neben dem
- * richtigen Termin stehen. Vergangene Zeilen bleiben, was sie sind.
+ * Erst bekommt jede Zeile den Termin an ihrem Tag, bei mehreren zuerst den
+ * mit ihrem Titel, dann den mit ihrer Uhrzeit. Danach geht eine Zeile ab
+ * morgen ohne solchen Termin an den nächstgelegenen freien Termin derselben
+ * alten ID mit gleichem Titel: der alte Parser las das Datum teils aus
+ * Kurztext oder Titel (Trockenlauf 2026-10-07: 7 von 553 Zeilen), die Zeile
+ * bliebe sonst mit falschem Datum neben dem richtigen Termin stehen.
+ * Vergangene und heutige Zeilen bleiben, was sie sind: fehlt der heutige
+ * Termin, hat er meist schon begonnen.
  *
- * Eine Zeile wechselt nie die Website: gekürzte gemeinde-registry-IDs
- * teilten sich Gemeinden (Prod 2026-10-11: 538 von 13.099 alten IDs unter
- * mehreren Websites), die Zeile gehört dem Termin ihrer eigenen Seite.
+ * Eine Zeile wechselt nie die Website und auf einen anderen Tag nie den
+ * Titel: gekürzte gemeinde-registry-IDs teilten sich Gemeinden (Prod
+ * 2026-10-11: 538 von 13.099 alten IDs unter mehreren Websites) und
+ * verschiedene Events einer Seite mit gleichem Anfang („Pensionistenverband
+ * - …"). Die Zeile gehört dem Termin, auf dem sie steht.
  */
 export function planSourceIdMigrations(
   events: readonly MigrationInput[],
@@ -96,9 +106,12 @@ export function planSourceIdMigrations(
   const unmatched: LegacyRow[] = [];
   for (const row of legacyRows) {
     const day = viennaDay(row.start_date);
-    const sameDay = free(row).filter((e) => viennaDay(e.start_date) === day);
     const at = new Date(row.start_date).getTime();
-    const target = sameDay.find((e) => new Date(e.start_date).getTime() === at) ?? sameDay[0];
+    // 0 Titel und Uhrzeit, 1 Titel, 2 Uhrzeit, 3 nur der Tag (stabil sortiert).
+    const rank = (e: MigrationInput) => (sameTitle(row, e) ? 0 : 2) + (new Date(e.start_date).getTime() === at ? 0 : 1);
+    const target = free(row)
+      .filter((e) => viennaDay(e.start_date) === day)
+      .sort((a, b) => rank(a) - rank(b))[0];
     if (target) take(row, target);
     else unmatched.push(row);
   }
@@ -106,9 +119,11 @@ export function planSourceIdMigrations(
   const today = viennaToday(now);
   for (const row of unmatched) {
     const day = viennaDay(row.start_date);
-    if (day < today) continue;
+    if (day <= today) continue;
     const distance = (e: MigrationInput) => Math.abs(viennaDayDiff(day, viennaDay(e.start_date)));
-    const target = free(row).sort((a, b) => distance(a) - distance(b) || a.start_date.localeCompare(b.start_date))[0];
+    const target = free(row)
+      .filter((e) => titleFits(row, e))
+      .sort((a, b) => distance(a) - distance(b) || a.start_date.localeCompare(b.start_date))[0];
     if (target) take(row, target);
   }
   return moves;
@@ -123,7 +138,7 @@ async function loadRows(supabase: SupabaseClient, sourceName: string, ids: strin
   for (let i = 0; i < unique.length; i += CHUNK) {
     const { data, error } = await supabase
       .from('events')
-      .select('id, source_name, source_id, start_date, source_url')
+      .select('id, source_name, source_id, start_date, source_url, title')
       .eq('source_name', sourceName)
       .in('source_id', unique.slice(i, i + CHUNK));
     if (error) throw new Error(`source-id-migration: ${error.message}`);
