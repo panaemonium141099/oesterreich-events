@@ -480,18 +480,23 @@ export async function GET(request: NextRequest) {
           query = query.or(orClause);
         } else {
           const matchedIds = (matchedRows ?? []).map((r: { id: string }) => r.id);
-          if (synonymCategories.length === 0) {
-            if (matchedIds.length === 0) {
-              const res = NextResponse.json({ events: [], total: 0, nextCursor: null, hasMore: false });
-              res.headers.set('X-Total-Count', '0');
-              return res;
-            }
+          if (matchedIds.length > 0) {
+            // Texttreffer gewinnen — auch wenn das Wort ein Synonym ist.
+            // Bis 2026-10-11 ersetzte die Synonym-Kategorie den Suchtext:
+            // „Jazz", „Rock" und „Konzert" lieferten alle dieselben
+            // ~13.000 Musik-Events, für den Nutzer sah es aus, als hinge
+            // die Suche an der vorigen Eingabe (Ticket: Suche nimmt zweite
+            // Eingabe nicht). Beides per OR zu kombinieren sprengt die
+            // URL (250 IDs ≈ 9 KB), deshalb Vorrang statt Vereinigung.
             query = query.in('id', matchedIds);
-          } else {
-            // Synonym path — use category eq alone. The trigram matches
-            // are already mostly contained in the synonym category and
-            // adding both via OR-clause overflows the URL.
+          } else if (synonymCategories.length > 0) {
+            // Auffangnetz: kein Texttreffer, aber ein bekanntes
+            // Kategorie-Wort („konzerte", „feste") → ganze Kategorie.
             query = query.in('category', synonymCategories);
+          } else {
+            const res = NextResponse.json({ events: [], total: 0, nextCursor: null, hasMore: false });
+            res.headers.set('X-Total-Count', '0');
+            return res;
           }
         }
       }

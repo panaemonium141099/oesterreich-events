@@ -377,3 +377,40 @@ describe('GET /api/events', () => {
     expect(query.lte).toHaveBeenCalledWith('start_date', '2026-06-30T23:59:59');
   });
 });
+
+/**
+ * Synonym-Pfad (2026-10-11): Suchwörter wie „jazz", „rock" oder „konzert"
+ * sind auf eine Kategorie abgebildet. Bisher ERSETZTE die Kategorie den
+ * Suchtext — „Jazz" und „Konzert" lieferten dieselben 13.000 Musik-Events,
+ * für den Nutzer sah es aus, als hinge die Suche an der vorigen Eingabe.
+ * Jetzt gewinnen die Texttreffer; die Kategorie bleibt Auffangnetz, wenn der
+ * Text nichts findet.
+ */
+describe('GET /api/events — Suchtext vor Synonym-Kategorie', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('nutzt die Texttreffer, wenn das Suchwort auch ein Synonym ist', async () => {
+    const query = createChainableQuery({ data: [], error: null, count: 0 });
+    mockFrom.mockReturnValue(query);
+    mockRpc.mockResolvedValueOnce({ data: [{ id: 'jazz-1' }, { id: 'jazz-2' }], error: null });
+
+    await GET(makeRequest({ search: 'jazz' }));
+
+    expect(query.in).toHaveBeenCalledWith('id', ['jazz-1', 'jazz-2']);
+    expect(query.in).not.toHaveBeenCalledWith('category', expect.anything());
+  });
+
+  it('fällt auf die Synonym-Kategorie zurück, wenn der Text nichts findet', async () => {
+    const query = createChainableQuery({ data: [], error: null, count: 0 });
+    mockFrom.mockReturnValue(query);
+    mockRpc.mockResolvedValueOnce({ data: [], error: null });
+
+    const res = await GET(makeRequest({ search: 'konzerte' }));
+
+    expect(res.status).toBe(200);
+    expect(query.in).toHaveBeenCalledWith('category', ['Musik']);
+    expect(query.in).not.toHaveBeenCalledWith('id', expect.anything());
+  });
+});
