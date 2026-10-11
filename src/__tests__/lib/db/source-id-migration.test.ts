@@ -81,6 +81,33 @@ describe('planSourceIdMigrations', () => {
     expect(planSourceIdMigrations(events, legacy, new Set()).map((m) => m.to)).toEqual(['fuehrung-14']);
   });
 
+  it('nimmt am selben Tag zuerst den Termin mit demselben Titel', () => {
+    // Gekürzte IDs teilten sich verschiedene Events einer Seite mit gleichem
+    // Anfang; die Uhrzeit des Termins hat sich verschoben.
+    const titled = (id: string, start: string, title: string) => ({ ...ev(id, start, 'alt'), title }) as ScrapedEvent;
+    const events = [titled('kaffee', '2026-10-16T08:00:00.000Z', 'Pensionistenverband - Kaffeeplauscherl'), titled('wurst', '2026-10-16T10:00:00.000Z', 'Pensionistenverband - Wurst, Saumeisen, Stelzen')];
+    const legacy = [{ ...row('e1', 'alt', '2026-10-16T08:00:00+00:00'), title: 'Pensionistenverband - Wurst, Saumeisen, Stelzen' }];
+    expect(planSourceIdMigrations(events, legacy, new Set(), new Date('2026-10-01T10:00:00Z')).map((m) => m.to)).toEqual(['wurst']);
+  });
+
+  it('gibt eine Zeile nur bei gleichem Titel an einen anderen Tag', () => {
+    // Prod-Probelauf 2026-10-11 (markersdorf-haindorf.gv.at): die Zeile
+    // „Wurst, Saumeisen, Stelzen" am 16.10. ging sonst an das Kaffeeplauscherl am 29.10.
+    const now = new Date('2026-10-11T10:00:00Z');
+    const titled = (id: string, start: string, title: string) => ({ ...ev(id, start, 'alt'), title }) as ScrapedEvent;
+    const legacy = [{ ...row('e1', 'alt', '2026-10-16T00:00:00+00:00'), title: 'Pensionistenverband - Wurst, Saumeisen, Stelzen' }];
+    expect(planSourceIdMigrations([titled('kaffee', '2026-10-29', 'Pensionistenverband - Kaffeeplauscherl')], legacy, new Set(), now)).toEqual([]);
+    expect(planSourceIdMigrations([titled('wurst', '2026-11-13', 'Pensionistenverband -  Wurst, Saumeisen, Stelzen ')], legacy, new Set(), now).map((m) => m.to)).toEqual(['wurst']);
+  });
+
+  it('lässt eine Zeile von heute ohne Termin stehen', () => {
+    // Die Seite listet den heutigen Termin nicht mehr (begonnen), die Zeile
+    // gehört trotzdem zu heute (Probelauf: Kinderflohmarkt 11.10. → 14.03.2027).
+    const now = new Date('2026-10-11T10:00:00Z');
+    const events = [ev('flohmarkt-2027-03-14', '2027-03-14', 'alt')];
+    expect(planSourceIdMigrations(events, [row('e1', 'alt', '2026-10-11T07:00:00+00:00')], new Set(), now)).toEqual([]);
+  });
+
   it('gibt eine Zeile nie an einen Termin einer anderen Website', () => {
     // Gekürzte Registry-IDs teilten sich Gemeinden (Prod 2026-10-11: 538
     // von 13.099). Ohne Termin der eigenen Seite bleibt die Zeile stehen.

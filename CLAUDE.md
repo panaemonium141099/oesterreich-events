@@ -187,7 +187,8 @@ node / next.js
   nie im Fettdruck/Fließtext. Ändert sich dadurch die ID, meldet der
   Scraper die alte als `previous_source_id` (Zeile bleibt erhalten; die
   Übernahme bleibt auf derselben Website und nimmt den Termin an ihrem Tag,
-  dort den mit ihrer Uhrzeit). IDs nie aus gekürzten Strings
+  dort zuerst den mit ihrem Titel, dann den mit ihrer Uhrzeit; auf einen
+  anderen Tag nur ab morgen und bei gleichem Titel). IDs nie aus gekürzten Strings
   bilden: gemeinde-registry kürzte Base64 auf 18 Byte, das Datum fiel weg
   (`registryEventId`, 2026-10-11).
   TYPO3-Kalenderkarten (`.calendarize-item`, `calendarize-card.ts`): Ende
