@@ -158,6 +158,7 @@ import { post as viktorFranklUndDerTod2026 } from './posts/viktor-frankl-und-der
 import { post as salonSpontanEinImproMusicalFuerAlle62026 } from './posts/salon-spontan-ein-impro-musical-fuer-alle-6-2026';
 import { post as atseGrazWienerEislaufverein2026 } from './posts/atse-graz-wiener-eislaufverein-2026';
 import { post as gospelProjectWeihnachtskonzertEmmanuel2026 } from './posts/gospel-project-weihnachtskonzert-emmanuel-2026';
+import { post as uebernachtenWoertherseeEventsommer } from './posts/uebernachten-woerthersee-eventsommer';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -326,6 +327,7 @@ export const ALL_POSTS: FestivalPost[] = [
   salonSpontanEinImproMusicalFuerAlle62026,
   atseGrazWienerEislaufverein2026,
   gospelProjectWeihnachtskonzertEmmanuel2026,
+  uebernachtenWoertherseeEventsommer,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
