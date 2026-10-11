@@ -33,7 +33,11 @@ on:
       # (Artefakt scrape-reports/dedup-plan.json) prüfen, dann mit höheren
       # Grenzen neu starten (am schnellsten mit skip_scrapers).
       dedup_max_new_duplicates:
-        description: 'Dedup: Grenze neue Duplikate (leer = 1500)'
+        description: 'Dedup: Grenze neue Duplikate am Bestand (leer = 800)'
+        required: false
+        default: ''
+      dedup_max_inflow_duplicates:
+        description: 'Dedup: Grenze neue Duplikate im Zulauf (leer = 4000)'
         required: false
         default: ''
       dedup_max_releases:
@@ -190,6 +194,7 @@ jobs:
           GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           DEDUP_REPORT_PATH: reports/dedup-plan.json
           DEDUP_MAX_NEW_DUPLICATES: ${{ github.event.inputs.dedup_max_new_duplicates }}
+          DEDUP_MAX_INFLOW_DUPLICATES: ${{ github.event.inputs.dedup_max_inflow_duplicates }}
           DEDUP_MAX_RELEASES: ${{ github.event.inputs.dedup_max_releases }}
           DEDUP_MAX_GARBAGE: ${{ github.event.inputs.dedup_max_garbage }}
 
