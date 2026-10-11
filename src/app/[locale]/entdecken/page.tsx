@@ -11,7 +11,7 @@
  * Smart-Tab: <V4EntdeckenSmartMode> — NLP semantic search (Phase-4).
  */
 
-import { useState, useCallback, useEffect, Suspense } from 'react';
+import { useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
@@ -73,7 +73,11 @@ function EntdeckenInner() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [mode, setMode] = useState<V4EntdeckenMode>(resolveMode(search.get('mode')));
+  // Der Modus kommt aus der URL, nicht aus lokalem State (2026-10-11).
+  // Vorher wurde ?mode nur beim Mount gelesen: eine Suche aus der Top-Nav
+  // schob ?search=… in die URL, der Smart-Tab blieb aber mit der alten
+  // Unterhaltung stehen — die neue Eingabe kam nie an.
+  const mode = resolveMode(search.get('mode'));
   const initialQuery = search.get('q') ?? '';
   const initialBlParam = search.get('bl');
   // Comma-separated bl supported so a bundesland hub can deep-link a single
@@ -84,34 +88,24 @@ function EntdeckenInner() {
   const tSeason = useTranslations('Landing.Season');
   const initialFilters = deriveInitialFilters(search, (id) => tSeason(`${id}.title`));
 
-  // Mirror mode back into URL — list-Modus default unparametrisiert
-  // damit /entdecken eine saubere URL hat. Smart-Modus persistiert
-  // ?mode=smart und optional ?q=<query>.
+  // Tab-Wechsel schreibt in die URL — list-Modus unparametrisiert, damit
+  // /entdecken eine saubere URL hat; Smart-Modus persistiert ?mode=smart.
   //
   // CRITICAL: must START from the current URL (search.toString()) and
-  // only TOGGLE mode/q. Earlier this effect built `next` from scratch,
-  // which on mount stripped search/district/category/bl from the URL
-  // every time — invisible bug as long as filters were only seeded on
-  // mount, but it kills any URL→state sync we layer on top.
-  useEffect(() => {
+  // only TOGGLE mode/q. Earlier this built `next` from scratch, which
+  // stripped search/district/category/bl from the URL every time.
+  const onModeChange = useCallback((nextMode: V4EntdeckenMode) => {
     const next = new URLSearchParams(search.toString());
-    if (mode === 'smart') {
+    if (nextMode === 'smart') {
       next.set('mode', 'smart');
-      if (initialQuery) next.set('q', initialQuery);
-      else next.delete('q');
     } else {
       next.delete('mode');
       next.delete('q');
     }
     const qs = next.toString();
-    // No-op guard — avoids a router.replace when nothing actually
-    // changed (which would be a useless re-render on every mount).
     if (qs === search.toString()) return;
     router.replace(`${pathname}${qs ? '?' + qs : ''}`, { scroll: false });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
-
-  const onModeChange = useCallback((next: V4EntdeckenMode) => { setMode(next); }, []);
+  }, [search, router, pathname]);
 
   // V4EntdeckenListMode seeds its filter state from initialFilters via
   // useState — only on mount. Subsequent URL changes (e.g. the user

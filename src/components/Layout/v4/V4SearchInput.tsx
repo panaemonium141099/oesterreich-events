@@ -18,9 +18,9 @@
  * Suche damit auf /en/entdecken; Placeholder/Labels aus messages/.
  */
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from '@/i18n/navigation';
+import { useRouter, usePathname } from '@/i18n/navigation';
 
 interface V4SearchInputProps {
   variant: 'hero' | 'nav';
@@ -42,8 +42,20 @@ export function V4SearchInput({
 }: V4SearchInputProps) {
   const t = useTranslations('Search');
   const router = useRouter();
+  const pathname = usePathname();
   const [query, setQuery] = useState('');
   const placeholderText = placeholder ?? t('placeholder');
+
+  // Die Nav-Variante lebt im Root-Layout und bleibt über Seitenwechsel
+  // gemountet: der zuletzt gesuchte Begriff stand deshalb auf jeder
+  // Folgeseite noch im Feld (2026-10-11). Beim Pfadwechsel den ?search-
+  // Wert der neuen Seite übernehmen bzw. leeren. window.location statt
+  // useSearchParams, weil das die statischen Seiten in einen CSR-Bailout
+  // zwingen würde (gleiches Muster wie V4LocaleSwitcher).
+  useEffect(() => {
+    if (variant !== 'nav' || typeof window === 'undefined') return;
+    setQuery(new URLSearchParams(window.location.search).get('search') ?? '');
+  }, [pathname, variant]);
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
