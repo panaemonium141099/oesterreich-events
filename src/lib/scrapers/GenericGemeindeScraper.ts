@@ -24,6 +24,7 @@ import { applyGemeindeContext } from './gemeinde-context';
 import { withStammdaten, type GemeindeStammdaten } from './gemeinden/stammdaten';
 import { firstText, isTitleCandidate } from './event-title';
 import { extractTimeOfDay } from './time-of-day';
+import { readCalendarizeCard, usesPlaceSuffix } from './calendarize-card';
 
 // Die Datei führt nur die Identität der Gemeinde; PLZ, Bezirk und
 // Mittelpunkt ergänzt withStammdaten() aus der Stammdatei.
@@ -362,6 +363,7 @@ export class GenericGemeindeScraper extends BaseScraper {
     const events: ScrapedEvent[] = [];
     const g = page.gemeinde;
     const seen = new Set<string>();
+    const placeSuffix = usesPlaceSuffix($);
 
     // Strategy: Find all elements containing a date pattern DD.MM.YYYY
     // Then extract the nearest heading/text as the event title
@@ -446,15 +448,25 @@ export class GenericGemeindeScraper extends BaseScraper {
       const startDate = time ? `${dateStr}T${time}` : dateStr;
       const id = (t: string) => `gemeinden-generic-${g.idKey}-${this.slugify(t)}-${dateStr}`;
 
+      // Kalenderkarte (calendarize-card.ts): Name, Ort und Ende aus der
+      // Karte. Die ID bleibt aus der Überschrift, sie trennt gleichnamige
+      // Termine an verschiedenen Orten ("Christmette | Pfarre MP/OP").
+      const cal = readCalendarizeCard($card, placeSuffix);
+      const fromCard = cal && cal.heading === title && cal.start.date === dateStr && (cal.start.time ?? null) === time
+        ? cal : null;
+      const name = fromCard?.title ?? title;
+
       events.push({
         source_id: id(title),
         ...this.previousId(this.blockTitle($el, text, () => true), title, id),
         source_name: this.name,
         source_url: link ? new URL(link, page.eventPageUrl).href : page.eventPageUrl,
-        title,
+        title: name,
+        ...(fromCard?.details ? { description: fromCard.details } : {}),
         start_date: startDate,
-        location_name: g.name,
-        category: this.guessCategory(title),
+        ...(fromCard?.end ? { end_date: fromCard.end } : {}),
+        location_name: fromCard?.location ?? g.name,
+        category: this.guessCategory(name),
       });
     });
 

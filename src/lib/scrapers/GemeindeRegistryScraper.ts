@@ -12,6 +12,7 @@ import { isEventType } from '../connectors/json-ld-connector';
 import { extractGem2goDetail } from './gem2go-detail';
 import { isUsableDetailHref } from './gemeinde-event-discovery';
 import { firstText, isEventList, isNamelessTitle, isTitleCandidate } from './event-title';
+import { readCalendarizeCard, usesPlaceSuffix } from './calendarize-card';
 
 export interface PaginationLogEntry {
   gemeinde: string;
@@ -1035,6 +1036,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
     const seen = new Set<string>();
+    const placeSuffix = usesPlaceSuffix($);
 
     $('article, .card, .event-item, .veranstaltung, .acc-item, li, tr, .wp-block-group, .elementor-widget-container, .entry-content a, div[class*="event"], div[class*="veranstaltung"], .news-list-view').each((_, el) => {
       try {
@@ -1062,6 +1064,15 @@ export class GemeindeRegistryScraper extends BaseScraper {
 
         const imageInfo = this.imageFromElement($el.find('img').first(), entry.eventUrl!);
 
+        // Kalenderkarte (calendarize-card.ts): Name, Ort und Ende aus der
+        // Karte. Die ID bleibt aus der Überschrift, sie trennt gleichnamige
+        // Termine an verschiedenen Orten ("Christmette | Pfarre MP/OP").
+        const cal = readCalendarizeCard($el, placeSuffix);
+        const fromCard = cal && this.cleanTitle(cal.heading) === title &&
+          (cal.start.time ? `${cal.start.date}T${cal.start.time}:00` : cal.start.date) === startDate
+          ? cal : null;
+        const name = (fromCard && this.cleanTitle(fromCard.title)) || title;
+
         events.push({
           source_id: id(title),
           // Alte ID aus der Titelwahl vor 2026-10: der Sync übernimmt die
@@ -1069,15 +1080,17 @@ export class GemeindeRegistryScraper extends BaseScraper {
           ...(legacyTitle && id(legacyTitle) !== id(title) ? { previous_source_id: id(legacyTitle) } : {}),
           source_name: this.name,
           source_url: sourceUrl,
-          title,
+          title: name,
+          ...(fromCard?.details ? { description: fromCard.details } : {}),
           start_date: startDate,
-          location_name: entry.name,
+          ...(fromCard?.end ? { end_date: fromCard.end } : {}),
+          location_name: fromCard?.location ?? entry.name,
           postal_code: entry.plz,
           bundesland: entry.bundesland,
           district: entry.bezirk,
           latitude: entry.lat,
           longitude: entry.lng,
-          category: categorizeEvent(title, ''),
+          category: categorizeEvent(name, ''),
           image_url: imageInfo?.url,
           image_width: imageInfo?.image_width,
           image_height: imageInfo?.image_height,

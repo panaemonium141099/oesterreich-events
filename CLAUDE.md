@@ -186,6 +186,9 @@ node / next.js
   ein Titel (`isNamelessTitle`), übersprungen wird nur in Überschrift/Link,
   nie im Fettdruck/Fließtext. Ändert sich dadurch die ID, meldet der
   Scraper die alte als `previous_source_id` (Zeile bleibt erhalten).
+  TYPO3-Kalenderkarten (`.calendarize-item`, `calendarize-card.ts`): Ende
+  aus der Terminzeile, „Titel | Ort" nur auf Seiten, die den Trenner
+  durchgehend setzen (anderswo Untertitel); die ID bleibt aus der Überschrift.
 - `src/lib/db/supabase-sync.ts` — EINZIGER Write-Pfad Scraper→Supabase
   (confidence-basierte Upsert-Guards); kein SQLite mehr im Projekt
 - `src/lib/search/smart-query.ts` — Parser/Whitelist/Ranking der Smart-Suche (pur, getestet)
