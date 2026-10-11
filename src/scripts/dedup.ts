@@ -19,7 +19,7 @@ import { dirname, join } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 import { canonicalizeIds } from '@/lib/pipeline/dedup-scorer';
 import { dedupDay, pairKey } from '@/lib/pipeline/dedup-engine';
-import { planDedup, releaseStatus, checkSafetyValve, dropDependentsOfFailedReleases, resolvePlanConflicts, type DedupPlan } from '@/lib/pipeline/dedup-plan';
+import { planDedup, releaseStatus, checkSafetyValve, valveClass, dropDependentsOfFailedReleases, resolvePlanConflicts, type DedupPlan, type ValveClass } from '@/lib/pipeline/dedup-plan';
 import { isPlausibleEventDay, planningStartDay, viennaDayBoundsUtc, viennaDayOf } from '@/lib/pipeline/dedup-evidence';
 import { isGarbageRow, namedPageKeys, surplusBrokenTitleIds, type GarbageRowInput } from '@/lib/pipeline/garbage-filter';
 import { staleVersionIds } from '@/lib/pipeline/dedup-cluster';
@@ -73,7 +73,11 @@ function strArg(name: string): string | null {
 }
 // Normale Nacht: ein paar hundert neue Dubletten, kaum Freigaben.
 const LIMITS = {
-  maxNewDuplicates: numArg('--max-new-duplicates', 1500, 'DEDUP_MAX_NEW_DUPLICATES'),
+  // Neue Duplikate am Bestand (valveClass 'stock'): eine normale Nacht
+  // bringt 170 bis 330 (Prod 2026-10-10/11), der erste Lauf nach einem
+  // Stopp das Doppelte. Zulauf hat einen eigenen, höheren Stolperdraht.
+  maxNewDuplicates: numArg('--max-new-duplicates', 800, 'DEDUP_MAX_NEW_DUPLICATES'),
+  maxInflowDuplicates: numArg('--max-inflow-duplicates', 4000, 'DEDUP_MAX_INFLOW_DUPLICATES'),
   maxReleases: numArg('--max-releases', 300, 'DEDUP_MAX_RELEASES'),
   // Seit Müll-Titel schon im Sync verworfen werden, kommt kaum neuer dazu.
   maxGarbage: numArg('--max-garbage', 1000, 'DEDUP_MAX_GARBAGE'),
@@ -376,11 +380,106 @@ interface ReportEntry {
   reason?: string;
 }
 
+/** Höchstens so weit zurück gilt der Zulauf als Zulauf: bleibt der Anker
+ *  stehen (Ventil-Stopps, Schreibfehler), zählt älterer Zulauf wieder als
+ *  Bestand, statt dass ein wachsender Teil des Bestands unsichtbar wird. */
+const MAX_ANCHOR_AGE_MS = 72 * 3_600_000;
+/** Mehr Schreibfehler im Plan: der Lauf zählt nicht als geschrieben. */
+const MAX_WRITE_ERRORS_FOR_WRITTEN = 20;
+
+interface Anchor {
+  /** Beginn des letzten geschriebenen Laufs (Datenbank-Uhr) oder null. */
+  at: Date | null;
+  /** Warum kein (voller) Anker gilt; landet im Grund eines Ventil-Stopps. */
+  problem: string | null;
+}
+
+/** Anker des Ventils: Beginn des letzten Laufs, der seinen Plan geschrieben hat. */
+async function loadAnchor(runStartedAt: Date): Promise<Anchor> {
+  const { data, error } = await supabase
+    .from('dedup_runs')
+    .select('started_at')
+    .eq('outcome', 'written')
+    .order('started_at', { ascending: false })
+    .limit(1);
+  if (error) return { at: null, problem: `Anker fehlt (dedup_runs: ${error.message}), jede neue Zeile zählt` };
+  const last = data?.[0] ? new Date(data[0].started_at as string) : null;
+  if (!last) return { at: null, problem: 'Anker fehlt (kein geschriebener Lauf), jede neue Zeile zählt' };
+  const floor = new Date(runStartedAt.getTime() - MAX_ANCHOR_AGE_MS);
+  if (last < floor) {
+    return { at: floor, problem: `letzter geschriebener Lauf ${last.toISOString()} älter als 72 h, Zulauf davor zählt als Bestand` };
+  }
+  return { at: last, problem: null };
+}
+
+interface RunStats {
+  newDuplicates: number;
+  stock: number;
+  inflow: number;
+  series: number;
+  repoints: number;
+  releases: number;
+  visibleReleases: number;
+  garbage: number;
+  writeErrors: number;
+}
+
+/** Laufzeile mit Beginn nach Datenbank-Uhr (created_at kommt auch von dort).
+ *  Ein abgebrochener Lauf bleibt 'running' und verschiebt den Anker nicht. */
+async function startRun(): Promise<{ id: string; startedAt: Date } | null> {
+  const { data, error } = await supabase
+    .from('dedup_runs')
+    .insert({ outcome: 'running', github_run_id: process.env.GITHUB_RUN_ID ? Number(process.env.GITHUB_RUN_ID) : null })
+    .select('id,started_at')
+    .single();
+  if (error || !data) {
+    console.warn(`  dedup_runs: Lauf nicht angelegt (${error?.message ?? 'keine Zeile'})`);
+    return null;
+  }
+  return { id: data.id as string, startedAt: new Date(data.started_at as string) };
+}
+
+/** Ausgang festhalten; ohne Eintrag zählt die nächste Nacht den Zulauf seit
+ *  dem älteren Anker mit. Schreibfehler hier sind laut. */
+async function finishRun(
+  run: { id: string; startedAt: Date } | null,
+  fallbackStart: Date,
+  outcome: 'written' | 'valve_stopped' | 'write_failed',
+  r: RunStats,
+  errors: string[],
+): Promise<void> {
+  const row = {
+    outcome,
+    finished_at: new Date().toISOString(),
+    new_duplicates: r.newDuplicates,
+    counted_new_duplicates: r.stock,
+    inflow_duplicates: r.inflow,
+    series_duplicates: r.series,
+    repoints: r.repoints,
+    releases: r.releases,
+    visible_releases: r.visibleReleases,
+    garbage: r.garbage,
+    write_errors: r.writeErrors,
+  };
+  const { error } = run
+    ? await supabase.from('dedup_runs').update(row).eq('id', run.id)
+    : await supabase.from('dedup_runs').insert({ ...row, started_at: fallbackStart.toISOString(),
+        github_run_id: process.env.GITHUB_RUN_ID ? Number(process.env.GITHUB_RUN_ID) : null });
+  if (error) errors.push(`dedup_runs schreiben: ${error.message}`);
+}
+
 async function main(): Promise<void> {
   const started = Date.now();
   console.log(`=== Batch Dedup ${DRY_RUN ? '(DRY RUN)' : '(LIVE)'} ===`);
-  console.log(`  Grenzen: ${LIMITS.maxNewDuplicates} neue Duplikate, ${LIMITS.maxReleases} Freigaben, ${LIMITS.maxGarbage} Müll`);
+  console.log(`  Grenzen: ${LIMITS.maxNewDuplicates} neue Duplikate am Bestand, ${LIMITS.maxInflowDuplicates} im Zulauf, ${LIMITS.maxReleases} Freigaben, ${LIMITS.maxGarbage} Müll`);
 
+  // Probeläufe schreiben nichts, auch keine Laufzeile.
+  const run = DRY_RUN ? null : await startRun();
+  const runStartedAt = run?.startedAt ?? new Date(started);
+  const anchor = await loadAnchor(runStartedAt);
+  const settledBefore = anchor.at;
+  console.log(`  Anker (danach angelegte Zeilen sind Zulauf): ${settledBefore?.toISOString() ?? 'keiner'}`);
+  if (anchor.problem) console.log(`  !!! ${anchor.problem}`);
   const garbageIds = await scanGarbage();
   const garbage = garbageIds.length;
   const manual = await loadManualDecisions();
@@ -392,6 +491,8 @@ async function main(): Promise<void> {
   console.log(`  ${days.length} Tage ab ${START_DAY} (${allDays.length - days.length} vergangene übersprungen), ${sourceLastSeen.size} Quellen`);
 
   let plan: DedupPlan = { markDuplicate: [], release: [], primaries: [] };
+  // Alle geladenen Zeilen (auch anderer Tage) für die Ventil-Zählung.
+  const allRows = new Map<string, EventRow>();
   const logPairs: LogPair[] = [];
   const reasons = new Map<string, number>();
   const report: ReportEntry[] = [];
@@ -430,6 +531,7 @@ async function main(): Promise<void> {
 
     // Auch Zeilen anderer Tage (verwaister Primary mit altem Datumsfehler).
     const byId = new Map([...external, ...events.map(e => [e.id, e] as const)]);
+    for (const [id, e] of byId) allRows.set(id, e);
     for (const m of dayPlan.markDuplicate) {
       const e = byId.get(m.id)!;
       const p = byId.get(m.primaryId)!;
@@ -458,11 +560,21 @@ async function main(): Promise<void> {
     }
   }
   const newDuplicates = plan.markDuplicate.filter(m => m.isNew).length;
+  const classify = (m: DedupPlan['markDuplicate'][number]) => valveClass(m, allRows, settledBefore);
+  const byClass = new Map<ValveClass, number>();
+  for (const m of plan.markDuplicate) {
+    const c = classify(m);
+    if (c) byClass.set(c, (byClass.get(c) ?? 0) + 1);
+  }
+  const stock = byClass.get('stock') ?? 0;
+  const inflow = byClass.get('inflow') ?? 0;
+  const series = byClass.get('series') ?? 0;
+  const visibleReleases = plan.release.filter(r => r.visible !== false).length;
   console.log('\n=== Plan ===');
   console.log(`  Events geprüft:        ${scanned}`);
   console.log(`  Kandidaten-Paare:      ${candidates}`);
   console.log(`  Cluster:               ${clusters}`);
-  console.log(`  Neue Duplikate:        ${newDuplicates}`);
+  console.log(`  Neue Duplikate:        ${newDuplicates}  (am Bestand ${stock}, Zulauf ${inflow}, Basis hinter eigener Terminzeile ${series})`);
   console.log(`  Umgehängte Duplikate:  ${plan.markDuplicate.length - newDuplicates}`);
   console.log(`  Freigaben:             ${plan.release.length}  (${[...releaseReasons.entries()].map(([r, n]) => `${r} ${n}`).join(', ') || '–'})`);
   console.log(`  Verwaiste Zeilen:      ${orphans} (Quelle liefert sie nicht mehr; nie Gegenbeleg, nie freigegeben)`);
@@ -486,12 +598,20 @@ async function main(): Promise<void> {
     console.log(`\n  Bericht: ${REPORT_PATH}`);
   }
 
-  const violations = checkSafetyValve(plan, LIMITS, garbage);
+  const stats = (writeErrors: number): RunStats => ({
+    newDuplicates, stock, inflow, series, repoints: plan.markDuplicate.length - newDuplicates,
+    releases: plan.release.length, visibleReleases, garbage, writeErrors,
+  });
+  const violations = checkSafetyValve(plan, LIMITS, garbage, classify);
   if (violations.length > 0) {
-    console.log(`\n!!! Sicherheitsventil: ${violations.join('; ')}`);
+    const why = [...violations, ...(anchor.problem ? [anchor.problem] : [])].join('; ');
+    console.log(`\n!!! Sicherheitsventil: ${why}`);
     if (!DRY_RUN) {
       console.log('    Nichts geschrieben. Probelauf prüfen (--dry-run --report …) und mit höheren Grenzen freigeben.');
-      reportStepReason(`Sicherheitsventil, nichts geschrieben: ${violations.join('; ')}`);
+      const recErrors: string[] = [];
+      await finishRun(run, runStartedAt, 'valve_stopped', stats(0), recErrors);
+      for (const e of recErrors) console.log(`    ${e}`);
+      reportStepReason(`Sicherheitsventil, nichts geschrieben: ${why}`);
       process.exit(1);
     }
   }
@@ -501,6 +621,7 @@ async function main(): Promise<void> {
     console.log('\n--- Phase 3: Schreiben ---');
     await suppressGarbage(garbageIds);
     await applyPlan(plan, errors);
+    const planErrors = errors.length;
     await writeLog(logPairs, errors);
 
     const { data: rewire, error: rewireErr } = await supabase.rpc('rewire_saved_events_to_primaries');
@@ -509,6 +630,11 @@ async function main(): Promise<void> {
       const row = rewire[0] as { rewired_saved_events: number; rewired_artist_notifications: number };
       console.log(`  Rewired ${row.rewired_saved_events} saved_events + ${row.rewired_artist_notifications} notifications to primaries.`);
     }
+    // Mit einzelnen Schreibfehlern ist der Plan geschrieben (der nächste Lauf
+    // rechnet ohnehin alles neu). Scheitert ein größerer Teil, bleibt der
+    // Anker stehen: der nicht verarbeitete Zulauf zählt sonst nie.
+    const outcome = planErrors > MAX_WRITE_ERRORS_FOR_WRITTEN ? 'write_failed' : 'written';
+    await finishRun(run, runStartedAt, outcome, stats(errors.length), errors);
   }
 
   console.log('\n=== Dedup Summary ===');

@@ -220,7 +220,11 @@ node / next.js
   Nicht-Event-Seiten (Kontakt, Kalender, „Alle Termine") nie.
   Der Dedup unterdrückt Altbestand erst nach dem Sicherheitsventil (Grenzen:
   1.500 neue Duplikate, 300 sichtbar machende Freigaben, 1.000 Müll; per
-  workflow_dispatch freigebbar, Plan als Artefakt). Golden-Sets aus echten
+  workflow_dispatch freigebbar, Plan als Artefakt). Das Ventil zählt nur
+  neue Duplikate am Bestand (`countsForValve`): Zulauf seit dem Beginn des
+  letzten geschriebenen Laufs (Tabelle `dedup_runs`, jeder Live-Lauf trägt
+  sich ein) und Basis-/Terminzeile derselben Serie zählen nicht, sonst
+  blockiert es sich nach einem Stopp selbst. Golden-Sets aus echten
   Prod-Fällen: `src/__tests__/pipeline/dedup-golden*.test.ts`; neue
   Fehlerfälle dort ergänzen, keine Quellen-Sonderregeln. Vor Regeländerungen
   `npm run dedup -- --dry-run --report r.json` gegen Prod.

@@ -19,7 +19,7 @@
 import { computeEnrichments, isDateOnlyTitle, underlyingStatus } from './dedup-cluster';
 import { isGarbageTitle } from './garbage-filter';
 import { newClusterId as defaultClusterId, pairKey, type ClusterResult } from './dedup-engine';
-import { isOrphanRow, knownStartMs, placeEvidence, titleRelation, titleTokensOf } from './dedup-evidence';
+import { addressPostcode, hasCancelMarker, isOrphanRow, knownStartMs, placeEvidence, sameDescription, titleRelation, titleTokensOf, viennaDayOf } from './dedup-evidence';
 import { haversineDistance } from './normalize-venue';
 import { LABEL_CONFLICTS, scorePair } from './dedup-scorer';
 import { isEventSpecificUrl, normalizeUrlForDedup } from './event-url';
@@ -263,11 +263,19 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
  */
 function isCounterEvidence(e: EventRow, p: EventRow, reason: string): boolean {
   if (LABEL_CONFLICTS.has(reason)) {
-    // Dieselbe Detailseite derselben Quelle ist dasselbe Event, auch wenn ein
-    // falsch konfigurierter Gemeinde-Kalender eine fremde PLZ setzt („Buch in
-    // Tirol" liest gemeinde-buch.at, Buch in Vorarlberg).
+    // Dieselbe Detailseite ist dasselbe Event, auch wenn ein falsch
+    // konfigurierter Gemeinde-Kalender eine fremde PLZ setzt („Buch in Tirol"
+    // liest gemeinde-buch.at, Buch in Vorarlberg), und auch, wenn zwei
+    // Scraper dieselbe Gemeinde-Seite lesen (gemeinde-registry und gemeinden:
+    // freistadt.at/de/Nockis_Schlagerparty_4, Stichprobe 2026-10-11).
     const ue = normalizeUrlForDedup(e.source_url);
-    if (e.source_name === p.source_name && ue && isEventSpecificUrl(ue) && ue === normalizeUrlForDedup(p.source_url)) return false;
+    if (ue && isEventSpecificUrl(ue) && ue === normalizeUrlForDedup(p.source_url)) return false;
+    // Übernommene Einträge tragen die Beschreibung mit, und die Adresse nennt
+    // den echten Ort, wo die PLZ-Spalte die Kalender-Gemeinde trägt.
+    if (sameDescription(e, p)) return false;
+    const pe = addressPostcode(e);
+    const pp = addressPostcode(p);
+    if ((pe && (pe === p.postal_code || pe === pp)) || (pp && pp === e.postal_code)) return false;
     const place = placeEvidence(e, p, { ignoreLabels: true }).relation;
     if (place === 'same' || place === 'town') return false;
     if (place === 'unknown' && sameSpecificTitle(e, p) && !farApart(e, p)) return false;
@@ -368,25 +376,87 @@ export function resolvePlanConflicts(plan: DedupPlan): DedupPlan {
 }
 
 export interface SafetyLimits {
+  /** Neue Duplikate am Bestand (siehe valveClass). */
   maxNewDuplicates: number;
+  /** Neue Duplikate im Zulauf: Stolperdraht für Fluten. */
+  maxInflowDuplicates?: number;
   maxReleases: number;
   /** Zeilen, die der Müll-Filter neu unterdrücken würde. */
   maxGarbage?: number;
 }
 
 /**
- * Massenänderungen sind fast immer ein Fehler (Regel kaputt, Daten halb
- * geladen). Dann schreibt der Lauf nichts und meldet sich laut; ein Mensch
- * prüft den Probelauf und gibt mit höheren Grenzen frei.
+ * Wie zählt ein neues Duplikat fürs Sicherheitsventil? Das Ventil soll Fehler
+ * fangen, die bestehende Events massenhaft verstecken; die zeigen sich am
+ * Bestand (Prod 2026-10-10/11: zwei Nächte gestoppt, das Ventil zählte den
+ * normalen Zulauf mit und blockierte sich nach einem Stopp selbst).
+ *  - 'series': die Basiszeile einer Serie hinter der Terminzeile ihres
+ *    eigenen Tages (Kennung „<basis>:<Wiener Tag>"), gleicher Titel und
+ *    Beginn. Dasselbe Event von Hause aus (Feratel 2026-10-09: 4.326 neue
+ *    Terminzeilen eine Stunde nach dem Nachholplan). Nur diese Richtung: eine
+ *    Terminzeile hinter der wandernden Basiszeile ist ein Fehler.
+ *  - 'inflow': nach dem Beginn des letzten geschriebenen Laufs angelegt
+ *    (rund 940 je Nacht). Hat eine eigene, höhere Grenze als Stolperdraht
+ *    für Fluten und neue Quellen, die falsch geschluckt werden.
+ *  - 'stock': alles andere, auch ein alter Primary, den eine neue Zeile
+ *    ablöst. Ohne Anker (`settledBefore` null) ist jede neue Zeile Bestand.
+ * Umhängen (isNew false) zählt nie: null.
  */
-export function checkSafetyValve(plan: DedupPlan, limits: SafetyLimits, garbage = 0): string[] {
+export type ValveClass = 'stock' | 'inflow' | 'series';
+
+export function valveClass(
+  m: MarkDuplicate,
+  rows: ReadonlyMap<string, EventRow>,
+  settledBefore: Date | null,
+): ValveClass | null {
+  if (!m.isNew) return null;
+  const e = rows.get(m.id);
+  const p = rows.get(m.primaryId);
+  if (!e) return 'stock';
+  if (p && isBaseBehindOwnOccurrence(e, p)) return 'series';
+  if (settledBefore && e.created_at && Date.parse(e.created_at) >= settledBefore.getTime()) return 'inflow';
+  return 'stock';
+}
+
+/** Zählt das neue Duplikat als Änderung am Bestand? */
+export function countsForValve(m: MarkDuplicate, rows: ReadonlyMap<string, EventRow>, settledBefore: Date | null): boolean {
+  return valveClass(m, rows, settledBefore) === 'stock';
+}
+
+function isBaseBehindOwnOccurrence(base: EventRow, dated: EventRow): boolean {
+  if (!base.source_name || base.source_name !== dated.source_name || !base.source_id || !dated.source_id) return false;
+  if (/:\d{4}-\d{2}-\d{2}$/.test(base.source_id)) return false;
+  const day = viennaDayOf(dated);
+  if (!day || dated.source_id !== `${base.source_id}:${day}`) return false;
+  if (Date.parse(base.start_date) !== Date.parse(dated.start_date)) return false;
+  const title = (t: string | null | undefined) => (t ?? '').trim().toLowerCase();
+  return title(base.title) === title(dated.title) && hasCancelMarker(base) === hasCancelMarker(dated);
+}
+
+/**
+ * Massenänderungen am Bestand sind fast immer ein Fehler (Regel kaputt, Daten
+ * halb geladen). Dann schreibt der Lauf nichts und meldet sich laut; ein
+ * Mensch prüft den Probelauf und gibt mit höheren Grenzen frei. `classify`
+ * ordnet neue Duplikate ein (siehe valveClass); ohne gilt jedes als Bestand.
+ */
+export function checkSafetyValve(
+  plan: DedupPlan,
+  limits: SafetyLimits,
+  garbage = 0,
+  classify: (m: MarkDuplicate) => ValveClass | null = m => (m.isNew ? 'stock' : null),
+): string[] {
   const violations: string[] = [];
   if (limits.maxGarbage !== undefined && garbage > limits.maxGarbage) {
     violations.push(`${garbage} Müll-Unterdrückungen > Grenze ${limits.maxGarbage}`);
   }
-  const newDuplicates = plan.markDuplicate.filter(m => m.isNew).length;
-  if (newDuplicates > limits.maxNewDuplicates) {
-    violations.push(`${newDuplicates} neue Duplikate > Grenze ${limits.maxNewDuplicates}`);
+  const classes = plan.markDuplicate.map(classify);
+  const stock = classes.filter(c => c === 'stock').length;
+  if (stock > limits.maxNewDuplicates) {
+    violations.push(`${stock} neue Duplikate am Bestand > Grenze ${limits.maxNewDuplicates}`);
+  }
+  const inflow = classes.filter(c => c === 'inflow').length;
+  if (limits.maxInflowDuplicates !== undefined && inflow > limits.maxInflowDuplicates) {
+    violations.push(`${inflow} neue Duplikate im Zulauf > Grenze ${limits.maxInflowDuplicates}`);
   }
   // Nur Freigaben, die etwas sichtbar machen; zurückgehaltene Zeilen bleiben
   // verborgen und ändern an der Seite nichts.

@@ -362,6 +362,19 @@ Probelauf ab Vortag: einmaliger Nachholplan mit rund 4.850 neuen
 Duplikaten, 2.050 Freigaben (davon rund 1.560 Rollentausch) und knapp 700
 Müllzeilen in 275 s (vorher 400 s über alle Tage).
 
+Betreuter Nachholplan 2026-10-09 (8.269 neue Duplikate, 2.172 umgehängt,
+1.890 Freigaben, 696 Müll; zweiter Lauf danach 0/0/0/0). Die Nachtläufe
+am 10. und 11.10. stoppten trotzdem am Ventil (5.084 / 5.810 neue
+Duplikate, Restdubletten bis 4.553). Ursachen: (1) Der stündliche
+Feratel-Sync legte eine Stunde nach dem Nachholplan in einer zweiten Welle
+4.326 Terminzeilen an, rund 3.900 Basiszeilen standen danach sichtbar
+neben ihrer eigenen Terminzeile. (2) Das Ventil zählte den normalen
+Zulauf mit (rund 940 neue Duplikate je Nacht); nach einem Stopp summierte
+sich der Zulauf zweier Nächte über die Grenze, das Ventil blockierte sich
+selbst. Seit 2026-10-11 zählt es nur neue Duplikate am Bestand: Zeilen,
+die vor dem Beginn des letzten geschriebenen Laufs angelegt wurden
+(Tabelle `dedup_runs`), und nicht Basis-/Terminzeile derselben Serie.
+
 Offen und an der Quelle zu beheben (keine Dedup-Fehler):
 - Gutschein-Produkte mit Platzhalterdatum 31.12.2030 (veranstaltungskalender.net).
 - Müllabfuhr-Termine.

@@ -6,7 +6,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { dedupDay } from '@/lib/pipeline/dedup-engine';
-import { planDedup, releaseStatus, checkSafetyValve, dropDependentsOfFailedReleases, resolvePlanConflicts } from '@/lib/pipeline/dedup-plan';
+import { planDedup, releaseStatus, checkSafetyValve, countsForValve, valveClass, dropDependentsOfFailedReleases, resolvePlanConflicts } from '@/lib/pipeline/dedup-plan';
 import type { EventRow } from '@/lib/pipeline/types';
 
 const PLACE = { location_name: 'Sargfabrik', postal_code: '1140', latitude: 48.1952, longitude: 16.3046, location_precision: 'building' };
@@ -319,6 +319,33 @@ describe('planDedup: Freigabe nur mit Gegenbeleg', () => {
     expect(day.release).toEqual([expect.objectContaining({ id: 'a' })]);
   });
 
+  // Stichprobe 2026-10-11: Etiketten-Freigaben waren wieder meist falsch.
+  it('Etikett ohne Gegenbeleg: wortgleiche Beschreibung, PLZ in der Adresse oder dieselbe Detailseite halten die Verbindung', () => {
+    const chor = 'Adventsingen des Hausruckchor Ottnang-Manning in der Pfarrkirche';
+    const desc = planWith([
+      ev({ id: 'a', source_name: 'q', title: 'Adventsingen des Hausruckchor Ottnang-Manning', description: chor, ...town({ location_name: 'Schwanenstadt',
+        postal_code: '4690', district: 'vöcklabruck', latitude: 48.05, longitude: 13.77, publish_status: 'duplicate', duplicate_of: 'b' }) }),
+      ev({ id: 'b', source_name: 'falter', title: 'Adventsingen', description: chor, ...town({ location_name: 'Ottnang', postal_code: '4901',
+        district: 'vöcklabruck', latitude: 48.10, longitude: 13.66 }) }),
+    ]);
+    expect(desc.release).toEqual([]);
+    const turnen = planWith([
+      ev({ id: 'a', source_name: 'q', title: 'Kinderturnen', ...town({ location_name: 'Berg im Attergau', address: 'Gries 284890 Frankenmarkt',
+        postal_code: '4880', district: 'vöcklabruck', latitude: 47.97, longitude: 13.48, publish_status: 'duplicate', duplicate_of: 'b' }) }),
+      ev({ id: 'b', source_name: 'falter', title: 'Kinderturnen', ...town({ location_name: 'Sporthalle Frankenmarkt', postal_code: '4890',
+        district: 'vöcklabruck', latitude: 47.99, longitude: 13.42 }) }),
+    ]);
+    expect(turnen.release).toEqual([]);
+    const url = 'https://www.freistadt.at/de/Nockis_Schlagerparty_4';
+    const page = planWith([
+      ev({ id: 'a', source_name: 'q', title: 'Nockis Schlagerparty', source_url: url, ...town({ location_name: 'Pregarten', postal_code: '4230',
+        district: 'freistadt', latitude: 48.35, longitude: 14.53, publish_status: 'duplicate', duplicate_of: 'b' }) }),
+      ev({ id: 'b', source_name: 'falter', title: 'Nockis Schlagerparty', source_url: url, ...town({ location_name: 'Freistadt', postal_code: '4240',
+        district: 'perg', latitude: 48.51, longitude: 14.50 }) }),
+    ]);
+    expect(page.release).toEqual([]);
+  });
+
   it('verschiedene Venue-Namen, aber der eine ist die Adresse des anderen: kein Gegenbeleg', () => {
     const p = planWith([
       ev({ id: 'a', source_name: 'q', title: 'Faszination Salzachau: Naturwunder am Flussufer', start_date: '2026-10-06T22:00:00Z', ...town({
@@ -525,5 +552,67 @@ describe('checkSafetyValve', () => {
     const limits = { maxNewDuplicates: 10, maxReleases: 5, maxGarbage: 100 };
     expect(checkSafetyValve(empty, limits, 101)).toEqual([expect.stringContaining('Müll')]);
     expect(checkSafetyValve(empty, limits, 100)).toHaveLength(0);
+  });
+
+  it('Bestand und Zulauf haben je eine eigene Grenze, Serien zählen nirgends', () => {
+    const p = { markDuplicate: Array.from({ length: 12 }, (_, i) => ({ id: `x${i}`, primaryId: 'p', clusterId: 'c', score: 1, isNew: true })), release: [], primaries: [] };
+    const cls = (m: { id: string }) => (m.id === 'x0' ? 'series' : Number(m.id.slice(1)) <= 5 ? 'inflow' : 'stock') as 'series' | 'inflow' | 'stock';
+    const limits = { maxNewDuplicates: 6, maxReleases: 5, maxInflowDuplicates: 5 };
+    expect(checkSafetyValve(p, limits, 0, cls)).toHaveLength(0);
+    expect(checkSafetyValve(p, { ...limits, maxNewDuplicates: 5 }, 0, cls)).toEqual([expect.stringContaining('am Bestand')]);
+    expect(checkSafetyValve(p, { ...limits, maxInflowDuplicates: 4 }, 0, cls)).toEqual([expect.stringContaining('Zulauf')]);
+  });
+});
+
+// Prod 2026-10-10/11: zwei Nachtläufe vom Ventil gestoppt (5.084 / 5.810 neue
+// Duplikate). 3.900 davon waren Feratel-Basiszeilen neben ihrer eigenen, eine
+// Stunde nach dem Nachholplan angelegten Terminzeile; 940 je Nacht normaler
+// Zulauf neuer Zeilen. Nach einem Stopp summierte sich beides über die Grenze,
+// das Ventil blockierte sich selbst.
+describe('countsForValve', () => {
+  const anchor = new Date('2026-10-09T12:32:00Z');
+  const row = (o: Partial<EventRow> & { id: string }) =>
+    ({ source_name: 'q', source_id: o.id, created_at: '2026-05-01T00:00:00Z', ...o }) as EventRow;
+  const rows = (...r: EventRow[]) => new Map(r.map(e => [e.id, e]));
+  const dup = (id: string, primaryId: string, isNew = true) => ({ id, primaryId, clusterId: 'c', score: 1, isNew });
+
+  it('ein bestehendes Event, das neu Duplikat wird, zählt', () => {
+    expect(countsForValve(dup('a', 'b'), rows(row({ id: 'a' }), row({ id: 'b', source_name: 'r' })), anchor)).toBe(true);
+  });
+  it('Zulauf (nach dem letzten geschriebenen Lauf angelegt) zählt nicht', () => {
+    expect(countsForValve(dup('a', 'b'), rows(row({ id: 'a', created_at: '2026-10-10T03:00:00Z' }), row({ id: 'b' })), anchor)).toBe(false);
+  });
+  const series = { source_name: 'feratel-deskline', title: 'Geführte Schneeschuhwanderung', start_date: '2026-12-05T09:15:00Z' };
+  it('Basiszeile hinter der Terminzeile ihres eigenen Tages zählt nicht, auch wenn die Basiszeile alt ist', () => {
+    const base = row({ id: 'a', ...series, source_id: 'feratel-8a86' });
+    const dated = row({ id: 'b', ...series, source_id: 'feratel-8a86:2026-12-05', created_at: '2026-10-09T13:22:00Z' });
+    expect(countsForValve(dup('a', 'b'), rows(base, dated), anchor)).toBe(false);
+    expect(valveClass(dup('a', 'b'), rows(base, dated), anchor)).toBe('series');
+  });
+  // Gegenprüfung 2026-10-11: die Ausnahme muss eng sein, sonst sieht das
+  // Ventil Fehler innerhalb einer Serie nicht.
+  it('Terminzeile hinter der wandernden Basiszeile, fremder Tag oder Absage zählen', () => {
+    const base = row({ id: 'a', ...series, source_id: 'feratel-8a86' });
+    const dated = row({ id: 'b', ...series, source_id: 'feratel-8a86:2026-12-05' });
+    expect(countsForValve(dup('b', 'a'), rows(base, dated), anchor)).toBe(true);
+    const otherDay = row({ id: 'c', ...series, source_id: 'feratel-8a86:2026-12-12' });
+    expect(countsForValve(dup('a', 'c'), rows(base, otherDay), anchor)).toBe(true);
+    const cancelled = row({ id: 'd', ...series, title: 'ABGESAGT: Geführte Schneeschuhwanderung', source_id: 'feratel-8a86:2026-12-05' });
+    expect(countsForValve(dup('a', 'd'), rows(base, cancelled), anchor)).toBe(true);
+  });
+  it('ein alter Primary zählt, auch wenn der neue Primary Zulauf ist', () => {
+    const old = row({ id: 'a' });
+    const fresh = row({ id: 'b', source_name: 'r', created_at: '2026-10-10T03:00:00Z' });
+    expect(countsForValve(dup('a', 'b'), rows(old, fresh), anchor)).toBe(true);
+    expect(valveClass(dup('b', 'a'), rows(old, fresh), anchor)).toBe('inflow');
+  });
+  it('dieselbe Kennung einer anderen Quelle ist keine Serie', () => {
+    const a = row({ id: 'a', source_name: 'q1', source_id: 'x' });
+    const b = row({ id: 'b', source_name: 'q2', source_id: 'x:2026-12-05' });
+    expect(countsForValve(dup('a', 'b'), rows(a, b), anchor)).toBe(true);
+  });
+  it('ohne bekannten geschriebenen Lauf zählt jede neue Zeile, Umhängen nie', () => {
+    expect(countsForValve(dup('a', 'b'), rows(row({ id: 'a', created_at: '2026-10-10T03:00:00Z' }), row({ id: 'b' })), null)).toBe(true);
+    expect(countsForValve(dup('a', 'b', false), rows(row({ id: 'a' }), row({ id: 'b' })), anchor)).toBe(false);
   });
 });

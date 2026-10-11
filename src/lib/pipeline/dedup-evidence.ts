@@ -472,6 +472,24 @@ function venueIsAddressOf(a: EventRow, b: EventRow): boolean {
   return !!k && k === streetKey(b.address, (b.postal_code ?? '').trim() || null);
 }
 
+/** PLZ, die in der Adresse vor einem Ortsnamen steht („Gries 28, 4890
+ *  Frankenmarkt", angeklebt „Gries 284890 Frankenmarkt"). Gemeinde-Kalender
+ *  tragen in `postal_code` oft ihre eigene PLZ, die Adresse nennt den echten
+ *  Ort (Stichprobe 2026-10-11: Kinderturnen Berg im Attergau / Frankenmarkt). */
+export function addressPostcode(e: Pick<EventRow, 'address'>): string | null {
+  const m = (e.address ?? '').match(/(\d{4})\s+\p{Lu}/u);
+  return m ? m[1] : null;
+}
+
+/** Wortgleiche Beschreibung mit Inhalt: ein Kalender hat das Event eines
+ *  anderen übernommen (Stichprobe 2026-10-11: „Adventsingen des Hausruckchor"
+ *  in den Kalendern von Schwanenstadt und Ottnang). */
+export function sameDescription(a: Pick<EventRow, 'description'>, b: Pick<EventRow, 'description'>): boolean {
+  const norm = (s: string | null | undefined) => foldText(s ?? '').replace(/[^a-z0-9]+/g, ' ').trim();
+  const da = norm(a.description);
+  return da.length >= 40 && da === norm(b.description);
+}
+
 /** Abgekürzte Ortsnamen („Haibach o.d. Donau", „Bruck a.d. Mur") ausschreiben. */
 function expandPlaceAbbreviations(name: string): string {
   return name
