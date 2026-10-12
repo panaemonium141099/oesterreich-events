@@ -159,6 +159,8 @@ import { post as salonSpontanEinImproMusicalFuerAlle62026 } from './posts/salon-
 import { post as atseGrazWienerEislaufverein2026 } from './posts/atse-graz-wiener-eislaufverein-2026';
 import { post as gospelProjectWeihnachtskonzertEmmanuel2026 } from './posts/gospel-project-weihnachtskonzert-emmanuel-2026';
 import { post as uebernachtenWoertherseeEventsommer } from './posts/uebernachten-woerthersee-eventsommer';
+import { post as martinKohlstedtKluftRosentalRozFestival2026 } from './posts/martin-kohlstedt-kluft-rosental-roz-festival-2026';
+import { post as barfussImPark2026 } from './posts/barfuss-im-park-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -328,6 +330,8 @@ export const ALL_POSTS: FestivalPost[] = [
   atseGrazWienerEislaufverein2026,
   gospelProjectWeihnachtskonzertEmmanuel2026,
   uebernachtenWoertherseeEventsommer,
+  martinKohlstedtKluftRosentalRozFestival2026,
+  barfussImPark2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
