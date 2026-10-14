@@ -4,13 +4,13 @@
  * Der Vertrag (`evaluateAdmission`) prüft die FINALEN Werte gegen Polygon
  * und PLZ. Eine verworfene Koordinate oder ein Orts-Widerspruch macht aus
  * der Entscheidung einen Konflikt (ohne Position, zurückgehalten), eine
- * sonstige Quarantäne einen ungeklärten Ort. Diese Abbildung gilt für JEDEN
+ * sonstige Orts-Quarantäne einen ungeklärten Ort. Diese Abbildung gilt für JEDEN
  * Schreibpfad gleich: Scraper-Sync und erneute Entscheidung im Bestand
  * (Backfill, Adress-Geocoder, Admin-Korrektur). Vorher kannte nur der Sync
  * den Vertrag; der Backfill schrieb dieselbe Zeile ohne ihn zurück, und die
  * Wiederholbarkeits-Stichprobe fand den Widerspruch (Galtür, 2026-09-14).
  */
-import type { AdmissionVerdict } from '@/lib/quality/admission';
+import { NON_LOCATION_REASONS, type AdmissionVerdict } from '@/lib/quality/admission';
 import type { LocationDecision, LocationPrecision, LocationStatus } from './types';
 
 export interface ContractedPosition {
@@ -40,11 +40,17 @@ export function applyAdmissionToPosition(
     out.reasons.push('admission:drop_coordinates');
   }
   if (admission.decision === 'quarantine') {
+    // Alle Gründe ins Protokoll, auch die ohne Ortsbezug: daran erkennt die
+    // erneute Entscheidung im Bestand, dass der Vertrag die Zeile hält
+    // (`publishChangeFor`). Den Ort ändern nur die Ortsgründe; ein Termin
+    // jenseits des Horizonts macht aus einer bestätigten Adresse keinen
+    // ungeklärten Ort.
     for (const r of admission.reasons) out.reasons.push(`admission:${r}`);
-    if (admission.reasons.includes('region_contradicts_coords') || admission.reasons.includes('foreign_place_signal')) {
+    const locationReasons = admission.reasons.filter(r => !NON_LOCATION_REASONS.has(r));
+    if (locationReasons.includes('region_contradicts_coords') || locationReasons.includes('foreign_place_signal')) {
       status = 'conflict';
       precision = 'unknown';
-    } else if (status !== 'conflict' && status !== 'online') {
+    } else if (locationReasons.length > 0 && status !== 'conflict' && status !== 'online') {
       status = 'unresolved';
       precision = 'unknown';
     }
