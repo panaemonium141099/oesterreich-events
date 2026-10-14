@@ -164,7 +164,9 @@ describe('gemeinden-generic: Kalenderkarten (oberpullendorf)', () => {
     },
     eventPageUrl: URL, path: '/leben-bildung/veranstaltungen/', dateCount: 1, eventKeywords: 1, htmlSize: 1,
   };
-  const events: Ev[] = (new GenericGemeindeScraper() as any).parsePage(oberpullendorf, page);
+  // Erst im beforeAll parsen: beim Einsammeln der Tests gilt die Fake-Uhr noch nicht.
+  let events: Ev[] = [];
+  beforeAll(() => { events = (new GenericGemeindeScraper() as any).parsePage(oberpullendorf, page); });
   const byTitle = (t: string) => events.filter(e => e.title === t);
 
   it('liest Titel ohne Ort, den Ort und das Ende', () => {
@@ -205,7 +207,8 @@ describe('gemeinde-registry: Kalenderkarten (oberpullendorf)', () => {
     name: 'Oberpullendorf', plz: '7350', bundesland: 'burgenland', bezirk: 'Oberpullendorf',
     lat: 47.5, lng: 16.5, strategy: 'generic-dates', status: 'active', eventUrl: URL,
   };
-  const events: Ev[] = (new GemeindeRegistryScraper() as any).parsePage(oberpullendorf, entry);
+  let events: Ev[] = [];
+  beforeAll(() => { events = (new GemeindeRegistryScraper() as any).parsePage(oberpullendorf, entry); });
 
   it('liest Titel ohne Ort, den Ort und das Ende', () => {
     const [halloween] = events.filter(e => e.title === 'Halloween im Garten');

@@ -20,6 +20,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Festival, FestivalArtist } from '@/types/festivals';
 import type { Event } from '@/types/events';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
+import { bundeslandToId } from '@/lib/bundeslaender';
+import { bundeslandForLocation, districtForLocation } from '@/lib/plz-district';
+import { resolveConservativeLocation } from '@/lib/location/conservative-resolution';
+import type { LocationDecision } from '@/lib/location/types';
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -33,7 +37,10 @@ export interface DeriveEventsOptions {
 export interface DeriveEventsResult {
   events_created: number;
   events_backlinked: number;
+  /** Lese- und Schreibfehler: der Pipeline-Schritt wird damit rot. */
   errors: string[];
+  /** Zeilen ohne Datum oder Fingerprint: unvollständige Festivaldaten, kein Fehler. */
+  skipped: string[];
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -70,6 +77,42 @@ function resolveStartDate(
   }
 
   return null;
+}
+
+/**
+ * Bundesland und Bezirk eines abgeleiteten Events, über dieselben Funktionen
+ * wie der Schreibpfad (`bundeslandForLocation`, `districtForLocation`).
+ *
+ * Mit Eltern-Event gilt dessen Ortsentscheidung. Ohne Eltern-Event (Prod
+ * 2026-10-14: alle 839 offenen Lineup-Zeilen) belegt der Festival-Ort die
+ * Gemeinde, über denselben Resolver wie im Sync: ohne Bundesland nur bei
+ * einem österreichweit eindeutigen Gemeindenamen. `festivals.state` ist nur
+ * der Rückfall. Der Wert ist von Hand gepflegt und steht als Anzeigename da
+ * („Niederösterreich"); als Spaltenwert verletzte er events_bundesland_check,
+ * jede Nacht für alle 839 Zeilen. Er ist zudem teils falsch: Nova Rock steht
+ * in Niederösterreich, Nickelsdorf liegt im Burgenland; Mondsee steht in
+ * Salzburg, liegt aber in Oberösterreich.
+ */
+export function derivedEventRegion(
+  festival: Pick<Festival, 'city' | 'state'>,
+  parent: Partial<Event> | null,
+): { bundesland: string | null; district: string | null } {
+  if (parent) {
+    const gemeinde = (parent.location_resolution as { gemeinde?: LocationDecision['gemeinde'] } | null | undefined)?.gemeinde ?? null;
+    const bundesland =
+      bundeslandForLocation(parent.bundesland, gemeinde, parent.postal_code) ?? bundeslandToId(festival.state);
+    return { bundesland, district: parent.district ?? null };
+  }
+  const place = resolveConservativeLocation({ city: festival.city, country: 'AT' });
+  const bundesland = bundeslandForLocation(null, place.gemeinde, place.postal_code) ?? bundeslandToId(festival.state);
+  const district = districtForLocation(
+    place.gemeinde,
+    place.postal_code,
+    bundesland,
+    null,
+    place.provenance.postal_code ?? null,
+  );
+  return { bundesland, district };
 }
 
 /**
@@ -111,6 +154,7 @@ export async function deriveFestivalEvents(
     events_created: 0,
     events_backlinked: 0,
     errors: [],
+    skipped: [],
   };
 
   // 1. Fetch un-derived festival_artists rows
@@ -164,7 +208,7 @@ export async function deriveFestivalEvents(
         `Skipping "${title}": no resolvable start_date (day_label=${artist.day_label}, festival.starts_at=${festival.starts_at})`,
         verbose
       );
-      result.errors.push(`No start_date for "${title}"`);
+      result.skipped.push(`No start_date for "${title}"`);
       continue;
     }
 
@@ -172,7 +216,7 @@ export async function deriveFestivalEvents(
     const fingerprint = generateFingerprint(title, startDate);
     if (!fingerprint) {
       log(`Skipping "${title}": could not generate fingerprint`, verbose);
-      result.errors.push(`No fingerprint for "${title}"`);
+      result.skipped.push(`No fingerprint for "${title}"`);
       continue;
     }
 
@@ -188,6 +232,7 @@ export async function deriveFestivalEvents(
     }
 
     // 7. Build the derived event row
+    const region = derivedEventRegion(festival, locationData);
     const eventRow = {
       source_type: 'derived',
       source_name: 'festival-lineup',
@@ -203,8 +248,8 @@ export async function deriveFestivalEvents(
       location_name: locationData?.location_name ?? festival.city ?? null,
       address: locationData?.address ?? null,
       postal_code: locationData?.postal_code ?? null,
-      bundesland: locationData?.bundesland ?? festival.state ?? null,
-      district: locationData?.district ?? null,
+      bundesland: region.bundesland,
+      district: region.district,
       latitude: locationData?.latitude ?? null,
       longitude: locationData?.longitude ?? null,
       // fn-25: abgeleitete Events erben die Ortsentscheidung des Festivals,
