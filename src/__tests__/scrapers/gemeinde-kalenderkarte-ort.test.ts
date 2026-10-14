@@ -205,7 +205,12 @@ describe('gemeinde-registry: Kalenderkarten (oberpullendorf)', () => {
     name: 'Oberpullendorf', plz: '7350', bundesland: 'burgenland', bezirk: 'Oberpullendorf',
     lat: 47.5, lng: 16.5, strategy: 'generic-dates', status: 'active', eventUrl: URL,
   };
-  const events: Ev[] = (new GemeindeRegistryScraper() as any).parsePage(oberpullendorf, entry);
+  // Erst im beforeAll lesen: im describe-Rumpf gilt die eingefrorene Uhr
+  // noch nicht, ab dem 14.10.2026 fiel "Treffpunkt Oberpullendorf" (13.10.) weg.
+  let events: Ev[] = [];
+  beforeAll(() => {
+    events = (new GemeindeRegistryScraper() as any).parsePage(oberpullendorf, entry);
+  });
 
   it('liest Titel ohne Ort, den Ort und das Ende', () => {
     const [halloween] = events.filter(e => e.title === 'Halloween im Garten');

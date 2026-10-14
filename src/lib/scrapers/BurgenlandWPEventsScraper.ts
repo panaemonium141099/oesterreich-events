@@ -423,21 +423,8 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
   }
 
   private async fetchWithTimeout(url: string): Promise<string | null> {
-    try {
-      const response = await fetch(url, {
-        redirect: 'follow',
-        signal: AbortSignal.timeout(this.timeoutMs),
-        headers: {
-          'User-Agent': this.userAgent,
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'de-AT,de;q=0.9,en;q=0.5',
-        },
-      });
-      if (response.status !== 200) return null;
-      return await response.text();
-    } catch {
-      return null;
-    }
+    const { html } = await this.fetchHtml(url, { timeoutMs: this.timeoutMs });
+    return html;
   }
 }
 

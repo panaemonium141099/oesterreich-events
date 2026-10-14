@@ -194,6 +194,13 @@ node / next.js
   TYPO3-Kalenderkarten (`.calendarize-item`, `calendarize-card.ts`): Ende
   aus der Terminzeile, „Titel | Ort" nur auf Seiten, die den Trenner
   durchgehend setzen (anderswo Untertitel); die ID bleibt aus der Überschrift.
+  Folgeseiten (`pagination.ts`): Pager-Container zuerst und maßgeblich,
+  Weiter-Beschriftung nur als ganzes Wort, Ziel nur auf eigener Website,
+  keine Dateien/Download-Links, nie die Seite selbst. Selbst gefundene Seiten
+  holen die Gemeinde-Scraper über `BaseScraper.fetchHtml` (`fetch-html.ts`:
+  nur text/html bzw. XHTML, höchstens 5 MB, gestreamt mit Abbruch). Vorher
+  lief Strobls 77-MB-PDF „Voranschlag 2026“ als Seite 2 in cheerio und
+  sprengte den Shard (2026-10-14).
 - `src/lib/db/supabase-sync.ts` — EINZIGER Write-Pfad Scraper→Supabase
   (confidence-basierte Upsert-Guards); kein SQLite mehr im Projekt
 - `src/lib/search/smart-query.ts` — Parser/Whitelist/Ranking der Smart-Suche (pur, getestet)

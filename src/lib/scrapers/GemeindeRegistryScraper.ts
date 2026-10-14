@@ -191,9 +191,11 @@ export class GemeindeRegistryScraper extends BaseScraper {
     if (entry.strategy !== 'cities-iife') {
       let currentUrl = entry.eventUrl;
       let currentHtml = html;
+      const visitedUrls = new Set<string>([currentUrl]);
       for (let page = 1; page < MAX_PAGES_PER_SITE; page++) {
         const detection = detectNextPage(currentHtml, currentUrl);
-        if (!detection.nextUrl) break;
+        if (!detection.nextUrl || visitedUrls.has(detection.nextUrl)) break;
+        visitedUrls.add(detection.nextUrl);
 
         if (paginationType === 'none') paginationType = detection.type;
 
@@ -1345,26 +1347,8 @@ export class GemeindeRegistryScraper extends BaseScraper {
       .trim();
   }
 
-  private async fetchWithTimeout(url: string): Promise<{ html: string | null; error?: string }> {
-    try {
-      const response = await fetch(url, {
-        redirect: 'follow',
-        signal: AbortSignal.timeout(this.timeoutMs),
-        headers: {
-          'User-Agent': this.userAgent,
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'de-AT,de;q=0.9,en;q=0.5',
-        },
-      });
-      if (response.status !== 200) {
-        return { html: null, error: `HTTP ${response.status}` };
-      }
-      return { html: await response.text() };
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      const error = msg.includes('abort') || msg.includes('timeout') ? 'timeout' : msg.substring(0, 80);
-      return { html: null, error };
-    }
+  private fetchWithTimeout(url: string): Promise<{ html: string | null; error?: string }> {
+    return this.fetchHtml(url, { timeoutMs: this.timeoutMs });
   }
 }
 

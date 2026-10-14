@@ -37,20 +37,31 @@ export const MAX_MONTHS_FORWARD = 4;
 /**
  * Detect the next page URL from the current HTML.
  * Tries multiple strategies in order of reliability.
+ *
+ * Jeder Kandidat muss eine Folgeseite sein können (`followableUrl`):
+ * dieselbe Website, keine Datei, nicht die aktuelle Seite. Bis 2026-10
+ * genügte ein Teilwort im Linktext ("vor" in "Voranschlag 2026"), und
+ * Strobl lieferte so ein 77,7-MB-PDF als "Seite 2" (GetDocument.ashx).
+ * Stichprobe 2026-10: von 246 erkannten Folgeseiten waren 109 Menüpunkte,
+ * Rückwärtslinks ("Vorige Seite", "Vorherige Veranstaltungen") oder die
+ * Seite selbst.
  */
 export function detectNextPage(html: string, currentUrl: string): PaginationResult {
   const $ = cheerio.load(html);
+  const ctx: LinkContext = { $, baseUrl: currentUrl, hosts: ownHosts($, currentUrl), containers: pagerContainers($) };
 
-  // Strategy 1: Numbered pager with "next" or "»" link
-  const nextLink = findNextLink($, currentUrl);
+  // Strategy 1: Pager-Container (.pagination, .pager, nav[aria-label*=Seite], …):
+  // Weiter-Link, sonst die Zahl nach der aktuellen Seite. Gibt der Pager
+  // nichts her, ist das die letzte Seite.
+  const pagerNext = findPagerContainerNext(ctx);
+  if (pagerNext) return pagerNext;
+
+  // Strategy 2: "next" classes / rel=next / whole-word next labels outside pagers
+  const nextLink = findNextLink(ctx);
   if (nextLink) return { nextUrl: nextLink, type: 'next-link' };
 
-  // Strategy 2: Numbered pagination (.pagination, .pager, .page-numbers)
-  const numberedNext = findNumberedPagerNext($, currentUrl);
-  if (numberedNext) return { nextUrl: numberedNext, type: 'numbered' };
-
   // Strategy 3: WordPress /page/N/ pattern
-  const wpNext = findWPPageNext($, currentUrl);
+  const wpNext = findWPPageNext(ctx);
   if (wpNext) return { nextUrl: wpNext, type: 'wp-page' };
 
   return { nextUrl: null, type: 'none' };
@@ -168,108 +179,295 @@ function buildFutureMonthUrls(currentUrl: string): MonthPageUrl[] {
   return urls;
 }
 
-// ─── Internal Strategies ────────────────────────────────────────────────────
+// ─── Folgeseiten-Prüfung ────────────────────────────────────────────────────
+
+interface LinkContext {
+  $: cheerio.CheerioAPI;
+  baseUrl: string;
+  /** Hosts dieser Website (ohne "www."): aktuelle URL, canonical, og:url */
+  hosts: Set<string>;
+  /** Pager-Container der Seite (pagerContainers) */
+  containers: cheerio.Cheerio<any>[];
+}
+
+/** Dateiendungen, hinter denen nie eine Folgeseite steckt. */
+const FILE_EXTENSION = /\.(pdf|docx?|xlsx?|pptx?|od[tsp]|rtf|txt|csv|zip|rar|7z|gz|jpe?g|png|gif|webp|svg|bmp|tiff?|mp3|mp4|m4a|wav|avi|mov|wmv|ics|vcs|vcf|xml|rss|json|exe|apk)$/i;
+
+/** Datei-Ausgaben ohne Endung: RiS/GEM2GO GetDocument.ashx, TYPO3 fileadmin, /download/… */
+const FILE_HANDLER = /\.ashx$|\/(fileadmin|download|downloads)\/|\/(getdocument|getfile|download)$/i;
+
+const stripWww = (host: string) => host.toLowerCase().replace(/^www\./, '');
 
 /**
- * Find a "next page" link by looking for common next-link patterns.
+ * Hosts, unter denen die Seite selbst erreichbar ist. Gemeinden laufen oft
+ * unter zwei Domains (trausdorf-wulka.gv.at listet seine Seiten absolut
+ * unter trausdorf-wulka.at), die Seite nennt ihre eigene im canonical/og:url.
  */
-function findNextLink($: cheerio.CheerioAPI, baseUrl: string): string | null {
-  // Common German/English next-link selectors and text patterns
-  const selectors = [
-    'a.next', 'a.page-next', 'a[rel="next"]',
-    'li.next a', 'li.page-next a',
-    '.pagination .next a', '.pager .next a',
-    '.nav-next a', '.next-page a',
-  ];
+function ownHosts($: cheerio.CheerioAPI, baseUrl: string): Set<string> {
+  const hosts = new Set<string>();
+  const add = (url: string | undefined) => {
+    if (!url) return;
+    try { hosts.add(stripWww(new URL(url, baseUrl).host)); } catch { /* skip */ }
+  };
+  add(baseUrl);
+  add($('link[rel="canonical"]').attr('href'));
+  add($('meta[property="og:url"]').attr('content'));
+  return hosts;
+}
 
-  for (const sel of selectors) {
-    const href = $(sel).attr('href');
-    if (href && href !== '#') {
-      try { return new URL(href, baseUrl).href; } catch { /* skip */ }
+const withoutHash = (url: URL) => url.href.replace(/#.*$/, '');
+
+/**
+ * Absolute URL des Links, wenn er eine Folgeseite derselben Website sein
+ * kann: http(s), eigener Host, kein Download-Link, keine Datei, nicht die
+ * aktuelle Seite. Sonst null.
+ */
+function followableUrl(ctx: LinkContext, el: cheerio.Cheerio<any>): string | null {
+  const href = el.attr('href')?.trim();
+  if (!href || href.startsWith('#') || /^(javascript|mailto|tel):/i.test(href)) return null;
+  if (el.attr('download') !== undefined || /download/i.test(el.attr('class') ?? '')) return null;
+
+  let url: URL;
+  try { url = new URL(href, ctx.baseUrl); } catch { return null; }
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+  if (!ctx.hosts.has(stripWww(url.host))) return null;
+  if (FILE_EXTENSION.test(url.pathname) || FILE_HANDLER.test(url.pathname)) return null;
+  if (url.searchParams.has('download')) return null;
+  try {
+    if (withoutHash(url) === withoutHash(new URL(ctx.baseUrl))) return null;
+  } catch { /* baseUrl ungültig: nichts zu vergleichen */ }
+  return url.href;
+}
+
+// ─── Weiter-Beschriftungen ──────────────────────────────────────────────────
+
+/** Wörter, die einen Weiter-Link tragen ("vor" nur als ganzes Wort: "zurück | vor"). */
+const NEXT_WORDS = new Set([
+  'nächste', 'nächster', 'nächstes', 'nächsten', 'weiter', 'vor', 'vorwärts',
+  'später', 'spätere', 'späteren', 'next',
+]);
+const NEXT_ARROWS = new Set(['»', '›', '>', '>>', '»»', '››', '→', '❯', '▶', '►']);
+/**
+ * Füllwörter neben einem Weiter-Wort ("Nächste Seite", "Weiter zur nächsten
+ * Seite"). Nur Mehrzahl: "Nächste Veranstaltung" ist eine Überschrift über
+ * dem kommenden Termin, keine Folgeseite (Kirchstetten 2026-10).
+ */
+const LABEL_FILLERS = new Set([
+  'seite', 'page', 'zur', 'zum', 'zu', 'der', 'die', 'den',
+  'veranstaltungen', 'termine', 'events', 'einträge', 'beiträge', 'ergebnisse',
+  'monat', 'woche', 'tag',
+]);
+const ARROWS_ONLY = /^[\s«‹<>»›|→←❮❯▶►◀◄]*$/;
+
+/**
+ * Ist die Beschriftung ein Weiter-Link? Ganze Wörter statt Teilwörter: die
+ * Beschriftung besteht nur aus Weiter-Wörtern, Pfeilen und Füllwörtern, und
+ * stehen Wörter darin, ist eines ein Weiter-Wort. "Voranschlag",
+ * "Gemeindevorstand", "Weitere Informationen", "Vorige Seite", ">|" (letzte
+ * Seite) und der Menüpunkt "Veranstaltungen ›" sind es nicht.
+ */
+export function isNextLabel(label: string): boolean {
+  const tokens = label.toLowerCase()
+    .replace(/([«‹<>»›→❯▶►|]+)/g, ' $1 ')
+    .replace(/[.,:;!?()[\]"'„“”…\-–]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+  let nextWord = false;
+  let arrow = false;
+  let filler = false;
+  for (const token of tokens) {
+    if (NEXT_WORDS.has(token)) nextWord = true;
+    else if (NEXT_ARROWS.has(token)) arrow = true;
+    else if (LABEL_FILLERS.has(token)) filler = true;
+    else return false;
+  }
+  return nextWord || (arrow && !filler);
+}
+
+/**
+ * Weiter-Link nach seiner Beschriftung. Der sichtbare Text entscheidet;
+ * bei reinen Pfeilen ("›", "»") gehen title/aria-label vor, denn "»" heißt
+ * in manchen Pagern "Letzte Seite".
+ */
+function hasNextLabel(el: cheerio.Cheerio<any>): boolean {
+  const text = el.text().replace(/\s+/g, ' ').trim();
+  if (!ARROWS_ONLY.test(text)) return isNextLabel(text);
+  const described = [el.attr('aria-label'), el.attr('title')].filter((s): s is string => !!s?.trim());
+  if (described.length > 0) return described.some(isNextLabel);
+  return isNextLabel(text);
+}
+
+/** Klasse eines Weiter-Links: a.next, li.next > a, tribe "…__next", "…--next", wp-pagenavi. */
+const NEXT_CLASS = /(^|[\s_-])next($|[\s_-])|nextpostslink/i;
+
+function hasNextClass(el: cheerio.Cheerio<any>): boolean {
+  return NEXT_CLASS.test(el.attr('class') ?? '') || (el.parent().is('li') && NEXT_CLASS.test(el.parent().attr('class') ?? ''));
+}
+
+// ─── Internal Strategies ────────────────────────────────────────────────────
+
+const PAGER_CONTAINERS = [
+  '.pagination', '.pager', '.page-numbers', '.pages', '.wp-pagenavi', '.paginierung',
+  '[class*="pagination"]', '[class*="pager"]', '[class*="pagebrowse"]',
+  'nav[aria-label*="seite" i]', 'nav[aria-label*="page" i]', 'nav[aria-label*="paginierung" i]',
+].join(', ');
+
+/** Pager-Container der Seite; bei Pagern ohne Container-Klasse (RiS: p > a.pager) das Elternelement der Seitenlinks. */
+function pagerContainers($: cheerio.CheerioAPI): cheerio.Cheerio<any>[] {
+  const seen = new Set<unknown>();
+  const out: cheerio.Cheerio<any>[] = [];
+  const add = (node: any) => {
+    if (seen.has(node)) return;
+    seen.add(node);
+    out.push($(node));
+  };
+  $(PAGER_CONTAINERS).not('a').each((_, node) => add(node));
+  $('a.pager, a.page-numbers, a.page-link').each((_, node) => {
+    const parent = $(node).parent();
+    const container = parent.is('li') ? parent.parent() : parent;
+    if (container.length > 0) add(container[0]);
+  });
+  return out;
+}
+
+/** Markierung der aktuellen Seite im Pager. */
+const ACTIVE_PAGE = '.active, .current, [aria-current="page"], .selected, .pager_sel';
+
+/**
+ * Im Pager-Container: zuerst ein Weiter-Link (Beschriftung oder Klasse),
+ * sonst die nächste Seitenzahl nach der aktuellen Seite.
+ */
+function findPagerContainerNext(ctx: LinkContext): PaginationResult | null {
+  const { containers } = ctx;
+
+  for (const container of containers) {
+    const links = container.find('a[href]');
+    for (let i = 0; i < links.length; i++) {
+      const el = links.eq(i);
+      if (!hasNextLabel(el) && !hasNextClass(el)) continue;
+      const url = followableUrl(ctx, el);
+      if (url) return { nextUrl: url, type: 'next-link' };
     }
   }
 
-  // Text-based detection: "Nächste", "Weiter", "»", "›", "Next", ">"
-  const nextTexts = ['nächste', 'weiter', '»', '›', 'next', '\\u003e', 'vor'];
-  const allLinks = $('a[href]');
-
-  for (let i = 0; i < allLinks.length; i++) {
-    const el = allLinks.eq(i);
-    const text = el.text().trim().toLowerCase();
-    const title = (el.attr('title') || '').toLowerCase();
-    const ariaLabel = (el.attr('aria-label') || '').toLowerCase();
-
-    for (const pattern of nextTexts) {
-      if (text === pattern || text.includes(pattern) || title.includes(pattern) || ariaLabel.includes(pattern)) {
-        const href = el.attr('href');
-        if (href && href !== '#' && !href.startsWith('javascript:')) {
-          try { return new URL(href, baseUrl).href; } catch { /* skip */ }
-        }
-      }
-    }
+  for (const container of containers) {
+    const url = findNumberedPagerNext(ctx, container);
+    if (url) return { nextUrl: url, type: 'numbered' };
   }
-
   return null;
 }
 
 /**
  * Find the next page in a numbered pagination control.
- * Looks for the "active" page and finds the next number.
+ * Looks for the "active" page and takes the following page number.
  */
-function findNumberedPagerNext($: cheerio.CheerioAPI, baseUrl: string): string | null {
-  const pagerSelectors = [
-    '.pagination', '.pager', '.page-numbers', '.pages',
-    'nav[aria-label*="Page"]', 'nav[aria-label*="Seite"]',
-    '.wp-pagenavi', '.paginierung',
+function findNumberedPagerNext(ctx: LinkContext, container: cheerio.Cheerio<any>): string | null {
+  const activePage = container.find(ACTIVE_PAGE).first();
+  if (activePage.length === 0) return null;
+
+  // Next sibling link (handles both <a class="active"> and <span class="active">),
+  // or — if the active page sits inside an <li> — the next <li>'s link
+  const candidates = [activePage.nextAll('a').first()];
+  const activeItem = activePage.is('li') ? activePage : activePage.parent().is('li') ? activePage.parent() : null;
+  if (activeItem) candidates.push(activeItem.next('li').find('a').first());
+
+  for (const el of candidates) {
+    if (el.length === 0) continue;
+    // Seitenzahl oder Weiter-Pfeil, kein Reiter wie "Beiträge"
+    const text = el.text().replace(/\s+/g, ' ').trim();
+    if (!/^\d+$/.test(text) && !hasNextLabel(el)) continue;
+    const url = followableUrl(ctx, el);
+    if (url) return url;
+  }
+  return null;
+}
+
+/**
+ * Find a "next page" link outside pager containers: next classes, rel=next,
+ * then whole-word next labels anywhere on the page. Links in Pager-Containern
+ * hat Strategie 1 schon gewertet: RiS setzt rel="Next" auch auf "Seite 1",
+ * auf der letzten Seite führte das zurück an den Anfang (Hainfeld 2026-10).
+ * Außerhalb eines Pagers muss das Ziel wie eine weitere Seite der Liste
+ * aussehen, sonst ist "Nächste Veranstaltung" ein Link auf den Kalender.
+ */
+function findNextLink(ctx: LinkContext): string | null {
+  const { $ } = ctx;
+  const inPager = new Set<unknown>();
+  for (const container of ctx.containers) {
+    container.find('a').each((_, node) => { inPager.add(node); });
+  }
+  const candidate = (el: cheerio.Cheerio<any>): string | null => {
+    if (inPager.has(el[0])) return null;
+    const url = followableUrl(ctx, el);
+    return url && looksLikePageOf(url, ctx.baseUrl) ? url : null;
+  };
+
+  const selectors = [
+    'a.next', 'a.page-next', 'a[rel~="next"]',
+    'li.next a', 'li.page-next a',
+    '.nav-next a', '.next-page a',
   ];
 
-  for (const containerSel of pagerSelectors) {
-    const container = $(containerSel).first();
-    if (container.length === 0) continue;
-
-    // Find the active/current page
-    const activePage = container.find('.active, .current, [aria-current="page"], .selected').first();
-    if (activePage.length === 0) continue;
-
-    // Get the next sibling link (handles both <a class="active"> and <span class="active">)
-    const nextLink = activePage.nextAll('a').first();
-    if (nextLink.length > 0) {
-      const href = nextLink.attr('href');
-      if (href && href !== '#') {
-        try { return new URL(href, baseUrl).href; } catch { /* skip */ }
-      }
+  for (const sel of selectors) {
+    const links = $(sel);
+    for (let i = 0; i < links.length; i++) {
+      const el = links.eq(i);
+      if (isBackLabel(el)) continue;
+      const url = candidate(el);
+      if (url) return url;
     }
+  }
 
-    // Also check if active is inside an <li> — then look at next <li>'s <a>
-    if (activePage.parent().is('li')) {
-      const nextLi = activePage.parent().next('li');
-      const nextLiLink = nextLi.find('a').first();
-      if (nextLiLink.length > 0) {
-        const href = nextLiLink.attr('href');
-        if (href && href !== '#') {
-          try { return new URL(href, baseUrl).href; } catch { /* skip */ }
-        }
-      }
-    }
+  // Text-based detection: "Nächste", "Weiter", "»", "›", "Next", ">" als ganze Wörter
+  const allLinks = $('a[href]');
+  for (let i = 0; i < allLinks.length; i++) {
+    const el = allLinks.eq(i);
+    if (!hasNextLabel(el)) continue;
+    const url = candidate(el);
+    if (url) return url;
   }
 
   return null;
 }
 
+/** Seitenangabe in Pfad oder Query: /seite/2/, /page-2, ?page=2, ?pno=2, tribe_paged=2, [currentPage]=2, ?start=10 */
+const PAGE_PARAM = /(^|[/?&;_\-[])(page|seite|pno|paged|pg|p|offset|start|currentpage|pointer)\]?[=/_-]?\d+/i;
+
+/** Gleicher Pfad wie die aktuelle Seite (andere Query) oder eine Seitenangabe in der URL. */
+function looksLikePageOf(url: string, baseUrl: string): boolean {
+  const next = new URL(url);
+  let base: URL;
+  try { base = new URL(baseUrl); } catch { return false; }
+  const path = (u: URL) => u.pathname.toLowerCase().replace(/\/+$/, '');
+  if (path(next) === path(base)) return true;
+  let pathAndQuery = next.pathname + next.search;
+  try { pathAndQuery = decodeURIComponent(pathAndQuery); } catch { /* roh prüfen */ }
+  return PAGE_PARAM.test(pathAndQuery);
+}
+
+/** Rückwärts-Beschriftung am Anfang: "«", "<", "|<", "Erste", "Vorige", "Zurück", "Previous" */
+const BACK_LABEL = /^(«|‹|<|\|\s*<|erste|vorige|vorherige|zurück|previous|prev|first)(?![a-zäöüß])/i;
+
+function isBackLabel(el: cheerio.Cheerio<any>): boolean {
+  const labels = [el.text(), el.attr('title') ?? '', el.attr('aria-label') ?? ''];
+  return labels.some(l => BACK_LABEL.test(l.replace(/\s+/g, ' ').trim()));
+}
+
 /**
  * Detect WordPress /page/N/ pagination pattern.
  */
-function findWPPageNext($: cheerio.CheerioAPI, baseUrl: string): string | null {
+function findWPPageNext(ctx: LinkContext): string | null {
+  const { $, baseUrl } = ctx;
   // Look for /page/N/ links in pagination
   const pageLinks: { page: number; url: string }[] = [];
   let currentPage = 1;
 
   $('a[href*="/page/"]').each((_, el) => {
-    const href = $(el).attr('href');
-    if (!href) return;
-    const pageMatch = href.match(/\/page\/(\d+)/);
+    const url = followableUrl(ctx, $(el));
+    if (!url) return;
+    const pageMatch = new URL(url).pathname.match(/\/page\/(\d+)/);
     if (pageMatch) {
-      pageLinks.push({ page: parseInt(pageMatch[1]), url: href });
+      pageLinks.push({ page: parseInt(pageMatch[1]), url });
     }
   });
 
@@ -281,14 +479,12 @@ function findWPPageNext($: cheerio.CheerioAPI, baseUrl: string): string | null {
 
   // Find the next page
   const nextPage = pageLinks.find((p) => p.page === currentPage + 1);
-  if (nextPage) {
-    try { return new URL(nextPage.url, baseUrl).href; } catch { /* skip */ }
-  }
+  if (nextPage) return nextPage.url;
 
   // If we're on page 1 (no /page/ in URL) and /page/2/ exists
-  if (!currentPageMatch && pageLinks.some((p) => p.page === 2)) {
-    const page2 = pageLinks.find((p) => p.page === 2)!;
-    try { return new URL(page2.url, baseUrl).href; } catch { /* skip */ }
+  if (!currentPageMatch) {
+    const page2 = pageLinks.find((p) => p.page === 2);
+    if (page2) return page2.url;
   }
 
   return null;

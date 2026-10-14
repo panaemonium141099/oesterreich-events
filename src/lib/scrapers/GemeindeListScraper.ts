@@ -125,30 +125,21 @@ export class GemeindeListScraper extends BaseScraper {
   private async findCalendarUrl(gemeinde: GemeindeInfo): Promise<string | null> {
     for (const path of this.calendarPaths) {
       const url = gemeinde.website + path;
-      try {
-        const response = await fetch(url, {
-          headers: {
-            'User-Agent': this.userAgent,
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'de-AT,de;q=0.9,en;q=0.5',
-          },
-          redirect: 'follow',
-          signal: AbortSignal.timeout(this.probeTimeoutMs),
-        });
-
-        if (response.ok) {
-          const html = await response.text();
-          if (this.looksLikeEventPage(html)) {
-            return url;
-          }
-        }
-      } catch {
-        // Timeout, DNS-Fehler, etc. → nächsten Pfad probieren
-        continue;
+      // Timeout, DNS-Fehler, kein HTML etc. → nächsten Pfad probieren
+      const { html } = await this.fetchHtml(url, { timeoutMs: this.probeTimeoutMs });
+      if (html && this.looksLikeEventPage(html)) {
+        return url;
       }
     }
 
     return null;
+  }
+
+  /** Kalender- und Folgeseiten nur als HTML (fetchHtml); Fehler als Exception wie bei fetchPage. */
+  private async fetchCalendarPage(url: string): Promise<string> {
+    const { html, error } = await this.fetchHtml(url, { retries: this.maxRetries });
+    if (html === null) throw new Error(error ?? `Fetch failed for ${url}`);
+    return html;
   }
 
   /**
@@ -186,7 +177,7 @@ export class GemeindeListScraper extends BaseScraper {
   private async scrapeCalendar(url: string, gemeinde: GemeindeInfo): Promise<ScrapedEvent[]> {
     let html: string;
     try {
-      html = await this.fetchPage(url);
+      html = await this.fetchCalendarPage(url);
     } catch {
       return [];
     }
@@ -206,7 +197,7 @@ export class GemeindeListScraper extends BaseScraper {
         visitedUrls.add(nextUrl);
 
         try {
-          const nextHtml = await this.fetchPage(nextUrl);
+          const nextHtml = await this.fetchCalendarPage(nextUrl);
           const nextEvents = this.parseCalendarPage(nextHtml, nextUrl, gemeinde);
           if (nextEvents.length === 0) break;
 
@@ -228,7 +219,7 @@ export class GemeindeListScraper extends BaseScraper {
         visitedUrls.add(mu.url);
 
         try {
-          const mHtml = await this.fetchPage(mu.url);
+          const mHtml = await this.fetchCalendarPage(mu.url);
           const mEvents = this.parseCalendarPage(mHtml, mu.url, gemeinde);
           allEvents.push(...mEvents);
           await this.sleep(500);

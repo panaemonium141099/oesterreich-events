@@ -581,21 +581,15 @@ export class GenericGemeindeScraper extends BaseScraper {
   }
 
   private async fetchPageSafe(url: string): Promise<string | null> {
-    try {
-      const r = await fetch(url, {
-        redirect: 'follow',
-        signal: AbortSignal.timeout(this.timeoutMs),
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          'Accept': 'text/html',
-          'Accept-Language': 'de-AT,de;q=0.9',
-        },
-      });
-      if (!r.ok) return null;
-      return await r.text();
-    } catch {
-      return null;
-    }
+    const { html } = await this.fetchHtml(url, {
+      timeoutMs: this.timeoutMs,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html',
+        'Accept-Language': 'de-AT,de;q=0.9',
+      },
+    });
+    return html;
   }
 
   private parseDate(text: string): string | null {
