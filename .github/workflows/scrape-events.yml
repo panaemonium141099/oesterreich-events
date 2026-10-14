@@ -5,8 +5,9 @@ name: Scrape Events Pipeline
 # liefen Geocoding/Scoring/Dedup/Indexing 10 Wochen lang nie. Jetzt:
 #   1. 6 parallele Scrape-Shards (deterministisch, alphabetisch round-robin)
 #   2. Venue-Ingestion parallel dazu
-#   3. EIN Post-Processing-Job (needs: alle Shards) mit normalize → geocoding
-#      → master_coords → scoring → withdrawal → dedup → artist_matching → indexing → report
+#   3. EIN Post-Processing-Job (needs: alle Shards) mit festival_lineups → normalize
+#      → geocoding → master_coords → scoring → withdrawal → dedup → artist_matching
+#      → indexing → report
 # Das 6h-Limit gilt PRO JOB — jeder Shard hat also reichlich Luft.
 
 on:
@@ -173,10 +174,6 @@ jobs:
           cache: 'npm'
 
       - run: npm ci
-
-      - name: Festival lineups (Hook-Ersatz, lief früher pro scrape.ts-Lauf)
-        continue-on-error: true
-        run: npx tsx src/scripts/scrape-festival-lineups.ts
 
       - name: Post-processing pipeline (normalize → geocode → score → withdrawal → dedup → indexing → report)
         run: |
