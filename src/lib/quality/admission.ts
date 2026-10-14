@@ -34,6 +34,8 @@
  * im Unit-Test ohne GeoJSON-Dateien läuft.
  */
 
+import { isMunicipalService } from '@/lib/category-classifier/municipal-service';
+
 /** `reject` = gar nicht schreiben. `quarantine` = schreiben, aber nie publik. */
 export type AdmissionDecision = 'admit' | 'quarantine' | 'reject';
 
@@ -51,14 +53,16 @@ export type AdmissionReason =
   | 'region_contradicts_coords'
   | 'coords_outside_declared_country'
   | 'foreign_place_signal'
-  | 'start_too_far_ahead';
+  | 'start_too_far_ahead'
+  /** Gemeinde-Dienst statt Event (Müllabfuhr, Sprechtag, …), siehe `contentQuarantineReasons`. */
+  | 'municipal_service';
 
 /**
  * Gründe, die nichts über den Ort aussagen. Die Ortsentscheidung
  * (`applyAdmissionToPosition`) lässt Status und Position dafür unberührt;
  * zurückgehalten wird die Zeile trotzdem (Quarantäne → needs_review).
  */
-export const NON_LOCATION_REASONS: ReadonlySet<AdmissionReason> = new Set<AdmissionReason>(['start_too_far_ahead']);
+export const NON_LOCATION_REASONS: ReadonlySet<AdmissionReason> = new Set<AdmissionReason>(['start_too_far_ahead', 'municipal_service']);
 
 /**
  * Freigabehorizont in Jahren ab heute (Wiener Kalendertag).
@@ -278,6 +282,24 @@ export function hasForeignPlaceSignal(value: string | null | undefined): boolean
 }
 
 /**
+ * Inhaltliche Quarantäne-Gründe, die nur am Titel hängen.
+ *
+ * Gemeinde-Dienste (Entscheidung 2026-10-14): Müllabfuhr, Sprechtage,
+ * Klimaticket-Verleih und Dorfservice sind keine Events und werden nirgends
+ * gezeigt. Quarantäne statt Verwerfen, damit die Zeilen bleiben und die
+ * Entscheidung umkehrbar ist. Vor der Regel waren davon 917 künftige
+ * Termine sichtbar (Prod 2026-10-14).
+ *
+ * Eigene Funktion, weil der Dedup denselben Status kennen muss, ohne den
+ * ganzen Vertrag (Polygon, PLZ) zu rechnen: eine noch nicht neu
+ * geschriebene Dublette darf nicht als Ersatz für ihr zurückgehaltenes
+ * Primary freigegeben werden (`underlyingStatus` in dedup-cluster.ts).
+ */
+export function contentQuarantineReasons(input: { title?: string | null }): AdmissionReason[] {
+  return isMunicipalService(input.title) ? ['municipal_service'] : [];
+}
+
+/**
  * Der Freigabevertrag. Reihenfolge: harte Verwerfungen zuerst, dann die
  * Gründe, die eine Zeile zwar zulassen, aber nicht veröffentlichen.
  */
@@ -404,6 +426,9 @@ export function evaluateAdmission(
   ) {
     quarantines.push('foreign_place_signal');
   }
+
+  // ── 4. Inhalt — Gemeinde-Dienste sind keine Events ─────────────────
+  quarantines.push(...contentQuarantineReasons(input));
 
   // Eine verworfene Zeile wird gar nicht geschrieben — Korrekturen daran
   // wären gegenstandslos.

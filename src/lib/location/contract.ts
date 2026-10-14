@@ -4,8 +4,9 @@
  * Der Vertrag (`evaluateAdmission`) prüft die FINALEN Werte gegen Polygon
  * und PLZ. Eine verworfene Koordinate oder ein Orts-Widerspruch macht aus
  * der Entscheidung einen Konflikt (ohne Position, zurückgehalten), eine
- * sonstige Orts-Quarantäne einen ungeklärten Ort. Diese Abbildung gilt für JEDEN
- * Schreibpfad gleich: Scraper-Sync und erneute Entscheidung im Bestand
+ * sonstige Orts-Quarantäne einen ungeklärten Ort. Gründe ohne Ortsbezug
+ * (Horizont, Gemeinde-Dienst) halten die Zeile zurück, lassen den Ort aber
+ * stehen. Diese Abbildung gilt für JEDEN Schreibpfad gleich: Scraper-Sync und erneute Entscheidung im Bestand
  * (Backfill, Adress-Geocoder, Admin-Korrektur). Vorher kannte nur der Sync
  * den Vertrag; der Backfill schrieb dieselbe Zeile ohne ihn zurück, und die
  * Wiederholbarkeits-Stichprobe fand den Widerspruch (Galtür, 2026-09-14).
@@ -43,8 +44,8 @@ export function applyAdmissionToPosition(
     // Alle Gründe ins Protokoll, auch die ohne Ortsbezug: daran erkennt die
     // erneute Entscheidung im Bestand, dass der Vertrag die Zeile hält
     // (`publishChangeFor`). Den Ort ändern nur die Ortsgründe; ein Termin
-    // jenseits des Horizonts macht aus einer bestätigten Adresse keinen
-    // ungeklärten Ort.
+    // jenseits des Horizonts oder ein Gemeinde-Dienst macht aus einer
+    // bestätigten Adresse keinen ungeklärten Ort.
     for (const r of admission.reasons) out.reasons.push(`admission:${r}`);
     const locationReasons = admission.reasons.filter(r => !NON_LOCATION_REASONS.has(r));
     if (locationReasons.includes('region_contradicts_coords') || locationReasons.includes('foreign_place_signal')) {

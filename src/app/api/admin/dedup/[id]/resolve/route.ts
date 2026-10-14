@@ -114,12 +114,13 @@ export async function POST(
       for (const eid of [eventAId, eventBId]) {
         const { data: ev } = await supabase
           .from('events')
-          .select('id,quality_score,publish_status,location_status,admission:location_resolution->admission->>decision')
+          .select('id,title,quality_score,publish_status,location_status,admission:location_resolution->admission->>decision')
           .eq('id', eid)
           .single();
 
         if (ev && ev.publish_status === 'duplicate') {
           const newStatus = releaseStatus({
+            title: ev.title,
             quality_score: ev.quality_score,
             location_status: ev.location_status,
             admission_decision: ev.admission as string | null,

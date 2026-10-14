@@ -489,14 +489,29 @@ describe('planDedup: Freigabe nur mit Gegenbeleg', () => {
 
 describe('releaseStatus', () => {
   it('folgt dem gespeicherten Qualitätsscore', () => {
-    expect(releaseStatus({ quality_score: 75 })).toBe('published');
-    expect(releaseStatus({ quality_score: 45 })).toBe('published_low_confidence');
+    expect(releaseStatus({ title: 'Konzert', quality_score: 75 })).toBe('published');
+    expect(releaseStatus({ title: 'Konzert', quality_score: 45 })).toBe('published_low_confidence');
   });
   it('Quarantäne aus der Aufnahmeprüfung bleibt Quarantäne', () => {
-    expect(releaseStatus({ quality_score: 90, admission_decision: 'quarantine' })).toBe('needs_review');
+    expect(releaseStatus({ title: 'Konzert', quality_score: 90, admission_decision: 'quarantine' })).toBe('needs_review');
   });
   it('Ortskonflikt darf nicht veröffentlicht werden (DB-Constraint events_location_conflict_not_published)', () => {
-    expect(releaseStatus({ quality_score: 90, location_status: 'conflict' })).toBe('needs_review');
+    expect(releaseStatus({ title: 'Konzert', quality_score: 90, location_status: 'conflict' })).toBe('needs_review');
+  });
+  it('Gemeinde-Dienst bleibt zurückgehalten, auch wenn die Zeile noch vor der Regel geschrieben wurde', () => {
+    expect(releaseStatus({ title: 'Biomüll', quality_score: 90, admission_decision: 'admit' })).toBe('needs_review');
+  });
+});
+
+describe('Gemeinde-Dienste im Dedup', () => {
+  it('eine alte Dublette wird nicht als Ersatz für ihr zurückgehaltenes Primary freigegeben', () => {
+    // a ist seit der Regel needs_review (neu geschrieben), b ist die
+    // Dublette aus einer Quelle, die seitdem nicht geliefert hat.
+    const p = plan([
+      ev({ id: 'a', title: 'Sperrmüll- und Problemstoffsammlung', source_name: 'gem2go', publish_status: 'needs_review', admission_decision: 'quarantine', dedup_cluster_id: 'c1' }),
+      ev({ id: 'b', title: 'Sperrmüll- und Problemstoffsammlung', source_name: 'gemeinden-generic', publish_status: 'duplicate', duplicate_of: 'a', dedup_cluster_id: 'c1', quality_score: 80 }),
+    ]);
+    expect(p.release.filter(r => r.visible)).toEqual([]);
   });
 });
 

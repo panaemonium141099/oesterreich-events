@@ -7,6 +7,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import {
+  contentQuarantineReasons,
   evaluateAdmission,
   hasTimeOfDay,
   isEndBeforeStart,
@@ -486,5 +487,40 @@ describe('applyAdmissionToPosition', () => {
     });
     expect(c.status).toBe('unresolved');
     expect(c.reasons).toEqual(['admission:start_too_far_ahead', 'admission:placeholder_location']);
+  });
+});
+
+describe('evaluateAdmission — Gemeinde-Dienste (Entscheidung 2026-10-14)', () => {
+  it('Müllabfuhr, Sprechtag, Klimaticket, Dorfservice: Quarantäne mit eigenem Grund', () => {
+    for (const title of ['Biomüll', 'Sperrmüll- und Problemstoffsammlung', 'Sozialsprechtag', 'Klimaticket', 'Dorfservice']) {
+      expect(evaluateAdmission({ ...OK, title }, { now: NOW }), title).toMatchObject({
+        decision: 'quarantine',
+        reasons: ['municipal_service'],
+      });
+    }
+  });
+
+  it('Gemeinschafts-Events bleiben zugelassen', () => {
+    for (const title of ['Flurreinigung', 'Müllsammelaktion für Kinder', 'Repair Café', 'Gesunde Gemeinde: Yoga', 'Tag der offenen Tür im ASZ']) {
+      expect(evaluateAdmission({ ...OK, title }, { now: NOW }).decision, title).toBe('admit');
+    }
+  });
+
+  it('verdrängt keine Orts-Gründe und keine Verwerfung', () => {
+    expect(evaluateAdmission({ ...OK, title: 'Restmüll', latitude: null, longitude: null, location_name: null, postal_code: null }, { now: NOW }).reasons)
+      .toEqual(['no_location_evidence', 'municipal_service']);
+    expect(evaluateAdmission({ ...OK, title: 'Restmüll', start_date: '2026-09-01T08:00:00Z' }, { now: NOW }).decision).toBe('reject');
+  });
+
+  it('scoreAndAdmit: needs_review trotz vollständiger Zeile', () => {
+    const r = scoreAndAdmit({ ...OK, title: 'Bausprechtag', description: 'x'.repeat(250), image_url: 'https://example.at/i.jpg', source_url: 'https://example.at/e' }, { now: NOW });
+    expect(r.publish_status).toBe('needs_review');
+    expect(r.corrected.latitude).toBe(OK.latitude);
+  });
+
+  it('contentQuarantineReasons hängt nur am Titel', () => {
+    expect(contentQuarantineReasons({ title: 'Gelber Sack' })).toEqual(['municipal_service']);
+    expect(contentQuarantineReasons({ title: 'Konzert' })).toEqual([]);
+    expect(contentQuarantineReasons({ title: null })).toEqual([]);
   });
 });

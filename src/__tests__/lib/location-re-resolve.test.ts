@@ -451,3 +451,44 @@ describe('publishChangeFor folgt dem Freigabevertrag wie der Sync', () => {
     expect(publishChangeFor(held, { status: 'municipality_only', reasons: ['gemeinde_centroid_from_plz'] })).toEqual({ publish_status: 'published' });
   });
 });
+
+describe('Gemeinde-Dienste (Entscheidung 2026-10-14): zurückgehalten, Ort bleibt', () => {
+  // Innerhalb des Freigabehorizonts (start_too_far_ahead), unabhängig vom Testdatum.
+  const start = new Date(Date.now() + 30 * 86_400_000).toISOString();
+  const synced = (e: Partial<ScrapedEvent>) => ({
+    ...(toSupabaseRow({ source_name: 'gemeinden-generic', source_id: 'm', source_url: 'https://example.at/m', title: 'Konzert', start_date: start, location_name: 'Posthof', address: 'Posthofstraße 43, 4020 Linz', ...e } as ScrapedEvent, new Map(), new Map()).row as unknown as StoredEventLocationRow & { publish_status: string }),
+    id: 'ev-1',
+    updated_at: '2026-10-07T08:00:00Z',
+  });
+
+  it('Sync: needs_review mit eigenem Grund, Ortsstatus und Position wie bei einem Event', () => {
+    const event = synced({});
+    const service = synced({ title: 'Biomüll' });
+    expect(event.publish_status).not.toBe('needs_review');
+    expect(service.publish_status).toBe('needs_review');
+    expect(service.location_status).toBe(event.location_status);
+    expect(service.latitude).toBe(event.latitude);
+    expect(service.location_resolution?.reasons).toContain('admission:municipal_service');
+    expect(repeatabilityOf(service, resolveEventLocation(inputFromStoredRow(service)))).toBe('same');
+  });
+
+  it('Neu-Entscheidung im Bestand: eine vor der Regel veröffentlichte Zeile wird zurückgehalten, der Ort bleibt', async () => {
+    const row = { ...synced({}), title: 'Sperrmüll- und Problemstoffsammlung', publish_status: 'published' };
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const sb = fakeClient([{ id: 'ev-1', updated_at: '2026-10-07T08:00:00Z' }], writes);
+    const [res] = await reResolveStoredEvents(sb, [row], { phase: 'test' });
+    expect(res.publish_change).toBe('withheld');
+    expect(writes[0].payload.publish_status).toBe('needs_review');
+    expect(writes[0].payload.location_status).toBe(row.location_status);
+    expect(writes[0].payload.latitude).toBe(row.latitude);
+  });
+
+  it('zurückgehaltene Zeile bleibt zurückgehalten; fällt die Regel weg, kommt sie zurück (umkehrbar)', async () => {
+    const held = synced({ title: 'Sozialsprechtag' });
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const [res] = await reResolveStoredEvents(fakeClient([{ id: 'ev-1', updated_at: '2026-10-07T08:00:00Z' }], writes), [held], { phase: 'test' });
+    expect(res.publish_change).toBeUndefined();
+    expect(writes.every(w => w.payload.publish_status === undefined)).toBe(true);
+    expect(publishChangeFor(held, { status: held.location_status as 'address_confirmed', reasons: [] })).toEqual({ publish_status: 'published' });
+  });
+});
