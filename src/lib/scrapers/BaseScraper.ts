@@ -2,6 +2,7 @@ import type { ScrapedEvent } from '@/types/events';
 import type { CheerioAPI } from 'cheerio';
 import { enrichFromDetailHtml } from './detail-extract/extract';
 import { mergeEnrichment } from './detail-extract/merge';
+import { fetchHtml, type FetchHtmlResult } from './fetch-html';
 
 export interface DetailEnrichSummary {
   fetched: number;
@@ -252,6 +253,38 @@ export abstract class BaseScraper {
     }
 
     throw lastError || new Error(`Fetch failed for ${url}`);
+  }
+
+  /**
+   * HTML-Seite holen, die der Scraper selbst gefunden hat (Kalenderliste,
+   * Folgeseite, Monatsansicht, Detailseite): nur text/html oder XHTML bis
+   * MAX_HTML_BYTES, sonst `html: null` mit Grund (fetch-html.ts).
+   * `retries` wiederholt nur vorübergehende Fehler (Timeout, Netz, 5xx).
+   */
+  protected async fetchHtml(
+    url: string,
+    opts: { timeoutMs?: number; retries?: number; headers?: Record<string, string> } = {},
+  ): Promise<FetchHtmlResult> {
+    const attempts = Math.max(1, opts.retries ?? 1);
+    let result: FetchHtmlResult = { html: null };
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      result = await fetchHtml(url, {
+        timeoutMs: opts.timeoutMs ?? this.fetchTimeoutMs,
+        headers: {
+          'User-Agent': this.userAgent,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'de-AT,de;q=0.9,en;q=0.5',
+          ...opts.headers,
+        },
+      });
+      if (result.html !== null) return result;
+      if (result.permanent) {
+        if (!result.error?.startsWith('HTTP')) this.log(`Übersprungen, ${result.error}: ${url}`);
+        return result;
+      }
+      if (attempt < attempts) await this.sleep(this.delayMs * Math.pow(2, attempt - 1));
+    }
+    return result;
   }
 
   protected async sleep(ms: number): Promise<void> {
