@@ -14,6 +14,7 @@ import {
   viennaCalendarDay,
 } from '@/lib/quality/admission';
 import { scoreAndAdmit } from '@/lib/quality/score-event';
+import { applyAdmissionToPosition } from '@/lib/location/contract';
 
 /** Fixer "Jetzt"-Zeitpunkt, damit die Tests nicht mit der Uhr altern. */
 const NOW = new Date('2026-09-06T10:00:00Z');
@@ -91,6 +92,56 @@ describe('Zeitintervalle', () => {
     expect(
       evaluateAdmission({ ...OK, start_date: '2026-09-06T19:00:00+02:00' }, { now: NOW }).decision,
     ).toBe('admit');
+  });
+
+  it('Gutschein mit Platzhalterdatum 31.12.2030 → Quarantäne (Prod 2026-10-14)', () => {
+    // veranstaltungskalender.net druckt das Datum selbst („Di 31.12.2030 um
+    // 00:00 Uhr", schema.org startDate 2030-12-31) und liefert die Zeile
+    // täglich neu. Quarantäne statt Verwerfen: nur so nimmt der nächste
+    // Upsert der schon veröffentlichten Zeile die Veröffentlichung.
+    const v = evaluateAdmission(
+      {
+        ...OK,
+        title: 'Helikopter - STMK - Rundflug 20 min, Heli-Line',
+        start_date: '2030-12-30T23:00:00.000Z', // Wien-Mitternacht 31.12.2030
+        location_name: 'Heli-Line',
+      },
+      { now: NOW },
+    );
+    expect(v.decision).toBe('quarantine');
+    expect(v.reasons).toEqual(['start_too_far_ahead']);
+  });
+
+  it('Tippfehler-Jahr (2202) → Quarantäne', () => {
+    const v = evaluateAdmission({ ...OK, start_date: '2202-11-12T19:30:00+01:00' }, { now: NOW });
+    expect(v.decision).toBe('quarantine');
+    expect(v.reasons).toContain('start_too_far_ahead');
+  });
+
+  it('Eventim-Konzert 2028 bleibt freigegeben', () => {
+    // Eventim hatte am 2026-10-14 keinen Termin nach drei Jahren, aber 7
+    // zwischen zwei und drei Jahren: echte Vorverkäufe, die sichtbar bleiben.
+    const v = evaluateAdmission(
+      { ...OK, title: 'Konzert in der Stadthalle', start_date: '2028-05-20T20:00:00.000+02:00' },
+      { now: NOW },
+    );
+    expect(v.decision).toBe('admit');
+  });
+
+  it('Horizont: genau drei Jahre ab heute (Wiener Kalendertag) gilt noch, der Tag danach nicht', () => {
+    expect(evaluateAdmission({ ...OK, start_date: '2029-09-06T23:30:00+02:00' }, { now: NOW }).decision).toBe('admit');
+    // 2029-09-06T22:30Z ist in Wien schon der 7. September.
+    expect(evaluateAdmission({ ...OK, start_date: '2029-09-06T22:30:00Z' }, { now: NOW }).reasons).toEqual([
+      'start_too_far_ahead',
+    ]);
+  });
+
+  it('Horizont ab einem 29. Februar', () => {
+    const leap = new Date('2028-02-29T10:00:00Z');
+    expect(evaluateAdmission({ ...OK, start_date: '2031-02-28T19:00:00+01:00' }, { now: leap }).decision).toBe('admit');
+    expect(evaluateAdmission({ ...OK, start_date: '2031-03-01T19:00:00+01:00' }, { now: leap }).decision).toBe(
+      'quarantine',
+    );
   });
 
   it('fehlender Titel / fehlendes Datum → zurückweisen', () => {
@@ -375,5 +426,65 @@ describe('scoreAndAdmit', () => {
     expect(r.quality_score).toBeGreaterThanOrEqual(60);
     expect(r.publish_status).toBe('needs_review');
     expect(r.admission.reasons).toContain('no_location_evidence');
+  });
+
+  it('Termin jenseits des Horizonts: needs_review, Ortswerte bleiben', () => {
+    const r = scoreAndAdmit(
+      {
+        title: 'bittermann - Vinarium Wertgutschein (NÖ)',
+        description: 'x'.repeat(250),
+        start_date: '2030-12-30T23:00:00.000Z',
+        location_name: 'Vinarium',
+        address: 'Abt Bruno Heinrich Platz 1',
+        postal_code: '2464',
+        bundesland: 'niederoesterreich',
+        country: 'AT',
+        latitude: 48.1431,
+        longitude: 16.7442,
+        category: 'Kulinarik',
+        image_url: 'https://example.at/i.jpg',
+        source_url: 'https://example.at/e',
+      },
+      { now: NOW },
+    );
+    expect(r.publish_status).toBe('needs_review');
+    expect(r.admission.reasons).toEqual(['start_too_far_ahead']);
+    expect(r.corrected).toEqual({ latitude: 48.1431, longitude: 16.7442, bundesland: 'niederoesterreich' });
+  });
+});
+
+// ─── Ortsentscheidung: Zeitgründe lassen den Ort unberührt ───────────
+
+describe('applyAdmissionToPosition', () => {
+  const position = {
+    status: 'address_confirmed' as const,
+    precision: 'building' as const,
+    latitude: 48.1431,
+    longitude: 16.7442,
+    geocoding_confidence: 'exact',
+    geocoding_source: 'nominatim',
+  };
+
+  it('Horizont-Quarantäne: Status und Position bleiben, der Grund steht im Protokoll', () => {
+    const c = applyAdmissionToPosition(position, {
+      decision: 'quarantine',
+      reasons: ['start_too_far_ahead'],
+      corrections: [],
+    });
+    expect(c.status).toBe('address_confirmed');
+    expect(c.precision).toBe('building');
+    expect(c.latitude).toBe(48.1431);
+    expect(c.revoked).toBeNull();
+    expect(c.reasons).toEqual(['admission:start_too_far_ahead']);
+  });
+
+  it('Horizont plus Ortsgrund: der Ortsgrund entscheidet wie bisher', () => {
+    const c = applyAdmissionToPosition(position, {
+      decision: 'quarantine',
+      reasons: ['start_too_far_ahead', 'placeholder_location'],
+      corrections: [],
+    });
+    expect(c.status).toBe('unresolved');
+    expect(c.reasons).toEqual(['admission:start_too_far_ahead', 'admission:placeholder_location']);
   });
 });

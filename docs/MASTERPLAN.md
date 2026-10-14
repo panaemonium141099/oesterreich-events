@@ -394,6 +394,42 @@ Offen und an der Quelle zu beheben (keine Dedup-Fehler):
 - Kommunale Dienste als Termine (Klimaticket, Dorfservice, Gesunde
   Gemeinde): Produktfrage, ob sie auf die Seite gehören.
 
+### 3.11 Platzhalter-Termine weit in der Zukunft: Horizont im Freigabevertrag (2026-10-14)
+
+**Befund (Prod-SQL):** veranstaltungskalender.net führt Gutscheine und
+Dauerangebote („Bungee Jumping - T - Europabrücke", „Vinarium
+Wertgutschein") mit dem Datum 31.12.2030 (102 sichtbar, täglich neu
+geliefert) und 31.12.2037 (69 sichtbar), dazu Tippfehler-Jahre (2029, 2202,
+2919, 3017). Die Quelle druckt das Datum selbst. `admission.ts` kannte nur
+die Untergrenze, die Detailseiten antworten 200, also blieb alles sichtbar.
+Jenseits von drei Jahren stand im ganzen Bestand nur so etwas; Eventim hatte
+dort 0 Termine, zwischen zwei und drei Jahren 7.
+
+**Regel:** Quarantäne `start_too_far_ahead`, wenn der Beginn mehr als drei
+Jahre nach heute liegt (Wiener Kalendertag). Quarantäne statt Verwerfen,
+damit der nächste Upsert schon veröffentlichte Zeilen auf `needs_review`
+setzt. Der Grund ändert die Ortsentscheidung nicht (`NON_LOCATION_REASONS`),
+steht aber als `admission:start_too_far_ahead` im Protokoll; daran hält
+auch die erneute Entscheidung im Bestand (`re-resolve.ts`) die Zeile.
+
+**Grenzen:**
+- Der Scraper erreicht die 2037er Zeilen nicht mehr: Wien hat 330
+  Listenseiten (Gutscheine auf Seite ~290 bis 325), OÖ 447, der Scraper
+  bricht bei `MAX_PAGES = 200` ab. Ein voller Durchlauf (1.593 Seiten)
+  bräuchte etwa 26 min und damit mehr als das Scraper-Timeout. Von 273
+  sichtbaren AT-Zeilen jenseits des Horizonts lieferten 170 ihre Quellen
+  nicht mehr (vknet 119, gemeinden-generic 43); der nächtliche
+  Adress-Geocoder entscheidet davon nur 28 sicher neu (20 weitere bei
+  Cache-Ablauf). Der Rest bleibt sichtbar, bis eine Quelle ihn wieder
+  liefert.
+- Ein Platzhalter 31.12.2030 rückt am 31.12.2027 in den Horizont und wäre
+  dann wieder sichtbar.
+- Eventim-Gutscheine (GrazTourismus „Gutschein für einen …-Rundgang",
+  31.12.2026/2027): im Feed `eventType 1` und `productType 1` wie jedes
+  Ticket, nur `priceCategoryName: "Gutschein"` unterscheidet sie
+  (Feed-Probe 2026-10-14). Kein Filter, solange kein strukturiertes Feld
+  trennt.
+
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
 1. **Affiliate-ID `J70` ist korrekt** und gehört uns (bestätigt). Eventim-Links im Feed
