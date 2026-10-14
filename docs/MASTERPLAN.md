@@ -431,6 +431,36 @@ auch die erneute Entscheidung im Bestand (`re-resolve.ts`) die Zeile.
   (Feed-Probe 2026-10-14). Kein Filter, solange kein strukturiertes Feld
   trennt.
 
+### 3.12 Veranstalterbüro als Veranstaltungsort (Feratel, 2026-10-14)
+
+**Befund (Prod-SQL):** Die Deskline-Detailseite führt unter addressType 32
+(Veranstaltungsort) teils dieselbe Büroadresse wie unter 31 (Veranstalter).
+„The Magic of Elvis" (Konzerthaus Klagenfurt) und „Impulso Tenors" (KUZ
+Eisenstadt) bekamen so „Hollergasse 32/6, 1150 Wien", standen auf dem
+Wiener Mittelpunkt mit Bundesland Wien, die Klagenfurter Eventim-Zeile hing
+als Dublette dahinter. Kette: `mergeFeratelDetail` übernahm Straße und PLZ,
+der Resolver nahm die eindeutige PLZ ohne Blick auf den genannten Ort, der
+Freigabevertrag las die PLZ als Bestätigung ihres eigenen Mittelpunkts
+(`use_coordinate_region`). Rund 1.440 künftige Feratel-Zeilen trugen eine
+Venue-Adresse aus einer anderen Gemeinde als dem Listen-Ort.
+
+**Regeln:** Die Venue-Adresse zählt nur in der Gemeinde des Listen-Orts
+(`place-match.ts`, Abgleich über `gemeindenNamedByPlaceText`: Teile,
+Post-Orte, Abkürzungen), ohne Listen-Ort, oder wenn die Quellkoordinate im
+Bundesland der Venue liegt (Grenzregionen Dachstein West, Katschberg);
+sonst `address_rejected: venue_other_town`. Der Resolver verwirft eine PLZ,
+die weder im genannten Ort noch im genannten Bundesland liegt und von
+keiner Quellkoordinate gestützt wird (`plz_contradicts_city`). Ein reiner
+PLZ-Mittelpunkt bestätigt die PLZ im Vertrag nicht (`coords_from_plz`). Eine
+vom Resolver abgeleitete Position folgt der neuen Entscheidung
+(`derived_position_superseded`), statt per Rang festzuhängen.
+
+**Wirkung (Simulation alter gegen neuen Code über alle 26.557 künftigen
+Feratel-Zeilen):** Adresse/PLZ ändern sich bei rund 1.440, Positionen bei
+241, 99 zurückgehaltene Zeilen werden frei (API-Pin gegen Veranstalter-PLZ
+war ein Konflikt), 8 veröffentlichte werden zurückgehalten (Rußbach ohne
+API-Koordinate, Position stammte nur aus der Gosauer Veranstalter-PLZ).
+
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
 1. **Affiliate-ID `J70` ist korrekt** und gehört uns (bestätigt). Eventim-Links im Feed

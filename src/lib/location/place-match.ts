@@ -15,7 +15,7 @@ import { gemeindenByPlz, gemeindenNamedByPlaceText, isKnownAustrianPlz, normaliz
 export type PlaceRelation = 'same' | 'different' | 'unknown';
 
 /** Österreichische PLZ aus einem Adressfeld („9020", „A-9020"), sonst null. */
-function austrianPlz(zip: string | null | undefined): string | null {
+export function austrianPlz(zip: string | null | undefined): string | null {
   const m = /^(?:A|AT)?\s*-?\s*(\d{4})$/i.exec(zip?.trim() ?? '');
   return m && isKnownAustrianPlz(m[1]) ? m[1] : null;
 }

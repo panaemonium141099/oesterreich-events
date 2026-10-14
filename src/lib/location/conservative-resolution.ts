@@ -338,11 +338,21 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
   // eine Gemeinde genau benennen: ein Ortsteil („Sonnberg" in Leogang) darf
   // nicht über eine gleich beginnende Gemeinde anderswo zum Widerspruch
   // werden. Ob die PLZ im Ort liegt, prüft dagegen der weite Abgleich.
+  // Stützt eine Koordinate der Quelle die PLZ, bleibt sie: in Grenzregionen
+  // nennt die Quelle den Ort des Tourismusverbands (Rußbach, Salzburg), das
+  // Event liegt an der Koordinate jenseits der Grenze (Hornspitz, 4824 Gosau).
   if (isAT && plz && cityText && declaredBl) {
     const plzRefs = gemeindenByPlz(plz);
     const namedRefs = gemeindenNamedByPlaceText(cityText, declaredBl, { exact: true });
     const cityRefs = gemeindenNamedByPlaceText(cityText, declaredBl);
+    const srcLat = typeof input.latitude === 'number' && Number.isFinite(input.latitude) ? input.latitude : null;
+    const srcLng = typeof input.longitude === 'number' && Number.isFinite(input.longitude) ? input.longitude : null;
+    const centroid = plzCentroid(plz, cityText);
+    const supportedByCoords =
+      srcLat != null && srcLng != null && input.coords_precision !== 'region' && !!centroid && !centroid.ambiguous &&
+      haversineKm(srcLat, srcLng, centroid.lat, centroid.lng) <= CONFLICT_KM;
     const contradicts =
+      !supportedByCoords &&
       plzRefs.length > 0 &&
       namedRefs.length > 0 &&
       !plzRefs.some(r => cityRefs.includes(r) || namedRefs.includes(r)) &&

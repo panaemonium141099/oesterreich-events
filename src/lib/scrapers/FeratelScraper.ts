@@ -1,7 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import { BaseScraper } from './BaseScraper';
 import { normalizeCountryCode } from '@/lib/location/conservative-resolution';
-import { addressPlaceRelation } from '@/lib/location/place-match';
+import { addressPlaceRelation, austrianPlz } from '@/lib/location/place-match';
+import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
+import { bundeslandFromPolygon } from '@/lib/eventim/bundesland-from-geo';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
@@ -834,13 +836,29 @@ function sameStreetAndZip(a: FeratelAddress, b: FeratelAddress | null): boolean 
   return key(a.street) === key(b.street) && key(a.zip) === key(b.zip) && (key(a.street) !== '' || key(a.zip) !== '');
 }
 
+/** Liegt die Quellkoordinate im Bundesland der Venue-PLZ statt im genannten? */
+function coordsInVenueBundesland(event: ScrapedEvent, venuePlz: string | null): boolean {
+  if (typeof event.latitude !== 'number' || typeof event.longitude !== 'number' || !venuePlz) return false;
+  const declared = bundeslandToId(event.bundesland);
+  const venueBl = getBundeslandFromPLZ(venuePlz);
+  if (!declared || !venueBl || venueBl === declared) return false;
+  try {
+    return bundeslandFromPolygon(event.latitude, event.longitude) === venueBl;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Gehört die Venue-Adresse der Detailseite zum Event? Deskline führt unter
  * Typ 32 teils die Büroadresse des Veranstalters (Prod 2026-10-14:
  * „Europolis Entertainment, Hollergasse 32/6, 1150 Wien" für Konzerte in
  * Klagenfurt und Eisenstadt; mit der PLZ landeten beide in Wien). Die
  * Adresse zählt nur, wenn sie in der Gemeinde des Listen-Orts liegt oder die
- * Liste keinen Ort nennt. Lässt sich das nicht entscheiden (Ort nicht in der
+ * Liste keinen Ort nennt. Ausnahme Grenzregion (Dachstein West, Katschberg):
+ * die Liste nennt den Ort des Tourismusverbands, die Koordinate der Quelle
+ * liegt aber im Bundesland der Venue; dann erklärt die Venue die Koordinate.
+ * Lässt sich nicht entscheiden, ob die Venue im Ort liegt (Ort nicht in der
  * Stammdatei), zählt eine eigene Venue-Angabe, die Anschrift des
  * Veranstalters aber nicht: sie belegt keinen Veranstaltungsort.
  */
@@ -850,6 +868,7 @@ export function feratelVenueBelongsToEvent(event: ScrapedEvent, venue: FeratelAd
   if (event.country && normalizeCountryCode(event.country) !== 'AT') return true;
   const relation = addressPlaceRelation(town, { postal_code: venue.zip, city: venue.city }, bundeslandToId(event.bundesland));
   if (relation === 'same') return true;
+  if (coordsInVenueBundesland(event, austrianPlz(venue.zip))) return true;
   if (relation === 'different') return false;
   return !sameStreetAndZip(venue, organizer);
 }

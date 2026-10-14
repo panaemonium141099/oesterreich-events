@@ -150,6 +150,32 @@ describe('mergeFeratelDetail: Veranstalterbüro in einem anderen Ort ist kein Ve
     expect(feratelVenueBelongsToEvent(ev('Salzburg', 'Salzburg'), venue('München', '81673'), org)).toBe(false);
   });
 
+  it('Grenzregion: liegt die Quellkoordinate im Bundesland der Venue, bleibt die Venue (Dachstein West, Hornspitz in Gosau)', () => {
+    const office = { company: 'Dachstein Tourismus AG', name: null, street: 'Gosauseestraße 52', zip: '4824', city: 'Gosau', url: null };
+    const ev = { ...ELVIS, city: 'Rußbach-Dachstein West', bundesland: 'Salzburg', location_name: 'Hornspitz' } as ScrapedEvent;
+    expect(feratelVenueBelongsToEvent({ ...ev, latitude: 47.566836, longitude: 13.5190796 }, office, office)).toBe(true);
+    // Ohne Koordinate stützt nichts die Veranstalteranschrift.
+    expect(feratelVenueBelongsToEvent(ev, office, office)).toBe(false);
+    // Die Venue-PLZ erklärt die Koordinate, der Resolver behält sie, der
+    // Freigabevertrag korrigiert das Bundesland wie bisher.
+    const [r] = mergeFeratelDetail({ ...ev, latitude: 47.566836, longitude: 13.5190796, coords_precision: 'venue' }, extractFeratelDetail({
+      addresses: [
+        { addressType: 31, company: office.company, address1: office.street, city: office.city, zipCode: office.zip },
+        { addressType: 32, company: office.company, address1: office.street, city: office.city, zipCode: office.zip },
+      ],
+    }));
+    const row = rowOf(r);
+    expect(row.postal_code).toBe('4824');
+    expect(row.bundesland).toBe('oberoesterreich');
+    expect(row.location_resolution.reasons).not.toContain('plz_contradicts_city');
+  });
+
+  it('Ortsname aus einer Liste im Nachbarland: „St. Wolfgang" (Salzburger Liste) ist St. Wolfgang im Salzkammergut', () => {
+    expect(gemeindenNamedByPlaceText('St. Wolfgang', 'salzburg').map(g => g.name)).toContain('St. Wolfgang im Salzkammergut');
+    const dorfalm = { company: 'Dorfalm', name: null, street: 'Markt 123', zip: '5360', city: 'St. Wofgang', url: null };
+    expect(feratelVenueBelongsToEvent({ ...ELVIS, city: 'St. Wolfgang', bundesland: 'Salzburg' } as ScrapedEvent, dorfalm, dorfalm)).toBe(true);
+  });
+
   it('Ort nicht in der Stammdatei: eigene Venue zählt, Veranstalteranschrift nicht', () => {
     const office = { company: 'TVB', name: null, street: 'Marktplatz 1', zip: '5661', city: 'Rauris', url: null };
     const ev = { ...ELVIS, city: 'Raurisertal', bundesland: 'Salzburg' } as ScrapedEvent;
@@ -179,6 +205,21 @@ describe('Resolver: PLZ gegen genannten Ort und Bundesland', () => {
       expect(d.reasons).toContain('plz_contradicts_city');
       expect(d.gemeinde?.name).toBe('Kufstein');
     }
+  });
+
+  it('eine Quellkoordinate bei der PLZ stützt sie: kein Widerspruch', () => {
+    // Ohne Koordinate fiele die PLZ (siehe Kufstein oben).
+    const d = resolve({ location_name: 'Saal', postal_code: '5020', city: 'Kufstein', bundesland: 'Tirol', latitude: 47.80, longitude: 13.04, coords_precision: 'venue' });
+    expect(d.reasons).not.toContain('plz_contradicts_city');
+    expect(d.postal_code).toBe('5020');
+    expect(d.latitude).toBe(47.8);
+  });
+
+  it('Quellkoordinate am Veranstaltungsort, Veranstalter-PLZ weit weg: PLZ fällt, kein Konflikt mehr', () => {
+    const d = resolve({ location_name: 'Konzerthaus Klagenfurt', postal_code: '1150', city: 'Klagenfurt am Wörthersee', bundesland: 'Kärnten', latitude: 46.621, longitude: 14.3137, coords_precision: 'venue' });
+    expect(d.reasons).toContain('plz_contradicts_city');
+    expect(d.status).not.toBe('conflict');
+    expect(d.latitude).toBe(46.621);
   });
 
   it('PLZ im genannten Bundesland bleibt (nur ein Widerspruch, nicht beide)', () => {

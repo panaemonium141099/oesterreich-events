@@ -132,8 +132,8 @@ const GENERIC_FIRST_WORDS = new Set(['sankt', 'bad', 'maria', 'markt', 'deutsch'
  * „Neustift im Stubaital", „Matrei i.O."), Ortsteile („Zürs") und
  * Schreibvarianten („Wörther See"). Gesucht wird nacheinander, bis es einen
  * Treffer gibt: der ganze Text, seine Teile und Post-Orte der PLZ-Tabelle;
- * dann im genannten Bundesland amtliche Namen, die mit den Wörtern des Texts
- * (auch abgekürzt) beginnen; zuletzt dort Namen mit demselben ersten,
+ * dann amtliche Namen, die mit den Wörtern des Texts (auch abgekürzt)
+ * beginnen; zuletzt im genannten Bundesland Namen mit demselben ersten,
  * unterscheidungskräftigen Wort (`exact: true` lässt diese beiden
  * Näherungen weg). Treffer im genannten Bundesland gehen vor; gibt es dort
  * keine, zählen alle.
@@ -156,15 +156,19 @@ export function gemeindenNamedByPlaceText(
   const inBl = (refs: Iterable<GemeindeRef>) => [...refs].filter(r => !bundesland || r.bundesland === bundesland);
   if (bundesland && !opts.exact && inBl(hits).length === 0) {
     const keys = [text, ...parts].map(t => normalizeGemeindeName(t).split(' ')).filter(k => k[0].length >= 3);
-    const pool = allRefs!.filter(r => r.bundesland === bundesland).map(r => ({ r, words: normalizeGemeindeName(r.name).split(' ') }));
+    const pool = allRefs!.map(r => ({ r, words: normalizeGemeindeName(r.name).split(' ') }));
     // Wortanfänge, auch abgekürzt: „Neustift" → „Neustift im Stubaital",
-    // „Matrei i.O." → „Matrei in Osttirol".
+    // „Matrei i.O." → „Matrei in Osttirol". Auch außerhalb des genannten
+    // Bundeslands (Wolfgangsee: „St. Wolfgang" aus einer Salzburger Liste
+    // ist St. Wolfgang im Salzkammergut); Treffer darin gehen unten vor.
     for (const { r, words } of pool) {
       if (keys.some(k => k.length <= words.length && k[0] === words[0] && k.every((w, i) => words[i].startsWith(w)))) hits.add(r);
     }
-    // Gleiches erstes Wort: „Millstatt am Millstätter See" → „Millstatt am See".
+    // Gleiches erstes Wort, nur im genannten Bundesland: „Millstatt am
+    // Millstätter See" → „Millstatt am See".
     if (inBl(hits).length === 0) {
       for (const { r, words } of pool) {
+        if (r.bundesland !== bundesland) continue;
         if (keys.some(k => k[0].length >= 5 && !GENERIC_FIRST_WORDS.has(k[0]) && k[0] === words[0])) hits.add(r);
       }
     }
