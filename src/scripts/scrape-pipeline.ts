@@ -7,6 +7,7 @@
  *   npx tsx src/scripts/scrape-pipeline.ts --trigger manual --source burgenland.info
  *   npx tsx src/scripts/scrape-pipeline.ts --trigger github_dispatch --skip-geocoding
  *   npx tsx src/scripts/scrape-pipeline.ts --dry-run --trigger manual
+ *   npx tsx src/scripts/scrape-pipeline.ts --skip-lineups   # ohne Festival-Lineups
  */
 import { readFileSync, existsSync, rmSync } from 'fs';
 import { join } from 'path';
@@ -61,6 +62,7 @@ function parseArgs(): PipelineOptions {
     source: get('--source'),
     skipScrapers: has('--skip-scrapers'),
     skipVenues: has('--skip-venues'),
+    skipLineups: has('--skip-lineups'),
     skipGeocoding: has('--skip-geocoding'),
     skipScore: has('--skip-score'),
     skipCategorization: has('--skip-categorization'),
@@ -136,6 +138,18 @@ async function main() {
     if (!opts.skipVenues) {
       steps.venues = await runStep('venues', async () => {
         execStep('Venue feed ingestion', `npx tsx ${envFlag}src/scripts/scrape-venues.ts`);
+      }, steps);
+    }
+
+    // Festival-Lineups und die abgeleiteten „Künstler at Festival"-Events
+    // (src/lib/lineup/). Vor den Nachbearbeitungsschritten, damit die neuen
+    // Zeilen im selben Lauf bewertet und dedupliziert werden. Bis 2026-10-14
+    // ein eigener Workflow-Schritt mit continue-on-error: 839 abgewiesene
+    // Upserts je Nacht (events_bundesland_check) blieben grün. Jetzt macht
+    // ein Schreibfehler den Schritt rot (reportStepReason).
+    if (!opts.skipLineups) {
+      steps.festival_lineups = await runStep('festival_lineups', async () => {
+        execStep('Festival lineups + derived events', `npx tsx ${envFlag}src/scripts/scrape-festival-lineups.ts`);
       }, steps);
     }
 

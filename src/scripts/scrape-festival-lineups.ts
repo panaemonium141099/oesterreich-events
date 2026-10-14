@@ -34,8 +34,10 @@ try {
 
 import {
   runLineupOrchestrator,
+  lineupStepFailure,
   type OrchestratorOptions,
 } from '../lib/lineup/orchestrator';
+import { reportStepReason } from '../lib/pipeline/step-reason';
 
 function parseArgs(): OrchestratorOptions {
   const args = process.argv.slice(2);
@@ -119,13 +121,24 @@ async function main() {
   console.log(`  Artists removed:         ${stats.artists_removed}`);
   console.log(`  Derived events created:  ${stats.events_derived}`);
   console.log(`  Events backlinked:       ${stats.events_backlinked}`);
+  console.log(`  Derive skipped:          ${stats.derive_skipped}`);
+  console.log(`  Derive errors:           ${stats.derive_errors.length}`);
 
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   console.log(`\nCompleted in ${elapsed}s`);
   console.log('='.repeat(60) + '\n');
+
+  // Schreibfehler machen den Pipeline-Schritt rot, mit Grund in der Alarm-Mail.
+  const failure = lineupStepFailure(stats);
+  if (failure) {
+    console.error(`!!! ${failure}`);
+    reportStepReason(failure);
+    process.exit(1);
+  }
 }
 
 main().catch((err) => {
   console.error('Fatal error:', err);
+  reportStepReason(`Abbruch: ${err instanceof Error ? err.message : String(err)}`);
   process.exit(1);
 });

@@ -13,6 +13,17 @@ export interface ReviewItem {
   created_at: string;
 }
 
+/**
+ * Gemeinde-Dienste (Müllabfuhr, Sprechtage, …) hält der Freigabevertrag als
+ * `needs_review` zurück, weil sie keine Events sind (Entscheidung
+ * 2026-10-14), nicht weil etwas zu klären wäre. Ohne diesen Filter stünden
+ * rund 900 künftige Termine in der Prüfliste. Der Grund steht in beiden
+ * Schreibwegen (Sync und Neu-Entscheidung) im Protokoll der Ortsentscheidung;
+ * Zeilen ohne Protokoll bleiben drin.
+ */
+const NOT_MUNICIPAL_SERVICE =
+  'location_resolution->reasons.is.null,location_resolution->reasons.not.cs.["admission:municipal_service"]';
+
 export async function GET(request: NextRequest) {
   try {
     const authError = await requireAdmin();
@@ -144,13 +155,15 @@ export async function GET(request: NextRequest) {
       const { count: confCount } = await supabase
         .from('events')
         .select('id', { count: 'exact', head: true })
-        .in('publish_status', ['published_low_confidence', 'needs_review']);
+        .in('publish_status', ['published_low_confidence', 'needs_review'])
+        .or(NOT_MUNICIPAL_SERVICE);
       counts.confidence = confCount ?? 0;
 
       let confQuery = supabase
         .from('events')
         .select('id, title, source_name, publish_status, quality_score, created_at')
         .in('publish_status', ['published_low_confidence', 'needs_review'])
+        .or(NOT_MUNICIPAL_SERVICE)
         .order('created_at', { ascending: false });
 
       if (sourceFilter) {

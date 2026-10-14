@@ -377,7 +377,7 @@ die vor dem Beginn des letzten geschriebenen Laufs angelegt wurden
 
 Offen und an der Quelle zu beheben (keine Dedup-Fehler):
 - Gutschein-Produkte mit Platzhalterdatum 31.12.2030 (veranstaltungskalender.net).
-- Müllabfuhr-Termine.
+- Müllabfuhr-Termine (entschieden 2026-10-14, siehe unten).
 - gem2go-Titel mit angeklebter Kategorie.
 - Falsch konfigurierte Gemeinde-Kalender: 70905 liest Buch in Vorarlberg,
   30701 liest Au im Bregenzerwald.
@@ -391,8 +391,45 @@ Offen und an der Quelle zu beheben (keine Dedup-Fehler):
   bleiben auf ihrer eigenen Seite sichtbar, tragen aber keinen Namen.
 - Eventim führt Ticketprodukte desselben Abends als eigene Events
   („Eintagesticket" / „Kombiticket", Jazz, Wine & More).
-- Kommunale Dienste als Termine (Klimaticket, Dorfservice, Gesunde
-  Gemeinde): Produktfrage, ob sie auf die Seite gehören.
+- Kommunale Dienste als Termine (Klimaticket, Dorfservice, Müllabfuhr,
+  Sprechtage): entschieden 2026-10-14, nicht zeigen (§4 Punkt 4). Gesunde
+  Gemeinde sind echte Kurse und bleiben.
+
+### 3.11 Platzhalter-Termine weit in der Zukunft: Horizont im Freigabevertrag (2026-10-14)
+
+**Befund (Prod-SQL):** veranstaltungskalender.net führt Gutscheine und
+Dauerangebote („Bungee Jumping - T - Europabrücke", „Vinarium
+Wertgutschein") mit dem Datum 31.12.2030 (102 sichtbar, täglich neu
+geliefert) und 31.12.2037 (69 sichtbar), dazu Tippfehler-Jahre (2029, 2202,
+2919, 3017). Die Quelle druckt das Datum selbst. `admission.ts` kannte nur
+die Untergrenze, die Detailseiten antworten 200, also blieb alles sichtbar.
+Jenseits von drei Jahren stand im ganzen Bestand nur so etwas; Eventim hatte
+dort 0 Termine, zwischen zwei und drei Jahren 7.
+
+**Regel:** Quarantäne `start_too_far_ahead`, wenn der Beginn mehr als drei
+Jahre nach heute liegt (Wiener Kalendertag). Quarantäne statt Verwerfen,
+damit der nächste Upsert schon veröffentlichte Zeilen auf `needs_review`
+setzt. Der Grund ändert die Ortsentscheidung nicht (`NON_LOCATION_REASONS`),
+steht aber als `admission:start_too_far_ahead` im Protokoll; daran hält
+auch die erneute Entscheidung im Bestand (`re-resolve.ts`) die Zeile.
+
+**Grenzen:**
+- Der Scraper erreicht die 2037er Zeilen nicht mehr: Wien hat 330
+  Listenseiten (Gutscheine auf Seite ~290 bis 325), OÖ 447, der Scraper
+  bricht bei `MAX_PAGES = 200` ab. Ein voller Durchlauf (1.593 Seiten)
+  bräuchte etwa 26 min und damit mehr als das Scraper-Timeout. Von 273
+  sichtbaren AT-Zeilen jenseits des Horizonts lieferten 170 ihre Quellen
+  nicht mehr (vknet 119, gemeinden-generic 43); der nächtliche
+  Adress-Geocoder entscheidet davon nur 28 sicher neu (20 weitere bei
+  Cache-Ablauf). Der Rest bleibt sichtbar, bis eine Quelle ihn wieder
+  liefert.
+- Ein Platzhalter 31.12.2030 rückt am 31.12.2027 in den Horizont und wäre
+  dann wieder sichtbar.
+- Eventim-Gutscheine (GrazTourismus „Gutschein für einen …-Rundgang",
+  31.12.2026/2027): im Feed `eventType 1` und `productType 1` wie jedes
+  Ticket, nur `priceCategoryName: "Gutschein"` unterscheidet sie
+  (Feed-Probe 2026-10-14). Kein Filter, solange kein strukturiertes Feld
+  trennt.
 
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
@@ -406,6 +443,19 @@ Offen und an der Quelle zu beheben (keine Dedup-Fehler):
 3. **Scraping + Feed-Imports (Eventim/Affiliate-Daten) gehören nicht auf Vercel.**
    Vercel bleibt reines Web-Hosting + Mini-Crons; die Daten-Pipeline läuft auf einem
    dedizierten Runner (GitHub Actions kurzfristig, VPS mittelfristig). Details in §5.
+4. **Gemeinde-Dienste sind keine Events (2026-10-14).** Müllabfuhr und Sammelstellen,
+   Sprechtage und Sprechstunden, Klimaticket-Verleih und Dorfservice werden nirgends
+   gezeigt (Liste, Karte, Hubs, Suche, Sitemap, Event-Seiten). Die Zeilen bleiben in der
+   DB, die Entscheidung ist umkehrbar. Umsetzung als Quarantäne-Grund `municipal_service`
+   im Freigabevertrag (`src/lib/quality/admission.ts`), Erkennung in
+   `src/lib/category-classifier/municipal-service.ts` (auch von der Smart-Suche genutzt).
+   Bestand kippt beim nächsten Upsert oder per Neu-Entscheidung
+   (`location-backfill.ts --with-raw --ids`), kein Fix-Skript. Der Ort bleibt
+   unverändert, die Admin-Prüfliste blendet den Grund aus, der Dedup gibt keine alte
+   Dublette als Ersatz frei. Echte Gemeinschafts-Events (Flurreinigung,
+   Müllsammelaktion, Repair Café, Gesunde-Gemeinde-Kurse, Tag der offenen Tür im ASZ)
+   bleiben; neue Dienst-Arten gehören in dieselbe Erkennung, nicht in Quellen-Sonderregeln.
+   Vorher sichtbar: Müll 505, Sprechtage 370, Klimaticket 29, Dorfservice 13.
 
 ## 5. Ziel-Architektur Automatisierung
 

@@ -51,6 +51,8 @@ export interface PipelineOptions {
   source?: string; // run only this scraper
   skipScrapers?: boolean;
   skipVenues?: boolean;
+  /** Skip festival lineups + derived "Artist at Festival" events. */
+  skipLineups?: boolean;
   skipGeocoding?: boolean;
   skipScore?: boolean;
   /** Skip both categorization sub-steps (backfill + AI residue). */

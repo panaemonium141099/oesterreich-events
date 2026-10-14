@@ -42,7 +42,23 @@ export interface OrchestratorStats {
   artists_removed: number;
   events_derived: number;
   events_backlinked: number;
+  /** Lese-/Schreibfehler beim Ableiten (Upsert, Rückverweis). */
+  derive_errors: string[];
+  /** Lineup-Zeilen ohne Datum oder Fingerprint. */
+  derive_skipped: number;
   duration_ms: number;
+}
+
+/**
+ * Grund für einen roten Pipeline-Schritt, sonst null. Rot machen nur
+ * Schreibfehler beim Ableiten: bis 2026-10-14 scheiterten jede Nacht 839
+ * Upserts an events_bundesland_check, und der Schritt blieb grün. Nicht
+ * erreichbare Lineup-Seiten einzelner Festivals bleiben ein Hinweis.
+ */
+export function lineupStepFailure(stats: OrchestratorStats): string | null {
+  const n = stats.derive_errors.length;
+  if (n === 0) return null;
+  return `${n} abgeleitete Lineup-Events nicht geschrieben, z. B. ${stats.derive_errors[0]}`;
 }
 
 // ── Scraper registry ────────────────────────────────────────────────────────
@@ -367,6 +383,8 @@ export async function runLineupOrchestrator(
     artists_removed: 0,
     events_derived: 0,
     events_backlinked: 0,
+    derive_errors: [],
+    derive_skipped: 0,
     duration_ms: 0,
   };
 
@@ -397,8 +415,11 @@ export async function runLineupOrchestrator(
     });
     stats.events_derived = deriveResult.events_created;
     stats.events_backlinked = deriveResult.events_backlinked;
+    stats.derive_errors = deriveResult.errors;
+    stats.derive_skipped = deriveResult.skipped.length;
     log(
-      `Derived events: ${deriveResult.events_created} created, ${deriveResult.events_backlinked} backlinked`,
+      `Derived events: ${deriveResult.events_created} created, ${deriveResult.events_backlinked} backlinked, ` +
+        `${deriveResult.errors.length} errors, ${deriveResult.skipped.length} skipped`,
       verbose
     );
   }
