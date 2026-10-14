@@ -377,7 +377,7 @@ die vor dem Beginn des letzten geschriebenen Laufs angelegt wurden
 
 Offen und an der Quelle zu beheben (keine Dedup-Fehler):
 - Gutschein-Produkte mit Platzhalterdatum 31.12.2030 (veranstaltungskalender.net).
-- Müllabfuhr-Termine.
+- Müllabfuhr-Termine (entschieden 2026-10-14, siehe unten).
 - gem2go-Titel mit angeklebter Kategorie.
 - Falsch konfigurierte Gemeinde-Kalender: 70905 liest Buch in Vorarlberg,
   30701 liest Au im Bregenzerwald.
@@ -391,8 +391,9 @@ Offen und an der Quelle zu beheben (keine Dedup-Fehler):
   bleiben auf ihrer eigenen Seite sichtbar, tragen aber keinen Namen.
 - Eventim führt Ticketprodukte desselben Abends als eigene Events
   („Eintagesticket" / „Kombiticket", Jazz, Wine & More).
-- Kommunale Dienste als Termine (Klimaticket, Dorfservice, Gesunde
-  Gemeinde): Produktfrage, ob sie auf die Seite gehören.
+- Kommunale Dienste als Termine (Klimaticket, Dorfservice, Müllabfuhr,
+  Sprechtage): entschieden 2026-10-14, nicht zeigen (§4 Punkt 4). Gesunde
+  Gemeinde sind echte Kurse und bleiben.
 
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
@@ -406,6 +407,19 @@ Offen und an der Quelle zu beheben (keine Dedup-Fehler):
 3. **Scraping + Feed-Imports (Eventim/Affiliate-Daten) gehören nicht auf Vercel.**
    Vercel bleibt reines Web-Hosting + Mini-Crons; die Daten-Pipeline läuft auf einem
    dedizierten Runner (GitHub Actions kurzfristig, VPS mittelfristig). Details in §5.
+4. **Gemeinde-Dienste sind keine Events (2026-10-14).** Müllabfuhr und Sammelstellen,
+   Sprechtage und Sprechstunden, Klimaticket-Verleih und Dorfservice werden nirgends
+   gezeigt (Liste, Karte, Hubs, Suche, Sitemap, Event-Seiten). Die Zeilen bleiben in der
+   DB, die Entscheidung ist umkehrbar. Umsetzung als Quarantäne-Grund `municipal_service`
+   im Freigabevertrag (`src/lib/quality/admission.ts`), Erkennung in
+   `src/lib/category-classifier/municipal-service.ts` (auch von der Smart-Suche genutzt).
+   Bestand kippt beim nächsten Upsert oder per Neu-Entscheidung
+   (`location-backfill.ts --with-raw --ids`), kein Fix-Skript. Der Ort bleibt
+   unverändert, die Admin-Prüfliste blendet den Grund aus, der Dedup gibt keine alte
+   Dublette als Ersatz frei. Echte Gemeinschafts-Events (Flurreinigung,
+   Müllsammelaktion, Repair Café, Gesunde-Gemeinde-Kurse, Tag der offenen Tür im ASZ)
+   bleiben; neue Dienst-Arten gehören in dieselbe Erkennung, nicht in Quellen-Sonderregeln.
+   Vorher sichtbar: Müll 505, Sprechtage 370, Klimaticket 29, Dorfservice 13.
 
 ## 5. Ziel-Architektur Automatisierung
 
