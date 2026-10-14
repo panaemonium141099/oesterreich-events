@@ -163,6 +163,8 @@ import { post as martinKohlstedtKluftRosentalRozFestival2026 } from './posts/mar
 import { post as barfussImPark2026 } from './posts/barfuss-im-park-2026';
 import { post as konzerteInDerMinoritenkircheBarockmusikZurWeihnachtsze2026 } from './posts/konzerte-in-der-minoritenkirche-barockmusik-zur-weihnachtsze-2026';
 import { post as konzerteInDerMinoritenkircheVivaldiMeetsPiazzolla2026 } from './posts/konzerte-in-der-minoritenkirche-vivaldi-meets-piazzolla-2026';
+import { post as grandFestival20262026 } from './posts/grand-festival-2026-2026';
+import { post as chopinVienneseFriendsPianoConcertByCandleGlow2026 } from './posts/chopin-viennese-friends-piano-concert-by-candle-glow-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -336,6 +338,8 @@ export const ALL_POSTS: FestivalPost[] = [
   barfussImPark2026,
   konzerteInDerMinoritenkircheBarockmusikZurWeihnachtsze2026,
   konzerteInDerMinoritenkircheVivaldiMeetsPiazzolla2026,
+  grandFestival20262026,
+  chopinVienneseFriendsPianoConcertByCandleGlow2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
