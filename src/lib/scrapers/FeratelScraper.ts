@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { BaseScraper } from './BaseScraper';
 import { normalizeCountryCode } from '@/lib/location/conservative-resolution';
+import { addressPlaceRelation } from '@/lib/location/place-match';
+import { bundeslandToId } from '@/lib/bundeslaender';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
 import {
@@ -21,6 +23,7 @@ import {
   saveDetailCache,
   selectDetailCandidates,
   type DetailCacheRow,
+  type FeratelAddress,
   type FeratelDetail,
   type RawDetail,
 } from './feratel-details';
@@ -825,14 +828,44 @@ export class FeratelScraper extends BaseScraper {
   }
 }
 
+function sameStreetAndZip(a: FeratelAddress, b: FeratelAddress | null): boolean {
+  if (!b) return false;
+  const key = (s: string | null) => (s ?? '').toLowerCase().replace(/[^a-z0-9äöüß]+/g, '');
+  return key(a.street) === key(b.street) && key(a.zip) === key(b.zip) && (key(a.street) !== '' || key(a.zip) !== '');
+}
+
+/**
+ * Gehört die Venue-Adresse der Detailseite zum Event? Deskline führt unter
+ * Typ 32 teils die Büroadresse des Veranstalters (Prod 2026-10-14:
+ * „Europolis Entertainment, Hollergasse 32/6, 1150 Wien" für Konzerte in
+ * Klagenfurt und Eisenstadt; mit der PLZ landeten beide in Wien). Die
+ * Adresse zählt nur, wenn sie in der Gemeinde des Listen-Orts liegt oder die
+ * Liste keinen Ort nennt. Lässt sich das nicht entscheiden (Ort nicht in der
+ * Stammdatei), zählt eine eigene Venue-Angabe, die Anschrift des
+ * Veranstalters aber nicht: sie belegt keinen Veranstaltungsort.
+ */
+export function feratelVenueBelongsToEvent(event: ScrapedEvent, venue: FeratelAddress, organizer: FeratelAddress | null): boolean {
+  const town = event.city?.trim();
+  if (!town) return true;
+  if (event.country && normalizeCountryCode(event.country) !== 'AT') return true;
+  const relation = addressPlaceRelation(town, { postal_code: venue.zip, city: venue.city }, bundeslandToId(event.bundesland));
+  if (relation === 'same') return true;
+  if (relation === 'different') return false;
+  return !sameStreetAndZip(venue, organizer);
+}
+
 /**
  * Detail-Auszug in ein Listen-Event mischen und die weiteren Termine als
  * eigene Zeilen (`feratel-<id>:<datum>`) anlegen. Der erste Termin ist der
  * Listentermin selbst (gleiche source_id, damit Slug und Verlauf bleiben).
  */
 export function mergeFeratelDetail(event: ScrapedEvent, detail: FeratelDetail): ScrapedEvent[] {
-  const venue = detail.venue;
   const organizer = detail.organizer;
+  // Eine Venue in einem anderen Ort bleibt Veranstalterangabe: Adresse und
+  // PLZ bleiben leer, der Resolver nimmt den genannten Ort. Eine früher
+  // gespeicherte Adresse fällt mit (address_rejected).
+  const venueFits = !detail.venue || feratelVenueBelongsToEvent(event, detail.venue, organizer);
+  const venue = venueFits ? detail.venue : null;
   const extraLines: string[] = [];
   if (detail.meetingPoint) extraLines.push(`Treffpunkt: ${detail.meetingPoint}`);
   if (detail.opening) extraLines.push(`Öffnungszeiten: ${detail.opening}`);
@@ -856,6 +889,7 @@ export function mergeFeratelDetail(event: ScrapedEvent, detail: FeratelDetail): 
     organizer: organizer?.company ?? organizer?.name ?? event.organizer,
     address: venue?.street ?? event.address,
     postal_code: venue?.zip ?? event.postal_code,
+    ...(venueFits ? {} : { address_rejected: 'venue_other_town' as const }),
     city: event.city ?? venue?.city ?? undefined,
     location_name: event.location_name ?? venue?.company ?? undefined,
     price_text: detail.price ?? event.price_text,

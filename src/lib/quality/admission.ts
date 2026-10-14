@@ -66,6 +66,13 @@ export interface AdmissionInput {
   country?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  /**
+   * Die Koordinate ist nur der Mittelpunkt der genannten PLZ (Resolver:
+   * Herkunft `derived:plz`, nicht vom genannten Ort bestätigt, siehe
+   * `positionFromPlzOnly`). Dann ist sie keine eigene Stimme, und die PLZ
+   * kann sie nicht bestätigen.
+   */
+  coords_from_plz?: boolean;
 }
 
 /**
@@ -351,11 +358,17 @@ export function evaluateAdmission(
             ? options.plzRegionOf(input.postal_code!.trim())
             : null;
 
+        //
+        // Ist die Koordinate selbst nur der Mittelpunkt dieser PLZ, wäre die
+        // Bestätigung ein Zirkelschluss: das Label wurde so aus einer
+        // Veranstalter-PLZ auf Wien umgeschrieben (Feratel „The Magic of
+        // Elvis", Konzerthaus Klagenfurt, Prod 2026-10-14). Dann zählen nur
+        // zwei Stimmen gegeneinander, und der Widerspruch bleibt offen.
         if (plzRegion && plzRegion === declared) {
           // Koordinate ist der Ausreisser: kein falscher Pin, aber das
           // Event bleibt publik — es liegt nachweislich in `declared`.
           corrections.push('drop_coordinates');
-        } else if (plzRegion && plzRegion === actual) {
+        } else if (plzRegion && plzRegion === actual && !input.coords_from_plz) {
           // Label ist der Ausreisser: Koordinate ist durch die PLZ gedeckt.
           corrections.push('use_coordinate_region');
           correctedBundesland = actual;

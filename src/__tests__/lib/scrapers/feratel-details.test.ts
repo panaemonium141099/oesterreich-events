@@ -71,7 +71,7 @@ describe('mergeFeratelDetail', () => {
   };
 
   it('mischt Adresse, Veranstalter, Link, Preis ein und legt die weiteren Termine als eigene Zeilen an', () => {
-    const rows = mergeFeratelDetail(event, extractFeratelDetail(RAW));
+    const rows = mergeFeratelDetail({ ...event, city: 'Salzburg' }, extractFeratelDetail(RAW));
     expect(rows).toHaveLength(4);
     const [first, , second, third] = rows;
     expect(first.source_id).toBe('feratel-abc');
@@ -81,7 +81,8 @@ describe('mergeFeratelDetail', () => {
     expect(first.organizer).toBe('Tourismusverband Abtenau');
     expect(first.address).toBe('Mozartplatz 5');
     expect(first.postal_code).toBe('5020');
-    expect(first.city).toBe('Abtenau');
+    expect(first.address_rejected).toBeUndefined();
+    expect(first.city).toBe('Salzburg');
     expect(first.location_name).toBe('Salzburg Altstadt');
     expect(first.price_text).toBe('€ 19,00 pro Person');
     expect(first.price_flags).toEqual(['barrierefrei']);
@@ -104,6 +105,16 @@ describe('mergeFeratelDetail', () => {
       'feratel-abc', 'feratel-abc:2026-09-18', 'feratel-abc:2026-10-02', 'feratel-abc:2026-10-09',
     ]);
     expect(rows[1].start_date).toBe(rows[0].start_date);
+  });
+
+  it('Venue in einer anderen Gemeinde als der Listen-Ort: Adresse, PLZ und Venue-Name bleiben weg', () => {
+    const [first] = mergeFeratelDetail(event, extractFeratelDetail(RAW));
+    expect(first.city).toBe('Abtenau');
+    expect(first.address).toBeUndefined();
+    expect(first.postal_code).toBeUndefined();
+    expect(first.location_name).toBeUndefined();
+    expect(first.address_rejected).toBe('venue_other_town');
+    expect(first.organizer).toBe('Tourismusverband Abtenau');
   });
 
   it('Eintritt frei in der Preisangabe setzt das Preis-Flag', () => {
