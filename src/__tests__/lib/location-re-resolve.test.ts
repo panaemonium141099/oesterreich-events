@@ -401,6 +401,44 @@ describe('Sync-Zeile ohne jede Ortsangabe der Quelle (kein Altbestand)', () => {
   });
 });
 
+describe('Horizont des Freigabevertrags im Bestand (start_too_far_ahead, 2026-10-14)', () => {
+  const farAhead = new Date(Date.now() + 5 * 365 * 864e5).toISOString();
+
+  it('veröffentlichte Zeile jenseits des Horizonts wird zurückgehalten, der Ort bleibt', async () => {
+    // veranstaltungskalender.net: Gutscheine mit 31.12.2037, die der Scraper
+    // seit Juli nicht mehr erreicht (Seite > 200) und die deshalb kein
+    // Upsert mehr in Quarantäne nimmt.
+    const row: StoredEventLocationRow = { ...baseRow(), start_date: farAhead, publish_status: 'published' };
+    const pure = resolveEventLocation(inputFromStoredRow(row));
+    const d = contractedDecision(row, pure);
+    expect(d.status).toBe(pure.status);
+    expect(d.latitude).toBe(pure.latitude);
+    expect(d.reasons).toContain('admission:start_too_far_ahead');
+
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const sb = fakeClient([{ id: 'ev-1', updated_at: '2026-09-14T08:00:00Z' }], writes);
+    const [res] = await reResolveStoredEvents(sb, [row], { phase: 'test' });
+    expect(res.publish_change).toBe('withheld');
+    expect(writes[0].payload.publish_status).toBe('needs_review');
+    expect(writes[0].payload.location_status).toBe(pure.status);
+  });
+
+  it('vergangene Zeile: nur der Ortsvertrag zählt, kein Horizont-Grund', () => {
+    // Vorher setzte die Prüfung vergangene Termine auf 2999-01-01; mit dem
+    // Horizont hätte das jede vergangene Zeile zurückgehalten.
+    const row: StoredEventLocationRow = { ...baseRow(), start_date: '2026-01-01T18:00:00.000Z', publish_status: 'published' };
+    const pure = resolveEventLocation(inputFromStoredRow(row));
+    const d = contractedDecision(row, pure);
+    expect(d.reasons).not.toContain('admission:start_too_far_ahead');
+    expect(publishChangeFor(row, d)).toBeNull();
+  });
+
+  it('Horizont-Grund entfällt: wieder veröffentlichen', () => {
+    const held = { publish_status: 'needs_review', location_resolution: { reasons: ['admission:start_too_far_ahead'] } };
+    expect(publishChangeFor(held, { status: 'address_confirmed', reasons: [] })).toEqual({ publish_status: 'published' });
+  });
+});
+
 describe('publishChangeFor folgt dem Freigabevertrag wie der Sync', () => {
   const held = { publish_status: 'needs_review', location_resolution: { reasons: ['admission:no_location_evidence'] } };
   it('weiterhin unter Quarantäne: bleibt zurückgehalten', () => {
@@ -411,5 +449,46 @@ describe('publishChangeFor folgt dem Freigabevertrag wie der Sync', () => {
   });
   it('Quarantäne aufgelöst: wieder veröffentlichen', () => {
     expect(publishChangeFor(held, { status: 'municipality_only', reasons: ['gemeinde_centroid_from_plz'] })).toEqual({ publish_status: 'published' });
+  });
+});
+
+describe('Gemeinde-Dienste (Entscheidung 2026-10-14): zurückgehalten, Ort bleibt', () => {
+  // Innerhalb des Freigabehorizonts (start_too_far_ahead), unabhängig vom Testdatum.
+  const start = new Date(Date.now() + 30 * 86_400_000).toISOString();
+  const synced = (e: Partial<ScrapedEvent>) => ({
+    ...(toSupabaseRow({ source_name: 'gemeinden-generic', source_id: 'm', source_url: 'https://example.at/m', title: 'Konzert', start_date: start, location_name: 'Posthof', address: 'Posthofstraße 43, 4020 Linz', ...e } as ScrapedEvent, new Map(), new Map()).row as unknown as StoredEventLocationRow & { publish_status: string }),
+    id: 'ev-1',
+    updated_at: '2026-10-07T08:00:00Z',
+  });
+
+  it('Sync: needs_review mit eigenem Grund, Ortsstatus und Position wie bei einem Event', () => {
+    const event = synced({});
+    const service = synced({ title: 'Biomüll' });
+    expect(event.publish_status).not.toBe('needs_review');
+    expect(service.publish_status).toBe('needs_review');
+    expect(service.location_status).toBe(event.location_status);
+    expect(service.latitude).toBe(event.latitude);
+    expect(service.location_resolution?.reasons).toContain('admission:municipal_service');
+    expect(repeatabilityOf(service, resolveEventLocation(inputFromStoredRow(service)))).toBe('same');
+  });
+
+  it('Neu-Entscheidung im Bestand: eine vor der Regel veröffentlichte Zeile wird zurückgehalten, der Ort bleibt', async () => {
+    const row = { ...synced({}), title: 'Sperrmüll- und Problemstoffsammlung', publish_status: 'published' };
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const sb = fakeClient([{ id: 'ev-1', updated_at: '2026-10-07T08:00:00Z' }], writes);
+    const [res] = await reResolveStoredEvents(sb, [row], { phase: 'test' });
+    expect(res.publish_change).toBe('withheld');
+    expect(writes[0].payload.publish_status).toBe('needs_review');
+    expect(writes[0].payload.location_status).toBe(row.location_status);
+    expect(writes[0].payload.latitude).toBe(row.latitude);
+  });
+
+  it('zurückgehaltene Zeile bleibt zurückgehalten; fällt die Regel weg, kommt sie zurück (umkehrbar)', async () => {
+    const held = synced({ title: 'Sozialsprechtag' });
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const [res] = await reResolveStoredEvents(fakeClient([{ id: 'ev-1', updated_at: '2026-10-07T08:00:00Z' }], writes), [held], { phase: 'test' });
+    expect(res.publish_change).toBeUndefined();
+    expect(writes.every(w => w.payload.publish_status === undefined)).toBe(true);
+    expect(publishChangeFor(held, { status: held.location_status as 'address_confirmed', reasons: [] })).toEqual({ publish_status: 'published' });
   });
 });

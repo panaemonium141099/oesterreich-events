@@ -220,11 +220,16 @@ export function contractedDecision(row: StoredEventLocationRow, decision: Resolv
 }
 
 function contract(row: StoredEventLocationRow, decision: ResolvedLocation): { decision: ResolvedLocation; admission: AdmissionVerdict } {
+  const nowIso = new Date().toISOString();
   const admission = evaluateAdmission(
     {
       title: row.title ?? 'Bestand',
-      // Vergangene Termine würden abgewiesen; hier zählt nur der Ortsvertrag.
-      start_date: row.start_date && row.start_date > new Date().toISOString() ? row.start_date : '2999-01-01T00:00:00.000Z',
+      // Künftige Termine mit ihrem Datum: auch der Horizont gilt im Bestand
+      // (start_too_far_ahead hält eine Zeile, die die Quelle nicht mehr
+      // liefert). Vergangene würden abgewiesen, für sie zählt nur der
+      // Ortsvertrag: dann gilt heute. Bis 2026-10 stand hier 2999, das
+      // nach Einführung des Horizonts jede vergangene Zeile hielte.
+      start_date: row.start_date && row.start_date > nowIso ? row.start_date : nowIso,
       location_name: decision.location_name,
       address: row.address_raw ?? row.address,
       postal_code: decision.postal_code,
