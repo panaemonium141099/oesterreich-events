@@ -27,6 +27,18 @@ export interface ContractedPosition {
   revoked: { latitude: number; longitude: number; geocoding_confidence: string | null } | null;
 }
 
+/**
+ * Ist die Position der Entscheidung nur der Mittelpunkt der genannten PLZ
+ * (kein Quellpunkt, keine vom genannten Ort benannte Gemeinde)? Dann ist sie
+ * im Freigabevertrag keine eigene Stimme neben der PLZ (`coords_from_plz`).
+ */
+export function positionFromPlzOnly(d: Pick<LocationDecision, 'provenance' | 'reasons'>): boolean {
+  return (
+    d.provenance.latitude === 'derived:plz' &&
+    (d.reasons.includes('gemeinde_centroid_from_plz') || d.reasons.includes('plz_centroid_from_table'))
+  );
+}
+
 export function applyAdmissionToPosition(
   loc: Pick<ContractedPosition, 'status' | 'precision' | 'latitude' | 'longitude' | 'geocoding_confidence' | 'geocoding_source'>,
   admission: Pick<AdmissionVerdict, 'decision' | 'reasons' | 'corrections'>,

@@ -234,9 +234,10 @@ export interface ScrapedEvent {
    */
   coords_precision?: 'venue' | 'address' | 'municipality' | 'postcode' | 'region' | 'unknown';
   /** fn-25: Die Quelle lieferte eine Adresse, die verworfen wurde (z. B.
-   *  Seitenadresse des Kalenders für viele verschiedene Veranstaltungsorte).
+   *  Seitenadresse des Kalenders für viele verschiedene Veranstaltungsorte,
+   *  oder eine Venue-Adresse in einem anderen Ort als dem genannten).
    *  Der Schreibpfad entfernt dann auch eine früher gespeicherte Adresse. */
-  address_rejected?: 'page_boilerplate';
+  address_rejected?: 'page_boilerplate' | 'venue_other_town';
   /** Die Quelle stützt keinen Gratis-Preis: ihr Text nennt "frei" nur neben
    *  einem Betrag (Kinder, Shuttle, Schnapserl). Der Schreibpfad entfernt
    *  dann ein früher gespeichertes "Eintritt frei" samt Stufe und Flag. */

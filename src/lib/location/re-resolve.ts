@@ -15,7 +15,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { LocationInput } from './conservative-resolution';
 import { loadLocationEvidence } from './evidence';
 import { resolveEventLocation, type ResolvedLocation } from './resolver';
-import { applyAdmissionToPosition } from './contract';
+import { applyAdmissionToPosition, positionFromPlzOnly } from './contract';
 import { evaluateAdmission, type AdmissionVerdict } from '@/lib/quality/admission';
 import { bundeslandFromPolygon } from '@/lib/eventim/bundesland-from-geo';
 import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
@@ -243,6 +243,7 @@ function contract(row: StoredEventLocationRow, decision: ResolvedLocation): { de
       country: decision.country,
       latitude: decision.latitude,
       longitude: decision.longitude,
+      coords_from_plz: positionFromPlzOnly(decision),
     },
     { regionOf: regionOfCoords, plzRegionOf: getBundeslandFromPLZ },
   );

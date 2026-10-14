@@ -24,6 +24,7 @@ import { bundeslandToId } from '@/lib/bundeslaender';
 import {
   gemeindenByName,
   gemeindenByPlz,
+  gemeindenNamedByPlaceText,
   hauptgemeindeFuerPlz,
   isKnownAustrianPlz,
   normalizeGemeindeName,
@@ -328,6 +329,43 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
 
   // ── Genannter Ort (Quellfeld oder Adresstext) ─────────────────────
   const cityText = hasText(input.city) ? input.city.trim() : extractCityFromAddress(input.address);
+
+  // ── PLZ gegen genannten Ort und Bundesland ────────────────────────
+  // Liegt die PLZ weder in der genannten Gemeinde noch im genannten
+  // Bundesland, gehört sie nicht zum Event (Veranstalterbüro: „1150 Wien"
+  // für ein Konzert in Klagenfurt, Prod 2026-10-14). Sie wird verworfen statt
+  // einen Mittelpunkt zu liefern; es zählt der genannte Ort. Der Ort muss
+  // eine Gemeinde genau benennen: ein Ortsteil („Sonnberg" in Leogang) darf
+  // nicht über eine gleich beginnende Gemeinde anderswo zum Widerspruch
+  // werden. Ob die PLZ im Ort liegt, prüft dagegen der weite Abgleich.
+  // Stützt eine Koordinate der Quelle die PLZ, bleibt sie: in Grenzregionen
+  // nennt die Quelle den Ort des Tourismusverbands (Rußbach, Salzburg), das
+  // Event liegt an der Koordinate jenseits der Grenze (Hornspitz, 4824 Gosau).
+  if (isAT && plz && cityText && declaredBl) {
+    const plzRefs = gemeindenByPlz(plz);
+    const namedRefs = gemeindenNamedByPlaceText(cityText, declaredBl, { exact: true });
+    const cityRefs = gemeindenNamedByPlaceText(cityText, declaredBl);
+    const srcLat = typeof input.latitude === 'number' && Number.isFinite(input.latitude) ? input.latitude : null;
+    const srcLng = typeof input.longitude === 'number' && Number.isFinite(input.longitude) ? input.longitude : null;
+    const centroid = plzCentroid(plz, cityText);
+    const supportedByCoords =
+      srcLat != null && srcLng != null && input.coords_precision !== 'region' && !!centroid && !centroid.ambiguous &&
+      haversineKm(srcLat, srcLng, centroid.lat, centroid.lng) <= CONFLICT_KM;
+    const contradicts =
+      !supportedByCoords &&
+      plzRefs.length > 0 &&
+      namedRefs.length > 0 &&
+      !plzRefs.some(r => cityRefs.includes(r) || namedRefs.includes(r)) &&
+      !plzRefs.some(r => r.bundesland === declaredBl);
+    if (contradicts) {
+      reasons.push('plz_contradicts_city');
+      rejected.push(`postal_code:${plz}:plz_contradicts_city`);
+      const i = evidence.findIndex(e => e.startsWith('plz:') && e.endsWith(`:${plz}`));
+      if (i >= 0) evidence.splice(i, 1);
+      delete provenance.postal_code;
+      plz = null;
+    }
+  }
 
   // ── Gemeinde belegen ───────────────────────────────────────────────
   let gemeinde: GemeindeRef | null = null;

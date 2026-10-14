@@ -130,6 +130,12 @@ node / next.js
   gemeinde-config.test.ts` und `scraper-koordinaten.test.ts`. Keine
   neuen PLZ-/Koordinaten-Tabellen anlegen, keine Fix-Skripte: Fehler an der
   Quelle (Stammdaten oder Scraper-Liste) beheben.
+  Eine Adresse aus einem anderen Ort als dem genannten ist meist das
+  Veranstalterbüro (Feratel: Konzert in Klagenfurt mit „1150 Wien",
+  2026-10-14): Venue-Adressen nur im genannten Ort (`place-match.ts`), der
+  Resolver verwirft eine PLZ gegen Ort UND Bundesland
+  (`plz_contradicts_city`), ein PLZ-Mittelpunkt bestätigt seine PLZ nicht
+  (`coords_from_plz`). MASTERPLAN §3.12.
 - **Nur Österreich (2026-10-08):** lasstreffen.at spielt ausschließlich
   Events mit `country = SITE_COUNTRY` (`src/lib/site-country.ts`, 'AT') aus.
   DE/CH-Events (Eventim) bleiben in der DB und im Import für spätere

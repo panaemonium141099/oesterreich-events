@@ -52,6 +52,8 @@ export interface ScoreableEvent {
   category?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  /** Koordinate ist nur der PLZ-Mittelpunkt (siehe AdmissionInput). */
+  coords_from_plz?: boolean;
   image_url?: string | null;
   source_url?: string | null;
   ticket_url?: string | null;
@@ -380,6 +382,7 @@ export function scoreAndAdmit(
       country: event.country,
       latitude: event.latitude,
       longitude: event.longitude,
+      coords_from_plz: event.coords_from_plz,
     },
     { regionOf: options.regionOf, plzRegionOf: options.plzRegionOf, now: options.now },
   );

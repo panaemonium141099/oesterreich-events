@@ -38,7 +38,7 @@ import {
 import type { LocationInput } from '@/lib/location/conservative-resolution';
 import { resolveEventLocation, type LocationEvidence, type ResolvedLocation } from '@/lib/location/resolver';
 import { loadLocationEvidence } from '@/lib/location/evidence';
-import { applyAdmissionToPosition } from '@/lib/location/contract';
+import { applyAdmissionToPosition, positionFromPlzOnly } from '@/lib/location/contract';
 import type { LocationDecision, LocationStatus } from '@/lib/location/types';
 import {
   closeScrapeRun,
@@ -240,6 +240,10 @@ interface ExistingRow {
   is_family_friendly: boolean | null;
   image_credit: string | null;
   price_tier: string | null;
+  /** Gründe der gespeicherten Ortsentscheidung (`location_resolution->reasons`). */
+  stored_location_reasons: string[] | null;
+  /** Herkunft der gespeicherten Position (`location_provenance->>latitude`). */
+  stored_latitude_provenance: string | null;
 }
 
 /** Statuses that the scoring pipeline owns. Everything else (e.g.
@@ -291,7 +295,8 @@ async function prefetchExistingRows(
           // fn-14.5 UPSERT-Guard fields:
           'image_url, image_width, image_height, description, enrichment_version, price_text, ' +
           'price_min, price_max, address, ' +
-          'audience, setting, occasion_tags, price_flags, language, is_family_friendly, image_credit, price_tier',
+          'audience, setting, occasion_tags, price_flags, language, is_family_friendly, image_credit, price_tier, ' +
+          'stored_location_reasons:location_resolution->reasons, stored_latitude_provenance:location_provenance->>latitude',
       )
       .in('source_name', uniqueSourceNames)
       .in('source_id', idSlice);
@@ -518,9 +523,20 @@ export function toSupabaseRow(
     // Nur bei vollständig geladenen Belegen: ohne Belege sähe ein belegter
     // Bestand fälschlich wie „von der Quelle abgestuft" aus.
     const rankConfidence = decision.provenance.latitude === 'source' && evidence.complete === true ? 'scraper' : resolved.confidence;
+    // Eine Position, die der Resolver selbst aus PLZ oder Gemeinde abgeleitet
+    // hat (Herkunft `derived:plz`, nicht als Altbestand behalten), hat keinen
+    // eigenen Beleg: liefert die neue Entscheidung eine Position, gilt diese.
+    // Sonst hielt der Rangvergleich einen Mittelpunkt gegen den gleichrangigen
+    // neuen fest (Feratel-Konzert in Klagenfurt blieb auf dem Wiener
+    // Mittelpunkt der Veranstalter-PLZ, Prod 2026-10-14).
+    const derivedSuperseded =
+      existing.stored_latitude_provenance === 'derived:plz' &&
+      !(existing.stored_location_reasons ?? []).some(r => r.startsWith('legacy_coords_retained')) &&
+      resolved.latitude != null && resolved.longitude != null;
+    if (!samePoint && derivedSuperseded) resolved.reasons.push('derived_position_superseded');
     // Gleiche Position: das Label folgt der Entscheidung (z. B. Feed-
     // Platzhalter, bisher `scraper`, jetzt Gebietsangabe `gemeinde-centroid`).
-    if (!samePoint && !shouldOverwriteCoords(existing, resolved.latitude, resolved.longitude, rankConfidence)) {
+    if (!samePoint && !derivedSuperseded && !shouldOverwriteCoords(existing, resolved.latitude, resolved.longitude, rankConfidence)) {
       // Bestandskoordinate bleibt — die gespeicherte Entscheidung muss das
       // abbilden, sonst behauptet sie eine Position, die nicht in der Zeile
       // steht.
@@ -724,6 +740,9 @@ export function toSupabaseRow(
       category: canonical.category,
       latitude: finalLat,
       longitude: finalLng,
+      // Nur wenn die Zeile die Position der Entscheidung trägt; eine
+      // behaltene Bestandskoordinate hat eine eigene Herkunft.
+      coords_from_plz: positionFromPlzOnly(decision) && finalLat === decision.latitude && finalLng === decision.longitude,
       image_url: finalImageUrl,
       source_url: event.source_url,
       ticket_url: finalTicketUrl,
