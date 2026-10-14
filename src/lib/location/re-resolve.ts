@@ -162,6 +162,11 @@ function heldByAdmission(decision: { reasons?: string[] }): boolean {
   return (decision.reasons ?? []).some(r => r.startsWith('admission:') && r !== 'admission:drop_coordinates');
 }
 
+/** Haltegründe des Vertrags im Protokoll, als vergleichbarer Schlüssel. */
+function admissionHolds(reasons: string[] | undefined): string {
+  return (reasons ?? []).filter(r => r.startsWith('admission:')).sort().join('|');
+}
+
 /** Gründe, die nur von der Ortsentscheidung stammen (A6, Vertrag, Sync). */
 const LOCATION_HOLD_REASONS = /^(a6_|location_conflict_withheld$|coords_vs_plz_conflict|.*_vs_plz_conflict|admission:|conflict_position_revoked$)/;
 
@@ -321,7 +326,12 @@ export async function reResolveStoredEvents(
       row.geocoding_confidence === decision.geocoding_confidence &&
       row.latitude === decision.latitude &&
       row.longitude === decision.longitude &&
-      row.location_resolution?.input_hash === decision.input_hash;
+      row.location_resolution?.input_hash === decision.input_hash &&
+      // Die Haltegründe des Vertrags gehören zur Entscheidung: an ihnen
+      // erkennt die Prüfliste den Grund und `publishChangeFor` später, ob die
+      // Zeile wieder frei darf. Kommt ein Grund ohne Ortsbezug neu dazu
+      // (Gemeinde-Dienst, Horizont), ist der Ort gleich, das Protokoll nicht.
+      admissionHolds(row.location_resolution?.reasons) === admissionHolds(decision.reasons);
     if (unchanged && !publishChange) {
       results.push({ id: row.id, decision, written: false, skipped_reason: 'unchanged' });
       continue;

@@ -492,3 +492,34 @@ describe('Gemeinde-Dienste (Entscheidung 2026-10-14): zurückgehalten, Ort bleib
     expect(publishChangeFor(held, { status: held.location_status as 'address_confirmed', reasons: [] })).toEqual({ publish_status: 'published' });
   });
 });
+
+describe('Neu-Entscheidung schreibt den Haltegrund ins Protokoll', () => {
+  const start = new Date(Date.now() + 30 * 86_400_000).toISOString();
+  const synced = (e: Partial<ScrapedEvent>) => ({
+    ...(toSupabaseRow({ source_name: 'gemeinden-generic', source_id: 'h', source_url: 'https://example.at/h', title: 'Konzert', start_date: start, location_name: 'Posthof', address: 'Posthofstraße 43, 4020 Linz', ...e } as ScrapedEvent, new Map(), new Map()).row as unknown as StoredEventLocationRow & { publish_status: string }),
+    id: 'ev-1',
+    updated_at: '2026-10-07T08:00:00Z',
+  });
+
+  it('Ort unverändert, neuer Haltegrund: ganze Entscheidung samt Grund, sonst fehlt er Prüfliste und Rücknahme', async () => {
+    // Prod-Fall: Zeile vor der Regel geschrieben (Protokoll ohne Haltegrund,
+    // veröffentlicht), Titel und Ort unverändert. Die Neu-Entscheidung ist
+    // im Ort identisch und hält die Zeile nur über den neuen Grund.
+    const first: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const row = synced({ title: 'Biomüll' });
+    await reResolveStoredEvents(fakeClient([{ id: 'ev-1', updated_at: row.updated_at }], first), [row], { phase: 'test' });
+    const settled = { ...row, ...(first[0]?.payload ?? {}) } as typeof row;
+    const resolution = settled.location_resolution as { reasons: string[] };
+    const beforeRule = {
+      ...settled,
+      publish_status: 'published',
+      location_resolution: { ...resolution, reasons: resolution.reasons.filter(r => r !== 'admission:municipal_service') },
+      updated_at: '2026-10-07T09:00:00Z',
+    } as typeof row;
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const [res] = await reResolveStoredEvents(fakeClient([{ id: 'ev-1', updated_at: beforeRule.updated_at }], writes), [beforeRule], { phase: 'test' });
+    expect(res.publish_change).toBe('withheld');
+    expect(writes[0].payload.publish_status).toBe('needs_review');
+    expect((writes[0].payload.location_resolution as { reasons: string[] } | undefined)?.reasons).toContain('admission:municipal_service');
+  });
+});
