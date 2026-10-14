@@ -53,22 +53,28 @@ export type AdmissionReason =
   | 'region_contradicts_coords'
   | 'coords_outside_declared_country'
   | 'foreign_place_signal'
+  | 'start_too_far_ahead'
   /** Gemeinde-Dienst statt Event (Müllabfuhr, Sprechtag, …), siehe `contentQuarantineReasons`. */
   | 'municipal_service';
 
 /**
- * Quarantäne-Gründe, die den ORT betreffen. Nur sie machen in der
- * Ortsentscheidung aus der Zeile einen ungeklärten Ort oder Konflikt
- * (`applyAdmissionToPosition`); ein inhaltlicher Grund wie
- * `municipal_service` lässt den Ort, wie er ist.
+ * Gründe, die nichts über den Ort aussagen. Die Ortsentscheidung
+ * (`applyAdmissionToPosition`) lässt Status und Position dafür unberührt;
+ * zurückgehalten wird die Zeile trotzdem (Quarantäne → needs_review).
  */
-export const LOCATION_QUARANTINE_REASONS: ReadonlySet<AdmissionReason> = new Set<AdmissionReason>([
-  'no_location_evidence',
-  'placeholder_location',
-  'region_contradicts_coords',
-  'coords_outside_declared_country',
-  'foreign_place_signal',
-]);
+export const NON_LOCATION_REASONS: ReadonlySet<AdmissionReason> = new Set<AdmissionReason>(['start_too_far_ahead', 'municipal_service']);
+
+/**
+ * Freigabehorizont in Jahren ab heute (Wiener Kalendertag).
+ *
+ * Gemessen am Prod-Bestand (2026-10-14): jenseits von drei Jahren standen nur
+ * Platzhalter, Tippfehler und Serienhochrechnungen. veranstaltungskalender.net
+ * führt Gutscheine und Dauerangebote („Bungee Jumping - T - Europabrücke",
+ * „Vinarium Wertgutschein") mit dem Datum 31.12.2030 bzw. 2037, dazu
+ * Jahreszahlen wie 2202, 2919 und 3017; Eventim hatte keinen einzigen Termin
+ * nach drei Jahren und 7 zwischen zwei und drei Jahren.
+ */
+export const ADMISSION_HORIZON_YEARS = 3;
 
 export interface AdmissionInput {
   title?: string | null;
@@ -317,8 +323,19 @@ export function evaluateAdmission(
       rejects.push('invalid_start_date');
     } else {
       const now = options.now ?? new Date();
-      if (viennaCalendarDay(start) < viennaCalendarDay(now)) {
+      const today = viennaCalendarDay(now);
+      const startDay = viennaCalendarDay(start);
+      if (startDay < today) {
         rejects.push('start_in_past');
+      }
+      // Quarantäne statt Verwerfen: eine verworfene Zeile wird nie
+      // geschrieben, eine schon veröffentlichte bliebe so sichtbar. Die
+      // Quarantäne nimmt ihr beim nächsten Upsert die Veröffentlichung.
+      // Der Vergleich als Zeichenkette verträgt auch einen 29. Februar,
+      // den es im Horizontjahr nicht gibt.
+      const horizonDay = `${Number(today.slice(0, 4)) + ADMISSION_HORIZON_YEARS}${today.slice(4)}`;
+      if (startDay > horizonDay) {
+        quarantines.push('start_too_far_ahead');
       }
 
       if (hasText(input.end_date)) {
