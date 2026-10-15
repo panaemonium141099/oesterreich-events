@@ -165,6 +165,8 @@ import { post as konzerteInDerMinoritenkircheBarockmusikZurWeihnachtsze2026 } fr
 import { post as konzerteInDerMinoritenkircheVivaldiMeetsPiazzolla2026 } from './posts/konzerte-in-der-minoritenkirche-vivaldi-meets-piazzolla-2026';
 import { post as grandFestival20262026 } from './posts/grand-festival-2026-2026';
 import { post as chopinVienneseFriendsPianoConcertByCandleGlow2026 } from './posts/chopin-viennese-friends-piano-concert-by-candle-glow-2026';
+import { post as charityFestivalDobermannDirtyKurtyBandTheSoulgasStat2026 } from './posts/charity-festival-dobermann-dirty-kurty-band-the-soulgas-stat-2026';
+import { post as ukrainischeKlaengeBarockKonzertUkrainischenUndEuropaei2026 } from './posts/ukrainische-klaenge-barock-konzert-ukrainischen-und-europaei-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -340,6 +342,8 @@ export const ALL_POSTS: FestivalPost[] = [
   konzerteInDerMinoritenkircheVivaldiMeetsPiazzolla2026,
   grandFestival20262026,
   chopinVienneseFriendsPianoConcertByCandleGlow2026,
+  charityFestivalDobermannDirtyKurtyBandTheSoulgasStat2026,
+  ukrainischeKlaengeBarockKonzertUkrainischenUndEuropaei2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
