@@ -970,8 +970,11 @@ scrape.ts. (b) *Alles-oder-Nichts-Verlust* — gem2go stand nach dem harten
 passiert erst nach scrape()-Return): die drei Gemeinde-Aggregatoren
 lieferten seit Einführung des Timeouts nichts mehr → Fix: Soft-Budget
 (`SCRAPER_SOFT_BUDGET_MIN`, default 240 min) mit Teilergebnis-Rückgabe +
-Tagesrotation des Startpunkts (volle Abdeckung über Folgeläufe; gem2go
-bräuchte ~388 min für alles), harte Timeouts nur noch als Backstop
+Tagesrotation des Startpunkts (gem2go bräuchte ~388 min für alles;
+*Korrektur 2026-10-17:* die Tagesrotation rückte nur einen Eintrag pro Tag
+weiter, gemeinde-registry erreichte so fast immer dieselben ~800 von 1.881
+Gemeinden, Salzburg/Steiermark seit Mai nicht; jetzt Fortsetzungs-Cursor in
+`source_runs.rotation_cursor`), harte Timeouts nur noch als Backstop
 (280 min für die Riesen, 45 für meinbezirk mit gemessenen 24,7).
 (c) *Stille Telemetrie-Verluste* — der CHECK-Constraint von source_runs
 kannte 'error'/'timeout' nicht und supabase-js wirft nicht → alle

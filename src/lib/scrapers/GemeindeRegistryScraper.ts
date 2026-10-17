@@ -64,6 +64,32 @@ export function registryEventId(
   };
 }
 
+/** Alle Registry-Einträge; Dateiname = Bundesland, Ortsdaten nur aus der Stammdatei. */
+export function loadRegistryEntries(): GemeindeRegistryEntry[] {
+  const registryDir = join(process.cwd(), 'data', 'gemeinden-registry');
+  const files = readdirSync(registryDir).filter(f => f.endsWith('.json'));
+  const entries: GemeindeRegistryEntry[] = [];
+  for (const file of files) {
+    const parsed = JSON.parse(readFileSync(join(registryDir, file), 'utf8')) as GemeindeRegistryConfig[];
+    entries.push(...withStammdaten(parsed, file.replace('.json', '')));
+  }
+  return entries;
+}
+
+export function isScrapeableEntry(e: GemeindeRegistryEntry): boolean {
+  return (e.status === 'active' || e.status === 'empty') && e.strategy !== 'none' && !!e.eventUrl;
+}
+
+/**
+ * Fortsetzungsschlüssel (rotation-cursor.ts): Kennziffer und Listenname.
+ * Die Kennziffer allein ist nicht eindeutig, fusionierte Gemeinden führen
+ * eigene Einträge unter derselben Kennziffer (Matrei am Brenner, Mühlbachl,
+ * Pfons).
+ */
+export function registryCursorKey(e: Pick<GemeindeRegistryEntry, 'gkz' | 'listName'>): string {
+  return `${e.gkz} ${e.listName}`;
+}
+
 /** Knöpfe der GEM2GO-Tabellenzeile neben dem Namen. */
 const GEM2GO_LIST_BUTTONS = '.va_list_additionel_date_link, .va_list_more_link';
 
@@ -88,6 +114,7 @@ const GEM2GO_LIST_BUTTONS = '.va_list_additionel_date_link, .va_list_more_link';
  */
 export class GemeindeRegistryScraper extends BaseScraper {
   readonly name = 'gemeinde-registry';
+  override readonly resumesSourceList = true;
 
   private readonly timeoutMs = 10000;
   private readonly gemeindeDelayMs = 1500;
@@ -103,17 +130,8 @@ export class GemeindeRegistryScraper extends BaseScraper {
   };
 
   private loadRegistry(): GemeindeRegistryEntry[] {
-    const registryDir = join(process.cwd(), 'data', 'gemeinden-registry');
     try {
-      const files = readdirSync(registryDir).filter(f => f.endsWith('.json'));
-      const entries: GemeindeRegistryEntry[] = [];
-      for (const file of files) {
-        const content = readFileSync(join(registryDir, file), 'utf8');
-        const parsed = JSON.parse(content) as GemeindeRegistryConfig[];
-        // Dateiname = Bundesland; Ortsdaten nur aus der Stammdatei.
-        entries.push(...withStammdaten(parsed, file.replace('.json', '')));
-      }
-      return entries;
+      return loadRegistryEntries();
     } catch {
       this.log('WARNUNG: Kein Registry-Verzeichnis oder keine JSON-Dateien gefunden');
       return [];
@@ -124,9 +142,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
     const registry = this.loadRegistry();
     const bundeslandFilter = process.env.REGISTRY_BUNDESLAND?.toLowerCase();
     const scrapeable = registry.filter(e =>
-      (e.status === 'active' || e.status === 'empty') &&
-      e.strategy !== 'none' &&
-      e.eventUrl &&
+      isScrapeableEntry(e) &&
       (!bundeslandFilter || e.bundesland.toLowerCase().includes(bundeslandFilter))
     );
 
@@ -139,16 +155,19 @@ export class GemeindeRegistryScraper extends BaseScraper {
     let fetchErrors = 0;
     let noEvents = 0;
 
-    // ~1900 scrapbare Gemeinden × ~5-8 s (inkl. 1,5 s Delay + Pagination)
-    // ≈ 160-250 min. Soft-Budget + Tagesrotation wie bei gem2go: bei
-    // Abbruch geht das Teilergebnis in den Sync statt am harten Timeout
-    // komplett zu verfallen (siehe BaseScraper.softDeadline/rotateDaily).
+    // 1.881 scrapbare Gemeinden × gemessen ~18 s (inkl. 1,5 s Delay und
+    // Folgeseiten) ≈ 560 min, das Soft-Budget von 240 min reicht für rund
+    // 800 (Prod 2026-10). Beim Abbruch geht das Teilergebnis in den Sync,
+    // und der nächste Lauf setzt nach der zuletzt bearbeiteten Gemeinde
+    // fort: volle Abdeckung in drei Nächten (BaseScraper.resumeAfterCursor).
+    // Ein auf ein Bundesland gefilterter Lauf (Handbetrieb) liest und
+    // schreibt keinen Cursor, sonst verschöbe er die Nachtläufe.
     const deadline = this.softDeadline();
-    const rotated = this.rotateDaily(scrapeable);
+    const rotated = bundeslandFilter ? scrapeable : this.resumeAfterCursor(scrapeable, registryCursorKey);
 
     for (let i = 0; i < rotated.length; i++) {
       if (Date.now() > deadline) {
-        this.log(`Soft-Budget erreicht nach ${i}/${rotated.length} Gemeinden — liefere ${allEvents.length} Events als Teilergebnis`);
+        this.log(`Soft-Budget erreicht nach ${i}/${rotated.length} Gemeinden, liefere ${allEvents.length} Events als Teilergebnis${this.reachedCursor ? `; der nächste Lauf setzt nach „${this.reachedCursor}" fort` : ''}`);
         break;
       }
       const entry = rotated[i];
@@ -173,6 +192,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         failed++;
         this.log(`  [${i + 1}/${scrapeable.length}] ${entry.name}: FEHLER - ${err instanceof Error ? err.message : err}`);
       }
+      if (!bundeslandFilter) this.markReached(registryCursorKey(entry));
       await this.sleep(this.gemeindeDelayMs);
     }
 
@@ -1456,7 +1476,7 @@ interface GemeindeRegistryConfig {
   region?: boolean;
 }
 
-type GemeindeRegistryEntry = GemeindeRegistryConfig & GemeindeStammdaten;
+type GemeindeRegistryEntry = GemeindeRegistryConfig & GemeindeStammdaten & { listName: string };
 
 interface CitiesPageEvents {
   upcomingEvents?: CitiesEvent[];

@@ -3,6 +3,7 @@ import type { CheerioAPI } from 'cheerio';
 import { enrichFromDetailHtml } from './detail-extract/extract';
 import { mergeEnrichment } from './detail-extract/merge';
 import { fetchHtml, type FetchHtmlResult } from './fetch-html';
+import { rotateAfterCursor } from './rotation-cursor';
 
 export interface DetailEnrichSummary {
   fetched: number;
@@ -212,6 +213,18 @@ export abstract class BaseScraper {
     return null;
   }
 
+  /**
+   * Die Quell-Liste setzt über Läufe fort (resumeAfterCursor). runScraper
+   * liest dann vor scrape() den Cursor des letzten Laufs nach
+   * `rotationCursor` und schreibt danach `reachedCursor` nach
+   * `source_runs.rotation_cursor`.
+   */
+  readonly resumesSourceList: boolean = false;
+  /** Cursor des letzten Laufs, null = Listenanfang. */
+  rotationCursor: string | null = null;
+  /** Schlüssel des zuletzt bearbeiteten Eintrags in diesem Lauf. */
+  reachedCursor: string | null = null;
+
   /** Request timeout in milliseconds (default: 30s) */
   protected fetchTimeoutMs: number = 30000;
 
@@ -309,9 +322,31 @@ export abstract class BaseScraper {
   }
 
   /**
-   * Tagesrotation für Quell-Listen: der Startpunkt wandert täglich, damit
-   * bei Budget-Abbruch über mehrere Läufe ALLE Einträge drankommen statt
-   * immer nur der Listenanfang (systematischer Coverage-Bias).
+   * Quell-Liste ab dem Eintrag nach dem Cursor des letzten Laufs
+   * (rotation-cursor.ts), ohne Cursor ab dem Listenanfang. Der Scraper
+   * meldet jeden bearbeiteten Eintrag mit markReached; bricht er am
+   * Soft-Budget ab, beginnt der nächste Lauf dahinter. Braucht
+   * `resumesSourceList = true`, sonst liest runScraper keinen Cursor.
+   */
+  protected resumeAfterCursor<T>(list: readonly T[], keyOf: (item: T) => string): T[] {
+    this.reachedCursor = null;
+    const { items, startIndex } = rotateAfterCursor(list, keyOf, this.rotationCursor);
+    this.log(this.rotationCursor == null
+      ? `Kein Cursor aus einem früheren Lauf, Start am Listenanfang (${list.length} Einträge)`
+      : `Setze nach „${this.rotationCursor}" fort: Eintrag ${startIndex + 1} von ${list.length}`);
+    return items;
+  }
+
+  protected markReached(key: string): void {
+    this.reachedCursor = key;
+  }
+
+  /**
+   * Tagesrotation: der Startpunkt rückt nur EINEN Eintrag pro Tag weiter.
+   * Schafft ein Lauf nur einen Teil der Liste, kommen die übrigen Einträge
+   * so gut wie nie dran (gemeinde-registry erreichte jede Nacht fast
+   * dieselben ~800 von 1.881 Gemeinden). Nur noch für Scraper, die nicht
+   * auf resumeAfterCursor umgestellt sind.
    */
   protected rotateDaily<T>(list: T[]): T[] {
     if (list.length === 0) return list;
