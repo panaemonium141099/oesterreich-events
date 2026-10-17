@@ -336,9 +336,12 @@ const SCRAPER_TIMEOUT_OVERRIDES_MIN: Record<string, number> = {
   'gemeinde-registry': 280,
   'gemeinden': 280, // 4. Kommunal-Aggregator (253 Gemeinden), Befund 2026-07-15
   'meinbezirk': 90, // Full detail coverage (formerly capped at 500), three workers
+  // Alle 1.593 Listenseiten ~26 min (2026-10-14), Zeitbudget im Scraper
+  // 38 min (VeranstaltungskalenderNetScraper.BUDGET_MIN) plus Sync.
+  'veranstaltungskalender.net': 45,
 };
 
-function timeoutMsFor(name: string): number {
+export function timeoutMsFor(name: string): number {
   return (SCRAPER_TIMEOUT_OVERRIDES_MIN[name] ?? DEFAULT_TIMEOUT_MIN) * 60_000;
 }
 
@@ -384,7 +387,7 @@ const SCRAPER_WEIGHTS: Record<string, number> = {
   'gemeinden': 130,                     // 253 Gemeinden inkl. Kalender-Discovery (Schätzung, Telemetrie liefert bald Messwert)
   // Gemessen 2026-07-14 (max_min, mit Headroom aufgerundet):
   'meinbezirk': 60,                     // Estimate with full detail coverage; update from telemetry
-  'veranstaltungskalender.net': 25,     // 21,6
+  'veranstaltungskalender.net': 30,     // 20 bei 1.171 von 1.593 Seiten (p90 2026-10), voll ~28
   'marxhalle': 20,                      // 17,6
   'falter': 14,                         // 11,4
   'burgenland.info': 12,                // 9,9

@@ -261,11 +261,11 @@ async function applyPlan(fullPlan: DedupPlan, errors: string[]): Promise<void> {
     for (let i = 0; i < ids.length; i += 200) {
       const { data, error } = await supabase
         .from('events')
-        .select('id,title,quality_score,location_status,admission:location_resolution->admission->>decision')
+        .select('id,title,start_date,quality_score,location_status,admission:location_resolution->admission->>decision')
         .in('id', ids.slice(i, i + 200));
       if (error) { errors.push(`Freigabe lesen: ${error.message}`); continue; }
-      for (const r of (data ?? []) as Array<{ id: string; title: string | null; quality_score: number | null; location_status: string | null; admission: string | null }>) {
-        statusById.set(r.id, releaseStatus({ title: r.title, quality_score: r.quality_score, admission_decision: r.admission, location_status: r.location_status }));
+      for (const r of (data ?? []) as Array<{ id: string; title: string | null; start_date: string | null; quality_score: number | null; location_status: string | null; admission: string | null }>) {
+        statusById.set(r.id, releaseStatus({ title: r.title, start_date: r.start_date, quality_score: r.quality_score, admission_decision: r.admission, location_status: r.location_status }));
       }
     }
     const byStatus = new Map<string, string[]>();

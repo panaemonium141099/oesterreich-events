@@ -80,8 +80,9 @@ node / next.js
   verwaiste Sockets getimeouteter Scraper den Job stundenlang am Leben.
   Dazu Venues-Job + EIN Post-Processing-Job (`scrape-pipeline.ts
   --skip-scrapers --skip-venues`: normalize → categorize → geocode →
-  master_coords → score → withdrawal → dedup → dedup_audit → security_audit →
-  artist_matching → indexing → report) mit `if: always()`, nie zwei
+  master_coords → score → withdrawal → admission_recheck → dedup →
+  dedup_audit → security_audit → artist_matching → indexing → report) mit
+  `if: always()`, nie zwei
   gleichzeitig (`concurrency`). Ein roter Schritt nennt seinen Grund in der
   Alarm-Mail (`reportStepReason`, `src/lib/pipeline/step-reason.ts`).
   `withdrawal` (`withdraw-stale-events.ts`, läuft VOR dem Dedup, damit der
@@ -94,7 +95,14 @@ node / next.js
   Ersatzzeile derselben Seite zählt nicht als Bestätigung, z. B.
   „ABGESAGT: …"). „Nicht gesehen" allein ist kein Beleg (Stichprobe: 15
   von 125 wirklich weg). Zurückgezogen = `suppressed` + `withdrawn_at`;
-  der Upsert hebt beides auf. `security_audit` wird rot, sobald eine
+  der Upsert hebt beides auf. `admission_recheck`
+  (`admission-recheck.ts`, Regeln in `src/lib/quality/admission-recheck.ts`)
+  wendet die Titel- und Zeitregeln des Freigabevertrags
+  (`titleTimeQuarantineReasons`: Gemeinde-Dienst, Horizont) auf
+  gespeicherte Zeilen an, auch auf solche, die keine Quelle mehr liefert:
+  sichtbar → `needs_review` mit `admission:<Grund>` im Protokoll, entfällt
+  der Grund, gilt wieder der Score. Ventil 500 Haltungen / 300 Freigaben,
+  Freigabe per workflow_dispatch. `security_audit` wird rot, sobald eine
   schreibende SECURITY-DEFINER-Funktion für anon ausführbar ist.
 - **GitHub Actions `import-eventim.yml`** (alle 6 h): PFT-Feed-Import mit
   Affiliate-Links. Secrets: `EVENTIM_FEED_USER`/`EVENTIM_FEED_PASS`.
@@ -216,9 +224,12 @@ node / next.js
   Weiter-Beschriftung nur als ganzes Wort, Ziel nur auf eigener Website,
   keine Dateien/Download-Links, nie die Seite selbst. Selbst gefundene Seiten
   holen die Gemeinde-Scraper über `BaseScraper.fetchHtml` (`fetch-html.ts`:
-  nur text/html bzw. XHTML, höchstens 5 MB, gestreamt mit Abbruch). Vorher
-  lief Strobls 77-MB-PDF „Voranschlag 2026“ als Seite 2 in cheerio und
-  sprengte den Shard (2026-10-14).
+  nur text/html bzw. XHTML, höchstens 5 MB, gestreamt mit Abbruch); gem2go
+  (eigene Weiterleitungsprüfung) und die Homepage-Suche
+  (`gemeinde-event-discovery.ts`) lesen ihre Antworten über `readHtml`.
+  Vorher lief Strobls 77-MB-PDF „Voranschlag 2026“ als Seite 2 in cheerio
+  und sprengte den Shard (2026-10-14); gem2go las Uttendorfs
+  GetDocument.ashx-PDFs als Detailseite (2026-10-17).
 - `src/lib/db/supabase-sync.ts` — EINZIGER Write-Pfad Scraper→Supabase
   (confidence-basierte Upsert-Guards); kein SQLite mehr im Projekt
 - `src/lib/search/smart-query.ts` — Parser/Whitelist/Ranking der Smart-Suche (pur, getestet)
@@ -278,6 +289,8 @@ npm run import:eventim       # Eventim-PFT-Feed (braucht EVENTIM_FEED_USER/PASS)
 npm run score | dedup        # Scoring / Cross-Source-Dedup (--dry-run --report r.json;
                              # Sicherheitsventil: --max-new-duplicates / --max-releases)
 npm run dedup:audit          # sichtbare Restdubletten zählen (Exit 1 über --max, Std. 100)
+npm run admission:recheck    # Titel-/Zeitregeln des Freigabevertrags im Bestand
+                             # (--dry-run --report r.json; --max-holds / --max-releases)
 npm run scrape:venues        # Venue-Feed-Ingestion
 npm run regen:taxonomy       # TAXONOMY.md §3 aus Code regenerieren (--check für CI)
 npm run import:activities    # Deskline-Infrastruktur-POIs → poi_activities
@@ -352,6 +365,19 @@ npm run scrape:festival-lineups | match-artists
   Freitext-Suchpfad sind ohne Portal-Zugriff unverifiziert und deshalb per Env
   konfigurierbar (TODO(viator-onboarding) im Code). GetYourGuide ist nur ein
   Helper-Gerüst hinter Feature-Flag (kein Konto, Format unverifiziert).
+- Hetzner-Server: `/opt/app/isr-guard.sh` (lt-isr-guard.timer, alle 15 min)
+  erzeugt den nextjs-app-Container neu, um den ISR-Cache im Writable-Layer zu
+  verwerfen (6–17 s Downtime, Caddy antwortet 502 „connection refused" /
+  „lookup nextjs-app … server misbehaving"). Bis 2026-10-17 maß er die GESAMTE
+  Platte (Schwelle 70 %) und lief, als das Envoy-Access-Log (14,2 GB, keine
+  Rotation) die Platte dauerhaft auf 77 % hielt, ab 06.10. in einer Schleife:
+  95 Recreates am Tag, 96 % aller 502-Antworten. Seit 17.10. zählt nur der
+  Writable-Layer (`docker inspect -s`, SizeRw ≥ 8 GB; Notbremse ab 90 %
+  Platte), sonst nur ein Logeintrag in `/var/log/lt-isr-guard.log`. Container-
+  Logs rotieren per `logging:` in den Compose-Dateien (100 MB × 5), ein
+  `daemon.json` würde ohne live-restore einen Docker-Neustart = Vollausfall
+  brauchen. Bei 502-Bursts im Minutenraster zuerst dieses Log lesen
+  (MASTERPLAN §3.13).
 
 <!-- BEGIN FLOW-NEXT -->
 ## Flow-Next

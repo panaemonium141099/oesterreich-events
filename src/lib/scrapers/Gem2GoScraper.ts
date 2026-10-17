@@ -7,6 +7,7 @@ import { withStammdaten } from './gemeinden/stammdaten';
 import { extractGem2goDetail } from './gem2go-detail';
 import { discoverAndParseGemeindeEvents, asScrapedEvent, isUsableDetailHref } from './gemeinde-event-discovery';
 import { applyGemeindeContext } from './gemeinde-context';
+import { readHtml } from './fetch-html';
 import type { ScrapedEvent } from '@/types/events';
 import { gemeindeCursorKey } from './rotation-cursor';
 
@@ -723,10 +724,6 @@ export class Gem2GoScraper extends BaseScraper {
 
   // ─── HILFSFUNKTIONEN ──────────────────────────────────────────────────────
 
-  /**
-   * Fetch mit Timeout via AbortSignal.
-   * Gibt null zurück statt zu werfen bei Fehler.
-   */
   private static GEM2GO_MARKERS = [
     'veranstaltungcmsliste', 'va_list', 'rasterlist', 'bemcard',
     'system/web/', 'gem2go', 'ctl00_', 'veranstaltung.aspx',
@@ -737,6 +734,10 @@ export class Gem2GoScraper extends BaseScraper {
     return Gem2GoScraper.GEM2GO_MARKERS.some(m => lower.includes(m));
   }
 
+  /**
+   * Fetch mit Timeout via AbortSignal.
+   * Gibt null zurück statt zu werfen bei Fehler.
+   */
   private async fetchWithTimeout(url: string, timeoutMs: number): Promise<string | null> {
     try {
       const response = await fetch(url, {
@@ -781,19 +782,31 @@ export class Gem2GoScraper extends BaseScraper {
             signal: AbortSignal.timeout(timeoutMs),
           });
           if (!res2.ok) return null;
-          const html = await res2.text();
-          return this.isGem2GoContent(html) ? html : null;
+          const html = await this.readPage(res2, url);
+          return html && this.isGem2GoContent(html) ? html : null;
         } catch {
           return null;
         }
       }
 
       if (!response.ok) return null;
-      const html = await response.text();
-      return this.isGem2GoContent(html) ? html : null;
+      const html = await this.readPage(response, url);
+      return html && this.isGem2GoContent(html) ? html : null;
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Nur HTML bis 5 MB lesen (fetch-html.ts). Detail-Links der Listen zeigen
+   * teils auf Dokumente: Uttendorf GetDocument.ashx, 302 auf application/pdf
+   * (Prod 2026-10-16). Ungeprüft gelesen sprengte so ein 77-MB-PDF schon
+   * den Registry-Shard.
+   */
+  private async readPage(response: Response, url: string): Promise<string | null> {
+    const { html, error } = await readHtml(response);
+    if (error) this.log(`Übersprungen, ${error}: ${url}`);
+    return html;
   }
 
   /**

@@ -5,7 +5,7 @@
  * bildet dedup-engine.ts (mit Mehrdeutigkeits- und Widerspruchsschutz).
  */
 
-import { contentQuarantineReasons } from '@/lib/quality/admission';
+import { titleTimeQuarantineReasons } from '@/lib/quality/admission';
 import { scoreToPublishStatus, type PublishStatus } from '@/lib/quality/score-event';
 import { isDateOnlyText } from './garbage-filter';
 import { knownStartMs, titleRelation, viennaDayOf } from './dedup-evidence';
@@ -15,19 +15,21 @@ import type { EventRow } from './types';
 /**
  * Status, den eine Zeile ohne Dedup hätte — wie beim Upsert: Quarantäne und
  * Ortskonflikt (DB-Constraint) bleiben zurückgehalten, sonst entscheidet der
- * gespeicherte Qualitätsscore. Inhaltliche Quarantäne (Gemeinde-Dienst)
- * folgt aus dem Titel, nicht aus der gespeicherten: eine Dublette, die ihre
- * Quelle seit der Regel nicht neu geliefert hat, würde sonst als Ersatz für
- * ihr zurückgehaltenes Primary sichtbar.
+ * gespeicherte Qualitätsscore. Quarantäne aus Titel und Termin
+ * (Gemeinde-Dienst, Horizont) folgt aus der Zeile selbst, nicht aus der
+ * gespeicherten: eine Dublette, die ihre Quelle seit der Regel nicht neu
+ * geliefert hat, würde sonst als Ersatz für ihr zurückgehaltenes Primary
+ * sichtbar.
  */
 export function underlyingStatus(row: {
   title: string | null | undefined;
+  start_date?: string | null;
   quality_score?: number | null;
   admission_decision?: string | null;
   location_status?: string | null;
 }): PublishStatus {
   if (row.admission_decision === 'quarantine') return 'needs_review';
-  if (contentQuarantineReasons(row).length > 0) return 'needs_review';
+  if (titleTimeQuarantineReasons(row).length > 0) return 'needs_review';
   if (row.location_status === 'conflict') return 'needs_review';
   return scoreToPublishStatus(row.quality_score ?? 0);
 }
