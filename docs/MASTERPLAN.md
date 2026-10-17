@@ -461,6 +461,44 @@ Feratel-Zeilen):** Adresse/PLZ ändern sich bei rund 1.440, Positionen bei
 war ein Konflikt), 8 veröffentlichte werden zurückgehalten (Rußbach ohne
 API-Koordinate, Position stammte nur aus der Gosauer Veranstalter-PLZ).
 
+### 3.13 502-Bursts im Minutenraster: ISR-Guard in der Schleife (2026-10-17)
+
+**Befund (Caddy-Log, isr-guard-Log, systemd-Timer):** In 48 Stunden
+1.918 Antworten mit Status 502 an Besucher, Googlebot, OAI-SearchBot,
+in Minuten-Bursts (17.10. 05:00 UTC: 184 in einer Minute). Fehlertext der
+Zeilen: 1.409 × „dial tcp 172.18.0.5:3000: connect: connection refused",
+467 × „lookup nextjs-app on 127.0.0.11:53: server misbehaving" — der
+Container war in diesen Sekunden nicht da. 96 % der 502 (1.844) fielen in
+die 40 s nach einem Eintrag „raeume ISR-Cache ab" in
+`/var/log/lt-isr-guard.log`; der Rest sind Deploys. `nextjs-app` hatte
+RestartCount 0, weil Compose den Container jeweils neu *erzeugt*
+(StartedAt = Guard-Zeitstempel). Der Guard lief seit dem 06.10. bei jedem
+Takt (95/Tag, vorher 2–4/Tag): Platte 77 % → Recreate → 76 % → 15 min
+später wieder 77 %. Der Writable-Layer, den ein Recreate freigibt, war
+dabei nur 180–380 MB groß. Die Platte hielt das Envoy-Access-Log
+(`supabase-envoy`, json-file ohne Rotation, 14,2 GB, ~360 MB/Tag mit
+kompletten PostgREST-Query-Strings) plus 18,8 GB Images (davon 3,1 GB
+`lasstreffen-app:isrtest` und 2,96 GB beatshyft) über der 70-%-Schwelle.
+Der lt-watchdog meldet erst ab 80 % und sah die Schleife nicht.
+
+**Behebung (live 17.10. 09:25 UTC, Backups mit Suffix `.bak-2026-10-17`):**
+`isr-guard.sh` misst den Writable-Layer (`docker inspect -s`, SizeRw) und
+erzeugt nur ab 8 GB neu (Notbremse: ab 90 % Platte reichen 2 GB); liegt die
+Platte über 70 %, der Layer aber darunter, schreibt er höchstens alle 6 h
+eine Warnung statt zu recreaten. Envoy mit `logging: max-size 100m ×
+max-file 5` in `docker-compose.override.yml` neu erzeugt (letztes GB des
+Logs gzip in `/var/backups/envoy-access-tail-2026-10-17.log.gz`), dieselbe
+Rotation in `/opt/app/docker-compose.yml` für nextjs-app (greift beim
+nächsten Deploy). Platte 77 % → 58 %. Kein `/etc/docker/daemon.json`:
+Log-Optionen gelten nur für neue Container und brauchen einen Docker-
+Neustart, der ohne live-restore alle Container (Postgres!) mitnimmt.
+
+**Offen:** `lasstreffen-app:isrtest` + Container `nextjs-isrtest` und
+`crazy_hawking` (node:22-slim, seit 5 Wochen) belegen ~3,5 GB ohne
+erkennbare Aufgabe; der Watchdog kennt die Recreate-Frequenz nicht
+(sinnvoll: Alarm ab 4 Recreates/24 h). Wurzel-Fix für den ISR-Cache
+bleibt ein `cacheHandler` mit Größenlimit.
+
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
 1. **Affiliate-ID `J70` ist korrekt** und gehört uns (bestätigt). Eventim-Links im Feed
