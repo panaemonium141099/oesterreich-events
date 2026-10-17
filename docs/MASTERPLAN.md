@@ -413,15 +413,25 @@ setzt. Der Grund ändert die Ortsentscheidung nicht (`NON_LOCATION_REASONS`),
 steht aber als `admission:start_too_far_ahead` im Protokoll; daran hält
 auch die erneute Entscheidung im Bestand (`re-resolve.ts`) die Zeile.
 
+**Listenende (2026-10-17):** Der Scraper erreichte die 2037er Zeilen nicht
+mehr: Wien hatte 330 Listenseiten (Gutscheine auf Seite ~290 bis 325), OÖ
+447, der Scraper brach je Bundesland bei `MAX_PAGES = 200` ab. Von 273
+sichtbaren AT-Zeilen jenseits des Horizonts lieferten 170 ihre Quellen
+nicht mehr (vknet 119, gemeinden-generic 43). Jetzt liest der Scraper jede
+Liste bis zur letzten Seite laut Pager, die Bundesländer im Wechsel, mit
+38 min Zeitbudget unter einem eigenen harten Timeout von 45 min
+(Standard 25). Probelauf 2026-10-17: alle 1.578 Seiten in 29 min (lokal,
+in Actions ~1 s je Seite), 790 Termine statt bisher ~525, darunter 75
+Wiener 2037er. Reicht das Budget einmal nicht, fehlen nur die fernsten
+Termine jeder Liste. Eine Seite zählt als leer nur ohne gelisteten
+Eintrag: Wien Seite 228 bis 231 zeigte nur einen Titel über 200 Zeichen,
+den der Parser verwirft, und hätte die Liste sonst dort beendet. Die
+source_ids bleiben `vknet-<id>`.
+
 **Grenzen:**
-- Der Scraper erreicht die 2037er Zeilen nicht mehr: Wien hat 330
-  Listenseiten (Gutscheine auf Seite ~290 bis 325), OÖ 447, der Scraper
-  bricht bei `MAX_PAGES = 200` ab. Ein voller Durchlauf (1.593 Seiten)
-  bräuchte etwa 26 min und damit mehr als das Scraper-Timeout. Von 273
-  sichtbaren AT-Zeilen jenseits des Horizonts lieferten 170 ihre Quellen
-  nicht mehr (vknet 119, gemeinden-generic 43); der nächtliche
-  Adress-Geocoder entscheidet davon nur 28 sicher neu (20 weitere bei
-  Cache-Ablauf). Der Rest bleibt sichtbar, bis eine Quelle ihn wieder
+- gemeinden-generic (43 Zeilen) liefert seine Zeilen jenseits des
+  Horizonts weiterhin nicht; der nächtliche Adress-Geocoder entscheidet
+  nur einen Teil neu. Sie bleiben sichtbar, bis eine Quelle sie wieder
   liefert.
 - Ein Platzhalter 31.12.2030 rückt am 31.12.2027 in den Horizont und wäre
   dann wieder sichtbar.

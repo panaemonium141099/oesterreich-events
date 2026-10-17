@@ -4,9 +4,35 @@ import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
 
 /**
+ * Letzte Listenseite laut Pager auf Seite 1 (`a.icon-last`, Ziel
+ * `?seite=319`). Ohne diesen Link (nur eine Seite oder geändertes Markup)
+ * null: dann endet die Liste an zwei leeren Seiten in Folge.
+ */
+export function lastListPage(html: string): number | null {
+  const href = cheerio.load(html)('a.icon-last').first().attr('href') ?? '';
+  const m = href.match(/[?&]seite=(\d+)/);
+  return m ? Number(m[1]) : null;
+}
+
+/**
  * veranstaltungskalender.net Scraper
- * Covers ALL of Oberösterreich AND Steiermark with SSR pages.
- * ~2000+ events total, pagination via ?seite=N
+ * Alle Bundesländer außer Burgenland, SSR-Listen mit ?seite=N.
+ *
+ * Seitenfolge: Eine Listenseite zeigt nur 1 bis 4 Einträge, chronologisch.
+ * Am 2026-10-14 hatte die Quelle 1.593 Listenseiten (OÖ 447, Wien 330,
+ * NÖ 237, Stmk 208, Sbg 124, Tirol 103, Ktn 82, Vbg 62). Bis dahin brach
+ * der Scraper je Bundesland bei 200 Seiten ab: Wiener Termine ab Dezember
+ * und OÖ ab Ende November kamen nie an, und die Wiener Gutscheine mit
+ * Datum 31.12.2037 (Seite ~290 bis 325) wurden seit Juli nicht mehr
+ * geliefert. Dadurch blieben sie veröffentlicht, obwohl die Quarantäne
+ * `start_too_far_ahead` sie beim nächsten Upsert zurückhält.
+ *
+ * Jetzt endet jede Liste an der letzten Seite, die ihr Pager auf Seite 1
+ * nennt. Die Bundesländer werden im Wechsel gelesen (Seite n aller Listen
+ * vor Seite n+1), und ein Zeitbudget unter dem harten Timeout
+ * (SCRAPER_TIMEOUT_OVERRIDES_MIN in index.ts) liefert ein Teilergebnis,
+ * statt alles zu verlieren. Reicht das Budget einmal nicht, fehlen so nur
+ * die fernsten Termine jeder Liste, nicht ein ganzes Bundesland.
  *
  * HTML structure (confirmed March 2026):
  *   div.global_listeneintrag
@@ -26,7 +52,17 @@ import type { ScrapedEvent } from '@/types/events';
 export class VeranstaltungskalenderNetScraper extends BaseScraper {
   readonly name = 'veranstaltungskalender.net';
   private readonly BASE = 'https://www.veranstaltungskalender.net';
-  private readonly MAX_PAGES = 200; // per region — some regions have 128+ pages
+  /** Nur Schutz gegen einen kaputten Pager, keine Abdeckungsgrenze. */
+  static readonly PAGE_CAP = 2000;
+  /** Pause zwischen zwei Abrufen; ein Abruf dauert inkl. Pause ~1 s. */
+  static readonly PAGE_DELAY_MS = 800;
+  /**
+   * Zeitbudget für das Lesen der Listen. Ein voller Durchlauf brauchte
+   * am 2026-10-14 etwa 26 min (1.593 Seiten zu ~0,98 s, gemessen an
+   * source_runs: 1.150 s für 1.171 Seiten). Muss mit Sync-Phase unter dem
+   * harten Timeout bleiben (veranstaltungskalender-net-pages.test.ts).
+   */
+  static readonly BUDGET_MIN = 38;
 
   private readonly REGIONS = [
     { path: '/oberoesterreich/', bundesland: 'oberoesterreich' },
@@ -42,47 +78,80 @@ export class VeranstaltungskalenderNetScraper extends BaseScraper {
   async scrape(): Promise<ScrapedEvent[]> {
     this.log('Starte veranstaltungskalender.net Scraping (alle Bundesländer)...');
     const allEvents = new Map<string, ScrapedEvent>();
+    const deadline = Date.now() + VeranstaltungskalenderNetScraper.BUDGET_MIN * 60_000;
+    const lists = this.REGIONS.map(region => ({
+      ...region,
+      lastPage: VeranstaltungskalenderNetScraper.PAGE_CAP,
+      read: 0,
+      misses: 0,
+      done: false,
+    }));
 
-    for (const region of this.REGIONS) {
-      let emptyCount = 0;
-      for (let page = 1; page <= this.MAX_PAGES; page++) {
+    let outOfBudget = false;
+    for (let page = 1; page <= VeranstaltungskalenderNetScraper.PAGE_CAP && !outOfBudget; page++) {
+      for (const list of lists) {
+        if (list.done) continue;
+        if (page > list.lastPage) {
+          list.done = true;
+          continue;
+        }
+        if (Date.now() >= deadline) {
+          outOfBudget = true;
+          break;
+        }
         const url = page === 1
-          ? `${this.BASE}${region.path}`
-          : `${this.BASE}${region.path}?seite=${page}`;
+          ? `${this.BASE}${list.path}`
+          : `${this.BASE}${list.path}?seite=${page}`;
 
         try {
           const html = await this.fetchPage(url);
-          const events = this.parsePage(html, region.bundesland);
+          if (page === 1) {
+            list.lastPage = Math.min(
+              lastListPage(html) ?? VeranstaltungskalenderNetScraper.PAGE_CAP,
+              VeranstaltungskalenderNetScraper.PAGE_CAP,
+            );
+          }
+          list.read = page;
+          const { listed, events } = this.parsePage(html, list.bundesland);
+          for (const ev of events) allEvents.set(ev.source_id, ev);
 
-          if (events.length === 0) {
-            emptyCount++;
-            if (emptyCount >= 2) break;
+          // Zwei Seiten ohne Eintrag oder Fehler in Folge beenden die Liste
+          // vor der Pager-Grenze (Liste inzwischen kürzer oder Seite kaputt).
+          // Gezählt wird, was die Seite listet, nicht was der Parser nimmt:
+          // Wien Seite 228 bis 231 zeigte nur einen Titel über 200 Zeichen.
+          if (listed === 0) {
+            if (++list.misses >= 2) list.done = true;
           } else {
-            emptyCount = 0;
-            for (const ev of events) allEvents.set(ev.source_id, ev);
+            list.misses = 0;
           }
 
-          if (page % 10 === 0) {
-            this.log(`${region.bundesland} Seite ${page}: ${events.length} Events (gesamt: ${allEvents.size})`);
+          if (page % 50 === 0) {
+            this.log(`${list.bundesland} Seite ${page}/${list.lastPage} (gesamt: ${allEvents.size})`);
           }
-          await this.sleep(800);
         } catch (err) {
-          this.log(`${region.bundesland} Seite ${page} fehler: ${err instanceof Error ? err.message : err}`);
-          emptyCount++;
-          if (emptyCount >= 2) break;
+          this.log(`${list.bundesland} Seite ${page} fehler: ${err instanceof Error ? err.message : err}`);
+          if (++list.misses >= 2) list.done = true;
         }
+        await this.sleep(VeranstaltungskalenderNetScraper.PAGE_DELAY_MS);
       }
-      this.log(`${region.bundesland}: fertig (gesamt: ${allEvents.size})`);
     }
 
+    for (const list of lists) {
+      this.log(`${list.bundesland}: Seite ${list.read} von ${list.lastPage}`);
+    }
+    if (outOfBudget) {
+      this.log(`Zeitbudget ${VeranstaltungskalenderNetScraper.BUDGET_MIN} min erreicht, Teilergebnis`);
+    }
     const events = Array.from(allEvents.values());
     this.log(`${events.length} Events gescrapt`);
     return events;
   }
 
-  private parsePage(html: string, bundesland: string): ScrapedEvent[] {
+  /** `listed`: Einträge der Seite ohne Werbung, auch die verworfenen. */
+  private parsePage(html: string, bundesland: string): { listed: number; events: ScrapedEvent[] } {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
+    let listed = 0;
 
     // Each event is inside div.global_listeneintrag
     $('div.global_listeneintrag').each((_, el) => {
@@ -97,6 +166,7 @@ export class VeranstaltungskalenderNetScraper extends BaseScraper {
         if (!$link.length) return;
 
         const href = $link.attr('href') || '';
+        listed++;
 
         // Title from h2.eintrag_titel
         const title = $container.find('h2.eintrag_titel').first().text().trim();
@@ -210,6 +280,6 @@ export class VeranstaltungskalenderNetScraper extends BaseScraper {
       } catch { /* skip malformed entry */ }
     });
 
-    return events;
+    return { listed, events };
   }
 }
