@@ -324,7 +324,8 @@ const DEFAULT_TIMEOUT_MIN = Number(process.env.SCRAPER_TIMEOUT_MIN) || 25;
 /**
  * Härtere Obergrenzen für Langläufer. Die Gemeinde-Aggregatoren brechen
  * ihre Schleife selbst per Soft-Budget ab (BaseScraper.softDeadline,
- * default 240 min) und liefern ein Teilergebnis — der harte Timeout hier
+ * default 240 min), liefern ein Teilergebnis und setzen im nächsten Lauf
+ * dahinter fort (BaseScraper.resumeAfterCursor) — der harte Timeout hier
  * ist nur noch Backstop für echte Hänger und muss über Soft-Budget +
  * Sync-Phase liegen. meinbezirk lief 24,7 min (Run 2026-07-14) — der
  * 25er-Default war haarscharf.
@@ -367,15 +368,16 @@ function scrapeWithTimeout(scraper: BaseScraper): Promise<ScrapedEvent[]> {
  * source_runs-Laufzeiten vom 2026-07-14 (81 Quellen; alles Ungelistete lag
  * ≤2 min → DEFAULT_WEIGHT). Die Gemeinde-Aggregatoren sind Budget-begrenzt
  * (Soft-Budget 240 min + Sync) — ihr Gewicht ist die Budget-Obergrenze,
- * nicht die theoretische Volllaufzeit (gem2go bräuchte ~388 min für alle
- * 2094 Gemeinden; Tagesrotation verteilt die Abdeckung über Läufe).
+ * nicht die theoretische Volllaufzeit (gem2go bräuchte ~400 min für alle
+ * 2.043 Gemeinden; der Fortsetzungs-Cursor verteilt die Abdeckung über
+ * Läufe).
  * Bei Änderungen nachziehen via:
  *   SELECT source_name, percentile_disc(0.9) WITHIN GROUP (ORDER BY duration_ms)
  *   FROM source_runs GROUP BY 1 ORDER BY 2 DESC;
  */
 const DEFAULT_WEIGHT = 3;
 const SCRAPER_WEIGHTS: Record<string, number> = {
-  // Budget-begrenzte Gemeinde-Aggregatoren (Soft-Budget + Rotation):
+  // Budget-begrenzte Gemeinde-Aggregatoren (Soft-Budget + Fortsetzung):
   'gem2go': 250,
   'gemeinden-generic': 240,             // 923 Seiten ≈ 225 min, läuft meist komplett durch
   'gemeinde-registry': 250,             // ~1900 Gemeinden, oft Budget-begrenzt

@@ -341,19 +341,6 @@ export abstract class BaseScraper {
     this.reachedCursor = key;
   }
 
-  /**
-   * Tagesrotation: der Startpunkt rückt nur EINEN Eintrag pro Tag weiter.
-   * Schafft ein Lauf nur einen Teil der Liste, kommen die übrigen Einträge
-   * so gut wie nie dran (gemeinde-registry erreichte jede Nacht fast
-   * dieselben ~800 von 1.881 Gemeinden). Nur noch für Scraper, die nicht
-   * auf resumeAfterCursor umgestellt sind.
-   */
-  protected rotateDaily<T>(list: T[]): T[] {
-    if (list.length === 0) return list;
-    const offset = Math.floor(Date.now() / 86_400_000) % list.length;
-    return [...list.slice(offset), ...list.slice(0, offset)];
-  }
-
   protected log(message: string): void {
     const timestamp = new Date().toISOString().slice(11, 19);
     console.log(`[${timestamp}] [${this.name}] ${message}`);

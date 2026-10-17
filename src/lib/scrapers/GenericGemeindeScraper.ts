@@ -25,6 +25,7 @@ import { withStammdaten, type GemeindeStammdaten } from './gemeinden/stammdaten'
 import { firstText, isTitleCandidate } from './event-title';
 import { extractTimeOfDay } from './time-of-day';
 import { readCalendarizeCard, usesPlaceSuffix } from './calendarize-card';
+import { gemeindeCursorKey } from './rotation-cursor';
 
 // Die Datei führt nur die Identität der Gemeinde; PLZ, Bezirk und
 // Mittelpunkt ergänzt withStammdaten() aus der Stammdatei.
@@ -50,7 +51,7 @@ function findDates(text: string): string[] {
 const GENERIC_LINK_TEXT = /^(mehr( informationen| infos?| erfahren| lesen)?|weiter(lesen)?|details?|zur veranstaltung|read more)\W*$/i;
 
 interface GemeindeEventPage {
-  gemeinde: GemeindeStammdaten & { website: string; region?: boolean };
+  gemeinde: GemeindeStammdaten & { website: string; region?: boolean; listName: string };
   eventPageUrl: string;
   path: string;
   dateCount: number;
@@ -58,8 +59,19 @@ interface GemeindeEventPage {
   htmlSize: number;
 }
 
+/**
+ * Fortsetzungsschlüssel einer Kalenderseite (rotation-cursor.ts). Mehrere
+ * Seiten derselben Gemeinde unterscheidet die URL. Gleiche Schlüssel haben
+ * nur doppelte Einträge der Datei (gleiche Gemeinde, gleiche URL, nur die
+ * Probe-Kennzahlen verschieden), die beim Scrapen dasselbe abrufen.
+ */
+export function genericPageCursorKey(p: { gemeinde: { gkz: string; listName: string }; eventPageUrl: string }): string {
+  return `${gemeindeCursorKey(p.gemeinde)} ${p.eventPageUrl}`;
+}
+
 export class GenericGemeindeScraper extends BaseScraper {
   name = 'gemeinden-generic';
+  override readonly resumesSourceList = true;
   private delay = 1000; // 1s between municipalities
   private timeoutMs = 8000;
 
@@ -96,17 +108,20 @@ export class GenericGemeindeScraper extends BaseScraper {
     let processed = 0;
     let totalFound = 0;
 
-    // 923 Seiten × ~15 s ≈ 225 min. Soft-Budget + Tagesrotation wie bei
-    // gem2go: bei Abbruch geht das Teilergebnis in den Sync statt (wie
-    // vor 2026-07-14) komplett am harten Timeout zu verfallen.
+    // 891 Seiten, Prod 2026-10 in 187 bis 245 min. Soft-Budget wie bei
+    // gem2go: bei Abbruch geht das Teilergebnis in den Sync statt (wie vor
+    // 2026-07-14) komplett am harten Timeout zu verfallen, und der nächste
+    // Lauf setzt nach der zuletzt bearbeiteten Seite fort
+    // (BaseScraper.resumeAfterCursor).
     const deadline = this.softDeadline();
 
-    for (const page of this.rotateDaily(pages)) {
+    for (const page of this.resumeAfterCursor(pages, genericPageCursorKey)) {
       if (Date.now() > deadline) {
-        console.log(`  Soft-Budget erreicht nach ${processed}/${pages.length} — liefere ${allEvents.length} Events als Teilergebnis`);
+        console.log(`  Soft-Budget erreicht nach ${processed}/${pages.length}, liefere ${allEvents.length} Events als Teilergebnis; der nächste Lauf setzt nach „${this.reachedCursor}" fort`);
         break;
       }
       processed++;
+      this.markReached(genericPageCursorKey(page));
       try {
         const events = await this.scrapeGemeinde(page);
         if (events.length > 0) {
@@ -122,7 +137,7 @@ export class GenericGemeindeScraper extends BaseScraper {
         console.log(`  [${processed}/${pages.length}] ... ${allEvents.length} events total`);
       }
 
-      await new Promise(r => setTimeout(r, this.delay));
+      await this.sleep(this.delay);
     }
 
     console.log(`  Total: ${allEvents.length} events from ${pages.length} municipalities`);

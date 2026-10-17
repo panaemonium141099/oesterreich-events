@@ -8,6 +8,7 @@ import { extractGem2goDetail } from './gem2go-detail';
 import { discoverAndParseGemeindeEvents, asScrapedEvent, isUsableDetailHref } from './gemeinde-event-discovery';
 import { applyGemeindeContext } from './gemeinde-context';
 import type { ScrapedEvent } from '@/types/events';
+import { gemeindeCursorKey } from './rotation-cursor';
 
 // Ortsdaten (PLZ, Bezirk, Mittelpunkt) nur aus der Stammdatei, siehe
 // gemeinden/stammdaten.ts. Lazy, damit der Import nichts von Platte liest.
@@ -33,6 +34,7 @@ type Gem2GoGemeinde = ReturnType<typeof gem2goGemeinden>[number];
  */
 export class Gem2GoScraper extends BaseScraper {
   readonly name = 'gem2go';
+  override readonly resumesSourceList = true;
 
   /** Timeout pro Request in ms */
   private readonly timeoutMs = 8000;
@@ -72,20 +74,25 @@ export class Gem2GoScraper extends BaseScraper {
     let gemeindenNoEvents = 0;
     let gemeindenNotGem2Go = 0;
 
-    // 2094 Gemeinden × ~11 s ≈ 388 min — passt in KEIN Job-Limit. Soft-
-    // Budget bricht mit Teilergebnis ab, Tagesrotation deckt den Rest in
-    // den Folgeläufen ab (siehe BaseScraper.softDeadline/rotateDaily).
+    // 2.043 Gemeinden, das Soft-Budget von 240 min reicht für rund 1.200
+    // (Prod 2026-10: „Soft-Budget erreicht nach 1218/2043"). Beim Abbruch
+    // geht das Teilergebnis in den Sync, und der nächste Lauf setzt nach
+    // der zuletzt bearbeiteten Gemeinde fort: volle Abdeckung in zwei
+    // Nächten (BaseScraper.resumeAfterCursor).
     const deadline = this.softDeadline();
     // 'https://none': keine eigene Website bekannt, oder die eingetragene
     // gehört einer anderen Gemeinde (siehe gemeinde-config.test.ts).
-    const gemeindenRotated = this.rotateDaily(gem2goGemeinden().filter(g => g.website !== 'https://none'));
+    const gemeindenRotated = this.resumeAfterCursor(gem2goGemeinden().filter(g => g.website !== 'https://none'), gemeindeCursorKey);
 
     for (let i = 0; i < gemeindenRotated.length; i++) {
       if (Date.now() > deadline) {
-        this.log(`Soft-Budget erreicht nach ${i}/${gemeindenRotated.length} Gemeinden — liefere ${allEvents.length} Events als Teilergebnis (Rotation setzt morgen fort)`);
+        this.log(`Soft-Budget erreicht nach ${i}/${gemeindenRotated.length} Gemeinden, liefere ${allEvents.length} Events als Teilergebnis; der nächste Lauf setzt nach „${this.reachedCursor}" fort`);
         break;
       }
       const gemeinde = gemeindenRotated[i];
+      // Abgebrochen wird nur zwischen zwei Gemeinden: ab hier gilt sie als
+      // bearbeitet, auch wenn ein Zweig unten mit continue weitergeht.
+      this.markReached(gemeindeCursorKey(gemeinde));
       try {
         const baseUrl = this.buildEventsUrl(gemeinde);
         const html = await this.fetchWithTimeout(baseUrl, this.timeoutMs);
