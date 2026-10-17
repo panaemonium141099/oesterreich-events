@@ -169,6 +169,8 @@ import { post as charityFestivalDobermannDirtyKurtyBandTheSoulgasStat2026 } from
 import { post as ukrainischeKlaengeBarockKonzertUkrainischenUndEuropaei2026 } from './posts/ukrainische-klaenge-barock-konzert-ukrainischen-und-europaei-2026';
 import { post as rudyGiovanniniWeihnachtskonzert2026 } from './posts/rudy-giovannini-weihnachtskonzert-2026';
 import { post as ramazuriCoffeeshockCompanyDieWeltIstNichtGenugTour2026 } from './posts/ramazuri-coffeeshock-company-die-welt-ist-nicht-genug-tour-2026';
+import { post as winterFestival20262026 } from './posts/winter-festival-2026-2026';
+import { post as palaisOfLightsACandlelitJourney2026 } from './posts/palais-of-lights-a-candlelit-journey-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -348,6 +350,8 @@ export const ALL_POSTS: FestivalPost[] = [
   ukrainischeKlaengeBarockKonzertUkrainischenUndEuropaei2026,
   rudyGiovanniniWeihnachtskonzert2026,
   ramazuriCoffeeshockCompanyDieWeltIstNichtGenugTour2026,
+  winterFestival20262026,
+  palaisOfLightsACandlelitJourney2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
