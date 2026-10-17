@@ -42,6 +42,10 @@ export interface OrchestratorStats {
   artists_removed: number;
   events_derived: number;
   events_backlinked: number;
+  /** Bestehende Lineup-Events, deren Ortsangaben nachgezogen wurden. */
+  events_updated: number;
+  /** Bestehende Lineup-Events, die der Lauf bestätigt hat (last_seen_at). */
+  events_confirmed: number;
   /** Lese-/Schreibfehler beim Ableiten (Upsert, Rückverweis). */
   derive_errors: string[];
   /** Lineup-Zeilen ohne Datum oder Fingerprint. */
@@ -364,7 +368,7 @@ async function processFestival(
  *
  * 1. Fetch eligible festivals (direct_lineup_candidate = true, lineup_url set)
  * 2. For each festival: scrape lineup, compute diff, upsert/remove artists
- * 3. Generate derived events for un-derived festival_artists rows
+ * 3. Generate derived events and keep the existing ones current
  * 4. Return stats
  */
 export async function runLineupOrchestrator(
@@ -383,6 +387,8 @@ export async function runLineupOrchestrator(
     artists_removed: 0,
     events_derived: 0,
     events_backlinked: 0,
+    events_updated: 0,
+    events_confirmed: 0,
     derive_errors: [],
     derive_skipped: 0,
     duration_ms: 0,
@@ -415,10 +421,13 @@ export async function runLineupOrchestrator(
     });
     stats.events_derived = deriveResult.events_created;
     stats.events_backlinked = deriveResult.events_backlinked;
+    stats.events_updated = deriveResult.events_updated;
+    stats.events_confirmed = deriveResult.events_confirmed;
     stats.derive_errors = deriveResult.errors;
     stats.derive_skipped = deriveResult.skipped.length;
     log(
       `Derived events: ${deriveResult.events_created} created, ${deriveResult.events_backlinked} backlinked, ` +
+        `${deriveResult.events_updated} updated, ${deriveResult.events_confirmed} confirmed, ` +
         `${deriveResult.errors.length} errors, ${deriveResult.skipped.length} skipped`,
       verbose
     );
