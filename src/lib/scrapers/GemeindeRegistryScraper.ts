@@ -14,6 +14,7 @@ import { extractGem2goDetail } from './gem2go-detail';
 import { isUsableDetailHref } from './gemeinde-event-discovery';
 import { eventNameNodes, firstText, isEventList, isNamelessTitle, isTitleCandidate, visibleText } from './event-title';
 import { readCalendarizeCard, usesPlaceSuffix } from './calendarize-card';
+import { gemeindeCursorKey } from './rotation-cursor';
 
 export interface PaginationLogEntry {
   gemeinde: string;
@@ -80,15 +81,8 @@ export function isScrapeableEntry(e: GemeindeRegistryEntry): boolean {
   return (e.status === 'active' || e.status === 'empty') && e.strategy !== 'none' && !!e.eventUrl;
 }
 
-/**
- * Fortsetzungsschlüssel (rotation-cursor.ts): Kennziffer und Listenname.
- * Die Kennziffer allein ist nicht eindeutig, fusionierte Gemeinden führen
- * eigene Einträge unter derselben Kennziffer (Matrei am Brenner, Mühlbachl,
- * Pfons).
- */
-export function registryCursorKey(e: Pick<GemeindeRegistryEntry, 'gkz' | 'listName'>): string {
-  return `${e.gkz} ${e.listName}`;
-}
+/** Fortsetzungsschlüssel (rotation-cursor.ts). */
+export const registryCursorKey: (e: Pick<GemeindeRegistryEntry, 'gkz' | 'listName'>) => string = gemeindeCursorKey;
 
 /** Knöpfe der GEM2GO-Tabellenzeile neben dem Namen. */
 const GEM2GO_LIST_BUTTONS = '.va_list_additionel_date_link, .va_list_more_link';
