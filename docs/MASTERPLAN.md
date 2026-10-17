@@ -428,6 +428,14 @@ Eintrag: Wien Seite 228 bis 231 zeigte nur einen Titel über 200 Zeichen,
 den der Parser verwirft, und hätte die Liste sonst dort beendet. Die
 source_ids bleiben `vknet-<id>`.
 
+Prod-Lauf 2026-10-17 (Actions, 27,5 min): 789 Termine, 204 per
+`start_too_far_ahead` zurückgehalten, sichtbare vknet-Zeilen jenseits des
+Horizonts 71 → 38. Die 38 sind Altzeilen mit source_id ohne Präfix („9220",
+angelegt 2026-03-29, zuletzt 05./06.05., ohne Admission-Protokoll): Dedup-
+Primary vor ihrem frisch gelieferten Zwilling `vknet-…` derselben URL. Der
+Dedup stellt das nicht um, weil er Tage mehr als fünf Jahre voraus
+überspringt (`isPlausibleEventDay`); sie hält `admission_recheck`.
+
 **Grenzen:**
 - gemeinden-generic (43 Zeilen) liefert seine Zeilen jenseits des
   Horizonts weiterhin nicht; der nächtliche Adress-Geocoder entscheidet
