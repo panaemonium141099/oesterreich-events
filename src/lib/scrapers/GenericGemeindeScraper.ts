@@ -22,7 +22,7 @@ import { extractGem2goDetail } from './gem2go-detail';
 import { isUsableDetailHref } from './gemeinde-event-discovery';
 import { applyGemeindeContext } from './gemeinde-context';
 import { withStammdaten, type GemeindeStammdaten } from './gemeinden/stammdaten';
-import { firstText, isTitleCandidate } from './event-title';
+import { eventNameNodes, firstText, isTitleCandidate, visibleText } from './event-title';
 import { extractTimeOfDay } from './time-of-day';
 import { readCalendarizeCard, usesPlaceSuffix } from './calendarize-card';
 import { gemeindeCursorKey } from './rotation-cursor';
@@ -427,28 +427,33 @@ export class GenericGemeindeScraper extends BaseScraper {
       // Skip past dates
       if (new Date(dateStr) < new Date('2025-01-01')) return;
 
-      let title = this.blockTitle($el, text, isTitleCandidate);
-      let $card: cheerio.Cheerio<any> = $el;
-      if (!title) {
+      // `legacy`: Titelwahl vor den Namens-Elementen (für previous_source_id).
+      const findTitle = (legacy: boolean): { title: string; $card: cheerio.Cheerio<any> } => {
+        const title = this.blockTitle($el, text, isTitleCandidate, legacy);
+        if (title) return { title, $card: $el };
         // Kachel länger als ein Block (tulln.at: >1000 Zeichen) oder
         // Datumszeile neben dem Titel (strass-steiermark.gv.at): der Titel
         // steht im umschließenden Element, das genau dieselben Daten nennt.
         // Ein Element mit weiteren Daten ist die Liste oder eine Kachel mit
         // "Von: … Bis: …", dort ist die einzelne Zeile kein Event. Ohne
-        // Überschrift zählt ein Link nur, wenn das Element ein einziges
-        // Ziel verlinkt: der Seitenkopf verlinkt viele und lieferte sonst
-        // "Aktuelles" (gralla.at).
+        // Namens-Element oder Überschrift zählt ein Link nur, wenn das
+        // Element ein einziges Ziel verlinkt: der Seitenkopf verlinkt viele
+        // und lieferte sonst "Aktuelles" (gralla.at).
+        const read = legacy ? (node: cheerio.Cheerio<any>) => node.text() : visibleText;
         let $up = $el.parent().closest(BLOCK);
         for (let level = 0; level < 3 && $up.length; level++) {
           const upText = $up.text();
           if (upText.length > 4000 || !sameDateSet(findDates(upText), dates)) break;
-          title = (firstText($up.find('h2, h3, h4, h5, h6'), isTitleCandidate)
-            || (this.linkTargets($up).size === 1 ? this.firstContentAnchorText($up, isTitleCandidate) : ''))
+          const upTitle = ((legacy ? '' : firstText(eventNameNodes($up), isTitleCandidate, read))
+            || firstText($up.find('h2, h3, h4, h5, h6'), isTitleCandidate, read)
+            || (this.linkTargets($up).size === 1 ? this.firstContentAnchorText($up, isTitleCandidate, read) : ''))
             .replace(/\s+/g, ' ').trim();
-          if (title) { $card = $up; break; }
+          if (upTitle) return { title: upTitle, $card: $up };
           $up = $up.parent().closest(BLOCK);
         }
-      }
+        return { title: '', $card: $el };
+      };
+      const { title, $card } = findTitle(false);
       if (title.length < 5 || title.length > 200) return;
 
       const key = `${dateStr}-${title.substring(0, 30)}`;
@@ -473,7 +478,7 @@ export class GenericGemeindeScraper extends BaseScraper {
 
       events.push({
         source_id: id(title),
-        ...this.previousId(this.blockTitle($el, text, () => true), title, id),
+        ...this.previousId([findTitle(true).title, this.blockTitle($el, text, () => true, true)], title, id),
         source_name: this.name,
         source_url: link ? new URL(link, page.eventPageUrl).href : page.eventPageUrl,
         title: name,
@@ -499,14 +504,15 @@ export class GenericGemeindeScraper extends BaseScraper {
    * sonst würde aus "12." die Uhrzeit mit Ort ("09:30 Uhr, Kolm Saigurn").
    * Mit `() => true` ist es die Titelwahl vor 2026-10, die Datums-
    * Überschriften ("09.10.2026" vor dem Titel, herzogenburg.at) und
-   * Datums-Links ("Fr Okt 09", ybbs.gv.at) als Titel nahm.
+   * Datums-Links ("Fr Okt 09", ybbs.gv.at) als Titel nahm. `legacy`: die
+   * Titelwahl vor den Namens-Elementen (siehe cardTitle).
    */
-  private blockTitle($el: cheerio.Cheerio<any>, text: string, accept: (t: string) => boolean): string {
-    let title = this.cardTitle($el, accept);
+  private blockTitle($el: cheerio.Cheerio<any>, text: string, accept: (t: string) => boolean, legacy = false): string {
+    let title = this.cardTitle($el, accept, legacy);
     // Überschrift oder Link der Kachel ist nur ein Datum: dann benennt auch
     // Fettdruck oder Fließtext kein Event (völkermarkt.gv.at: Überschrift
     // "10. Oktober …", erste Textzeile "BEITRAG VOM").
-    if (!title && this.cardTitle($el, () => true)) return '';
+    if (!title && this.cardTitle($el, () => true, legacy)) return '';
     title ||= $el.find('strong, b').first().text().trim();
     if (!title || title.length < 5) {
       // Use the text but remove the date, take first meaningful line
@@ -519,39 +525,55 @@ export class GenericGemeindeScraper extends BaseScraper {
   }
 
   /**
-   * Überschrift, Titel-Element oder Link-Text einer Kachel.
+   * Namens-Element, Überschrift, Titel-Element oder Link-Text einer Kachel,
+   * ohne Screenreader-Text. Namens-Elemente (eventNameNodes) gehen vor: auf
+   * neuberg-bgld.at (EventON) ist die erste Überschrift der Kachel
+   * „Veranstaltungsdetails", der Name steht in `.evcal_event_title`.
    * Anchors sind absichtlich NACH den Headings und ohne mailto:/tel:
    * — `find()` liefert Dokumentreihenfolge, nicht Selektorreihenfolge,
    * sonst gewinnt der Kontakt-Link eines Vereinsblocks gegen die
-   * Ueberschrift und die Mailadresse wird zum Titel.
+   * Ueberschrift und die Mailadresse wird zum Titel. `legacy`: die
+   * Titelwahl davor (ohne Namens-Elemente, mit Screenreader-Text), für
+   * previous_source_id.
    */
-  private cardTitle($el: cheerio.Cheerio<any>, accept: (t: string) => boolean): string {
-    return firstText($el.find('h2, h3, h4, h5, h6'), accept)
-      || this.titleElementText($el, accept)
-      || this.firstContentAnchorText($el, accept);
+  private cardTitle($el: cheerio.Cheerio<any>, accept: (t: string) => boolean, legacy = false): string {
+    const read = legacy ? (node: cheerio.Cheerio<any>) => node.text() : visibleText;
+    return (legacy ? '' : firstText(eventNameNodes($el), accept, read))
+      || firstText($el.find('h2, h3, h4, h5, h6'), accept, read)
+      || this.titleElementText($el, accept, read)
+      || this.firstContentAnchorText($el, accept, read);
   }
 
-  /** Alte ID einer Zeile, deren Titel der Parser früher anders las: der
+  /** Alte IDs einer Zeile, deren Titel der Parser früher anders las: der
    *  Sync schlüsselt sie um (source-id-migration.ts), Zeilen-ID und Slug
    *  bleiben erhalten. */
   private previousId(
-    legacyTitle: string,
+    legacyTitles: string | string[],
     title: string,
     id: (t: string) => string,
-  ): { previous_source_id?: string } {
-    const legacy = legacyTitle.replace(/\s+/g, ' ').trim();
-    if (!legacy || id(legacy) === id(title)) return {};
-    return { previous_source_id: id(legacy) };
+  ): { previous_source_id?: string | string[] } {
+    const ids = [...new Set(
+      [legacyTitles].flat()
+        .map(t => t.replace(/\s+/g, ' ').trim())
+        .filter(t => t && id(t) !== id(title))
+        .map(id),
+    )];
+    if (ids.length === 0) return {};
+    return { previous_source_id: ids.length === 1 ? ids[0] : ids };
   }
 
   /** Text des innersten Elements mit "title"/"header" in der Klasse
    *  (z. B. gem2go-Karten: `.card-title > .bemHeader`), ohne Datum. */
-  private titleElementText($el: cheerio.Cheerio<any>, accept: (t: string) => boolean): string {
+  private titleElementText(
+    $el: cheerio.Cheerio<any>,
+    accept: (t: string) => boolean,
+    read: (node: cheerio.Cheerio<any>) => string = visibleText,
+  ): string {
     const sel = '[class*="title" i], [class*="header" i]';
     const nodes = $el.find(sel);
     for (let i = 0; i < nodes.length; i++) {
       if (nodes.eq(i).find(sel).length > 0) continue;
-      const text = nodes.eq(i).text().replace(/\s+/g, ' ').trim();
+      const text = read(nodes.eq(i)).replace(/\s+/g, ' ').trim();
       if (text.length >= 5 && findDates(text).length === 0 && accept(text)) return text;
     }
     return '';
@@ -561,13 +583,17 @@ export class GenericGemeindeScraper extends BaseScraper {
    *  Anchors ganz ohne href bleiben zulaessig — die sind reine Wrapper.
    *  Generische Linktexte ("mehr Informationen") und Anchors, die die
    *  ganze Kachel samt Datum umschließen, benennen kein Event. */
-  private firstContentAnchorText($el: cheerio.Cheerio<any>, accept: (t: string) => boolean): string {
+  private firstContentAnchorText(
+    $el: cheerio.Cheerio<any>,
+    accept: (t: string) => boolean,
+    read: (node: cheerio.Cheerio<any>) => string = visibleText,
+  ): string {
     const anchors = $el.find('a');
     for (let i = 0; i < anchors.length; i++) {
       const a = anchors.eq(i);
       const href = a.attr('href');
       if (href && !isUsableDetailHref(href)) continue;
-      const text = a.text().trim();
+      const text = read(a).trim();
       if (GENERIC_LINK_TEXT.test(text) || findDates(text).length > 0) continue;
       if (text && accept(text)) return text;
     }

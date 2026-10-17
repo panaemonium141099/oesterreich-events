@@ -54,17 +54,64 @@ export const isTitleCandidate = (text: string): boolean => text === '' || !isNam
 /**
  * Getrimmter Text des ersten Elements (Dokumentreihenfolge), den `accept`
  * annimmt. Mit `() => true` ist das `.first().text().trim()`, also die
- * Titelwahl vor 2026-10 (für previous_source_id).
+ * Titelwahl vor 2026-10 (für previous_source_id). `read` liest den Text
+ * eines Elements, z. B. `visibleText`.
  */
 export function firstText(
   nodes: cheerio.Cheerio<any>,
   accept: (text: string) => boolean,
+  read: (node: cheerio.Cheerio<any>) => string = node => node.text(),
 ): string {
   for (let i = 0; i < nodes.length; i++) {
-    const text = nodes.eq(i).text().trim();
+    const text = read(nodes.eq(i)).trim();
     if (accept(text)) return text;
   }
   return '';
+}
+
+/**
+ * Text nur für Screenreader: unsichtbar und nie Teil des Namens.
+ * stadthalle.com setzt „Detailinfos zu " vor jeden Namen (Prod 2026-10-14:
+ * alle 170 künftigen Zeilen), GEM2GO-Karten legen „mehr zu <Name>" in den
+ * Bild-Link, der vor der Überschrift steht.
+ */
+const SCREEN_READER_ONLY = '.sr-only, .visually-hidden, .screen-reader-text';
+
+/** Text einer Überschrift oder eines Links ohne Screenreader-Text. */
+export function visibleText(node: cheerio.Cheerio<any>): string {
+  if (!node.is(SCREEN_READER_ONLY) && node.find(SCREEN_READER_ONLY).length === 0) return node.text();
+  const copy = node.not(SCREEN_READER_ONLY).clone();
+  copy.find(SCREEN_READER_ONLY).remove();
+  return copy.text();
+}
+
+/**
+ * Elemente, mit denen eine Kachel ihren Namen ausdrücklich auszeichnet:
+ * Schema.org-Name, EventON-Titel (neuberg-bgld.at), Titel-Klasse
+ * (krumpendorf.gv.at: `div.title.h4`), GEM2GO-Kopf (`.bemHeader`),
+ * GEM2GO-Tabellenspalte (`.va_list_bez`) und GEM2GO-Terminbox
+ * (`.veranstaltungsBox_…_Titel`, niederleis.gv.at). Sie gehen Überschriften und
+ * Links vor: in solchen Kacheln sind die Überschriften Beschriftungen
+ * ("Veranstaltungsdetails", "Termin" auf neuberg-bgld.at) und die Links
+ * Knöpfe ("mehr lesen", "Weitere Termine vorhanden").
+ */
+const EVENT_NAME = '[itemprop="name"], .evcal_event_title, .title, .bemHeader, .va_list_bez, .veranstaltungsBox_listView_Item_Titel, .veranstaltungsBox_Content_Titel';
+
+/**
+ * Namens-Elemente einer Kachel. Ein Schema.org-Name zählt nur für das
+ * Event selbst, nicht für Ort oder Veranstalter darin (`itemprop="name"`
+ * unter `itemtype="…/Place"`). `.title` vor einem `.value` ist die
+ * Beschriftung eines Felds (schaerding.at: „Uhrzeit:", „Ort:").
+ */
+export function eventNameNodes($el: cheerio.Cheerio<any>): cheerio.Cheerio<any> {
+  const nodes = $el.find(EVENT_NAME);
+  return nodes.filter(i => {
+    const node = nodes.eq(i);
+    if (node.is('.title') && node.next('.value').length > 0) return false;
+    if (!node.is('[itemprop="name"]') || node.is('.evcal_event_title')) return true;
+    const scope = node.parent().closest('[itemscope]');
+    return scope.length === 0 || /Event/i.test(scope.attr('itemtype') ?? '');
+  });
 }
 
 /**

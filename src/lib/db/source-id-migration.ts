@@ -9,7 +9,8 @@
  * getrennt. Befund 2026-10-07 (gem2go Card-Layout): die alte ID hatte kein
  * Datum, Serientermine teilten sie, `source_url` war die Listenseite.
  *
- * Der Scraper meldet zur neuen ID die alte (`previous_source_id`). Eine
+ * Der Scraper meldet zur neuen ID die alte (`previous_source_id`, auch
+ * mehrere, wenn noch Zeilen mehrerer Fassungen stehen können). Eine
  * alte Zeile geht an den Termin, der am selben Wiener Kalendertag liegt;
  * Zeilen-ID und Slug bleiben so erhalten. Regeln im Detail:
  * `planSourceIdMigrations`.
@@ -55,8 +56,14 @@ function site(url: string | null | undefined): string | null {
   }
 }
 
+/** Frühere IDs eines Events (ohne die eigene). */
+export function previousSourceIds(e: Pick<ScrapedEvent, 'source_id' | 'previous_source_id'>): string[] {
+  const ids = Array.isArray(e.previous_source_id) ? e.previous_source_id : [e.previous_source_id];
+  return [...new Set(ids)].filter((id): id is string => !!id && id !== e.source_id);
+}
+
 const withPrevious = <T extends MigrationInput>(events: readonly T[]) =>
-  events.filter((e) => e.previous_source_id && e.previous_source_id !== e.source_id);
+  events.filter((e) => previousSourceIds(e).length > 0);
 
 /**
  * Rein: welche alte Zeile bekommt welche neue ID. `existingKeys` sind die
@@ -85,8 +92,10 @@ export function planSourceIdMigrations(
 ): SourceIdMove[] {
   const byPrevious = new Map<string, MigrationInput[]>();
   for (const e of withPrevious(events)) {
-    const k = key(e.source_name, e.previous_source_id!);
-    byPrevious.set(k, [...(byPrevious.get(k) ?? []), e]);
+    for (const previous of previousSourceIds(e)) {
+      const k = key(e.source_name, previous);
+      byPrevious.set(k, [...(byPrevious.get(k) ?? []), e]);
+    }
   }
   const claimed = new Set(existingKeys);
   const moves: SourceIdMove[] = [];
@@ -159,7 +168,7 @@ export async function migrateSourceIds(
   const candidates = withPrevious(events);
   for (const sourceName of new Set(candidates.map((e) => e.source_name))) {
     const own = candidates.filter((e) => e.source_name === sourceName);
-    const legacy = await loadRows(supabase, sourceName, own.map((e) => e.previous_source_id!));
+    const legacy = await loadRows(supabase, sourceName, own.flatMap(previousSourceIds));
     if (legacy.length === 0) continue;
     const existing = await loadRows(supabase, sourceName, own.map((e) => e.source_id));
     const existingKeys = new Set(existing.map((r) => key(r.source_name, r.source_id)));
