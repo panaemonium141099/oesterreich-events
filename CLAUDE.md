@@ -346,6 +346,19 @@ npm run scrape:festival-lineups | match-artists
   Freitext-Suchpfad sind ohne Portal-Zugriff unverifiziert und deshalb per Env
   konfigurierbar (TODO(viator-onboarding) im Code). GetYourGuide ist nur ein
   Helper-Gerüst hinter Feature-Flag (kein Konto, Format unverifiziert).
+- Hetzner-Server: `/opt/app/isr-guard.sh` (lt-isr-guard.timer, alle 15 min)
+  erzeugt den nextjs-app-Container neu, um den ISR-Cache im Writable-Layer zu
+  verwerfen (6–17 s Downtime, Caddy antwortet 502 „connection refused" /
+  „lookup nextjs-app … server misbehaving"). Bis 2026-10-17 maß er die GESAMTE
+  Platte (Schwelle 70 %) und lief, als das Envoy-Access-Log (14,2 GB, keine
+  Rotation) die Platte dauerhaft auf 77 % hielt, ab 06.10. in einer Schleife:
+  95 Recreates am Tag, 96 % aller 502-Antworten. Seit 17.10. zählt nur der
+  Writable-Layer (`docker inspect -s`, SizeRw ≥ 8 GB; Notbremse ab 90 %
+  Platte), sonst nur ein Logeintrag in `/var/log/lt-isr-guard.log`. Container-
+  Logs rotieren per `logging:` in den Compose-Dateien (100 MB × 5), ein
+  `daemon.json` würde ohne live-restore einen Docker-Neustart = Vollausfall
+  brauchen. Bei 502-Bursts im Minutenraster zuerst dieses Log lesen
+  (MASTERPLAN §3.13).
 
 <!-- BEGIN FLOW-NEXT -->
 ## Flow-Next
