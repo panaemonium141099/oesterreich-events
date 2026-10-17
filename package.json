@@ -45,6 +45,7 @@
     "dedup": "tsx --env-file-if-exists=.env.local src/scripts/dedup.ts",
     "dedup:audit": "tsx --env-file-if-exists=.env.local src/scripts/dedup-audit.ts",
     "withdraw:stale": "tsx --env-file=.env.local src/scripts/withdraw-stale-events.ts",
+    "admission:recheck": "tsx --env-file-if-exists=.env.local src/scripts/admission-recheck.ts",
     "migrate": "tsx --env-file=.env.local src/scripts/apply-migration.ts",
     "test": "vitest run",
     "test:watch": "vitest",
