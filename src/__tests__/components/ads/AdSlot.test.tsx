@@ -17,6 +17,11 @@ declare global {
 // lib/ads/ads-allowed.test.ts — hier ist der Besucher immer freigegeben.
 vi.mock('@/lib/ads/ads-allowed', () => ({ useAdsAllowed: () => true }));
 
+// Jede Anforderung meldet sich als Analytics-Event `ad_request` (2026-10-17),
+// damit Crawler-Impressionen in analytics_events sichtbar werden.
+const trackEvent = vi.fn();
+vi.mock('@/lib/analytics', () => ({ trackEvent: (...args: unknown[]) => trackEvent(...args) }));
+
 let intersect: () => void = () => {};
 
 async function loadAdSlot() {
@@ -35,6 +40,7 @@ describe('AdSlot — Anzeigen nur nach Nutzergeste', () => {
     vi.stubEnv('NEXT_PUBLIC_ADS_ENABLED', 'true');
     vi.stubEnv('NEXT_PUBLIC_ADSENSE_CLIENT_ID', 'ca-pub-test');
     window.adsbygoogle = [];
+    trackEvent.mockClear();
     class FakeObserver {
       constructor(cb: (entries: Array<{ isIntersecting: boolean }>) => void) {
         intersect = () => cb([{ isIntersecting: true }]);
@@ -63,6 +69,7 @@ describe('AdSlot — Anzeigen nur nach Nutzergeste', () => {
 
     expect(container.querySelector('ins.adsbygoogle')).toBeNull();
     expect(adRequests()).toBe(0);
+    expect(trackEvent).not.toHaveBeenCalled();
   });
 
   it('programmatisches Scrollen zaehlt nicht als Geste', async () => {
@@ -88,6 +95,18 @@ describe('AdSlot — Anzeigen nur nach Nutzergeste', () => {
     expect(ins).toHaveAttribute('data-ad-slot', '123');
     expect(ins).toHaveAttribute('data-ad-client', 'ca-pub-test');
     expect(adRequests()).toBe(1);
+  });
+
+  it('jede Anforderung meldet sich als Analytics-Event ad_request mit der Slot-ID', async () => {
+    const AdSlot = await loadAdSlot();
+    render(<AdSlot slot="123" />);
+
+    fireEvent.wheel(window);
+    act(() => intersect());
+
+    expect(adRequests()).toBe(1);
+    expect(trackEvent).toHaveBeenCalledTimes(1);
+    expect(trackEvent).toHaveBeenCalledWith('ad_request', { slot: '123' });
   });
 
   it('Fallback-Timer laeuft erst ab der Geste', async () => {
@@ -116,6 +135,7 @@ describe('AdSlot — Anzeigen nur nach Nutzergeste', () => {
 
     expect(container.querySelector('ins.adsbygoogle')).toBeNull();
     expect(adRequests()).toBe(0);
+    expect(trackEvent).not.toHaveBeenCalled();
   });
 
   it('ohne Schalter rendert der Slot gar nichts', async () => {

@@ -15,6 +15,7 @@
 export const MAX_HTML_BYTES = 5 * 1024 * 1024;
 
 const HTML_TYPE = /^\s*(text\/html|application\/xhtml\+xml)\s*(;|$)/i;
+const XML_TYPE = /^\s*(text|application)\/xml\s*(;|$)/i;
 
 export interface FetchHtmlOptions {
   timeoutMs: number;
@@ -31,42 +32,19 @@ export interface FetchHtmlResult {
 }
 
 export async function fetchHtml(url: string, opts: FetchHtmlOptions): Promise<FetchHtmlResult> {
-  const maxBytes = opts.maxBytes ?? MAX_HTML_BYTES;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), opts.timeoutMs);
-
-  // Antwort verwerfen, ohne den Body zu lesen
-  const reject = async (response: Response, error: string, permanent: boolean): Promise<FetchHtmlResult> => {
-    await response.body?.cancel().catch(() => undefined);
-    controller.abort();
-    return { html: null, error, permanent };
-  };
 
   try {
     const response = await fetch(url, { redirect: 'follow', signal: controller.signal, headers: opts.headers });
     if (!response.ok) {
-      return reject(response, `HTTP ${response.status}`, response.status < 500 && response.status !== 429);
-    }
-
-    const type = response.headers.get('content-type');
-    if (type && !HTML_TYPE.test(type)) {
-      return reject(response, `kein HTML (${type.split(';')[0].trim()})`, true);
-    }
-    const length = Number(response.headers.get('content-length'));
-    if (length > maxBytes) {
-      return reject(response, `zu groß (${length} Bytes)`, true);
-    }
-
-    const body = await readCapped(response, maxBytes);
-    if (!body) {
+      await response.body?.cancel().catch(() => undefined);
       controller.abort();
-      return { html: null, error: `zu groß (über ${maxBytes} Bytes)`, permanent: true };
+      return { html: null, error: `HTTP ${response.status}`, permanent: response.status < 500 && response.status !== 429 };
     }
-    if (!type && looksBinary(body)) {
-      return { html: null, error: 'kein HTML (binär)', permanent: true };
-    }
-    // Wie response.text(): UTF-8, BOM entfernt
-    return { html: new TextDecoder().decode(body) };
+    const result = await readHtml(response, { maxBytes: opts.maxBytes });
+    if (result.html === null) controller.abort();
+    return result;
   } catch (err) {
     if (controller.signal.aborted) return { html: null, error: 'timeout' };
     const msg = err instanceof Error ? err.message : String(err);
@@ -74,6 +52,38 @@ export async function fetchHtml(url: string, opts: FetchHtmlOptions): Promise<Fe
   } finally {
     clearTimeout(timer);
   }
+}
+
+export interface ReadHtmlOptions {
+  maxBytes?: number;
+  /** Auch text/xml bzw. application/xml annehmen (sitemap.xml) */
+  xml?: boolean;
+}
+
+/**
+ * Body einer schon erhaltenen 2xx-Antwort lesen, aber nur HTML bis `maxBytes`.
+ * Alles andere wird verworfen, bevor der Body gelesen ist. Für Abrufe mit
+ * eigener Weiterleitungs-Logik (gem2go, Homepage-Suche); sonst `fetchHtml`.
+ */
+export async function readHtml(response: Response, opts: ReadHtmlOptions = {}): Promise<FetchHtmlResult> {
+  const maxBytes = opts.maxBytes ?? MAX_HTML_BYTES;
+  const discard = async (error: string): Promise<FetchHtmlResult> => {
+    await response.body?.cancel().catch(() => undefined);
+    return { html: null, error, permanent: true };
+  };
+
+  const type = response.headers.get('content-type');
+  if (type && !HTML_TYPE.test(type) && !(opts.xml && XML_TYPE.test(type))) {
+    return discard(`kein HTML (${type.split(';')[0].trim()})`);
+  }
+  const length = Number(response.headers.get('content-length'));
+  if (length > maxBytes) return discard(`zu groß (${length} Bytes)`);
+
+  const body = await readCapped(response, maxBytes);
+  if (!body) return { html: null, error: `zu groß (über ${maxBytes} Bytes)`, permanent: true };
+  if (!type && looksBinary(body)) return { html: null, error: 'kein HTML (binär)', permanent: true };
+  // Wie response.text(): UTF-8, BOM entfernt
+  return { html: new TextDecoder().decode(body) };
 }
 
 /** Body lesen, Abbruch sobald mehr als `maxBytes` ankommen (fehlende oder falsche Content-Length). */

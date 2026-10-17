@@ -20,6 +20,7 @@ import * as cheerio from 'cheerio';
 import type { ScrapedEvent } from '@/types/events';
 import { firstText, isNamelessTitle, isTitleCandidate } from './event-title';
 import { categorizeEvent } from '../categorize';
+import { readHtml } from './fetch-html';
 
 // Score by URL keyword. Collection paths (events ending in /) score higher
 // than calendar variants (heurigenkalender is NOT what we want). Specific event
@@ -68,7 +69,9 @@ interface FetchResult {
   finalUrl?: string;
 }
 
-async function fetchHtml(url: string, timeoutMs = 8000): Promise<FetchResult> {
+// Kandidaten sind Links der Homepage, darunter Dokumente ("…Veranstaltung_PDF.pdf",
+// GetDocument.ashx): nur HTML (bzw. XML für die Sitemap) bis 5 MB lesen.
+async function fetchHtml(url: string, timeoutMs = 8000, xml = false): Promise<FetchResult> {
   try {
     const res = await fetch(url, {
       headers: {
@@ -80,7 +83,8 @@ async function fetchHtml(url: string, timeoutMs = 8000): Promise<FetchResult> {
       redirect: 'follow',
     });
     if (!res.ok) return { ok: false, status: res.status };
-    const html = await res.text();
+    const { html } = await readHtml(res, { xml });
+    if (html === null) return { ok: false, status: res.status };
     return { ok: true, status: res.status, html, finalUrl: res.url };
   } catch {
     return { ok: false, status: 0 };
@@ -165,7 +169,7 @@ function scoreUrl(href: string, anchorText: string): number {
 // installations expose every event URL in the sitemap even when the human-
 // navigable menu doesn't link to a clean collection page.
 async function urlsFromSitemap(baseUrl: string): Promise<string[]> {
-  const res = await fetchHtml(`${baseUrl}/sitemap.xml`, 6000);
+  const res = await fetchHtml(`${baseUrl}/sitemap.xml`, 6000, true);
   if (!res.ok || !res.html) return [];
   const matches = res.html.match(/<loc>([^<]+)<\/loc>/g);
   if (!matches) return [];
