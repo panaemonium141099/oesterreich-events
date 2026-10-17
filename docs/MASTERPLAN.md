@@ -431,8 +431,8 @@ source_ids bleiben `vknet-<id>`.
 **Grenzen:**
 - gemeinden-generic (43 Zeilen) liefert seine Zeilen jenseits des
   Horizonts weiterhin nicht; der nächtliche Adress-Geocoder entscheidet
-  nur einen Teil neu. Sie bleiben sichtbar, bis eine Quelle sie wieder
-  liefert.
+  nur einen Teil neu. Seit 2026-10-17 hält sie der Pipeline-Schritt
+  `admission_recheck` (siehe unten).
 - Ein Platzhalter 31.12.2030 rückt am 31.12.2027 in den Horizont und wäre
   dann wieder sichtbar.
 - Eventim-Gutscheine (GrazTourismus „Gutschein für einen …-Rundgang",
@@ -440,6 +440,20 @@ source_ids bleiben `vknet-<id>`.
   Ticket, nur `priceCategoryName: "Gutschein"` unterscheidet sie
   (Feed-Probe 2026-10-14). Kein Filter, solange kein strukturiertes Feld
   trennt.
+
+**Nachprüfung im Bestand (2026-10-17):** Sync und re-resolve entscheiden
+`publish_status` nur beim Schreiben; Zeilen, die keine Quelle mehr liefert,
+erreichen sie nicht. Drei Tage nach den Regeln waren noch 127 Gemeinde-Dienste
+(alle verwaist, ohne Quellenstand) und 124 Termine jenseits des Horizonts
+sichtbar. Der nächtliche Schritt `admission_recheck` (nach `withdrawal`, vor
+dem Dedup) rechnet die Regeln, die nur an Titel und Termin hängen
+(`titleTimeQuarantineReasons`), für alle künftigen sichtbaren und
+zurückgehaltenen Zeilen neu: halten mit Grund im Protokoll, freigeben, wenn
+der Grund entfällt und nichts anderes hält. Ventil 500 Haltungen / 300
+Freigaben. Der Dedup (`underlyingStatus`) rechnet dieselben Regeln, damit
+kein Duplikat als Ersatz für ein so gehaltenes Primary sichtbar wird.
+Dry-Run gegen Prod: 251 Haltungen (127 Dienste, 124 Horizont), 0 Freigaben,
+23 nur Protokoll.
 
 ### 3.12 Veranstalterbüro als Veranstaltungsort (Feratel, 2026-10-14)
 

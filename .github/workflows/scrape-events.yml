@@ -49,6 +49,16 @@ on:
         description: 'Dedup: Grenze Müll-Unterdrückungen (leer = 1000)'
         required: false
         default: ''
+      # Freigabe nach einem Ventil-Stopp der Nachprüfung des Freigabevertrags
+      # (Artefakt scrape-reports/admission-recheck.json).
+      admission_recheck_max_holds:
+        description: 'Nachprüfung: Grenze Haltungen (leer = 500)'
+        required: false
+        default: ''
+      admission_recheck_max_releases:
+        description: 'Nachprüfung: Grenze Freigaben (leer = 300)'
+        required: false
+        default: ''
 
 # Shard-Kalibrierung 2026-07-08 (erster Lauf): mit 6 Shards à 150 min
 # liefen 2 durch (35/85 min), 4 wurden am Timeout gekillt — die
@@ -175,7 +185,7 @@ jobs:
 
       - run: npm ci
 
-      - name: Post-processing pipeline (normalize → geocode → score → withdrawal → dedup → indexing → report)
+      - name: Post-processing pipeline (normalize → geocode → score → withdrawal → admission_recheck → dedup → indexing → report)
         run: |
           TRIGGER="cron"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -194,6 +204,9 @@ jobs:
           DEDUP_MAX_INFLOW_DUPLICATES: ${{ github.event.inputs.dedup_max_inflow_duplicates }}
           DEDUP_MAX_RELEASES: ${{ github.event.inputs.dedup_max_releases }}
           DEDUP_MAX_GARBAGE: ${{ github.event.inputs.dedup_max_garbage }}
+          ADMISSION_RECHECK_REPORT_PATH: reports/admission-recheck.json
+          ADMISSION_RECHECK_MAX_HOLDS: ${{ github.event.inputs.admission_recheck_max_holds }}
+          ADMISSION_RECHECK_MAX_RELEASES: ${{ github.event.inputs.admission_recheck_max_releases }}
 
       - name: Generate scrape report
         if: success()
