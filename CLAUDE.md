@@ -194,9 +194,15 @@ node / next.js
   Scraper die alte als `previous_source_id` (Zeile bleibt erhalten; die
   Übernahme bleibt auf derselben Website und nimmt den Termin an ihrem Tag,
   dort zuerst den mit ihrem Titel, dann den mit ihrer Uhrzeit; auf einen
-  anderen Tag nur ab morgen und bei gleichem Titel). IDs nie aus gekürzten Strings
+  anderen Tag nur ab morgen und bei gleichem Titel; mehrere alte IDs als
+  Array, Registry: Hash und gekürzte ID der alten Lesart). IDs nie aus gekürzten Strings
   bilden: gemeinde-registry kürzte Base64 auf 18 Byte, das Datum fiel weg
-  (`registryEventId`, 2026-10-11).
+  (`registryEventId`, 2026-10-11). Ausgezeichnete Namen (`eventNameNodes`:
+  Schema.org-Name des Events, `.title`, `.bemHeader`, `.va_list_bez`,
+  EventON) gehen Überschriften und Links vor, Text für Screenreader
+  (`visibleText`: `.sr-only`, `.visually-hidden`) ist nie Teil des Titels;
+  sonst entstehen „Weitere Termine vorhanden<Name>Mehr", „Detailinfos zu
+  <Name>" oder „mehr lesen" (2026-10-14). Keine Liste verbotener Wörter.
   TYPO3-Kalenderkarten (`.calendarize-item`, `calendarize-card.ts`): Ende
   aus der Terminzeile, „Titel | Ort" nur auf Seiten, die den Trenner
   durchgehend setzen (anderswo Untertitel); die ID bleibt aus der Überschrift.

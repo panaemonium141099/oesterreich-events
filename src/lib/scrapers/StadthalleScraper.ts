@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
+import { visibleText } from './event-title';
 import type { ScrapedEvent } from '@/types/events';
 
 const MONTHS: Record<string, string> = {
@@ -52,8 +53,10 @@ export class StadthalleScraper extends BaseScraper {
         // Get parent container
         const $container = $link.closest('li').length ? $link.closest('li') : $link.parent();
 
-        // Title from h3
-        const title = $container.find('h3').first().text().trim()
+        // Title from h3, ohne „Detailinfos zu " für Screenreader (Prod
+        // 2026-10-14: alle 170 künftigen Zeilen hießen so). Die source_id
+        // kommt aus der URL und bleibt.
+        const title = visibleText($container.find('h3').first()).trim()
           || $link.text().trim().split('\n')[0].trim();
         if (!title || title.length < 2) return;
 
