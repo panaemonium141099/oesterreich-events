@@ -12,7 +12,7 @@ import type { ScrapedEvent } from '@/types/events';
 import { isEventType } from '../connectors/json-ld-connector';
 import { extractGem2goDetail } from './gem2go-detail';
 import { isUsableDetailHref } from './gemeinde-event-discovery';
-import { firstText, isEventList, isNamelessTitle, isTitleCandidate } from './event-title';
+import { eventNameNodes, firstText, isEventList, isNamelessTitle, isTitleCandidate, visibleText } from './event-title';
 import { readCalendarizeCard, usesPlaceSuffix } from './calendarize-card';
 
 export interface PaginationLogEntry {
@@ -38,12 +38,29 @@ export interface PaginationLogEntry {
  * wanderte und als alte Zeile im Dedup Primary blieb. Die alte ID geht als
  * previous_source_id mit; der Sync gibt die Zeile an den Termin an ihrem
  * Tag (source-id-migration.ts), die übrigen bekommen eigene Zeilen.
+ *
+ * `legacy`: so las der Parser denselben Termin bisher (Titel, ggf. Form
+ * und Beginn). Weicht es ab, gehen Hash-ID und gekürzte ID der alten
+ * Lesart mit, denn seit 2026-10-11 stehen Zeilen beider Fassungen (Prod
+ * 2026-10-14: 430 sichtbare Zeilen „Weitere Termine vorhanden<Name>Mehr").
  */
-export function registryEventId(form: string, title: string, start: string): Pick<ScrapedEvent, 'source_id' | 'previous_source_id'> {
-  const key = title + start;
+export function registryEventId(
+  form: string,
+  title: string,
+  start: string,
+  legacy?: { title: string; form?: string; start?: string },
+): Pick<ScrapedEvent, 'source_id' | 'previous_source_id'> {
+  const hashId = (f: string, t: string, s: string) =>
+    `registry-${f}-${createHash('sha256').update(t + s).digest('hex').slice(0, 16)}-${s.slice(0, 10)}`;
+  const shortId = (f: string, t: string, s: string) =>
+    `registry-${f}-${Buffer.from(t + s).toString('base64').substring(0, 24)}`;
+  const old = { form: legacy?.form ?? form, title: legacy?.title || title, start: legacy?.start ?? start };
+  if (old.form === form && old.title === title && old.start === start) {
+    return { source_id: hashId(form, title, start), previous_source_id: shortId(form, title, start) };
+  }
   return {
-    source_id: `registry-${form}-${createHash('sha256').update(key).digest('hex').slice(0, 16)}-${start.slice(0, 10)}`,
-    previous_source_id: `registry-${form}-${Buffer.from(key).toString('base64').substring(0, 24)}`,
+    source_id: hashId(form, title, start),
+    previous_source_id: [hashId(old.form, old.title, old.start), shortId(old.form, old.title, old.start)],
   };
 }
 
@@ -72,6 +89,9 @@ export function isScrapeableEntry(e: GemeindeRegistryEntry): boolean {
 export function registryCursorKey(e: Pick<GemeindeRegistryEntry, 'gkz' | 'listName'>): string {
   return `${e.gkz} ${e.listName}`;
 }
+
+/** Knöpfe der GEM2GO-Tabellenzeile neben dem Namen. */
+const GEM2GO_LIST_BUTTONS = '.va_list_additionel_date_link, .va_list_more_link';
 
 /**
  * GemeindeRegistryScraper: Scrapt Veranstaltungen von österreichischen Gemeinden
@@ -498,7 +518,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
    * parseMEC → parseGenericDates can recurse to stack overflow on
    * pages without parseable events.
    */
-  private parseJsonLdOnly(html: string, entry: GemeindeRegistryEntry): ScrapedEvent[] {
+  private parseJsonLdOnly(html: string, entry: GemeindeRegistryEntry, legacy = false): ScrapedEvent[] {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
     const seen = new Set<string>();
@@ -518,7 +538,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
           if (seen.has(dedupeKey)) continue;
           seen.add(dedupeKey);
 
-          const startDate = this.parseIsoDate(item.startDate);
+          const startDate = this.parseIsoDate(item.startDate, legacy);
           if (!startDate) continue;
 
           const endDate = item.endDate ? this.parseIsoDate(item.endDate) ?? undefined : undefined;
@@ -593,19 +613,49 @@ export class GemeindeRegistryScraper extends BaseScraper {
     return [];
   }
 
-  private parseIsoDate(dateStr: string): string | null {
+  /** `legacy`: nur die Formen, die der Parser vor 2026-10 las (ohne parseLooseIsoDate). */
+  private parseIsoDate(dateStr: string, legacy = false): string | null {
     if (!dateStr) return null;
     if (dateStr.match(/^\d{4}-\d{2}-\d{2}T/)) {
       try {
         const d = new Date(dateStr);
-        if (isNaN(d.getTime())) return null;
-        const local = d.toLocaleString('sv-SE', { timeZone: 'Europe/Vienna' });
-        const [date, time] = local.split(' ');
-        return time && time !== '00:00:00' ? `${date}T${time}` : date;
-      } catch { return null; }
+        if (!isNaN(d.getTime())) {
+          const local = d.toLocaleString('sv-SE', { timeZone: 'Europe/Vienna' });
+          const [date, time] = local.split(' ');
+          return time && time !== '00:00:00' ? `${date}T${time}` : date;
+        }
+      } catch { /* weiter unten */ }
     }
     if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dateStr;
-    return null;
+    return legacy ? null : this.parseLooseIsoDate(dateStr);
+  }
+
+  /**
+   * ISO-Angaben, die `Date` nicht liest. EventON (neuberg-bgld.at) schreibt
+   * Tag und Monat ohne führende Null und den Offset einstellig, ganzjährig
+   * „+2:00" („2027-1-30T17:00+2:00"): Karte und `data-time` zeigen 17:00,
+   * der Offset ist die Sommerzeit der Website, nicht die des Termins. Ein
+   * Wiener Offset (+1 oder +2) lässt die Wandzeit deshalb stehen, andere
+   * rechnet der Parser nach Wien um. Bis 2026-10 fielen solche Termine weg,
+   * die Seite lief über die Datums-Blöcke mit Titeln wie „Termin".
+   */
+  private parseLooseIsoDate(dateStr: string): string | null {
+    const m = dateStr.trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:T(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?\s*(Z|([+-])(\d{1,2}):?(\d{2})?)?)?$/i);
+    if (!m) return null;
+    const [, y, mo, d, h, mi, sec = '00', zone, sign, oh, om = '00'] = m;
+    const date = `${y}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    const day = new Date(`${date}T00:00:00Z`);
+    if (isNaN(day.getTime()) || day.toISOString().slice(0, 10) !== date) return null;
+    if (h === undefined) return date;
+    if (Number(h) > 23) return null;
+    const wall = `${h.padStart(2, '0')}:${mi}:${sec}`;
+    const viennaOffset = sign === '+' && om === '00' && (Number(oh) === 1 || Number(oh) === 2);
+    if (zone && !viennaOffset) {
+      const instant = new Date(`${date}T${wall}${sign ? `${sign}${oh.padStart(2, '0')}:${om}` : 'Z'}`);
+      const [localDate, localTime] = instant.toLocaleString('sv-SE', { timeZone: 'Europe/Vienna' }).split(' ');
+      return localTime !== '00:00:00' ? `${localDate}T${localTime}` : localDate;
+    }
+    return wall !== '00:00:00' ? `${date}T${wall}` : date;
   }
 
   // ── Strategy: MEC HTML ──────────────────────────────────────────
@@ -866,7 +916,13 @@ export class GemeindeRegistryScraper extends BaseScraper {
       try {
         const $el = $(el);
         const dateCell = $el.find('.va_list_day, .va_list_bez, td').first().text().trim();
-        const titleCell = $el.find('.va_list_bez a, td a').text().trim();
+        // Name nur aus der Spalte `.va_list_bez`: daneben stehen die Links
+        // „Weitere Termine vorhanden" und „Mehr", die `text()` aller Links
+        // an den Namen klebte (Prod 2026-10-14: 430 sichtbare Zeilen,
+        // alkoven.at, stockerau.at, danek.at).
+        const titleCell = (visibleText($el.find('.va_list_bez a')).trim()
+          || firstText($el.find('td a').not(GEM2GO_LIST_BUTTONS), t => t !== '', visibleText));
+        const legacyTitle = $el.find('.va_list_bez a, td a').text().trim();
         if (!titleCell || !dateCell) return;
 
         const startDate = this.parseGermanDate(dateCell);
@@ -885,7 +941,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         );
 
         events.push({
-          ...registryEventId('gem2go', titleCell, startDate),
+          ...registryEventId('gem2go', titleCell, startDate, { title: legacyTitle }),
           source_name: this.name,
           source_url: sourceUrl,
           title: titleCell,
@@ -1073,8 +1129,31 @@ export class GemeindeRegistryScraper extends BaseScraper {
     // this function, recursing to stack overflow on any page with no
     // parseable events anywhere.
     const jsonLdEvents = this.parseJsonLdOnly(html, entry);
-    if (jsonLdEvents.length > 0) return jsonLdEvents;
+    if (jsonLdEvents.length > 0) {
+      // Fand der Parser vor 2026-10 hier kein JSON-LD-Event (EventON-Daten,
+      // parseLooseIsoDate), lief die Seite über die Datums-Blöcke. Deren
+      // Zeile derselben Detailseite und desselben Tages geht an den Termin.
+      if (this.parseJsonLdOnly(html, entry, true).length === 0) {
+        const blocks = this.parseDateBlocks(html, entry, true);
+        for (const e of jsonLdEvents) {
+          const day = e.start_date.slice(0, 10);
+          const old = blocks.filter(b => b.source_url === e.source_url && b.start_date.slice(0, 10) === day);
+          if (old.length > 0) {
+            e.previous_source_id = [e.previous_source_id, ...old.flatMap(b => [b.source_id, b.previous_source_id])]
+              .flat().filter((id): id is string => !!id);
+          }
+        }
+      }
+      return jsonLdEvents;
+    }
+    return this.parseDateBlocks(html, entry);
+  }
 
+  /**
+   * Datums-Blöcke einer Seite ohne JSON-LD-Events. `legacy`: Titel und
+   * IDs, wie der Parser sie vor den Namens-Elementen las.
+   */
+  private parseDateBlocks(html: string, entry: GemeindeRegistryEntry, legacy = false): ScrapedEvent[] {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
     const seen = new Set<string>();
@@ -1090,7 +1169,8 @@ export class GemeindeRegistryScraper extends BaseScraper {
         if (!startDate) startDate = this.parseGermanDate(text);
         if (!startDate) return;
 
-        const title = this.blockTitle($el, isEventList($el) ? () => true : isTitleCandidate);
+        const accept = isEventList($el) ? () => true : isTitleCandidate;
+        const title = this.blockTitle($el, accept, legacy);
         if (!title || title.length < 3 || title.length > 200 || isNamelessTitle(title)) return;
 
         const dedupeKey = `${startDate}-${title.substring(0, 30)}`;
@@ -1114,11 +1194,9 @@ export class GemeindeRegistryScraper extends BaseScraper {
         const name = (fromCard && this.cleanTitle(fromCard.title)) || title;
 
         events.push({
-          // Alte ID ist die gekürzte aus diesem Titel: Zeilen aus der
-          // Titelwahl vor 2026-10 hat der Sync seit 09.10. auf ihn
-          // umgeschlüsselt (Prod 2026-10-11: keine gelieferte Zeile mehr
-          // mit Datum als Titel).
-          ...registryEventId('gen', title, startDate),
+          // Alte IDs aus der Titelwahl vor den Namens-Elementen (Zeilen aus
+          // der Titelwahl vor PR #301 hat der Sync seit 09.10. umgeschlüsselt).
+          ...registryEventId('gen', title, startDate, legacy ? undefined : { title: this.blockTitle($el, accept, true) }),
           source_name: this.name,
           source_url: sourceUrl,
           title: name,
@@ -1304,19 +1382,24 @@ export class GemeindeRegistryScraper extends BaseScraper {
   }
 
   /**
-   * Titel eines Datums-Blocks: Überschrift, sonst Link, sonst Fettdruck.
-   * Überschrift und Link nehmen das erste Element, das `accept` annimmt,
-   * der Fettdruck nur das erste (sonst würde aus "12." die Uhrzeit mit Ort,
-   * raurisertal.at). Mit `() => true` ist es die Titelwahl vor 2026-10,
-   * die die Datums-Überschrift vor dem Titel nahm (ottenschlag.com:
-   * "11.10.2026, 10:00 - 18:00" über "Oktoberfest vom Hilfswerk"). Sind
-   * Überschrift und Link nur ein Datum, benennt auch der Fettdruck kein
-   * Event.
+   * Titel eines Datums-Blocks: Namens-Element (eventNameNodes), sonst
+   * Überschrift, sonst Link, sonst Fettdruck; Screenreader-Text zählt nicht.
+   * Namens-Element, Überschrift und Link nehmen das erste Element, das
+   * `accept` annimmt, der Fettdruck nur das erste (sonst würde aus "12."
+   * die Uhrzeit mit Ort, raurisertal.at). Mit `() => true` ist es die
+   * Titelwahl vor 2026-10, die die Datums-Überschrift vor dem Titel nahm
+   * (ottenschlag.com: "11.10.2026, 10:00 - 18:00" über "Oktoberfest vom
+   * Hilfswerk"). Sind Überschrift und Link nur ein Datum, benennt auch der
+   * Fettdruck kein Event. `legacy`: die Titelwahl vor den Namens-Elementen
+   * (für previous_source_id), die auf krumpendorf.gv.at „mehr lesen" und
+   * auf GEM2GO-Karten „mehr zu <Name>" las.
    */
-  private blockTitle($el: cheerio.Cheerio<any>, accept: (t: string) => boolean): string {
+  private blockTitle($el: cheerio.Cheerio<any>, accept: (t: string) => boolean, legacy = false): string {
+    const read = legacy ? (node: cheerio.Cheerio<any>) => node.text() : visibleText;
     const headings = $el.find('h2, h3, h4, h5, h6');
-    let title = firstText(headings, accept) || this.firstContentAnchorText($el, accept);
-    if (!title && (firstText(headings, () => true) || this.firstContentAnchorText($el, () => true))) return '';
+    let title = (legacy ? '' : firstText(eventNameNodes($el), accept, read))
+      || firstText(headings, accept, read) || this.firstContentAnchorText($el, accept, read);
+    if (!title && (firstText(headings, () => true, read) || this.firstContentAnchorText($el, () => true, read))) return '';
     title ||= $el.find('strong, b').first().text().trim();
     return title ? this.cleanTitle(title) : '';
   }
@@ -1324,13 +1407,17 @@ export class GemeindeRegistryScraper extends BaseScraper {
   /** Text des ersten Anchors, der kein Kontakt-Link (mailto:/tel:/…) ist.
    *  Ohne diesen Filter gewinnt der mailto:-Anchor eines Vereinsblocks gegen
    *  die Ueberschrift und die Mailadresse landet als Event-Titel in der DB. */
-  private firstContentAnchorText($el: cheerio.Cheerio<any>, accept: (t: string) => boolean): string {
+  private firstContentAnchorText(
+    $el: cheerio.Cheerio<any>,
+    accept: (t: string) => boolean,
+    read: (node: cheerio.Cheerio<any>) => string = visibleText,
+  ): string {
     const anchors = $el.find('a');
     for (let i = 0; i < anchors.length; i++) {
       const a = anchors.eq(i);
       const href = a.attr('href');
       if (href && !isUsableDetailHref(href)) continue;
-      const text = a.text().trim();
+      const text = read(a).trim();
       if (text && accept(text)) return text;
     }
     return '';

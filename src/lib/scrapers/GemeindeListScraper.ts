@@ -8,7 +8,7 @@ import { withStammdaten } from './gemeinden/stammdaten';
 import type { ScrapedEvent } from '@/types/events';
 import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
 import { isEventType } from '../connectors/json-ld-connector';
-import { firstText, isNamelessTitle, isTitleCandidate } from './event-title';
+import { eventNameNodes, firstText, isNamelessTitle, isTitleCandidate, visibleText } from './event-title';
 
 // Ortsdaten nur aus der Stammdatei (gemeinden/stammdaten.ts), lazy geladen.
 let listCache: ReturnType<typeof withStammdaten<(typeof GEMEINDEN_LISTE)[number]>> | null = null;
@@ -416,9 +416,17 @@ export class GemeindeListScraper extends BaseScraper {
       // sonst die längste Zelle, die kein Datum ist. Die Datumszelle mit
       // Uhrzeit ("09.10.2026 09:00 - 10:30 Uhr", kremsmuenster.at) ist oft
       // die längste; ohne sie gewänne in solchen Zeilen der Ort.
-      let title = this.titleColumnText($row);
-      if (!title) title = this.longestCell($, $row, isTitleCandidate);
-      if (!title || title.length < 3) title = firstText($row.find('a'), isTitleCandidate);
+      // Vor allem das Namens-Element der Zeile (GEM2GO `.va_list_bez`):
+      // die längste Zelle ist dort die ganze Detail-Spalte samt
+      // „Veranstaltungsort: …" (ferlach.at).
+      const titleOf = (named: boolean) => {
+        let t = named ? firstText(eventNameNodes($row), isTitleCandidate, visibleText) : '';
+        if (!t) t = this.titleColumnText($row);
+        if (!t) t = this.longestCell($, $row, isTitleCandidate);
+        if (!t || t.length < 3) t = firstText($row.find('a'), isTitleCandidate);
+        return t;
+      };
+      const title = titleOf(true);
 
       if (!title || title.length < 3 || isNamelessTitle(title) || seenTitles.has(title)) return;
       seenTitles.add(title);
@@ -431,7 +439,7 @@ export class GemeindeListScraper extends BaseScraper {
 
       events.push({
         source_id: this.eventId(gemeinde, title),
-        ...this.previousId(gemeinde, legacyTitle, title),
+        ...this.previousId(gemeinde, [titleOf(false), legacyTitle], title),
         source_name: this.name,
         source_url: eventUrl,
         title,
@@ -495,8 +503,8 @@ export class GemeindeListScraper extends BaseScraper {
 
     $('a').each((_, el) => {
       const $a = $(el);
-      const linkText = $a.text().trim();
-      if (!linkText || linkText.length < 3 || linkText.length > 200) return;
+      const rawText = $a.text().trim();
+      if (!rawText || rawText.length < 3 || rawText.length > 200) return;
 
       // Prüfe ob im Elternelement ein Datum steht
       const parent = $a.parent();
@@ -505,12 +513,18 @@ export class GemeindeListScraper extends BaseScraper {
       if (!dateStr) return;
 
       const href = $a.attr('href');
-      // Datums-Kachel als Link (spielberg.at, iCagenda: "09 Okt 2026"): der
-      // Name steht im Link mit demselben Ziel.
-      const title = isNamelessTitle(linkText)
-        ? firstText(parent.find('a').filter((_, x) => !!href && $(x).attr('href') === href), t => !isNamelessTitle(t))
-        : linkText;
+      // Name ist der sichtbare Linktext. Ohne Namen darin steht er im Link
+      // mit demselben Ziel: neben der Datums-Kachel (spielberg.at, iCagenda:
+      // "09 Okt 2026") oder neben dem Link nur für Screenreader („<Name> -
+      // Montag,28.09.2026, 19:00 Mehr erfahren", tulln.at); sonst im Kopf
+      // der Karte (GEM2GO-Bild-Link mit „mehr zu <Name>",
+      // deutschlandsberg.at, stadt-melk.at).
+      const named = (t: string) => !isNamelessTitle(t);
+      const sameTarget = parent.find('a').filter((_, x) => !!href && $(x).attr('href') === href);
+      const linkText = visibleText($a).trim();
+      const title = named(linkText) ? linkText : firstText(sameTarget, named, visibleText) || this.cardName($a);
       if (!title || title.length > 200) return;
+      const oldTitle = named(rawText) ? rawText : firstText(sameTarget, named);
 
       if (seenTitles.has(title)) return;
       seenTitles.add(title);
@@ -520,7 +534,7 @@ export class GemeindeListScraper extends BaseScraper {
 
       events.push({
         source_id: this.eventId(gemeinde, title),
-        ...this.previousId(gemeinde, linkText, title),
+        ...this.previousId(gemeinde, [oldTitle, rawText], title),
         source_name: this.name,
         source_url: eventUrl,
         title,
@@ -538,11 +552,20 @@ export class GemeindeListScraper extends BaseScraper {
     return `gemeinde-${gemeinde.idKey}-${this.slugify(title)}`;
   }
 
-  /** Alte ID einer Zeile, deren Titel der Parser früher anders las (Datum
-   *  statt Name): der Sync schlüsselt sie um (source-id-migration.ts). */
-  private previousId(gemeinde: GemeindeInfo, legacyTitle: string, title: string): { previous_source_id?: string } {
-    if (!legacyTitle || this.eventId(gemeinde, legacyTitle) === this.eventId(gemeinde, title)) return {};
-    return { previous_source_id: this.eventId(gemeinde, legacyTitle) };
+  /** Alte IDs einer Zeile, deren Titel der Parser früher anders las (Datum
+   *  statt Name, Screenreader-Text): der Sync schlüsselt sie um
+   *  (source-id-migration.ts). */
+  private previousId(gemeinde: GemeindeInfo, legacyTitles: string | string[], title: string): { previous_source_id?: string | string[] } {
+    const ids = [...new Set([legacyTitles].flat().filter(Boolean).map(t => this.eventId(gemeinde, t)))]
+      .filter(id => id !== this.eventId(gemeinde, title));
+    if (ids.length === 0) return {};
+    return { previous_source_id: ids.length === 1 ? ids[0] : ids };
+  }
+
+  /** Name der Karte um einen Link (GEM2GO `.bemCard`: `.bemHeader`). */
+  private cardName($a: cheerio.Cheerio<any>): string {
+    const $card = $a.closest('.bemCard, [itemtype*="Event"], article, .event, .event-item');
+    return firstText(eventNameNodes($card), t => !isNamelessTitle(t), visibleText).replace(/\s+/g, ' ').trim();
   }
 
   /** Längste Zelle der Zeile, die `accept` annimmt und kein bloßes Datum ist. */

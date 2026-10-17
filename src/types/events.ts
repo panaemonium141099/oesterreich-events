@@ -150,8 +150,11 @@ export interface ScrapedEvent {
    * Frühere source_id desselben Termins, wenn ein Scraper seine ID-Bildung
    * geändert hat. Der Schreibpfad schlüsselt die alte Zeile einmalig um
    * (src/lib/db/source-id-migration.ts), statt eine zweite anzulegen.
+   * Mehrere, wenn die ID-Bildung sich mehrmals geändert hat und noch Zeilen
+   * jeder Fassung stehen können (gemeinde-registry: gekürzte ID und Hash
+   * des früheren Titels).
    */
-  previous_source_id?: string;
+  previous_source_id?: string | string[];
   /**
    * Public-facing source URL. Nullable because some scrapers (notably
    * Feratel-Deskline via webapi.deskline.net) only have backend API
