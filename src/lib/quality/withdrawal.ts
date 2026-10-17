@@ -111,7 +111,8 @@ const DAY = 86_400_000;
 export function coverageScope(row: Pick<SightingRow, 'source_name' | 'source_url'>): string {
   const m = row.source_url?.match(/^https?:\/\/([^/?#]+)(\/[^/?#]*)?/i);
   const host = (m?.[1] ?? '').toLowerCase().replace(/^www\./, '');
-  // je Bundesland bis zu 200 Seiten (VeranstaltungskalenderNetScraper)
+  // je Bundesland eine eigene Liste, bei Budget-Ende nicht bis zur letzten
+  // Seite gelesen (VeranstaltungskalenderNetScraper)
   if (row.source_name === 'veranstaltungskalender.net' && m?.[2]) {
     return `${row.source_name}|${host}${m[2].toLowerCase()}`;
   }
