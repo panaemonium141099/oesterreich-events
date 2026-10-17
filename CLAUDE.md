@@ -275,7 +275,13 @@ node / next.js
   Fehlerfälle dort ergänzen, keine Quellen-Sonderregeln. Vor Regeländerungen
   `npm run dedup -- --dry-run --report r.json` gegen Prod.
 - `src/lib/dedup/` (Fingerprint/Jaro-Winkler, Dedup innerhalb eines Scraper-Laufs), `src/lib/series-detection/`,
-  `src/lib/lineup/`, `src/lib/artist-matching.ts` — Serien / Festival-Lineups / Matching
+  `src/lib/lineup/`, `src/lib/artist-matching.ts` — Serien / Festival-Lineups / Matching.
+  Lineup-Events („Act at Festival", `source_type='derived'`) entscheidet
+  `derive-events.ts` über denselben Resolver wie der Sync: ohne Eltern-Event
+  der Gemeinde-Mittelpunkt des Festival-Orts (`municipality_only`, kein Pin),
+  `festivals.state` nur als Bundesland-Rückfall. Jeder Lauf zieht auch den
+  Bestand nach und setzt `last_seen_at`; ohne diese Sichtung zöge der Rückzug
+  sie nach 30 Tagen als „Quelle tot" ein (2026-10-17).
 - `.github/workflows/` — scrape-events.yml (Shards+post), import-eventim.yml, tests.yml, deploy.yml
 - `docs/MASTERPLAN.md` — Strategie & Betriebszustand; `docs/TAXONOMY.md` — Taxonomie
 
