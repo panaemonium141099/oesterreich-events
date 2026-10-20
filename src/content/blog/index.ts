@@ -176,6 +176,8 @@ import { post as andreasFernerBroFessorCheckstDu2026 } from './posts/andreas-fer
 import { post as uebernachtenLinzStaedtetrip } from './posts/uebernachten-linz-staedtetrip';
 import { post as weihnachtskonzertBoziniKoncertLichterglanzDerStimmenSi2026 } from './posts/weihnachtskonzert-bozini-koncert-lichterglanz-der-stimmen-si-2026';
 import { post as erotikUndFetischMesse2026 } from './posts/erotik-und-fetisch-messe-2026';
+import { post as weihnachtskonzertKlangquadrat2026 } from './posts/weihnachtskonzert-klangquadrat-2026';
+import { post as vivaldi4SeasonsCrossoverKonzert2026 } from './posts/vivaldi-4-seasons-crossover-konzert-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -362,6 +364,8 @@ export const ALL_POSTS: FestivalPost[] = [
   uebernachtenLinzStaedtetrip,
   weihnachtskonzertBoziniKoncertLichterglanzDerStimmenSi2026,
   erotikUndFetischMesse2026,
+  weihnachtskonzertKlangquadrat2026,
+  vivaldi4SeasonsCrossoverKonzert2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
