@@ -490,7 +490,9 @@ statische Assets `cf-cache-status` MISS dann HIT, HTML DYNAMIC; Rate-Limit
 120/min greift pro Client über Cloudflare (429 mit `retry-after: 15`); Let's
 Encrypt HTTP-01 durch den Proxy funktioniert (Wegwerf-Host `cf-test`
 bekam um 13:07 ein Zertifikat); AdSense-Script lädt auf Event-Seiten ohne
-CSP-Fehler.
+CSP-Fehler; im zehnminütigen Caddy-Volllog kamen 7 Googlebot- und 22
+bingbot-Abrufe über Cloudflare mit 200 an (`client_ip` aus den
+verifizierten Netzen, keine Challenge).
 
 **Fallen:** (1) Cloudflares Universal-SSL-Zertifikat war nach der
 Aktivierung rund acht Minuten `pending_validation`; solange scheitert jeder
