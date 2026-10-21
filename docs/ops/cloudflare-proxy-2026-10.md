@@ -191,6 +191,16 @@ Origin direkt erreichbar bleibt.
    (Cloudflare-Block oder Caddy); im Cloudflare-Security-Dashboard
    erscheinen Challenges/Blocks.
 
+#### Ergebnis Schritt C und D (2026-10-21)
+
+Internex-Eintrag 14:05 (lokal), nic.at-Zone mit der Delegation ab 15:00,
+Cloudflare-Status active um 15:00, Universal-SSL-Paket active 15:08. In den
+acht Minuten dazwischen scheiterte HTTPS am Edge (Apex und www waren
+kurzzeitig auf DNS-only zurückgenommen). Alle Belege aus Schritt D sind
+erbracht und in MASTERPLAN §3.13 festgehalten; der Googlebot-Nachweis per
+Search-Console-Live-Test bleibt dem User, ergänzend das Caddy-Volllog
+(siehe unten).
+
 ### Schritt E: Dokumentation
 
 MASTERPLAN Betriebsteil (Abschnitt 3) um den Cloudflare-Stand ergänzen,

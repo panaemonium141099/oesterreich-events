@@ -105,6 +105,14 @@ node / next.js
   (GSC/CrUX-Snapshot — Collector hart deadline-begrenzt, `count: 'planned'`
   statt exact!), warm-cache, sync-feratel (stündlich), lifecycle-emails,
   outreach-* (Kaltakquise-Funnel), expire-boosts.
+- **Cloudflare (seit 2026-10-21) vor lasstreffen.at + www** (Free: Bot Fight
+  Mode, WAF-Regeln, Cache nur statische Pfade); `api.lasstreffen.at` bleibt
+  DNS-only. Caddy liest die Client-IP aus `CF-Connecting-IP` nur von
+  Cloudflare-Netzen (`cf-trusted-proxies.caddy`, `lt-cf-ranges.timer`),
+  Sperrlisten und Rate-Limits laufen auf `client_ip`. Cloudflare-Änderungen
+  per API mit `/root/.cloudflare-token` (IP-gefiltert, `curl -4`), Skript
+  `docs/ops/cloudflare/cf-setup.py`; Plan/Rückwege
+  `docs/ops/cloudflare-proxy-2026-10.md`, Betrieb MASTERPLAN §3.13.
 - **pg_cron in Supabase:** MV-Refreshes (event_stats_cache 30 min,
   event_map_points stündlich), match-artists stündlich.
 

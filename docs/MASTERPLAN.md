@@ -461,6 +461,49 @@ Feratel-Zeilen):** Adresse/PLZ ändern sich bei rund 1.440, Positionen bei
 war ein Konflikt), 8 veröffentlichte werden zurückgehalten (Rußbach ohne
 API-Koordinate, Position stammte nur aus der Gosauer Veranstalter-PLZ).
 
+### 3.13 Cloudflare als Proxy vor der Website (2026-10-21)
+
+**Anlass:** AdSense-Einschränkung seit 16.09. durch Bot-Farmen mit
+Browser-UA (AWS-Headless, Tencent, Baidu-Render-Crawler Chrome/99 aus
+116.179.33.x). Jede Welle wurde einzeln in Caddy gesperrt (§3-Memos,
+`Caddyfile` Bot-Sperre I bis III). Seit 21.10. läuft `lasstreffen.at` und
+`www` hinter Cloudflare Free (Zone `962399ba2ed7d14167caf40733fdee2d`,
+Nameserver cortney/jacob.ns.cloudflare.com, Registrar Internex). Bot Fight
+Mode, drei WAF-Regeln (Block Chrome/99-UA, Managed Challenge für
+Chrome-Builds unter 140 und für nicht verifizierte Clients aus China, je ohne
+`cf.client.bot` und robots.txt), IP-Allow für den eigenen Server, TLS Full
+(strict), Email-Obfuscation aus, Cache nur für `/_next/static`, `/_next/image`,
+`/icons`, `/images`, `/favicon` (Rest Bypass). `api.lasstreffen.at`, `neu`,
+`flights`, MX/TXT/DKIM bleiben DNS-only. Caddy bleibt zweite Schicht:
+`trusted_proxies` aus den Cloudflare-Netzen (`lt-cf-ranges.timer`, täglich),
+`client_ip_headers CF-Connecting-IP`, alle Sperrlisten als `client_ip`-Matcher,
+Rate-Limit-Key `{client_ip}`. Plan, Rückwege und Skripte:
+`docs/ops/cloudflare-proxy-2026-10.md`, `docs/ops/cloudflare/`.
+
+**Belege nach dem Cutover (21.10., 13:05 bis 13:20 UTC):** `cf-ray` und
+`server: cloudflare` auf jeder Antwort; Caddy-Log zeigt `remote_ip` aus dem
+Cloudflare-Netz und `client_ip` = echte Client-IP (82.218.41.127 über
+172.68.50.203); `/api/health` 200 über den Edge auch mit curl-UA (IP-Allow);
+Chrome/99-UA 403 schon am Edge, Chrome/124 Managed Challenge
+(`cf-mitigated: challenge`), Headless-Signatur weiterhin 403 von Caddy;
+statische Assets `cf-cache-status` MISS dann HIT, HTML DYNAMIC; Rate-Limit
+120/min greift pro Client über Cloudflare (429 mit `retry-after: 15`); Let's
+Encrypt HTTP-01 durch den Proxy funktioniert (Wegwerf-Host `cf-test`
+bekam um 13:07 ein Zertifikat); AdSense-Script lädt auf Event-Seiten ohne
+CSP-Fehler.
+
+**Fallen:** (1) Cloudflares Universal-SSL-Zertifikat war nach der
+Aktivierung rund acht Minuten `pending_validation`; solange scheitert jeder
+HTTPS-Handshake am Edge für Resolver, die schon die Cloudflare-IPs kennen.
+Richtig ist: Zone mit DNS-only-Records anlegen, Nameserver umstellen, erst
+nach `certificate_packs status=active` die Records proxien. (2) nic.at
+veröffentlicht die Zone stündlich, die Delegation war 55 Minuten nach dem
+Internex-Eintrag draußen; Resolver halten NS-Einträge bis 3 h. (3) Der
+Server geht per IPv6 raus; der IP-gefilterte API-Token verlangt `curl -4`.
+(4) Bot Fight Mode ist nicht per WAF-Regel umgehbar, nur eine
+IP-Access-Allow-Regel greift vorher. (5) `cf.threat_score` ist dauerhaft 0,
+Challenges brauchen eigene Signale (UA-Build, Land, `cf.client.bot`).
+
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
 1. **Affiliate-ID `J70` ist korrekt** und gehört uns (bestätigt). Eventim-Links im Feed
