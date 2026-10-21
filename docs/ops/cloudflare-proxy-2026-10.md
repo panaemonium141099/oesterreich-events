@@ -143,6 +143,18 @@ Dashboard:
 
 Rückweg vor dem Nameserver-Wechsel: Zone löschen, nichts ist live.
 
+#### Stand Schritt B (ausgeführt 2026-10-21 per API, Skript `docs/ops/cloudflare/cf-setup.py`)
+
+Zone-ID `962399ba2ed7d14167caf40733fdee2d`, Account `d3d4ab2e3819ff7f3144e45f00c81b2e`,
+Plan Free, Status pending. Nameserver: **cortney.ns.cloudflare.com** und
+**jacob.ns.cloudflare.com**. Alle 10 Records, 13 Einstellungen, Bot Fight
+Mode (braucht `enable_js: true` im selben PUT, sonst 10400), IP-Access-Allow
+157.180.42.4, 3 WAF-Regeln und 2 Cache-Regeln sind angelegt und
+zurückgelesen. Token liegt IP-gefiltert in `/root/.cloudflare-token`; der
+Server geht per IPv6 raus, API-Aufrufe deshalb immer mit IPv4 (`curl -4`).
+Der Proxy ist erst nach der Delegation aktiv: vor dem Wechsel antwortet
+Cloudflares Nameserver mit der Origin-IP.
+
 ### Schritt C: Nameserver bei Internex umstellen (User)
 
 Der User trägt bei Internex die zwei Cloudflare-Nameserver ein (ersetzt
