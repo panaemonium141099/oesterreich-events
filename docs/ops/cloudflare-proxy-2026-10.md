@@ -25,6 +25,7 @@ Challenge, bevor sie Next.js, Postgres und AdSense erreichen.
   | www.lasstreffen.at | CNAME | lasstreffen.at | Caddy leitet auf Apex um |
   | api.lasstreffen.at | A | 157.180.42.4 | Supabase-API (Envoy hinter Caddy), apikey-Header |
   | neu.lasstreffen.at | A | 157.180.42.4 | Vorschau, noindex |
+  | flights.lasstreffen.at | A | 157.180.42.4 | Altlast, kein Caddy-Site-Block (erst im Internex-Editor gesehen, 2026-10-21) |
   | lasstreffen.at | MX 10 | mail.lasstreffen.at | Ziel existiert nicht (Altlast, unverändert übernehmen) |
   | lasstreffen.at | TXT | brevo-code:136d683d506a145222964bc7ba7ebf9d | Brevo-Domainverifizierung |
   | lasstreffen.at | TXT | google-site-verification=yaXJSoHMatdzCq5abG9_Hz1_3uBlCMejRBcPOUOBe90 | Search Console |
