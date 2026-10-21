@@ -178,6 +178,8 @@ import { post as weihnachtskonzertBoziniKoncertLichterglanzDerStimmenSi2026 } fr
 import { post as erotikUndFetischMesse2026 } from './posts/erotik-und-fetisch-messe-2026';
 import { post as weihnachtskonzertKlangquadrat2026 } from './posts/weihnachtskonzert-klangquadrat-2026';
 import { post as vivaldi4SeasonsCrossoverKonzert2026 } from './posts/vivaldi-4-seasons-crossover-konzert-2026';
+import { post as falcoVillaFuehrungJaenner2027 } from './posts/falco-villa-fuehrung-jaenner-2027';
+import { post as impulsoTenorsTotalChristmas2026 } from './posts/impulso-tenors-total-christmas-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -366,6 +368,8 @@ export const ALL_POSTS: FestivalPost[] = [
   erotikUndFetischMesse2026,
   weihnachtskonzertKlangquadrat2026,
   vivaldi4SeasonsCrossoverKonzert2026,
+  falcoVillaFuehrungJaenner2027,
+  impulsoTenorsTotalChristmas2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
