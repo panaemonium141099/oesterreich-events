@@ -391,7 +391,7 @@ npm run scrape:festival-lineups | match-artists
   Logs rotieren per `logging:` in den Compose-Dateien (100 MB × 5), ein
   `daemon.json` würde ohne live-restore einen Docker-Neustart = Vollausfall
   brauchen. Bei 502-Bursts im Minutenraster zuerst dieses Log lesen
-  (MASTERPLAN §3.14).
+  (MASTERPLAN §3.13).
 
 <!-- BEGIN FLOW-NEXT -->
 ## Flow-Next
