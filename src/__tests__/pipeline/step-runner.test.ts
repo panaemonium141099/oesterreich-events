@@ -35,6 +35,14 @@ describe('scrape-pipeline Reihenfolge', () => {
     expect(file.indexOf("runStep('withdrawal'")).toBeGreaterThan(-1);
     expect(file.indexOf("runStep('withdrawal'")).toBeLessThan(file.indexOf("runStep('dedup'"));
   });
+
+  it('Nachprüfung des Freigabevertrags läuft nach dem Rückzug und vor dem Dedup', async () => {
+    const { readFileSync } = await import('node:fs');
+    const file = readFileSync('src/scripts/scrape-pipeline.ts', 'utf8');
+    const recheck = file.indexOf("runStep('admission_recheck'");
+    expect(recheck).toBeGreaterThan(file.indexOf("runStep('withdrawal'"));
+    expect(recheck).toBeLessThan(file.indexOf("runStep('dedup'"));
+  });
 });
 
 describe('shouldSkipStep', () => {

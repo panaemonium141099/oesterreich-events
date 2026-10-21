@@ -227,6 +227,15 @@ async function main() {
       execStep('Withdraw events no longer listed', `npx tsx ${envFlag}src/scripts/withdraw-stale-events.ts`);
     }, steps);
 
+    // Titel- und Zeitregeln des Freigabevertrags (Gemeinde-Dienst, Horizont)
+    // auch für Zeilen, die keine Quelle mehr liefert: Sync und re-resolve
+    // erreichen sie nicht. Vor dem Dedup, damit er die Status im selben Lauf
+    // sieht. Sicherheitsventil bei Massenänderungen → Schritt rot; der Dedup
+    // läuft trotzdem, er rechnet dieselben Regeln selbst (underlyingStatus).
+    steps.admission_recheck = await runStep('admission_recheck', async () => {
+      execStep('Recheck admission rules on stored events', `npx tsx ${envFlag}src/scripts/admission-recheck.ts`);
+    }, steps);
+
     if (!opts.skipDedup) {
       steps.dedup = await runStep('dedup', async () => {
         // Quellenübergreifender Dedup: rechnet alle Cluster je Wiener Tag neu

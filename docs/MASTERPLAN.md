@@ -413,16 +413,34 @@ setzt. Der Grund ändert die Ortsentscheidung nicht (`NON_LOCATION_REASONS`),
 steht aber als `admission:start_too_far_ahead` im Protokoll; daran hält
 auch die erneute Entscheidung im Bestand (`re-resolve.ts`) die Zeile.
 
+**Listenende (2026-10-17):** Der Scraper erreichte die 2037er Zeilen nicht
+mehr: Wien hatte 330 Listenseiten (Gutscheine auf Seite ~290 bis 325), OÖ
+447, der Scraper brach je Bundesland bei `MAX_PAGES = 200` ab. Von 273
+sichtbaren AT-Zeilen jenseits des Horizonts lieferten 170 ihre Quellen
+nicht mehr (vknet 119, gemeinden-generic 43). Jetzt liest der Scraper jede
+Liste bis zur letzten Seite laut Pager, die Bundesländer im Wechsel, mit
+38 min Zeitbudget unter einem eigenen harten Timeout von 45 min
+(Standard 25). Probelauf 2026-10-17: alle 1.578 Seiten in 29 min (lokal,
+in Actions ~1 s je Seite), 790 Termine statt bisher ~525, darunter 75
+Wiener 2037er. Reicht das Budget einmal nicht, fehlen nur die fernsten
+Termine jeder Liste. Eine Seite zählt als leer nur ohne gelisteten
+Eintrag: Wien Seite 228 bis 231 zeigte nur einen Titel über 200 Zeichen,
+den der Parser verwirft, und hätte die Liste sonst dort beendet. Die
+source_ids bleiben `vknet-<id>`.
+
+Prod-Lauf 2026-10-17 (Actions, 27,5 min): 789 Termine, 204 per
+`start_too_far_ahead` zurückgehalten, sichtbare vknet-Zeilen jenseits des
+Horizonts 71 → 38. Die 38 sind Altzeilen mit source_id ohne Präfix („9220",
+angelegt 2026-03-29, zuletzt 05./06.05., ohne Admission-Protokoll): Dedup-
+Primary vor ihrem frisch gelieferten Zwilling `vknet-…` derselben URL. Der
+Dedup stellt das nicht um, weil er Tage mehr als fünf Jahre voraus
+überspringt (`isPlausibleEventDay`); sie hält `admission_recheck`.
+
 **Grenzen:**
-- Der Scraper erreicht die 2037er Zeilen nicht mehr: Wien hat 330
-  Listenseiten (Gutscheine auf Seite ~290 bis 325), OÖ 447, der Scraper
-  bricht bei `MAX_PAGES = 200` ab. Ein voller Durchlauf (1.593 Seiten)
-  bräuchte etwa 26 min und damit mehr als das Scraper-Timeout. Von 273
-  sichtbaren AT-Zeilen jenseits des Horizonts lieferten 170 ihre Quellen
-  nicht mehr (vknet 119, gemeinden-generic 43); der nächtliche
-  Adress-Geocoder entscheidet davon nur 28 sicher neu (20 weitere bei
-  Cache-Ablauf). Der Rest bleibt sichtbar, bis eine Quelle ihn wieder
-  liefert.
+- gemeinden-generic (43 Zeilen) liefert seine Zeilen jenseits des
+  Horizonts weiterhin nicht; der nächtliche Adress-Geocoder entscheidet
+  nur einen Teil neu. Seit 2026-10-17 hält sie der Pipeline-Schritt
+  `admission_recheck` (siehe unten).
 - Ein Platzhalter 31.12.2030 rückt am 31.12.2027 in den Horizont und wäre
   dann wieder sichtbar.
 - Eventim-Gutscheine (GrazTourismus „Gutschein für einen …-Rundgang",
@@ -430,6 +448,20 @@ auch die erneute Entscheidung im Bestand (`re-resolve.ts`) die Zeile.
   Ticket, nur `priceCategoryName: "Gutschein"` unterscheidet sie
   (Feed-Probe 2026-10-14). Kein Filter, solange kein strukturiertes Feld
   trennt.
+
+**Nachprüfung im Bestand (2026-10-17):** Sync und re-resolve entscheiden
+`publish_status` nur beim Schreiben; Zeilen, die keine Quelle mehr liefert,
+erreichen sie nicht. Drei Tage nach den Regeln waren noch 127 Gemeinde-Dienste
+(alle verwaist, ohne Quellenstand) und 124 Termine jenseits des Horizonts
+sichtbar. Der nächtliche Schritt `admission_recheck` (nach `withdrawal`, vor
+dem Dedup) rechnet die Regeln, die nur an Titel und Termin hängen
+(`titleTimeQuarantineReasons`), für alle künftigen sichtbaren und
+zurückgehaltenen Zeilen neu: halten mit Grund im Protokoll, freigeben, wenn
+der Grund entfällt und nichts anderes hält. Ventil 500 Haltungen / 300
+Freigaben. Der Dedup (`underlyingStatus`) rechnet dieselben Regeln, damit
+kein Duplikat als Ersatz für ein so gehaltenes Primary sichtbar wird.
+Dry-Run gegen Prod: 251 Haltungen (127 Dienste, 124 Horizont), 0 Freigaben,
+23 nur Protokoll.
 
 ### 3.12 Veranstalterbüro als Veranstaltungsort (Feratel, 2026-10-14)
 
@@ -461,7 +493,45 @@ Feratel-Zeilen):** Adresse/PLZ ändern sich bei rund 1.440, Positionen bei
 war ein Konflikt), 8 veröffentlichte werden zurückgehalten (Rußbach ohne
 API-Koordinate, Position stammte nur aus der Gosauer Veranstalter-PLZ).
 
-### 3.13 Cloudflare als Proxy vor der Website (2026-10-21)
+### 3.13 502-Bursts im Minutenraster: ISR-Guard in der Schleife (2026-10-17)
+
+**Befund (Caddy-Log, isr-guard-Log, systemd-Timer):** In 48 Stunden
+1.918 Antworten mit Status 502 an Besucher, Googlebot, OAI-SearchBot,
+in Minuten-Bursts (17.10. 05:00 UTC: 184 in einer Minute). Fehlertext der
+Zeilen: 1.409 × „dial tcp 172.18.0.5:3000: connect: connection refused",
+467 × „lookup nextjs-app on 127.0.0.11:53: server misbehaving" — der
+Container war in diesen Sekunden nicht da. 96 % der 502 (1.844) fielen in
+die 40 s nach einem Eintrag „raeume ISR-Cache ab" in
+`/var/log/lt-isr-guard.log`; der Rest sind Deploys. `nextjs-app` hatte
+RestartCount 0, weil Compose den Container jeweils neu *erzeugt*
+(StartedAt = Guard-Zeitstempel). Der Guard lief seit dem 06.10. bei jedem
+Takt (95/Tag, vorher 2–4/Tag): Platte 77 % → Recreate → 76 % → 15 min
+später wieder 77 %. Der Writable-Layer, den ein Recreate freigibt, war
+dabei nur 180–380 MB groß. Die Platte hielt das Envoy-Access-Log
+(`supabase-envoy`, json-file ohne Rotation, 14,2 GB, ~360 MB/Tag mit
+kompletten PostgREST-Query-Strings) plus 18,8 GB Images (davon 3,1 GB
+`lasstreffen-app:isrtest` und 2,96 GB beatshyft) über der 70-%-Schwelle.
+Der lt-watchdog meldet erst ab 80 % und sah die Schleife nicht.
+
+**Behebung (live 17.10. 09:25 UTC, Backups mit Suffix `.bak-2026-10-17`):**
+`isr-guard.sh` misst den Writable-Layer (`docker inspect -s`, SizeRw) und
+erzeugt nur ab 8 GB neu (Notbremse: ab 90 % Platte reichen 2 GB); liegt die
+Platte über 70 %, der Layer aber darunter, schreibt er höchstens alle 6 h
+eine Warnung statt zu recreaten. Envoy mit `logging: max-size 100m ×
+max-file 5` in `docker-compose.override.yml` neu erzeugt (letztes GB des
+Logs gzip in `/var/backups/envoy-access-tail-2026-10-17.log.gz`), dieselbe
+Rotation in `/opt/app/docker-compose.yml` für nextjs-app (greift beim
+nächsten Deploy). Platte 77 % → 58 %. Kein `/etc/docker/daemon.json`:
+Log-Optionen gelten nur für neue Container und brauchen einen Docker-
+Neustart, der ohne live-restore alle Container (Postgres!) mitnimmt.
+
+**Offen:** `lasstreffen-app:isrtest` + Container `nextjs-isrtest` und
+`crazy_hawking` (node:22-slim, seit 5 Wochen) belegen ~3,5 GB ohne
+erkennbare Aufgabe; der Watchdog kennt die Recreate-Frequenz nicht
+(sinnvoll: Alarm ab 4 Recreates/24 h). Wurzel-Fix für den ISR-Cache
+bleibt ein `cacheHandler` mit Größenlimit.
+
+### 3.14 Cloudflare als Proxy vor der Website (2026-10-21)
 
 **Anlass:** AdSense-Einschränkung seit 16.09. durch Bot-Farmen mit
 Browser-UA (AWS-Headless, Tencent, Baidu-Render-Crawler Chrome/99 aus
@@ -953,8 +1023,11 @@ scrape.ts. (b) *Alles-oder-Nichts-Verlust* — gem2go stand nach dem harten
 passiert erst nach scrape()-Return): die drei Gemeinde-Aggregatoren
 lieferten seit Einführung des Timeouts nichts mehr → Fix: Soft-Budget
 (`SCRAPER_SOFT_BUDGET_MIN`, default 240 min) mit Teilergebnis-Rückgabe +
-Tagesrotation des Startpunkts (volle Abdeckung über Folgeläufe; gem2go
-bräuchte ~388 min für alles), harte Timeouts nur noch als Backstop
+Tagesrotation des Startpunkts (gem2go bräuchte ~388 min für alles;
+*Korrektur 2026-10-17:* die Tagesrotation rückte nur einen Eintrag pro Tag
+weiter, gemeinde-registry erreichte so fast immer dieselben ~800 von 1.881
+Gemeinden, Salzburg/Steiermark seit Mai nicht; jetzt Fortsetzungs-Cursor in
+`source_runs.rotation_cursor`), harte Timeouts nur noch als Backstop
 (280 min für die Riesen, 45 für meinbezirk mit gemessenen 24,7).
 (c) *Stille Telemetrie-Verluste* — der CHECK-Constraint von source_runs
 kannte 'error'/'timeout' nicht und supabase-js wirft nicht → alle

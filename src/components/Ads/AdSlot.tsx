@@ -33,12 +33,20 @@
  *      nicht per Rad und bewegen keinen Zeiger; ein programmatisches
  *      window.scrollTo zaehlt deshalb bewusst NICHT als Geste.
  *
+ *   7. **Messbar (2026-10-17).** Jede Anforderung meldet sich als
+ *      Analytics-Event `ad_request` mit der Slot-ID (ueber denselben Pfad
+ *      wie ClickTracker/PageviewTracker). Ohne diesen Event war nicht zu
+ *      sehen, ob ein JS-ausfuehrender Crawler (Baidus Render-Farm aus
+ *      116.179.33.x, 1.000-2.800 Pageviews/Tag) Anzeigen ausloest —
+ *      die Abfrage dazu liegt in docs/ops/ad-request-nach-ua-und-ip.sql.
+ *
  * Bleibt eine Flaeche unbefuellt, verschwindet sie ganz statt einen
  * leeren Rahmen stehen zu lassen.
  */
 
 import { useEffect, useRef, useState } from 'react';
 import { useAdsAllowed } from '@/lib/ads/ads-allowed';
+import { trackEvent } from '@/lib/analytics';
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 const ADS_ENABLED = process.env.NEXT_PUBLIC_ADS_ENABLED === 'true';
@@ -126,6 +134,7 @@ export function AdSlot({ slot, minHeight = 280, tone = 'dark', className = '' }:
     if (!inView) return;
     try {
       (window.adsbygoogle = window.adsbygoogle ?? []).push({});
+      trackEvent('ad_request', { slot });
     } catch {
       /* Adblocker o. ae. — Flaeche bleibt leer und wird ausgeblendet */
     }

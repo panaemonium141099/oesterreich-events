@@ -569,6 +569,54 @@
       "slug": "palais-of-lights-a-candlelit-journey-2026",
       "title": "Palais of Lights – A Candlelit Journey",
       "writtenAt": "2026-10-17T07:15:17.180Z"
+    },
+    {
+      "eventId": "6b75481e-8d52-45db-b5fb-75a62e7f3951",
+      "slug": "nand-es-waere-schoen-tour-2026",
+      "title": "nand - Es wäre schön-Tour",
+      "writtenAt": "2026-10-18T07:26:51.397Z"
+    },
+    {
+      "eventId": "f151d2e1-2fdf-41a2-b4cd-7879e8b6fffa",
+      "slug": "andreas-ferner-bro-fessor-checkst-du-2026",
+      "title": "Andreas Ferner - Bro-Fessor, checkst du?",
+      "writtenAt": "2026-10-18T07:29:30.165Z"
+    },
+    {
+      "eventId": "0e88883a-7ef1-48fb-a55a-43cdab07f4cd",
+      "slug": "weihnachtskonzert-bozini-koncert-lichterglanz-der-stimmen-si-2026",
+      "title": "Weihnachtskonzert - Božini Koncert - Lichterglanz der Stimmen - Sijaj Glasov",
+      "writtenAt": "2026-10-19T08:07:05.237Z"
+    },
+    {
+      "eventId": "32421779-b90b-4fd7-abea-758709e7df49",
+      "slug": "erotik-und-fetisch-messe-2026",
+      "title": "Erotik- und Fetisch Messe",
+      "writtenAt": "2026-10-19T08:08:21.363Z"
+    },
+    {
+      "eventId": "9ed080a9-1974-496f-8a11-8acbf4f6ec8a",
+      "slug": "weihnachtskonzert-klangquadrat-2026",
+      "title": "Weihnachtskonzert Klangquadrat",
+      "writtenAt": "2026-10-20T00:16:07.687Z"
+    },
+    {
+      "eventId": "2fa79cf6-f461-4748-97e7-c8bcb7d2557d",
+      "slug": "vivaldi-4-seasons-crossover-konzert-2026",
+      "title": "Vivaldi 4 Seasons - Crossover Konzert",
+      "writtenAt": "2026-10-20T00:17:43.337Z"
+    },
+    {
+      "eventId": "5ca5f484-b962-4b30-a63b-b234944e99d1",
+      "slug": "falco-villa-fuehrung-jaenner-2027",
+      "title": "Falco Villa Führung Jänner",
+      "writtenAt": "2026-10-21T08:01:31.887Z"
+    },
+    {
+      "eventId": "548f5168-41cb-4e2e-8df5-d405b30bb797",
+      "slug": "impulso-tenors-total-christmas-2026",
+      "title": "Impulso Tenors - Total Christmas",
+      "writtenAt": "2026-10-21T08:02:59.694Z"
     }
   ],
   "stayGuides": [
@@ -577,6 +625,7 @@
     "salzburg-festspielzeit",
     "neusiedler-see-festivalsommer",
     "innsbruck-berge",
-    "woerthersee-eventsommer"
+    "woerthersee-eventsommer",
+    "linz-staedtetrip"
   ]
 }

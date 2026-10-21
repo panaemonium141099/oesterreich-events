@@ -121,6 +121,8 @@ async function main() {
   console.log(`  Artists removed:         ${stats.artists_removed}`);
   console.log(`  Derived events created:  ${stats.events_derived}`);
   console.log(`  Events backlinked:       ${stats.events_backlinked}`);
+  console.log(`  Derived events updated:  ${stats.events_updated}`);
+  console.log(`  Derived events confirmed: ${stats.events_confirmed}`);
   console.log(`  Derive skipped:          ${stats.derive_skipped}`);
   console.log(`  Derive errors:           ${stats.derive_errors.length}`);
 

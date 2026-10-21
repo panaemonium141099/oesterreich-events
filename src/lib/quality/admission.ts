@@ -307,6 +307,36 @@ export function contentQuarantineReasons(input: { title?: string | null }): Admi
 }
 
 /**
+ * Liegt der Beginn mehr als `ADMISSION_HORIZON_YEARS` nach heute (Wiener
+ * Kalendertag)? Der Vergleich als Zeichenkette verträgt auch einen
+ * 29. Februar, den es im Horizontjahr nicht gibt.
+ */
+export function startBeyondHorizon(start: Date, now: Date): boolean {
+  const today = viennaCalendarDay(now);
+  const horizonDay = `${Number(today.slice(0, 4)) + ADMISSION_HORIZON_YEARS}${today.slice(4)}`;
+  return viennaCalendarDay(start) > horizonDay;
+}
+
+/**
+ * Quarantäne-Gründe, die nur an Titel und Termin hängen, also genau die
+ * `NON_LOCATION_REASONS`. Sie lassen sich ohne Rohwerte und ohne Polygon für
+ * jede gespeicherte Zeile neu rechnen: die nächtliche Nachprüfung im Bestand
+ * (`admission-recheck.ts`) erreicht damit auch Zeilen, die keine Quelle mehr
+ * liefert, und der Dedup (`underlyingStatus`) gibt kein Duplikat als Ersatz
+ * für ein so zurückgehaltenes Primary frei.
+ */
+export function titleTimeQuarantineReasons(
+  input: { title?: string | null; start_date?: string | null },
+  now: Date = new Date(),
+): AdmissionReason[] {
+  const reasons: AdmissionReason[] = [];
+  const start = hasText(input.start_date) ? new Date(input.start_date!) : null;
+  if (start && !isNaN(start.getTime()) && startBeyondHorizon(start, now)) reasons.push('start_too_far_ahead');
+  reasons.push(...contentQuarantineReasons(input));
+  return reasons;
+}
+
+/**
  * Der Freigabevertrag. Reihenfolge: harte Verwerfungen zuerst, dann die
  * Gründe, die eine Zeile zwar zulassen, aber nicht veröffentlichen.
  */
@@ -338,10 +368,7 @@ export function evaluateAdmission(
       // Quarantäne statt Verwerfen: eine verworfene Zeile wird nie
       // geschrieben, eine schon veröffentlichte bliebe so sichtbar. Die
       // Quarantäne nimmt ihr beim nächsten Upsert die Veröffentlichung.
-      // Der Vergleich als Zeichenkette verträgt auch einen 29. Februar,
-      // den es im Horizontjahr nicht gibt.
-      const horizonDay = `${Number(today.slice(0, 4)) + ADMISSION_HORIZON_YEARS}${today.slice(4)}`;
-      if (startDay > horizonDay) {
+      if (startBeyondHorizon(start, now)) {
         quarantines.push('start_too_far_ahead');
       }
 

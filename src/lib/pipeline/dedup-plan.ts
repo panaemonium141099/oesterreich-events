@@ -339,6 +339,7 @@ const RELEASE_REASONS = new Set([
  */
 export function releaseStatus(row: {
   title: string | null | undefined;
+  start_date?: string | null;
   quality_score?: number | null;
   admission_decision?: string | null;
   location_status?: string | null;

@@ -171,6 +171,15 @@ import { post as rudyGiovanniniWeihnachtskonzert2026 } from './posts/rudy-giovan
 import { post as ramazuriCoffeeshockCompanyDieWeltIstNichtGenugTour2026 } from './posts/ramazuri-coffeeshock-company-die-welt-ist-nicht-genug-tour-2026';
 import { post as winterFestival20262026 } from './posts/winter-festival-2026-2026';
 import { post as palaisOfLightsACandlelitJourney2026 } from './posts/palais-of-lights-a-candlelit-journey-2026';
+import { post as nandEsWaereSchoenTour2026 } from './posts/nand-es-waere-schoen-tour-2026';
+import { post as andreasFernerBroFessorCheckstDu2026 } from './posts/andreas-ferner-bro-fessor-checkst-du-2026';
+import { post as uebernachtenLinzStaedtetrip } from './posts/uebernachten-linz-staedtetrip';
+import { post as weihnachtskonzertBoziniKoncertLichterglanzDerStimmenSi2026 } from './posts/weihnachtskonzert-bozini-koncert-lichterglanz-der-stimmen-si-2026';
+import { post as erotikUndFetischMesse2026 } from './posts/erotik-und-fetisch-messe-2026';
+import { post as weihnachtskonzertKlangquadrat2026 } from './posts/weihnachtskonzert-klangquadrat-2026';
+import { post as vivaldi4SeasonsCrossoverKonzert2026 } from './posts/vivaldi-4-seasons-crossover-konzert-2026';
+import { post as falcoVillaFuehrungJaenner2027 } from './posts/falco-villa-fuehrung-jaenner-2027';
+import { post as impulsoTenorsTotalChristmas2026 } from './posts/impulso-tenors-total-christmas-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -352,6 +361,15 @@ export const ALL_POSTS: FestivalPost[] = [
   ramazuriCoffeeshockCompanyDieWeltIstNichtGenugTour2026,
   winterFestival20262026,
   palaisOfLightsACandlelitJourney2026,
+  nandEsWaereSchoenTour2026,
+  andreasFernerBroFessorCheckstDu2026,
+  uebernachtenLinzStaedtetrip,
+  weihnachtskonzertBoziniKoncertLichterglanzDerStimmenSi2026,
+  erotikUndFetischMesse2026,
+  weihnachtskonzertKlangquadrat2026,
+  vivaldi4SeasonsCrossoverKonzert2026,
+  falcoVillaFuehrungJaenner2027,
+  impulsoTenorsTotalChristmas2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()

@@ -197,7 +197,7 @@ Internex-Eintrag 14:05 (lokal), nic.at-Zone mit der Delegation ab 15:00,
 Cloudflare-Status active um 15:00, Universal-SSL-Paket active 15:08. In den
 acht Minuten dazwischen scheiterte HTTPS am Edge (Apex und www waren
 kurzzeitig auf DNS-only zurückgenommen). Alle Belege aus Schritt D sind
-erbracht und in MASTERPLAN §3.13 festgehalten. Googlebot-Nachweis aus dem
+erbracht und in MASTERPLAN §3.14 festgehalten. Googlebot-Nachweis aus dem
 Caddy-Volllog (log_skip für zehn Minuten aus, 13:12 bis 13:24 UTC): 7
 Googlebot-Abrufe und 22 bingbot-Abrufe kamen über Cloudflare-Netze an und
 bekamen 200, `client_ip` aus 66.249.68.x bzw. 157.55.39.x/207.46.13.x/

@@ -335,9 +335,12 @@ const SCRAPER_TIMEOUT_OVERRIDES_MIN: Record<string, number> = {
   'gemeinde-registry': 280,
   'gemeinden': 280, // 4. Kommunal-Aggregator (253 Gemeinden), Befund 2026-07-15
   'meinbezirk': 90, // Full detail coverage (formerly capped at 500), three workers
+  // Alle 1.593 Listenseiten ~26 min (2026-10-14), Zeitbudget im Scraper
+  // 38 min (VeranstaltungskalenderNetScraper.BUDGET_MIN) plus Sync.
+  'veranstaltungskalender.net': 45,
 };
 
-function timeoutMsFor(name: string): number {
+export function timeoutMsFor(name: string): number {
   return (SCRAPER_TIMEOUT_OVERRIDES_MIN[name] ?? DEFAULT_TIMEOUT_MIN) * 60_000;
 }
 
@@ -382,7 +385,7 @@ const SCRAPER_WEIGHTS: Record<string, number> = {
   'gemeinden': 130,                     // 253 Gemeinden inkl. Kalender-Discovery (Schätzung, Telemetrie liefert bald Messwert)
   // Gemessen 2026-07-14 (max_min, mit Headroom aufgerundet):
   'meinbezirk': 60,                     // Estimate with full detail coverage; update from telemetry
-  'veranstaltungskalender.net': 25,     // 21,6
+  'veranstaltungskalender.net': 30,     // 20 bei 1.171 von 1.593 Seiten (p90 2026-10), voll ~28
   'marxhalle': 20,                      // 17,6
   'falter': 14,                         // 11,4
   'burgenland.info': 12,                // 9,9
@@ -465,6 +468,13 @@ export async function runAllScrapers(subset?: BaseScraper[]): Promise<void> {
  * nachziehen). Fire-and-forget: Telemetrie darf nie einen Scrape killen;
  * ohne Service-Key (lokale Runs) wird still übersprungen.
  */
+function telemetryClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key, { auth: { persistSession: false } });
+}
+
 async function recordSourceRun(row: {
   source_name: string;
   events_found: number;
@@ -472,12 +482,12 @@ async function recordSourceRun(row: {
   duration_ms: number;
   status: 'success' | 'error' | 'timeout';
   error_message: string | null;
+  /** Fortsetzungspunkt, nur bei Scrapern mit resumesSourceList. */
+  rotation_cursor?: string;
 }): Promise<void> {
   try {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!url || !key) return;
-    const sb = createClient(url, key, { auth: { persistSession: false } });
+    const sb = telemetryClient();
+    if (!sb) return;
     // supabase-js wirft NICHT — Fehler kommen im Result-Objekt. Genau so
     // gingen bis 2026-07-14 alle error-/timeout-Zeilen still verloren
     // (CHECK-Constraint kannte die Status-Werte nicht).
@@ -489,6 +499,34 @@ async function recordSourceRun(row: {
     }
   } catch (e) {
     console.warn(`[telemetry] source_runs insert failed (${row.source_name}):`, e instanceof Error ? e.message : e);
+  }
+}
+
+/**
+ * Fortsetzungspunkt des letzten Laufs, der einen geschrieben hat
+ * (rotation-cursor.ts). Läufe ohne Cursor (Timeout, Absturz) überspringt
+ * die Abfrage, ihr Teil kommt im nächsten Lauf noch einmal dran. Ohne
+ * Datenbank oder bei einem Lesefehler: null, also Start am Listenanfang.
+ */
+async function loadRotationCursor(sourceName: string): Promise<string | null> {
+  try {
+    const sb = telemetryClient();
+    if (!sb) return null;
+    const { data, error } = await sb
+      .from('source_runs')
+      .select('rotation_cursor')
+      .eq('source_name', sourceName)
+      .not('rotation_cursor', 'is', null)
+      .order('run_at', { ascending: false })
+      .limit(1);
+    if (error) {
+      console.warn(`[${sourceName}] Cursor nicht lesbar, Start am Listenanfang: ${error.message}`);
+      return null;
+    }
+    return (data?.[0] as { rotation_cursor?: string | null } | undefined)?.rotation_cursor ?? null;
+  } catch (e) {
+    console.warn(`[${sourceName}] Cursor nicht lesbar, Start am Listenanfang:`, e instanceof Error ? e.message : e);
+    return null;
   }
 }
 
@@ -525,6 +563,8 @@ export async function runScraper(scraper: BaseScraper): Promise<ScraperRunResult
     message: `Scraping ${scraper.name}...`,
     startedAt,
   });
+
+  if (scraper.resumesSourceList) scraper.rotationCursor = await loadRotationCursor(scraper.name);
 
   try {
     // fn-25 B3: Genauigkeit der Adapter-Koordinaten je Quelle deklarieren,
@@ -593,6 +633,9 @@ export async function runScraper(scraper: BaseScraper): Promise<ScraperRunResult
         syncErrors > 0
           ? `${syncErrors} Zeilen nicht geschrieben: ${syncErrorDetail || 'DB-Fehler'}`.slice(0, 500)
           : null,
+      // Nur wenn scrape() zurückkam: nach einem Timeout ist das Ergebnis
+      // verloren, der nächste Lauf wiederholt den Abschnitt.
+      ...(scraper.resumesSourceList && scraper.reachedCursor ? { rotation_cursor: scraper.reachedCursor } : {}),
     });
     return {
       eventsFound, eventsUpserted: eventsNew, durationMs: Date.now() - startedMs,

@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { fetchHtml, MAX_HTML_BYTES } from '@/lib/scrapers/fetch-html';
+import { fetchHtml, readHtml, MAX_HTML_BYTES } from '@/lib/scrapers/fetch-html';
 import { BaseScraper } from '@/lib/scrapers/BaseScraper';
+import { Gem2GoScraper } from '@/lib/scrapers/Gem2GoScraper';
+import { discoverEventListUrl } from '@/lib/scrapers/gemeinde-event-discovery';
 import type { ScrapedEvent } from '@/types/events';
 
 /**
@@ -139,5 +141,116 @@ describe('BaseScraper.fetchHtml', () => {
     const headers = (fn.mock.calls[0] as unknown as [string, RequestInit])[1].headers as Record<string, string>;
     expect(headers['User-Agent']).toContain('BurgenlandEvents-Scraper');
     expect(headers['Accept']).toContain('text/html');
+  });
+});
+
+describe('readHtml', () => {
+  it('XML nur mit xml-Option (Sitemap)', async () => {
+    const xml = () => new Response('<urlset/>', { headers: { 'content-type': 'application/xml; charset=utf-8' } });
+    expect(await readHtml(xml())).toEqual({ html: null, error: 'kein HTML (application/xml)', permanent: true });
+    expect((await readHtml(xml(), { xml: true })).html).toBe('<urlset/>');
+    const pdf = new Response('%PDF', { headers: { 'content-type': 'application/pdf' } });
+    expect((await readHtml(pdf, { xml: true })).error).toBe('kein HTML (application/pdf)');
+  });
+});
+
+/** Antwort mit gesetzter URL, wie fetch sie nach Weiterleitungen liefert. */
+function at(url: string, res: Response): Response {
+  Object.defineProperty(res, 'url', { value: url });
+  return res;
+}
+
+const pdfBody = () => countingBody(64 * 1024, Infinity, 0x25);
+
+describe('Gem2GoScraper: Abrufe nur als HTML', () => {
+  type Internals = { fetchWithTimeout(url: string, ms: number): Promise<string | null>; log(msg: string): void };
+  function gem2go() {
+    const s = new Gem2GoScraper() as unknown as Internals;
+    const logs: string[] = [];
+    s.log = (m) => { logs.push(m); };
+    return { s, logs };
+  }
+
+  it('Uttendorf: Detail-Link GetDocument.ashx, 302 auf ein PDF, wird nicht gelesen', async () => {
+    const doc = 'http://www.uttendorf.at/system/web/GetDocument.ashx?cts=1791897816&fileId=2249808&useFlipbook=true';
+    const { stream, state } = pdfBody();
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: '/system/web/GetDocument.ashx?fileId=2249808&file=1' } }))
+      .mockResolvedValueOnce(new Response(stream, { headers: { 'content-type': 'application/pdf', 'content-length': '367814' } })));
+    const { s, logs } = gem2go();
+    expect(await s.fetchWithTimeout(doc, 1000)).toBeNull();
+    expect(state.cancelled).toBe(true);
+    expect(state.pulled).toBeLessThanOrEqual(1);
+    expect(logs).toEqual([`Übersprungen, kein HTML (application/pdf): ${doc}`]);
+  });
+
+  it('Strobl: PDF ohne Weiterleitung (77 MB) wird nicht gelesen', async () => {
+    const { stream, state } = pdfBody();
+    stubFetch(new Response(stream, { headers: { 'content-type': 'application/pdf', 'content-length': '77669838' } }));
+    const { s } = gem2go();
+    expect(await s.fetchWithTimeout('https://www.strobl.salzburg.at/system/web/GetDocument.ashx?fileId=2225464', 1000)).toBeNull();
+    expect(state.cancelled).toBe(true);
+    expect(state.pulled).toBeLessThanOrEqual(1);
+  });
+
+  it('HTML ohne Content-Length über 5 MB: Abbruch beim Lesen', async () => {
+    const { stream, state } = countingBody(1024 * 1024, Infinity);
+    stubFetch(new Response(stream, { headers: { 'content-type': 'text/html' } }));
+    const { s, logs } = gem2go();
+    expect(await s.fetchWithTimeout('https://www.x.at/system/web/veranstaltung.aspx?sprache=1', 1000)).toBeNull();
+    expect(state.cancelled).toBe(true);
+    expect(state.pulled).toBeLessThanOrEqual(7);
+    expect(logs[0]).toContain('zu groß');
+  });
+
+  it('gem2go-Seite kommt unverändert durch', async () => {
+    const html = '<html><body><table class="va_list_table"></table></body></html>';
+    stubFetch(new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8' } }));
+    const { s, logs } = gem2go();
+    expect(await s.fetchWithTimeout('https://www.x.at/system/web/veranstaltung.aspx?sprache=1', 1000)).toBe(html);
+    expect(logs).toEqual([]);
+  });
+});
+
+describe('Gemeinde-Homepage-Suche: Kandidaten nur als HTML', () => {
+  const home = 'https://www.gemeinde.at';
+  function route(pages: Record<string, () => Response>) {
+    const fn = vi.fn(async (url: string) => at(url, pages[url]?.() ?? new Response('weg', { status: 404 })));
+    vi.stubGlobal('fetch', fn);
+    return fn;
+  }
+
+  it('ein Dokument-Link mit "Veranstaltungskalender" wird abgerufen, aber nicht gelesen', async () => {
+    const doc = `${home}/system/web/GetDocument.ashx?fileId=7`;
+    const states: Array<{ pulled: number; cancelled: boolean }> = [];
+    const html = (body: string) => () => new Response(`<html><body>${body}</body></html>`, { headers: { 'content-type': 'text/html' } });
+    const fn = route({
+      [home]: html(`<a href="/veranstaltungen">Veranstaltungen</a><a href="/system/web/GetDocument.ashx?fileId=7">Veranstaltungskalender 2026</a>`),
+      [`${home}/veranstaltungen`]: html('<h1>Veranstaltungen</h1>'),
+      [doc]: () => {
+        const { stream, state } = pdfBody();
+        states.push(state);
+        return new Response(stream, { headers: { 'content-type': 'application/pdf' } });
+      },
+    });
+    const r = await discoverEventListUrl(home);
+    expect(fn.mock.calls.map((c) => c[0])).toContain(doc);
+    expect(states.length).toBeGreaterThan(0);
+    for (const st of states) {
+      expect(st.cancelled).toBe(true);
+      expect(st.pulled).toBeLessThanOrEqual(1);
+    }
+    expect(r?.url).toBe(`${home}/veranstaltungen`);
+  });
+
+  it('sitemap.xml (application/xml) wird weiter gelesen', async () => {
+    route({
+      [home]: () => new Response('<html><body><a href="/kontakt">Kontakt</a></body></html>', { headers: { 'content-type': 'text/html' } }),
+      [`${home}/sitemap.xml`]: () => new Response(
+        `<urlset><url><loc>${home}/veranstaltungen-liste</loc></url><url><loc>${home}/kontakt</loc></url></urlset>`,
+        { headers: { 'content-type': 'application/xml' } },
+      ),
+    });
+    expect(await discoverEventListUrl(home)).toEqual({ url: `${home}/veranstaltungen-liste`, eventCount: 0 });
   });
 });
