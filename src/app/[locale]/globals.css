@@ -307,8 +307,15 @@ body {
   from { transform: translate3d(0, 0, 0); }
   to   { transform: translate3d(0, 100%, 0); }
 }
+/* Füllmodus `backwards`, nicht `both`: mit `both` bliebe nach der
+   Einblendung dauerhaft `transform: translate3d(0,0,0)` am Sheet stehen,
+   und ein transformiertes Element wird zum Bezugsrahmen für
+   `position: fixed`-Nachfahren. Die Ticketleiste des Event-Sheets
+   (V4MobileStickyBar) klebte so nicht mehr am Viewport, sondern scrollte
+   im Sheet mit nach oben (Mobile-Audit 2026-10-22). Der Endzustand ist
+   ohnehin „kein Transform“. */
 [data-sheet-state='open'] {
-  animation: sheet-slide-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: sheet-slide-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 [data-sheet-state='closed'] {
   animation: sheet-slide-out 0.22s cubic-bezier(0.7, 0, 0.84, 0) both;
@@ -323,7 +330,7 @@ body {
      pair below. */
   [data-sheet-state='open'] {
     animation: none;
-    transform: translate3d(0, 0, 0);
+    transform: none;
   }
   [data-sheet-state='closed'] {
     animation: none;

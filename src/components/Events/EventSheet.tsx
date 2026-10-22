@@ -222,7 +222,9 @@ export function EventSheet({ children }: EventSheetProps) {
       // user reported "anzeige der verschiedenen events bleibt im
       // vordergrund" exactly because of this z-index inversion.
       className="fixed inset-0 z-[1100] overflow-y-auto overscroll-contain"
-      style={{ background: '#0a0a0c' }}
+      // --v4-sticky-bottom: die Tab-Bar liegt unter diesem Overlay, also
+      // sitzt die mobile Ticketleiste (V4MobileStickyBar) hier am Rand.
+      style={{ background: '#0a0a0c', '--v4-sticky-bottom': '0px' } as React.CSSProperties}
       data-sheet-state={exiting ? 'closed' : 'open'}
       // fn-15.5 round-9 (codex): tell RouteTransitions to ignore link
       // clicks inside this overlay. Our own capture-phase handler

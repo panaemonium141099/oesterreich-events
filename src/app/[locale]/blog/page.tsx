@@ -165,7 +165,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
     <div className="min-h-screen bg-[#f8f6f2]">
 
       {/* TOP NAV */}
-      <nav className="border-b border-gray-200 bg-[#f8f6f2]/80 backdrop-blur-sm sticky top-0 z-40">
+      <nav className="border-b border-gray-200 bg-[#f8f6f2]/80 backdrop-blur-sm sticky top-16 z-20">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/" className="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors tracking-tight">
             LassTreffen.at

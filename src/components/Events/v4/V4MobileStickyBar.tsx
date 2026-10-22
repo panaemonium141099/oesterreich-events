@@ -33,7 +33,11 @@ export function V4MobileStickyBar({ state, eventId, provider, priceFrom, ticketU
     <div
       data-v4-event-sticky={state}
       className="md:hidden fixed left-0 right-0 z-[22] flex items-center gap-3 px-4 py-3 border-t border-[var(--v4-hairline-2)] bg-[rgba(10,10,12,0.96)] backdrop-blur"
-      style={{ bottom: 82 /* V4TabBar ist 81px hoch — 76 überlappte 5px */ }}
+      // V4TabBar ist 81px hoch (76 überlappte 5px). Im Event-Sheet
+      // (@modal, z-1100) liegt die Tab-Bar UNTER dem Overlay — dort setzt
+      // EventSheet die Variable auf 0, sonst klebte die Leiste 82px über
+      // dem Rand und der Text lief darunter durch (Mobile-Audit 2026-10-22).
+      style={{ bottom: 'var(--v4-sticky-bottom, 82px)' }}
     >
       {state === 'ticket' || state === 'match' || state === 'lineup' ? (
         // Bedingung ist das ZIEL, nicht der Preis. Stand hier frueher auch

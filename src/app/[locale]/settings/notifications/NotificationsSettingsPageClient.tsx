@@ -14,7 +14,7 @@ import NotificationPreferences from '@/components/Settings/NotificationPreferenc
 export function NotificationsSettingsPageClient() {
   return (
     <div className="min-h-screen bg-[#0a0a0c] text-white">
-      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#0a0a0c]/80 backdrop-blur-md">
+      <header className="sticky top-16 z-20 border-b border-white/[0.06] bg-[#0a0a0c]/80 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-4">
           <Link
             href="/profile"
