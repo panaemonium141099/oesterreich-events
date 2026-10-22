@@ -109,26 +109,30 @@ export function LocationBanner({ onLocationFound, suppressAutoFly = false }: Loc
         .location-banner-exit {
           animation: locFadeOut 180ms ease-in forwards;
         }
+        /* Nur die Y-Achse animieren: die horizontale Zentrierung kommt aus
+           Tailwinds -translate-x-1/2, das in v4 die eigene CSS-Eigenschaft
+           translate setzt. Ein translate(-50%) im Keyframe-transform
+           addierte sich dazu, der Banner hing mobil zur Hälfte links aus
+           dem Bild (Mobile-Audit 2026-10-22). */
         @keyframes locSlideDown {
-          from { opacity: 0; transform: translate(-50%, -12px); }
-          to { opacity: 1; transform: translate(-50%, 0); }
+          from { opacity: 0; transform: translateY(-12px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         @keyframes locFadeOut {
-          from { opacity: 1; transform: translate(-50%, 0); }
-          to { opacity: 0; transform: translate(-50%, -8px); }
+          from { opacity: 1; transform: translateY(0); }
+          to { opacity: 0; transform: translateY(-8px); }
         }
         @media (prefers-reduced-motion: reduce) {
           .location-banner-enter,
           .location-banner-exit {
             animation: none !important;
+            transform: none;
           }
           .location-banner-enter {
             opacity: 1;
-            transform: translate(-50%, 0);
           }
           .location-banner-exit {
             opacity: 0;
-            transform: translate(-50%, 0);
           }
         }
       `}</style>

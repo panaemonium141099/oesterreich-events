@@ -123,8 +123,11 @@ export function WidgetCodeGenerator() {
 
   return (
     <div className="mt-8 grid lg:grid-cols-2 gap-6 items-start">
-      {/* Konfiguration + Code */}
-      <div>
+      {/* Konfiguration + Code. min-w-0: Grid-Kinder haben min-width:auto
+          und wachsen sonst auf die längste Zeile des <pre> (~600 px) —
+          die ganze Seite wurde mobil 644 px breit (Mobile-Audit
+          2026-10-22). */}
+      <div className="min-w-0">
         <label htmlFor="widget-region" className="block text-sm font-semibold mb-2 text-white/70">
           Region, Bezirk oder Gemeinde
         </label>
@@ -191,7 +194,7 @@ export function WidgetCodeGenerator() {
       </div>
 
       {/* Live-Vorschau */}
-      <div>
+      <div className="min-w-0">
         <p className="text-sm font-semibold mb-2 text-white/70">Vorschau</p>
         <iframe
           key={selected.slug}

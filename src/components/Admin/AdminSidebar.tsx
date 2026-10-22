@@ -67,14 +67,19 @@ export function AdminSidebar() {
 
   return (
     <>
-      {/* Mobile hamburger */}
-      <button
-        onClick={() => setOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white/[0.06] border border-white/[0.06] text-white/70 hover:text-white"
-        aria-label="Open navigation"
-      >
-        <Menu className="w-5 h-5" />
-      </button>
+      {/* Mobile: eigene Leiste unter dem globalen V4TopNav (64 px) statt
+          eines fixed-Buttons oben links — der saß genau auf dem Logo im
+          Top-Nav. Sticky, damit der Menü-Zugang beim Scrollen bleibt. */}
+      <div className="lg:hidden sticky top-16 z-20 flex items-center gap-3 px-4 py-2 bg-black/90 backdrop-blur border-b border-white/[0.06]">
+        <button
+          onClick={() => setOpen(true)}
+          className="p-2 rounded-lg bg-white/[0.06] border border-white/[0.06] text-white/70 hover:text-white"
+          aria-label="Open navigation"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <span className="text-sm font-semibold text-white/80 tracking-wide uppercase">Admin Panel</span>
+      </div>
 
       {/* Backdrop */}
       {open && (

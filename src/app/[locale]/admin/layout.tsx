@@ -13,9 +13,12 @@ export const metadata = { title: 'Admin Panel' };
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <AppShell hideSocialNav>
-      <div className="min-h-screen bg-black text-white flex">
+      {/* flex-col auf Mobile: die AdminSidebar rendert dort eine sticky
+          Menü-Leiste im Fluss (über dem Inhalt), erst ab lg die statische
+          Seitenleiste neben dem Inhalt. */}
+      <div className="min-h-screen bg-black text-white flex flex-col lg:flex-row">
         <AdminSidebar />
-        <main className="flex-1 p-6 lg:p-8 overflow-auto">
+        <main className="flex-1 min-w-0 p-6 lg:p-8 overflow-auto">
           {children}
         </main>
       </div>

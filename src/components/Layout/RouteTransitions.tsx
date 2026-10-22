@@ -118,7 +118,19 @@ export function RouteTransitions() {
       // react during the transition. Cleared on `finished`.
       document.body.setAttribute('data-route-transitioning', 'true');
 
+      // `view-transition-name` nur für die Dauer der Animation setzen.
+      // Dauerhaft gesetzt (früher inline im Layout) macht der Name den
+      // Seiten-Wrapper zum Stacking-Context, und jedes fixed-Overlay in
+      // den Seiten landet unter Top-Nav und Tab-Bar (Mobile-Audit
+      // 2026-10-22). Vor start() gesetzt, damit der Alt-Schnappschuss den
+      // Namen trägt; der Neu-Schnappschuss entsteht nach dem Callback,
+      // solange der Name noch steht.
+      const routeRoot = document.querySelector<HTMLElement>('.route-root');
+      const nameRouteRoot = () => routeRoot?.style.setProperty('view-transition-name', 'route-root');
+      const unnameRouteRoot = () => routeRoot?.style.removeProperty('view-transition-name');
+
       try {
+        nameRouteRoot();
         const transition = start(() => {
           // CRITICAL: this is where the DOM update must happen for the
           // View Transition API to capture old/new snapshots correctly.
@@ -128,11 +140,13 @@ export function RouteTransitions() {
           router.push(href);
         });
         transition.finished.finally(() => {
+          unnameRouteRoot();
           document.body.removeAttribute('data-route-transitioning');
         });
       } catch {
         // startViewTransition can throw if another transition is mid-
         // flight. Fall back to a plain push so the user still navigates.
+        unnameRouteRoot();
         document.body.removeAttribute('data-route-transitioning');
         router.push(href);
       }
