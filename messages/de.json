@@ -335,9 +335,7 @@
     "anonPrivacyLink": "Datenschutzerklärung"
   },
   "Discover": {
-    "eyebrow": "Entdecken",
-    "title": "Was läuft in Österreich?",
-    "subtitle": "Filter nach Datum, Region und Kategorie — oder beschreib in Smart-Suche frei was du willst.",
+    "title": "Entdecken",
     "tabsAria": "Suchmodus",
     "tabList": "Liste",
     "tabSmart": "Smart-Suche",
@@ -345,7 +343,6 @@
     "loadingMore": "Weitere Events werden geladen …",
     "scrollForMore": "Scrollen für mehr Events",
     "regionRailAria": "Nach Region",
-    "regionRail": "Nach Region:",
     "chipTickets": "Tickets verfügbar",
     "chipFree": "Gratis",
     "chipDoorsale": "Abendkasse",
@@ -360,7 +357,22 @@
     "sortTickets": "Tickets",
     "sortDistance": "Nähe",
     "sortLabel": "Sortieren",
-    "events": "Events"
+    "events": "Events",
+    "scopeAll": "ganz Österreich",
+    "scopeAllChip": "Überall",
+    "picksAria": "Top-Picks",
+    "topPick": "Top-Pick heute",
+    "shelfTonight": "Heute Abend",
+    "shelfWeekend": "Dieses Wochenende",
+    "shelfRegion": "Nach Region",
+    "shelfFree": "Gratis",
+    "shelfCategories": "Nach Kategorie",
+    "showAll": "Alle anzeigen",
+    "nEvents": "{count} Events",
+    "dayRange": "{from} bis {to}",
+    "scrollBack": "Zurück",
+    "scrollForward": "Weiter",
+    "backToOverview": "Zur Übersicht"
   },
   "MapPage": {
     "srTitle": "Event-Karte Österreich — Konzerte, Festivals, Märkte und Veranstaltungen auf Karte",

@@ -1091,3 +1091,12 @@ button:active, a:active, [role="button"]:active {
   --v4-go:               #7bb794;
   --v4-alert:            #c67079;
 }
+
+/* /entdecken Poster-Raster (Variante „Regale", 2026-10-22) */
+.v4-poster-grid {
+  display: grid;
+  gap: 18px 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 720px) { .v4-poster-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .v4-poster-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }

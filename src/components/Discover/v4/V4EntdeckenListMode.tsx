@@ -11,11 +11,14 @@
  * Filter-Verhalten ist 1:1 identisch zum heutigen /map?view=list.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { EventListView } from '@/components/MapV3/EventListView';
 import { FilterDrawer } from '@/components/MapV3/FilterDrawer';
+import { applyDatePreset } from '@/components/MapV3/datePresets';
 import { V4RegionRail } from '@/components/Discover/v4/V4RegionRail';
+import { V4EntdeckenShelves, type ShelfPreset } from '@/components/Discover/v4/V4EntdeckenShelves';
+import { hasNarrowing } from '@/components/Discover/v4/shelves-select';
 import { useFilteredEvents } from '@/lib/v4/use-filtered-events';
 import { useBoostedIds } from '@/lib/hooks/useBoostedIds';
 import type { EventFilters } from '@/types/events';
@@ -51,6 +54,20 @@ export function V4EntdeckenListMode({
 
   const [filterOpen, setFilterOpen] = useState(false);
   const boostedIds = useBoostedIds();
+
+  // Regale (Variante „Regale", 2026-10-22) nur ohne Einschränkung: eine
+  // Suche, ein Deep-Link oder „Alle anzeigen" blendet zur reinen Liste um.
+  const curated = !hasNarrowing(filters as Record<string, unknown>, bundeslandIds);
+  const onPreset = useCallback((preset: ShelfPreset) => {
+    const r = applyDatePreset(preset);
+    if (r) setFilters((f) => ({ ...f, dateFrom: r.dateFrom, dateTo: r.dateTo }));
+  }, [setFilters]);
+  const onCategory = useCallback((category: string) => {
+    setFilters((f) => ({ ...f, category, categories: undefined, tags: undefined }));
+  }, [setFilters]);
+  const onFree = useCallback(() => {
+    setFilters((f) => ({ ...f, priceTier: 'gratis' }));
+  }, [setFilters]);
 
   // Ein Batch Vorsprung: der erste Cursor-Batch (10-13 s Micro-DB, nie im
   // Edge-Cache) startet direkt nach dem Erst-Paint im Hintergrund, damit
@@ -89,11 +106,30 @@ export function V4EntdeckenListMode({
 
   return (
     <div className="max-w-[1180px] mx-auto px-4 md:px-14 pb-20">
-      {/* Region rail → entry into the city/bundesland SEO hubs (hybrid loop). */}
+      {/* Region-Chips → Einstieg in die Stadt-Hubs (hybrid loop). */}
       <V4RegionRail />
 
+      {curated && (
+        <V4EntdeckenShelves
+          events={finalEvents}
+          loading={loading}
+          onPreset={onPreset}
+          onCategory={onCategory}
+          onFree={onFree}
+        />
+      )}
+
       {/* Toolbar: Filter-Button rechts; Count + Sort sitzt in EventListView. */}
-      <div className="flex items-center justify-end gap-3 mb-4">
+      <div className={'flex items-center justify-end gap-3 mb-4' + (curated ? ' pt-6 border-t border-[var(--v4-hairline-2)]' : '')}>
+        {!curated && (
+          <button
+            type="button"
+            onClick={() => { setFilters({}); setBundeslandIds(['all']); }}
+            className="press-haptic mr-auto inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)] transition-colors"
+          >
+            ‹ {t('backToOverview')}
+          </button>
+        )}
         <button
           type="button"
           onClick={() => setFilterOpen(true)}

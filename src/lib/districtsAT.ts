@@ -773,3 +773,32 @@ function _haversineApprox(lat1: number, lng1: number, lat2: number, lng2: number
   const dLng = (lng2 - lng1) * Math.cos(((lat1 + lat2) / 2) * (Math.PI / 180));
   return dLat * dLat + dLng * dLng;
 }
+
+/**
+ * Anzeigename eines Bezirks aus dem kanonischen Kleinschreibwert
+ * (`events.district`, z. B. „sankt johann im pongau", „8. josefstadt",
+ * „graz (stadt)"): Schreibweise aus dem Register, „(Stadt)" ohne Suffix;
+ * unbekannte Werte werden wortweise groß geschrieben.
+ */
+const DISTRICT_DISPLAY_SMALL_WORDS = new Set(['am', 'an', 'im', 'in', 'der', 'bei', 'ob', 'und', 'auf', 'von', 'zu']);
+let districtDisplayIndex: Map<string, string> | null = null;
+
+export function districtDisplayName(raw: string | null | undefined): string {
+  const base = displayDistrictName(raw);
+  if (!base) return '';
+  if (!districtDisplayIndex) {
+    districtDisplayIndex = new Map();
+    for (const list of Object.values(DISTRICTS_BY_BUNDESLAND)) {
+      for (const d of list) {
+        const shown = displayDistrictName(d.name);
+        districtDisplayIndex.set(shown.toLowerCase(), shown);
+      }
+    }
+  }
+  const known = districtDisplayIndex.get(base.toLowerCase());
+  if (known) return known;
+  return base
+    .split(' ')
+    .map((w, i) => (i > 0 && DISTRICT_DISPLAY_SMALL_WORDS.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(' ');
+}
