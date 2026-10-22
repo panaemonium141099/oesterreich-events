@@ -1,0 +1,58 @@
+// Echte Events von lasstreffen.at/entdecken (22.10.2026), Preise + Tage für das Mockup ergänzt.
+const T = 'https://www.oeticket.com/obj/media/AT-eventim/teaser/222x222/';
+window.EVENTS = [
+  { t: 'Steaming Satellites', img: T+'2025/Steaming-Satellites-2026-tickets-m.jpg', time: '19:00', cat: 'Musik', venue: 'ppc', city: 'Graz', price: 'ab 26 €', day: 0 },
+  { t: 'Poxrucker Sisters – DNA Tour', img: T+'2025/Poxrucker-Sisters-DNA-2026-tickets-c-Laura-Edl-m.jpg', time: '19:30', cat: 'Musik', venue: 'SZENE Salzburg', city: 'Salzburg', price: 'ab 34 €', day: 0 },
+  { t: 'Stand-up Comedy Mixed Show', img: T+'2026/Stand_up_Comedy_Mixed_Show_tickets_2026_c_lucky_222.jpg', time: '20:00', cat: 'Kabarett', venue: 'Lucky Punch Comedy Club', city: 'Wien', price: '18 €', day: 0 },
+  { t: 'Dews Pegahorn', img: T+'2025/Dews-Pegahorn-2026-tickets-m.jpg', time: '20:00', cat: 'Musik', venue: 'B72', city: 'Wien', price: '15 €', day: 0 },
+  { t: 'Imperial Gala Concert', img: T+'2026/Imperial_Gala_Concert_tickets_2026_c_Tritsch_Tratsch_Veranstaltungs_GmbH_222.jpg', time: '18:00', cat: 'Klassik', venue: 'Palais Auersperg', city: 'Wien', price: 'ab 49 €', day: 0 },
+  { t: 'Sonja Pikart – Stark', img: T+'2025/Sonja_Pikart_tickets_2025_c_Stefan_Joham_222.jpg', time: '19:30', cat: 'Kabarett', venue: 'Josef-Baumann-Saal', city: 'Wagna', price: '28 €', day: 0 },
+  { t: 'Oskar Haag – Lost Cause Tour', img: T+'2026/Oskar-Haag-Lost-Cause-Tour-2026-tickets-c-Michelle-Rassnitzer-m.jpg', time: '20:00', cat: 'Musik', venue: 'Cinema Paradiso', city: 'St. Pölten', price: 'ab 24 €', day: 0 },
+  { t: 'Freddie Mercury Opera Show', img: T+'2026/Freddie-Mercury-Opera-Show-2026-27-tickets-m.jpg', time: '20:30', cat: 'Musik', venue: 'Royal Vienna Hall', city: 'Wien', price: 'ab 39 €', day: 0 },
+  { t: 'maschek – Exit', img: T+'2025/Maschek_2025_c_Apollonia_Theresa_Bitzan_222.jpg', time: '20:00', cat: 'Kabarett', venue: 'Rabenhof Theater', city: 'Wien', price: '29 €', day: 0 },
+  { t: 'Evon Rose – Live im Chelsea', img: T+'2026/ContentMarei/EVON_ROSE_Live_im_Chelsea_Wien_c_Alex_Gotter_222.jpg', time: '20:00', cat: 'Musik', venue: 'Chelsea', city: 'Wien', price: '12 €', day: 0 },
+  { t: 'Harry G – HoamStories', img: T+'2023/harry-g-tickets-2023-222.jpg', time: '19:30', cat: 'Kabarett', venue: 'Congress Saalfelden', city: 'Saalfelden', price: 'ab 36 €', day: 0 },
+  { t: 'Caro Fux – Live 2026', img: T+'2026/Caro_Fux_tickets_2026_c_Caro_Fux_222.jpg', time: '19:30', cat: 'Musik', venue: 'Kulturcentrum Wimpassing', city: 'Wimpassing', price: '22 €', day: 0 },
+  { t: 'Some Sprouts', img: T+'2026/Some-Sprouts-2026-tickets-m.jpg', time: '20:00', cat: 'Musik', venue: 'dasWERK', city: 'Wien', price: 'Gratis', day: 0 },
+  { t: 'Vivalis: Tribute an Ludovico Einaudi', img: T+'2026/ContentMarei/Vivalis_Tribute_an_Ludovico_Einaudi_c_Vivalis_Music_222.jpg', time: '19:30', cat: 'Klassik', venue: 'Wiener Hofmusikkapelle', city: 'Wien', price: 'ab 32 €', day: 0 },
+  { t: 'Gernot & Stipsits – Lotterbuben', img: T+'2023/Gernot_und_Stipsits_color_c_Lukas_Beck_222.jpg', time: '19:30', cat: 'Kabarett', venue: 'Messehalle Freistadt', city: 'Freistadt', price: 'ab 33 €', day: 0 },
+  { t: 'Peter Cornelius & Band – Zeitlos', img: T+'2025/peter-cornelius-zeitlos-tickets-2025-m.jpg', time: '20:00', cat: 'Musik', venue: 'Helmut List Halle', city: 'Graz', price: 'ab 45 €', day: 0 },
+  { t: 'Wolfgang „Fifi" Pissecker – Na gratuliere', img: T+'2025/WOLFGANG_FIFI_PISSECKER_NA_GRATULIERE_tickets_2025_c_Sabine_Klimpt_m.jpg', time: '19:30', cat: 'Kabarett', venue: 'VAZ St. Pölten', city: 'St. Pölten', price: '27 €', day: 1 },
+  { t: 'Benefizkonzert St. Florianer Sängerknaben', img: T+'2026/Benefizkonzert-St.-Florianer-Saengerknaben-Little-Singers-of-Armenia-2026-tickets-m.jpg', time: '19:00', cat: 'Klassik', venue: 'Alter Dom', city: 'Linz', price: 'Spende', day: 1 },
+  { t: 'G’mischter Satz – Schmäh, Musik & ein bisserl Drama', img: T+'2026/Gmischter-Satz-Schmaeh,-Musik-ein-bisserl-Drama-2026-tickets-m.jpg', time: '20:00', cat: 'Musik', venue: 'Theater Center Forum', city: 'Wien', price: '25 €', day: 1 },
+  { t: 'Klassische Konzerte im Haus der Musik', img: T+'2025/Klassische_Konzerte_Haus_der_Musik_c_YouOnTour_Wiener_Klassik_Ensemble_222.jpg', time: '20:00', cat: 'Klassik', venue: 'Haus der Musik', city: 'Wien', price: 'ab 29 €', day: 1 },
+  { t: 'House of Strauss: Classics of Austria', img: T+'2026/House_of_Strauss_Classics_of_Austria_c_PhilippLipiarski_222.jpg', time: '20:30', cat: 'Klassik', venue: 'House of Strauss', city: 'Wien', price: 'ab 59 €', day: 1 },
+  { t: 'Omar Sarsam – STIMMT', img: T+'2024/omar-sarsam-stimmt_c-stefan-gergely_tickets-2024-m.jpg', time: '19:30', cat: 'Kabarett', venue: 'Stadtsaal Krems', city: 'Krems', price: 'ab 31 €', day: 1 },
+  { t: '30. ARTfair Innsbruck', img: T+'2026/30ARTfair-Innsbruck-2026-222.jpg', time: '10:00', cat: 'Ausstellung', venue: 'Olympiahalle', city: 'Innsbruck', price: '14 €', day: 2 },
+  { t: 'Oysterband – The Song Goes On', img: T+'2026/Oysterband-c-sargfabrik-2026-222.jpg', time: '19:30', cat: 'Musik', venue: 'Sargfabrik', city: 'Wien', price: 'ab 28 €', day: 2 },
+  { t: 'Gabriel Castaneda – Nacho Man', img: T+'2025/Gabriel-Castaneda-Nacho-Man-2025-c-Franz-Preschern-m.jpg', time: '19:30', cat: 'Kabarett', venue: 'Die Bachschmiede', city: 'Wals', price: '26 €', day: 2 },
+  { t: 'Friedrich Kleinhapl & Sinfonisches Orchester Leoben', img: T+'2026/Friedrich-Kleinhapl-Sinfonisches-Orchester-Leoben-2026-tickets-c-Lukas-Elsneg-m.jpg', time: '19:30', cat: 'Klassik', venue: 'Live Congress', city: 'Leoben', price: 'ab 22 €', day: 2 },
+  { t: 'Gerald Fleischhacker – Alter nicer Mann', img: T+'2026/Gerald-Fleischhacker-Alter-nicer-Mann-2026-m.jpg', time: '19:30', cat: 'Kabarett', venue: 'KUZ Mattersburg', city: 'Mattersburg', price: '29 €', day: 2 },
+  { t: 'Konzerte in der Peterskirche', img: T+'2025/Konzerte_in_der_Peterskirche_Wien_tickets_2025_c_CEV_Classic_Ensemble_Veranstaltung_OG_m.jpg', time: '20:30', cat: 'Klassik', venue: 'Peterskirche', city: 'Wien', price: 'ab 25 €', day: 3 },
+  { t: 'Wolfram Vertnik', img: T+'2024/Wolfram_Vertnik_neu_tickets_2025_m.jpg', time: '19:00', cat: 'Vortrag', venue: 'Laudersbach’s Landhotel', city: 'Altenmarkt', price: '19 €', day: 3 },
+  { t: 'Promenadenspompanadln', img: 'https://media.wien-ticket.at/IEZo1lEAP9a_w_OLbl2UVO1KCT2dJDd7qdSsE8SLQNs/rs:fill-down:1280:1280/f:webp/gravity:fp:0.5:0.5/plain/local:///28069_Promenadenspompanadln_LEO_1280x500__3_.png', time: '19:30', cat: 'Musik', venue: 'L.E.O. Operntheater', city: 'Wien', price: '24 €', day: 3 },
+];
+window.DAYS = [
+  { k: 'Heute', d: 'Do', n: '22', m: 'Okt.' },
+  { k: 'Morgen', d: 'Fr', n: '23', m: 'Okt.' },
+  { k: 'Samstag', d: 'Sa', n: '24', m: 'Okt.' },
+  { k: 'Sonntag', d: 'So', n: '25', m: 'Okt.' },
+];
+window.REGIONS = [
+  { n: 'Wien', c: 2140, seed: 'wien1' }, { n: 'Graz', c: 612, seed: 'graz2' }, { n: 'Linz', c: 498, seed: 'linz3' },
+  { n: 'Salzburg', c: 455, seed: 'salzburg4' }, { n: 'Innsbruck', c: 301, seed: 'innsbruck5' }, { n: 'Klagenfurt', c: 188, seed: 'klagenfurt6' },
+  { n: 'Burgenland', c: 1320, seed: 'burgenland7' }, { n: 'Niederösterreich', c: 9870, seed: 'noe8' }, { n: 'Steiermark', c: 6210, seed: 'stmk9' },
+  { n: 'Tirol', c: 4120, seed: 'tirol10' }, { n: 'Vorarlberg', c: 2050, seed: 'vbg11' }, { n: 'Kärnten', c: 2890, seed: 'ktn12' },
+];
+window.CATS = [
+  ['Konzerte', 'M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z'],
+  ['Kabarett', 'M8 10h.01M16 10h.01M8 15c1.5 1.5 6.5 1.5 8 0M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z'],
+  ['Party', 'M12 2l2.4 5.6 6.1.5-4.6 4 1.4 6L12 15l-5.3 3.1 1.4-6-4.6-4 6.1-.5z'],
+  ['Essen & Wein', 'M8 2v8M5 2v6a3 3 0 0 0 6 0V2M8 10v12M17 2v20M17 2c-2 2-3 5-3 8h3'],
+  ['Märkte & Feste', 'M3 20h18M4 20V9l8-6 8 6v11M9 20v-6h6v6'],
+  ['Familie', 'M9 7a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM17 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM3 21v-5a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v5M15 21v-3a3 3 0 0 1 3-3h3v6'],
+  ['Sport', 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3.5 9.5l17 5M3.5 14.5l17-5'],
+  ['Natur', 'M12 22V12M12 12l-5-5M12 12l5-5M12 7l-4-4M12 7l4-4'],
+  ['Klassik', 'M6 3v12a3 3 0 1 0 2 2.8V7l10-2v8a3 3 0 1 0 2 2.8V3L6 5z'],
+  ['Wissen', 'M4 19V5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2zm0 0a2 2 0 0 0 2 2h14'],
+];

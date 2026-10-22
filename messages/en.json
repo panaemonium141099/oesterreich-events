@@ -335,9 +335,7 @@
     "anonPrivacyLink": "privacy policy"
   },
   "Discover": {
-    "eyebrow": "Discover",
-    "title": "What's on in Austria?",
-    "subtitle": "Filter by date, region and category — or describe freely what you want in Smart Search.",
+    "title": "Discover",
     "tabsAria": "Search mode",
     "tabList": "List",
     "tabSmart": "Smart Search",
@@ -345,7 +343,6 @@
     "loadingMore": "Loading more events …",
     "scrollForMore": "Scroll for more events",
     "regionRailAria": "By region",
-    "regionRail": "By region:",
     "chipTickets": "Tickets available",
     "chipFree": "Free",
     "chipDoorsale": "Box office",
@@ -360,7 +357,22 @@
     "sortTickets": "Tickets",
     "sortDistance": "Distance",
     "sortLabel": "Sort by",
-    "events": "events"
+    "events": "events",
+    "scopeAll": "all of Austria",
+    "scopeAllChip": "Anywhere",
+    "picksAria": "Top picks",
+    "topPick": "Top pick today",
+    "shelfTonight": "Tonight",
+    "shelfWeekend": "This weekend",
+    "shelfRegion": "By region",
+    "shelfFree": "Free entry",
+    "shelfCategories": "By category",
+    "showAll": "Show all",
+    "nEvents": "{count} events",
+    "dayRange": "{from} to {to}",
+    "scrollBack": "Back",
+    "scrollForward": "Forward",
+    "backToOverview": "Back to overview"
   },
   "MapPage": {
     "srTitle": "Event map of Austria — concerts, festivals, markets and events on a map",
