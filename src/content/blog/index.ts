@@ -180,6 +180,8 @@ import { post as weihnachtskonzertKlangquadrat2026 } from './posts/weihnachtskon
 import { post as vivaldi4SeasonsCrossoverKonzert2026 } from './posts/vivaldi-4-seasons-crossover-konzert-2026';
 import { post as falcoVillaFuehrungJaenner2027 } from './posts/falco-villa-fuehrung-jaenner-2027';
 import { post as impulsoTenorsTotalChristmas2026 } from './posts/impulso-tenors-total-christmas-2026';
+import { post as jazzWineMoreMusicFestivalEintagesticketFuerSamstag2026 } from './posts/jazz-wine-more-music-festival-eintagesticket-fuer-samstag-2026';
+import { post as theMagicForest2026 } from './posts/the-magic-forest-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -370,6 +372,8 @@ export const ALL_POSTS: FestivalPost[] = [
   vivaldi4SeasonsCrossoverKonzert2026,
   falcoVillaFuehrungJaenner2027,
   impulsoTenorsTotalChristmas2026,
+  jazzWineMoreMusicFestivalEintagesticketFuerSamstag2026,
+  theMagicForest2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
