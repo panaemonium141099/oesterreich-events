@@ -139,8 +139,12 @@ Dashboard:
    - Managed Challenge: `ip.src.country eq "CN"`.
    - Block: `http.user_agent contains "Chrome/99.0.4844.51"` (bekannte Welle,
      Caddy gibt dasselbe 403; doppelte Schicht ist Absicht).
-   - Managed Challenge (seit 2026-10-23): `starts_with(http.request.uri.path, "/en/")
-     and http.request.method eq "GET" and http.referer eq ""`. Hintergrund: ab
+   - Interaktive Challenge (seit 2026-10-23): `starts_with(http.request.uri.path, "/en/")
+     and http.request.method eq "GET" and http.referer eq ""`. Zuerst als
+     Managed Challenge angelegt (18:46 UTC); die Welle bestand sie, denn danach
+     kamen ihre Pageviews weiter an, jetzt mit der eigenen URL als Referrer (die
+     Umleitung nach bestandener Challenge). Seit 18:54 UTC `challenge`
+     (interaktiv, ein Klick, dann cf_clearance-Cookie). Hintergrund: ab
      21.10. abends crawlte ein echtes Chromium 151 (passende Sec-CH-UA,
      Accept-Language en-US) über Residential-Proxys (jede Pageview eine neue IP,
      ~4.300 Pageviews/Tag = 80 % aller Pageviews, 90 % davon /en, Referer immer

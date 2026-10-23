@@ -116,9 +116,12 @@ waf_rules = [
     # Fight Mode und loeste ad_request aus. Menschen erreichen /en fast nur
     # ueber Google (Referer gesetzt); Direktaufrufe bekommen die unsichtbare
     # Managed Challenge. RSC-/Prefetch-Requests tragen einen Referer.
-    {"description": "Managed Challenge: Direktaufruf (ohne Referer) einer /en-Seite ohne verifizierten Bot (Residential-Proxy-Welle 10/2026)",
+    # 18:46 UTC als managed_challenge angelegt; die Welle bestand sie (danach
+    # kamen ihre Pageviews mit sich selbst als Referrer = Challenge-Umleitung).
+    # Seit 18:54 UTC interaktive Challenge: ein Klick, cf_clearance-Cookie.
+    {"description": "Interaktive Challenge: Direktaufruf (ohne Referer) einer /en-Seite ohne verifizierten Bot (Residential-Proxy-Welle 10/2026)",
      "expression": f'(starts_with(http.request.uri.path, "/en/") and http.request.method eq "GET" and http.referer eq "" and {guard})',
-     "action": "managed_challenge", "enabled": True},
+     "action": "challenge", "enabled": True},
 ]
 d = cf("PUT", f"/zones/{ZONE}/rulesets/phases/http_request_firewall_custom/entrypoint", {"rules": waf_rules})
 for r in (d.get("result") or {}).get("rules", []):
