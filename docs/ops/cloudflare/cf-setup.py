@@ -123,7 +123,12 @@ waf_rules = [
      "expression": f'(starts_with(http.request.uri.path, "/en/") and http.request.method eq "GET" and http.referer eq "" and {guard})',
      "action": "challenge", "enabled": True},
 ]
-d = cf("PUT", f"/zones/{ZONE}/rulesets/phases/http_request_firewall_custom/entrypoint", {"rules": waf_rules})
+# Die fuenfte Regel (Free-Plan-Limit) pflegt /opt/app/traffic-audit.py
+# ("auto: ..."), sie bleibt beim PUT erhalten.
+live = (cf("GET", f"/zones/{ZONE}/rulesets/phases/http_request_firewall_custom/entrypoint").get("result") or {}).get("rules", [])
+auto_rules = [{k: r[k] for k in ("description", "expression", "action", "enabled") if k in r}
+              for r in live if r.get("description", "").startswith("auto:")]
+d = cf("PUT", f"/zones/{ZONE}/rulesets/phases/http_request_firewall_custom/entrypoint", {"rules": waf_rules + auto_rules})
 for r in (d.get("result") or {}).get("rules", []):
     print(f"  {r['action']:18} {r['description'][:70]}")
 

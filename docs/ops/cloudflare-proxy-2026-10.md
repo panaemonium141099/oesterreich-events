@@ -153,6 +153,21 @@ Dashboard:
      Prefetch-Requests tragen einen Referer. Beleg nach dem Anlegen: Direktaufruf
      einer /en-Event-Seite ohne Referer → `Cf-Mitigated: challenge`, mit
      Google-Referer → 200, deutsche Seite ohne Referer → 200.
+   - auto-Regel (5. und letzter Slot im Free-Plan, seit 2026-10-23): pflegt
+     `/opt/app/traffic-audit.py` täglich (Timer `lt-traffic-audit`, 05:35 UTC),
+     `cf-setup.py` lässt Regeln mit Beschreibung `auto:` beim PUT stehen.
+     Inhalt: `http.user_agent in {…}` der Kennungen mit Bot-Signatur und
+     Referer leer, Aktion interaktive Challenge. Signaturen je User-Agent über
+     24 h: R (rotierend: IPs/Pageview ≥ 0,85, ohne Referrer ≥ 85 %, Nachtanteil
+     0-5 Uhr Wien ≥ 12 %; Menschen liegen bei 3 %) oder F (Farm: ≥ 8 Pageviews
+     je IP, ohne Referrer ≥ 85 %); ab 300 Pageviews; ein Google-Referrer-Anteil
+     ≥ 10 % gilt als menschlich und schützt. Kennungen verfallen nach 7 Tagen
+     ohne Treffer, höchstens 20 in der Regel. Bericht (Pageviews, Nachtanteil,
+     ad_request je IP, Caddy-403, auffällige Kennungen, Anzeigen-Anforderungen
+     mit Bot-Muster) geht per Brevo an ALERT_EMAIL; Log
+     `/var/log/lt-traffic-audit.log`, Zustand `/var/lib/lt-traffic-audit/state.json`.
+     Trockenlauf: `python3 /opt/app/traffic-audit.py --dry-run --hours 48`.
+     Kopie im Repo: `docs/ops/cloudflare/traffic-audit.py` (+ Unit-Dateien).
 8. Cache Rules: Eligible für die statischen Pfade aus Abschnitt 3 (Edge-TTL
    „respect origin“), Bypass für alles andere.
 
