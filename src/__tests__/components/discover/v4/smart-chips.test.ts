@@ -19,6 +19,11 @@ describe('buildUnderstoodChips', () => {
     expect(chips).toEqual([{ key: 'date:weekday:samstag', label: 'Samstag' }]);
   });
 
+  it('konkretes Datum und Monat werden gemappt', () => {
+    expect(buildUnderstoodChips({ signals: ['date:2026-10-24'] })).toEqual([{ key: 'date:2026-10-24', label: 'Sa., 24. Okt.' }]);
+    expect(buildUnderstoodChips({ signals: ['month:2026-11'] })).toEqual([{ key: 'month:2026-11', label: 'November' }]);
+  });
+
   it('Preis-Tier wird gemappt', () => {
     const chips = buildUnderstoodChips({ signals: [], max_price_tier: 'gratis' });
     expect(chips).toEqual([{ key: 'price', label: 'Gratis' }]);

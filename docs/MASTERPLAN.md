@@ -651,6 +651,21 @@ Suchvolumen statt Datenbestand. Code: `src/lib/search/smart-query.ts` +
 `/api/search/semantic`; Concierge (Gemini + Google-Grounding) unverändert.
 Das ist vereinbar mit dem Enrichment-Ausstieg: dessen Problem waren Tokens
 für 300k Events, nicht KI im Request-Pfad.
+**Oberfläche neu seit 2026-10-23** (Befund `docs/design/smart-suche-analyse-
+2026-10-23.md`, Mockups `docs/design/smart-planer/`): der Concierge-Chat im
+Smart-Tab brachte in 30 Tagen 35 Suchen und einen Klick auf ein Ergebnis
+(10 bis 17 s Prosa, Treffer als Mini-Zeilen). Jetzt Freitext-Feld →
+`/api/search/semantic` → Verstanden-Chips, ein deterministischer
+Concierge-Satz, Poster-Regale nach Tag oder Tagesphase, Plan-Leiste
+(`V4SmartPlanner`). Stufe 0 dazu: Intent-Fehler werden in Prod geloggt,
+Intent läuft über `CONCIERGE_PROVIDER` (Prod OpenAI) mit dem anderen
+Anbieter als Reserve, Wort-Fallback ohne Stoppwörter wie „von", konkrete
+Tage/Monate im Parser, Serien auf eine Karte, `parsed.unmatched_terms` für
+ehrliche Leere. `/api/search/chat` bleibt als API, kein UI mehr. Offen:
+AdSense-Auto-Anzeigen (Anchor über dem Eingabefeld, Intent-Links im Text)
+im AdSense-Konto für /entdecken ausschließen; Venues (312 k OSM-Lokale,
+79 k mit Öffnungszeiten) sind nicht an die Suche angebunden, Specials
+(Happy Hour) gibt es in keiner Quelle.
 
 **Was die Qualität stattdessen sichert:**
 

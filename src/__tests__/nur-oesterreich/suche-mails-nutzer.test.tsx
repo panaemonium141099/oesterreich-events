@@ -22,6 +22,7 @@ vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://test.supabase.co');
 vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'test-service-role-key');
 vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'test-anon-key');
 vi.stubEnv('GEMINI_API_KEY', '');
+vi.stubEnv('OPENAI_API_KEY', '');
 vi.stubEnv('CRON_SECRET', '');
 
 type Row = Record<string, unknown>;

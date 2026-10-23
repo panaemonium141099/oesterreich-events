@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Planer – Variante A: Freitext + Regale</title>
+<link rel="stylesheet" href="base.css">
+<style>
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:36px;align-items:start}
+.layout>div{min-width:0}
+@media(max-width:960px){.layout{grid-template-columns:minmax(0,1fr)}.rail{display:none}}
+/* Freitext-Hero */
+.hero{margin:22px 0 0;text-align:center}
+.hero h1{margin:0;font-size:38px;font-weight:800;letter-spacing:-.04em;line-height:1.05}
+.hero p{margin:8px 0 0;color:var(--ink50);font-size:14.5px}
+.ask{margin:18px auto 0;max-width:780px;position:relative}
+.ask textarea{width:100%;min-height:104px;resize:none;border-radius:20px;background:var(--elev);border:1px solid var(--h3);color:var(--ink);font:500 18px/1.4 Inter,system-ui,sans-serif;padding:20px 22px 56px;outline:none;display:block}
+.ask textarea:focus{border-color:var(--amber-line)}
+.ask .send{position:absolute;right:12px;bottom:12px}
+.ask .loc{position:absolute;left:18px;bottom:20px;font-size:12.5px;color:var(--ink50)}.ask .loc u{color:var(--ink70);text-decoration:none;margin-left:6px;cursor:pointer}
+.examples{margin:14px auto 0;max-width:780px;font-size:13px;color:var(--ink50);line-height:1.9;text-align:left}
+.examples span{margin-right:8px;white-space:nowrap}
+.examples a{color:var(--ink70);border-bottom:1px solid var(--h4);margin-right:16px;cursor:pointer;white-space:nowrap}
+.examples a:hover{color:var(--ink);border-color:var(--ink50)}
+@media(max-width:720px){.hero h1{font-size:28px}.ask textarea{font-size:16px;padding:16px 16px 60px;min-height:120px}.ask .loc{left:14px;bottom:18px}.ask .send{right:10px;bottom:10px}.examples a{white-space:normal;display:block;margin:0}}
+/* Verstanden */
+.understood{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:22px 0 0}
+.understood .chip{padding:6px 11px;font-size:12.5px}
+.understood .chip{background:var(--elev);border-color:var(--h3)}
+/* Rechte Timeline-Leiste */
+.rail{position:sticky;top:72px;border-radius:18px;background:var(--elev);border:1px solid var(--h2);padding:16px}
+.rail h4{margin:0 0 2px;font-size:15px;font-weight:800;letter-spacing:-.02em}
+.rail .sub{font-size:12px;color:var(--ink50);margin:0 0 12px}
+.tl{list-style:none;margin:8px 0 0;padding:0 0 0 14px;border-left:2px solid var(--h3);display:flex;flex-direction:column;gap:10px}
+.tl li{position:relative;display:flex;gap:10px;align-items:center}
+.tl li::before{content:'';position:absolute;left:-19px;top:14px;width:8px;height:8px;border-radius:50%;background:var(--amber)}
+.tl img{width:40px;height:40px;border-radius:8px;object-fit:cover;flex:none}
+.tl b{display:block;font-size:12.5px;line-height:1.25}
+.tl span{font-size:11px;color:var(--ink50)}
+.tl .gap{font-size:11px;color:var(--ink30);margin:-4px 0}
+.tl .gap::before{display:none}
+.rail .sum{display:flex;justify-content:space-between;font-size:12.5px;margin-top:12px;padding-top:10px;border-top:1px solid var(--h2)}
+.rail .sum b{color:var(--go)}
+.rail .actions{display:flex;gap:6px;margin-top:12px}
+.rail .empty{font-size:12.5px;color:var(--ink50);line-height:1.5;margin:8px 0 0}
+/* Mobile Bottom-Bar */
+.bar{display:none}
+@media(max-width:960px){.bar{display:flex;position:fixed;left:12px;right:12px;bottom:14px;z-index:30;align-items:center;gap:10px;padding:10px 10px 10px 14px;border-radius:999px;background:#fff;color:#0a0a0c;box-shadow:0 10px 30px rgba(0,0,0,.5)}.bar b{font-size:13px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bar .av{display:flex;flex:none}.bar .av img{width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid #fff;margin-left:-8px}.bar .av img:first-child{margin:0}.bar .btn{background:#0a0a0c;color:#fff}}
+.pad{height:90px}
+.ev.over .ph{opacity:.6}
+.ev.venue .vph{position:absolute;inset:0;display:grid;place-items:center;font-size:44px;font-weight:800;color:var(--ink30);background:linear-gradient(135deg,#1c1c20,#141416)}
+</style></head><body>
+<div class="nav wrap"><span class="logo">lass<b>treffen</b>.at</span><div class="links"><span class="on">Entdecken</span><span>Freizeit</span><span>Künstler</span><span>Karte</span><span>Meine Pläne</span></div><div class="search">⌕ Künstler, Event oder Ort</div><span class="cta">Anmelden</span></div>
+
+<div class="wrap">
+  <div class="head" style="justify-content:flex-end"><div class="tabs"><span>Liste</span><span class="on">Smart-Suche</span></div></div>
+
+  <section class="hero">
+    <h1>Sag einfach, was du vorhast.</h1>
+    <p>In deinen Worten, so wie du es einem Freund schreibst. Ort, Zeit und Budget lesen wir daraus.</p>
+    <div class="ask">
+      <textarea id="q"></textarea>
+      <span class="loc">Standort: Wien, 9. Bezirk <u>ändern</u></span>
+      <span class="btn amber send">Los geht's</span>
+    </div>
+    <p class="examples"><span>Zum Beispiel:</span><a>Bin Student und will heute abend billig saufen gehen</a><a>Plan mir ein Date für Samstag in Graz, wir sind beide 25</a><a>Was tun bei Regen mit zwei Kindern in Linz?</a><a>Wandern und danach gut essen, Tirol, Sonntag</a></p>
+  </section>
+
+  <div class="understood" id="understood"></div>
+
+  <div class="layout">
+    <div>
+      <div class="conc"><div class="av">C</div><p>Alles klar: <b>heute in Wien, möglichst billig</b>. Ich hab dir <b>Vorglühen ohne Eintritt</b> ab 20 Uhr und <b>Partys unter 15 €</b> ab 22 Uhr rausgesucht, alles mit Öffis erreichbar. Die drei am Gürtel liegen 2 Minuten auseinander. Mit <b>+</b> baust du dir deinen Abend.</p></div>
+      <div id="shelves"></div>
+      <section class="shelf"><div class="hd"><h2>Bars in der Nähe, heute bis 2 Uhr offen</h2><span>aus der Venue-Tabelle, noch nicht an die Suche angebunden</span><a>Alle</a></div><div class="track" id="venues"></div></section>
+      <section class="shelf"><div class="hd"><h2>Noch genauer?</h2></div><div class="row" id="follow"></div></section>
+      <div class="pad"></div>
+    </div>
+    <aside class="rail" id="rail"></aside>
+  </div>
+</div>
+<div class="bar" id="bar"></div>
+
+<script src="data.js"></script>
+<script>
+document.getElementById('q').value = QUERY;
+const sel = new Set(['e1','e5','e7']);
+const ev = e => `<a class="ev ${sel.has(e.id)?'sel':''} ${e.over?'over':''}" data-id="${e.id}"><div class="ph"><img src="${e.img}" alt=""><span class="tm">${e.time}</span><span class="add">${sel.has(e.id)?'✓':'+'}</span><span class="pr ${/Gratis|Spende/.test(e.price)?'free':''}">${e.price}</span></div><h3>${e.t}</h3><p>${e.venue} · ${e.bez}</p><p class="why">${e.why}</p></a>`;
+document.getElementById('understood').innerHTML = `<span class="lbl">Verstanden</span>` + UNDERSTOOD.map(c=>`<span class="chip">${c}<span class="x">✕</span></span>`).join('') + `<span class="chip ghost">ändern</span>`;
+document.getElementById('venues').innerHTML = VENUES.map(v=>`<a class="ev venue"><div class="ph"><div class="vph">${v.initial}</div><span class="tm">${v.open}</span><span class="add">+</span></div><h3>${v.t}</h3><p>${v.sub} · ${v.bez}</p><p class="why">${v.why}</p></a>`).join('');
+document.getElementById('follow').innerHTML = FOLLOWUPS.map(f=>`<span class="chip">${f}</span>`).join('') + `<span class="chip ghost">Eigene Nachfrage tippen …</span>`;
+function render(){
+  document.getElementById('shelves').innerHTML = SHELVES.map(s=>{const list=EVENTS.filter(e=>e.slot===s.k);return list.length?`<section class="shelf"><div class="hd"><h2>${s.h}</h2><span>${s.sub}</span><a>Alle</a></div><div class="track">${list.map(ev).join('')}</div></section>`:''}).join('');
+  const picked=[...sel].map(byId).sort((a,b)=>a.time.localeCompare(b.time));
+  const sum=picked.reduce((n,e)=>n+(parseFloat((e.price.match(/[\d,]+/)||['0'])[0].replace(',','.'))||0),0);
+  const rail=document.getElementById('rail');
+  rail.innerHTML=`<h4>Dein Abend</h4><p class="sub">Freitag, 23. Oktober · ${picked.length} Stopps</p>`
+   + (picked.length?`<ul class="tl">${picked.map((e,i)=>`<li><img src="${e.img}" alt=""><div><b>${e.t}</b><span>${e.time} · ${e.venue}</span></div></li>`+(picked[i+1]?`<li class="gap">↓ ${[9,14,6][i%3]} min mit Öffis</li>`:'')).join('')}</ul><div class="sum"><span>Eintritt gesamt</span><b>${sum.toFixed(2).replace('.',',').replace(',00','')} €</b></div>`:`<p class="empty">Tippe <b>+</b> auf einer Karte. Die Stopps sortieren sich nach Uhrzeit, Eintritt wird zusammengezählt.</p>`)
+   + `<div class="actions"><span class="btn sm">Als Plan speichern</span><span class="btn sm ghost">An Freunde schicken</span></div>`;
+  document.getElementById('bar').innerHTML=`<div class="av">${picked.slice(0,4).map(e=>`<img src="${e.img}" alt="">`).join('')}</div><b>${picked.length} Stopps · ${sum.toFixed(2).replace('.',',').replace(',00','')} € gesamt</b><span class="btn sm">Mein Abend</span>`;
+}
+render();
+document.addEventListener('click',e=>{const c=e.target.closest('.ev');if(c){e.preventDefault();const id=c.dataset.id;sel.has(id)?sel.delete(id):sel.add(id);render();}});
+</script>
+</body></html>

@@ -56,7 +56,7 @@ export function buildUnderstoodChips(parsed: ParsedSummary | undefined): Underst
   const chips: UnderstoodChip[] = [];
 
   // Datum (Regex-Parser-Signale 'today' | 'tomorrow' | 'weekend' |
-  // 'weekday:<tag>')
+  // 'weekday:<tag>' | 'date:YYYY-MM-DD' | 'month:YYYY-MM')
   for (const s of signals) {
     if (DATE_LABELS[s]) {
       chips.push({ key: `date:${s}`, label: DATE_LABELS[s] });
@@ -66,6 +66,22 @@ export function buildUnderstoodChips(parsed: ParsedSummary | undefined): Underst
       const day = s.slice('weekday:'.length);
       chips.push({ key: `date:${s}`, label: day[0].toUpperCase() + day.slice(1) });
       break;
+    }
+    if (s.startsWith('date:')) {
+      const iso = s.slice('date:'.length);
+      const d = new Date(`${iso}T12:00:00Z`);
+      if (!Number.isNaN(d.getTime())) {
+        chips.push({ key: s, label: d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }) });
+        break;
+      }
+    }
+    if (s.startsWith('month:')) {
+      const [y, m] = s.slice('month:'.length).split('-').map(Number);
+      const d = new Date(Date.UTC(y, (m || 1) - 1, 1));
+      if (!Number.isNaN(d.getTime())) {
+        chips.push({ key: s, label: d.toLocaleDateString('de-AT', { month: 'long', timeZone: 'UTC' }) });
+        break;
+      }
     }
   }
 
