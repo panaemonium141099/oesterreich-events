@@ -30,7 +30,10 @@
  */
 
 import { GoogleGenAI, Type } from '@google/genai';
+import OpenAI from 'openai';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { isQuotaExhausted } from '@/lib/search/gemini-error';
+import { collapseSeries, pickFallbackTerms } from '@/lib/search/smart-fallback';
 import {
   parseQuery,
   validateIntent,
@@ -67,6 +70,18 @@ import {
 import { SITE_COUNTRY } from '@/lib/site-country';
 
 const INTENT_MODEL = 'gemini-2.5-flash';
+/**
+ * Derselbe Schalter wie Chat und Concierge (CONCIERGE_PROVIDER). Bis
+ * 2026-10-23 hing der Intent fest an Gemini: bei mehr als ~10 Suchen pro
+ * Minute lief der Free-Tier-Key ins Ratenlimit, der Fehler wurde nur in
+ * Development geloggt, und die Beispiel-Chips der UI lieferten still null
+ * Treffer. Jetzt: Primär-Anbieter aus der Env, der andere als Reserve.
+ */
+const INTENT_PROVIDER: 'gemini' | 'openai' =
+  process.env.CONCIERGE_PROVIDER === 'openai' ? 'openai' : 'gemini';
+const OPENAI_INTENT_MODEL = 'gpt-4o-mini';
+const INTENT_TIMEOUT_MS = 4000;
+const INTENT_BACKUP_TIMEOUT_MS = 3000;
 /** Kandidaten pro Retrieval-Pfad — klein genug für die Micro-Instanz,
  *  groß genug dass das Ranking echte Auswahl hat. */
 const CANDIDATES_PER_PATH = 60;
@@ -94,11 +109,30 @@ export interface SmartSearchPayload {
     location_district: string | null;
     location_bundesland: string | null;
     content_types: ContentType[];
+    /**
+     * Ehrliche Leere (2026-10-23): konkrete Suchbegriffe, für die der
+     * Text-Pfad im Filterfenster nichts fand. `matches` enthält dann nur
+     * Beifang aus Kategorie/Facetten ("oldtimer treffen niederösterreich"
+     * zeigte Kleidungstausch und Jahreshauptversammlung, als wäre es ein
+     * Treffer). Die UI sagt es so, statt es als Treffer zu verkaufen.
+     */
+    unmatched_terms: string[];
   };
-  matches: CandidateEvent[];
+  matches: SmartMatch[];
   count: number;
   activityMatches: ActivitySearchMatch[];
 }
+
+/**
+ * Serien (derselbe Titel am selben Ort an mehreren Tagen) sind EINE Karte:
+ * der nächste Termin plus `series_count`/`series_dates` der übrigen.
+ * "Weihnachtsmarkt Salzburg" belegte vorher sechs von acht Plätzen mit zwei
+ * Märkten an je drei Tagen.
+ */
+export type SmartMatch = CandidateEvent & {
+  series_count?: number;
+  series_dates?: string[];
+};
 
 export interface SmartSearchOptions {
   /** fn-19 Phase B: Chat-Tools erzwingen ihren Pfad explizit, statt ihn
@@ -114,17 +148,11 @@ export interface SmartSearchOptions {
 // was nicht wörtlich im Taxonomie-Vokabular steht.
 // ────────────────────────────────────────────────────────────────────
 
-async function extractIntentViaAI(
-  query: string,
-  intentText: string,
-  geminiKey: string,
-): Promise<SearchIntent | null> {
-  const ai = new GoogleGenAI({ apiKey: geminiKey });
+function buildIntentSystemInstruction(): string {
   const locationVocab = [
     ...new Set([...Object.keys(CITIES), ...Object.keys(BUNDESLAENDER_KEYS)]),
   ].join(', ');
-  const systemInstruction =
-`Du übersetzt eine österreichische Freizeit-Suchanfrage in strukturierte Facetten. Die Datenbank enthält ZWEI Bestände: Veranstaltungen (events) und dauerhafte Freizeit-Ziele/POIs (activities: Bäder, Thermen, Sommerrodelbahnen, Klettersteige, Hochseilgärten, Museen, Aussichtstürme, Erlebniswege …).
+  return `Du übersetzt eine österreichische Freizeit-Suchanfrage in strukturierte Facetten. Die Datenbank enthält ZWEI Bestände: Veranstaltungen (events) und dauerhafte Freizeit-Ziele/POIs (activities: Bäder, Thermen, Sommerrodelbahnen, Klettersteige, Hochseilgärten, Museen, Aussichtstürme, Erlebniswege …).
 
 Erlaubte categories (max 3, exakte Schreibweise): ${PRIMARY_CATEGORIES.join(' | ')}
 Erlaubte tags (max 8): ${TAGS.join(', ')}
@@ -141,13 +169,37 @@ Regeln:
 - location: erwähnter Ort als EIN Wert aus der Location-Liste (Tippfehler korrigieren: "eisenstad" → eisenstadt, "burgnland" → burgenland). Kein Ort erwähnt oder unbekannt → null.
 - Interpretiere Absichten: "saufen gehen" → Nightlife & Party + ausgehen; "was mit Kindern" → Familie & Kinder + family-Tags; "romantisch" → date-night.
 - Lieber wenige treffende Facetten als viele lose.`;
+}
 
+function intentUserPrompt(query: string, intentText: string): string {
+  return `Suchanfrage: "${query}"\nKern-Intent (Datum/Preis-Wörter bereits entfernt): "${intentText}"`;
+}
+
+/**
+ * Intent-Fehler IMMER loggen (Prod eingeschlossen): bis 2026-10-23 stand
+ * hier `if (NODE_ENV === 'development')`, und niemand sah, dass der
+ * Gemini-Pfad bei Last ausfiel. Ein erschöpftes Kontingent und ein
+ * Ratenlimit sind Betriebszustände, keine Entwickler-Details.
+ */
+function logIntentFailure(provider: string, e: unknown): void {
+  const status = (e as { status?: unknown })?.status;
+  const kind = isQuotaExhausted(e) ? 'quota/rate-limit' : 'error';
+  const msg = e instanceof Error ? e.message.slice(0, 200) : String(e).slice(0, 200);
+  console.error(`[smart-search/intent] ${provider} ${kind}${status ? ` (status ${status})` : ''}: ${msg}`);
+}
+
+async function extractIntentViaGemini(
+  query: string,
+  intentText: string,
+  geminiKey: string,
+): Promise<SearchIntent | null> {
+  const ai = new GoogleGenAI({ apiKey: geminiKey });
   try {
     const resp = await ai.models.generateContent({
       model: INTENT_MODEL,
-      contents: `Suchanfrage: "${query}"\nKern-Intent (Datum/Preis-Wörter bereits entfernt): "${intentText}"`,
+      contents: intentUserPrompt(query, intentText),
       config: {
-        systemInstruction,
+        systemInstruction: buildIntentSystemInstruction(),
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
@@ -171,9 +223,74 @@ Regeln:
     if (!text) return null;
     return validateIntent(JSON.parse(text));
   } catch (e) {
-    if (process.env.NODE_ENV === 'development') console.error('[smart-search/intent]', e);
+    logIntentFailure('gemini', e);
     return null;
   }
+}
+
+/** Gleiche Anweisung, gleiches Schema, OpenAI im JSON-Modus. */
+async function extractIntentViaOpenAI(
+  query: string,
+  intentText: string,
+  openaiKey: string,
+): Promise<SearchIntent | null> {
+  try {
+    const client = new OpenAI({ apiKey: openaiKey });
+    const resp = await client.chat.completions.create({
+      model: OPENAI_INTENT_MODEL,
+      messages: [
+        { role: 'system', content: buildIntentSystemInstruction() + '\nAntworte als JSON-Objekt mit den Feldern categories, tags, audiences, occasions, vibes, searchTerms (Arrays aus Strings), location (String oder null), contentTypes (Array).' },
+        { role: 'user', content: intentUserPrompt(query, intentText) },
+      ],
+      response_format: { type: 'json_object' },
+      max_tokens: 400,
+      temperature: 0,
+    });
+    const text = resp.choices[0]?.message?.content;
+    if (!text) return null;
+    return validateIntent(JSON.parse(text));
+  } catch (e) {
+    logIntentFailure('openai', e);
+    return null;
+  }
+}
+
+function withTimeout<T>(p: Promise<T | null>, ms: number, label: string): Promise<T | null> {
+  return Promise.race([
+    p,
+    new Promise<null>(resolve => setTimeout(() => {
+      console.error(`[smart-search/intent] ${label} timeout after ${ms} ms`);
+      resolve(null);
+    }, ms)),
+  ]);
+}
+
+/**
+ * Primär-Anbieter laut CONCIERGE_PROVIDER, der andere als Reserve, jeder
+ * mit eigenem Timeout. Liefert den Intent und den Anbieter, der ihn
+ * geliefert hat (Signal `intent:provider:<name>`).
+ */
+export async function extractIntent(
+  query: string,
+  intentText: string,
+  keys: { gemini?: string; openai?: string },
+  provider: 'gemini' | 'openai' = INTENT_PROVIDER,
+): Promise<{ intent: SearchIntent; provider: 'gemini' | 'openai' } | null> {
+  const order: Array<'gemini' | 'openai'> = provider === 'openai' ? ['openai', 'gemini'] : ['gemini', 'openai'];
+  let first = true;
+  for (const p of order) {
+    const key = p === 'openai' ? keys.openai : keys.gemini;
+    if (!key) continue;
+    const timeout = first ? INTENT_TIMEOUT_MS : INTENT_BACKUP_TIMEOUT_MS;
+    first = false;
+    const intent = await withTimeout(
+      p === 'openai' ? extractIntentViaOpenAI(query, intentText, key) : extractIntentViaGemini(query, intentText, key),
+      timeout,
+      p,
+    );
+    if (intent) return { intent, provider: p };
+  }
+  return null;
 }
 
 /** Intent-Location (String vom LLM) → DetectedLocation via Whitelist. */
@@ -258,8 +375,10 @@ async function fetchCandidates(
   supabase: SupabaseClient<any>,
   hard: HardFilters,
   intent: SearchIntent,
-): Promise<CandidateEvent[]> {
+): Promise<{ candidates: CandidateEvent[]; textHits: number | null }> {
   const paths: Array<Promise<CandidateEvent[]>> = [];
+  /** Treffer des Text-Pfads; null, wenn er nicht lief (keine Suchbegriffe). */
+  let textHits: number | null = null;
 
   // Pfad A: Kategorie-Treffer, zeitlich nächste zuerst
   if (intent.categories.length > 0) {
@@ -304,7 +423,10 @@ async function fetchCandidates(
   // — kein Injection- oder Pattern-Risiko in or-Syntax/ilike).
   if (intent.searchTerms.length > 0) {
     let q = baseQuery(supabase, hard);
-    for (const term of intent.searchTerms.slice(0, 4)) {
+    for (const raw of intent.searchTerms.slice(0, 4)) {
+      // "Techno-Party" soll "Techno Party", "Techno-Party" und "Technoparty"
+      // treffen: Bindestrich und Leerzeichen im Begriff werden zum Joker.
+      const term = raw.replace(/[-\s]+/g, '%');
       q = q.or(`title.ilike.%${term}%,location_name.ilike.%${term}%,category.ilike.%${term}%`);
     }
     paths.push(
@@ -312,9 +434,11 @@ async function fetchCandidates(
         .order('event_score', SCORE_ORDER)
         .limit(CANDIDATES_PER_PATH)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .then((r: any) =>
-          takeData(r, 'path-text').map(ev => ({ ...ev, _textHit: true })),
-        ),
+        .then((r: any) => {
+          const rows = takeData(r, 'path-text');
+          textHits = rows.length;
+          return rows.map(ev => ({ ...ev, _textHit: true }));
+        }),
     );
   }
 
@@ -332,7 +456,7 @@ async function fetchCandidates(
   }
 
   const settled = await Promise.all(paths);
-  return settled.flat();
+  return { candidates: settled.flat(), textHits };
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -454,17 +578,16 @@ export async function runSmartSearch(
     ? { ...detectedGemeinde, radiusKm: radiusOverride ?? detectedGemeinde.radiusKm }
     : null;
 
-  // 2. Intent via Gemini (ersetzt Embedding + separaten Location-Call).
-  //    4s-Timeout: eine hängende Gemini-API darf die Suche nicht bis zum
+  // 2. Intent via LLM (ersetzt Embedding + separaten Location-Call).
+  //    Primär-Anbieter laut CONCIERGE_PROVIDER, der andere als Reserve,
+  //    je mit Timeout: eine hängende API darf die Suche nicht bis zum
   //    Function-Timeout blockieren — nach Ablauf degradiert die Suche in
-  //    den deterministischen Volltext-Fallback.
-  const geminiKey = process.env.GEMINI_API_KEY;
-  let intent: SearchIntent | null = geminiKey
-    ? await Promise.race([
-        extractIntentViaAI(rawQuery, intentText, geminiKey),
-        new Promise<null>(resolve => setTimeout(() => resolve(null), 4000)),
-      ])
-    : null;
+  //    den deterministischen Volltext-Fallback (und sagt es im Signal).
+  const extracted = await extractIntent(rawQuery, intentText, {
+    gemini: process.env.GEMINI_API_KEY,
+    openai: process.env.OPENAI_API_KEY,
+  });
+  let intent: SearchIntent | null = extracted?.intent ?? null;
   let intentSource: 'ai' | 'fallback' = 'ai';
 
   // 2b. Pfad-Gating (Epic E9). Deterministik gewinnt — gleiche Politik wie
@@ -489,22 +612,13 @@ export async function runSmartSearch(
   }
   // Deterministischer Text-Fallback: die Wörter des gestrippten
   // Intent-Texts gehen als AND-verknüpfte Suchbegriffe in die
-  // ilike-Suche (max 2, je ≥3 Zeichen, ohne Stoppwörter — jedes Wort
-  // ist ein Pflicht-Match, zu viele Wörter würgen das Ergebnis).
+  // ilike-Suche (max 2, Auswahl in smart-fallback.ts — jedes Wort ist ein
+  // Pflicht-Match, zu viele oder zu allgemeine Wörter würgen das Ergebnis).
   // Bedingung ist bewusst intentHasNoFacets() und NICHT intentIsEmpty():
   // sonst verlöre eine Event-Query mit Aktivitäts-Vokabular ("wandern in
   // tirol") ihre Suchbegriffe, nur weil contentTypes 'activity' enthält.
   if (intentHasNoFacets(intent) && intentText.length >= 3) {
-    const STOPWORDS = new Set([
-      'und', 'oder', 'der', 'die', 'das', 'den', 'dem', 'ein', 'eine', 'einen', 'einem',
-      'mit', 'für', 'auf', 'was', 'wer', 'wie', 'ist', 'gibt', 'geht', 'gehen', 'etwas',
-      'abend', 'abends', 'bin', 'the', 'and',
-    ]);
-    intent.searchTerms = intentText
-      .split(/\s+/)
-      .map(w => w.replace(/[^\p{L}\p{N}'&.-]/gu, ''))
-      .filter(w => w.length >= 3 && !STOPWORDS.has(w.toLowerCase()))
-      .slice(0, 2);
+    intent.searchTerms = pickFallbackTerms(intentText);
   }
 
   // fn-19 Phase B: Tool-Aufrufe des Chat legen den Pfad explizit fest.
@@ -514,7 +628,12 @@ export async function runSmartSearch(
     intent.contentTypes = [...opts.forceContentTypes];
   }
 
-  if (intentSource === 'ai') filters.keywordSignals.push('intent:ai');
+  if (intentSource === 'ai') {
+    filters.keywordSignals.push('intent:ai');
+    if (extracted) filters.keywordSignals.push(`intent:provider:${extracted.provider}`);
+  } else {
+    filters.keywordSignals.push('intent:fallback');
+  }
   intent.categories.forEach(c => filters.keywordSignals.push(`category:${c}`));
   intent.tags.forEach(t => filters.keywordSignals.push(`tag:${t}`));
   intent.audiences.forEach(a => filters.keywordSignals.push(`audience:${a}`));
@@ -573,26 +692,37 @@ export async function runSmartSearch(
   //     contentType gesetzt ist — bei ['activity'] wird fetchCandidates
   //     (inkl. Top-Score-Fallback) nachweislich nicht aufgerufen.
   let candidates: CandidateEvent[] = [];
+  let textHits: number | null = null;
   let activityMatches: ActivitySearchMatch[] = [];
   try {
     const [ev, act] = await Promise.all([
-      wantEvents ? fetchCandidates(supabase, hard, intent) : Promise.resolve([]),
+      wantEvents
+        ? fetchCandidates(supabase, hard, intent)
+        : Promise.resolve({ candidates: [] as CandidateEvent[], textHits: null }),
       wantActivities
         ? fetchActivityMatches(supabase, activityFilters, intent)
         : Promise.resolve([] as ActivitySearchMatch[]),
     ]);
     // fn-19: Müll-/Amtstermine der Gemeinde-Kalender raus aus der
     // Freizeit-Suche ("Sperrmüll Rechnitz" war Top-Samstag-Treffer).
-    candidates = ev.filter(c => !isWasteOrAdminEvent((c as { title?: string | null }).title));
+    candidates = ev.candidates.filter(c => !isWasteOrAdminEvent((c as { title?: string | null }).title));
+    textHits = ev.textHits;
     activityMatches = act;
   } catch (e) {
     console.error('[smart-search] candidate fetch failed:', e);
     throw new SmartSearchUnavailableError('search unavailable');
   }
 
-  // 4. Ranken + Payload. `matches`/`count` bleiben event-only (alter
-  //    Contract), `activityMatches` ist additiv.
-  const ranked = wantEvents ? rankCandidates(candidates, intent, limit) : [];
+  // 4. Ranken, Serien zusammenfassen, Payload. `matches`/`count` bleiben
+  //    event-only (alter Contract), `activityMatches` ist additiv. Das
+  //    Ranking bekommt Luft (4× limit), damit nach dem Zusammenfassen von
+  //    Serien noch `limit` verschiedene Karten übrig sind.
+  const ranked = wantEvents
+    ? collapseSeries(rankCandidates(candidates, intent, limit * 4)).slice(0, limit)
+    : [];
+  // Ehrliche Leere: der Text-Pfad lief für konkrete Begriffe und fand
+  // nichts — dann sind alle `matches` Beifang aus Kategorie/Facetten.
+  const unmatchedTerms = textHits === 0 ? [...intent.searchTerms] : [];
 
   return {
     query: rawQuery,
@@ -607,6 +737,7 @@ export async function runSmartSearch(
       location_district: filters.location?.districts?.join(',') ?? null,
       location_bundesland: filters.location?.bundesland ?? null,
       content_types: intent.contentTypes as ContentType[],
+      unmatched_terms: unmatchedTerms,
     },
     matches: ranked,
     count: ranked.length,

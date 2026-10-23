@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Planer – Variante B: Freitext + Karte</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* Freitext als eine Zeile, Verstanden-Chips direkt darunter */
+.ask{margin:16px 0 0;display:flex;align-items:center;gap:10px;padding:8px 8px 8px 18px;border-radius:999px;background:var(--elev);border:1px solid var(--h3)}
+.ask input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--ink);font:500 16px Inter,system-ui,sans-serif}
+.ask .mic{color:var(--ink50)}
+.understood{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.understood .chip{padding:5px 10px;font-size:12px;background:var(--elev2);border-color:transparent;color:var(--ink70)}
+.understood .chip.on{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-line)}
+/* Split */
+.split{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:18px;margin:16px 0 0;height:calc(100vh - 330px);min-height:520px}
+.list{overflow-y:auto;scrollbar-width:thin;padding-right:6px}
+.list .hd2{display:flex;align-items:baseline;gap:10px;position:sticky;top:0;background:var(--surface);padding:8px 0;z-index:2}
+.list .hd2 h2{margin:0;font-size:15px;font-weight:800;letter-spacing:-.02em}
+.list .hd2 span{font-size:12px;color:var(--ink50)}
+.card{display:grid;grid-template-columns:86px minmax(0,1fr);gap:12px;padding:8px;border-radius:14px;border:1px solid transparent;margin:0 0 6px;position:relative;cursor:pointer}
+.card:hover{background:var(--elev)}
+.card.sel{background:var(--elev);border-color:var(--amber-line)}
+.card .ph{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--elev)}
+.card .ph img{width:100%;height:100%;object-fit:cover}
+.card .n{position:absolute;left:6px;top:6px;width:22px;height:22px;border-radius:50%;background:#fff;color:#0a0a0c;font-size:11.5px;font-weight:800;display:grid;place-items:center}
+.card.sel .n{background:var(--amber)}
+.card h3{margin:2px 36px 2px 0;font-size:14px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
+.card p{margin:0;font-size:12.5px;color:var(--ink50)}
+.card .meta{display:flex;gap:8px;align-items:center;margin-top:6px;font-size:12px;font-weight:700;flex-wrap:wrap}
+.card .why{font-size:11.5px;color:var(--amber);margin-top:4px}
+.card .add{position:absolute;right:10px;top:10px;width:28px;height:28px;border-radius:50%;border:1px solid var(--h3);display:grid;place-items:center;font-size:16px;font-weight:700}
+.card.sel .add{background:var(--amber);color:#0a0a0c;border-color:var(--amber)}
+.card .tk{font-size:10.5px;font-weight:800;color:#0a0a0c;background:var(--amber);padding:2px 6px;border-radius:4px;letter-spacing:.04em}
+/* Karte */
+.map{position:relative;border-radius:18px;overflow:hidden;background:#0e1014;border:1px solid var(--h2)}
+.map svg{width:100%;height:100%;display:block}
+.map .ctl{position:absolute;left:14px;top:14px;display:flex;gap:6px;flex-wrap:wrap}
+.map .ctl .chip{background:rgba(10,10,12,.82);backdrop-filter:blur(8px);border-color:var(--h3)}
+.map .legend{position:absolute;right:14px;bottom:14px;display:flex;gap:6px}
+.map .legend .chip{background:rgba(10,10,12,.82);backdrop-filter:blur(8px);font-size:12px;padding:6px 10px}
+.map .legend .chip:first-child::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--amber)}
+.map .legend .chip:last-child::before{content:'';width:10px;height:10px;border-radius:50%;background:#fff}
+.pin{cursor:pointer}.pin circle{fill:#fff;stroke:#0a0a0c;stroke-width:2}.pin.sel circle{fill:var(--amber)}
+.pin text{font:800 10px Inter,sans-serif;fill:#0a0a0c;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.me circle{fill:#4c8dff;stroke:#fff;stroke-width:3}
+.lbl2{font:600 11px Inter,sans-serif;fill:rgba(255,255,255,.4)}
+.tip{position:absolute;transform:translate(-50%,-125%);background:#fff;color:#0a0a0c;border-radius:12px;padding:8px 10px;display:flex;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.5);width:250px}
+.tip img{width:46px;height:46px;border-radius:8px;object-fit:cover}
+.tip b{display:block;font-size:12.5px;line-height:1.25}.tip span{font-size:11px;color:#555}
+.tip::after{content:'';position:absolute;left:50%;bottom:-6px;width:12px;height:12px;background:#fff;transform:translateX(-50%) rotate(45deg)}
+/* Abend-Timeline */
+.tlbar{margin:16px 0 40px;border-radius:18px;background:var(--elev);border:1px solid var(--h2);padding:14px 16px}
+.tlbar .hd{display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+.tlbar h4{margin:0;font-size:15px;font-weight:800;letter-spacing:-.02em}
+.tlbar .hd .muted{font-size:12.5px}
+.tlbar .hd .btn{margin-left:auto}
+.ax{position:relative;border-top:2px solid var(--h3);padding-top:10px}
+.ax .ticks{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink30);margin-bottom:8px}
+.ax .items{position:relative;height:58px;overflow:hidden}
+.ax .it{position:absolute;top:0;display:flex;gap:8px;align-items:center;padding:5px 10px 5px 5px;border-radius:999px;background:var(--elev2);border:1px solid var(--amber-line);white-space:nowrap;max-width:230px}
+.ax .it img{width:30px;height:30px;border-radius:50%;object-fit:cover}
+.ax .it b{font-size:12px;display:block;line-height:1.2;overflow:hidden;text-overflow:ellipsis}
+.ax .it span{font-size:10.5px;color:var(--ink50)}
+.ax .drive{position:absolute;top:19px;height:2px;background:repeating-linear-gradient(90deg,var(--amber) 0 4px,transparent 4px 8px)}
+@media(max-width:960px){
+  .split{display:block;height:auto}
+  .map{height:280px;position:sticky;top:60px;z-index:5}
+  .list{max-height:none;overflow:visible;padding:12px 0 0}
+  .tip{display:none}
+  .tlbar .hd .btn{margin-left:0}.tlbar .hd .muted{width:100%;order:3}
+  .ax .it{max-width:190px}
+  .ask .btn{display:none}
+}
+</style></head><body>
+<div class="nav wrap"><span class="logo">lass<b>treffen</b>.at</span><div class="links"><span class="on">Entdecken</span><span>Freizeit</span><span>Künstler</span><span>Karte</span><span>Meine Pläne</span></div><div class="search">⌕ Künstler, Event oder Ort</div><span class="cta">Anmelden</span></div>
+
+<div class="wrap">
+  <div class="head"><div><h1>Heute Abend in Wien</h1><p>12 Treffer rund um deinen Standort · alle unter 15 €</p></div><div class="tabs"><span>Liste</span><span class="on">Smart-Suche</span></div></div>
+
+  <div class="ask"><input id="q" value=""><span class="mic">🎤</span><span class="btn sm amber">Neu fragen</span></div>
+  <div class="understood" id="understood"></div>
+
+  <div class="conc"><div class="av">C</div><p>Billig heißt heute: <b>Vorglühen gratis</b> am Gürtel (1 bis 2), dann <b>Party ab 22 Uhr unter 15 €</b> (4 bis 9). Die Pins zeigen dir, was nah beieinander liegt. Dein Standort ist der blaue Punkt, Nachtbus-Linien fahren ab 0:30.</p></div>
+
+  <div class="split">
+    <div class="list" id="list"></div>
+    <div class="map" id="map"></div>
+  </div>
+
+  <div class="tlbar" id="tl"></div>
+</div>
+
+<script src="data.js"></script>
+<script>
+document.getElementById('q').value = QUERY;
+const sel = new Set(['e1','e5','e7']);
+const num = {}; EVENTS.forEach((e,i)=>num[e.id]=i+1);
+document.getElementById('understood').innerHTML = `<span class="lbl">Verstanden</span>` + UNDERSTOOD.map((c,i)=>`<span class="chip ${i<3?'on':''}">${c} ✕</span>`).join('') + `<span class="chip">+</span>`;
+const card = e => `<div class="card ${sel.has(e.id)?'sel':''}" data-id="${e.id}"><div class="ph"><img src="${e.img}" alt=""><span class="n">${num[e.id]}</span></div><div><h3>${e.t}</h3><p>${e.venue} · ${e.bez}</p><div class="meta"><span>${e.time}</span><span class="${/Gratis|Spende/.test(e.price)?'free':''}">${e.price}</span>${e.ticket?'<span class="tk">TICKET</span>':''}</div><p class="why">${e.why}</p></div><span class="add">${sel.has(e.id)?'✓':'+'}</span></div>`;
+// Projektion Wien innerhalb des Gürtels: lng 16.32 bis 16.42, lat 48.195 bis 48.245
+const W=760,H=560, X=lng=>((lng-16.325)/(16.415-16.325))*W, Y=lat=>H-((lat-48.198)/(48.242-48.198))*H;
+const places=[['Innere Stadt',48.2085,16.3731],['Leopoldstadt',48.2215,16.3885],['Josefstadt',48.2120,16.3500],['Alsergrund',48.2250,16.3570],['Praterstern',48.2185,16.3920],['Gürtel',48.2060,16.3415],['Donaukanal',48.2180,16.3770]];
+function renderMap(){
+  const m=document.getElementById('map');
+  const pins=EVENTS.map(e=>`<g class="pin ${sel.has(e.id)?'sel':''}" data-id="${e.id}" transform="translate(${X(e.lng)},${Y(e.lat)})"><circle r="11"/><text>${num[e.id]}</text></g>`).join('');
+  const picked=[...sel].map(byId).sort((a,b)=>a.time.localeCompare(b.time));
+  const route=picked.length>1?`<polyline points="${picked.map(e=>X(e.lng)+','+Y(e.lat)).join(' ')}" fill="none" stroke="var(--amber)" stroke-width="2" stroke-dasharray="5 5" opacity=".8"/>`:'';
+  const me=`<g class="me" transform="translate(${X(16.355)},${Y(48.215)})"><circle r="22" fill="rgba(76,141,255,.15)" stroke="none"/><circle r="7"/></g>`;
+  m.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice">
+    <defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="rgba(255,255,255,.04)"/></pattern></defs>
+    <rect width="${W}" height="${H}" fill="#0e1014"/><rect width="${W}" height="${H}" fill="url(#g)"/>
+    <path d="M${X(16.36)} 0 C ${X(16.372)} 200 ${X(16.38)} 300 ${X(16.41)} ${H}" fill="none" stroke="rgba(120,160,220,.3)" stroke-width="5"/>
+    <path d="M${X(16.335)} 0 C ${X(16.34)} 200 ${X(16.345)} 400 ${X(16.36)} ${H}" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="7"/>
+    <ellipse cx="${X(16.372)}" cy="${Y(48.208)}" rx="70" ry="70" fill="rgba(255,255,255,.03)"/>
+    ${places.map(p=>`<text class="lbl2" x="${X(p[2])}" y="${Y(p[1])-16}" text-anchor="middle">${p[0]}</text>`).join('')}
+    ${route}${me}${pins}</svg>
+    <div class="ctl"><span class="chip">📍 Mein Standort · 3 km ▾</span><span class="chip on">Heute</span><span class="chip">Öffis zeigen</span></div>
+    <div class="tip" style="left:${X(16.3391)/W*100}%;top:${Y(48.2108)/H*100}%"><img src="${byId('e5').img}" alt=""><div><b>${byId('e5').t}</b><span>23:00 · Rhiz · 8 €* · 2 min vom Kramladen</span></div></div>
+    <div class="legend"><span class="chip">Im Plan</span><span class="chip">Treffer</span></div>`;
+}
+function renderList(){
+  document.getElementById('list').innerHTML = SHELVES.map(s=>{const l=EVENTS.filter(e=>e.slot===s.k);return l.length?`<div class="hd2"><h2>${s.h}</h2><span>${s.sub}</span></div>${l.map(card).join('')}`:''}).join('');
+}
+function renderTl(){
+  const picked=[...sel].map(byId).sort((a,b)=>a.time.localeCompare(b.time));
+  const pos=time=>{const [h,m]=time.split(':').map(Number);return ((h+m/60-18)/10)*100};
+  document.getElementById('tl').innerHTML=`<div class="hd"><h4>Dein Abend</h4><span class="muted">${picked.length} Stopps · Öffi-Wege gestrichelt</span><span class="btn sm">Als Plan speichern</span><span class="btn sm ghost">An Freunde schicken</span></div>
+   <div class="ax"><div class="ticks">${['18','20','22','24','02','04'].map(x=>`<span>${x} Uhr</span>`).join('')}</div><div class="items">${picked.map((e,i)=>`<div class="it" style="left:${pos(e.time)}%"><img src="${e.img}" alt=""><div><b>${e.t}</b><span>${e.time} · ${e.venue}</span></div></div>`+(picked[i+1]?`<div class="drive" style="left:${pos(e.time)+10}%;width:${Math.max(0,pos(picked[i+1].time)-pos(e.time)-10)}%"></div>`:'')).join('')}</div></div>`;
+}
+function render(){renderList();renderMap();renderTl();}
+render();
+document.addEventListener('click',e=>{const el=e.target.closest('[data-id]');if(!el)return;const id=el.dataset.id;sel.has(id)?sel.delete(id):sel.add(id);render();});
+</script>
+</body></html>
