@@ -33,6 +33,16 @@
  *      nicht per Rad und bewegen keinen Zeiger; ein programmatisches
  *      window.scrollTo zaehlt deshalb bewusst NICHT als Geste.
  *
+ *   8. **Nur vertrauenswuerdige, zeitlich gestreckte Gesten (2026-10-23).**
+ *      Ein echtes Chromium 151 ueber Residential-Proxys (jede Pageview eine
+ *      neue IP, ~4.300 Seiten/Tag, 80 % aller Pageviews, fast nur /en) kam
+ *      an der webdriver-Pruefung und an Cloudflare vorbei und loeste in
+ *      zwei Tagen 86 ad_request aus (etwa 9 % der Impressionen). Skripte
+ *      koennen nur Ereignisse mit isTrusted=false erzeugen, und Automation
+ *      setzt den Zeiger in einem Sprung statt ihn ueber Zeit zu bewegen.
+ *      Darum zaehlen nur vom Browser erzeugte Ereignisse, und pointermove
+ *      erst ab drei Bewegungen ueber mindestens 300 ms.
+ *
  *   7. **Messbar (2026-10-17).** Jede Anforderung meldet sich als
  *      Analytics-Event `ad_request` mit der Slot-ID (ueber denselben Pfad
  *      wie ClickTracker/PageviewTracker). Ohne diesen Event war nicht zu
@@ -67,8 +77,11 @@ export interface AdSlotProps {
   className?: string;
 }
 
-/** Eingaben, die nur ein Mensch (oder ein gezielt simulierender Bot) erzeugt. */
-const GESTURE_EVENTS = ['wheel', 'touchstart', 'pointerdown', 'pointermove', 'keydown'] as const;
+/** Eingaben, die sofort als Geste gelten — wenn der Browser sie erzeugt hat. */
+const IMMEDIATE_GESTURES = ['wheel', 'touchstart', 'pointerdown', 'keydown'] as const;
+/** Zeigerbewegung gilt erst, wenn sie sich ueber Zeit erstreckt (Punkt 8). */
+const MOVE_MIN_COUNT = 3;
+const MOVE_MIN_SPAN_MS = 300;
 
 export function AdSlot({ slot, minHeight = 280, tone = 'dark', className = '' }: AdSlotProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -82,14 +95,30 @@ export function AdSlot({ slot, minHeight = 280, tone = 'dark', className = '' }:
   useEffect(() => {
     if (!ADS_ENABLED || !CLIENT_ID) return;
     if (typeof navigator !== 'undefined' && navigator.webdriver) return;
-    const onGesture = () => {
+    let moves = 0;
+    let firstMoveAt = 0;
+    const accept = () => {
       setInteracted(true);
       remove();
     };
-    const remove = () => {
-      for (const ev of GESTURE_EVENTS) window.removeEventListener(ev, onGesture);
+    // Nur vom Browser erzeugte Ereignisse; per dispatchEvent erzeugte
+    // tragen isTrusted=false.
+    const onImmediate = (ev: Event) => {
+      if (ev.isTrusted) accept();
     };
-    for (const ev of GESTURE_EVENTS) window.addEventListener(ev, onGesture, { passive: true });
+    const onMove = (ev: Event) => {
+      if (!ev.isTrusted) return;
+      const now = Date.now();
+      if (moves === 0) firstMoveAt = now;
+      moves += 1;
+      if (moves >= MOVE_MIN_COUNT && now - firstMoveAt >= MOVE_MIN_SPAN_MS) accept();
+    };
+    const remove = () => {
+      for (const ev of IMMEDIATE_GESTURES) window.removeEventListener(ev, onImmediate);
+      window.removeEventListener('pointermove', onMove);
+    };
+    for (const ev of IMMEDIATE_GESTURES) window.addEventListener(ev, onImmediate, { passive: true });
+    window.addEventListener('pointermove', onMove, { passive: true });
     return remove;
   }, []);
 

@@ -139,12 +139,22 @@ Dashboard:
    - Managed Challenge: `ip.src.country eq "CN"`.
    - Block: `http.user_agent contains "Chrome/99.0.4844.51"` (bekannte Welle,
      Caddy gibt dasselbe 403; doppelte Schicht ist Absicht).
+   - Managed Challenge (seit 2026-10-23): `starts_with(http.request.uri.path, "/en/")
+     and http.request.method eq "GET" and http.referer eq ""`. Hintergrund: ab
+     21.10. abends crawlte ein echtes Chromium 151 (passende Sec-CH-UA,
+     Accept-Language en-US) über Residential-Proxys (jede Pageview eine neue IP,
+     ~4.300 Pageviews/Tag = 80 % aller Pageviews, 90 % davon /en, Referer immer
+     leer) an Bot Fight Mode vorbei und löste 86 `ad_request` in zwei Tagen aus.
+     Menschen erreichen /en fast nur über Google (Referer gesetzt); RSC- und
+     Prefetch-Requests tragen einen Referer. Beleg nach dem Anlegen: Direktaufruf
+     einer /en-Event-Seite ohne Referer → `Cf-Mitigated: challenge`, mit
+     Google-Referer → 200, deutsche Seite ohne Referer → 200.
 8. Cache Rules: Eligible für die statischen Pfade aus Abschnitt 3 (Edge-TTL
    „respect origin“), Bypass für alles andere.
 
 Rückweg vor dem Nameserver-Wechsel: Zone löschen, nichts ist live.
 
-#### Stand Schritt B (ausgeführt 2026-10-21 per API, Skript `docs/ops/cloudflare/cf-setup.py`)
+#### Stand Schritt B (ausgeführt 2026-10-21 per API, Skript `docs/ops/cloudflare/cf-setup.py`, Kopie von `/root/cf-setup.py` auf dem Server)
 
 Zone-ID `962399ba2ed7d14167caf40733fdee2d`, Account `d3d4ab2e3819ff7f3144e45f00c81b2e`,
 Plan Free, Status pending. Nameserver: **cortney.ns.cloudflare.com** und
