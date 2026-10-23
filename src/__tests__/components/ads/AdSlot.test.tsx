@@ -35,6 +35,17 @@ function adRequests() {
   return window.adsbygoogle?.length ?? 0;
 }
 
+/**
+ * Ein Ereignis, wie es der Browser selbst erzeugt: isTrusted = true.
+ * fireEvent/dispatchEvent liefern immer isTrusted = false — genau das, was
+ * ein Skript (Bot) auch nur erzeugen kann.
+ */
+function trusted(type: string, init: EventInit = {}) {
+  const ev = new Event(type, { bubbles: true, ...init });
+  Object.defineProperty(ev, 'isTrusted', { value: true });
+  window.dispatchEvent(ev);
+}
+
 describe('AdSlot — Anzeigen nur nach Nutzergeste', () => {
   beforeEach(() => {
     vi.stubEnv('NEXT_PUBLIC_ADS_ENABLED', 'true');
@@ -87,7 +98,7 @@ describe('AdSlot — Anzeigen nur nach Nutzergeste', () => {
     const AdSlot = await loadAdSlot();
     const { container } = render(<AdSlot slot="123" />);
 
-    fireEvent.wheel(window);
+    act(() => trusted('wheel'));
     act(() => intersect());
 
     const ins = container.querySelector('ins.adsbygoogle');
@@ -101,7 +112,7 @@ describe('AdSlot — Anzeigen nur nach Nutzergeste', () => {
     const AdSlot = await loadAdSlot();
     render(<AdSlot slot="123" />);
 
-    fireEvent.wheel(window);
+    act(() => trusted('wheel'));
     act(() => intersect());
 
     expect(adRequests()).toBe(1);
@@ -117,8 +128,69 @@ describe('AdSlot — Anzeigen nur nach Nutzergeste', () => {
     act(() => { vi.advanceTimersByTime(10_000); });
     expect(adRequests()).toBe(0);
 
-    fireEvent.pointerMove(window);
+    act(() => trusted('pointerdown'));
     act(() => { vi.advanceTimersByTime(4_000); });
+
+    expect(container.querySelector('ins.adsbygoogle')).not.toBeNull();
+    expect(adRequests()).toBe(1);
+  });
+
+  // 2026-10-23: Ein echtes Chromium 151 ueber Residential-Proxys (jede
+  // Pageview eine neue IP, 80 % aller Pageviews, fast nur /en) kam durch
+  // webdriver-Pruefung und Cloudflare und loeste 86 ad_request in 2 Tagen
+  // aus. Skripte koennen nur isTrusted=false-Ereignisse erzeugen, und
+  // Automation bewegt den Zeiger in einem Sprung statt ueber Zeit.
+  it('synthetische Ereignisse (isTrusted=false) zaehlen nicht als Geste', async () => {
+    const AdSlot = await loadAdSlot();
+    const { container } = render(<AdSlot slot="123" />);
+
+    fireEvent.wheel(window);
+    fireEvent.pointerDown(window);
+    fireEvent.keyDown(window, { key: 'ArrowDown' });
+    act(() => intersect());
+
+    expect(container.querySelector('ins.adsbygoogle')).toBeNull();
+    expect(adRequests()).toBe(0);
+    expect(trackEvent).not.toHaveBeenCalled();
+  });
+
+  it('ein einzelner pointermove reicht nicht', async () => {
+    vi.useFakeTimers();
+    const AdSlot = await loadAdSlot();
+    const { container } = render(<AdSlot slot="123" />);
+
+    act(() => trusted('pointermove'));
+    act(() => intersect());
+    act(() => { vi.advanceTimersByTime(10_000); });
+
+    expect(container.querySelector('ins.adsbygoogle')).toBeNull();
+    expect(adRequests()).toBe(0);
+  });
+
+  it('drei pointermove innerhalb weniger Millisekunden reichen nicht', async () => {
+    vi.useFakeTimers();
+    const AdSlot = await loadAdSlot();
+    const { container } = render(<AdSlot slot="123" />);
+
+    act(() => { trusted('pointermove'); trusted('pointermove'); trusted('pointermove'); });
+    act(() => intersect());
+    act(() => { vi.advanceTimersByTime(10_000); });
+
+    expect(container.querySelector('ins.adsbygoogle')).toBeNull();
+    expect(adRequests()).toBe(0);
+  });
+
+  it('drei pointermove ueber mindestens 300 ms zaehlen als Geste', async () => {
+    vi.useFakeTimers();
+    const AdSlot = await loadAdSlot();
+    const { container } = render(<AdSlot slot="123" />);
+
+    act(() => trusted('pointermove'));
+    act(() => { vi.advanceTimersByTime(200); });
+    act(() => trusted('pointermove'));
+    act(() => { vi.advanceTimersByTime(200); });
+    act(() => trusted('pointermove'));
+    act(() => intersect());
 
     expect(container.querySelector('ins.adsbygoogle')).not.toBeNull();
     expect(adRequests()).toBe(1);
