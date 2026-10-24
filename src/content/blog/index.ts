@@ -184,6 +184,8 @@ import { post as jazzWineMoreMusicFestivalEintagesticketFuerSamstag2026 } from '
 import { post as theMagicForest2026 } from './posts/the-magic-forest-2026';
 import { post as konzertVoicePassionSongsFromOutlanderVikingsTheLast2026 } from './posts/konzert-voice-passion-songs-from-outlander-vikings-the-last-2026';
 import { post as konzertOldSchoolBasterdsVintageChristmasMusicShow2026 } from './posts/konzert-old-school-basterds-vintage-christmas-music-show-2026';
+import { post as post29GuinnessIrishChristmasFestival2026 } from './posts/29-guinness-irish-christmas-festival-2026';
+import { post as jodokcelloWorldTour2026 } from './posts/jodokcello-world-tour-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -378,6 +380,8 @@ export const ALL_POSTS: FestivalPost[] = [
   theMagicForest2026,
   konzertVoicePassionSongsFromOutlanderVikingsTheLast2026,
   konzertOldSchoolBasterdsVintageChristmasMusicShow2026,
+  post29GuinnessIrishChristmasFestival2026,
+  jodokcelloWorldTour2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
