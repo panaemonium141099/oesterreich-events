@@ -69,13 +69,13 @@ node / next.js
   Per-Scraper-Timeout 25 min (`SCRAPER_TIMEOUT_MIN`), Riesen 280 via
   Override; die Gemeinde-Aggregatoren brechen per Soft-Budget
   (`SCRAPER_SOFT_BUDGET_MIN`, 240 min) mit Teilergebnis ab.
-  gemeinde-registry setzt im nächsten Lauf nach der zuletzt bearbeiteten
-  Gemeinde fort (`source_runs.rotation_cursor`, `rotation-cursor.ts`;
-  Schlüssel Kennziffer + Listenname, nie der Index; ohne Cursor ab dem
-  Listenanfang): ~800 von 1.881 je Nacht, alle in drei Nächten. gem2go,
-  gemeinden und gemeinden-generic laufen noch über `rotateDaily`, das nur
-  einen Eintrag pro Tag weiterrückt (Umstellung in eigener Nacht, damit
-  nicht zwei Nachhol-Wellen in denselben Dedup-Lauf fallen).
+  Der nächste Lauf setzt nach dem zuletzt bearbeiteten Eintrag fort
+  (`source_runs.rotation_cursor`, `rotation-cursor.ts`; Schlüssel
+  Kennziffer + Listenname, nie der Index; ohne Cursor ab dem
+  Listenanfang): gemeinde-registry ~800 von 1.881 je Nacht (alle in drei
+  Nächten), gem2go ~1.200 von 2.043 (zwei Nächte), gemeinden und
+  gemeinden-generic meist komplett. Die frühere Tagesrotation rückte nur
+  einen Eintrag pro Tag weiter (Salzburg/Steiermark seit Mai nicht gescrapt).
   scrape.ts endet mit explizitem `process.exit(0)` — sonst halten
   verwaiste Sockets getimeouteter Scraper den Job stundenlang am Leben.
   Dazu Venues-Job + EIN Post-Processing-Job (`scrape-pipeline.ts
