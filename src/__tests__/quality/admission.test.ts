@@ -524,3 +524,34 @@ describe('evaluateAdmission — Gemeinde-Dienste (Entscheidung 2026-10-14)', () 
     expect(contentQuarantineReasons({ title: null })).toEqual([]);
   });
 });
+
+describe('evaluateAdmission — gesperrte Personen (2026-10-25)', () => {
+  const titles = [
+    'Gunkl - Apropos übrigens',
+    'GUNKL: APROPOS ÜBRIGENS | Tirol Premiere!',
+    'Einladung zum Konzert "Gunkl & Breinschmid"',
+    'Abgesagt: GUNKL',
+    'Gunkls neues Programm',
+    'Kabarett mit Günther Paal',
+  ];
+
+  it.each(titles)('verwirft „%s“ — die Zeile wird nie geschrieben', title => {
+    const v = evaluateAdmission({ ...OK, title }, { now: NOW });
+    expect(v.decision).toBe('reject');
+    expect(v.reasons).toEqual(['blocked_performer']);
+  });
+
+  it('hält eine gespeicherte Zeile zurück (Nachprüfung und Dedup lesen contentQuarantineReasons)', () => {
+    expect(contentQuarantineReasons({ title: 'Gunkl - Apropos übrigens' })).toEqual(['blocked_performer']);
+    const r = scoreAndAdmit({ ...OK, title: 'Gunkl - Apropos übrigens', source_name: 'Eventim' } as never, { now: NOW });
+    expect(r.publish_status).toBe('needs_review');
+  });
+
+  it('lässt andere Events in Ruhe, auch wenn der Name nur Teil eines Wortes ist', () => {
+    for (const title of ['Frischling 2027 — Freistädter Kabarettpreis', 'Begunkler Abend', 'Paalhuberfest']) {
+      const v = evaluateAdmission({ ...OK, title }, { now: NOW });
+      expect(v.decision, title).toBe('admit');
+    }
+    expect(contentQuarantineReasons({ title: 'Pörd Festivalino im Althof Retz' })).toEqual([]);
+  });
+});
