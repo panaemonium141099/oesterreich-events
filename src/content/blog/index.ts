@@ -186,6 +186,8 @@ import { post as konzertVoicePassionSongsFromOutlanderVikingsTheLast2026 } from 
 import { post as konzertOldSchoolBasterdsVintageChristmasMusicShow2026 } from './posts/konzert-old-school-basterds-vintage-christmas-music-show-2026';
 import { post as post29GuinnessIrishChristmasFestival2026 } from './posts/29-guinness-irish-christmas-festival-2026';
 import { post as jodokcelloWorldTour2026 } from './posts/jodokcello-world-tour-2026';
+import { post as benefizkonzertKrebshilfe2026DarknessConfidence2026 } from './posts/benefizkonzert-krebshilfe-2026-darkness-confidence-2026';
+import { post as weihnachtlicheLesungFriedrichVonThun2026 } from './posts/weihnachtliche-lesung-friedrich-von-thun-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -382,6 +384,8 @@ export const ALL_POSTS: FestivalPost[] = [
   konzertOldSchoolBasterdsVintageChristmasMusicShow2026,
   post29GuinnessIrishChristmasFestival2026,
   jodokcelloWorldTour2026,
+  benefizkonzertKrebshilfe2026DarknessConfidence2026,
+  weihnachtlicheLesungFriedrichVonThun2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
