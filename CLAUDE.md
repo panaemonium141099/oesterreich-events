@@ -98,7 +98,9 @@ node / next.js
   der Upsert hebt beides auf. `admission_recheck`
   (`admission-recheck.ts`, Regeln in `src/lib/quality/admission-recheck.ts`)
   wendet die Titel- und Zeitregeln des Freigabevertrags
-  (`titleTimeQuarantineReasons`: Gemeinde-Dienst, Horizont) auf
+  (`titleTimeQuarantineReasons`: Gemeinde-Dienst, Horizont, gesperrte
+  Personen aus `src/lib/quality/blocked-performers.ts` — der Vertrag
+  verwirft sie schon im Sync, Nachprüfung und Dedup halten Bestand) auf
   gespeicherte Zeilen an, auch auf solche, die keine Quelle mehr liefert:
   sichtbar → `needs_review` mit `admission:<Grund>` im Protokoll, entfällt
   der Grund, gilt wieder der Score. Ventil 500 Haltungen / 300 Freigaben,

@@ -35,6 +35,7 @@
  */
 
 import { isMunicipalService } from '@/lib/category-classifier/municipal-service';
+import { isBlockedPerformer } from '@/lib/quality/blocked-performers';
 
 /** `reject` = gar nicht schreiben. `quarantine` = schreiben, aber nie publik. */
 export type AdmissionDecision = 'admit' | 'quarantine' | 'reject';
@@ -47,6 +48,8 @@ export type AdmissionReason =
   | 'invalid_end_date'
   | 'start_in_past'
   | 'end_before_start'
+  /** Gesperrte Person im Titel (`blocked-performers.ts`): nie schreiben, im Bestand halten. */
+  | 'blocked_performer'
   // ── quarantine ──────────────────────────────────────────────────
   | 'no_location_evidence'
   | 'placeholder_location'
@@ -62,7 +65,11 @@ export type AdmissionReason =
  * (`applyAdmissionToPosition`) lässt Status und Position dafür unberührt;
  * zurückgehalten wird die Zeile trotzdem (Quarantäne → needs_review).
  */
-export const NON_LOCATION_REASONS: ReadonlySet<AdmissionReason> = new Set<AdmissionReason>(['start_too_far_ahead', 'municipal_service']);
+export const NON_LOCATION_REASONS: ReadonlySet<AdmissionReason> = new Set<AdmissionReason>([
+  'start_too_far_ahead',
+  'municipal_service',
+  'blocked_performer',
+]);
 
 /**
  * Freigabehorizont in Jahren ab heute (Wiener Kalendertag).
@@ -303,7 +310,12 @@ export function hasForeignPlaceSignal(value: string | null | undefined): boolean
  * Primary freigegeben werden (`underlyingStatus` in dedup-cluster.ts).
  */
 export function contentQuarantineReasons(input: { title?: string | null }): AdmissionReason[] {
-  return isMunicipalService(input.title) ? ['municipal_service'] : [];
+  const reasons: AdmissionReason[] = [];
+  if (isMunicipalService(input.title)) reasons.push('municipal_service');
+  // Im Vertrag ein Verwerfungsgrund (Zeile wird nie geschrieben); hier
+  // zusätzlich, damit Nachprüfung und Dedup eine vorhandene Zeile halten.
+  if (isBlockedPerformer(input.title)) reasons.push('blocked_performer');
+  return reasons;
 }
 
 /**
@@ -351,6 +363,7 @@ export function evaluateAdmission(
 
   // ── 1. Identität & Zeit — ohne die gibt es kein Event ──────────────
   if (!hasText(input.title)) rejects.push('missing_title');
+  else if (isBlockedPerformer(input.title)) rejects.push('blocked_performer');
 
   if (!hasText(input.start_date)) {
     rejects.push('missing_start_date');

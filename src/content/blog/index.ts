@@ -122,7 +122,6 @@ import { post as symphonieorchesterVorarlbergKonzert3DiakunSchumannDvor2026 } fr
 import { post as averageKayo2026 } from './posts/average-kayo-2026';
 import { post as oskarHaagLostCauseTour20262026 } from './posts/oskar-haag-lost-cause-tour-2026-2026';
 import { post as charityFestival2Tagesticket2026 } from './posts/charity-festival-2-tagesticket-2026';
-import { post as gunklAproposUebrigens2026 } from './posts/gunkl-apropos-uebrigens-2026';
 import { post as post4GaengeGourmetDinner2026 } from './posts/4-gaenge-gourmet-dinner-2026';
 import { post as orgelkonzertBachMozartChopinUA2026 } from './posts/orgelkonzert-bach-mozart-chopin-u-a-2026';
 import { post as panEnglishComedyTour20262026 } from './posts/pan-english-comedy-tour-2026-2026';
@@ -320,7 +319,6 @@ export const ALL_POSTS: FestivalPost[] = [
   averageKayo2026,
   oskarHaagLostCauseTour20262026,
   charityFestival2Tagesticket2026,
-  gunklAproposUebrigens2026,
   post4GaengeGourmetDinner2026,
   orgelkonzertBachMozartChopinUA2026,
   panEnglishComedyTour20262026,
