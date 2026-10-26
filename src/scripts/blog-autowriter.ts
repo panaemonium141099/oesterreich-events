@@ -33,6 +33,8 @@ import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { startWorkflowRun, finishWorkflowRun, type WorkflowItem } from '../lib/reporting/workflow-run';
 import { toViennaDate } from '../lib/utils/event-time';
+import { selectFestivalBlogCandidates, festivalBlogKey } from '../lib/festivals/upcoming';
+import type { Festival, FestivalArtist } from '../types/festivals';
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const POSTS_DIR = path.join(ROOT, 'src', 'content', 'blog', 'posts');
@@ -76,6 +78,8 @@ interface AutowriterState {
   covered: Array<{ eventId: string; slug: string; title: string; writtenAt: string }>;
   /** fn-21: abgearbeitete Stay-Guide-Topics (Topic-Slugs, rotieren). */
   stayGuides?: string[];
+  /** Festival-Vorschau-Posts (--festivals): `${festival.slug}:${starts_at}` je Ausgabe. */
+  festivals?: string[];
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────
@@ -736,6 +740,13 @@ async function main(): Promise<void> {
     return;
   }
 
+  // --festivals: Vorschau-Posts fuer Festivals, die in ~5 Monaten starten
+  // (Kandidaten aus der festivals-Tabelle, nicht aus events).
+  if (args.includes('--festivals')) {
+    await writeFestivalPosts(supabase, state, dryRun, count, new Set(ALL_POSTS.map(p => p.slug)), runId);
+    return;
+  }
+
   const knownTitles = [
     ...ALL_POSTS.map(p => p.title),
     ...state.covered.map(c => c.title),
@@ -949,6 +960,365 @@ async function main(): Promise<void> {
   });
 
   // Für den Commit-Step der GitHub-Action
+  const ghOutput = process.env.GITHUB_OUTPUT;
+  if (ghOutput) fs.appendFileSync(ghOutput, `slugs=${writtenSlugs.join(' ')}\n`);
+}
+
+// ─── Festival-Vorschau (5 Monate vor Festivalbeginn) ──────────────────────
+//
+// Kandidaten kommen aus `festivals` (kuratiert über data/festivals-upcoming.json,
+// npm run import:festivals), nicht aus `events`: dort sind Festivals oft nur
+// als Einzeltermine oder gar nicht vorhanden. Harte Fakten (Termin, Ort,
+// Website, Ticketlink, Preis, Lineup) stammen aus der Tabelle; die Recherche
+// liefert Geschichte, Anreise und Tipps; das Modell formuliert nur.
+//
+// Fenster: Start in 138..152 Tagen (≈ 5 Monate mit zwei Wochen Nachlauf, falls
+// Slots am Abo-Limit scheitern). Jede Ausgabe genau einmal (State-Key
+// `${slug}:${starts_at}`), die naechste Ausgabe desselben Festivals im Jahr
+// darauf wieder.
+
+type FestivalCandidate = Festival & { lineup: FestivalArtist[] };
+
+async function fetchFestivalCandidates(
+  supabase: SupabaseClient,
+  covered: Set<string>,
+): Promise<FestivalCandidate[]> {
+  const today = new Date().toISOString().slice(0, 10);
+  // Grob vorfiltern (120..170 Tage), fein in selectFestivalBlogCandidates.
+  const from = new Date(Date.now() + 120 * 86400_000).toISOString().slice(0, 10);
+  const to = new Date(Date.now() + 170 * 86400_000).toISOString().slice(0, 10);
+  const { data, error } = await supabase
+    .from('festivals')
+    .select('*')
+    .gte('starts_at', from)
+    .lte('starts_at', to)
+    .order('starts_at', { ascending: true })
+    .limit(100);
+  if (error) throw new Error(`festival candidate query failed: ${error.message}`);
+  const picked = selectFestivalBlogCandidates((data ?? []) as Festival[], today, covered);
+  const out: FestivalCandidate[] = [];
+  for (const f of picked) {
+    const { data: acts } = await supabase
+      .from('festival_artists')
+      .select('*')
+      .eq('festival_id', f.id)
+      .limit(200);
+    out.push({ ...f, lineup: (acts ?? []) as FestivalArtist[] });
+  }
+  return out;
+}
+
+const BILLING_RANK: Record<string, number> = { headliner: 0, sub_headliner: 1, support: 2, opener: 3, unknown: 4 };
+
+function festivalFacts(f: FestivalCandidate): string {
+  const acts = [...f.lineup]
+    .sort((a, b) => (BILLING_RANK[a.billing ?? 'unknown'] ?? 9) - (BILLING_RANK[b.billing ?? 'unknown'] ?? 9))
+    .slice(0, 40)
+    .map(a => `${a.artist_name_raw}${a.billing && a.billing !== 'unknown' ? ` (${a.billing})` : ''}${a.day_label ? `, ${a.day_label}` : ''}`);
+  return [
+    `Festival: ${f.canonical_name}`,
+    `Termin (fix): ${f.starts_at} bis ${f.ends_at}`,
+    `Ort: ${[f.city, f.state].filter(Boolean).join(', ')}`,
+    f.website_url ? `Website: ${f.website_url}` : null,
+    f.ticket_url ? `Tickets: ${f.ticket_url}` : null,
+    f.price_text ? `Preise laut Veranstalter: ${f.price_text}` : null,
+    f.description ? `Kurzbeschreibung: ${f.description}` : null,
+    acts.length > 0 ? `Bestätigtes Lineup (${f.lineup.length} Acts): ${acts.join('; ')}` : 'Lineup: noch nicht angekündigt',
+  ].filter(Boolean).join('\n');
+}
+
+async function researchFestival(f: FestivalCandidate): Promise<string> {
+  const prompt = `Recherchiere gründlich das folgende Festival in Österreich für einen Vorschau-Blogartikel, der etwa fünf Monate vor Beginn erscheint. Nutze aktiv die Websuche und liefere NUR verifizierte Fakten mit heutigem Stand — wenn du etwas nicht findest, schreib "unbekannt" statt zu raten. Die Fakten aus unserer Datenbank unten gelten als gesetzt (Termin nicht ändern).
+
+${festivalFacts(f)}
+
+Recherchiere und liste strukturiert:
+1. Offizielle Website, exakte Termine, Einlass-/Öffnungszeiten, Gelände/Bühnen
+2. Lineup der KOMMENDEN Ausgabe (nur bestätigte Acts; wenn unsere Liste leer ist, was bisher angekündigt wurde; wann weitere Namen erwartet werden)
+3. Ticketkategorien und Preise (Festivalpass, Tagesticket, Camping, VIP; Early-Bird-Fristen, Verkaufsstart)
+4. Geschichte und Bedeutung (seit wann, Besucherzahlen, Höhepunkte vergangener Jahre)
+5. Anreise (Bahn, Shuttle, Auto, Parken), Camping/Übernachtung, Gelände-Infos
+6. Praktische Tipps (was man mitnehmen darf, Wetter, Verpflegung, Cashless, Altersgrenzen)
+7. Häufig gestellte Fragen von Besuchern und deren Antworten`;
+
+  return claudeText(prompt, {
+    model: MODEL_RESEARCH,
+    allowedTools: ['WebSearch', 'WebFetch'],
+    maxTurns: RESEARCH_MAX_TURNS,
+  });
+}
+
+async function composeFestivalPost(f: FestivalCandidate, research: string): Promise<Record<string, unknown>> {
+  const prompt = `Du schreibst für LassTreffen.at (österreichische Event-Plattform) einen hochwertigen deutschen SEO-Vorschauartikel über dieses Festival. Der Artikel erscheint rund fünf Monate vor Beginn: Leser wollen wissen, ob sich das Festival lohnt, was sie erwartet und wie sie jetzt Tickets, Anreise und Unterkunft planen. Basis sind AUSSCHLIESSLICH die Fakten unten — erfinde nichts dazu; wo die Recherche "unbekannt" sagt, formuliere ohne konkrete Zahl. Acts nur nennen, wenn sie in den Datenbank-Fakten oder der Recherche als bestätigt vorkommen.
+
+DATENBANK-FAKTEN (gesetzt, nicht ändern):
+${festivalFacts(f)}
+
+RECHERCHE:
+${research}
+
+Antworte NUR mit einem JSON-Objekt exakt dieser Form (alle Texte Deutsch, Sie-Form wie ein Magazin, lebendig aber faktentreu):
+{
+  "title": "prägnanter Titel mit Festivalname und Jahr, z. B. '${f.canonical_name} ${f.starts_at?.slice(0, 4)}: Das erwartet euch'",
+  "subtitle": "eine Zeile, macht Lust aufs Festival — mit Ortsnennung",
+  "excerpt": "150-250 Zeichen Teaser",
+  "category": "Musik & Festival",
+  "keyFacts": {
+    "dates": "menschenlesbare Termine",
+    "location": "Gelände/Venue, Ort",
+    "address": "Straße, PLZ Ort (oder Ort, Bundesland)",
+    "genre": "Genre/Art des Festivals",
+    "price": "Preisinfo (Festivalpass/Tagesticket) oder 'Eintritt frei'",
+    "website": "offizielle URL",
+    "capacity": "Besucher/Kapazität oder weglassen",
+    "since": "Gründungsjahr oder weglassen"
+  },
+  "lineup": [{ "name": "Act", "role": "headliner|support|special", "day": "Tag optional", "stage": "Bühne optional" }],
+  "lineupTitle": "Lineup",
+  "lineupNote": "Hinweis, wie vollständig das Lineup ist und wann weitere Acts erwartet werden",
+  "intro": "3-5 Sätze szenischer Einstieg, min. 400 Zeichen",
+  "historyTitle": "Überschrift zur Geschichte",
+  "history": "Geschichte/Bedeutung, min. 400 Zeichen",
+  "whatToExpectTitle": "Überschrift",
+  "whatToExpect": "Was Besucher erwartet (Gelände, Bühnen, Camping, Stimmung), min. 300 Zeichen",
+  "whatToExpectList": ["5-7 konkrete Highlights"],
+  "practicalInfo": [{ "icon": "ein Emoji", "label": "Tickets|Anreise|Camping|Packliste|...", "text": "konkreter Tipp" }],
+  "ctaText": "Call-to-Action, z. B. 'Zur Festivalseite mit Lineup'",
+  "seoTitle": "max. 60 Zeichen, Festivalname + Jahr vorn",
+  "seoDescription": "max. 155 Zeichen",
+  "keywords": ["6-10 deutsche Suchbegriffe, inkl. '<Festival> <Jahr> tickets' und '<Festival> lineup'"],
+  "faqs": [{ "question": "…", "answer": "…" }],
+  "endDate": "${f.ends_at ?? ''}"
+}
+Mindestens 5 faqs (darunter Tickets, Anreise, Camping/Übernachtung), mindestens 4 practicalInfo-Einträge.
+STIL: Keine Gedankenstriche (– oder —) als Einschub in sichtbaren Texten. Stattdessen Komma, Doppelpunkt oder ein neuer Satz.`;
+
+  return claudeJson(prompt, POST_SCHEMA as unknown as Record<string, unknown>, { model: MODEL_COMPOSE });
+}
+
+/** Festival-Zeile als Candidate, damit Hero-/Sanitize-Pfade wiederverwendbar bleiben. */
+function festivalAsCandidate(f: FestivalCandidate): Candidate {
+  return {
+    id: f.id,
+    title: f.canonical_name,
+    start_date: `${f.starts_at}T00:00:00Z`,
+    end_date: f.ends_at ? `${f.ends_at}T00:00:00Z` : null,
+    location_name: f.city,
+    address: null,
+    postal_code: null,
+    bundesland: f.state,
+    image_url: f.image_url,
+    source_name: f.canonical_name,
+    source_url: f.website_url,
+    ticket_url: f.ticket_url,
+    quality_score: null,
+    description: f.description,
+    latitude: null,
+    longitude: null,
+  };
+}
+
+async function writeFestivalPosts(
+  supabase: SupabaseClient,
+  state: AutowriterState,
+  dryRun: boolean,
+  count: number,
+  knownSlugs: Set<string>,
+  runId: Awaited<ReturnType<typeof startWorkflowRun>>,
+): Promise<void> {
+  const reportItems: WorkflowItem[] = [];
+  const reportErrors: string[] = [];
+  const covered = new Set(state.festivals ?? []);
+  const candidates = await fetchFestivalCandidates(supabase, covered);
+  log(`Festival-Vorschau: ${candidates.length} Kandidat(en) im 5-Monats-Fenster`);
+
+  if (candidates.length === 0) {
+    await finishWorkflowRun(runId, {
+      status: 'success',
+      summary: 'Festival-Vorschau: kein Festival im 5-Monats-Fenster faellig',
+      metrics: { Kandidaten: 0, Geschrieben: 0 },
+    });
+    log('Nichts faellig — Ende.');
+    return;
+  }
+
+  let written = 0;
+  const writtenSlugs: string[] = [];
+  for (const f of candidates) {
+    if (written >= count) break;
+    const c = festivalAsCandidate(f);
+    const year = f.starts_at!.slice(0, 4);
+    const baseSlug = slugifyTitle(f.canonical_name.replace(/\b(19|20)\d{2}\b/g, '').trim());
+    let slug = `${baseSlug}-${year}`;
+    if (knownSlugs.has(slug)) slug = `${slug}-vorschau`;
+    log(`Festival: "${f.canonical_name}" (${f.starts_at}..${f.ends_at}, ${f.state ?? '?'}, acts=${f.lineup.length}) → ${slug}`);
+
+    try {
+      const hero = await resolveHero(c, slug);
+      if (!hero) {
+        log('  Kein brauchbares Hero-Bild — skip');
+        reportErrors.push(`"${f.canonical_name}": Bild nicht ladbar (${f.image_url})`);
+        continue;
+      }
+      const research = await researchFestival(f);
+      if (research.trim().length < 800) {
+        log('  Recherche zu duenn — skip');
+        reportErrors.push(`"${f.canonical_name}": Recherche zu duenn`);
+        continue;
+      }
+      const draft = await composeFestivalPost(f, research);
+      sanitizeDraft(draft, c);
+      const errors = validateDraft(draft);
+      if (errors.length > 0) {
+        log(`  Entwurf verworfen: ${errors.join('; ')}`);
+        reportErrors.push(`"${f.canonical_name}": ${errors.join('; ')}`);
+        continue;
+      }
+
+      if (dryRun) {
+        log(`  DRY-RUN ok: ${slug} — "${draft.title as string}"`);
+        written++;
+        continue;
+      }
+
+      const kf = draft.keyFacts as Record<string, string>;
+      const today = new Date().toISOString().slice(0, 10);
+      const heroPath = `/images/blog/${slug}/${hero.heroImage}`;
+      // Lineup: steht es in der DB, gewinnt die DB (kein Modell-Act dazu);
+      // sonst die aus der Recherche komponierten Acts.
+      const lineup = f.lineup.length > 0
+        ? [...f.lineup]
+            .sort((a, b) => (BILLING_RANK[a.billing ?? 'unknown'] ?? 9) - (BILLING_RANK[b.billing ?? 'unknown'] ?? 9))
+            .slice(0, 60)
+            .map(a => ({
+              name: a.artist_name_raw,
+              ...(a.billing === 'headliner' ? { role: 'headliner' } : a.billing === 'support' || a.billing === 'opener' ? { role: 'support' } : {}),
+              ...(a.day_label ? { day: a.day_label } : {}),
+              ...(a.stage_name ? { stage: a.stage_name } : {}),
+            }))
+        : (Array.isArray(draft.lineup) ? draft.lineup : []);
+
+      const post: Record<string, unknown> = {
+        slug,
+        title: draft.title,
+        subtitle: draft.subtitle,
+        heroImage: heroPath,
+        heroImageCredit: `Foto: ${f.canonical_name}`,
+        ...(hero.layout === 'poster' ? { heroLayout: 'poster', heroImageWidth: hero.width } : {}),
+        ...(f.ticket_url ? { ticketUrl: f.ticket_url } : {}),
+        publishDate: today,
+        updatedDate: today,
+        readingTime: Math.max(5, Math.round(
+          [draft.intro, draft.history, draft.whatToExpect].join(' ').split(/\s+/).length / 180,
+        ) + 3),
+        excerpt: draft.excerpt,
+        category: 'Musik & Festival',
+        categoryColor: CATEGORIES['Musik & Festival'],
+        keyFacts: {
+          dates: kf.dates,
+          location: kf.location,
+          address: kf.address || [f.city, f.state].filter(Boolean).join(', ') || 'Österreich',
+          genre: kf.genre,
+          price: f.price_text ?? kf.price,
+          website: f.website_url ?? kf.website,
+          ...(kf.capacity ? { capacity: kf.capacity } : {}),
+          ...(kf.since ? { since: kf.since } : {}),
+        },
+        lineup,
+        lineupTitle: 'Lineup',
+        ...(draft.lineupNote ? { lineupNote: draft.lineupNote } : {}),
+        intro: draft.intro,
+        historyTitle: draft.historyTitle,
+        history: draft.history,
+        whatToExpectTitle: draft.whatToExpectTitle,
+        whatToExpect: draft.whatToExpect,
+        whatToExpectList: draft.whatToExpectList,
+        practicalInfoTitle: 'Praktische Informationen',
+        practicalInfo: draft.practicalInfo,
+        gallery: [],
+        ctaText: isStr(draft.ctaText, 5, 60) ? draft.ctaText : 'Zur Festivalseite mit Lineup',
+        ctaLink: `/festivals/${f.slug}`,
+        seoTitle: draft.seoTitle,
+        seoDescription: draft.seoDescription,
+        keywords: draft.keywords,
+        ...(f.city ? { stayCity: f.city } : {}),
+        relatedEvents: {
+          terms: [f.canonical_name.replace(/\b(festival|open air)\b/gi, '').trim() || f.canonical_name],
+          from: `${f.starts_at}T00:00:00Z`,
+          to: `${f.ends_at}T23:59:59Z`,
+        },
+        jsonLdEvent: {
+          name: draft.title,
+          startDate: f.starts_at,
+          endDate: f.ends_at,
+          location: [f.city, f.state].filter(Boolean).join(', ') || 'Österreich',
+          addressCountry: 'AT',
+          url: f.website_url ?? kf.website,
+          description: draft.excerpt,
+          image: `https://lasstreffen.at${heroPath}`,
+        },
+        faqs: draft.faqs,
+      };
+
+      writePostFile(slug, post);
+      updateRegistry(slug);
+      await smokeTest(slug);
+
+      state.festivals = [...(state.festivals ?? []), festivalBlogKey(f)];
+      fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2) + '\n', 'utf8');
+      knownSlugs.add(slug);
+      writtenSlugs.push(slug);
+      reportItems.push({
+        title: String(post.title ?? f.canonical_name),
+        excerpt: post.excerpt ? String(post.excerpt) : undefined,
+        url: `https://lasstreffen.at/blog/${slug}`,
+        meta: {
+          Festival: f.canonical_name,
+          Termin: `${f.starts_at} bis ${f.ends_at}`,
+          Bundesland: f.state ?? '—',
+          Acts: String(f.lineup.length),
+        },
+      });
+      written++;
+      log(`  ✓ geschrieben: ${slug}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (err instanceof ClaudeCliError) {
+        const rateLimited = err instanceof ClaudeRateLimitError;
+        await finishWorkflowRun(runId, {
+          status: 'failed',
+          summary: rateLimited ? 'Festival-Vorschau: Abo-Sitzungslimit, naechster Slot versucht es erneut' : 'Festival-Vorschau: Claude-CLI nicht nutzbar',
+          items: reportItems,
+          errors: [...reportErrors, msg],
+        });
+        if (rateLimited) {
+          log(`RATE-LIMIT: ${msg}`);
+          process.exit(EXIT_RATE_LIMITED);
+        }
+        throw err;
+      }
+      log(`  Fehler bei "${f.canonical_name}": ${msg} — skip`);
+      reportErrors.push(`"${f.canonical_name}": ${msg}`);
+    }
+  }
+
+  if (written === 0) {
+    await finishWorkflowRun(runId, {
+      status: 'failed',
+      summary: 'Festival-Vorschau: faellige Festivals, aber kein Post geschrieben',
+      metrics: { Kandidaten: candidates.length, Geschrieben: 0 },
+      errors: reportErrors,
+    });
+    throw new Error('Festival-Vorschau: kein Post geschrieben (siehe Log)');
+  }
+  await finishWorkflowRun(runId, {
+    status: 'success',
+    summary: `Festival-Vorschau: ${written} Post(s) geschrieben` + (reportErrors.length ? `, ${reportErrors.length} verworfen` : ''),
+    metrics: { Kandidaten: candidates.length, Geschrieben: written, Verworfen: reportErrors.length },
+    items: reportItems,
+    errors: reportErrors,
+  });
+  log(`Fertig: ${written} Festival-Post(s) — ${writtenSlugs.join(', ')}`);
   const ghOutput = process.env.GITHUB_OUTPUT;
   if (ghOutput) fs.appendFileSync(ghOutput, `slugs=${writtenSlugs.join(' ')}\n`);
 }

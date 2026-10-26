@@ -81,8 +81,15 @@ export function V4FestivalCard({ festival, lineupMatch = false }: V4FestivalCard
           {displayName}
         </h3>
         <p className="text-[11.5px] text-[var(--v4-ink-50)]">
+          {festival.date_status === 'expected' ? 'vorauss. ' : ''}
           {dateRange(festival.starts_at, festival.ends_at)}
+          {festival.city ? ` · ${festival.city}` : ''}
         </p>
+        {festival.price_text && (
+          <p className="text-[11.5px] font-medium text-[var(--v4-ink-70)] line-clamp-1">
+            {festival.price_text}
+          </p>
+        )}
       </div>
     </>
   );

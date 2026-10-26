@@ -484,6 +484,7 @@ async function getLandingDataInner(): Promise<{ data: LandingData; failed: strin
       lineupMatch: false, // Phase 2 best-effort — see fn-docstring above
       image_url:
         parentEvent?.image_url
+        ?? f.image_url
         ?? FESTIVAL_OVERRIDES[f.slug]?.imageUrl
         ?? festivalCategoryFallback(f.id),
       href,
