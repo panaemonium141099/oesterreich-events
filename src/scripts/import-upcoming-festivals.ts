@@ -126,8 +126,9 @@ async function main(): Promise<void> {
       }
       log(`  ${e.slug}: ${note}`);
     }
-    if (changed && !dryRun) {
-      // Ergebnis zurück in die Seed-Datei, damit der nächste Lauf ohne
+    if (changed) {
+      // Ergebnis zurück in die Seed-Datei (auch im Dry-Run: lokale Datei,
+      // nicht die DB), damit der nächste Lauf ohne
       // Netz auskommt und die Datei den gelieferten Stand dokumentiert.
       writeFileSync(SEED_PATH, JSON.stringify(seeds, null, 2) + '\n', 'utf8');
       log('Seed-Datei mit geprüften Bild-URLs aktualisiert');
