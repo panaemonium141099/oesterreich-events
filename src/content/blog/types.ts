@@ -89,6 +89,12 @@ export interface FestivalPost {
   whatToExpectTitle: string;
   whatToExpect: string;
   whatToExpectList: string[];
+  /**
+   * Belegte Kuriositäten und Zahlen rund um das Event (3-6 kurze Absätze),
+   * gerendert als eigene Sektion "Fun Facts" nach der Geschichte. Optional:
+   * ältere Posts haben keine.
+   */
+  funFacts?: string[];
   practicalInfoTitle: string;
   practicalInfo: { icon: string; label: string; text: string }[];
   gallery: GalleryImage[];

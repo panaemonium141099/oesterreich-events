@@ -106,6 +106,16 @@ node / next.js
   der Grund, gilt wieder der Score. Ventil 500 Haltungen / 300 Freigaben,
   Freigabe per workflow_dispatch. `security_audit` wird rot, sobald eine
   schreibende SECURITY-DEFINER-Funktion für anon ausführbar ist.
+- **Festivals (2026-10):** Die Festivalseite zeigt nur `ends_at >= heute`;
+  die kommenden Ausgaben (Termin, Ticketlink, Preis, Beschreibung, Bild,
+  Lineup) kommen aus der kuratierten `data/festivals-upcoming.json`
+  (`npm run import:festivals`, Regeln in `src/lib/festivals/upcoming.ts`),
+  nicht aus der mica-Registry (nur ein Jahrgang). Neue Jahrgänge dort
+  nachrecherchieren. `blog-autowriter.yml` schreibt täglich 04:10 UTC
+  (`--festivals`) je Festival einen Vorschau-Post 138 bis 152 Tage vor
+  Beginn, mit Fun Facts, ohne Striche (`src/lib/blog/dashes.ts`); jede
+  Ausgabe einmal (State-Key `slug:starts_at`). Lineup im Blog nur über
+  `toBlogLineup`: Acts ohne Rolle rendert die Blogseite nicht.
 - **GitHub Actions `import-eventim.yml`** (alle 6 h): PFT-Feed-Import mit
   Affiliate-Links. Secrets: `EVENTIM_FEED_USER`/`EVENTIM_FEED_PASS`.
 - **GitHub Actions `ingest-activities.yml`** (wöchentlich): Deskline-
@@ -316,6 +326,8 @@ npm run import-osm-pois      # OSM-Freizeit-POIs → osm_pois (Overpass, Disk-Ca
                              # --fetch-only | --skip-fetch | --region X | --dry-run)
 npm run build:stammdaten     # data/gemeinden-at.json + URL-Ortsslugs neu bauen
 npm run scrape:festival-lineups | match-artists
+npm run import:festivals     # data/festivals-upcoming.json → festivals + festival_artists
+                             # (--dry-run | --fetch-images | --slug X); validiert vorab komplett
 ```
 
 ## Deployment
