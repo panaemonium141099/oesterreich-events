@@ -26,7 +26,6 @@
 
 import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import type { Metadata } from 'next';
 import { unstable_cache } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
@@ -40,9 +39,7 @@ import {
   haversineKm,
   type AustrianGemeinde,
 } from '@/lib/gemeinden/data';
-import { buildEventUrlV2 } from '@/lib/utils/slugify';
-import { formatDateLong, formatTime } from '@/lib/utils/date';
-import { resolvePrimaryEventImage } from '@/lib/event-images';
+import type { Event } from '@/types/events';
 import {
   buildGemeindeHubJsonLd,
   buildHubMeta,
@@ -66,13 +63,16 @@ import { getHubIntro } from '@/lib/seo/hub-refresh';
 import { getCityHub } from '@/lib/hubs/city-hubs';
 import { HubSearchCTA } from '@/components/Hub/HubSearchCTA';
 import { HubSmartCTA } from '@/components/Hub/HubSmartCTA';
+import { HubShelves } from '@/components/Hub/HubShelves';
+import { HubEventGrid } from '@/components/Hub/HubEventGrid';
+import { buildEntdeckenHref } from '@/lib/hubs/hub-links';
 import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { viennaFields } from '@/lib/utils/event-time';
 import { routing, type AppLocale } from '@/i18n/routing';
 import { bilingualAlternates } from '@/lib/seo/canonical';
-import { dateLocaleFor } from '@/lib/i18n/date-locale';
 import { bundeslandDisplayName, placeDisplayName } from '@/lib/i18n/bundesland-names';
+import { dateLocaleFor } from '@/lib/i18n/date-locale';
 import { SITE_COUNTRY } from '@/lib/site-country';
 
 function resolveLocale(raw: string): AppLocale {
@@ -117,6 +117,9 @@ interface NearbyEvent {
   image_width: number | null;
   source_id: string | null;
   price_text: string | null;
+  price_min: number | null;
+  price_max: number | null;
+  district: string | null;
   event_score: number | null;
   _distance_km?: number;
 }
@@ -128,7 +131,7 @@ const loadNearbyEventsCached = unstable_cache(
 
     const { data, error } = await supabase
       .from('events')
-      .select('id, title, slug, start_date, end_date, location_name, address, postal_code, bundesland, latitude, longitude, category, image_url, image_width, source_id, price_text, event_score')
+      .select('id, title, slug, start_date, end_date, location_name, address, postal_code, bundesland, district, latitude, longitude, category, image_url, image_width, source_id, price_text, price_min, price_max, event_score')
       .gte('start_date', today)
       .eq('publish_status', 'published')
       // Der Umkreis reicht über die Grenze (Bregenz → Lindau, Braunau →
@@ -338,6 +341,11 @@ export default async function GemeindeHubPage({
     : null;
 
   const cityHub = getCityHub(g.slug);
+  const entdeckenScope = {
+    bundesland: slugifyBundesland(g.bundesland),
+    placeName: g.name,
+    placePostalCode: g.plz,
+  };
   // Content-Fall der Seite (a/b/c/d) — steuert Hero-Copy + H1 (Review-
   // Finding: Fall (b) mit 1-2 Rest-Events und Fall (c) dürfen nicht im
   // alten Event-Intro landen).
@@ -373,25 +381,25 @@ export default async function GemeindeHubPage({
           path={`/gemeinde/${g.slug}`}
         />
       )}
-      <main className="min-h-screen bg-surface text-white">
-        <div className="max-w-5xl mx-auto px-4 py-8">
+      <main className="min-h-screen bg-[var(--v4-surface)] text-[var(--v4-ink)]">
+        <div className="max-w-[1180px] mx-auto px-4 md:px-14 pt-6 md:pt-8 pb-20">
           {/* Breadcrumb */}
-          <nav className="text-sm text-white/50 mb-4" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-white/80">{t('crumbHome')}</Link>
-            <span className="mx-2">›</span>
-            <Link href={`/${slugifyBundesland(g.bundesland)}`} className="hover:text-white/80">
+          <nav className="flex flex-wrap items-center gap-1.5 text-[12.5px] text-[var(--v4-ink-50)] mb-4" aria-label="Breadcrumb">
+            <Link href="/" className="hover:text-[var(--v4-ink-70)]">{t('crumbHome')}</Link>
+            <span>/</span>
+            <Link href={`/${slugifyBundesland(g.bundesland)}`} className="hover:text-[var(--v4-ink-70)]">
               {blName}
             </Link>
-            <span className="mx-2">›</span>
-            <span>{placeName}</span>
+            <span>/</span>
+            <span className="text-[var(--v4-ink-70)]">{placeName}</span>
           </nav>
 
           {/* Header */}
-          <header className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+          <header className="mb-7">
+            <h1 className="m-0 text-[34px] md:text-[40px] font-extrabold tracking-[-0.035em] leading-[1.05] text-[var(--v4-ink)]">
               {h1Text}
             </h1>
-            <p className="text-white/60">
+            <p className="mt-1.5 mb-0 text-[14px] text-[var(--v4-ink-50)]">
               {g.plz} {placeName}
               {g.bezirk ? ` · ${t('bezirkLabel', { bezirk: g.bezirk })}` : ''}
               {' · '}{blName}
@@ -402,23 +410,23 @@ export default async function GemeindeHubPage({
                 // Content-Fall — die Mixed-/Aktivitäts-Copy ERSETZT das
                 // kuratierte Event-Intro als Hauptinhalt (das kuratierte
                 // Intro bleibt den event-only/empty-Fällen vorbehalten).
-                <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">
+                <p className="mt-4 text-[var(--v4-ink-70)] leading-relaxed max-w-2xl">
                   {mode === 'mixed'
                     ? hubMixedHeroLead(placeName, events.length, activities.length, t)
                     : hubActivityHeroLead(placeName, activities.length, t)}
                 </p>
               ) : (
                 <>
-                  <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">
+                  <p className="mt-4 text-[var(--v4-ink-70)] leading-relaxed max-w-2xl">
                     {cityHub.intro.lead}
                   </p>
-                  <p className="mt-2 text-sm text-white/60 leading-relaxed max-w-2xl">
+                  <p className="mt-2 text-sm text-[var(--v4-ink-50)] leading-relaxed max-w-2xl">
                     {cityHub.intro.body}
                   </p>
                 </>
               )
             ) : (
-              <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">
+              <p className="mt-4 text-[var(--v4-ink-70)] leading-relaxed max-w-2xl">
                 {mode === 'activities' ? (
                   // fn-18 Fall (b) — auch mit 1-2 Rest-Events: Aktivitäts-
                   // Copy als Hauptinhalt; der "keine Events"-Hinweis wird
@@ -439,13 +447,9 @@ export default async function GemeindeHubPage({
           {/* Hybrid bridge → open the full /entdecken explorer scoped to this
               place. From there the user can widen the filter and browse all of
               Austria, so a Google visitor isn't trapped on a single list. */}
-          <div className="mb-10 flex flex-wrap items-center gap-3">
+          <div className="mb-4 flex flex-wrap items-center gap-3">
             <HubSearchCTA
-              scope={{
-                bundesland: slugifyBundesland(g.bundesland),
-                placeName: g.name,
-                placePostalCode: g.plz,
-              }}
+              scope={entdeckenScope}
               label={t('searchCta', { name: placeName })}
             />
             <HubSmartCTA
@@ -454,44 +458,17 @@ export default async function GemeindeHubPage({
             />
           </div>
 
-          {/* Event grid */}
+          {/* Regale wie auf /entdecken, darunter alle Events als Poster-Raster.
+              „Alle anzeigen" der Kategorie-Regale öffnet /entdecken mit
+              diesem Ort und der Kategorie. */}
           {events.length > 0 && (
-            <section className="mb-12">
-              <h2 className="text-xl font-semibold mb-4">{t('sectionEvents')}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {events.map(e => (
-                  <Link
-                    key={e.id}
-                    href={buildEventUrlV2(e)}
-                    className="rounded-xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/25 transition-colors block"
-                  >
-                    <div className="relative w-full aspect-[4/3] bg-white/5">
-                      <Image
-                        src={resolvePrimaryEventImage({ imageUrl: e.image_url, category: e.category, title: e.title, imageWidth: e.image_width, sourceId: e.source_id })}
-                        alt={e.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        className="object-cover"
-                        unoptimized={process.env.NODE_ENV !== 'production'}
-                      />
-                    </div>
-                    <div className="p-3">
-                      <div className="text-xs text-white/50 mb-1">
-                        {formatDateLong(e.start_date, numberLocale)}
-                        {formatTime(e.start_date, numberLocale) && ` · ${formatTime(e.start_date, numberLocale)}`}
-                      </div>
-                      <div className="font-semibold leading-snug line-clamp-2 mb-1">
-                        {e.title}
-                      </div>
-                      <div className="text-xs text-white/50">
-                        {e.location_name ?? e.address ?? g.name}
-                        {e._distance_km != null && ` · ${e._distance_km.toFixed(1)} km`}
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
+            <>
+              <HubShelves
+                events={events as unknown as Event[]}
+                links={{ category: (category) => buildEntdeckenHref({ ...entdeckenScope, category }) }}
+              />
+              <HubEventGrid title={t('sectionEvents')} events={events as unknown as Event[]} />
+            </>
           )}
 
           {/* fn-22 — Touren & Aktivitaeten (GetYourGuide). Bewusst direkt
@@ -526,8 +503,8 @@ export default async function GemeindeHubPage({
 
           {/* Neighbour gemeinden */}
           <section className="mb-12">
-            <h2 className="text-xl font-semibold mb-3">{t('neighboursTitle')}</h2>
-            <p className="text-sm text-white/50 mb-4">
+            <h2 className="m-0 mb-2 text-[21px] font-extrabold tracking-[-0.03em] text-[var(--v4-ink)]">{t('neighboursTitle')}</h2>
+            <p className="text-sm text-[var(--v4-ink-50)] mb-4">
               {t('neighboursLead', { name: placeName })}
             </p>
             <div className="flex flex-wrap gap-2">
@@ -535,10 +512,10 @@ export default async function GemeindeHubPage({
                 <Link
                   key={n.slug}
                   href={`/gemeinde/${n.slug}`}
-                  className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-white/25 text-sm text-white/80"
+                  className="rounded-full border border-[var(--v4-hairline-3)] hover:border-[var(--v4-hairline-4)] px-3.5 py-1.5 text-[13px] font-semibold text-[var(--v4-ink)] transition-colors"
                 >
                   {n.name}
-                  <span className="text-white/40 ml-1.5">
+                  <span className="text-[var(--v4-ink-50)] font-medium ml-1.5">
                     {haversineKm(g.lat, g.lng, n.lat, n.lng).toFixed(1)} km
                   </span>
                 </Link>

@@ -28,6 +28,7 @@ import { bundeslandDisplayName } from './i18n/bundesland-names';
 import { CATEGORY_MESSAGE_KEYS } from './i18n/category-labels';
 import type { AppLocale } from '@/i18n/routing';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { landingShelfConfig, loadShelfPool, type LandingShelves } from './hubs/shelf-pool';
 
 const BASE_URL = 'https://lasstreffen.at';
 
@@ -192,6 +193,30 @@ export async function loadBundeslandPage(
   };
 }
 
+/**
+ * Regale über der Liste einer Bundesland-Seite. Eigene Funktion statt Teil
+ * von loadBundeslandPage, weil generateMetadata jene ebenfalls aufruft und
+ * die Regal-Abfragen dort nichts beitragen.
+ */
+export async function loadBundeslandShelves(
+  bundesland: string,
+  category: string | null,
+  timeFilter: 'heute' | 'wochenende' | null,
+): Promise<LandingShelves | null> {
+  if (!isValidBundesland(bundesland)) return null;
+  const config = landingShelfConfig(`/${bundesland}`, category, timeFilter);
+  if (!config) return null;
+  const range = timeFilter ? getDateRange(timeFilter) : null;
+  const events = await loadShelfPool(getReadClient(), {
+    bundesland,
+    category,
+    window: range ? { from: range.from, to: range.to } : null,
+    statuses: ['published', 'published_low_confidence'],
+    minQuality: MIN_QUALITY,
+  });
+  return { events, ...config };
+}
+
 // ---------------------------------------------------------------------------
 // Stadt page data
 // ---------------------------------------------------------------------------
@@ -312,7 +337,7 @@ async function queryEvents(
   // count, exact count macht zweite Vollscan-Query auf der 175k events-Tabelle.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (supabase.from('events') as any).select(
-    'id, title, description, start_date, end_date, location_name, address, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, event_score, quality_score, venue_id',
+    'id, title, slug, description, start_date, end_date, location_name, address, postal_code, bundesland, district, latitude, longitude, category, image_url, price_text, price_min, price_max, event_score, quality_score, venue_id',
     { count: 'estimated' },
   )
     // Nicht nur über das Bundesland: in Prod tragen 7 DE/CH-Zeilen ein

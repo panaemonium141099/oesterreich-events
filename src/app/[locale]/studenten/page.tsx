@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { loadStudentIndex } from '@/lib/student-data';
 import { bilingualAlternates } from '@/lib/seo/canonical';
 import { StudentCityGrid } from '@/components/Landing/StudentCityGrid';
-import { EventListCard } from '@/components/Events/EventListCard';
+import { Shelf, ShelfCard } from '@/components/Discover/v4/shelf-ui';
 import { routing, type AppLocale } from '@/i18n/routing';
 
 export const revalidate = 3600;
@@ -67,21 +67,21 @@ export default async function StudentenIndexPage({
   ]).catch(() => ({ cities: [], todayEvents: [] } as unknown as Awaited<ReturnType<typeof loadStudentIndex>>));
 
   return (
-    <main className="min-h-screen bg-surface text-white">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <main className="min-h-screen bg-[var(--v4-surface)] text-[var(--v4-ink)]">
+      <div className="max-w-[1180px] mx-auto px-4 md:px-14 pt-7 md:pt-9 pb-20">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+        <header className="mb-8">
+          <h1 className="m-0 text-[34px] md:text-[40px] font-extrabold tracking-[-0.035em] leading-[1.05] text-[var(--v4-ink)]">
             {t('h1')}
           </h1>
-          <p className="text-sm text-white/50">
+          <p className="mt-2 mb-0 max-w-2xl text-[14px] text-[var(--v4-ink-50)]">
             {t('intro')}
           </p>
-        </div>
+        </header>
 
         {/* City Grid */}
-        <section className="mb-10">
-          <h2 className="text-lg font-semibold text-white mb-4">
+        <section className="mb-4">
+          <h2 className="m-0 mb-3 text-[21px] font-extrabold tracking-[-0.03em] text-[var(--v4-ink)]">
             {t('chooseCity')}
           </h2>
           <StudentCityGrid cities={cities} />
@@ -89,16 +89,11 @@ export default async function StudentenIndexPage({
 
         {/* Today's student events */}
         {todayEvents.length > 0 && (
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-4">
-              {t('todayForStudents')}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {todayEvents.map((event) => (
-                <EventListCard key={event.id} event={event} />
-              ))}
-            </div>
-          </section>
+          <Shelf title={t('todayForStudents')}>
+            {todayEvents.map((event) => (
+              <ShelfCard key={event.id} ev={event} />
+            ))}
+          </Shelf>
         )}
       </div>
     </main>

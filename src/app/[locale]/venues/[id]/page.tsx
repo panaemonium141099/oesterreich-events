@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Event } from '@/types/events';
-import { EventListCard } from '@/components/Events/EventListCard';
+import { HubEventGrid } from '@/components/Hub/HubEventGrid';
 import { VenueDetail } from '@/components/Venues/VenueDetail';
 import { SimilarVenues } from '@/components/Venues/SimilarVenues';
 import { Link } from '@/i18n/navigation';
@@ -109,7 +109,7 @@ export default async function VenueDetailPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: events, count: totalEvents } = await (supabase.from('events') as any)
     .select(
-      'id, title, description, start_date, end_date, location_name, address, bundesland, image_url, category, price_text, price_min, price_max, event_score, quality_score, venue_id',
+      'id, title, slug, description, start_date, end_date, location_name, address, postal_code, bundesland, district, image_url, category, price_text, price_min, price_max, event_score, quality_score, venue_id',
       { count: 'exact' },
     )
     .eq('venue_id', id)
@@ -202,44 +202,39 @@ export default async function VenueDetailPage({
         }}
       />
 
-      <main className="min-h-screen bg-surface text-white">
-        <div className="max-w-3xl mx-auto px-4 py-8">
+      <main className="min-h-screen bg-[var(--v4-surface)] text-[var(--v4-ink)]">
+        <div className="max-w-[1180px] mx-auto px-4 md:px-14 pt-6 md:pt-8 pb-20">
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-xs text-white/40 mb-6">
-            <Link href="/" className="hover:text-white/70 transition-colors">
+          <nav className="flex items-center gap-1.5 text-[12.5px] text-[var(--v4-ink-50)] mb-4">
+            <Link href="/" className="hover:text-[var(--v4-ink-70)] transition-colors">
               {t('crumbHome')}
             </Link>
             <span>/</span>
-            <span className="text-white/60">{venueData.name}</span>
+            <span className="text-[var(--v4-ink-70)]">{venueData.name}</span>
           </nav>
 
           {/* Venue Info */}
-          <VenueDetail venue={venueData} totalEvents={totalEvents ?? 0} />
+          <div className="max-w-3xl">
+            <VenueDetail venue={venueData} totalEvents={totalEvents ?? 0} />
+          </div>
 
-          {/* Upcoming Events */}
-          <section className="mt-8">
-            <h2 className="text-lg font-semibold text-white mb-4">
-              {t('upcomingEvents')}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {eventList.map((event) => (
-                <EventListCard key={event.id} event={event} />
-              ))}
-            </div>
-          </section>
+          {/* Upcoming Events: Spielplan als Poster-Raster wie /entdecken */}
+          <HubEventGrid title={t('upcomingEvents')} events={eventList} />
 
           {/* Similar Venues */}
-          <SimilarVenues venues={similarVenues} />
+          <div className="max-w-3xl">
+            <SimilarVenues venues={similarVenues} />
+          </div>
 
           {/* Internal Links */}
           {internalLinks.length > 0 && (
-            <nav className="mt-10 pt-8 border-t border-white/10">
+            <nav className="mt-10 pt-8 border-t border-[var(--v4-hairline-2)]">
               <div className="flex flex-wrap gap-2">
                 {internalLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="text-xs text-white/40 hover:text-white/70 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full border border-white/10 transition-colors"
+                    className="text-[12.5px] font-medium text-[var(--v4-ink-50)] hover:text-[var(--v4-ink)] px-3 py-1.5 rounded-full border border-[var(--v4-hairline-2)] hover:border-[var(--v4-hairline-4)] transition-colors"
                   >
                     {link.label}
                   </Link>

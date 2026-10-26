@@ -35,9 +35,13 @@ import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { ALL_THEMES, getThemeBySlug, type Theme } from '@/lib/themes/data';
+import type { Event } from '@/types/events';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
-import { formatDateLong, formatTime } from '@/lib/utils/date';
-import { resolvePrimaryEventImage } from '@/lib/event-images';
+import { loadShelfPool } from '@/lib/hubs/shelf-pool';
+import { viennaToday } from '@/lib/utils/event-time';
+import { HubShelves } from '@/components/Hub/HubShelves';
+import { HubEventGrid } from '@/components/Hub/HubEventGrid';
+import { RegionTile, Shelf } from '@/components/Discover/v4/shelf-ui';
 import { buildFAQPageSchema, faqForTheme, type FAQTranslator } from '@/lib/seo/faq';
 import { Link } from '@/i18n/navigation';
 import { routing, type AppLocale } from '@/i18n/routing';
@@ -107,14 +111,15 @@ interface ThemeEvent {
   image_width: number | null;
   source_id: string | null;
   price_text: string | null;
+  price_min: number | null;
+  price_max: number | null;
+  district: string | null;
   event_score: number | null;
 }
 
 /**
- * Map from `events.bundesland` value → URL slug used by /[bundesland]/[filter].
- * DB stores the display names ("Niederösterreich"); the landing-page routes
- * expect the slug form ("niederoesterreich"). Keep in sync with BUNDESLAENDER
- * in `src/lib/bundeslaender.ts` (same mapping, duplicated here for zero-import).
+ * Anzeigename → Slug der neun Bundesländer. events.bundesland und die
+ * Routen /[bundesland]/[filter] verwenden beide den Slug.
  */
 const BL_SLUG: Record<string, string> = {
   'Burgenland':       'burgenland',
@@ -128,18 +133,12 @@ const BL_SLUG: Record<string, string> = {
   'Wien':             'wien',
 };
 
-/** Best-effort reverse-slug — DB sometimes carries abbreviations. */
-function bundeslandToSlug(bl: string | null | undefined): string | null {
-  if (!bl) return null;
-  return BL_SLUG[bl] ?? bl.trim().toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue');
-}
-
 const loadThemeEventsCached = unstable_cache(
   async (category: string): Promise<ThemeEvent[]> => {
     const today = new Date().toISOString().slice(0, 10);
     const { data, error } = await supabase
       .from('events')
-      .select('id, title, slug, start_date, end_date, location_name, address, postal_code, bundesland, latitude, longitude, category, image_url, image_width, source_id, price_text, event_score')
+      .select('id, title, slug, start_date, end_date, location_name, address, postal_code, bundesland, district, latitude, longitude, category, image_url, image_width, source_id, price_text, price_min, price_max, event_score')
       .eq('category', category)
       .eq('publish_status', 'published')
       // Österreichweit heißt hier ohne Ortsfilter: nach Score standen sonst
@@ -158,6 +157,14 @@ const loadThemeEventsCached = unstable_cache(
   { revalidate: 3600, tags: ['event', 'thema'] },
 );
 
+/** Regal-Kandidaten (heute bis Wochenende + 14 Tage), österreichweit. */
+const loadThemeShelfPoolCached = unstable_cache(
+  async (category: string, today: string): Promise<Event[]> =>
+    loadShelfPool(supabase, { category, statuses: ['published'] }, today),
+  ['thema-shelf-pool-v1'],
+  { revalidate: 3600, tags: ['event', 'thema'] },
+);
+
 const loadBundeslandCountsCached = unstable_cache(
   async (category: string): Promise<Record<string, number>> => {
     const today = new Date().toISOString().slice(0, 10);
@@ -166,12 +173,16 @@ const loadBundeslandCountsCached = unstable_cache(
     // One count query per bundesland — 9 small parallel HEAD requests.
     // A single GROUP BY via RPC would be faster in theory, but the count
     // head-requests are cheap (<50 ms each) and this avoids a custom RPC.
-    const bundeslaender = Object.keys(BL_SLUG);
+    // events.bundesland trägt den Slug ('niederoesterreich'), nicht den
+    // Anzeigenamen: mit den Namen standen bis 2026-10-26 überall 0 Events.
+    // 'estimated' wie die Bundesland-Seiten, exakte Zählungen sprengen bei
+    // großen Kategorien das Statement-Timeout.
+    const bundeslaender = Object.values(BL_SLUG);
     await Promise.all(
       bundeslaender.map(async bl => {
         const { count } = await supabase
           .from('events')
-          .select('id', { count: 'exact', head: true })
+          .select('id', { count: 'estimated', head: true })
           .eq('category', category)
           .eq('bundesland', bl)
           .eq('publish_status', 'published')
@@ -182,7 +193,8 @@ const loadBundeslandCountsCached = unstable_cache(
     );
     return counts;
   },
-  ['thema-bl-counts'],
+  // -v2: Zählungen nach Slug statt Anzeigename
+  ['thema-bl-counts-v2'],
   { revalidate: 3600, tags: ['event', 'thema'] },
 );
 
@@ -324,7 +336,7 @@ export default async function ThemePage({
   const theme = getThemeBySlug(slug);
   if (!theme) notFound();
 
-  const [copy, tp, tc, tFaq, tCat, events, blCounts] = await Promise.all([
+  const [copy, tp, tc, tFaq, tCat, events, blCounts, shelfPool] = await Promise.all([
     loadThemeCopy(theme.slug, locale),
     getTranslations({ locale, namespace: 'ThemaPage' }),
     getTranslations({ locale, namespace: 'ThemeContent' }),
@@ -332,6 +344,7 @@ export default async function ThemePage({
     getTranslations({ locale, namespace: 'Categories' }),
     loadThemeEventsCached(theme.category),
     loadBundeslandCountsCached(theme.category),
+    loadThemeShelfPoolCached(theme.category, viennaToday()),
   ]);
 
   const numberLocale = dateLocaleFor(locale);
@@ -357,19 +370,19 @@ export default async function ThemePage({
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
-      <main className="min-h-screen bg-surface text-white">
-        <div className="max-w-6xl mx-auto px-4 py-8">
+      <main className="min-h-screen bg-[var(--v4-surface)] text-[var(--v4-ink)]">
+        <div className="max-w-[1180px] mx-auto px-4 md:px-14 pt-6 md:pt-8 pb-20">
           {/* Breadcrumb */}
-          <nav className="text-sm text-white/50 mb-4" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-white/80">{tp('crumbHome')}</Link>
-            <span className="mx-2">›</span>
-            <Link href="/" className="hover:text-white/80">{tp('crumbThemes')}</Link>
-            <span className="mx-2">›</span>
-            <span>{copy.title}</span>
+          <nav className="flex flex-wrap items-center gap-1.5 text-[12.5px] text-[var(--v4-ink-50)] mb-4" aria-label="Breadcrumb">
+            <Link href="/" className="hover:text-[var(--v4-ink-70)]">{tp('crumbHome')}</Link>
+            <span>/</span>
+            <Link href="/" className="hover:text-[var(--v4-ink-70)]">{tp('crumbThemes')}</Link>
+            <span>/</span>
+            <span className="text-[var(--v4-ink-70)]">{copy.title}</span>
           </nav>
 
           {/* Hero */}
-          <header className="relative mb-10 rounded-2xl overflow-hidden aspect-[21/9] md:aspect-[21/7]">
+          <header className="relative mb-8 rounded-2xl overflow-hidden aspect-[4/3] sm:aspect-[21/9] md:aspect-[21/7]">
             <Image
               src={theme.image}
               alt={copy.title}
@@ -393,105 +406,54 @@ export default async function ThemePage({
           </header>
 
           {/* Intro */}
-          <section className="mb-10 max-w-3xl">
-            <p className="text-white/80 text-[15px] leading-relaxed">
+          <section className="mb-2 max-w-3xl">
+            <p className="text-[var(--v4-ink-70)] text-[15px] leading-relaxed">
               {copy.bodyIntro}
             </p>
           </section>
 
-          {/* Top events grid */}
-          {events.length > 0 && (
-            <section className="mb-14">
-              <div className="flex items-baseline justify-between mb-4">
-                <h2 className="text-xl md:text-2xl font-bold">
-                  {tp('topEvents')}
-                  <span className="text-white/40 text-sm ml-2 font-normal">
-                    {tp('selectedCount', { count: events.length })}
-                  </span>
-                </h2>
-                <Link
-                  href={`/map?category=${encodeURIComponent(theme.category)}`}
-                  className="text-sm text-white/60 hover:text-white"
-                >
-                  {tp('allOnMap')}
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {events.map(e => {
-                  const blSlug = bundeslandToSlug(e.bundesland);
-                  return (
-                    <Link
-                      key={e.id}
-                      href={buildEventUrlV2(e)}
-                      className="group rounded-xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/25 transition-colors"
-                    >
-                      <div className="relative w-full aspect-[4/3] bg-white/5">
-                        <Image
-                          src={resolvePrimaryEventImage({ imageUrl: e.image_url, category: e.category, title: e.title, imageWidth: e.image_width, sourceId: e.source_id })}
-                          alt={e.title}
-                          fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          className="object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                          unoptimized={process.env.NODE_ENV !== 'production'}
-                        />
-                      </div>
-                      <div className="p-3">
-                        <div className="text-xs text-white/50 mb-1">
-                          {formatDateLong(e.start_date, numberLocale)}
-                          {formatTime(e.start_date, numberLocale) && ` · ${formatTime(e.start_date, numberLocale)}`}
-                        </div>
-                        <div className="font-semibold leading-snug line-clamp-2 mb-1">
-                          {e.title}
-                        </div>
-                        <div className="text-xs text-white/50">
-                          {e.location_name ?? e.address ?? '—'}
-                          {e.bundesland && ` · ${bundeslandDisplayName(e.bundesland, locale)}`}
-                          {blSlug && e.price_text && ' · '}
-                          {e.price_text && <span>{e.price_text}</span>}
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* Bundesland breakdown — internal link density */}
-          <section className="mb-14">
-            <h2 className="text-xl md:text-2xl font-bold mb-3">
-              {tp('byBundesland', { noun: themeNoun })}
-            </h2>
-            <p className="text-sm text-white/50 mb-5 max-w-2xl">
-              {tp('byBundeslandText')}
-            </p>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
-              {Object.entries(blCounts)
-                .sort((a, b) => b[1] - a[1])
-                .map(([bl, count]) => {
-                  const blSlug = BL_SLUG[bl];
-                  return (
-                    <Link
+          {/* Regale wie auf /entdecken. „Nach Region" ersetzt die frühere
+              Bundesland-Liste und verlinkt wie sie /{bundesland}/{thema}. */}
+          <HubShelves
+            events={shelfPool}
+            hide={{ categories: true, chips: true }}
+            extra={
+              <Shelf title={tp('byBundesland', { noun: themeNoun })} sub={tp('byBundeslandText')}>
+                {Object.entries(blCounts)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([bl, count]) => (
+                    <RegionTile
                       key={bl}
-                      href={`/${blSlug}/${theme.slug}`}
-                      className="flex items-baseline justify-between px-4 py-3 rounded-xl bg-white/5 border border-white/10 hover:border-white/25 transition-colors"
-                    >
-                      <span className="font-medium">{bundeslandDisplayName(bl, locale)}</span>
-                      <span className="text-sm text-white/50 tabular-nums">
-                        {count.toLocaleString(numberLocale)}
-                      </span>
-                    </Link>
-                  );
-                })}
+                      href={`/${bl}/${theme.slug}`}
+                      name={bundeslandDisplayName(bl, locale)}
+                      image={`/images/regions/${bl}.jpg`}
+                      count={count}
+                    />
+                  ))}
+              </Shelf>
+            }
+          />
+
+          {/* Top events */}
+          <HubEventGrid
+            title={tp('topEvents')}
+            sub={tp('selectedCount', { count: events.length })}
+            events={events as unknown as Event[]}
+          >
+            <div className="flex justify-center mt-8">
+              <Link
+                href={`/map?category=${encodeURIComponent(theme.category)}`}
+                className="press-haptic px-6 py-2.5 rounded-full text-[13px] font-semibold text-[var(--v4-ink)] border border-[var(--v4-hairline-3)] hover:border-[var(--v4-hairline-4)] transition-colors"
+              >
+                {tp('allOnMap')}
+              </Link>
             </div>
-          </section>
+          </HubEventGrid>
 
           {/* Related themes */}
           <section className="mb-14">
-            <h2 className="text-xl md:text-2xl font-bold mb-3">{tp('otherThemes')}</h2>
-            <p className="text-sm text-white/50 mb-5 max-w-2xl">
+            <h2 className="m-0 mb-2 text-[21px] font-extrabold tracking-[-0.03em] text-[var(--v4-ink)]">{tp('otherThemes')}</h2>
+            <p className="text-sm text-[var(--v4-ink-50)] mb-4 max-w-2xl">
               {tp('otherThemesText', { noun: themeNoun })}
             </p>
             <div className="flex flex-wrap gap-2">
@@ -499,7 +461,7 @@ export default async function ThemePage({
                 <Link
                   key={t.slug}
                   href={`/thema/${t.slug}`}
-                  className="px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-white/25 text-sm text-white/80 transition-colors"
+                  className="rounded-full border border-[var(--v4-hairline-3)] hover:border-[var(--v4-hairline-4)] px-3.5 py-1.5 text-[13px] font-semibold text-[var(--v4-ink)] transition-colors"
                 >
                   {tc(`${t.slug}.title`).split(' — ')[0]}
                 </Link>

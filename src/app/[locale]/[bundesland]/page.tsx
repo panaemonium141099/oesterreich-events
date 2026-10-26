@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { isValidBundesland } from '@/lib/landing-slugs';
-import { loadBundeslandPage } from '@/lib/landing-data';
+import { loadBundeslandPage, loadBundeslandShelves } from '@/lib/landing-data';
 import { bilingualAlternates } from '@/lib/seo/canonical';
 import { LandingPageShell } from '@/components/Landing/LandingPageShell';
 import { HubSearchCTA } from '@/components/Hub/HubSearchCTA';
@@ -67,7 +67,10 @@ export default async function BundeslandPage({
   setRequestLocale(locale);
   if (!isValidBundesland(bundesland)) notFound();
 
-  const data = await loadBundeslandPage(bundesland, null, null, locale);
+  const [data, shelves] = await Promise.all([
+    loadBundeslandPage(bundesland, null, null, locale),
+    loadBundeslandShelves(bundesland, null, null),
+  ]);
   if (!data) notFound();
 
   const t = await getTranslations({ locale, namespace: 'HubLanding' });
@@ -75,6 +78,7 @@ export default async function BundeslandPage({
   return (
     <LandingPageShell
       {...data}
+      shelves={shelves}
       searchCta={
         <div className="flex flex-wrap items-center gap-3">
           <HubSearchCTA
