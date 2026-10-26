@@ -7,6 +7,7 @@ import {
   selectFestivalBlogCandidates,
   festivalBlogKey,
   addDays,
+  toBlogLineup,
   type UpcomingFestivalSeed,
 } from '@/lib/festivals/upcoming';
 
@@ -186,6 +187,44 @@ describe('selectFestivalBlogCandidates', () => {
       { slug: 'out', starts_at: addDays(TODAY, 153), ...base },
     ], TODAY, new Set());
     expect(picked.map(p => p.slug)).toEqual(['lo', 'hi']);
+  });
+});
+
+describe('toBlogLineup', () => {
+  it('gibt jedem Act eine Rolle, damit die Blogseite keinen verschluckt', () => {
+    const { lineup, highlightsOnly } = toBlogLineup([
+      { name: 'Evanescence', billing: 'unknown' },
+      { name: 'Die Ärzte', billing: 'headliner' },
+      { name: 'Slash', billing: null },
+    ]);
+    expect(highlightsOnly).toBe(false);
+    expect(lineup).toEqual([
+      { name: 'Die Ärzte', role: 'headliner' },
+      { name: 'Evanescence', role: 'support' },
+      { name: 'Slash', role: 'support' },
+    ]);
+  });
+
+  it('markiert ohne Headliner-Billing die ersten Programmpunkte als Höhepunkte', () => {
+    const acts = Array.from({ length: 9 }, (_, i) => ({ name: `Act ${i}`, billing: 'unknown' }));
+    const { lineup, highlightsOnly } = toBlogLineup(acts, { highlights: 3 });
+    expect(highlightsOnly).toBe(true);
+    expect(lineup.filter(a => a.role === 'headliner').map(a => a.name)).toEqual(['Act 0', 'Act 1', 'Act 2']);
+    expect(lineup).toHaveLength(9);
+  });
+
+  it('dedupliziert, behält Tag und Bühne, kappt bei max', () => {
+    const { lineup } = toBlogLineup([
+      { name: 'A', billing: 'headliner', day: 'Fr', stage: 'Blue' },
+      { name: 'a', billing: 'support' },
+      { name: 'B', billing: 'support' },
+      { name: 'C', billing: 'support' },
+    ], { max: 2 });
+    expect(lineup).toEqual([{ name: 'A', role: 'headliner', day: 'Fr', stage: 'Blue' }, { name: 'B', role: 'support' }]);
+  });
+
+  it('leeres Lineup bleibt leer und ist kein Highlight-Fall', () => {
+    expect(toBlogLineup([])).toEqual({ lineup: [], highlightsOnly: false });
   });
 });
 

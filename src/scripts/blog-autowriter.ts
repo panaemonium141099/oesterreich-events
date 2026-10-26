@@ -33,7 +33,8 @@ import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { startWorkflowRun, finishWorkflowRun, type WorkflowItem } from '../lib/reporting/workflow-run';
 import { toViennaDate } from '../lib/utils/event-time';
-import { selectFestivalBlogCandidates, festivalBlogKey } from '../lib/festivals/upcoming';
+import { selectFestivalBlogCandidates, festivalBlogKey, toBlogLineup } from '../lib/festivals/upcoming';
+import { stripDashesDeep } from '../lib/blog/dashes';
 import type { Festival, FestivalArtist } from '../types/festivals';
 
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -190,6 +191,13 @@ const POST_SCHEMA = {
   },
   required: ['title', 'subtitle', 'excerpt', 'category', 'keyFacts', 'lineup', 'intro', 'historyTitle', 'history',
     'whatToExpectTitle', 'whatToExpect', 'whatToExpectList', 'practicalInfo', 'ctaText', 'seoTitle', 'seoDescription', 'keywords', 'faqs'],
+} as const;
+
+/** Festival-Vorschau: wie POST_SCHEMA, zusätzlich Fun Facts (eigene Sektion). */
+const FESTIVAL_POST_SCHEMA = {
+  ...POST_SCHEMA,
+  properties: { ...POST_SCHEMA.properties, funFacts: strArr },
+  required: [...POST_SCHEMA.required, 'funFacts'],
 } as const;
 
 /** Schema für composeStayGuide (fn-21). */
@@ -1039,7 +1047,8 @@ Recherchiere und liste strukturiert:
 4. Geschichte und Bedeutung (seit wann, Besucherzahlen, Höhepunkte vergangener Jahre)
 5. Anreise (Bahn, Shuttle, Auto, Parken), Camping/Übernachtung, Gelände-Infos
 6. Praktische Tipps (was man mitnehmen darf, Wetter, Verpflegung, Cashless, Altersgrenzen)
-7. Häufig gestellte Fragen von Besuchern und deren Antworten`;
+7. Häufig gestellte Fragen von Besuchern und deren Antworten
+8. Fun Facts: 5 bis 8 überraschende, belegte Kuriositäten (Rekorde, Anekdoten, Zahlen, berühmte Momente, Besonderheiten des Ortes), jeweils mit Quelle`;
 
   return claudeText(prompt, {
     model: MODEL_RESEARCH,
@@ -1057,10 +1066,10 @@ ${festivalFacts(f)}
 RECHERCHE:
 ${research}
 
-Antworte NUR mit einem JSON-Objekt exakt dieser Form (alle Texte Deutsch, Sie-Form wie ein Magazin, lebendig aber faktentreu):
+Antworte NUR mit einem JSON-Objekt exakt dieser Form (alle Texte Deutsch, österreichisch, erzählend wie ein Stadtmagazin, lebendig aber faktentreu; wo du Leser ansprichst, mit "du", nie mit "Sie"):
 {
-  "title": "prägnanter Titel mit Festivalname und Jahr, z. B. '${f.canonical_name} ${f.starts_at?.slice(0, 4)}: Das erwartet euch'",
-  "subtitle": "eine Zeile, macht Lust aufs Festival — mit Ortsnennung",
+  "title": "prägnanter Titel mit Festivalname und Jahr, z. B. '${f.canonical_name} ${f.starts_at?.slice(0, 4)}: Was dich erwartet'",
+  "subtitle": "eine Zeile mit Ortsnennung, die Lust aufs Festival macht",
   "excerpt": "150-250 Zeichen Teaser",
   "category": "Musik & Festival",
   "keyFacts": {
@@ -1076,24 +1085,28 @@ Antworte NUR mit einem JSON-Objekt exakt dieser Form (alle Texte Deutsch, Sie-Fo
   "lineup": [{ "name": "Act", "role": "headliner|support|special", "day": "Tag optional", "stage": "Bühne optional" }],
   "lineupTitle": "Lineup",
   "lineupNote": "Hinweis, wie vollständig das Lineup ist und wann weitere Acts erwartet werden",
-  "intro": "3-5 Sätze szenischer Einstieg, min. 400 Zeichen",
-  "historyTitle": "Überschrift zur Geschichte",
-  "history": "Geschichte/Bedeutung, min. 400 Zeichen",
-  "whatToExpectTitle": "Überschrift",
-  "whatToExpect": "Was Besucher erwartet (Gelände, Bühnen, Camping, Stimmung), min. 300 Zeichen",
-  "whatToExpectList": ["5-7 konkrete Highlights"],
-  "practicalInfo": [{ "icon": "ein Emoji", "label": "Tickets|Anreise|Camping|Packliste|...", "text": "konkreter Tipp" }],
-  "ctaText": "Call-to-Action, z. B. 'Zur Festivalseite mit Lineup'",
+  "intro": "4 bis 6 Sätze szenischer Einstieg, mindestens 600 Zeichen",
+  "historyTitle": "eigene Überschrift zur Geschichte",
+  "history": "Geschichte und Bedeutung (Gründung, Wendepunkte, Besucherzahlen, Rang), mindestens 700 Zeichen",
+  "funFacts": ["4 bis 6 belegte Kuriositäten aus der Recherche, je 1 bis 3 Sätze, nichts Allgemeines"],
+  "whatToExpectTitle": "eigene Überschrift",
+  "whatToExpect": "Was Besucher bei der kommenden Ausgabe erwartet (Programm, Gelände, Bühnen, Stimmung), mindestens 600 Zeichen",
+  "whatToExpectList": ["6 bis 8 konkrete Highlights der kommenden Ausgabe"],
+  "practicalInfo": [{ "icon": "ein Emoji", "label": "Tickets|Anreise|Übernachten|Camping|Gut zu wissen|...", "text": "konkreter Tipp mit Zahlen, Haltestellen, Preisen" }],
+  "ctaText": "Call to Action, max. 40 Zeichen, z. B. 'Zur Festivalseite mit Lineup'",
   "seoTitle": "max. 60 Zeichen, Festivalname + Jahr vorn",
   "seoDescription": "max. 155 Zeichen",
   "keywords": ["6-10 deutsche Suchbegriffe, inkl. '<Festival> <Jahr> tickets' und '<Festival> lineup'"],
   "faqs": [{ "question": "…", "answer": "…" }],
   "endDate": "${f.ends_at ?? ''}"
 }
-Mindestens 5 faqs (darunter Tickets, Anreise, Camping/Übernachtung), mindestens 4 practicalInfo-Einträge.
-STIL: Keine Gedankenstriche (– oder —) als Einschub in sichtbaren Texten. Stattdessen Komma, Doppelpunkt oder ein neuer Satz.`;
+6 bis 8 faqs (darunter Tickets, Anreise, Übernachtung), 5 bis 7 practicalInfo-Einträge, 4 bis 6 funFacts.
+STIL (verbindlich):
+- Keine Striche in sichtbarem Text: kein Gedankenstrich (– oder —), auch nicht in Spannen ("21. bis 31. Jänner", "25 bis 120 Euro"). Keine Bindestrich-Kopplungen, wo es eine natürliche Form gibt ("Kammermusikfestival", "Festivalpass", "Open Air", "Vorverkauf", "Mailadresse"); erlaubt nur in offiziell so geschriebenen Eigennamen.
+- Keine Werbefloskeln ("unvergesslich", "ein Muss", "für jeden etwas") und keine KI-Klischees ("eintauchen", "pulsierend", "ein wahres Fest für die Sinne").
+- Konkret statt allgemein: Namen, Zahlen, Orte, Werke, Uhrzeiten.`;
 
-  return claudeJson(prompt, POST_SCHEMA as unknown as Record<string, unknown>, { model: MODEL_COMPOSE });
+  return claudeJson(prompt, FESTIVAL_POST_SCHEMA as unknown as Record<string, unknown>, { model: MODEL_COMPOSE });
 }
 
 /** Festival-Zeile als Candidate, damit Hero-/Sanitize-Pfade wiederverwendbar bleiben. */
@@ -1166,9 +1179,12 @@ async function writeFestivalPosts(
         reportErrors.push(`"${f.canonical_name}": Recherche zu duenn`);
         continue;
       }
-      const draft = await composeFestivalPost(f, research);
+      const draft = stripDashesDeep(await composeFestivalPost(f, research));
       sanitizeDraft(draft, c);
       const errors = validateDraft(draft);
+      const facts = Array.isArray(draft.funFacts) ? (draft.funFacts as unknown[]).filter(x => isStr(x, 30, 600)) : [];
+      if (facts.length < 3) errors.push('funFacts < 3');
+      draft.funFacts = facts.slice(0, 6);
       if (errors.length > 0) {
         log(`  Entwurf verworfen: ${errors.join('; ')}`);
         reportErrors.push(`"${f.canonical_name}": ${errors.join('; ')}`);
@@ -1185,18 +1201,18 @@ async function writeFestivalPosts(
       const today = new Date().toISOString().slice(0, 10);
       const heroPath = `/images/blog/${slug}/${hero.heroImage}`;
       // Lineup: steht es in der DB, gewinnt die DB (kein Modell-Act dazu);
-      // sonst die aus der Recherche komponierten Acts.
-      const lineup = f.lineup.length > 0
-        ? [...f.lineup]
-            .sort((a, b) => (BILLING_RANK[a.billing ?? 'unknown'] ?? 9) - (BILLING_RANK[b.billing ?? 'unknown'] ?? 9))
-            .slice(0, 60)
-            .map(a => ({
-              name: a.artist_name_raw,
-              ...(a.billing === 'headliner' ? { role: 'headliner' } : a.billing === 'support' || a.billing === 'opener' ? { role: 'support' } : {}),
-              ...(a.day_label ? { day: a.day_label } : {}),
-              ...(a.stage_name ? { stage: a.stage_name } : {}),
-            }))
-        : (Array.isArray(draft.lineup) ? draft.lineup : []);
+      // sonst die aus der Recherche komponierten Acts. toBlogLineup gibt
+      // jedem Act eine Rolle: die Blogseite verschluckt Acts ohne Rolle.
+      const { lineup, highlightsOnly } = toBlogLineup(
+        f.lineup.length > 0
+          ? f.lineup.map(a => ({ name: a.artist_name_raw, billing: a.billing, day: a.day_label, stage: a.stage_name }))
+          : (Array.isArray(draft.lineup) ? (draft.lineup as Array<Record<string, unknown>>) : []).map(a => ({
+              name: String(a.name ?? ''),
+              billing: a.role === 'headliner' ? 'headliner' : 'unknown',
+              day: typeof a.day === 'string' ? a.day : null,
+              stage: typeof a.stage === 'string' ? a.stage : null,
+            })),
+      );
 
       const post: Record<string, unknown> = {
         slug,
@@ -1225,7 +1241,7 @@ async function writeFestivalPosts(
           ...(kf.since ? { since: kf.since } : {}),
         },
         lineup,
-        lineupTitle: 'Lineup',
+        lineupTitle: highlightsOnly ? 'Programm' : 'Lineup',
         ...(draft.lineupNote ? { lineupNote: draft.lineupNote } : {}),
         intro: draft.intro,
         historyTitle: draft.historyTitle,
@@ -1233,6 +1249,7 @@ async function writeFestivalPosts(
         whatToExpectTitle: draft.whatToExpectTitle,
         whatToExpect: draft.whatToExpect,
         whatToExpectList: draft.whatToExpectList,
+        funFacts: draft.funFacts,
         practicalInfoTitle: 'Praktische Informationen',
         practicalInfo: draft.practicalInfo,
         gallery: [],

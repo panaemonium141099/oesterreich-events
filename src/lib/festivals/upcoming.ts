@@ -215,6 +215,54 @@ export function toLineupRows(lineup: SeedLineupAct[]): LineupRow[] {
   return rows;
 }
 
+// ─── Blog: Lineup-Darstellung ─────────────────────────────────────────────
+
+export interface BlogLineupAct {
+  name: string;
+  role: 'headliner' | 'support';
+  day?: string;
+  stage?: string;
+}
+
+const BLOG_BILLING_RANK: Record<string, number> = { headliner: 0, sub_headliner: 1, support: 2, opener: 3, unknown: 4 };
+
+/**
+ * Festival-Acts → Lineup eines Blogposts.
+ *
+ * Die Blogseite zeigt nur Acts mit Rolle "headliner" (oben) oder
+ * "support"/"special" (darunter); ohne Rolle fällt ein Act still weg.
+ * Deshalb bekommt hier jeder Act eine Rolle. Gibt es kein echtes
+ * Headliner-Billing, werden die ersten Programmpunkte als Höhepunkte
+ * markiert (`highlightsOnly`), und der Aufrufer setzt einen Lineup-Titel,
+ * damit die Seite "Highlights" statt "Headliner" beschriftet.
+ */
+export function toBlogLineup(
+  acts: Array<{ name: string; billing?: string | null; day?: string | null; stage?: string | null }>,
+  opts: { max?: number; highlights?: number } = {},
+): { lineup: BlogLineupAct[]; highlightsOnly: boolean } {
+  const max = opts.max ?? 60;
+  const highlights = opts.highlights ?? 6;
+  const seen = new Set<string>();
+  const clean = acts
+    .map((a, i) => ({ ...a, name: (a.name ?? '').replace(/\s+/g, ' ').trim(), i }))
+    .filter(a => {
+      const key = normalizeArtistKey(a.name);
+      if (!a.name || !key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => ((BLOG_BILLING_RANK[a.billing ?? 'unknown'] ?? 9) - (BLOG_BILLING_RANK[b.billing ?? 'unknown'] ?? 9)) || a.i - b.i)
+    .slice(0, max);
+  const hasHeadliner = clean.some(a => a.billing === 'headliner');
+  const lineup = clean.map((a, idx): BlogLineupAct => ({
+    name: a.name,
+    role: (hasHeadliner ? a.billing === 'headliner' : idx < highlights) ? 'headliner' : 'support',
+    ...(a.day ? { day: a.day } : {}),
+    ...(a.stage ? { stage: a.stage } : {}),
+  }));
+  return { lineup, highlightsOnly: !hasHeadliner && lineup.length > 0 };
+}
+
 // ─── Blog-Autowriter: Festival-Kandidaten ─────────────────────────────────
 
 export interface FestivalBlogCandidateInput {

@@ -189,6 +189,27 @@ import { post as benefizkonzertKrebshilfe2026DarknessConfidence2026 } from './po
 import { post as weihnachtlicheLesungFriedrichVonThun2026 } from './posts/weihnachtliche-lesung-friedrich-von-thun-2026';
 import { post as konzerteInDerMinoritenkircheTrioCarusoDieDreiTenoere2026 } from './posts/konzerte-in-der-minoritenkirche-trio-caruso-die-drei-tenoere-2026';
 import { post as karaokeNight2026 } from './posts/karaoke-night-2026';
+import { post as post3TageJazz2027 } from './posts/3-tage-jazz-2027';
+import { post as artacts2027 } from './posts/artacts-2027';
+import { post as classicEsterhazy2027 } from './posts/classic-esterhazy-2027';
+import { post as elevateFestival2027 } from './posts/elevate-festival-2027';
+import { post as folkArtFestival2026 } from './posts/folk-art-festival-2026';
+import { post as imagoDei2027 } from './posts/imago-dei-2027';
+import { post as impulsFestival2027 } from './posts/impuls-festival-2027';
+import { post as musiksommerBadSchallerbach2027 } from './posts/musiksommer-bad-schallerbach-2027';
+import { post as akkordeonfestivalWien2027 } from './posts/akkordeonfestival-wien-2027';
+import { post as interpenetration2026 } from './posts/interpenetration-2026';
+import { post as jazzwerkstattGraz2026 } from './posts/jazzwerkstatt-graz-2026';
+import { post as klassikImBurghof2026 } from './posts/klassik-im-burghof-2026';
+import { post as lisztFestivalRaiding2027 } from './posts/liszt-festival-raiding-2027';
+import { post as mozartwoche2027 } from './posts/mozartwoche-2027';
+import { post as musicaSacraLinz2026 } from './posts/musica-sacra-linz-2026';
+import { post as onTheCouch2026 } from './posts/on-the-couch-2026';
+import { post as resonanzen2027 } from './posts/resonanzen-2027';
+import { post as tirolerFestspieleErlWinter2026 } from './posts/tiroler-festspiele-erl-winter-2026';
+import { post as trickyWomen2027 } from './posts/tricky-women-2027';
+import { post as wienModern2026 } from './posts/wien-modern-2026';
+import { post as winterfest2026 } from './posts/winterfest-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -388,6 +409,27 @@ export const ALL_POSTS: FestivalPost[] = [
   weihnachtlicheLesungFriedrichVonThun2026,
   konzerteInDerMinoritenkircheTrioCarusoDieDreiTenoere2026,
   karaokeNight2026,
+  post3TageJazz2027,
+  artacts2027,
+  classicEsterhazy2027,
+  elevateFestival2027,
+  folkArtFestival2026,
+  imagoDei2027,
+  impulsFestival2027,
+  musiksommerBadSchallerbach2027,
+  akkordeonfestivalWien2027,
+  interpenetration2026,
+  jazzwerkstattGraz2026,
+  klassikImBurghof2026,
+  lisztFestivalRaiding2027,
+  mozartwoche2027,
+  musicaSacraLinz2026,
+  onTheCouch2026,
+  resonanzen2027,
+  tirolerFestspieleErlWinter2026,
+  trickyWomen2027,
+  wienModern2026,
+  winterfest2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()

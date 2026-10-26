@@ -38,7 +38,7 @@
     "city": "Wien",
     "state": "Wien",
     "genres": "N, K",
-    "price_text": "Einzeltickets je nach Veranstaltung, z. B. 13 € (ermäßigt 7,50 €) für SOUNDSPACESCULPTURE in der Secession; Festivalpass im Ticketshop",
+    "price_text": "Festivalpass 140 Euro, ermäßigt 112 Euro, unter 30 Jahren 56 Euro; gilt direkt für 10 Produktionen, 35 weitere kosten mit Pass 5 Euro, 22 Produktionen bei freiem Eintritt",
     "description": "Wien Modern ist seit 1988 das Festival für Musik der Gegenwart in Wien und bespielt jeden November rund einen Monat lang das Konzerthaus, den Musikverein, die Secession, das MAK, den Reaktor und viele weitere Orte mit Uraufführungen, Klanginstallationen und Konzerten. Die 39. Ausgabe steht unter dem Motto Im großen Ganzen und widmet sich Musik und Ökosystemen, mit dem Eröffnungskonzert Mit der Donau von Pia Palme am 30. Oktober 2026 im Konzerthaus, Olga Neuwirth und Elfriede Jelinek im Musikverein, Liza Lim im Reaktor und Ausstellungen von Bernhard Leitner und Annea Lockwood. Ein Termin für 2027 ist noch nicht veröffentlicht.",
     "image_url": "https://www.wienmodern.at/images/gross/3091.jpg",
     "lineup": [
@@ -76,7 +76,8 @@
     ],
     "sources": [
       "https://www.wienmodern.at",
-      "https://www.wienmodern.at/2026-kalender"
+      "https://www.wienmodern.at/2026-kalender",
+      "https://www.wienmodern.at/festivalpass"
     ],
     "notes": "Eröffnung 30.10.2026, Kalender listet Termine bis 30.11.2026 (wienmodern.at/2026-kalender, geprüft 2026-10-26)."
   },
@@ -232,8 +233,8 @@
     "city": "Linz",
     "state": "Oberösterreich",
     "genres": "K",
-    "price_text": null,
-    "description": "musica sacra ist die Konzertreihe für geistliche Musik in Linz, getragen von der Diözese, und bespielt von November bis Mai die Minoritenkirche, die Ursulinenkirche, die Martin-Luther-Kirche und die Friedenskirche. Die Saison 2026/27 bringt 14 Konzerte, eröffnet vom Ensemble Turdus mit Messiaens Quartett für das Ende der Zeit am 9. November. Weitere Höhepunkte sind Inspired by Bach mit Michael Schöch, die Salzburger Adventmusik, C. P. E. Bachs Matthäuspassion und das Finale Ochre mit dem Hard-Chor Linz am 8. Mai. Karten laufen über das Kulturticket des Landestheaters.",
+    "price_text": "18 bis 49 Euro je nach Konzert und Kategorie, Stehplatz 10 Euro; bis 26 Jahre 50 Prozent im Vorverkauf",
+    "description": "Seit 1987 bringt musica sacra geistliche Musik in Linzer Kirchen. Die Saison 2026/27 startet am 9. November mit Messiaen und bringt Adventmusik, Bachkantaten, C. P. E. Bachs Matthäuspassion und 14 Abende bis Mai.",
     "image_url": "https://static1.squarespace.com/static/6826e70a15c47b5d6c661d39/t/6829a5b64e576a2ca96a79e9/1790942024367/",
     "lineup": [
       {
@@ -309,7 +310,9 @@
     ],
     "sources": [
       "https://www.musicasacra.at",
-      "https://www.tips.at/nachrichten/linz/kultur/736676-musica-sacra-bringt-die-linzer-kirchen-wieder-zum-klingen"
+      "https://www.tips.at/nachrichten/linz/kultur/736676-musica-sacra-bringt-die-linzer-kirchen-wieder-zum-klingen",
+      "https://www.musicasacra.at/verein",
+      "https://www.musicasacra.at/karten"
     ],
     "notes": "Konzertreihe, kein Festival; starts/ends = erster und letzter Termin der Saison 2026/27. Preise nicht auf der Website."
   },
@@ -324,8 +327,8 @@
     "city": "Salzburg",
     "state": "Salzburg",
     "genres": "I",
-    "price_text": null,
-    "description": "Das Winterfest ist Österreichs größtes Festival für zeitgenössischen Zirkus und bespielt seit 2001 jeden Winter Zelte im Salzburger Volksgarten sowie die ARGEkultur. Die Ausgabe 2026/27 zeigt sieben Produktionen in 75 Vorstellungen an 35 Spieltagen, fünf davon erstmals in Österreich. Erstmals gastiert mit Cirquework und dem Stück Yoah eine Compagnie aus Japan, dazu kommt der Zip Zap Circus aus Südafrika, und die Reihe Circus Vision zeigt Arbeiten junger Künstler. Lesematineen, Konzerte und Gastronomie ergänzen das Programm, die Ticketpreise wurden nicht erhöht.",
+    "price_text": "Circusvorstellungen Erwachsene 30 bis 82 Euro, Kinder bis 15 Jahre 21 bis 26 Euro; Konzert 20 Euro, Kinder 10 Euro",
+    "description": "Vom 25. November bis 6. Jänner wird der Salzburger Volksgarten wieder zur Zeltstadt. Erstmals dabei sind eine Compagnie aus Japan und eine aus Südafrika, dazu jongliert Wes Peden zu Beats aus Achterbahngeräuschen.",
     "image_url": "https://www.winterfest.at/wp-content/uploads/2026/06/YOAH-640x640.jpg",
     "lineup": [
       {
@@ -347,7 +350,8 @@
     ],
     "sources": [
       "https://www.winterfest.at",
-      "https://www.vienna.at/salzburger-winterfest-heuer-mit-zirkuskunst-aus-japan/10507745"
+      "https://www.vienna.at/salzburger-winterfest-heuer-mit-zirkuskunst-aus-japan/10507745",
+      "https://www.winterfest.at/info/"
     ],
     "notes": "Rund 30.000 Karten, Preise laut Veranstalter unverändert, Beträge nicht genannt."
   },
@@ -421,7 +425,7 @@
     "state": "Kärnten",
     "genres": "K",
     "price_text": "Einzelticket 20 € bis 39 €, ermäßigt 18 € bis 33 €, Jahresabo 279 € bis 419 €, Jugendliche bis 18 frei",
-    "description": "Klassik im Burghof ist die Sommerreihe des Vereins Klassik in Klagenfurt mit Samstag-Matineen um 11 Uhr im Burghof des Museums Moderner Kunst Kärnten. Von Juli bis September spielen dort Ensembles wie die acht Cellisten der Wiener Symphoniker, das Klezmer-Ensemble Kolsimcha oder Michael Schade mit Freunden. Als nächster Termin steht am 8. Dezember 2026 ein adventliches Sonderkonzert mit Fiori Musicali Austria an. Die Sommerreihe 2027 ist noch nicht veröffentlicht.",
+    "description": "Im Sommer spielt Klassik im Burghof samstags um 11 Uhr im Arkadenhof des Museums Moderner Kunst Kärnten. Bis die Saison 2027 startet, lädt der Veranstalter am 8. Dezember 2026 zu einem barocken Adventkonzert in die Johanneskirche.",
     "image_url": null,
     "lineup": [
       {
@@ -432,7 +436,8 @@
     ],
     "sources": [
       "https://www.klassikinklagenfurt.at",
-      "https://www.klagenfurt.at/fileadmin/user_upload/Klagenfurt_Kultur/News/2026/2026_Q3_KulturKalender.pdf"
+      "https://www.klagenfurt.at/fileadmin/user_upload/Klagenfurt_Kultur/News/2026/2026_Q3_KulturKalender.pdf",
+      "https://www.klassikinklagenfurt.at/sonderkonzerte/2026/08/12/fiorimusicali"
     ],
     "notes": "Termin ist ein Sonderkonzert (Harmonie der Herzen, Adventliche Klänge), nicht die Sommerreihe. Saison 2027 unbekannt. Karten nur telefonisch oder per E-Mail."
   },
@@ -468,9 +473,9 @@
     "name": "Tiroler Festspiele Erl",
     "website_url": "https://www.tiroler-festspiele.at",
     "ticket_url": "https://tickets.tiroler-festspiele.at/webshop/webticket/eventlist",
-    "starts_at": "2026-12-27",
-    "ends_at": "2027-01-01",
-    "date_status": "expected",
+    "starts_at": "2026-12-06",
+    "ends_at": "2027-01-06",
+    "date_status": "confirmed",
     "city": "Erl",
     "state": "Tirol",
     "genres": "K",
@@ -534,20 +539,24 @@
     "slug": "internationaler-musiksommer-bad-schallerbach",
     "name": "Internationaler Musiksommer Bad Schallerbach",
     "website_url": "https://www.musiksommerbadschallerbach.at",
-    "ticket_url": null,
+    "ticket_url": "https://www.oeticket.com/noapp/event/32-internationaler-musiksommer-bad-schallerbach-atrium-bad-schallerbach-21732070/",
     "starts_at": "2027-01-10",
-    "ends_at": "2027-01-10",
-    "date_status": "expected",
+    "ends_at": "2027-12-29",
+    "date_status": "confirmed",
     "city": "Bad Schallerbach",
     "state": "Oberösterreich",
     "genres": "K, I",
-    "price_text": null,
-    "description": "Der Internationale Musiksommer Bad Schallerbach ist seit 1970 die Kulturreihe des Kurorts im Hausruckviertel und bietet trotz des Namens das ganze Jahr über Konzerte, Kabarett, Satire und Literatur. Stammhaus ist das Atrium Bad Schallerbach, weitere Aufführungen finden in der evangelischen Kirche Wallern statt. Der nächste belegte Termin ist das Neujahrskonzert am 10. Jänner 2027 im Europasaal des Atriums. Das Sommerprogramm 2027 ist noch nicht veröffentlicht.",
+    "price_text": "24 bis 48 Euro, Konzerte des Kurorchesters Eintritt frei",
+    "description": "Der Internationale Musiksommer Bad Schallerbach spielt 2027 von Jänner bis Dezember. Los geht es am 10. Jänner mit Erwin Steinhauer und den OÖ. Concert Schrammeln, später kommen Voces8, Armin Wolf mit Peter Filzmaier und ein Beethovenschwerpunkt.",
     "image_url": null,
     "lineup": [],
     "sources": [
       "https://www.ausflugsziele.jetzt/?p=304665",
-      "https://www.oberoesterreich.at/oesterreich-poi/detail/171651/internationaler-musiksommer-bad-schallerbach.html"
+      "https://www.oberoesterreich.at/oesterreich-poi/detail/171651/internationaler-musiksommer-bad-schallerbach.html",
+      "https://www.musiksommerbadschallerbach.at/programm/",
+      "https://www.musiksommerbadschallerbach.at/programm/bad-schallerbacher-neujahrskonzert-2027-erwin-steinhauer-ooe-concert-schrammeln/",
+      "https://www.tips.at/nachrichten/grieskirchen/kultur/675236-grosse-kuenstler-bei-der-30-auflage-des-musiksommers-bad-schallerbach",
+      "https://www.musiksommerbadschallerbach.at/kurorchester/"
     ],
     "notes": "Offizielle Website per Fetch nicht erreichbar (TLS-Zertifikat ungültig). Neujahrskonzert 10.01.2027, 17 Uhr, nur über Aggregator belegt, daher expected. Vitalwelt-Gästekarte als Ermäßigung."
   },
@@ -562,7 +571,7 @@
     "city": "Wien",
     "state": "Wien",
     "genres": "K",
-    "price_text": null,
+    "price_text": "Einzelkarten 29 bis 107 Euro (Flamenco mit Buffet 64 bis 108 Euro); Zyklus aller acht Konzerte 201 bis 510 Euro, 25 Prozent unter Einzelpreis; Einzelkartenverkauf ab 9. November 2026, für Mitglieder ab 2. November 2026",
     "description": "Resonanzen ist seit 1993 das Festival für Alte Musik im Wiener Konzerthaus und zählt zu den renommiertesten seiner Art in Europa. Eine Woche lang spielen internationale Originalklang-Ensembles Musik vom Mittelalter bis zum Barock im Großen und Mozart-Saal. Die 35. Ausgabe steht unter dem Motto Hände und fragt nach dem Greifen, Erschaffen und Zerstören. Angekündigt sind das Dunedin Consort mit Händels Belshazzar, Graindelavoix mit einem Manierismus-Programm, la fonte musica und das Prager Collegium 1704 mit Zelenka.",
     "image_url": "https://konzerthaus.at/media/thumbnails/pixxio/1347372649/wkh_website_2_3_Resonanzen.jpg.1920x800_q85_crop_upscale.webp",
     "lineup": [
@@ -679,7 +688,7 @@
     "state": "Salzburg",
     "genres": "K",
     "price_text": "Einzelkarten je Konzert gestaffelt, Wahlabo bis 20 % Ersparnis, U27 in Ausbildung 25 €, U30 50 % Ermäßigung",
-    "description": "Die Mozartwoche der Stiftung Mozarteum feiert seit 1956 jedes Jahr rund um Mozarts Geburtstag am 27. Jänner den Komponisten in seiner Heimatstadt. Unter Intendant Rolando Villazón steht die Ausgabe unter dem Motto Mozart und Mozarts und stellt Zeitgenossen wie Devienne, Bologne, Arriaga und Kraus neben das Werk des Genius Loci. Im Zentrum steht eine neue szenische Produktion von Così fan tutte im Haus für Mozart unter Ivor Bolton, mit der Villazón seinen Da-Ponte-Zyklus abschließt. Die Wiener Philharmoniker sind dreimal zu hören, darunter mit Beethovens Neunter unter Christian Thielemann und mit Igor Levit unter Adam Fischer.",
+    "description": "Von 21. bis 31. Jänner 2027 feiert Salzburg Mozart und vier seiner Zeitgenossen: Così fan tutte mit Thomas Hampson im Haus für Mozart, Beethovens Neunte unter Christian Thielemann und 50 Programmpunkte in der ganzen Stadt.",
     "image_url": "https://mozarteum.at/static/62056c2bc7b10915087f1975819e598b/2026-04-21_Mozarteum_Portrait_RolandoVillazon_165.jpg",
     "lineup": [
       {
@@ -801,7 +810,8 @@
     "sources": [
       "https://mozarteum.at/mozartwoche/",
       "https://mozarteum.at/static/ca181ddf504281552ea62c7cdef0124f/MoWo_27_HP_WEB.pdf",
-      "https://www.srf.ch/radio-srf-2-kultur/srf-kulturclub/28-bis-31-januar-2027-mozartwoche-in-salzburg-ausgebucht-warteliste-verfuegbar"
+      "https://www.srf.ch/radio-srf-2-kultur/srf-kulturclub/28-bis-31-januar-2027-mozartwoche-in-salzburg-ausgebucht-warteliste-verfuegbar",
+      "https://mozarteum.at/en/events/mozarts-cosi-fan-tutte"
     ],
     "notes": "Bilder auf der Website nur als Base64 eingebettet, daher keine Bild-URL. Così-fan-tutte-Termine 22., 24., 29.01."
   },
@@ -819,11 +829,33 @@
     "price_text": null,
     "description": "3 Tage Jazz ist die Winterausgabe des Jazzfestivals Saalfelden und wird seit 2016 jeweils im Jänner veranstaltet. Der Name erinnert an das allererste Festival von 1978. Gespielt wird im Kunsthaus Nexus, in der Stadtpfarrkirche Saalfelden und im Bergbau- und Gotikmuseum Leogang. Die zehnte Ausgabe läuft von 22. bis 24. Jänner 2027; die Besetzung ist noch nicht veröffentlicht.",
     "image_url": null,
-    "lineup": [],
+    "lineup": [
+      {
+        "name": "Henri Texier Essential Quartet",
+        "billing": "headliner",
+        "day": "Sa 23.01."
+      },
+      {
+        "name": "Das Kapital",
+        "billing": "unknown",
+        "day": "Sa 23.01."
+      },
+      {
+        "name": "Flora Geißelbrecht & Jelena Popržan",
+        "billing": "unknown",
+        "day": "Sa 23.01."
+      },
+      {
+        "name": "Helene Glüxam",
+        "billing": "unknown",
+        "day": "So 24.01."
+      }
+    ],
     "sources": [
       "https://jazzsaalfelden.com/en",
       "https://www.jazzsaalfelden.com/de",
-      "https://www.salzburgerland.com/de/magazin/3-tage-jazz-im-winter-in-saalfelden-leogang"
+      "https://www.salzburgerland.com/de/magazin/3-tage-jazz-im-winter-in-saalfelden-leogang",
+      "https://www.jazzsaalfelden.com"
     ],
     "notes": "Termin von der offiziellen Website. Preise 2027 nicht veröffentlicht."
   },
@@ -902,7 +934,7 @@
     "state": "Wien",
     "genres": "I",
     "price_text": null,
-    "description": "Tricky Women / Tricky Realities ist seit 2001 das Wiener Festival für Animationsfilm von Frauen und nicht-binären Filmschaffenden, das einzige seiner Art weltweit. Jedes Frühjahr zeigt es im Metro Kinokulturhaus und weiteren Orten einen internationalen Wettbewerb, Themenprogramme, Retrospektiven, Workshops und Gespräche. Die Ausgabe 2027 findet von 10. bis 14. März 2027 statt; Einreichungen liefen bis Oktober 2026.",
+    "description": "Seit 2001 holt Tricky Women Animationsfilme von Frauen und genderqueeren Kunstschaffenden nach Wien. 2027 läuft das Festival von 10. bis 14. März, mit Preisen über 22.000 Euro. Programm, Tickets und Hintergründe.",
     "image_url": "https://trickywomen.at/api/og?title=Tricky+Women+Tricky+Realities&type=page",
     "lineup": [],
     "sources": [
@@ -957,10 +989,10 @@
     "slug": "liszt-festival-raiding",
     "name": "Liszt Festival Raiding",
     "website_url": "https://www.lisztfestival.at",
-    "ticket_url": "https://www.oeticket.com/noapp/artist/liszt-festival-raiding/liszt-festival-raiding-2023-3265610/",
+    "ticket_url": "https://lisztfestival.at/programm-tickets/kalender/alle-termine/",
     "starts_at": "2027-03-12",
     "ends_at": "2027-06-13",
-    "date_status": "expected",
+    "date_status": "confirmed",
     "city": "Raiding",
     "state": "Burgenland",
     "genres": "K",
