@@ -30,8 +30,11 @@ export function defaultDateTo(): string {
  * `null` for `'custom'` — the caller should render an explicit date
  * picker for that branch.
  */
-export function applyDatePreset(id: DatePresetId): { dateFrom?: string; dateTo?: string } | null {
-  const today = viennaToday();
+// `today` ist für Aufrufer mit eigenem Bezugstag (planShelves, Tests)
+// übergebbar; sonst der Wiener Kalendertag der Runtime. Bis 2026-10-26 las
+// das Wochenend-Regal hier still die echte Uhr und ignorierte den Tag, den
+// planShelves bekam.
+export function applyDatePreset(id: DatePresetId, today: string = viennaToday()): { dateFrom?: string; dateTo?: string } | null {
 
   switch (id) {
     case 'jetzt':

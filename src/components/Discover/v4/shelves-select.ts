@@ -57,7 +57,7 @@ function isFree(e: Event): boolean {
 export function planShelves(events: Event[], today: string = viennaToday()): ShelfPlan {
   const tomorrow = addViennaDays(today, 1);
   const horizon = addViennaDays(today, HORIZON_DAYS);
-  const weekend = applyDatePreset('wochenende') ?? { dateFrom: today, dateTo: today };
+  const weekend = applyDatePreset('wochenende', today) ?? { dateFrom: today, dateTo: today };
   const weekendFrom = weekend.dateFrom ?? today;
   const weekendTo = weekend.dateTo ?? weekendFrom;
 
