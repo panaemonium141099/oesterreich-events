@@ -569,6 +569,7 @@
     "linksCities": "Städte",
     "linksOtherRegions": "Andere Regionen",
     "noEventsForFilter": "Keine Events gefunden für diesen Filter.",
+    "allEvents": "Alle Veranstaltungen",
     "insiderTip": "Insider-Tipp:",
     "searchCta": "Alle Veranstaltungen in {name} durchsuchen",
     "loadMore": "Mehr Events laden",

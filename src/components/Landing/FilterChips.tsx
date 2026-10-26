@@ -18,20 +18,21 @@ export function FilterChips({ chips }: FilterChipsProps) {
   if (chips.length === 0) return null;
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+    <nav className="flex gap-2 overflow-x-auto pb-1 thin-scroll">
       {chips.map((chip) => (
         <Link
           key={chip.href}
           href={chip.href}
-          className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors ${
+          aria-current={chip.active ? 'page' : undefined}
+          className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors ${
             chip.active
-              ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/30'
-              : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white/80'
+              ? 'bg-[var(--v4-ink)] text-[#0a0a0c] border border-transparent'
+              : 'border border-[var(--v4-hairline-3)] hover:border-[var(--v4-hairline-4)] text-[var(--v4-ink)]'
           }`}
         >
           {chip.label}
         </Link>
       ))}
-    </div>
+    </nav>
   );
 }

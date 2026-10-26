@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import type { Event } from '@/types/events';
-import { EventListCard } from '@/components/Events/EventListCard';
+import { ShelfCard } from '@/components/Discover/v4/shelf-ui';
 
 interface LoadMoreEventsProps {
   /** Query params to pass to /api/events for pagination parity */
@@ -61,19 +61,19 @@ export function LoadMoreEvents({
   return (
     <div>
       {events.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+        <div className="v4-poster-grid mt-[18px]">
           {events.map((event) => (
-            <EventListCard key={event.id} event={event} />
+            <ShelfCard key={event.id} ev={event} grid />
           ))}
         </div>
       )}
 
       {hasMore && (
-        <div className="flex justify-center mt-6">
+        <div className="flex justify-center mt-8">
           <button
             onClick={loadMore}
             disabled={loading}
-            className="px-6 py-2.5 rounded-full text-sm font-medium bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white/80 transition-colors disabled:opacity-50"
+            className="press-haptic px-6 py-2.5 rounded-full text-[13px] font-semibold text-[var(--v4-ink)] border border-[var(--v4-hairline-3)] hover:border-[var(--v4-hairline-4)] transition-colors disabled:opacity-50"
           >
             {loading ? t('loadingMore') : t('loadMore')}
           </button>
