@@ -234,7 +234,7 @@
     "genres": "K",
     "price_text": null,
     "description": "musica sacra ist die Konzertreihe für geistliche Musik in Linz, getragen von der Diözese, und bespielt von November bis Mai die Minoritenkirche, die Ursulinenkirche, die Martin-Luther-Kirche und die Friedenskirche. Die Saison 2026/27 bringt 14 Konzerte, eröffnet vom Ensemble Turdus mit Messiaens Quartett für das Ende der Zeit am 9. November. Weitere Höhepunkte sind Inspired by Bach mit Michael Schöch, die Salzburger Adventmusik, C. P. E. Bachs Matthäuspassion und das Finale Ochre mit dem Hard-Chor Linz am 8. Mai. Karten laufen über das Kulturticket des Landestheaters.",
-    "image_url": null,
+    "image_url": "https://static1.squarespace.com/static/6826e70a15c47b5d6c661d39/t/6829a5b64e576a2ca96a79e9/1790942024367/",
     "lineup": [
       {
         "name": "Ensemble Turdus",
@@ -476,7 +476,7 @@
     "genres": "K",
     "price_text": "Jahreswechsel-Abo 135 € bis 333 €, Premierenabo 270 € bis 666 €, Sommer-Wochenendabos ab 135 €",
     "description": "Die Tiroler Festspiele Erl bespielen das Passionsspielhaus und das 2012 eröffnete Festspielhaus im Inntal und sind seit 1998 ein Zentrum für Wagner, Strauss und Raritäten. Seit 2024 wird die ganze Spielzeit mit Ausklang im Herbst, Winter, Ostern und Sommer als Einheit angekündigt. Der Jahreswechsel bringt eine neue La traviata ab 27. Dezember sowie Silvester- und Neujahrskonzert, zu Ostern folgen Parsifal und die Matthäus-Passion. Der Sommer 2027 vom 2. bis 25. Juli bietet Tristan und Isolde, Schrekers Der ferne Klang und die österreichische Erstaufführung von Francesco Filideis Accabadora.",
-    "image_url": null,
+    "image_url": "https://www.tiroler-festspiele.at/img/containers/assets/header/tfe_winter_hero.jpg/b9ba66012a50b75cd3fd9143672c7be4/tfe_winter_hero.jpg",
     "lineup": [
       {
         "name": "La traviata (Verdi)",
@@ -564,7 +564,7 @@
     "genres": "K",
     "price_text": null,
     "description": "Resonanzen ist seit 1993 das Festival für Alte Musik im Wiener Konzerthaus und zählt zu den renommiertesten seiner Art in Europa. Eine Woche lang spielen internationale Originalklang-Ensembles Musik vom Mittelalter bis zum Barock im Großen und Mozart-Saal. Die 35. Ausgabe steht unter dem Motto Hände und fragt nach dem Greifen, Erschaffen und Zerstören. Angekündigt sind das Dunedin Consort mit Händels Belshazzar, Graindelavoix mit einem Manierismus-Programm, la fonte musica und das Prager Collegium 1704 mit Zelenka.",
-    "image_url": "https://konzerthaus.at/media/thumbnails/pixxio/1347372649/wkh_website_2_3_Resonanzen.jpg.215x287_q85_crop_upscale.webp",
+    "image_url": "https://konzerthaus.at/media/thumbnails/pixxio/1347372649/wkh_website_2_3_Resonanzen.jpg.1920x800_q85_crop_upscale.webp",
     "lineup": [
       {
         "name": "Dunedin Consort",
@@ -680,7 +680,7 @@
     "genres": "K",
     "price_text": "Einzelkarten je Konzert gestaffelt, Wahlabo bis 20 % Ersparnis, U27 in Ausbildung 25 €, U30 50 % Ermäßigung",
     "description": "Die Mozartwoche der Stiftung Mozarteum feiert seit 1956 jedes Jahr rund um Mozarts Geburtstag am 27. Jänner den Komponisten in seiner Heimatstadt. Unter Intendant Rolando Villazón steht die Ausgabe unter dem Motto Mozart und Mozarts und stellt Zeitgenossen wie Devienne, Bologne, Arriaga und Kraus neben das Werk des Genius Loci. Im Zentrum steht eine neue szenische Produktion von Così fan tutte im Haus für Mozart unter Ivor Bolton, mit der Villazón seinen Da-Ponte-Zyklus abschließt. Die Wiener Philharmoniker sind dreimal zu hören, darunter mit Beethovens Neunter unter Christian Thielemann und mit Igor Levit unter Adam Fischer.",
-    "image_url": null,
+    "image_url": "https://mozarteum.at/static/62056c2bc7b10915087f1975819e598b/2026-04-21_Mozarteum_Portrait_RolandoVillazon_165.jpg",
     "lineup": [
       {
         "name": "Wiener Philharmoniker",
@@ -903,7 +903,7 @@
     "genres": "I",
     "price_text": null,
     "description": "Tricky Women / Tricky Realities ist seit 2001 das Wiener Festival für Animationsfilm von Frauen und nicht-binären Filmschaffenden, das einzige seiner Art weltweit. Jedes Frühjahr zeigt es im Metro Kinokulturhaus und weiteren Orten einen internationalen Wettbewerb, Themenprogramme, Retrospektiven, Workshops und Gespräche. Die Ausgabe 2027 findet von 10. bis 14. März 2027 statt; Einreichungen liefen bis Oktober 2026.",
-    "image_url": null,
+    "image_url": "https://trickywomen.at/api/og?title=Tricky+Women+Tricky+Realities&type=page",
     "lineup": [],
     "sources": [
       "https://www.trickywomen.at"
@@ -945,7 +945,7 @@
     "genres": "K, N, G, I",
     "price_text": null,
     "description": "Imago Dei ist das Osterfestival im Klangraum Krems Minoritenkirche, 1999 gegründet und seit 2025 von Albert Hosp kuratiert, der auch Glatt&Verkehrt leitet. In den Wochen vor Ostern verbindet es Alte und Neue Musik, Weltmusik, Tanz, Literatur und Performance in der gotischen Kirche in Stein. Die Ausgabe 2027 läuft vom 12. bis 29. März und endet am Ostermontag. Das Programm ist noch nicht veröffentlicht.",
-    "image_url": "https://noeku.on.damlivery.com/s/6d5c6d4e77e867723fb1b8059924cc7c/noeku/877295/rm:fit/h:400/w:500/q:90/rs:originalSizePng/f:webp/g:fp:0.5:0.5",
+    "image_url": null,
     "lineup": [],
     "sources": [
       "https://www.klangraum.at",
@@ -966,7 +966,7 @@
     "genres": "K",
     "price_text": null,
     "description": "Das Liszt Festival Raiding bespielt seit 2006 das Franz-Liszt-Konzerthaus im Geburtsort des Komponisten im Mittelburgenland, geleitet vom Klavierduo Eduard und Johannes Kutrowatz. Die Saison gliedert sich in mehrere Blöcke: Barock Haydn Tage im März, Brass Fest im April, Sommerkonzerte im Juni und das Hauptfestival im Oktober. Für 2027 stehen die Barock Haydn Tage vom 12. bis 14. März mit Barucco, Minetti Quartett und Wiener KammerOrchester, das Brass Fest vom 22. bis 25. April mit Federspiel und die Sommerkonzerte vom 10. bis 13. Juni mit Benjamin Schmid fest. Die Termine des Oktober-Festivals 2027 sind noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://lisztfestival.at/fileadmin-kultur/_processed_/0/a/csm_Liszt_Festival_Raiding2_c_KBB_d1246087ed.jpg",
     "lineup": [
       {
         "name": "Barucco Vokalensemble & Orchester",
@@ -1043,7 +1043,7 @@
     "genres": "K, G",
     "price_text": null,
     "description": "PSALM ist das Osterfestival aus dem Haus der styriarte und bespielt seit 2005 in der Karwoche Grazer Kirchen, den Stefaniensaal und die Helmut-List-Halle mit geistlicher Musik aller Religionen, Passionen und Alter Musik. Nach großem Zuspruch 2026 wird die Ausgabe 2027 um zwei Tage verlängert und läuft vom 19. bis 29. März. Das Programm ist noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://styriarte.imgix.net/social/styriarte-og-image-1.png",
     "lineup": [],
     "sources": [
       "https://www.vienna.at/musikfestival-styriarte-auslastung-2026-bei-94-prozent/10350215",
@@ -1064,7 +1064,7 @@
     "genres": "G, P",
     "price_text": null,
     "description": "Das Winter Woodstock der Blasmusik ist der Winterableger des Innviertler Festivals und bespielt an einem Märzwochenende das Brixental in den Kitzbüheler Alpen: Konzerte in Brixen im Thale, Kirchberg und Westendorf, auf Hütten und in Zelten, dazu eine Woodstock Academy. Die Ausgabe 2026 zählte rund 15.000 Fans. 2027 findet das Festival von 19. bis 21. März mit 36 Bands und Blasmusik-Acts statt.",
-    "image_url": null,
+    "image_url": "https://www.kitzbueheler-alpen.com/media/facebook/schnellballschlacht-original.jpg",
     "lineup": [],
     "sources": [
       "https://www.tt.com/artikel/30930500/rekordandrang-15-000-fans-kamen-zum-winter-woodstock-der-blasmusik-ins-brixental",
@@ -1206,7 +1206,7 @@
     "genres": "K",
     "price_text": "Gala-Tickets im Vorverkauf ab Oktober 2026; Preise noch nicht veröffentlicht",
     "description": "Das International Guitar Festival Rust vereint seit 1999 ein Konzertfestival für klassische Gitarre mit dem Alirio Díaz Wettbewerb für Erwachsene und junge Spieler im Seehof Rust am Neusiedler See. Die 29. Ausgabe läuft von 21. bis 24. März 2027 mit Eröffnungskonzert, Wettbewerbsrunden, Festivalkonzerten und Preisverleihung mit Preisträgerkonzert. Den Abschluss bildet am 25. März ein Galakonzert im Musikverein Wien mit Gabriel Guillen und Jovan Pesec. Angekündigt sind unter anderem Roberto Fabbri, Juan Lorenzo, Nejc Kuhar und David Pavlovits.",
-    "image_url": null,
+    "image_url": "https://image.jimcdn.com/app/cms/image/transf/none/path/s7c3964283c6df778/backgroundarea/i614c33f72634b52f/version/1639679203/image.jpg",
     "lineup": [
       {
         "name": "Gabriel Guillen",
@@ -1305,7 +1305,7 @@
     "genres": "P",
     "price_text": "3-Tages-Ticket und Pakete mit Unterkunft über Mayrhofen Tourismus und metaltix; Early-Bird-Verkauf startete am 10.7.2026; Preise 2027 nicht auf der Website",
     "description": "Full Metal Mayrhofen ist der Nachfolger des Full Metal Mountain vom Nassfeld und verbindet seit 2025 eine Woche Skiurlaub im Zillertal mit Metal-Konzerten, organisiert vom Team hinter der Full Metal Cruise. Von Montag bis Mittwoch spielen die Bands im Europahaus Mayrhofen, von Donnerstag bis Samstag auf dem Waldfestplatz, tagsüber geht es auf die Pisten von Penken und Ahorn. Für die dritte Ausgabe 2027 sind unter anderem Feuerschwanz, UDO, Grave Digger, Rhapsody Of Fire, Dog Eat Dog, Annisokay, Callejon und Visions Of Atlantis bestätigt, weitere Bands folgen. Tickets gibt es als Festivalpass oder als Paket mit Unterkunft und Skipass.",
-    "image_url": "https://www.full-metal-mayrhofen.com/wp-content/uploads/2026/07/FMM2027_Logo_4c_mit_Datum-300x164.png",
+    "image_url": "https://www.full-metal-mayrhofen.com/wp-content/uploads/2025/01/fmm_2025_bandposter_1024x576_241114.jpg",
     "lineup": [
       {
         "name": "Feuerschwanz",
@@ -1482,7 +1482,7 @@
     "genres": "I",
     "price_text": null,
     "description": "Die Diagonale ist das Festival des österreichischen Films und zeigt seit 1998 jedes Frühjahr in Graz den Jahrgang des heimischen Filmschaffens: rund 100 aktuelle Spiel-, Dokumentar-, Kurz- und Experimentalfilme im Wettbewerb, dazu Retrospektiven, Gespräche und Branchentreffen. Gespielt wird im Annenhof Kino, im KIZ RoyalKino, im Schubertkino und im Rechbauerkino, die Eröffnung findet in der Helmut List Halle statt. Die Ausgabe 2027 läuft von 7. bis 12. April 2027 und damit einige Wochen später als bisher.",
-    "image_url": null,
+    "image_url": "https://www.diagonale.at/wp-content/uploads/2023/10/Diagonale_Open_Graph_1200x630.jpg",
     "lineup": [],
     "sources": [
       "https://www.diagonale.at",
@@ -1701,7 +1701,7 @@
     "genres": "P",
     "price_text": "Preise 2027 noch nicht veröffentlicht; Festivalpass 2026: 55 €",
     "description": "Das Noppen Air ist ein Musikfestival der Freiwilligen Feuerwehr Neudorf auf dem alten Noppenhof in Neußerling im Mühlviertel und eröffnet traditionell Ende April die oberösterreichische Festivalsaison. Was als Feuerwehrfest begann, ist seit mehr als 30 Jahren ein dreitägiges Open Air mit Austropop, Rock und Partybands sowie Zeltfest-Stimmung. Die 29. Ausgabe findet von 23. bis 25. April 2027 statt, am Line-up wird laut Veranstalter noch gearbeitet.",
-    "image_url": null,
+    "image_url": "https://www.noppenair.at/wp-content/uploads/2023/02/sm.jpg",
     "lineup": [],
     "sources": [
       "https://www.noppenair.at",
@@ -1784,7 +1784,7 @@
     "genres": "G, J",
     "price_text": null,
     "description": "Das ZOA Festival bringt seit 2018 Weltmusik, Jazz und Folk in das Stift Ardagger im Mostviertel. An zwei Tagen spielen internationale Acts im Ita-Stadel und in der Stiftskirche, 2026 etwa Manu Delago, Hazmat Modine und Rita Payés. Festivaldirektor ist Peter Hofmayer. Die Ausgabe 2027 findet am 7. und 8. Mai 2027 statt; Lineup und Vorverkauf starten am 1. Dezember 2026.",
-    "image_url": null,
+    "image_url": "https://zoafestival.at/storage/2026/09/Countdown.png",
     "lineup": [],
     "sources": [
       "https://www.zoafestival.at",
@@ -1826,7 +1826,7 @@
     "genres": "K",
     "price_text": null,
     "description": "Die Salzburger Festspiele Pfingsten sind das viertägige Frühjahrsfestival der Salzburger Festspiele, seit 2012 unter der künstlerischen Leitung von Cecilia Bartoli, deren Vertrag bis 2031 verlängert wurde. Jede Ausgabe folgt einem Motto mit einer Opernproduktion, in der Bartoli meist selbst singt, dazu Konzerte, Barock und Tanz im Haus für Mozart und Großen Festspielhaus. 2026 stand Rossinis Il viaggio a Reims unter dem Titel Bon Voyage im Zentrum. Die Ausgabe 2027 läuft vom 14. bis 17. Mai, das Programm ist noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://www.salzburgerfestspiele.at/wp-content/uploads/2019/02/sf_imagebilder_2018_59_leopold.jpg",
     "lineup": [
       {
         "name": "Cecilia Bartoli",
@@ -1895,7 +1895,7 @@
     "genres": "I",
     "price_text": null,
     "description": "Vienna Shorts ist seit 2004 das internationale Kurzfilmfestival Wiens und als Oscar-, BAFTA- und Europäischer-Filmpreis-qualifizierendes Festival eines der wichtigsten seiner Art in Europa. Rund 300 Kurzfilme laufen in Wettbewerben, Themenschwerpunkten und Specials in Kinos wie dem Metro Kinokulturhaus, dem Stadtkino und dem Gartenbaukino, begleitet von Talks, Partys und Branchenprogramm. Die 24. Ausgabe findet von 25. bis 30. Mai 2027 statt.",
-    "image_url": null,
+    "image_url": "https://www.viennashorts.com/assets/media/_1200x630_crop_center-center_none_ns/Vienna-Shorts-Website-Newsbeitrag-1200x880px-Relaunch.jpg",
     "lineup": [],
     "sources": [
       "https://www.viennashorts.com"
@@ -1915,7 +1915,7 @@
     "genres": "P, E, H",
     "price_text": "Eintritt frei",
     "description": "Das Stream Festival ist seit 2018 das kostenlose Open-Air-Festival für Pop, Electronic, Hip-Hop und Indie in der Linzer Innenstadt, veranstaltet mit FM4. An zwei Tagen bespielen rund zwei Dutzend Acts mehrere Bühnen rund um den Hauptplatz, dazu kommen Workshops und Kunstprogramm. Die Ausgabe 2027 ist als Save the Date für 28. und 29. Mai 2027 angekündigt.",
-    "image_url": null,
+    "image_url": "https://stream-festival.at/wp-content/uploads/2026/02/STR-26-SM-Newsletter-660x330-1-scaled.png",
     "lineup": [],
     "sources": [
       "https://www.stream-festival.at",
@@ -1936,7 +1936,7 @@
     "genres": "K",
     "price_text": null,
     "description": "Das Wörthersee Classics Festival widmet sich seit 2001 den Komponisten, die am Wörthersee lebten und arbeiteten: Brahms, Mahler, Wolf, Webern und Berg. Gespielt wird im Konzerthaus Klagenfurt mit Orchesterkonzerten, Kammermusik und jungen Solisten, künstlerische Leitung Elena Denisova und Alexei Kornienko. Die nächste Spielzeit ist kompakt für den 4. bis 6. Juni angekündigt. Programm und Mitwirkende sind noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://static.tildacdn.com/tild3562-3535-4563-a635-323863356662/Brahmsfest.JPG",
     "lineup": [],
     "sources": [
       "https://www.woertherseeclassics.com"
@@ -2152,7 +2152,7 @@
     "genres": "I",
     "price_text": null,
     "description": "Das Festival der Regionen ist seit 1993 Oberösterreichs Biennale für zeitgenössische Kunst im ländlichen Raum und zieht alle zwei Jahre in eine andere Region. Künstlerinnen und Kollektive entwickeln ortsbezogene Projekte, Performances, Installationen und Interventionen gemeinsam mit der Bevölkerung. Die 18. Ausgabe folgt unter dem Motto Eintauchen / Diving Deeper von 11. bis 20. Juni 2027 der Donau stromaufwärts von Linz Richtung Passau, Festivalzentrum ist Aschach an der Donau. Die Projekte wurden per Open Call bis April 2026 eingereicht.",
-    "image_url": null,
+    "image_url": "https://fdr.at/wp-content/uploads/2024/10/FdR_Newsletterbanner-25_v1.png",
     "lineup": [],
     "sources": [
       "https://fdr.at/en/?p=83991",
@@ -2349,7 +2349,7 @@
     "genres": "K",
     "price_text": null,
     "description": "Die styriarte wurde 1985 für Nikolaus Harnoncourt gegründet und ist heute unter Intendant Mathis Huber das steirische Sommerfestival für Alte und Neue Musik, Oper und Tanz. Gespielt wird im Grazer Stefaniensaal, in der Helmut-List-Halle, in Schlössern und Kirchen der Steiermark. Die Ausgabe 2027 steht vom 25. Juni bis 25. Juli unter dem Motto Phantastisch!. Das Detailprogramm folgt, die Saison 2026 erreichte 94 Prozent Auslastung.",
-    "image_url": null,
+    "image_url": "https://styriarte.imgix.net/social/styriarte-og-image-1.png",
     "lineup": [],
     "sources": [
       "https://www.vienna.at/musikfestival-styriarte-auslastung-2026-bei-94-prozent/10350215",
@@ -2399,7 +2399,7 @@
     "genres": "G, P",
     "price_text": "Festivalpass 249 €, Festivalpass mit Camping 299 €, Tagestickets 99 bis 149 €",
     "description": "Woodstock der Blasmusik ist das größte Blasmusikfestival Europas und findet seit 2011 auf dem 56 Hektar großen Gelände in Ort im Innkreis statt, mit mehr als 150 Bands auf acht Bühnen und Zehntausenden Campern. Die Jubiläumsausgabe zum 15-jährigen Bestehen läuft von 1. bis 4. Juli 2027 und holt ausschließlich Bands zurück, die schon einmal in Woodstock gespielt haben, ergänzt um Newcomer aus dem Wettbewerb Copa Kapella. Angekündigt sind unter anderem Fäaschtbänkler, Querbeat, Sašo Avsenik, Lucky Chops, Dicht & Ergreifend, da Blechhauf'n, German Brass, Federspiel und Thomas Gansch.",
-    "image_url": null,
+    "image_url": "https://www.woodstock.at/wp-content/uploads/Header_wdb27.jpg",
     "lineup": [
       {
         "name": "Fäaschtbänkler",
@@ -2604,7 +2604,7 @@
     "genres": "G, J, P",
     "price_text": null,
     "description": "Das Internationale Musikfest Waidhofen an der Thaya wird vom 1979 gegründeten Folk-Club veranstaltet, der im Waldviertel auch das Clublokal Igel an der Stadtmauer betreibt. An drei Tagen Anfang Juli spielen Bands aus Folk, Weltmusik, Jazz und Blues an bis zu 16 Orten in der Stadt, von Innenhöfen bis zum Stadtplatz. Die nächste Ausgabe ist für 2. bis 4. Juli 2027 angekündigt.",
-    "image_url": null,
+    "image_url": "https://folkclub.at/wp-content/uploads/2021/01/2019-Musikfest-Samstag-2631.jpg",
     "lineup": [],
     "sources": [
       "https://www.folkclub.at"
@@ -2748,7 +2748,7 @@
     "genres": "P, E, I",
     "price_text": null,
     "description": "Das Poolbar Festival ist ein sechswöchiges Kultur- und Musikfestival im Alten Hallenbad in Feldkirch, das seit 1994 jeden Sommer Konzerte, Clubnächte, Kabarett, Poetry Slam, Film und Architektur unter einem Dach vereint. Jede Ausgabe bekommt ein eigenes, von Gestaltungsteams entwickeltes Raumkonzept, Konzerte finden im Hallenbad, im Garten und bei Open-Air-Terminen in der Stadt statt. Für 2027 ist bereits KAMRAD für ein Open Air am 14. August angekündigt, weitere Acts folgen laufend. Neben Einzeltickets gibt es einen Festivalpass für die gesamte Laufzeit.",
-    "image_url": null,
+    "image_url": "https://www.poolbar.at/og.jpg",
     "lineup": [
       {
         "name": "KAMRAD",
@@ -2775,7 +2775,7 @@
     "genres": "E",
     "price_text": "Festival Pass Phase 1: 209 € zzgl. Gebühren, Tagesticket ab 134 €, Full Experience Pass inkl. Camping 309 €, Warm-up-Party Mittwoch 45 €, Camping 55 €",
     "description": "Das Electric Love Festival ist das größte Electronic-Festival Österreichs und verwandelt seit 2013 den Salzburgring bei Plainfeld in eine Bühnenlandschaft mit rund 200 Acts auf sieben Stages. Zuletzt kamen etwa 180.000 Besucherinnen und Besucher zu House, Techno, Hardstyle, Drum and Bass und EDM in der Rennstrecken-Kulisse am Fuß des Gaisbergs. Die Ausgabe 2027 läuft von Donnerstag bis Samstag, am Mittwoch davor gibt es die Warm-up-Party auf dem Campinggelände. Der Vorverkauf ist in Phase 1 gestartet, VIP- und Full-Experience-Pakete in Bronze, Silber und Gold sind bereits ausverkauft. Die ersten Namen für 2027 waren bei Redaktionsschluss noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://www.electriclove.at/en/wp-content/uploads/sites/2/2026/07/ELF26-Mainstage-1024x576.png",
     "lineup": [],
     "sources": [
       "https://www.electriclove.at",
@@ -2798,7 +2798,7 @@
     "genres": "I",
     "price_text": null,
     "description": "ImPulsTanz ist das Vienna International Dance Festival und seit 1984 das größte Festival für zeitgenössischen Tanz und Performance in Europa. Fünf Wochen lang zeigen internationale Choreografinnen und Compagnien Produktionen im Volkstheater, im Burgtheater, im Odeon, im mumok und in der Halle E+G, dazu kommen hunderte Workshops, die Research-Programme ATLAS und danceWEB sowie die Festival-Lounge. Die Ausgabe 2027 ist für 8. Juli bis 8. August 2027 angekündigt; das Programm wird im Frühjahr veröffentlicht, Vorverkauf erfahrungsgemäß ab Mai.",
-    "image_url": null,
+    "image_url": "https://www.impulstanz.com/media/sys_autoimg/f687a8e03d9ba3d9562eff333c4892bd.jpg",
     "lineup": [],
     "sources": [
       "https://www.impulstanz.com/en/"
@@ -2839,7 +2839,7 @@
     "genres": "K, P, J",
     "price_text": null,
     "description": "Klassik am Dom bespielt seit 2011 den Linzer Domplatz vor dem Mariendom mit Open-Air-Konzerten zwischen Klassik, Crossover und Pop. Im Jubiläumsjahr eröffnet Gregory Porter, es folgen Russell Crowe mit Band, Musical am Dom, ABBA Symphonic mit dem Royal Philharmonic Orchestra, Elīna Garanča, Peter Cornelius, Blasmusik am Dom und Unheilig. Als Abschluss kommen am 7. August Bilderbuch erstmals auf den Domplatz. Tickets gibt es über oeticket.",
-    "image_url": null,
+    "image_url": "https://www.klassikamdom.at/wp-content/uploads/Header_Test2.jpg",
     "lineup": [
       {
         "name": "Gregory Porter",
@@ -2912,7 +2912,7 @@
     "genres": "K, I",
     "price_text": null,
     "description": "Das Festival Retz, früher Festival Offene Grenzen, bespielt seit 2003 die Weinviertler Stadt Retz und das mährische Znojmo mit einer Kirchenoper in der Stadtpfarrkirche, Konzerten, Film und Begegnungen über die Grenze. Zuletzt stand Bononcinis Salome im Mittelpunkt, zuvor Barockraritäten wie Händels Jephtha. Die Ausgabe 2027 läuft vom 9. bis 25. Juli. Programm und Vorverkauf werden über den Newsletter bekanntgegeben.",
-    "image_url": "https://festivalretz.at/wp-content/uploads/elementor/thumbs/festival-retz-2024-rcicmsu3ngu2hedja61cqimkfbf3jo5bopomcic3r4.jpg",
+    "image_url": null,
     "lineup": [],
     "sources": [
       "https://festivalretz.at",
@@ -2996,7 +2996,7 @@
     "genres": "K",
     "price_text": null,
     "description": "Das Lehár Festival Bad Ischl ist das Operettenfestival Österreichs und spielt seit 1961 im Kongress & TheaterHaus der Kaiserstadt, in der Franz Lehár lebte und starb. Die Saison eröffnet mit Lehárs Die lustige Witwe, es folgen Millöckers Gasparone und als Rarität Oscar Straus' Die lustigen Nibelungen. Drei Premieren verteilen sich über sieben Wochen von Mitte Juli bis Ende August. Besetzungen und Preise sind noch nicht veröffentlicht, der Kartenverkauf läuft über den Spielplan der Website.",
-    "image_url": "https://www.leharfestival.at/wp-content/uploads/2026/09/ICON_Witwe_27.jpg",
+    "image_url": null,
     "lineup": [
       {
         "name": "Die lustige Witwe (Lehár)",
@@ -3219,7 +3219,7 @@
     "genres": "P",
     "price_text": null,
     "description": "Das Area 53 Festival ist ein Metal- und Rock-Festival im VAZ Schladnitz in Leoben in der Obersteiermark, das seit 2015 jeden Juli Bands aus Heavy Metal, Industrial, Folk Metal und Hardrock auf zwei Bühnen bringt. Vier Tage lang gibt es Konzerte ab dem frühen Nachmittag, Camping direkt am Gelände und die Matinee als Auftakt. Für 2027 sind unter anderem HammerFall, Eisbrecher, Ektomorf, Grima, Chuggaboom und Ghidrah bestätigt, als Matinee tritt Jazz Gitti auf.",
-    "image_url": null,
+    "image_url": "https://bringticket.com/wp-content/uploads/2024/01/bringticket-x-band-meets-band.jpg",
     "lineup": [
       {
         "name": "HammerFall",
@@ -3270,7 +3270,7 @@
     "genres": "K",
     "price_text": "Karten 29 € bis 185 € in neun Kategorien, U27 Fr/Sa 30 % Ermäßigung, Mi/Do/So Fixpreis 21 €",
     "description": "Die Oper im Steinbruch zeigt seit 1996 jeden Sommer eine große Opernproduktion im Römersteinbruch St. Margarethen, einer der spektakulärsten Open-Air-Bühnen Europas. Nach rund 90.000 Besuchern bei Tosca steht nun Verdis Rigoletto auf dem Spielplan, vom 14. Juli bis 22. August. Der Vorverkauf liegt laut Veranstalter Esterhazy rund 15 Prozent über dem Vorjahr. Die Bühne vor der Felskulisse fasst mehrere tausend Zuschauer, Regie und Besetzung sind noch nicht veröffentlicht.",
-    "image_url": "https://www.operimsteinbruch.at/imager/images/Rigoletto-2027/42106/Rig27_Plakat_DinA4_260708-ohneText_WEB_6578b320438053ef8571877d789d3479.jpg",
+    "image_url": null,
     "lineup": [
       {
         "name": "Rigoletto (Verdi)",
@@ -3497,7 +3497,7 @@
     "genres": "K, P",
     "price_text": null,
     "description": "Der AVB Musical Sommer Amstetten produziert seit 1999 jeden Sommer ein Musical in der Pölz-Halle der Amstettner Veranstaltungsbetriebe und erreichte zuletzt mit der Uraufführung Augustin rund 12.500 Besucher. 2027 steht Joyride auf dem Spielplan, ein Musical mit den Hits von Roxette nach Jane Fallons Roman Got You Back. Die Generalprobe ist am 20. Juli, 14 Vorstellungen laufen vom 22. Juli bis zur Dernière am 22. August, jeweils 19:30 Uhr. Die Besetzung wird demnächst bekanntgegeben.",
-    "image_url": null,
+    "image_url": "https://www.avb.am/wp2023/wp-content/uploads/2023/09/unternehmen.jpg",
     "lineup": [
       {
         "name": "Joyride (Roxette-Musical)",
@@ -3774,7 +3774,7 @@
     "genres": "K, J, G",
     "price_text": null,
     "description": "Die Montafoner Resonanzen sind ein Spätsommerfestival an authentischen Orten im Montafon, von Kirchen über Bergstationen bis zu Hofstätten. Jedes Wochenende hat ein eigenes Genre. 2027 läuft das Festival von 6. August bis 4. September: Bläser am 6. und 7. August, Jazz von 12. bis 15. August, Kammermusik am 20. und 21. August, Cross-Over am 25. und 26. August, Volksmusik von 27. bis 29. August und Orgel von 2. bis 4. September. Konkrete Künstler sind noch nicht veröffentlicht.",
-    "image_url": "https://www.montafon.at/montafon/grafiken_icons/events/montafoner-resonanzen/54693/image-thumb__54693__headerImageFrontpage/MoRe_Website_1800x900px.e07db1fe.jpg",
+    "image_url": "https://www.montafon.at/montafon/grafiken_icons/events/montafoner-resonanzen/54693/image-thumb__54693__ogImage/MoRe_Website_1800x900px.53c2f2e6.jpg",
     "lineup": [],
     "sources": [
       "https://www.montafon.at/montafoner-resonanzen/de",
@@ -3838,7 +3838,7 @@
     "genres": "P, E",
     "price_text": "Eintritt frei (freiwillige Spende)",
     "description": "Das Sunny Days Festival ist ein Gratis-Open-Air des Vereins wakmusic in Dietersdorf in der Gemeinde Wundschuh südlich von Graz. An zwei Tagen Anfang August spielen regionale Bands und DJs auf einer Bühne zwischen Feldern, dazu gibt es Camping, Bars und Foodstände, finanziert wird das Festival über freiwillige Spenden und den Getränkeverkauf. Die Ausgabe 2027 findet am Freitag, 6., und Samstag, 7. August statt, das Line-up wird laufend bekannt gegeben.",
-    "image_url": null,
+    "image_url": "https://i0.wp.com/wakmusic.at/wp-content/uploads/2025/09/Festival-Graz-Umgebung-Sunny-Days.jpg?fit=2048%2C1365&#038;ssl=1",
     "lineup": [],
     "sources": [
       "https://wakmusic.at/festivals/sunny-days-festival",
@@ -3859,7 +3859,7 @@
     "genres": "E",
     "price_text": "Super Early Bird Festival Pass 99 € zzgl. Servicegebühren (ausverkauft), Super Early Bird VIP Festival Pass 159 €",
     "description": "Das Shutdown Festival ist ein eintägiges Electronic-Festival auf dem Gelände des nie in Betrieb gegangenen Atomkraftwerks Zwentendorf an der Donau westlich von Wien. Auf fünf Bühnen zwischen Kühlturm-Kulisse und Reaktorgebäude spielen rund 60 Acts aus Techno, House, Hardstyle und Drum and Bass, zuletzt kamen rund 15.000 Gäste. Die Ausgabe 2027 findet am Samstag, 7. August, statt, das Line-up ist noch nicht veröffentlicht, die günstigsten Pässe sind bereits weg.",
-    "image_url": null,
+    "image_url": "https://www.shutdownfestival.at/wp-content/uploads/sites/2/2026/08/Shutdown-Festival-Fav-Icon-128.png",
     "lineup": [],
     "sources": [
       "https://www.shutdownfestival.at",
@@ -4050,7 +4050,7 @@
     "genres": "E, P",
     "price_text": "Tickets je Event, streng limitiert; Preise 2027 nicht veröffentlicht",
     "description": "Das Pink Lake Festival ist Österreichs größtes LGBTQI*-Festival und bringt seit 2010 eine Woche lang Partys, Beach Clubs und Bootsfahrten an den Wörthersee. Veranstaltet von der Wörthersee Tourismus GmbH, gehören der Beach Club im Strandbad Pörtschach, die Almrausch-Party im Schloss Leonstain, die Club Night im fritz Club und eine Boat Cruise Party zum festen Programm, Drag-Shows und DJs sorgen für den Soundtrack. Die Ausgabe 2027 läuft von 23. bis 29. August in Pörtschach.",
-    "image_url": "https://www.woerthersee.com/fileadmin/_processed_/b/1/csm_Pink_Lake_Fabrik__c__WTG_Daniel_Gollner_5269f046cf.jpg",
+    "image_url": "https://www.woerthersee.com/fileadmin/_processed_/0/9/csm_A7R00728-Pink_Lake__c__WTG_Daniel_Gollner_51ab38c634.jpg",
     "lineup": [],
     "sources": [
       "https://www.woerthersee.com/pinklake"
@@ -4070,7 +4070,7 @@
     "genres": "K, N, G",
     "price_text": "Festivalpass 140 €, Einzeltickets ab Juli bei der Weissenseeinfo und an der Abendkassa",
     "description": "Das Weissensee Klassik Festival wird von der Wiener Klangkommune veranstaltet und bringt seit 2014 Ende August Kammermusik, Neue Musik und Crossover an ungewöhnliche Orte rund um den Kärntner Weissensee, etwa die Tenne Graln's Tenn in Neusach oder den Ronacherfels. Formate reichen vom Familienkonzert über das experimentelle Weissensee Lab bis zu Duo Ruut oder dem Ensemble ALMA. Die 13. Ausgabe findet vom 25. bis 28. August statt. Das Programm ist noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://www.weissenseeklassik.at/volumes/media/WEI-26-ogImage.jpg",
     "lineup": [],
     "sources": [
       "https://www.weissenseeklassik.at",
@@ -4152,7 +4152,7 @@
     "genres": "J",
     "price_text": null,
     "description": "Most+Jazz nennt sich Österreichs größter Open-Air-Jazzclub: Seit über 25 Jahren wird der Hauptplatz von Fehring im Vulkanland an einem Septemberwochenende zur Bühne für regionale und internationale Jazzmusiker, begleitet von Most, Bier und Küche aus der Region. Das Festival ist familienfreundlich und bewusst ohne elitäre Hürden angelegt. Die Ausgabe 2027 ist für 10. bis 12. September am Hauptplatz angekündigt, mit Eröffnung am Donnerstag, 9. September.",
-    "image_url": null,
+    "image_url": "https://www.mostundjazz.com/wp-content/uploads/2025/09/Ankuendigung2026.png",
     "lineup": [],
     "sources": [
       "https://www.mostundjazz.com"
@@ -4305,7 +4305,7 @@
     "genres": "J",
     "price_text": null,
     "description": "Das Internationale Jazzfestival Leibnitz verbindet seit 2013 an vier Tagen Ende September Jazz mit südsteirischem Wein: Konzerte im Hugo-Wolf-Saal, im Rathaus Leibnitz und auf Schloss Ottersbach, dazu Weinverkostungen mit Partnerwinzern. Zu Gast waren zuletzt unter anderem Greg Osby und Alexander von Schlippenbach. Die 15. Ausgabe ist für 30. September bis 3. Oktober 2027 angekündigt.",
-    "image_url": null,
+    "image_url": "https://jazzfestivalleibnitz.at/wp-content/uploads/2026/06/JFL_Farbenspiel2026_RGB-Fill-3-scaled.webp",
     "lineup": [],
     "sources": [
       "https://jazzfestivalleibnitz.at",
@@ -4390,7 +4390,7 @@
     "genres": "G",
     "price_text": null,
     "description": "Die Afrika Tage Wien sind ein mehrtägiges Festival auf der Donauinsel mit afrikanischer Musik, Markt, Küche und Kinderprogramm und seit über 20 Jahren fester Teil des Wiener Sommers. Auf der Bühne standen zuletzt Acts wie Marla Glen und Elvis Zuma. Die 22. Ausgabe lief von 14. bis 24. August 2026. Ein Termin für 2027 war nicht belegbar.",
-    "image_url": null,
+    "image_url": "https://afrika-tage.at/_assets/images/c2d1b017a429529cf10cc9c05218fbf8.jpg",
     "lineup": [],
     "sources": [
       "https://www.wien.gv.at/veranstaltungen/afrika-tage",
@@ -4472,7 +4472,7 @@
     "genres": "N",
     "price_text": null,
     "description": "Aspekte Salzburg ist seit 1977 das Festival für Musik unserer Zeit in Salzburg und findet alle zwei Jahre im März statt, zuletzt von 11. bis 15. März 2026 unter dem Motto Pulse mit Konzerten im Solitär der Universität Mozarteum und in der SZENE Salzburg. Dazwischen läuft jährlich das Jugendformat aspekteSPIELRÄUME. Die nächste Festivalausgabe ist für 2028 angekündigt und feiert 50 Jahre Aspekte; 2027 findet kein Hauptfestival statt.",
-    "image_url": null,
+    "image_url": "https://aspekte-salzburg.com/wp-content/uploads/2025/09/aspekte-fallback.jpg",
     "lineup": [],
     "sources": [
       "https://aspekte-salzburg.com",
@@ -4555,7 +4555,7 @@
     "genres": "K, N",
     "price_text": null,
     "description": "Der Beethoven Frühling ist ein junges Festival unter der Leitung der Pianistin Dorothy Khadem-Missagh, das seit 2021 Beethovens Rückzugsorte in Niederösterreich bespielt: Baden, Mödling, Gneixendorf bei Krems, Heiligenstadt und das Retzer Land. Konzerte reichen von der Klassik bis zur Gegenwart, mit internationalen Solisten und Kammerensembles. Die sechste Saison lief vom 21. Mai bis 21. Juni 2026. Für 2027 ist ein Auftragswerk aus der EU Composer Residency angekündigt, Termine stehen noch aus.",
-    "image_url": null,
+    "image_url": "https://static.wixstatic.com/media/ab428d_27a7d34153db47d6be131812fe462f1f%7Emv2.jpg/v1/fit/w_2500,h_1330,al_c/ab428d_27a7d34153db47d6be131812fe462f1f%7Emv2.jpg",
     "lineup": [],
     "sources": [
       "https://beethovenfruehling.at",
@@ -4678,7 +4678,7 @@
     "genres": "P",
     "price_text": null,
     "description": "Das Dynamo Festival ist das Indie- und Pop-Festival des Spielboden Dornbirn und präsentiert seit 2016 an zwei Abenden im Frühling aufstrebende Bands aus Österreich, der Schweiz und Deutschland. Die Ausgabe 2026 fand am 29. und 30. Mai 2026 mit Acts wie Ankathie Koi, Soft Loft, Oskar Haag und Salo statt. Für 2027 ist noch kein Termin veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://image.jimcdn.com/app/cms/image/transf/none/path/s042bcf73c514c7c8/backgroundarea/i97d5250658ffdd38/version/1760519484/image.png",
     "lineup": [],
     "sources": [
       "https://www.dynamofestival.at",
@@ -4783,7 +4783,7 @@
     "genres": "P, E, H",
     "price_text": null,
     "description": "Das FM4 Geburtstagsfest ist die jährliche Indoor-Party des ORF-Jugendsenders FM4 zu seinem Sendestart im Jänner 1995, mit Live-Bands, DJs und mehreren Floors an einem Samstag Ende Jänner. Nach Jahren in der Wiener Arena und zwei Jahren Pause findet es seit 2023 in der Ottakringer Brauerei statt, mit einer Mischung aus heimischen Indie-, Hip-Hop- und Elektronik-Acts. Ein Termin für das Fest 2027 ist noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://fm4.orf.at/img/share-image.webp",
     "lineup": [],
     "sources": [
       "https://www.falter.at/zeitung/20240123/fm4-feiert-party-und-wellness-ohne-ende",
@@ -4846,7 +4846,7 @@
     "genres": "K",
     "price_text": null,
     "description": "Das Grafenegg Festival versammelt seit 2007 jeden Spätsommer internationale Spitzenorchester und Solisten im Schlosspark von Grafenegg bei Krems. Gespielt wird auf der Open-Air-Bühne Wolkenturm und im Auditorium, das bei Schlechtwetter als Ausweichort dient. Residenzorchester ist das Tonkünstler-Orchester Niederösterreich, dazu kommen Gastorchester aus aller Welt, die Composer-in-Residence-Reihe und das Sommerkonzerte-Programm im Juni und Juli. Das Jubiläumsfestival 2026 lief vom 14. August bis 6. September, Termine für 2027 sind noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://noeku.on.damlivery.com/s/55fe08fd3d3b95d362b3550869025df4/noeku/767885/rm:fill/h:627/w:1200/q:90/rs:originalSizePng/f:webp/g:fp:0.5:0.5",
     "lineup": [],
     "sources": [
       "https://www.grafenegg.com",
@@ -4867,7 +4867,7 @@
     "genres": "J",
     "price_text": "Niveau 2026: 25 € / ermäßigt 18 €, Kulturpass frei",
     "description": "Die grazJAZZnacht bündelt an einem Abend im März die Grazer Jazzszene: Stockwerk Jazz, Berndt Luef, open music und der Royal Garden Jazzclub programmieren gemeinsam mehrere Bühnen, dazu gibt es ein Kinderkonzert am Nachmittag und ein Open End im Kunsthauscafé. Die Ausgabe 2026 fand am 13. März statt. Für 2027 existiert bereits eine Seite, ein Datum ist dort aber noch nicht eingetragen.",
-    "image_url": null,
+    "image_url": "https://www.grazjazz.at/wp-content/uploads/2026/09/Eva-Plankton_HP.jpg",
     "lineup": [],
     "sources": [
       "https://www.grazjazz.at/grazjazznacht2027/",
@@ -4888,7 +4888,7 @@
     "genres": "I",
     "price_text": null,
     "description": "Der Kultur Sommer Güssing ist seit 1994 das Kabarett- und Theaterfestival des Südburgenlands, gegründet von Frank Hoffmann und seit 2024 unter der Intendanz von Andreas Vitásek. Im Kulturzentrum Güssing und im Freilichtmuseum Gerersdorf treten im Juli und September die bekanntesten Kabarettistinnen und Kabarettisten des Landes auf, 2026 unter anderem Josef Hader, Alfred Dorfer, Dirk Stermann und Malarina. Die Ausgabe 2026 lief von 12. Juli bis 19. September 2026. Das Programm 2027 ist noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://www.kultursommer.net/fileadmin-kultur/_processed_/4/9/csm_All_Stars_Gala_28062024__VA_KSG_2cda18b215.png",
     "lineup": [],
     "sources": [
       "https://www.kultursommer.net",
@@ -4909,7 +4909,7 @@
     "genres": "E, N, I",
     "price_text": null,
     "description": "Heart of Noise ist Innsbrucks Festival für Avantgarde, Noise, Techno und experimentelle Elektronik und findet seit 2011 meist Ende Mai oder im Juni an Orten wie dem Stadtsaal und der Treibhaus statt. Nationale und internationale Acts sprengen dort die üblichen Genregrenzen, ergänzt um Installationen und Klangspaziergänge. Die Website zeigt zuletzt die Ausgabe 2025 mit dem Hinweis auf 2026. Ein Termin für 2027 ist nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://www.heartofnoise.at/fileadmin/_processed_/0/1/csm_HoN_2025_BG_c51e56a9b5.png",
     "lineup": [],
     "sources": [
       "https://heartofnoise.at",
@@ -5013,7 +5013,7 @@
     "genres": "J, G, E",
     "price_text": "Eintritt frei",
     "description": "Jazz & The City verwandelt seit mehr als 25 Jahren jeden Oktober die Salzburger Altstadt in ein Festivalgelände mit freiem Eintritt. Rund 60 Acts und über 140 Musikerinnen und Musiker spielen an etwa 20 Orten, von Kirchen über Kellerlokale bis zu Plätzen, mit Jazz, Global Groove und Elektronik. Die Ausgabe 2026 lief von 15. bis 18. Oktober. Ein Termin für 2027 ist noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://salzburg-altstadt.at/header/jazz/image-thumb__28482__hero/AM_Onlinebanner_JATC26_Header_1980x825-abzug-1.jpg",
     "lineup": [],
     "sources": [
       "https://www.salzburg-altstadt.at/de/salzburgjazz",
@@ -5097,7 +5097,7 @@
     "genres": "J",
     "price_text": "Niveau 2025: Tageskarte 20 €, Kombiticket 30 €, Kinder unter 14 frei",
     "description": "Das Jazzweekend Linz ist ein Festival des Oö. Landesmusikschulwerks an der Anton Bruckner Privatuniversität mit Konzerten, Workshops und Familienprogramm. An zwei Tagen im März treten rund 16 Acts auf, vom Solo bis zum Chor, von Jazz bis Elektronik. Die Website zeigt derzeit nur die Ausgabe vom 15. und 16. März 2025. Ein Termin für 2027 ist nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://landesmusikschulen.at/images/fotos/jazzweekend/2025/2025_Jazzweekend_Screen_1920x1080px.jpg#joomlaImage://local-images/fotos/jazzweekend/2025/2025_Jazzweekend_Screen_1920x1080px.jpg?width=1600&height=900",
     "lineup": [],
     "sources": [
       "https://landesmusikschulen.at/jazzweekend"
@@ -5324,7 +5324,7 @@
     "genres": "K",
     "price_text": null,
     "description": "Das Lech Classic Festival bringt seit 2013 jeden Sommer eine Woche Klassik in den Arlberg-Ort Lech, seit 2023 in den neuen Konzertsaal Lechwelten. Das Lech Festival Orchester, ein Festivalchor aus Mitgliedern des Bayerischen Staatsopernchors und internationale Solisten spielen Opern in konzertanter Form, Galas und Kammerkonzerte. Die 14. Ausgabe lief vom 2. bis 9. August 2026 mit Rossinis Barbier von Sevilla. Termine für 2027 sind noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://www.lechclassicfestival.com/wp-content/uploads/2023/10/Lech_Classic_2023_LZT_by_Dietmar_Hurnaus_53-1-scaled.jpg",
     "lineup": [],
     "sources": [
       "https://www.lechclassicfestival.com",
@@ -5387,7 +5387,7 @@
     "genres": "P",
     "price_text": null,
     "description": "Das Linzer Krone Fest ist ein dreitägiges Innenstadtfest, bei dem auf mehreren Bühnen zwischen Hauptplatz, Landstraße und Donaulände nationale und internationale Stars von Pop über Rock bis Schlager spielen. Das von der Kronen Zeitung initiierte Fest gehört zu den größten Gratis-Veranstaltungen Oberösterreichs und zieht an einem Augustwochenende mehrere hunderttausend Gäste in die Linzer City. Die Website bedankt sich für die Ausgabe 2026, ein Termin für 2027 ist noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://www.kronefest.at/wp-content/uploads/2026/01/LKF-2025-Titelbild_Web.jpg",
     "lineup": [],
     "sources": [
       "https://www.kronefest.at"
@@ -5539,7 +5539,7 @@
     "genres": "N, I",
     "price_text": null,
     "description": "Die Musiktheatertage Wien sind seit 2015 das Festival für zeitgenössisches und experimentelles Musiktheater in Wien. Jeden September zeigen sie Uraufführungen und internationale Gastspiele an Orten wie dem WUK, dem MuTh, dem Theater Odeon, dem Favoritner Wasserturm oder dem Stephansdom. Die zehnte Ausgabe lief von 16. bis 27. September 2026 mit der Premiere The Mass Man. Für 2027 sind noch keine Termine veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://mttw.at/wp-content/uploads/Header-ntry-1096-x-656-px.png",
     "lineup": [],
     "sources": [
       "https://mttw.at",
@@ -5581,7 +5581,7 @@
     "genres": "K",
     "price_text": null,
     "description": "Die OÖ. Stiftskonzerte bringen seit 1974 jeden Frühsommer internationale Orchester und Solisten in die Barockstifte Oberösterreichs: St. Florian, Kremsmünster, Lambach, Schlierbach, Wilhering, Reichersberg und Engelszell. Das Bruckner Orchester Linz unter Philippe Jordan eröffnet traditionell in St. Florian, dazu kommen Kammermusik und die Nachwuchsreihe Talent trifft Tradition. Die 53. Saison lief vom 30. Mai bis 26. Juli 2026 mit 22 Veranstaltungen. Die Programmpräsentation für 2027 erfolgt üblicherweise im März.",
-    "image_url": null,
+    "image_url": "https://www.stiftskonzerte.at/wp-content/uploads/2023/03/Stift-Lambach-4-c-Reinhard-Winkler.jpg",
     "lineup": [],
     "sources": [
       "https://www.stiftskonzerte.at",
@@ -5602,7 +5602,7 @@
     "genres": "K",
     "price_text": null,
     "description": "Das Opernfestival Schloss Kirchstetten bespielt seit 1998 den barocken Maulbertsch-Saal im Weinviertel, das mit 160 Plätzen kleinste Opernhaus Österreichs. Jeden Sommer wird eine selten gespielte Oper mit dem Orchester Virtuosi Brunenses unter Hooman Khalatbari produziert, 2026 Rossinis La cambiale di matrimonio in der Regie von Richard Panzenböck. Das Festival 2027 ist angekündigt, Tickets gibt es ab 1. Dezember 2026. Produktion und Termine sind noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://www.schloss-kirchstetten.at/wp-content/uploads/2025/11/Website-Hauptsujet_1200x800_Blockbuster.jpg",
     "lineup": [],
     "sources": [
       "https://www.schloss-kirchstetten.at",
@@ -5707,7 +5707,7 @@
     "genres": "P, E, H",
     "price_text": "Eintritt frei",
     "description": "Das Popfest Wien ist seit 2010 das Festival für heimische Popmusik am Karlsplatz. Vier Tage lang spielen österreichische Acts bei freiem Eintritt auf der Seebühne vor der Karlskirche, dazu kommen Indoor-Konzerte im Wien Museum, im TU-Prechtlsaal, im Club U und in der Karlskirche selbst. Jedes Jahr kuratiert ein wechselndes Team das Programm. Die 17. Ausgabe lief von 23. bis 26. Juli 2026; ein Termin für 2027 ist noch nicht veröffentlicht.",
-    "image_url": "https://popfest.at/wp-content/themes/videozoom/images/popfest-logo-2026.png?v2",
+    "image_url": "https://popfest.at/wp-content/themes/videozoom/images/popfest-2026-wien.jpg?v2",
     "lineup": [],
     "sources": [
       "https://popfest.at",
@@ -5728,7 +5728,7 @@
     "genres": "P",
     "price_text": "Preisniveau 2026: Festivalpass ab 45 €, Tageskarten ab 10 €, Familiensonntag frei bis 18 Jahre",
     "description": "Rock'N'Roll Kurpark ist ein dreitägiges Rockabilly- und Rock'n'Roll-Festival am Toni-Stricker-Pavillon im Kurpark von Bad Sauerbrunn im Burgenland. Jeden Sommer spielen internationale Bands der Fifties- und Sixties-Szene, zuletzt etwa Kitty, Daisy & Lewis und Junior and the Fat Cats, dazu gibt es Oldtimer, Tanzkurse und einen Familiensonntag mit freiem Eintritt für Jugendliche. Die Ausgabe 2026 fand von 24. bis 26. Juli statt, ein Termin für 2027 ist noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://www.rocknrollkurpark.com/images/og-image.png",
     "lineup": [],
     "sources": [
       "https://www.rocknrollkurpark.com"
@@ -5791,7 +5791,7 @@
     "genres": "I",
     "price_text": null,
     "description": "Das Slash Filmfestival ist seit 2010 Österreichs Festival für fantastischen Film und zeigt jeden Herbst Horror, Science-Fiction, Fantasy und Genre-Kino aus aller Welt im Gartenbaukino und im Filmcasino. Preise wie die Goldene Urne, Fantastic Futures und die Queere Urne werden vergeben, im Frühjahr gibt es die Kurzausgabe Slash einhalb. Die Ausgabe 2026 lief von 23. September bis 4. Oktober 2026. Termine für 2027 sind noch nicht veröffentlicht.",
-    "image_url": null,
+    "image_url": "https://slashfilmfestival.com/uploads/2026/09/sujet-banner-website.jpg",
     "lineup": [],
     "sources": [
       "https://www.slashfilmfestival.com"
@@ -5956,7 +5956,7 @@
     "genres": "P",
     "price_text": null,
     "description": "Das STP Metalweekend ist ein zweitägiges Indoor-Metal-Festival im Freiraum St. Pölten, das seit 2008 jeden September Bands der österreichischen und internationalen Underground-Szene von Thrash bis Death Metal zusammenbringt. Zwei Abende lang spielen jeweils mehrere Bands im Club in der Herzogenburger Straße, organisiert aus der lokalen Szene. Die Ausgabe 2026 fand am 25. und 26. September statt, ein Termin für 2027 ist noch nicht angekündigt.",
-    "image_url": null,
+    "image_url": "https://scontent.fvie3-1.fna.fbcdn.net/v/t39.30808-1/857416536_29367191262878667_1456802928366351333_n.avif?stp=dst-avif&cstp=mx400x400&ctp=s400x400&_nc_cat=107&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=3ab345&_nc_ohc=qiXncjka79IQ7kNvwHbkVGD&_nc_oc=AdqjWUVjbLTstmpnX2Zl5lLjSfTpZsC3kvLomK1K695aOtS0P0St7x5EL9YwrWuEPWU&_nc_zt=24&_nc_ht=scontent.fvie3-1.fna&_nc_gid=2bYdyMozz36Vy2LUqssy8w&_nc_ss=7c289&oh=00_AQNpgCiKrhBZOTWvbupNfBBIZlJU7-JRAdkfqie4fjLepQ&oe=6AE54787",
     "lineup": [],
     "sources": [
       "https://www.ausflugsziele.jetzt/?p=205157",
@@ -6165,7 +6165,7 @@
     "genres": "P",
     "price_text": null,
     "description": "Das Vinyl & Music Festival in der Ottakringer Brauerei ist Österreichs größte Plattenbörse mit Festivalcharakter: Händler aus ganz Europa, Live-Konzerte, DJs, Talks und HiFi-Ausstellung an einem Märzwochenende. Die Ausgabe 2026 fand am 7. und 8. März statt. Die Website zeigt bereits ein Sujet für 2027 mit Link zum oeticket-Vorverkauf, ein konkretes Datum ist aber noch nicht abrufbar.",
-    "image_url": null,
+    "image_url": "https://cdn.shortpixel.ai/spai/q_glossy+ex_1+ret_img+to_auto/www.vinyl-music.at/wp-content/uploads/2022/05/aktuell-1.jpg",
     "lineup": [],
     "sources": [
       "https://www.vinyl-music.at",
