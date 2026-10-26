@@ -168,13 +168,31 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const festival = await fetchFestivalRow(slug);
   if (!festival) return { title: 'Festival nicht gefunden — lasstreffen.at' };
   const dateRange = formatDateRange(festival.starts_at, festival.ends_at);
-  const desc = festival.city
+  const base = festival.city
     ? `${festival.canonical_name} in ${festival.city}: ${dateRange}.`
     : `${festival.canonical_name}: ${dateRange}.`;
+  // Kuratierte Beschreibung (erster Satz) hebt das Snippet über die reine
+  // Termin-Zeile; Preis dazu, wenn bekannt.
+  const firstSentence = festival.description?.match(/^[^.!?]{20,180}[.!?]/)?.[0] ?? null;
+  const desc = [base, firstSentence, festival.price_text ? `Tickets: ${festival.price_text}.` : null]
+    .filter(Boolean).join(' ').slice(0, 300);
   return {
     title: `${festival.canonical_name} ${dateRange} — lasstreffen.at`,
     description: desc,
   };
+}
+
+/** Ticket-Anbieter aus dem Link für das Klick-Tracking (data-track-provider). */
+function ticketProviderOf(url: string): string {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, '');
+    if (/oeticket|eventim/.test(host)) return 'eventim';
+    if (/ticketmaster/.test(host)) return 'ticketmaster';
+    if (/ntry\.at/.test(host)) return 'ntry';
+    return host;
+  } catch {
+    return 'unknown';
+  }
 }
 
 const BILLING_ORDER: Record<string, number> = {
@@ -201,21 +219,31 @@ export default async function FestivalDetailPage({ params }: { params: Promise<{
   // Parallel: parent event, artists, runtime enrichment from the
   // official festival website. All three swallow errors → page never
   // crashes if any data source is unhappy.
+  //
+  // Kuratierte Spalten (data/festivals-upcoming.json, 2026-10) gehen vor:
+  // trägt die Zeile Beschreibung, Bild und Preis, entfällt der Website-
+  // Abruf komplett (bis zu ~7 s Latenz bei trägen Festival-Seiten).
+  const curatedComplete = !!festival.description && !!festival.image_url && !!festival.price_text;
   const [parentEvent, artists, enrichment] = await Promise.all([
     fetchParentEvent(festival.parent_event_id),
     fetchArtists(festival.id),
-    getFestivalEnrichment(festival.website_url, festival.slug),
+    curatedComplete
+      ? getFestivalEnrichment(null, festival.slug)
+      : getFestivalEnrichment(festival.website_url, festival.slug),
   ]);
 
   const heroImage =
     parentEvent?.image_url
+    ?? festival.image_url
     ?? enrichment.imageUrl
     ?? festivalCategoryFallback(festival.id);
-  const dateRange = formatDateRange(festival.starts_at, festival.ends_at);
+  const dateRange = (festival.date_status === 'expected' ? 'voraussichtlich ' : '')
+    + formatDateRange(festival.starts_at, festival.ends_at);
   const place = [festival.city, festival.state].filter(Boolean).join(' · ');
   const genreLabel = expandGenres(festival.genres);
 
-  const description = enrichment.description;
+  const description = festival.description ?? enrichment.description;
+  const priceText = festival.price_text ?? enrichment.priceText;
   const enrichmentArtists = artists.length === 0 ? enrichment.artists : [];
 
   const parentEventHref = parentEvent && parentEvent.slug && parentEvent.start_date
@@ -419,13 +447,28 @@ export default async function FestivalDetailPage({ params }: { params: Promise<{
                     </dd>
                   </div>
                 )}
-                {enrichment.priceText && (
+                {priceText && (
                   <div className="flex justify-between gap-3">
                     <dt className="text-[var(--v4-ink-50)]">Preis</dt>
-                    <dd className="text-[var(--v4-ink)] text-right">{enrichment.priceText}</dd>
+                    <dd className="text-[var(--v4-ink)] text-right">{priceText}</dd>
                   </div>
                 )}
               </dl>
+
+              {festival.ticket_url && (
+                <a
+                  href={festival.ticket_url}
+                  target="_blank"
+                  rel="noopener noreferrer sponsored"
+                  data-track="ticket_click"
+                  data-track-id={festival.id}
+                  data-track-provider={ticketProviderOf(festival.ticket_url)}
+                  className="press-haptic flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-ticket)] text-[#1a1208] text-sm font-semibold"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
+                  Tickets{priceText ? ` · ${priceText.replace(/^(Festivalpass|Tickets?|Eintritt)\s*/i, '')}` : ''}
+                </a>
+              )}
 
               <V4FestivalActions
                 mapsUrl={mapsUrl}

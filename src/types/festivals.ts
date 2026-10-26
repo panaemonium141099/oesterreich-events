@@ -63,9 +63,25 @@ export interface Festival {
   lineup_hash: string | null;
   lineup_last_checked_at: string | null;
   parent_event_id: string | null;
+  // ── Kuratierte Felder (2026-10, data/festivals-upcoming.json) ─────────
+  /** Offizieller Ticketlink; null bei Eintritt frei oder unbekannt. */
+  ticket_url: string | null;
+  /** Kurzer Preistext, z. B. "Festivalpass ab 229 €" oder "Eintritt frei". */
+  price_text: string | null;
+  /** Kuratierte Beschreibung (deutsch, 3-6 Sätze). */
+  description: string | null;
+  /** Hero-/Kartenbild (Sujet der Festival-Website oder og:image). */
+  image_url: string | null;
+  /** 'confirmed' = offizieller Termin, 'expected' = nur angekündigtes Fenster. */
+  date_status: FestivalDateStatus;
+  /** Wann die kuratierten Felder zuletzt importiert wurden. */
+  seed_updated_at: string | null;
   created_at: string;
   updated_at: string;
 }
+
+/** Terminstatus einer Festival-Ausgabe (Spalte festivals.date_status). */
+export type FestivalDateStatus = 'confirmed' | 'expected';
 
 /**
  * Input type for creating/upserting a festival from the seed registry.

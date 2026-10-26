@@ -38,6 +38,12 @@ function fest(over: Partial<Festival & { href?: string | null }> = {}): Festival
     lineup_hash: null,
     lineup_last_checked_at: null,
     parent_event_id: null,
+    ticket_url: null,
+    price_text: null,
+    description: null,
+    image_url: null,
+    date_status: 'confirmed',
+    seed_updated_at: null,
     created_at: '',
     updated_at: '',
     ...over,
@@ -79,5 +85,16 @@ describe('V4FestivalCard', () => {
   it('no badge when lineupMatch is false', () => {
     render(<V4FestivalCard festival={fest({ href: '/events/x/y/z' })}/>);
     expect(document.querySelector('[data-v4-badge][data-kind="lineup"]')).toBeNull();
+  });
+
+  it('zeigt Ort und Preis aus den kuratierten Spalten', () => {
+    render(<V4FestivalCard festival={fest({ city: 'Nickelsdorf', price_text: 'Festivalpass ab 229 €' })}/>);
+    expect(screen.getByText(/Nickelsdorf/)).toBeInTheDocument();
+    expect(screen.getByText('Festivalpass ab 229 €')).toBeInTheDocument();
+  });
+
+  it('markiert nur angekündigte Terminfenster als voraussichtlich', () => {
+    render(<V4FestivalCard festival={fest({ date_status: 'expected' })}/>);
+    expect(screen.getByText(/^vorauss\./)).toBeInTheDocument();
   });
 });
