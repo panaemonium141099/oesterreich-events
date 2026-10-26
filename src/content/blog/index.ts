@@ -187,6 +187,8 @@ import { post as post29GuinnessIrishChristmasFestival2026 } from './posts/29-gui
 import { post as jodokcelloWorldTour2026 } from './posts/jodokcello-world-tour-2026';
 import { post as benefizkonzertKrebshilfe2026DarknessConfidence2026 } from './posts/benefizkonzert-krebshilfe-2026-darkness-confidence-2026';
 import { post as weihnachtlicheLesungFriedrichVonThun2026 } from './posts/weihnachtliche-lesung-friedrich-von-thun-2026';
+import { post as konzerteInDerMinoritenkircheTrioCarusoDieDreiTenoere2026 } from './posts/konzerte-in-der-minoritenkirche-trio-caruso-die-drei-tenoere-2026';
+import { post as karaokeNight2026 } from './posts/karaoke-night-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -384,6 +386,8 @@ export const ALL_POSTS: FestivalPost[] = [
   jodokcelloWorldTour2026,
   benefizkonzertKrebshilfe2026DarknessConfidence2026,
   weihnachtlicheLesungFriedrichVonThun2026,
+  konzerteInDerMinoritenkircheTrioCarusoDieDreiTenoere2026,
+  karaokeNight2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
