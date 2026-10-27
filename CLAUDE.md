@@ -118,6 +118,15 @@ node / next.js
   `toBlogLineup`: Acts ohne Rolle rendert die Blogseite nicht.
 - **GitHub Actions `import-eventim.yml`** (alle 6 h): PFT-Feed-Import mit
   Affiliate-Links. Secrets: `EVENTIM_FEED_USER`/`EVENTIM_FEED_PASS`.
+- **GitHub Actions `import-eventfrog.yml`** (täglich 02:35 UTC): Eventfrog
+  Public API (`src/lib/eventfrog/`), Vollabruf je Land (AT ~9 von 2.000
+  Anfragen/Tag, 30/min je Konto). Secret `EVENTFROG_API_KEY` (Key-Typ
+  Public, ein Organizer-Key bekommt 403). Dauerangebote (gleicher
+  Veranstalter + Titel an ≥ 30 Tagen, mindestens jeden zweiten Tag: Rätsel-
+  Touren, Stadtspiele, Öffnungszeiten) verwirft der Parser, 2026-10-27 waren
+  das 2.414 von 3.455 AT-Zeilen. Bilder nie hotlinken (API-Bedingung):
+  Spiegel im Storage-Bucket `event-images/eventfrog/`, sonst kein Bild.
+  DE/CH per `EVENTFROG_COUNTRIES` erst mit lasstreffen.de (DE ~84.000 Events).
 - **GitHub Actions `ingest-activities.yml`** (wöchentlich): Deskline-
   Infrastruktur-POIs → `poi_activities` (Run-Bookkeeping, Dedup, Prune).
   Der OSM-Bestand (`osm_pois`) läuft NICHT im Cron — `npm run import-osm-pois`
@@ -302,7 +311,7 @@ node / next.js
   `festivals.state` nur als Bundesland-Rückfall. Jeder Lauf zieht auch den
   Bestand nach und setzt `last_seen_at`; ohne diese Sichtung zöge der Rückzug
   sie nach 30 Tagen als „Quelle tot" ein (2026-10-17).
-- `.github/workflows/` — scrape-events.yml (Shards+post), import-eventim.yml, tests.yml, deploy.yml
+- `.github/workflows/` — scrape-events.yml (Shards+post), import-eventim.yml, import-eventfrog.yml, tests.yml, deploy.yml
 - `docs/MASTERPLAN.md` — Strategie & Betriebszustand; `docs/TAXONOMY.md` — Taxonomie
 
 ## Build & Test
@@ -312,6 +321,7 @@ npm test                     # Vitest, muss grün sein (CI + Deploy-Gate)
 npm run scrape               # alle Scraper | --source <name> | --shard i/N
 npm run scrape:pipeline      # scrape + post-processing (CI nutzt --skip-scrapers im post-Job)
 npm run import:eventim       # Eventim-PFT-Feed (braucht EVENTIM_FEED_USER/PASS)
+npm run import:eventfrog     # Eventfrog Public API (braucht EVENTFROG_API_KEY; --dry-run, --country AT,DE)
 npm run score | dedup        # Scoring / Cross-Source-Dedup (--dry-run --report r.json;
                              # Sicherheitsventil: --max-new-duplicates / --max-releases)
 npm run dedup:audit          # sichtbare Restdubletten zählen (Exit 1 über --max, Std. 100)
