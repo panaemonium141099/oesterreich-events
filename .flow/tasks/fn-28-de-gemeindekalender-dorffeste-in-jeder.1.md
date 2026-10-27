@@ -38,9 +38,9 @@ Ergebnisdatei: `docs/research/de-gemeinden/00-bundesweit.md`.
 
 
 ## Done summary
-TBD
-
+Ergebnis docs/research/de-gemeinden/00-bundesweit.md (+ Anhang 00-bundesweit-anfragen.md), PR #342 gemergt.
+Generics mit zentraler Schnittstelle: Heimat-Info (JSON-API, 648 Kommunen selbst gezählt, v. a. BY), Cross7 (JSON-API, Eigenangabe über 450 Kunden), NOLIS (iCal, Eigenangabe über 450 Kommunen). WITTICH-Gruppe (meinOrt 2.197 Orte) nur per Vereinbarung. Verlage fast nur PDF, NUSSBAUM strukturiert aber KI-Crawler gesperrt. Kalender-Plugins mit Feed-Pfaden und Erkennungsregeln (D5) für die Länder-Stichproben; 12 von 181 Startseiten mit offenem Plugin-Feed. destination.one: 5 von 20 Beispielgemeinden mit Treffer, wenige Dorffeste im Titel.
 ## Evidence
-- Commits:
+- Commits: f46f4c83e5a44510309d17c14fbf6d9f2dbb41de
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/342
