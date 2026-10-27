@@ -33,9 +33,8 @@ Ergebnisdatei: `docs/research/de-gemeinden/03-schleswig-holstein.md`.
 
 
 ## Done summary
-TBD
-
+Ergebnis in docs/research/de-gemeinden/03-schleswig-holstein.md (PR #350). Stichprobe 30 Gemeinden unter 10.000 EW (Destatis 30.09.2026, Seed 20261027) mit 25 Ämtern. Ämter sind meist keine Kalenderebene (4 von 25 mit Dorfterminen). Stärkster Hebel termine-regional.de der NetzWerkstatt Rendsburg (291 SH-Gemeinden im Ortsfilter, 10 von 30; Export entgeltlich, Anfrage nötig). TA.SH-Landesdatenbank offen auf opendata.schleswig-holstein.de (4.350 Termine, Lizenz je Eintrag), aber nur 4 von 30 kleinen Gemeinden. communice (inixmedia) mit offenem Atom-Feed in 6 von 25 Ämtern, iKISS in 7 von 25 ohne Dorftermine. destination.one 3 von 30. Ringreiten und Vogelschießen in keiner strukturierten Quelle; 8 von 30 Gemeinden ohne auffindbare Termine.
 ## Evidence
-- Commits:
+- Commits: 4881399e
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/350
