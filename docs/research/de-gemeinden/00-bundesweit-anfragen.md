@@ -585,3 +585,35 @@ Format: Statuscode nach Weiterleitungen (000 = keine Verbindung/Timeout). Zusät
 | https://plaidt.de/wp-json/tribe/events/v1/events?per_page=1 | 200, `total` 15 |
 
 An meta.et4.de gingen damit rund 50 Anfragen, mehr als die übliche Handvoll je Host; Grund war die Zählung je Festart und je Beispielgemeinde. Bei den letzten vier Anfragen kam eine leere Antwort, weitere Abfragen unterblieben.
+
+## F. Nachtrag 27.10.2026 (meinOrt, Gemeindeseiten, verwaltungsportal.de)
+
+Der User hat die Abfrage der meinOrt-Endpunkte ausdrücklich beauftragt; die robots.txt von meinort.de sperrt URLs mit Query-String, darunter `/welcome?ort=` (Weiterleitung) und `/load-new-events?…`.
+
+| URL | Status |
+|---|---|
+| https://api.meinort.app/ | 401 |
+| https://api.meinort.app/robots.txt | 200 |
+| https://api.meinort.app/api/v1/events | 404 |
+| https://api.meinort.app/events.json | 401 |
+| https://digital.wittich.de/robots.txt | 200 |
+| https://www.wittich.de/impressum | 200 |
+| https://www.heimat-info.de/impressum | 200 |
+| https://meinort.de/impressum | 200 |
+| https://meinort.de/orte-list | 200 |
+| https://meinort.de/1936-Atzelgift → /welcome?ort=1936-Atzelgift | 200 |
+| https://meinort.de/events (Turbo-Stream und HTML) | 200, 200 |
+| https://meinort.de/events/1833872 (ohne Sitzung) | 200 |
+| https://meinort.de/packs/js/application-f4795cce9fd47edbef83.js, …/891-03a17de7d4c70837915d.js | 200 |
+| https://meinort.de/load-new-events?page=1..10&radius=&search=&category=&event_date= (Atzelgift) | 10 × 200 |
+| https://meinort.de/314-Herbstein, /1680-Sietow, /678-Altenahr (je mit Weiterleitung) | 200 |
+| https://meinort.de/load-new-events?page=1..3 (je Herbstein, Sietow, Altenahr) | 9 × 200 |
+| https://www.lautertal-vogelsberg.de/ (zweimal) | 200 |
+| https://www.gedern.de/, /robots.txt (zweimal), /veranstaltungen/index.php (zweimal), /impressum/index.php, /seite/impressum.html (404), /veranstaltungen/index.php?rss=1 (HTML) | 200 |
+| https://www.gedern.de/veranstaltungen/2914208/2026/12/19/krippenspiel-amp-weihnachtsmarkt-in-ober-seemen.html | 200 |
+| https://www.verwaltungsportal.de/, /robots.txt | 404, 404 |
+| http://admin.verwaltungsportal.de/ (HEAD, zweimal) | 301 |
+| https://www.azubi-projekte.de/robots.txt, /, /impressum/index.php, /referenzen, /fragen-und-antworten | 200 |
+| https://www.heiligengrabe.de/, https://www.mundelsheim.de/, https://www.wunsiedel.de/ | 200 |
+
+Dazu Websuchen nach „Wittich meinOrt Schnittstelle API“, den drei Herbsteiner Vereinsterminen, verwaltungsportal.de und dem Förderverein für regionale Entwicklung.

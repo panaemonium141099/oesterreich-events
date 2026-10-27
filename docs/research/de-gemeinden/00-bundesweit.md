@@ -25,8 +25,11 @@ Die Länder-Tickets verlinken hierher und ergänzen nur die Landessicht.
    erreichbar.** Zu ihr gehören meinOrt (2.197 Orte selbst gezählt, Eigenangabe
    „Über 2.500“), Heimat-Info (Cosmema WITTICH GmbH), die WordPress-Gemeindeseiten
    „townhall“ (spiegeln Heimat-Info) und die LINUS-WITTICH-Amtsblätter. meinOrt und
-   das Redaktionssystem sind per robots.txt gesperrt. Ein Gespräch mit WITTICH ist
-   die wichtigste Einzelanfrage dieses Epics.
+   das Redaktionssystem sind per robots.txt gesperrt. Die Web-App lädt die Termine
+   als JSON (Nachtrag in B1), die AGB verbieten den Abzug aber ohne schriftliche
+   Zustimmung und erlauben WITTICH zugleich, Dritten ein Nutzungsrecht einzuräumen.
+   In einer Stichprobe standen drei Vereinstermine nur dort. Ein Gespräch mit WITTICH
+   ist die wichtigste Einzelanfrage dieses Epics.
 3. **Amtsblatt-Verlage veröffentlichen fast nur PDF.** Ausnahme ist **NUSSBAUM**
    (BW, Eigenangabe „>380 Städte und Gemeinden“) mit strukturierten Event-Seiten und
    Tages-Sitemaps; die robots.txt sperrt aber KI-Crawler ausdrücklich und eine Lizenz
@@ -75,6 +78,7 @@ kein strukturierter Zugang oder kaum Gemeinden.
 | Riedel-Verlag | Verlag | RIEDEL GmbH & Co. KG | 127 Titel in 120 Orten (selbst gezählt) | SN, TH, ST | nur PDF per Mail-Link | entfällt | niedrig |
 | LFV Bayern Website-Kit | Feuerwehr | Landesfeuerwehrverband Bayern | nicht belegt | BY | HTML, Kalender leer | entfällt | niedrig |
 | festivalsindeutschland.de | Festverzeichnis | Christophe Contard EI | 18.523 Seiten (selbst gezählt) | DE | JSON-LD | AGB untersagen Nutzung der Datenbank | nur Lückenliste |
+| verwaltungsportal.de (Azubi-Projekte) | Kommunal-CMS | Förderverein für regionale Entwicklung e.V. | nicht belegt | HE, BB, BW, BY | einheitliches HTML + JSON-LD je Termin | nicht belegt | mittel bis hoch |
 | ekom21, AKDB, KDO, regio iT, GSB, Sitepark, SixCMS | Kommunal-IT | diverse | nicht belegt | | kein Veranstaltungsmodul mit Export belegt | | niedrig |
 
 ## A. Gemeinde-Apps und Dorfplattformen
@@ -210,9 +214,42 @@ Gemeinde24: Kommunenzahl jeweils nicht belegt. „Hallo Gemeinde“, „Dorf.App
   https://epaper.wittich.de/frontend/catalogs/548559/2/pdf/complete.pdf .
 * **Dorffest-Test:** im Amtsblatt Altenahr „Bartholomäuskirmes in Liers“
   (24.08.2026) und „Feuerwehrfest Lantershofen 1./2.8.2026“, nur als PDF-Text.
+* **Nachtrag 27.10.2026, Datenweg der Web-App (Test, rund 30 Anfragen):** Nach
+  `GET https://meinort.de/<id>-<Ort>` (setzt den Ort in der Sitzung) liefert
+  `GET https://meinort.de/load-new-events?page=N&radius=&search=&category=&event_date=`
+  mit Header `X-Requested-With: XMLHttpRequest` JSON: `data.pagination`
+  (`page`, `total_entries`, `per_page` 10) und `data.data[]` mit `lw_id`, `title`,
+  `subtitle`, `start_time`, `finish_time` (mit Offset), `start_time_whole_day`,
+  `address` (`place`, `street`, `zip`, `city`), `art` (Kategorie), `cancelled`,
+  `sold_out`, `body_html`, `images_data`, `distance`, `publication_date`,
+  `b_rlp_tourism`, `b_advert`. Detailseiten `https://meinort.de/events/<lw_id>` sind
+  ohne Sitzung offen und tragen JSON-LD `Event` und einen „Quellhinweis“.
+  `https://api.meinort.app/` und `/events.json` antworten ohne Schlüssel mit 401
+  „Access denied“. Die robots.txt sperrt auch `/load-new-events?…` (`Disallow: /*?*`).
+* **Inhalt je Ort (Test):** Atzelgift (RP) 95 Termine im Umkreis von etwa 10 km,
+  davon 93 mit `b_rlp_tourism` (RLP Touristik, also dieselbe Herkunft wie
+  destination.one); Herbstein (HE) 83 Termine im Umkreis von etwa 20 km, ohne
+  Tourismusflag, mit Vereinsterminen wie „Dämmerschoppen des MGV Eintracht 1888
+  Engelrod“, „Salzekuchenessen in Dirlammen“, „Beulchesessen ASV Ober-Seemen“;
+  Sietow (MV) 2.961 und Altenahr (RP) 2.334 Termine im Umkreis von etwa 50 km. Der
+  Umkreis hängt vom Ort ab und folgt dem Parameter `radius`.
+* **Exklusivität (Stichprobe drei Termine):** Die drei Herbsteiner Vereinstermine
+  stehen weder auf der Gemeindeseite noch in einer Websuche. Lautertal
+  (https://www.lautertal-vogelsberg.de/) hat keinen Veranstaltungskalender; der
+  Kalender von Gedern (verwaltungsportal.de, C7) führt am 07.11.2026 nur
+  „Rotweinabend“ und ein Konzert. Drei Termine aus einer Region sind keine Statistik.
+* **AGB LINUS WITTICH Medien KG (Stand 09.06.2023, PDF vom User):** Ziffer IV.9
+  untersagt, Daten aus dem Internetauftritt mit technischen Hilfsmitteln zu kopieren,
+  sie für Dritte elektronisch zu speichern und sie ohne schriftliche Zustimmung
+  gewerblich zu nutzen. Ziffer IV.4 gibt LW das Recht, Dritten ein einfaches
+  Nutzungsrecht an eingesandten Artikeln einzuräumen, ausdrücklich auch an
+  Veranstaltungshinweisen (IV.2). meinOrt betreibt die LW Medien GmbH; ob für meinOrt
+  eigene AGB gelten (IV.1), ist nicht belegt.
 * **Nächster Schritt:** Ein Gespräch mit WITTICH für meinOrt, Heimat-Info und die
-  townhall-Seiten zusammen: gibt es einen Partner-Export (JSON/iCal) aus cmsweb, und
-  unter welcher Lizenz. Keine technische Umgehung der Sperren.
+  townhall-Seiten zusammen: schriftliche Zustimmung nach IV.9, einfaches
+  Nutzungsrecht nach IV.4, Zugang zu `api.meinort.app`. Kontakt laut Impressum:
+  service@meinort.de (LW Medien GmbH), app-support@cosmema-wittich.de (Cosmema
+  WITTICH GmbH). Bis zur Zusage keine weiteren Abrufe.
 
 ### B2. NUSSBAUM Medien (nussbaum.de, früher lokalmatador.de)
 
@@ -415,6 +452,43 @@ Gemeinde24: Kommunenzahl jeweils nicht belegt. „Hallo Gemeinde“, „Dorf.App
 * **Nächster Schritt:** Angebot und Nutzungsrechte anfragen; vorher in den
   Länder-Stichproben zählen, wie viele Gemeinden dort vorkommen.
 
+### C7. verwaltungsportal.de (Programm „Azubi-Projekte“), Nachtrag 27.10.2026
+
+* **Betreiber:** Gemeindeseiten auf dieser Plattform nennen im Impressum das
+  Förderprogramm „Azubi-Projekte“ (Gedern: „Diese Seite wurde kostenlos erstellt im
+  Rahmen der Azubi-Projekte“). Herausgeber laut https://www.azubi-projekte.de/impressum/index.php :
+  Förderverein für regionale Entwicklung e.V., Nuthetal. Länderprogramme „Bayern
+  vernetzt“, „Hessen vernetzt“ u. a. laut Gemeinde-PDFs, z. B.
+  https://trebur.de/fileadmin/media/nachrichten/2024/Foerderprogramm_Hessen_vernetzt.pdf .
+  `www.verwaltungsportal.de` selbst antwortet 404; Technik liegt unter
+  `layout.verwaltungsportal.de`, `fotos.verwaltungsportal.de`, `admin.verwaltungsportal.de`.
+* **Gemeinden:** nicht belegt. Die Referenzseite https://www.azubi-projekte.de/referenzen
+  nennt keine Zahl und mischt Gemeinden, Schulen, Vereine und Firmen. Die
+  Layout-Nummern im Pfad (Gedern 2963, Mundelsheim 3624, Heiligengrabe 18119,
+  Wunsiedel 21245) sind Kennungen, keine Zählung.
+* **Zugriff:** einheitliches HTML. Liste `/veranstaltungen/index.php`, Detail
+  `/veranstaltungen/<id>/<JJJJ>/<MM>/<TT>/<slug>.html` (Datum steht in der URL).
+  Detailseite mit JSON-LD `Event`. RSS/iCal: nicht gefunden.
+* **Felder (Probe Gedern):** JSON-LD `name`, `description`, `startDate`
+  (`2026-12-19T15:00:00+0100`), `location` (`@type: Place`, `name`); in der Probe
+  keine Adresse und keine Koordinaten.
+* **Erkennung:** Ressourcen von `layout.verwaltungsportal.de/<Nummer>/`,
+  `fonts.verwaltungsportal.de`, Link `azubi-projekte.de` im Impressum.
+* **robots.txt (gedern.de):** `Disallow: /` und `Crawl-delay: 10` nur für eine Liste
+  benannter Bots (dotbot, AhrefsBot, MJ12bot u. a.), keine Regel für `*`.
+  Nutzungsbedingungen nicht belegt.
+* **Gemeinde-Beispiele:** Gedern (HE) https://www.gedern.de/veranstaltungen/index.php ;
+  Heiligengrabe (BB) https://www.heiligengrabe.de/ ; Mundelsheim (BW)
+  https://www.mundelsheim.de/ ; Wunsiedel (BY) https://www.wunsiedel.de/ (alle mit
+  Termin-Links im Muster oben auf der Startseite).
+* **Dorffest-Test:** „Krippenspiel & Weihnachtsmarkt in Ober-Seemen“ mit
+  Weihnachtsmarkt der örtlichen Vereine, 19.12.2026
+  https://www.gedern.de/veranstaltungen/2914208/2026/12/19/krippenspiel-amp-weihnachtsmarkt-in-ober-seemen.html ;
+  in Gedern außerdem „Weningser Markt“, „67. Gederner Seefest“, „Geflügelpreisschießen
+  für jedermann“; in Wunsiedel „Katharinenmarkt“.
+* **Nächster Schritt:** Merkmal in die Länder-Stichproben aufnehmen, um den Anteil
+  zu messen; ein Parser für Liste plus JSON-LD deckt alle Seiten der Plattform ab.
+
 ## D. Kalender-Erweiterungen in Open-Source-CMS
 
 Befund aus 238 abgefragten Startseiten kleiner Gemeinden (181 mit 200): Die meisten
@@ -501,7 +575,7 @@ Je Gemeinde-Startseite einmal abrufen und in dieser Reihenfolge prüfen:
 2. `heimat-info.de/embeddings` oder `events_heimatinfo` → Heimat-Info (A1)
 3. `NOLIS GmbH` / `fonts.nol-is.de` → NOLIS-iCal (C2)
 4. `content="Advantic GmbH"` / `data-ikiss-mfid` → iKISS (C3)
-5. `dvv-Mastertemplates` → Komm.ONE-RSS (C4)
+5. `dvv-Mastertemplates` → Komm.ONE-RSS (C4); `layout.verwaltungsportal.de` → HTML + JSON-LD (C7)
 6. `plugins/the-events-calendar` → Tribe-REST; `modern-events-calendar` → `/events/feed/`
 7. `com_jevents`, `com_icagenda` → Joomla-RSS
 8. `resc.deskline.net/DW5` → Feratel Deskline (in lasstreffen.at schon angebunden)
@@ -611,12 +685,13 @@ nach Rechtslage.
 | # | Integration | Gemeinden (Beleg) | Datenqualität | Rechtslage | Nächster Schritt |
 |---|---|---|---|---|---|
 | 1 | Heimat-Info JSON-API | 648 Kommunen | Titel, Start/Ende, Freitext-Ort, Vereine als Veranstalter, keine Koordinaten | keine Regel für Dritte | Anfrage Cosmema WITTICH (mit 2), danach Dry-Run |
-| 2 | WITTICH meinOrt / cmsweb | 2.197 Orte | nicht belegt | gesperrt, nur Vertrag | gleiche Anfrage wie 1 |
+| 2 | WITTICH meinOrt | 2.197 Orte | JSON mit Adresse, Kategorie, Offset-Zeiten; Vereinstermine, die sonst nirgends stehen (Stichprobe 3 von 3) | AGB IV.9 verbietet Abzug ohne Zustimmung, IV.4 erlaubt Lizenz | gleiche Anfrage wie 1 |
 | 3 | Cross7-API | „Über 450 Kunden“ | Datum, Uhrzeit, Adresse mit PLZ, Kategorie | nicht belegt | Anfrage cm city media; Kunden über Merkmal sammeln |
 | 4 | NOLIS-iCal | „über 450 Kommunen“ (alle Produkte) | Kommune, Ort, Veranstalter, Schlagworte; GEO lückenhaft | nicht belegt | kreisweite Abfrage testen; Nutzungsbedingungen lesen |
 | 5 | Plugin-Detektor (Tribe, MEC, Joomla-RSS) | 12 von 181 Startseiten | Tribe sehr gut (Venue, Zeitzone), MEC gut | Gemeinde-Websites, je Seite prüfen | Detektor-Regeln D5 in den Länder-Stichproben anwenden |
 | 6 | NUSSBAUM | „>380“ BW-Gemeinden | Koordinaten, Zeitfenster, Kategorie | KI-Crawler gesperrt, keine Lizenz | Lizenz/Feed anfragen, sonst nichts |
 | 7 | iKISS bzw. termine-regional.de | 299 Gebietskörperschaften | HTML einheitlich, iCal gesperrt | nicht belegt; termine-regional entgeltlich | Advantic nach Export fragen, termine-regional Angebot |
+| 7b | verwaltungsportal.de | nicht belegt | JSON-LD je Termin, Ort nur als Name | nicht belegt | Anteil in den Länder-Stichproben messen |
 | 8 | Komm.ONE-RSS | nicht belegt (BW) | hCalendar, gekürzt | nicht belegt | Item-Limit klären |
 | 9 | regioactive | nicht belegt | JSON-LD gut | Kooperation vorgesehen | Kooperationszugang anfragen, Überschneidung mit Eventfrog messen |
 | 10 | Rhein-Kreis Neuss Open Data | Grevenbroich, Neuss | Festliste mit Koordinaten | CC0 | Mini-Import erst nach gemessener Lücke |
@@ -640,6 +715,7 @@ Zufallsstichprobe vor; ihren Anteil messen die Länder-Tickets mit den Merkmalen
 * Kundenlisten von Cross7 und NOLIS sind nicht öffentlich; Zahlen nur Eigenangabe.
 * Nutzungsbedingungen von Cross7, NOLIS, termine-regional.de, Smartes Land und
   meinOrt nicht gelesen bzw. nicht auffindbar.
+* Zahl der Gemeinden auf verwaltungsportal.de nicht belegt.
 * RCE-Event (Landkreise München, Bergstraße), ionas/Chamaeleon, komuna, DigiPublica,
   cEasy (hitcom) und „hw“-TYPO3 tauchten auf, Gemeindezahl und Export nicht geprüft.
 * Schützenbund-Portale und Landesfeuerwehrverbände außerhalb Bayerns nicht recherchiert.
