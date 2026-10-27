@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-27T16:05:23.399272Z",
+  "depends_on": [],
+  "epic": "fn-28-de-gemeindekalender-dorffeste-in-jeder",
+  "id": "fn-28-de-gemeindekalender-dorffeste-in-jeder.4",
+  "priority": 4,
+  "spec_path": ".flow/tasks/fn-28-de-gemeindekalender-dorffeste-in-jeder.4.md",
+  "status": "todo",
+  "title": "Gemeindekalender Schleswig-Holstein",
+  "updated_at": "2026-10-27T16:05:23.767681Z"
+}

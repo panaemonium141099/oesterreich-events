@@ -1,0 +1,32 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-27T16:05:33.122408Z",
+  "depends_on": [
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.1",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.2",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.3",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.4",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.5",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.6",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.7",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.8",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.9",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.10",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.11",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.12",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.13",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.14",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.15",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.16",
+    "fn-28-de-gemeindekalender-dorffeste-in-jeder.17"
+  ],
+  "epic": "fn-28-de-gemeindekalender-dorffeste-in-jeder",
+  "id": "fn-28-de-gemeindekalender-dorffeste-in-jeder.18",
+  "priority": 99,
+  "spec_path": ".flow/tasks/fn-28-de-gemeindekalender-dorffeste-in-jeder.18.md",
+  "status": "todo",
+  "title": "Synthese: Abdeckungsmatrix und Umsetzungsreihenfolge",
+  "updated_at": "2026-10-27T16:05:33.475496Z"
+}
