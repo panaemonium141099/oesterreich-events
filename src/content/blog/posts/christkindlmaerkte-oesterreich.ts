@@ -87,8 +87,8 @@ export const post: FestivalPost = {
   "gallery": [],
   "ctaText": "Adventmärkte in ganz Österreich entdecken",
   "ctaLink": "/entdecken",
-  "seoTitle": "Christkindlmärkte in Österreich 2026: Termine, Öffnungszeiten, Tipps",
-  "seoDescription": "Alle großen Christkindlmärkte in Österreich 2026 von Wien bis Bregenz: Termine, Öffnungszeiten, Eintritt und Tipps für den Besuch in jedem Bundesland.",
+  "seoTitle": "Christkindl- & Adventmärkte Österreich 2026: alle Termine",
+  "seoDescription": "Christkindl- und Adventmärkte in Österreich 2026: Wien ab 13. November, Termine und Öffnungszeiten in allen neun Bundesländern, Eintritt und Tipps.",
   "keywords": ["christkindlmarkt österreich", "weihnachtsmarkt öffnungszeiten", "adventmarkt termine", "christkindlmarkt wann öffnet", "adventmärkte 2026"],
   "faqs": [
     {

@@ -1,5 +1,8 @@
 import type { FestivalPost } from '../types';
 
+// Termine und Öffnungszeiten 2026 geprüft am 2026-10-27 gegen christkindlmarkt-linz.at
+// (Veranstalter ARGE Christkindlmarkt Hauptplatz). Vorher standen hier im April
+// geschätzte Werte (Start 20.11., Montag bis Samstag 10 bis 21 Uhr).
 export const post: FestivalPost = {
   slug: 'linzer-christkindlmarkt',
   title: 'Linzer Christkindlmarkt',
@@ -7,19 +10,19 @@ export const post: FestivalPost = {
   heroImage: '/images/blog/linzer-christkindlmarkt/hero.jpg',
   thumbnailImage: '/images/blog/linzer-christkindlmarkt/thumb.jpg',
   publishDate: '2026-04-01',
-  updatedDate: '2026-04-01',
+  updatedDate: '2026-10-27',
   readingTime: 5,
   excerpt:
     'Der Linzer Christkindlmarkt am barocken Hauptplatz zählt zu den beliebtesten Adventmärkten Österreichs. Handwerk, Glühwein und Linzer Torte unter dem Licht tausender Weihnachtslichter.',
   category: 'Kultur & Tradition',
   categoryColor: 'bg-red-700 text-white',
   keyFacts: {
-    dates: '20. November – 24. Dezember 2026',
+    dates: '21. November bis 24. Dezember 2026',
     location: 'Hauptplatz Linz',
     address: 'Hauptplatz 1, 4020 Linz',
     genre: 'Weihnachtsmarkt, Handwerk, Kulinarik',
     price: 'Eintritt frei',
-    website: 'https://www.linz.at/christkindlmarkt',
+    website: 'https://christkindlmarkt-linz.at',
     since: '1975',
   },
   lineup: [
@@ -52,7 +55,7 @@ export const post: FestivalPost = {
     {
       icon: '🕐',
       label: 'Öffnungszeiten',
-      text: 'Montag–Samstag 10:00–21:00 Uhr, Sonntag 10:00–20:00 Uhr. Am 24. Dezember von 10:00–14:00 Uhr.',
+      text: 'Von 21. November bis 23. Dezember täglich jedenfalls 11 bis 19 Uhr, die Stände öffnen frühestens um 9 und schließen spätestens um 22 Uhr. Am 24. Dezember öffnen sie freiwillig von 9 bis 16 Uhr.',
     },
     {
       icon: '🚊',
@@ -73,9 +76,9 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Weihnachtsmärkte in Oberösterreich entdecken',
   ctaLink: '/map?bundesland=Oberoesterreich&category=Weihnachtsmarkt',
-  seoTitle: 'Linzer Christkindlmarkt 2026 – Termine & Tipps',
+  seoTitle: 'Linzer Christkindlmarkt 2026: 21.11. bis 24.12. am Hauptplatz',
   seoDescription:
-    'Linzer Christkindlmarkt 2026: Advent am Hauptplatz (20. Nov – 24. Dez). Linzer Torte, Glühwein, Handwerk & Konzerte. Öffnungszeiten & Infos.',
+    'Linzer Christkindlmarkt 2026 am Hauptplatz: 21. November bis 24. Dezember, täglich jedenfalls 11 bis 19 Uhr. Handwerk, Glühwein, Öffnungszeiten und Anreise.',
   keywords: [
     'Linzer Christkindlmarkt 2026',
     'Weihnachtsmarkt Linz',
@@ -90,11 +93,11 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Linzer Christkindlmarkt 2026',
-    startDate: '2026-11-20',
+    startDate: '2026-11-21',
     endDate: '2026-12-24',
     location: 'Hauptplatz Linz, Hauptplatz 1, 4020 Linz, Austria',
     addressCountry: 'AT',
-    url: 'https://www.linz.at/christkindlmarkt',
+    url: 'https://christkindlmarkt-linz.at',
     description:
       'Der Linzer Christkindlmarkt am Hauptplatz ist einer der schönsten Weihnachtsmärkte Österreichs mit über 100 Ständen, Handwerk, Kulinarik und Adventkonzerten.',
     image:

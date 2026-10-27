@@ -1,5 +1,8 @@
 import type { FestivalPost } from '../types';
 
+// Termine und Öffnungszeiten 2026 geprüft am 2026-10-27 gegen steiermark.com
+// (Graz Tourismus, Event 26571865). Die Termine stimmten, die Öffnungszeiten waren im
+// April geschätzt (10 bis 21 Uhr).
 export const post: FestivalPost = {
   slug: 'grazer-christkindlmarkt',
   title: 'Grazer Christkindlmarkt',
@@ -7,14 +10,14 @@ export const post: FestivalPost = {
   heroImage: '/images/blog/grazer-christkindlmarkt/hero.jpg',
   thumbnailImage: '/images/blog/grazer-christkindlmarkt/thumb.jpg',
   publishDate: '2026-04-01',
-  updatedDate: '2026-04-01',
+  updatedDate: '2026-10-27',
   readingTime: 6,
   excerpt:
     'Der Grazer Christkindlmarkt am Hauptplatz gehört zu den schönsten Weihnachtsmärkten Österreichs. Mit dem illuminierten Rathaus als Kulisse und dem Duft von Punsch und gebrannten Mandeln ist er ein Erlebnis für alle Sinne.',
   category: 'Kultur & Tradition',
   categoryColor: 'bg-red-700 text-white',
   keyFacts: {
-    dates: '20. November – 24. Dezember 2026',
+    dates: '20. November bis 24. Dezember 2026',
     location: 'Grazer Hauptplatz & Franziskanerplatz',
     address: 'Hauptplatz 1, 8010 Graz',
     genre: 'Weihnachtsmarkt, Advent, Handwerk, Kulinarik',
@@ -53,7 +56,7 @@ export const post: FestivalPost = {
     {
       icon: '🕰️',
       label: 'Öffnungszeiten',
-      text: 'Montag–Sonntag 10–21 Uhr, Heiliger Abend 10–14 Uhr. Eintritt kostenlos.',
+      text: 'Täglich 11 bis 20 Uhr, Gastronomie bis 22 Uhr. Am Heiligen Abend 11 bis 14 Uhr. Eintritt kostenlos.',
     },
     {
       icon: '🚂',
@@ -76,7 +79,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Steiermark&category=Kultur',
   seoTitle: 'Grazer Christkindlmarkt 2026 – Öffnungszeiten & Tipps',
   seoDescription:
-    'Grazer Christkindlmarkt 2026 (20. Nov.–24. Dez.): Adventstimmung am Hauptplatz. Öffnungszeiten & Tipps für den schönsten Weihnachtsmarkt der Steiermark.',
+    'Grazer Christkindlmarkt 2026 am Hauptplatz: 20. November bis 24. Dezember, täglich 11 bis 20 Uhr, Gastronomie bis 22 Uhr. Tipps für den Besuch in Graz.',
   keywords: [
     'Grazer Christkindlmarkt 2026',
     'Weihnachtsmarkt Graz',
