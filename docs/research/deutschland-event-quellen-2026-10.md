@@ -29,7 +29,7 @@ Entscheidungen nötigen Teile sind hier übernommen.
    (Berlin, Hamburg, München, Frankfurt, Düsseldorf, Leipzig, Dresden, Hannover,
    Bremen) hat einen offenen städtischen Veranstaltungskalender mit Termindaten.
    Berlin, Hamburg und Mecklenburg-Vorpommern sind auch bei destination.one fast leer.
-   Dort tragen Eventim, Eventfrog (in Arbeit), Ticketmaster und Reservix.
+   Dort tragen Eventim, Eventfrog (in Arbeit) und Reservix.
 4. **Eventim ist im Haus, aber mit dem falschen Shop:** Der PFT-Feed liefert schon
    8.214 kommende DE-Events in unsere DB, ihre Ticketlinks zeigen aber alle auf
    oeticket.com. Für lasstreffen.de braucht es Links auf eventim.de mit eigener
@@ -39,7 +39,7 @@ Entscheidungen nötigen Teile sind hier übernommen.
    kommende Berliner Termine) sind offen abrufbar, aber ohne belegte Datenlizenz.
 
 Empfohlene Reihenfolge der Integrationen: destination.one, DZT-Graph, Eventim auf
-eventim.de umstellen, Eventfrog (läuft), Ticketmaster, Reservix. Danach nur noch
+eventim.de umstellen, Eventfrog (läuft), Reservix. Danach nur noch
 gezielt nach gemessener Lücke.
 
 ## Priorisierte Liste
@@ -52,7 +52,7 @@ Bewertet nach Datenqualität vor Menge, dann nach Fläche je Integration.
 | 2 | DZT Open Data Knowledge Graph | Key kostenlos, auf Antrag | CC0, CC BY, CC BY-SA, kommerziell erlaubt | alle 16 Länder als Partner, Event-Zahl nicht belegt | Key beantragen, SPARQL-COUNT je Land |
 | 3 | Eventim PFT-Feed (im Haus) | Partnervertrag besteht | Vertrag | 8.214 kommende DE-Events in unserer DB | eventim.de-Deeplinks mit Provision klären |
 | 4 | Eventfrog Public API | Bearer-Token | nicht hier geprüft | Filter `country=DE` | wird in anderer Session gebaut |
-| 5 | Ticketmaster Discovery API | Key per Selbstregistrierung, kostenlos | Terms mit Erlös-Klausel | DE unterstützt, Zahl nicht belegt | Key holen, DE zählen, Erlös-Klausel klären |
+| ~~5~~ | Ticketmaster Discovery API | Key per Selbstregistrierung, kostenlos | Terms verbieten Erlöse ohne Ausnahme für Werbung | DE unterstützt, Zahl nicht belegt | gestrichen (Abschnitt 5) |
 | 6 | Reservix / ADticket | Partnervertrag | nicht belegt | Eigenangabe über 90.000 Veranstaltungen | API-Zugang bei affiliate@reservix.de anfragen |
 | 7 | BayernCloud Tourismus | Selbstregistrierung, Freischaltung nach Ermessen | CC0, CC BY, CC BY-SA, DL-DE | Bayern, Zahl nicht belegt | nur wenn Bayern über 1/2 dünn bleibt |
 | 8 | Evangelische Termine (5 Landeskirchen) | offen, ohne Key | nicht belegt | ELKB 125.172 Einträge, davon wenige publikumsrelevant | Nutzungserlaubnis anfragen |
@@ -189,18 +189,28 @@ In Arbeit in einer anderen Session (`api.eventfrog.net/public/v1`, Filter
 `country=DE`). Ohne Token antwortet `GET .../events?country=DE&perPage=1` mit 401
 „Please provide a bearer token“ (`serviceVersion 1.21.1`). Hier nicht weiter geprüft.
 
-## 5. Ticketmaster Discovery API
+## 5. Ticketmaster Discovery API (gestrichen)
 
 **Zugang, Kosten.** Key per Selbstregistrierung, Discovery-API sofort, keine Preise
 genannt (https://developer.ticketmaster.com/products-and-docs/apis/getting-started/).
 Ohne Key: 401. Die alte International Discovery API nimmt keine neuen Keys mehr an.
 
+**Entscheidung 2026-10-27: gestrichen.** lasstreffen verdient über AdSense, und die
+Terms schließen Werbeerlöse nicht aus (Wortlaut unten, nachgelesen am 27.10.2026).
+Dazu passt ein Bestandsimport nicht zu den Abrufregeln.
+
 **Bedingungen** (https://developer.ticketmaster.com/support/terms-of-use/):
+* Verboten ist, „derive revenues from the use or provision of the Ticketmaster API,
+  whether for direct commercial or monetary gain or otherwise, except as set forth
+  below“. Eine Ausnahme folgt im Text nicht. Werbung wird nur an anderer Stelle
+  erwähnt: Die Datenschutzerklärung muss offenlegen, dass „third parties (including
+  advertisers)“ Anzeigen ausspielen. Ob AdSense-Erlöse auf Seiten mit
+  Ticketmaster-Daten erlaubt sind, beantworten die Terms also nicht.
+* Ticketmaster behält sich vor, Anwendungen zu drosseln oder zu sperren, die viele
+  Abrufe machen, „that are not primarily in response to direct user actions“. Ein
+  nächtlicher Import in unsere DB ist genau so ein Muster.
 * Event-Inhalte nur „for reasonable periods“ cachen, keine feste Frist.
 * Inhalte auf Wunsch des Eigentümers binnen 24 h entfernen; kein Bild-Hosting.
-* **Risiko:** Verbot, „derive revenues from the use or provision of the Ticketmaster
-  API ... except as set forth below“; eine Ausnahme folgt im Text nicht. Für eine
-  Seite mit AdSense und Affiliate vorab schriftlich klären.
 * Zur Indexierung sagen die Terms nichts.
 
 **Abdeckung.** `countryCode=DE` steht in der Liste unterstützter Länder (Market 210).
@@ -219,9 +229,8 @@ Datum oder Region aufteilen. Delta-Filter nicht belegt.
 Provision nicht öffentlich
 (https://developer.ticketmaster.com/partners/distribution-partners/affiliate-sign-up).
 
-**Nächster Schritt.** Key registrieren (durch den User), `countryCode=DE` zählen
-(`page.totalElements`), Überschneidung mit Eventim messen; Impact-Bewerbung und
-Erlös-Klausel schriftlich klären.
+**Nächster Schritt.** Keiner. Nur wieder aufnehmen, wenn Ticketmaster schriftlich
+bestätigt, dass Werbeerlöse und ein nächtlicher Import erlaubt sind.
 
 ## 6. Reservix / ADticket
 
@@ -388,7 +397,7 @@ landesweiten Linkkey samt Freigabe.
 * **Baden-Württemberg, Thüringen:** bei destination.one dünn (539 und 386). Weg über
   den DZT-Graph; Lizenzmix in BW laut TMBW-Präsentation nur teilweise offen.
 * **Preise und Ticketlinks bei Tourismusdaten:** kaum vorhanden. Ticketlinks kommen
-  aus Eventim, Eventfrog, Ticketmaster, Reservix; die Zusammenführung erledigt der
+  aus Eventim, Eventfrog und Reservix; die Zusammenführung erledigt der
   bestehende Dedup.
 
 ## Was der User selbst tun muss
@@ -397,6 +406,5 @@ landesweiten Linkkey samt Freigabe.
 2. destination.one anschreiben (support@destination.one): kommerzielle Nutzung der
    Experience `open-data`, Pflichthinweis.
 3. Eventim: eventim.de-Feed und Provision für J70 klären, sonst Awin 11388.
-4. Ticketmaster-Key auf developer.ticketmaster.com registrieren; Erlös-Klausel klären.
-5. Reservix: affiliate@reservix.de, dazu Awin 31293 / 18490.
-6. Optional: Nutzungserlaubnis Evangelische Termine, kulturdaten.berlin.
+4. Reservix: affiliate@reservix.de, dazu Awin 31293 / 18490.
+5. Optional: Nutzungserlaubnis Evangelische Termine, kulturdaten.berlin.
