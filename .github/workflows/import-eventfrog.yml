@@ -1,0 +1,55 @@
+name: Import Eventfrog
+
+on:
+  schedule:
+    # Täglich 02:35 UTC, vor dem Scrape-Lauf (03:17): Dedup, Score und
+    # Rückzug der Nacht sehen den frischen Eventfrog-Bestand. Vollabruf AT
+    # kostet ~8 von 2.000 API-Anfragen am Tag.
+    - cron: '35 2 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry-run (kein DB-Write, keine Bild-Uploads)'
+        required: false
+        default: false
+        type: boolean
+      countries:
+        description: 'Länder, kommagetrennt (Standard AT)'
+        required: false
+        default: 'AT'
+        type: string
+
+concurrency:
+  group: import-eventfrog
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      EVENTFROG_API_KEY: ${{ secrets.EVENTFROG_API_KEY }}
+      EVENTFROG_COUNTRIES: ${{ github.event.inputs.countries || 'AT' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Import Eventfrog Public API
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="--dry-run"
+          fi
+          npx tsx src/scripts/import-eventfrog.ts $ARGS
