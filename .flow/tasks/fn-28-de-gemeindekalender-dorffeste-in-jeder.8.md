@@ -33,9 +33,13 @@ Ergebnisdatei: `docs/research/de-gemeinden/07-thueringen.md`.
 
 
 ## Done summary
-TBD
-
+Thüringen-Recherche in docs/research/de-gemeinden/07-thueringen.md (PR #345, gemergt).
+Stichprobe 30 von 566 Gemeinden unter 10.000 EW (Destatis 30.09.2026, Seed 280816).
+verwaltungsportal.de ("Thüringen vernetzt") ist der Generic: 18/30 Gemeinden, JSON-LD Event, Kalender oft dünn, Zahl der TH-Seiten nicht belegt.
+ThüCAT: 4.514 Termine ab 27.10.2026, 4 Dorfkirmessen, 0 Maibaum/Erntefest; API-Key auf Anfrage bei der TTG, CC-Lizenzen; 3/30 Gemeinden.
+destination.one open-data 0/30. WITTICH-Amtsblatt 4/30. Dorffest online belegt 10/30.
+Priorisierung: 1 verwaltungsportal-Parser + Teilnehmerliste, 2 ThüCAT-Key, 3 WITTICH bundesweit.
 ## Evidence
-- Commits:
+- Commits: 895d65c0, 25e7c3e42ec71a9aa073032c01f02b0a4ae5eeb1
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/345
