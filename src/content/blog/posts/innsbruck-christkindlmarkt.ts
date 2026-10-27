@@ -1,5 +1,9 @@
 import type { FestivalPost } from '../types';
 
+// Märkte, Termine und Öffnungszeiten 2026 geprüft am 2026-10-27 gegen
+// innsbruck.info/events/christkindlmaerkte-innsbruck.html (Innsbruck Tourismus, sieben
+// Märkte). Vorher standen hier im April geschätzte Werte (20.11. bis 6.1., Markt am
+// Landhausplatz, den es laut Innsbruck Tourismus nicht gibt).
 export const post: FestivalPost = {
   slug: 'innsbruck-christkindlmarkt',
   title: 'Innsbrucker Christkindlmarkt',
@@ -7,19 +11,19 @@ export const post: FestivalPost = {
   heroImage: '/images/blog/innsbruck-christkindlmarkt/hero.jpg',
   thumbnailImage: '/images/blog/innsbruck-christkindlmarkt/thumb.jpg',
   publishDate: '2026-04-01',
-  updatedDate: '2026-04-01',
+  updatedDate: '2026-10-27',
   readingTime: 5,
   excerpt:
     'Der Innsbrucker Christkindlmarkt gehört zu den schönsten Weihnachtsmärkten Österreichs. Auf dem historischen Marktplatz umrahmt von der Nordkette und der mittelalterlichen Altstadt entsteht jedes Jahr ein unvergesslicher Adventzauber.',
   category: 'Kultur & Tradition',
   categoryColor: 'bg-red-700 text-white',
   keyFacts: {
-    dates: '20. November – 6. Januar 2027',
-    location: 'Altstadt-Marktplatz & Landhausplatz, Innsbruck',
-    address: 'Marktplatz 1, 6020 Innsbruck',
+    dates: 'Altstadt und Marktplatz: 13. November bis 23. Dezember 2026. Maria-Theresien-Straße und Hungerburg bis 6. Jänner 2027',
+    location: 'Altstadt, Marktplatz und fünf weitere Plätze, Innsbruck',
+    address: 'Herzog-Friedrich-Straße, 6020 Innsbruck',
     genre: 'Weihnachtsmarkt, Advent, Handwerk, Kulinarik',
     price: 'Eintritt frei',
-    website: 'https://www.innsbruck.info/weihnachtsmarkt',
+    website: 'https://www.innsbruck.info/events/christkindlmaerkte-innsbruck.html',
     capacity: 'bis zu 600.000 Besucher pro Saison',
     since: '1970er Jahre',
   },
@@ -33,7 +37,7 @@ export const post: FestivalPost = {
   lineupNote:
     'Das tägliche Bühnenprogramm mit Volksmusik, Chören und Kinderprogramm wird im Oktober auf der Website von Innsbruck Tourismus veröffentlicht.',
   intro:
-    'Kein Christkindlmarkt in Österreich hat eine imposantere Naturkulisse: In Innsbruck leuchten Hunderte Stände auf dem historischen Marktplatz, während die schneebedeckten Gipfel der Nordkette und des Karwendels den Horizont rahmen. Die Tiroler Hauptstadt verwandelt sich ab Ende November in eine Adventsstadt, die zu Fuß in kleinen Gassen erkundet werden will. Mehrere Märkte bespannen verschiedene Plätze der Altstadt — vom intimen Landhausplatz bis zum belebten Marktplatz direkt an der Innbrücke.',
+    'Kein Christkindlmarkt in Österreich hat eine imposantere Naturkulisse: In Innsbruck leuchten Hunderte Stände auf dem historischen Marktplatz, während die schneebedeckten Gipfel der Nordkette und des Karwendels den Horizont rahmen. Die Tiroler Hauptstadt verwandelt sich ab Mitte November in eine Adventsstadt, die zu Fuß in kleinen Gassen erkundet werden will. Sieben Märkte verteilen sich über die Stadt, von der Altstadt vor dem Goldenen Dachl über den Marktplatz am Inn bis hinauf zur Hungerburg.',
   historyTitle: 'Tiroler Adventtradition im Herzen der Alpen',
   history:
     'Die Geschichte des Innsbrucker Weihnachtsmarkts reicht bis in die frühen 1970er Jahre zurück, als auf dem Marktplatz erste festliche Stände aufgebaut wurden. Über die Jahrzehnte wuchs der Markt von einem lokalen Handwerksmarkt zu einem international bekannten Adventereignis. Heute erstreckt er sich über mehrere Plätze in der Innenstadt. Besonders charakteristisch für Innsbruck ist die Einbindung echter Tiroler Handwerkstradition: Holzschnitzereien aus dem Grödnertal, Trachtenmode und regionale Lebensmittel vom Bergbauern stehen neben internationalem Weihnachtsschmuck.',
@@ -58,7 +62,7 @@ export const post: FestivalPost = {
     {
       icon: '🕐',
       label: 'Öffnungszeiten',
-      text: 'Täglich 10:00–21:00 Uhr. Heiligabend (24.12.) 10:00–14:00 Uhr. Silvester und Neujahr teilweise geöffnet.',
+      text: 'Altstadt, Marktplatz und Maria-Theresien-Straße täglich 11 bis 21 Uhr, St. Nikolaus 16 bis 21 Uhr, Wiltener Platzl 16 bis 20 Uhr. Hungerburg werktags 13 bis 19 Uhr, am Wochenende 12 bis 19 Uhr.',
     },
     {
       icon: '❄️',
@@ -68,15 +72,15 @@ export const post: FestivalPost = {
     {
       icon: '🗺️',
       label: 'Markt-Locations',
-      text: 'Hauptmarkt am Marktplatz, weiterer Markt am Landhausplatz, und der stimmungsvolle Weihnachtsmarkt am Bergiselweg.',
+      text: 'Altstadt und Marktplatz 13.11. bis 23.12., Maria-Theresien-Straße 25.11. bis 6.1., Hungerburg 20.11. bis 6.1., St. Nikolaus und Wiltener Platzl 20.11. bis 23.12., Bergisel 13.11. bis 20.12. (Freitag bis Sonntag).',
     },
   ],
   gallery: [],
   ctaText: 'Advent-Events in Tirol entdecken',
   ctaLink: '/map?bundesland=Tirol&category=Kultur',
-  seoTitle: 'Innsbrucker Christkindlmarkt 2026 – Termine & Tipps',
+  seoTitle: 'Innsbrucker Christkindlmarkt 2026: Termine aller 7 Märkte',
   seoDescription:
-    'Innsbrucker Christkindlmarkt 2026: Öffnungszeiten und Programm. Advent mit Nordkette-Panorama — einer der schönsten Weihnachtsmärkte Österreichs.',
+    'Innsbrucker Christkindlmärkte 2026: Altstadt und Marktplatz 13. November bis 23. Dezember, täglich 11 bis 21 Uhr, Maria-Theresien-Straße bis 6. Jänner.',
   keywords: [
     'Innsbrucker Christkindlmarkt 2026',
     'Weihnachtsmarkt Innsbruck',
@@ -91,13 +95,13 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Innsbrucker Christkindlmarkt 2026',
-    startDate: '2026-11-20',
+    startDate: '2026-11-13',
     endDate: '2027-01-06',
-    location: 'Marktplatz 1, 6020 Innsbruck, Austria',
+    location: 'Herzog-Friedrich-Straße, 6020 Innsbruck, Austria',
     addressCountry: 'AT',
-    url: 'https://www.innsbruck.info/weihnachtsmarkt',
+    url: 'https://www.innsbruck.info/events/christkindlmaerkte-innsbruck.html',
     description:
-      'Der Innsbrucker Christkindlmarkt findet auf dem historischen Marktplatz und dem Landhausplatz in Innsbruck statt und bietet Tiroler Handwerk, Kulinarik und Adventstimmung.',
+      'Die Innsbrucker Christkindlmärkte in der Altstadt, am Marktplatz und an fünf weiteren Plätzen bieten Tiroler Handwerk, Kulinarik und Adventstimmung.',
     image:
       'https://images.unsplash.com/photo-1543933441-92abb7bd2ca2?w=1600&q=85&auto=format&fit=crop',
   },

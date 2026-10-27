@@ -1,5 +1,8 @@
 import type { FestivalPost } from '../types';
 
+// Termine und Öffnungszeiten 2026 geprüft am 2026-10-27 gegen salzburg.info
+// (Veranstaltungskalender, Event 42164337). Vorher standen hier im April geschätzte
+// Werte (22.11. bis 26.12., täglich 10 bis 20 Uhr).
 export const post: FestivalPost = {
   slug: 'salzburger-christkindlmarkt',
   title: 'Salzburger Christkindlmarkt',
@@ -7,14 +10,14 @@ export const post: FestivalPost = {
   heroImage: '/images/blog/salzburger-christkindlmarkt/hero.jpg',
   thumbnailImage: '/images/blog/salzburger-christkindlmarkt/thumb.jpg',
   publishDate: '2026-04-01',
-  updatedDate: '2026-04-01',
+  updatedDate: '2026-10-27',
   readingTime: 5,
   excerpt:
     'Mitten in der barocken Altstadt Salzburgs leuchtet jeden Dezember der älteste Christkindlmarkt Österreichs. Zwischen Dom, Residenz und Festung Hohensalzburg entfaltet sich purer Advent-Zauber.',
   category: 'Kultur & Tradition',
   categoryColor: 'bg-red-700 text-white',
   keyFacts: {
-    dates: '22. November – 26. Dezember 2026',
+    dates: '19. November 2026 bis 1. Jänner 2027',
     location: 'Domplatz & Residenzplatz, Salzburg',
     address: 'Domplatz 1, 5020 Salzburg',
     genre: 'Weihnachtsmarkt, Advent, Handwerk, Kulinarik',
@@ -58,7 +61,7 @@ export const post: FestivalPost = {
     {
       icon: '🕐',
       label: 'Öffnungszeiten',
-      text: 'Täglich 10:00–20:00 Uhr. Heiligabend (24.12.) 10:00–14:00 Uhr.',
+      text: 'Montag bis Donnerstag 10 bis 20:30 Uhr, Freitag 10 bis 21 Uhr, Samstag 9 bis 21 Uhr, Sonn- und Feiertage 9 bis 20:30 Uhr. Am 24.12. 9 bis 15 Uhr, am 25. und 26.12. sowie am 1.1. 11 bis 18 Uhr.',
     },
     {
       icon: '📅',
@@ -74,9 +77,9 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Advent-Events in Salzburg entdecken',
   ctaLink: '/map?bundesland=Salzburg&category=Kultur',
-  seoTitle: 'Salzburger Christkindlmarkt 2026 – Domplatz & Infos',
+  seoTitle: 'Salzburger Christkindlmarkt 2026: 19.11. bis 1.1. am Domplatz',
   seoDescription:
-    'Salzburger Christkindlmarkt 2026 auf dem Domplatz: Termine, Öffnungszeiten und Tipps. Einer der ältesten Weihnachtsmärkte Europas im UNESCO-Welterbe.',
+    'Salzburger Christkindlmarkt 2026 am Dom- und Residenzplatz: 19. November bis 1. Jänner 2027, Öffnungszeiten je Wochentag und an den Feiertagen. Eintritt frei.',
   keywords: [
     'Salzburger Christkindlmarkt',
     'Weihnachtsmarkt Salzburg',
@@ -91,8 +94,8 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Salzburger Christkindlmarkt 2026',
-    startDate: '2026-11-22',
-    endDate: '2026-12-26',
+    startDate: '2026-11-19',
+    endDate: '2027-01-01',
     location: 'Domplatz 1, 5020 Salzburg, Austria',
     addressCountry: 'AT',
     url: 'https://www.christkindlmarkt.co.at',

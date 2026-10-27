@@ -1,5 +1,7 @@
 import type { FestivalPost } from '../types';
 
+// Termine und Öffnungszeiten 2026 geprüft am 2026-10-27 gegen wien.info/de/weihnachtsmarkt
+// (Wien Tourismus). Vorher standen hier im April geschätzte Werte (Start 14.11., 21:30 Uhr).
 export const post: FestivalPost = {
   slug: 'wien-christkindlmarkt',
   title: 'Wiener Christkindlmarkt',
@@ -7,14 +9,14 @@ export const post: FestivalPost = {
   heroImage: '/images/blog/wien-christkindlmarkt/hero.jpg',
   thumbnailImage: '/images/blog/wien-christkindlmarkt/thumb.jpg',
   publishDate: '2026-03-31',
-  updatedDate: '2026-03-31',
+  updatedDate: '2026-10-27',
   readingTime: 6,
   excerpt:
     'Jedes Jahr im November und Dezember verwandelt sich der Wiener Rathausplatz in ein leuchtendes Weihnachtsdorf. Glühwein, Lebkuchen und festliche Stimmung vor der prachtvollen Kulisse des Rathauses.',
   category: 'Kultur & Tradition',
   categoryColor: 'bg-red-700 text-white',
   keyFacts: {
-    dates: 'Mitte November – 26. Dezember',
+    dates: '13. November bis 26. Dezember 2026',
     location: 'Rathausplatz, Wien',
     address: 'Rathausplatz 1, 1010 Wien',
     genre: 'Weihnachtsmarkt, Advent, Handwerk, Kulinarik',
@@ -57,7 +59,7 @@ export const post: FestivalPost = {
     {
       icon: '🕐',
       label: 'Öffnungszeiten',
-      text: 'Täglich 10:00–21:30 Uhr, Heiligabend (24. Dezember) 10:00–17:00 Uhr.',
+      text: 'Täglich 10 bis 22 Uhr, am Heiligen Abend (24. Dezember) 10 bis 18:30 Uhr.',
     },
     {
       icon: '🎄',
@@ -73,9 +75,9 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Advent-Events in Wien entdecken',
   ctaLink: '/map?category=Kultur&region=Wien',
-  seoTitle: 'Wiener Christkindlmarkt 2026 – Rathausplatz Wien',
+  seoTitle: 'Wiener Christkindlmarkt 2026: 13.11. bis 26.12., Rathausplatz',
   seoDescription:
-    'Der Wiener Christkindlmarkt am Rathausplatz: Termine, Öffnungszeiten, Anreise & Tipps für den bekanntesten Weihnachtsmarkt Österreichs.',
+    'Wiener Christkindlmarkt am Rathausplatz 2026: 13. November bis 26. Dezember, täglich 10 bis 22 Uhr, am 24.12. bis 18:30 Uhr. Eintritt frei, Anreise und Tipps.',
   keywords: [
     'Wiener Christkindlmarkt',
     'Weihnachtsmarkt Wien',
@@ -91,7 +93,7 @@ export const post: FestivalPost = {
   faqs: [
     {
       question: 'Was sind die Öffnungszeiten des Wiener Christkindlmarkts?',
-      answer: 'Der Christkindlmarkt am Rathausplatz ist täglich von 10:00 bis 21:30 Uhr geöffnet. Am Heiligabend (24. Dezember) gelten verkürzte Öffnungszeiten von 10:00 bis 17:00 Uhr. Der Markt läuft von Mitte November bis zum 26. Dezember.',
+      answer: 'Der Christkindlmarkt am Rathausplatz ist 2026 vom 13. November bis zum 26. Dezember täglich von 10 bis 22 Uhr geöffnet. Am Heiligen Abend (24. Dezember) gilt die verkürzte Öffnungszeit von 10 bis 18:30 Uhr.',
     },
     {
       question: 'Kostet der Wiener Christkindlmarkt Eintritt?',
@@ -108,7 +110,7 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Wiener Christkindlmarkt 2026',
-    startDate: '2026-11-14',
+    startDate: '2026-11-13',
     endDate: '2026-12-26',
     location: 'Rathausplatz 1, 1010 Wien, Austria',
     addressCountry: 'AT',
