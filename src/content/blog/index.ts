@@ -212,6 +212,8 @@ import { post as wienModern2026 } from './posts/wien-modern-2026';
 import { post as winterfest2026 } from './posts/winterfest-2026';
 import { post as genesisLightshowOrgelkonzert2027 } from './posts/genesis-lightshow-orgelkonzert-2027';
 import { post as toniMoerwaldPalazzo2026 } from './posts/toni-moerwald-palazzo-2026';
+import { post as psalmFestival2027 } from './posts/psalm-festival-2027';
+import { post as winterWoodstockDerBlasmusik2027 } from './posts/winter-woodstock-der-blasmusik-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -434,6 +436,8 @@ export const ALL_POSTS: FestivalPost[] = [
   winterfest2026,
   genesisLightshowOrgelkonzert2027,
   toniMoerwaldPalazzo2026,
+  psalmFestival2027,
+  winterWoodstockDerBlasmusik2027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
