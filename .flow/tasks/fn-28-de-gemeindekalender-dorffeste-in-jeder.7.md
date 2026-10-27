@@ -33,9 +33,13 @@ Ergebnisdatei: `docs/research/de-gemeinden/06-mecklenburg-vorpommern.md`.
 
 
 ## Done summary
-TBD
+Recherche Mecklenburg-Vorpommern in docs/research/de-gemeinden/06-mecklenburg-vorpommern.md (PR #348), Anfragen und Rohnotizen im Anhang 06-mecklenburg-vorpommern-anfragen.md.
 
+- Stichprobe 30 von 706 Gemeinden unter 10.000 EW (Destatis 30.09.2026, random.Random(13)), je Gemeinde Fundort, Link, CMS, Dorffest-Test, destination.one-Treffer.
+- Das Amt ist die Kalenderebene: 13/30 mit datiertem Termin online, 10 davon im Amtskalender, 17/30 nirgends; datiertes Dorffest 9/30; destination.one 0/30.
+- Generics: verwaltungsportal.de (7/23 Ämter, JSON-LD mit Adresse und Veranstalter), TMV-Datenbank infomax imx.Platform (landesweit, API mit Zugangsdaten, Lizenz nicht belegt), Advantic iKISS (8 MV-Ämter laut Referenzkarte, offener RSS in Wittenburg), NOLIS (3/23, keine Festtermine), WITTICH-Amtsblätter (7/23 Ämter).
+- Priorisierte Liste: Amts-Registry MV mit verwaltungsportal-Parser zuerst, TMV-Datenzugang anfragen, WITTICH-Gespräch um MV erweitern.
 ## Evidence
-- Commits:
+- Commits: 4cf233a1d86ff5aa47f55117d89118051e587f4e
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/348
