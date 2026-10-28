@@ -1,68 +1,62 @@
 import type { FestivalPost } from '../types';
 
+// Bestand geprüft am 2026-10-27 gegen marketing.lustenau.at (Lustenau Marketing, Termine
+// Lange Nacht der Musik und Chrischtkendlimarkt, kein Martinimarkt) und das Märkteverzeichnis
+// 2026 der WKO Vorarlberg (wko.at/vlbg/handel/markt-strassen-wanderhandel/
+// maerkteverzeichnis-komplett.pdf: Lustenau ohne Novembermarkt außer Chrischtkendlimarkt,
+// Martinimärkte nur in Dornbirn 6.11. und Bürs 15.11.). Vorher stand hier ein erfundener
+// "Lustenauer Martinimarkt" am 6. bis 8. November 2026 auf dem Rathausplatz mit Bühnenprogramm
+// (Lustenauer Musikverein, Brass-Ensemble Vorarlberg, Trachtengruppe, Kinderchor),
+// Martinszug um 18 Uhr ab Kirchplatz und Tradition "seit dem 19. Jahrhundert". Post deshalb
+// neu geschrieben, ohne Event-Schema.
 export const post: FestivalPost = {
   slug: 'lustenauer-martinimarkt',
   title: 'Lustenauer Martinimarkt',
-  subtitle: 'Traditioneller Herbstmarkt zum Martinitag in Lustenau am Bodensee',
+  subtitle: 'Warum es 2026 keinen Martinimarkt in Lustenau gibt und wo Martinimärkte stattfinden',
   heroImage: '/images/blog/lustenauer-martinimarkt/hero.jpg',
   thumbnailImage: '/images/blog/lustenauer-martinimarkt/thumb.jpg',
   publishDate: '2026-04-01',
-  updatedDate: '2026-04-01',
-  readingTime: 5,
+  updatedDate: '2026-10-27',
+  readingTime: 3,
   excerpt:
-    'Rund um den Martinitag belebt ein traditioneller Herbstmarkt die Lustenauer Ortsmitte. Handwerk, regionale Produkte und Martinszug für Kinder — ein echtes Gemeindefest.',
+    'Einen Lustenauer Martinimarkt gibt es 2026 nicht: Weder Lustenau Marketing noch das Märkteverzeichnis der Wirtschaftskammer Vorarlberg führen einen. Martinimärkte gibt es in Dornbirn und Bürs, in Lustenau folgt Ende November der Chrischtkendlimarkt.',
   category: 'Kultur & Tradition',
   categoryColor: 'bg-orange-700 text-white',
   keyFacts: {
-    dates: '6.–8. November 2026',
-    location: 'Lustenau Ortszentrum (Rathausplatz)',
-    address: 'Rathausstraße 1, 6890 Lustenau',
-    genre: 'Herbstmarkt, Handwerk, Martinszug, Kulinarik',
-    price: 'Eintritt frei',
+    dates: 'Kein Martinimarkt in Lustenau 2026. Luschnouar Chrischtkendlimarkt: 26. bis 29. November 2026',
+    location: 'Kirchplatz Lustenau (Chrischtkendlimarkt)',
+    address: 'Kirchplatz, 6890 Lustenau',
+    genre: 'Markt, Advent',
+    price: 'Infos bei Lustenau Marketing',
     website: 'https://marketing.lustenau.at',
-    since: 'Tradition seit dem 19. Jahrhundert',
   },
-  lineup: [
-    { name: 'Lustenauer Musikverein', role: 'headliner', stage: 'Rathausplatz-Bühne', day: 'Samstag' },
-    { name: 'Kinderchor der Volksschule Lustenau', role: 'support', stage: 'Kirchplatz', day: 'Sonntag' },
-    { name: 'Brass-Ensemble Vorarlberg', role: 'special', stage: 'Rathausplatz-Bühne', day: 'Freitag' },
-    { name: 'Trachtengruppe Lustenau', role: 'support', stage: 'Rathausplatz', day: 'Samstag' },
-  ],
-  lineupTitle: 'Programm-Highlights',
-  lineupNote:
-    'Das vollständige Bühnenprogramm wird im Oktober veröffentlicht. Die Martinimarkt-Tradition in Lustenau beinhaltet Martinszug, Konzerte und regionales Handwerk.',
+  lineup: [],
   intro:
-    'Rund um den Martinitag (11. November) belebt ein traditioneller Herbstmarkt die Lustenauer Ortsmitte am Bodensee. Die Martini-Tradition ist in Vorarlberg tief verwurzelt: Herbstmärkte und Martinszüge gehören zu den ältesten gemeinschaftlichen Festen in der Region. In Lustenau, der größten Marktgemeinde Österreichs, hat dieser Brauch besondere Bedeutung — die Zusammenkunft von Handwerkern, Landwirten und Gemeinschaft am Ende der Erntesaison.',
-  historyTitle: 'Martinitradition in Lustenau',
+    'Rund um den Martinitag am 11. November gibt es in Vorarlberg Martinimärkte. Ein Lustenauer Martinimarkt gehört 2026 aber nicht dazu: Lustenau Marketing nennt für November die Lange Nacht der Musik am 6. November und den Luschnouar Chrischtkendlimarkt am Kirchplatz vom 26. bis 29. November. Auch das Märkteverzeichnis 2026 der Wirtschaftskammer Vorarlberg, in dem die Gemeinden ihre Markttermine melden, führt für Lustenau keinen Martinimarkt.',
+  historyTitle: 'Martinitag und Märkte in Lustenau',
   history:
-    'Der Martinitag geht auf den heiligen Martin von Tours zurück, der am 11. November gefeiert wird. In der Bodenseeregion und in Vorarlberg ist die Martini-Zeit traditionell die Saison für Herbstmärkte, Gänseschmaus und Martinszüge. Lustenau hat diese Traditionen über Generationen weitergegeben. Die lokalen Vereine, die Trachtengruppe und die Musikkapellen tragen zum Gemeinschaftsgefühl bei, das diese Herbstfeste auszeichnet.',
-  whatToExpectTitle: 'Was der Martinimarkt 2026 bietet',
+    'Der Martinitag geht auf den heiligen Martin von Tours zurück und wird am 11. November gefeiert. Lustenau, die größte Marktgemeinde Österreichs, hat übers Jahr viele eigene Märkte: 2026 etwa Kreativmarkt, Muttertagsmarkt, Weinfest, Markt der Kulturen, Kräutermarkt, die Luschnouar Kilbi im Oktober und den Chrischtkendlimarkt im Advent, dazu den Wochenmarkt am Donnerstag und Samstag.',
+  whatToExpectTitle: 'Martinimärkte in der Nähe 2026',
   whatToExpect:
-    'Der Lustenauer Herbstmarkt rund um den Martinitag bietet auf dem Rathausplatz Handwerk, regionale Lebensmittel und saisonale Produkte. Höhepunkt für Familien ist der Martinszug mit Laternen am Abend des 11. November. Lokale Musikkapellen spielen, und in der Gastronomie gibt es traditionellen Martinsgansschmaus.',
+    'Wer einen Martinimarkt sucht, findet ihn laut Märkteverzeichnis der Wirtschaftskammer Vorarlberg 2026 in der Nachbarstadt Dornbirn am 6. November und in Bürs am 15. November. In Lustenau selbst folgt im Advent der Luschnouar Chrischtkendlimarkt am Kirchplatz.',
   whatToExpectList: [
-    'Traditionelles Handwerk und regionale Produkte auf dem Rathausplatz',
-    'Martinszug mit Laternen für Kinder am Abend des 11. November',
-    'Martinsgans und Herbstküche in lokalen Gasthäusern',
-    'Konzerte des Lustenauer Musikvereins',
-    'Trachtengruppe und volkskundliche Darbietungen',
-    'Gemütliches Beisammensein in vorarlbergerischer Tradition',
+    'Dornbirn: Martinimarkt am 6. November 2026',
+    'Bürs: Martinimarkt am 15. November 2026',
+    'Lustenau: Lange Nacht der Musik am 6. November 2026',
+    'Lustenau: Luschnouar Chrischtkendlimarkt am Kirchplatz, 26. bis 29. November 2026',
+    'Lustenau: Wochenmarkt jeden Donnerstag und Samstag von 8 bis 12 Uhr',
   ],
   practicalInfoTitle: 'Praktische Informationen',
   practicalInfo: [
     {
-      icon: '🕯️',
-      label: 'Martinszug',
-      text: 'Der Martinszug findet am 11. November statt. Kinder basteln in Schulen und Kindergärten Laternen. Beginn des Umzugs typisch um 18 Uhr ab Kirchplatz.',
-    },
-    {
-      icon: '🚌',
-      label: 'Anreise',
-      text: 'Lustenau ist per Bus aus Bregenz (30 min) und Dornbirn (20 min) gut erreichbar. Haltestelle Rathaus direkt am Marktgelände.',
+      icon: 'ℹ️',
+      label: 'Termine',
+      text: 'Aktuelle Termine der Lustenauer Märkte veröffentlicht Lustenau Marketing auf marketing.lustenau.at. Die Märkte der anderen Gemeinden stehen im Märkteverzeichnis der Wirtschaftskammer Vorarlberg.',
     },
     {
       icon: '🦢',
-      label: 'Martinsgans',
-      text: 'Die Martinsgans ist Pflicht: Lokale Gasthäuser in Lustenau bieten Ganslessen zum Martinstag an. Reservierung im Voraus empfohlen.',
+      label: 'Martinigansl',
+      text: 'Rund um den 11. November hat das Martinigansl in vielen Gasthäusern Saison. Reservierung im Voraus empfohlen.',
     },
     {
       icon: '🧣',
@@ -73,31 +67,18 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Herbstevents in Vorarlberg entdecken',
   ctaLink: '/map?bundesland=Vorarlberg&category=Kultur',
-  seoTitle: 'Lustenauer Martinimarkt 2026 – Herbstmarkt & Tipps',
+  seoTitle: 'Martinimarkt Lustenau 2026? Termine & Alternativen',
   seoDescription:
-    'Lustenauer Martinimarkt 2026 (6.–8. November): Herbstmarkt rund um den Martinitag in Lustenau/Vorarlberg. Martinszug, Handwerk & Gastronomie.',
+    'Einen Lustenauer Martinimarkt gibt es 2026 nicht. Martinimärkte in Dornbirn (6.11.) und Bürs (15.11.), Chrischtkendlimarkt Lustenau vom 26. bis 29. November.',
   keywords: [
     'Lustenauer Martinimarkt 2026',
     'Martinimarkt Lustenau',
-    'Herbstmarkt Vorarlberg',
+    'Martinimarkt Dornbirn',
+    'Martinimarkt Vorarlberg',
+    'Chrischtkendlimarkt Lustenau',
     'Martinitag Lustenau',
-    'Martinszug Vorarlberg',
     'Lustenau November Events',
     'Markt Vorarlberg Herbst',
-    'Handwerksmarkt Vorarlberg',
-    'Bodenseeregion Herbstfest',
     'Lustenau Veranstaltungen',
   ],
-  jsonLdEvent: {
-    name: 'Lustenauer Martinimarkt 2026',
-    startDate: '2026-11-06',
-    endDate: '2026-11-08',
-    location: 'Rathausplatz Lustenau, Rathausstraße 1, 6890 Lustenau, Austria',
-    addressCountry: 'AT',
-    url: 'https://marketing.lustenau.at',
-    description:
-      'Der Lustenauer Martinimarkt ist ein traditioneller Herbstmarkt in Vorarlberg rund um den Martinitag — mit regionalem Handwerk, Martinszug und Kulinarik.',
-    image:
-      'https://images.unsplash.com/photo-1481833761820-0509d3217039?w=1600&q=85&auto=format&fit=crop',
-  },
 };

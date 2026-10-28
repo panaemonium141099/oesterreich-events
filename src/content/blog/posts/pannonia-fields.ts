@@ -1,102 +1,72 @@
 import type { FestivalPost } from '../types';
 
+// Existenz, Ort und Anreise geprüft am 2026-10-27 gegen novarock.at (Veranstalter des einzigen
+// Festivals auf dem Gelände), vienna.at (APA-Berichte "Nova Rock 2026: How to Successfully
+// Travel from Vienna to Nickelsdorf" und "Nova Rock startet") und Websuchen. Ein "Pannonia
+// Fields Electronic Festival" gibt es nicht, die Domain pannoniafields.at existiert nicht
+// (DNS-Fehler). Vorher erfunden: das Festival samt Termin 6. bis 9.08.2026, Lineup (Charlotte
+// de Witte, Amelie Lens, Nina Kraviz, Ben Klock, Maceo Plex, Sven Väth), 20.000 Besucher,
+// Preis, Camping inklusive, 24h-Programm, Direktzüge ab Wien Hbf. Post neu geschrieben.
 export const post: FestivalPost = {
   slug: 'pannonia-fields',
-  title: 'Pannonia Fields Electronic Festival 2026',
-  subtitle: 'Techno, Trance und das weite Burgenland — Europas Outdoor-Rave-Perle',
+  title: 'Pannonia Fields Electronic Festival: gibt es nicht',
+  subtitle: 'Auf den Pannonia Fields in Nickelsdorf läuft Nova Rock, kein Techno-Festival',
   heroImage: '/images/blog/pannonia-fields/hero.jpg',
   thumbnailImage: '/images/blog/pannonia-fields/thumb.jpg',
   publishDate: '2026-04-01',
-  updatedDate: '2026-04-01',
-  readingTime: 6,
+  updatedDate: '2026-10-27',
+  readingTime: 3,
   excerpt:
-    'Die Pannonia Fields in Nickelsdorf werden nicht nur von Rock-Fans geliebt: Das Electronic Festival bringt tausende Techno- und Trance-Fans auf die burgenländische Tiefebene und verwandelt das flache Land in ein Mekka der elektronischen Musik.',
+    'Ein „Pannonia Fields Electronic Festival“ in Nickelsdorf lässt sich in keiner Quelle finden. Das Gelände Pannonia Fields II ist die Heimat von Nova Rock, Österreichs großem Rock- und Metal-Festival im Juni.',
   category: 'Musik & Festival',
   categoryColor: 'bg-violet-700 text-white',
   keyFacts: {
-    dates: 'August 2026',
-    location: 'Pannonia Fields, Nickelsdorf (Burgenland)',
+    dates: 'Kein Termin: das Electronic Festival ist nicht belegt',
+    location: 'Pannonia Fields II, Nickelsdorf (Burgenland)',
     address: 'Pannonia Fields II, 2425 Nickelsdorf',
-    genre: 'Techno, Trance, House, Electronic',
-    price: 'Tickets ab € 79 | Camping inklusive',
-    website: 'https://www.pannoniafields.at',
-    capacity: '20.000 Besucher',
+    genre: 'Gelände von Nova Rock (Rock, Metal)',
+    price: 'kein Festival, keine Tickets',
+    website: 'https://www.novarock.at',
   },
-  lineup: [
-    { name: 'Charlotte de Witte', role: 'headliner' },
-    { name: 'Amelie Lens', role: 'headliner' },
-    { name: 'Nina Kraviz', role: 'headliner' },
-    { name: 'Ben Klock', role: 'special' },
-    { name: 'Maceo Plex', role: 'support' },
-    { name: 'Sven Väth', role: 'support' },
-  ],
-  lineupNote: 'Line-up Stand: Frühjahr 2026. Weitere Acts werden laufend bekannt gegeben.',
+  lineup: [],
   intro:
-    'Die flachen Felder rund um Nickelsdorf im Burgenland sind der ideale Ort für ein Outdoor-Elektronikfestival, das seinesgleichen sucht. Während Nova Rock die Rock-Fans begeistert, versammelt das Pannonia Fields Electronic Festival die Community der Techno- und Trance-Liebhaber. Unter freiem Himmel, ohne Lärmbeschränkungen durch nahe Wohngebiete, können die Bassfrequenzen so weit reichen, wie das Auge blickt — ein einzigartiges Erlebnis, das nur die burgenländische Tiefebene bieten kann.',
-  historyTitle: 'Elektronische Musik in der Puszta',
+    'Diese Seite beschrieb früher ein „Pannonia Fields Electronic Festival“ mit Techno-Stars wie Charlotte de Witte oder Sven Väth. Wir haben das im Oktober 2026 geprüft: Ein solches Festival gibt es nicht. Die angegebene Website pannoniafields.at existiert nicht, und weder Veranstalter noch Medien berichten über ein Elektronik-Festival auf dem Gelände. Termin, Lineup, Besucherzahl und Preise waren erfunden und sind entfernt.',
+  historyTitle: 'Was auf den Pannonia Fields wirklich stattfindet',
   history:
-    'Das Pannonia Fields Electronic Festival hat sich aus der Nova-Rock-Familie entwickelt und nutzt dieselbe weitläufige Infrastruktur des Festivalgeländes. Die flache Landschaft ohne natürliche Hindernisse ermöglicht eine einzigartige Soundarchitektur: Mehrere Stages können parallel betrieben werden, ohne dass Klang zwischen ihnen interferiert. Das Festival hat sich schnell als Top-Adresse für elektronische Musik in Mitteleuropa etabliert und zieht Acts und Publikum aus ganz Europa an.',
-  whatToExpectTitle: 'Bass, Bühnen und Burgenland-Weite',
+    'Die Pannonia Fields II in Nickelsdorf im Bezirk Neusiedl am See sind das Gelände von Nova Rock, einem Rock- und Metal-Festival des Veranstalters Nova Music Entertainment. 2026 fand Nova Rock vom 11. bis 14. Juni statt, laut APA rechneten die Veranstalter über die vier Tage mit mehr als 200.000 Besuchen. Alles zu Nova Rock steht in unserem eigenen Beitrag und auf novarock.at.',
+  whatToExpectTitle: 'Elektronische Musik in Österreich',
   whatToExpect:
-    'Das Pannonia Fields Electronic Festival 2026 bietet mehrere Stages mit unterschiedlichen Subgenres: von düsterem Techno über melodischen Trance bis zu groovigem House. Das Camping-Ticket ist inklusive, und das 24h-Programm erlaubt es den Besuchern, ihre eigene Festival-Timeline zu gestalten. Die weite Puszta-Landschaft schafft eine Atmosphäre, die zwischen Endzeitstimmung und reiner Euphorie pendelt.',
+    'Wer ein Techno- oder Elektronik-Festival sucht, findet es nicht in Nickelsdorf. Aktuelle Elektronik-Events in Österreich zeigt unsere Eventsuche.',
   whatToExpectList: [
-    'Mehrere spezialisierte Stages: Techno, Trance, House, Ambient',
-    'Durchgehendes 24h-Programm für eingefleischte Raver',
-    'Camping inklusive im Ticket — weite, gut ausgestattete Camping-Zone',
-    'Internationale DJ-Acts aus der Weltspitze der elektronischen Musik',
-    'Innovative Licht- und Soundinstallationen zwischen den Stages',
-    'Kürzeste Anreise aus Wien (ca. 45 Min.) aller österreichischen Outdoor-Festivals',
+    'Kein Elektronik-Festival auf den Pannonia Fields belegt',
+    'Pannonia Fields II: Gelände von Nova Rock im Juni',
+    'Nova Rock 2026: 11. bis 14. Juni',
   ],
-  practicalInfoTitle: 'Praktische Informationen',
+  practicalInfoTitle: 'Anreise zu den Pannonia Fields',
   practicalInfo: [
     {
-      icon: '🚂',
-      label: 'Anreise mit der Bahn',
-      text: 'Direktzüge ab Wien Hauptbahnhof nach Nickelsdorf (ca. 45 Min.). Shuttlebus zum Gelände ab Bahnhof.',
-    },
-    {
       icon: '🚗',
-      label: 'Anreise mit dem Auto',
-      text: 'A4 Abfahrt Nickelsdorf, beschilderte Parkplätze. Fahrgemeinschaften empfohlen — Parkgebühr ca. € 10.',
+      label: 'Auto',
+      text: 'Über die Ostautobahn A4, Abfahrt Nickelsdorf, bei Stau auch Mönchhof. Im Navi „Pannonia Fields II“ eingeben.',
     },
     {
-      icon: '⛺',
-      label: 'Camping',
-      text: 'Camping ist im Ticket inklusive. Frühzeitig ankommen für gute Zeltplätze in der Nähe der Stages.',
-    },
-    {
-      icon: '👂',
-      label: 'Gehörschutz',
-      text: 'Bei 24h-Programm und hohen dB-Pegeln: Hochwertiger Gehörschutz zum Schutz des Gehörs mitbringen.',
+      icon: '🚂',
+      label: 'Bahn bei Nova Rock',
+      text: 'Zu Nova Rock 2026 fuhren ÖBB-Sonderzüge ab Wien Meidling nach Nickelsdorf, vom Bahnhof weiter per Shuttlebus.',
     },
   ],
   gallery: [],
-  ctaText: 'Elektronik-Events im Burgenland entdecken',
+  ctaText: 'Musik-Events im Burgenland entdecken',
   ctaLink: '/map?bundesland=Burgenland&category=Musik',
-  seoTitle: 'Pannonia Fields Electronic Festival 2026',
+  seoTitle: 'Pannonia Fields Electronic Festival: gibt es nicht',
   seoDescription:
-    'Pannonia Fields Electronic Festival 2026 in Nickelsdorf: Techno, Trance & House unter freiem Himmel. Tickets, Line-up, Camping-Tipps für das Burgenland-Festival.',
+    'Ein Pannonia Fields Electronic Festival in Nickelsdorf gibt es nicht. Auf dem Gelände Pannonia Fields II findet Nova Rock statt, 2026 vom 11. bis 14. Juni.',
   keywords: [
+    'Pannonia Fields',
+    'Pannonia Fields II Nickelsdorf',
     'Pannonia Fields Festival',
-    'Electronic Festival Burgenland',
-    'Techno Festival Österreich',
-    'Pannonia Fields 2026',
     'Nickelsdorf Festival',
-    'Trance Festival Österreich',
-    'Outdoor Rave Österreich',
-    'House Festival Burgenland',
-    'Festival Camping Österreich',
+    'Nova Rock Gelände',
+    'Electronic Festival Burgenland',
   ],
-  jsonLdEvent: {
-    name: 'Pannonia Fields Electronic Festival 2026',
-    startDate: '2026-08-06',
-    endDate: '2026-08-09',
-    location: 'Pannonia Fields, 2425 Nickelsdorf, Austria',
-    addressCountry: 'AT',
-    url: 'https://www.pannoniafields.at',
-    description:
-      'Das Pannonia Fields Electronic Festival ist ein großes Outdoor-Techno- und Trance-Festival auf den Pannonia Fields in Nickelsdorf im Burgenland.',
-    image:
-      'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1600&q=85&auto=format&fit=crop',
-  },
 };

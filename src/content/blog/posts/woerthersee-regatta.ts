@@ -1,69 +1,76 @@
 import type { FestivalPost } from '../types';
 
+// Geprüft am 2026-10-27 gegen den Regattakalender 2026 des Kärntner Segelverbands
+// (kyck.at/wp-content/uploads/2026/02/Regattakalender-2026.pdf, Stand 27.01.2026, verlinkt
+// von landessegelverband.at), uycwoe.at (Union Yacht Club Wörthersee, seit 1886) und yca.at.
+// Vorher falsch: eine „Klagenfurter Wörthersee Regatta“ am 7. bis 9. August 2026 gibt es im
+// Kalender nicht; der Yacht Club Austria (yca.at) sitzt in Linz und ist kein Wörthersee-
+// Club; „Segelclub Klagenfurt, Metnitzstrand“, 400 Boote, Nenngeld ab 60 €, „seit den
+// 1960ern“ und die Seelänge von 19 km ohne Beleg. Post auf die tatsächliche Regattaszene
+// (Wörthersee Cup, Wörthersee-Segelwoche) umgeschrieben; Kalender 2027 noch nicht veröffentlicht.
 export const post: FestivalPost = {
   slug: 'woerthersee-regatta',
-  title: 'Klagenfurter Wörthersee Regatta',
-  subtitle: 'Segeln am schönsten See Kärntens – Regatta-Highlight mit Festesstimmung',
+  title: 'Segelregatten am Wörthersee',
+  subtitle: 'Wörthersee Cup und Wörthersee-Segelwoche: der Regattasommer am größten See Kärntens',
   heroImage: '/images/blog/woerthersee-regatta/hero.jpg',
   thumbnailImage: '/images/blog/woerthersee-regatta/thumb.jpg',
   publishDate: '2026-04-01',
-  updatedDate: '2026-04-01',
-  readingTime: 6,
+  updatedDate: '2026-10-27',
+  readingTime: 5,
   excerpt:
-    'Die Klagenfurter Wörthersee Regatta ist das größte Segelevent am schönsten See Kärntens. Jedes Sommer tummeln sich Hunderte von Booten auf dem tiefblauen Wörthersee – ein Spektakel für Seglerinnen und Segler und Zuschauerinnen und Zuschauer gleichermaßen.',
+    'Eine einzelne große „Wörthersee Regatta“ gibt es nicht, dafür einen dichten Regattasommer: Acht Segelclubs am See laden von April bis September zu Wettfahrten, mit dem Wörthersee Cup und der Wörthersee-Segelwoche des Union Yacht Club Wörthersee als Höhepunkten.',
   category: 'Sport & Outdoor',
   categoryColor: 'bg-cyan-700 text-white',
   keyFacts: {
-    dates: '7.–9. August 2026',
-    location: 'Wörthersee, Klagenfurt & Pörtschach',
-    address: 'Segelclub Klagenfurt, Metnitzstrand, 9020 Klagenfurt',
-    genre: 'Segeln, Regatta, Wassersport, Clubsport',
-    price: 'Nenngeld für Segler ab 60 €; Zuschauen kostenlos',
-    website: 'https://www.yca.at',
-    capacity: 'ca. 400 Boote; Tausende Zuschauer am Ufer',
-    since: '1960er-Jahre',
+    dates: 'Saison 2026: April bis September, Wörthersee-Segelwoche 14. bis 16. August. Kalender 2027 folgt',
+    location: 'Wörthersee: Klagenfurt, Krumpendorf, Pörtschach, Velden, Dellach (Maria Wörth), Schiefling',
+    address: 'Union Yacht Club Wörthersee, Süduferstraße 236, 9082 Maria Wörth',
+    genre: 'Segeln, Regatta, Yardstick, Clubsport',
+    price: 'Nenngeld laut Ausschreibung des jeweiligen Clubs',
+    website: 'https://www.landessegelverband.at',
   },
   lineup: [
-    { name: 'Optimist-Klasse (Nachwuchs)', role: 'headliner', stage: 'Wörthersee Regattastrecke' },
-    { name: 'Laser/ILCA-Klasse (Einhandsegler)', role: 'headliner', stage: 'Wörthersee Regattastrecke' },
-    { name: 'Keelboat-Klassen (ORC/IRC)', role: 'headliner', stage: 'Wörthersee Regattastrecke' },
-    { name: 'Siegerehrung & Clubabend', role: 'special', stage: 'Segelclub Klagenfurt' },
+    { name: '24 Stunden Regatta (KYCK)', role: 'headliner', day: '26. bis 27. Juni 2026' },
+    { name: 'Veldener Goldpokal (Yacht Club Velden)', role: 'support', day: '12. Juli 2026' },
+    { name: 'Silberner Schwan und Hafenfest (Klagenfurter Segelverein Loretto)', role: 'support', day: '25. Juli 2026' },
+    { name: 'Wörthersee-Segelwoche mit Elschnig Slalom (UYCWö)', role: 'headliner', day: '14. bis 16. August 2026' },
+    { name: 'Cup Weißes Rössl (Yacht Club Schiefling Wörthersee)', role: 'support', day: '29. August 2026' },
+    { name: 'Preis von Pörtschach (Kärntner Yacht Club Pörtschach)', role: 'support', day: '5. September 2026' },
   ],
-  lineupTitle: 'Programm-Highlights',
+  lineupTitle: 'Rückblick: Wörthersee Cup und Segelwoche 2026',
   lineupNote:
-    'Genaue Startzeiten, Klassen und Regattaprogramm auf der Website des Yacht Club Austria Klagenfurt (yca.at). Nennschluss typischerweise 4 Wochen vor dem Event.',
+    'Termine laut Regattakalender 2026 des Kärntner Segelverbands. Der Kalender für 2027 ist noch nicht veröffentlicht, er erscheint auf landessegelverband.at.',
   intro:
-    'Der Wörthersee ist der Seespiegel Kärntens: 19 km lang, tiefblau und von sanften Hügeln umrahmt – ein Paradies für Seglerinnen und Segler. Jedes Jahr im Sommer verwandelt er sich in einen riesigen Regattakurs, auf dem von Optimisten über Laser bis zu Kielbooten alle Klassen um die Wette segeln. Die Wörthersee Regatta ist das größte Wassersportevent am See und ein gesellschaftlicher Höhepunkt des Kärntner Sommers.',
+    'Der Wörthersee ist der größte See Kärntens und ein Revier mit langer Segeltradition. Statt einer einzelnen großen Regatta gibt es hier einen ganzen Regattasommer: Zehn Clubs des Kärntner Segelverbands, die meisten davon am Wörthersee, tragen zwischen April und September Wettfahrten aus, von der Jollenregatta über Jugendwochen bis zur 24-Stunden-Regatta. Ausgewählte Wettfahrten zählen zum Wörthersee Cup, und im August lädt der Union Yacht Club Wörthersee zur Wörthersee-Segelwoche.',
   historyTitle: 'Segel-Tradition am Wörthersee',
   history:
-    'Die Segelclubs am Wörthersee blicken auf eine mehr als 100-jährige Geschichte zurück. Der Yacht Club Austria Klagenfurt, einer der ältesten Segelclubs Österreichs, organisiert seit Jahrzehnten Regatten auf dem Wörthersee. Die modernen Regatten vereinen sportlichen Wettkampf mit geselligem Club-Leben – der Hafen in Klagenfurt und Pörtschach sind an Regattawochenenden belebte Treffpunkte für Seglerinnen und Segler aus ganz Österreich und dem benachbarten Ausland.',
+    'Der Union Yacht Club Wörthersee in Dellach am Südufer wurde 1886 gegründet und ist nach eigenen Angaben der zweitälteste Segelclub Österreichs; 2026 feierte er sein 140-jähriges Bestehen. Daneben segeln am See unter anderem der Kärntner Yacht Club Klagenfurt mit Clubgelände in Krumpendorf, der Kärntner Yacht Club Pörtschach, der Klagenfurter Segelverein Loretto, der Yacht Club Velden, die Carinthian Fleet Techelsberg-Wörthersee und der Yacht Club Schiefling Wörthersee. Ihre Termine stimmt der Kärntner Segelverband in einem gemeinsamen Regattakalender ab.',
   whatToExpectTitle: 'Segelsport, Seeufer und Sommerfreude',
   whatToExpect:
-    'Die Wörthersee Regatta ist für Seglerinnen und Segler aller Klassen ein Pflichttermin, für Zuschauerinnen und Zuschauer ein farbenfrohes Spektakel. Entlang des Ufers sammeln sich Fans, um dem Treiben auf dem See zu folgen, und die Strandpromenaden von Klagenfurt und Pörtschach werden zu geselligen Treffpunkten. Nach dem Rennen treffen sich alle im Clubhaus zur Siegerehrung.',
+    'Die meisten Wettfahrten am Wörthersee sind Yardstick-Regatten, bei denen unterschiedliche Bootstypen über eine Ausgleichszahl gegeneinander antreten. Dazu kommen Klassenregatten, Landesmeisterschaften und 2026 sogar die Finn-Staatsmeisterschaft beim UYCWö. Den Wörthersee Cup bilden sechs ausgewählte Regatten, zu denen laut Verband immer ein Schlepp organisiert wird. Die Wörthersee-Segelwoche im August verbindet kurze Wettfahrten, eine lange Wettfahrt und den Elschnig Slalom.',
   whatToExpectList: [
-    'Regatten in mehreren Klassen über mehrere Tage',
-    'Nachwuchsregatten in der Optimist- und Laser-Klasse',
-    'Zuschauerstände entlang der Uferpromenade',
-    'Siegerehrung und Clubabend mit geselligem Beisammensein',
-    'Begleitprogramm in Klagenfurter Strandbädern und Cafés',
-    'Möglichkeit zum Segeln lernen in Segelschulen am See',
+    'Wörthersee Cup: sechs Regatten von Juni bis September',
+    'Wörthersee-Segelwoche des UYCWö im August',
+    'Freitagsregatten im Wörthersee West Freitags Cup',
+    'Jugendwochen für Opti, 29er, Laser, 420er und 470er',
+    'Landesmeisterschaften und Klassenregatten',
   ],
   practicalInfoTitle: 'Praktische Informationen',
   practicalInfo: [
     {
       icon: '⛵',
       label: 'Für Segler',
-      text: 'Anmeldung über yca.at. Eigenes Boot erforderlich oder über Regatta-Charterpartner. Bootsliegeplätze begrenzt – frühzeitig reservieren.',
+      text: 'Ausschreibung, Nennung und Startzeiten veröffentlicht der jeweils veranstaltende Club. Für alle Yachten ist eine gültige Haftpflichtversicherung Pflicht.',
     },
     {
-      icon: '👀',
-      label: 'Für Zuschauer',
-      text: 'Kostenloser Zugang zu Uferpromenaden in Klagenfurt und Pörtschach. Beste Sicht von der Seepromenade Pörtschach und dem Strandbad Klagenfurt.',
+      icon: '📅',
+      label: 'Regattakalender',
+      text: 'Alle Termine der Kärntner Clubs stehen im Regattakalender des Kärntner Segelverbands auf landessegelverband.at.',
     },
     {
       icon: '🚗',
       label: 'Anreise',
-      text: 'Klagenfurt HBF ist 3 km vom Segelclub entfernt. Pörtschach mit Regionalbahn ab Klagenfurt (20 min).',
+      text: 'Die Clubs liegen rund um den See, von Klagenfurt und Krumpendorf über Pörtschach bis Velden und Dellach. Welcher Hafen gilt, steht in der Ausschreibung.',
     },
     {
       icon: '🌤️',
@@ -74,30 +81,30 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Wassersport-Events am Wörthersee entdecken',
   ctaLink: '/map?bundesland=Kärnten&category=Sport',
-  seoTitle: 'Wörthersee Regatta 2026 – Programm & Infos',
+  seoTitle: 'Segelregatten am Wörthersee: Wörthersee Cup und Segelwoche',
   seoDescription:
-    'Klagenfurter Wörthersee Regatta 2026: Das größte Segelevent am Wörthersee in Kärnten. Regatta-Klassen, Anmeldung und Tipps für Segler und Zuschauer.',
+    'Regatten am Wörthersee: Wörthersee Cup mit sechs Wettfahrten, Wörthersee-Segelwoche des UYCWö im August, Clubs und Regattakalender des Kärntner Segelverbands.',
   keywords: [
-    'Wörthersee Regatta 2026',
+    'Wörthersee Regatta',
     'Segeln Wörthersee',
-    'Klagenfurt Regatta',
-    'Yacht Club Austria Klagenfurt',
-    'Wörthersee Segeln',
+    'Wörthersee Cup',
+    'Wörthersee-Segelwoche',
+    'Union Yacht Club Wörthersee',
     'Regatta Kärnten',
+    'Kärntner Segelverband Regattakalender',
     'Wassersport Wörthersee',
-    'Segelclub Klagenfurt',
-    'Kärntner Seeregatta',
+    'Kärntner Yacht Club Klagenfurt',
     'Wörthersee Sommer Sport',
   ],
   jsonLdEvent: {
-    name: 'Klagenfurter Wörthersee Regatta 2026',
-    startDate: '2026-08-07',
-    endDate: '2026-08-09',
-    location: 'Wörthersee, Segelclub Klagenfurt, Metnitzstrand, 9020 Klagenfurt, Austria',
+    name: 'Wörthersee-Segelwoche 2026',
+    startDate: '2026-08-14',
+    endDate: '2026-08-16',
+    location: 'Union Yacht Club Wörthersee, Süduferstraße 236, 9082 Maria Wörth, Austria',
     addressCountry: 'AT',
-    url: 'https://www.yca.at',
+    url: 'https://www.landessegelverband.at',
     description:
-      'Die Klagenfurter Wörthersee Regatta ist das größte Segelevent am Wörthersee mit Regatten in mehreren Klassen und geselligem Clubprogramm.',
+      'Die Wörthersee-Segelwoche des Union Yacht Club Wörthersee mit kurzen Wettfahrten, langer Wettfahrt und Elschnig Slalom; der Slalom zählt zum Wörthersee Cup.',
     image:
       'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1600&q=85&auto=format&fit=crop',
   },

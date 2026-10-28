@@ -1,104 +1,115 @@
 import type { FestivalPost } from '../types';
 
+// Termine, Line-up, Spielorte, Preise und Geschichte geprüft am 2026-10-27 gegen
+// snowbombing.com (Startseite, /book, /experience/venues), tirol.at/aktivitaeten/events/
+// alle-events/snowbombing (Termin 2026, Veranstalter SBH Events Ltd) und
+// inthesnow.com/25-years-of-snowbombing (Risoul, Umzug nach Mayrhofen 2005). Vorher stand
+// hier im April Geschätztes und Erfundenes: 30. März bis 4. April 2026 (tatsächlich 6. bis
+// 11. April), Gründung 1999 durch zwei „Musikjournalisten“ Gareth Cooper und Ed Cole
+// (offiziell „since 2000“, Start in Frankreich), ein Line-up 2026 aus Chase & Status,
+// Annie Mac, The Blessed Madonna, Jamie Jones u. a., Bühnen „Stadium“ und Igluzelt
+// „Arctic Disco“ (auf der Spielort-Seite nicht vorhanden), 10.000 Besucher, Festival-Pass
+// ab 250 €, Adresse Hauptstraße 428, Bahnzeiten und Pistenkilometer ohne Beleg.
 export const post: FestivalPost = {
   slug: 'snowbombing-mayrhofen',
   title: 'Snowbombing Festival Mayrhofen',
-  subtitle: 'Das weltberühmte Schneefestival: Electronic Music, Live-Acts und Skifahren in den Zillertaler Alpen',
+  subtitle: 'Das Schneefestival in Mayrhofen: Electronic Music, Live-Acts und Skifahren im Zillertal',
   heroImage: '/images/blog/snowbombing-mayrhofen/hero.jpg',
   thumbnailImage: '/images/blog/snowbombing-mayrhofen/thumb.jpg',
   publishDate: '2026-04-01',
-  updatedDate: '2026-04-01',
+  updatedDate: '2026-10-27',
   readingTime: 6,
   excerpt:
-    'Snowbombing in Mayrhofen gilt als „das weltweit beste Schneefestival": Tagsüber Ski und Snowboard auf Tiroler Traumhängen, abends und nachts Worldclass-Musik von elektronischen DJs und Live-Acts in Igluclubs und Open-Air-Bühnen.',
+    'Snowbombing in Mayrhofen verbindet Skifahren im Zillertal mit Musik bis in die Nacht: tagsüber Pisten und Bergpartys, abends DJs und Live-Acts im Wald, auf der Straße und in Clubs. Die 27. Ausgabe findet von 5. bis 10. April 2027 statt.',
   category: 'Musik & Konzerte',
   categoryColor: 'bg-cyan-600 text-white',
   keyFacts: {
-    dates: '30. März – 4. April 2026',
+    dates: '5. bis 10. April 2027 (2026: 6. bis 11. April)',
     location: 'Mayrhofen im Zillertal',
-    address: 'Hauptstraße 428, 6290 Mayrhofen',
+    address: '6290 Mayrhofen, Zillertal',
     genre: 'Electronic, House, Techno, Drum & Bass, Live-Konzerte',
-    price: 'Festival-Pass ab 250 € (ohne Skipass), All-Inclusive-Pakete verfügbar',
+    price: 'Pakete mit Unterkunft ab 399 £ pro Person, inklusive Festivalband (249 £)',
     website: 'https://www.snowbombing.com',
-    capacity: 'ca. 10.000 Festivalbesucher',
-    since: '1999',
+    since: '2000 (in Mayrhofen seit 2005)',
   },
   lineup: [
-    { name: 'Chase & Status', role: 'headliner', day: 'Mittwoch', stage: 'Stadium' },
-    { name: 'Andy C', role: 'headliner', day: 'Donnerstag', stage: 'Arctic Disco' },
-    { name: 'Bicep (Live)', role: 'headliner', day: 'Freitag', stage: 'Stadium' },
-    { name: 'Annie Mac', role: 'special', day: 'Samstag', stage: 'Arctic Disco' },
-    { name: 'The Blessed Madonna', role: 'special', day: 'Samstag', stage: 'Stadium' },
-    { name: 'Jamie Jones', role: 'special', day: 'Sonntag', stage: 'Arctic Disco' },
+    { name: 'Bicep (Live)', role: 'headliner' },
+    { name: 'Fatboy Slim', role: 'headliner' },
+    { name: '2manydjs (DJ Set)', role: 'headliner' },
+    { name: 'Basement Jaxx (DJ Set)', role: 'special' },
+    { name: 'Groove Armada (DJ Set)', role: 'special' },
+    { name: 'Andy C', role: 'special' },
+    { name: 'Skream', role: 'support' },
+    { name: 'Wilkinson', role: 'support' },
   ],
   lineupNote:
-    'Das Line-up 2026 wird stufenweise ab September 2025 bekanntgegeben. Frühbuchertickets sind mit dem ersten Ankündigungs-Drop verfügbar.',
+    'Auswahl aus dem bisher angekündigten Line-up 2027 laut snowbombing.com; weitere Acts folgen. Tage und Bühnen sind noch nicht veröffentlicht.',
   intro:
-    'Mayrhofen im Zillertal wird jeden April zum Epizentrum einer besonderen Fusion: Snowbombing vereint Europas erste Riege elektronischer Musiker und Live-Acts mit dem besten Skifahren der österreichischen Alpen. Gegründet 1999 von zwei britischen Musikjournalisten als kleines Experiment, hat sich das Festival zu einem der meistbesuchten Winter-Musikfestivals weltweit entwickelt. Das Konzept ist einfach genial: tagsüber Skifahren auf der Penken- und Ahorn-Bahn, abends Konzerte auf Außenbühnen, nachts bis in den Morgen tanzen im legendären Igluzelt „Arctic Disco". Mayrhofen selbst — ein charmantes Tiroler Dorf — trägt die wochenlange Party mit bemerkenswerter Begeisterung.',
-  historyTitle: 'Von der Ski-Party zum Weltfestival: Snowbombing seit 1999',
+    'Mayrhofen im Zillertal wird jeden April zum Schauplatz einer besonderen Mischung: Snowbombing verbindet elektronische Musik und Live-Acts mit Skifahren in den Tiroler Alpen. Das Konzept: tagsüber auf die Piste und zu Partys am Berg, abends Konzerte und DJ-Sets an ungewöhnlichen Orten, von der Bühne im Wald bis zur Straßenparty im Ortszentrum. Bekannt ist das Festival auch für seine Kostümpartys. Veranstalter ist das britische Unternehmen SBH Events Ltd.',
+  historyTitle: 'Von Frankreich ins Zillertal: Snowbombing seit 2000',
   history:
-    'Snowbombing wurde 1999 von Gareth Cooper und Ed Cole gegründet, zwei britischen Musikjournalisten, die die Begeisterung für elektronische Musik und Skifahren zusammenführen wollten. Die erste Ausgabe in Mayrhofen zählte nur einige Hundert Besucher. In den 2000er Jahren wuchs das Festival rapide: Mit zunehmend hochkarätigen Line-ups, eigens errichteten Spielorten auf der Piste und dem ikonischen Arctic Disco-Igluzelt entstand eine eigene Festival-Welt. Heute gilt Snowbombing als Blaupause für das „Snow Festival"-Genre und hat direkten Einfluss auf vergleichbare Events in Europa und Nordamerika.',
-  whatToExpectTitle: 'Was Snowbombing 2026 bietet',
+    'Snowbombing gibt es laut Veranstalter seit 2000. Die ersten Ausgaben fanden in Frankreich statt, zuerst im Skiort Risoul, später in Les Arcs und im schweizerischen Villars. 2005 zog das Festival nach Mayrhofen in Tirol und ist seither dort zu Hause. 2027 steht die 27. Ausgabe an.',
+  whatToExpectTitle: 'Was Snowbombing bietet',
   whatToExpect:
-    'Snowbombing erstreckt sich über 5 Nächte und 6 Tage. Tagsüber stehen Skifahren, Snowboard-Contests und Après-Ski-Partys auf dem Programm; abends beginnt der musikalische Teil mit mehreren Stages unterschiedlicher Größe und Genre-Ausrichtung. Das Herzstück ist das Hauptstadion auf der Hauptbühne und die Underground-Kultstätte Arctic Disco.',
+    'Snowbombing dauert sechs Tage. Tagsüber stehen Skifahren, Snowboarden und Partys am Berg auf dem Programm, dazu Wellness und Yoga. Abends und nachts verteilt sich die Musik auf Spielorte im ganzen Ort: The Forest Stage im Wald, die große Open-Air-Party The Street Party im Ortszentrum, Clubs wie The Racket Club und The Vault sowie Pop-up-Partys.',
   whatToExpectList: [
-    'Tages-Skiing auf Penken und Ahorn (Zillertal Skipass separat buchbar)',
-    'Hauptbühne mit internationalen Headlinern: Electronic, Drum & Bass, House',
-    'Arctic Disco Igluzelt: Underground-Clubbing bis Sonnenaufgang',
-    'Après-Ski-Events auf den Pisten: Tagesparties und DJ-Sets',
-    'Spezial-Events: Comedy-Nights, Pool-Partys, Secret Garden Stage',
-    'Festival-Dorf in Mayrhofen mit Merchandise, Food und Bars',
+    'The Forest Stage: Bühne mitten im Wald',
+    'The Street Party: Open-Air-Party im Ortszentrum von Mayrhofen',
+    'Pilz Bar und Mountaintop Brunch am Berg',
+    'Clubs: The Racket Club, The Fun Haus, The Vault, Rompa’s Reggae Shack',
+    'Kostümpartys, Pop-up-Partys und Bongo’s Bingo',
+    'Wellness: Yoga am Berg und Rooftop-Pools',
   ],
   practicalInfoTitle: 'Alles Wichtige zu Snowbombing',
   practicalInfo: [
     {
       icon: '🎫',
       label: 'Tickets & Pakete',
-      text: 'Festival-Pass ab 250 € (ohne Unterkunft und Skipass). All-Inclusive-Pakete mit Hotel, Skipass und Festival ab 900 €. Buchung unter snowbombing.com.',
+      text: 'Gebucht wird über snowbombing.com, meist als Paket mit Unterkunft. Pakete starten bei 399 £ pro Person, darin enthalten ist das Festivalband um 249 £. Anzahlung 50 £ pro Person, der Rest in Raten bis 1. März.',
     },
     {
       icon: '🚂',
       label: 'Anreise',
-      text: 'Mayrhofen im Zillertal: Züge nach Jenbach (aus Innsbruck 45 min, aus Salzburg 1,5 h), dann Zillertalbahn nach Mayrhofen (50 min). Shuttles im Festival-Paket.',
+      text: 'Mit dem Zug nach Jenbach im Inntal, dann mit der Zillertalbahn bis Mayrhofen.',
     },
     {
       icon: '🎿',
       label: 'Skipass',
-      text: 'Zillertal Skipass separat buchbar. Mayrhofen Skigebiet Penken und Ahorn bieten 180 km Pistenkilometer.',
+      text: 'Die Paketpreise auf der Buchungsseite nennen keinen Skipass.',
     },
     {
       icon: '🏨',
       label: 'Unterkunft',
-      text: 'Hotels und Chalets in Mayrhofen für das Festivalwochenende früh buchen. Offizielle Partnerpakete auf snowbombing.com verfügbar.',
+      text: 'Snowbombing bietet Pakete in Hotels, Chalets und Apartments in Mayrhofen an; einzelne Unterkünfte sind früh ausgebucht.',
     },
   ],
   gallery: [],
   ctaText: 'Musik-Events in Tirol entdecken',
   ctaLink: '/map?bundesland=Tirol&category=Musik',
-  seoTitle: 'Snowbombing Mayrhofen 2026 – Festival, Tickets & Tipps',
+  seoTitle: 'Snowbombing Mayrhofen 2027: Line-up, Pakete & Tipps',
   seoDescription:
-    'Snowbombing Mayrhofen 2026: Skiing tagsüber, Weltklasse-Musik nachts. Line-up, Tickets und Tipps für das beste Schneefestival in den Tiroler Alpen.',
+    'Snowbombing Mayrhofen 2027 von 5. bis 10. April: Skifahren tagsüber, DJs und Live-Acts nachts. Line-up, Pakete und Tipps zum Schneefestival im Zillertal.',
   keywords: [
-    'Snowbombing 2026',
+    'Snowbombing 2027',
     'Snowbombing Mayrhofen',
     'Musik Festival Tirol Winter',
     'Ski Festival Österreich',
     'Electronic Music Festival Alpen',
     'Mayrhofen Festival April',
-    'Arctic Disco Snowbombing',
+    'Snowbombing Line-up',
     'Snowbombing Tickets',
     'Zillertal Festival',
     'Snow Festival Mayrhofen Programm',
   ],
   jsonLdEvent: {
-    name: 'Snowbombing Festival Mayrhofen 2026',
-    startDate: '2026-03-30',
-    endDate: '2026-04-04',
-    location: 'Hauptstraße 428, 6290 Mayrhofen, Austria',
+    name: 'Snowbombing Festival Mayrhofen 2027',
+    startDate: '2027-04-05',
+    endDate: '2027-04-10',
+    location: '6290 Mayrhofen, Austria',
     addressCountry: 'AT',
     url: 'https://www.snowbombing.com',
     description:
-      'Snowbombing ist das weltweit bekannteste Schneefestival in Mayrhofen, Tirol — eine einzigartige Kombination aus Skifahren und internationalen Musikacts.',
+      'Snowbombing ist ein Schneefestival in Mayrhofen, Tirol: Skifahren im Zillertal kombiniert mit internationalen DJs und Live-Acts.',
     image:
       'https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=1600&q=85&auto=format&fit=crop',
   },
