@@ -10,9 +10,8 @@ Rahmenbedingungen: Der Qualitätsvertrag DE im Epic-Spec (`flowctl cat fn-29-de-
 - [ ] Neubau-Skript mit Diff-Ausgabe
 
 ## Done summary
-TBD
-
+DE-Gemeinde-Registry (PR #365): data/de-gemeinde-registry.json mit 10.749 Einträgen (Stufe, Integration, Kalender-URL, geprüfter Feed, Ausweichweg Amt/VG bzw. meinOrt, Heimat-Info-ID). Builder npm run build:registry:de [-- --feeds] mit AGS-/Integrations-/Stufenprüfung, Diff, Feed-Lauf (robots.txt, Standardseiten je Hersteller, Abruf mit Formatprüfung); Terminbuchung und Abfallkalender nie Kalender-URL. Stufe A: 2.135 von 3.203 Gemeinden mit geprüftem Feed (67 %), 251 VG-Ausweichwege mit Feed. Wächter registry-de.test.ts 20/20.
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: e6e8abd565c628cfe8385dad966e4d5504e79be1
+- Tests: npx vitest run src/__tests__/lib/registry-de
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/365
