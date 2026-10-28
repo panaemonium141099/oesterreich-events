@@ -10,9 +10,8 @@ Rahmenbedingungen: Der Qualitätsvertrag DE im Epic-Spec (`flowctl cat fn-29-de-
 - [ ] Schwellen als Konstanten, gegen die der Bericht prüft
 
 ## Done summary
-TBD
-
+DE-Prüfstand und AT-Referenzwerte (PR #361): npm run pruefstand:de -- --adapter <name> [--offline] [--fresh] [--mit-belegen] mit fetch-Cache (.pruefstand/), Schreibweg des Syncs ohne Schreiben (toSupabaseRow(...).row), Kennzahlen, Schwellen (src/lib/pruefstand/schwellen.ts), Diff nach source_id, deterministische 30er-Stichprobe, Exit 1 bei Riss. AT-Referenz (npm run pruefstand:at-referenz, nur lesend) aus 37.817 Zeilen: Müll-Titel 0,1 %, ohne Uhrzeit 60,9 %, ohne Koordinaten 0,3 %, sichtbare Gemeinde-Dienste 0, Dubletten je Quelle 1,7 % (data/pruefstand/at-referenz.json, docs/research/de-gemeinden/02-at-referenzwerte.md). Probelauf gemeinden-wp-burgenland bestanden, offline deterministisch.
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: fec94cfd1504bad473873d99919751201d664ea4
+- Tests: npx vitest run src/__tests__/lib/pruefstand/
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/361
