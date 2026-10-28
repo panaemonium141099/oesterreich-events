@@ -1,0 +1,18 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-28T16:58:27.951166Z",
+  "depends_on": [
+    "fn-29-de-gemeinde-registry-gemeindekalender.2",
+    "fn-29-de-gemeinde-registry-gemeindekalender.3",
+    "fn-29-de-gemeinde-registry-gemeindekalender.4"
+  ],
+  "epic": "fn-29-de-gemeinde-registry-gemeindekalender",
+  "id": "fn-29-de-gemeinde-registry-gemeindekalender.19",
+  "priority": 19,
+  "spec_path": ".flow/tasks/fn-29-de-gemeinde-registry-gemeindekalender.19.md",
+  "status": "todo",
+  "title": "Lizenzquellen nach Zustimmung: meinOrt und Heimat-Info (WITTICH), termine-regional.de, toubiz, TMV, NUSSBAUM",
+  "updated_at": "2026-10-28T16:58:28.321864Z"
+}
