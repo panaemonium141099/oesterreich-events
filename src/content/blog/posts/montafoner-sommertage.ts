@@ -17,6 +17,13 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/montafoner-sommertage/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.montafon.at/montafoner-resonanzen/de',
+      'https://www.creativeaustria.at/en/2026/07/15/montafon-resonances-2026-montafon-vorarlberg/',
+    ],
+  },
   readingTime: 4,
   excerpt:
     'Ein Festival namens "Montafoner Sommertage" gibt es nicht. Das Musikfestival im Montafon heißt Montafoner Resonanzen, früher Montafoner Sommer: Von Anfang August bis Anfang September spielen Musikerinnen und Musiker an besonderen Orten im Tal.',

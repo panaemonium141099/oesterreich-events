@@ -17,6 +17,16 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/seefestspiele-moerbisch/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.seefestspiele-moerbisch.at/programm/mamma-mia-2027/infos-zum-stueck/',
+      'https://www.weekend.at/bundesland/burgenland/seefestspiele-moerbisch-2026-ein-kaefig-voller-narren-la-cage-aux-folles',
+      'https://www.seefestspiele-moerbisch.at/rund-um-die-seefestspiele/ueber-uns/geschichte/',
+      'https://www.seefestspiele-moerbisch.at/fileadmin-seefestspiele/user_upload/downloads/seebuehne-grafik-2027-hg-weiss.png',
+      'https://www.seefestspiele-moerbisch.at/rund-um-die-seefestspiele/erlebnis-seebuehne/anreise-parken/',
+    ],
+  },
   readingTime: 7,
   excerpt:
     'Auf der Seebühne am Neusiedler See inszenieren die Seefestspiele Mörbisch seit 1957 jeden Sommer eine große Produktion. 2026 war es „Ein Käfig voller Narren“ (La Cage aux Folles), 2027 folgt MAMMA MIA! vom 15. Juli bis 21. August.',

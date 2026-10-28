@@ -14,19 +14,10 @@ import type { FestivalPost } from '@/content/blog/types';
  * Posts kommen nie hinein.
  */
 const OHNE_BELEGE = new Set<string>([
-  // April-Batch (Spec fn-3, 2026-04-01), Fakten-Audit läuft
-  'ars-electronica-festival', 'bregenz-festspiele', 'bregenzer-fruehling', 'carinthian-summer-ossiach',
-  'donauinselfest-2026', 'esterhazy-konzerte', 'europaeisches-forum-alpbach', 'feldkirch-festival',
-  'frequency-festival-2026', 'grafenegg-festival', 'grazer-aufsteirern', 'hahnenkamm-rennen-kitzbuehel',
-  'innsbruck-festwochen-alte-musik', 'ironman-austria-klagenfurt', 'kaiser-wiesn', 'klagenfurter-stadtfest',
-  'lehar-festival-bad-ischl', 'lichterfest-melk', 'linz-marathon', 'linz-pflasterspektakel',
-  'linzer-klangwolke', 'lustenauer-martinimarkt', 'montafoner-sommertage', 'murau-stadtfest',
-  'nova-rock-2026', 'pannonia-fields', 'retz-weinlesefest', 'salzburg-jazz-and-the-city',
-  'salzburger-dult', 'salzburger-festspiele', 'seefestspiele-moerbisch', 'snowbombing-mayrhofen',
-  'steyr-stadtfest', 'styriarte-graz', 'tiroler-volksschauspiele-telfs', 'vienna-city-marathon',
-  'viennale', 'villacher-fasching', 'wiener-festwochen', 'wiener-genussfestival',
-  'wiener-neujahrskonzert', 'wiener-opernball', 'wiener-regenbogenparade', 'wiener-silvesterpfad',
-  'wiesen-fest', 'woerthersee-beachvolleyball', 'woerthersee-regatta',
+  // April-Batch (Spec fn-3, 2026-04-01): die übrigen 38 Posts sind seit dem Fakten-Audit 2026-10-27 belegt
+  'donauinselfest-2026', 'frequency-festival-2026', 'nova-rock-2026', 'kaiser-wiesn',
+  'vienna-city-marathon', 'viennale', 'wiener-festwochen', 'wiener-genussfestival',
+  'wiener-neujahrskonzert',
   // Handgeschrieben am 2026-04-13 (Commit 54f3845e), nie gegen Quellen geprüft
   'electric-love-festival-2026', 'fest-der-freude-2026', 'glatt-und-verkehrt-2026', 'impulstanz-2026',
   'jazzfest-wien-2026', 'musikfestival-steyr-2026', 'narzissenfest-2026', 'poolbar-festival-2026',

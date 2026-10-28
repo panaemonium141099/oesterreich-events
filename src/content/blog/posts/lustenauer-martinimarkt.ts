@@ -17,6 +17,13 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/lustenauer-martinimarkt/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.wko.at/vlbg/handel/markt-strassen-wanderhandel/maerkteverzeichnis-komplett.pdf',
+      'https://marketing.lustenau.at',
+    ],
+  },
   readingTime: 3,
   excerpt:
     'Einen Lustenauer Martinimarkt gibt es 2026 nicht: Weder Lustenau Marketing noch das Märkteverzeichnis der Wirtschaftskammer Vorarlberg führen einen. Martinimärkte gibt es in Dornbirn und Bürs, in Lustenau folgt Ende November der Chrischtkendlimarkt.',

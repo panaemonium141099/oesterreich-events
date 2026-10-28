@@ -16,6 +16,14 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/feldkirch-festival/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.vol.at/feldkirch-festival-muss-pausieren/3391514',
+      'https://www.feldkirch.at/entdecken/kulturangebote/',
+      'https://austria-forum.org/af/AustriaWiki/Feldkirchfestival',
+    ],
+  },
   readingTime: 4,
   excerpt:
     'Das Feldkirch Festival gibt es nicht mehr. Von 2001 bis 2012 brachte es meist im Juni Konzerte und Theater nach Feldkirch. Seit Oktober 2012 ruht die Festivalgesellschaft, einen Termin 2026 gibt es nicht.',

@@ -18,6 +18,15 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/murau-stadtfest/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.steiermark.com/de/Murau/Urlaub-planen/Veranstaltungen/Gasseln-in-der-Murauer-Altstadt_ed_88554015',
+      'https://www.murau.gv.at',
+      'https://www.meinbezirk.at/murau/c-wirtschaft/rund-15000-besucher-werden-beim-bierstadtfest-erwartet_a7131069',
+      'https://www.ausflugsziele.jetzt/veranstaltung/gasseln-in-der-murauer-altstadt/',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Ein eigenes „Murauer Stadtfest“ gibt es nicht. Gefeiert wird in der Murauer Altstadt beim Gasseln im Sommer und, in größeren Abständen, beim Bierstadtfest der Brauerei Murau.',

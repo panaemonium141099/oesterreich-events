@@ -17,6 +17,15 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/esterhazy-konzerte/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://esterhazy.at/classic-esterhazy',
+      'https://www.herbstgold.at/',
+      'https://www.falter.at/festival/24237/herbstgold-2026',
+      'https://en.wikipedia.org/wiki/Schloss_Esterh%C3%A1zy',
+    ],
+  },
   readingTime: 5,
   excerpt:
     'Im prachtvollen Haydnsaal des Schlosses Esterházy in Eisenstadt erklingt Musik in einem der schönsten Konzertsäle Österreichs. Die Reihe classic.Esterhazy, das Festival Herbstgold im September und das Chamber Orchestra of Europe als Residenzorchester machen das Burgenland zum Klangmittelpunkt.',

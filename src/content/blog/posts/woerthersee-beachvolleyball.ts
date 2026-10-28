@@ -17,6 +17,15 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/woerthersee-beachvolleyball/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.vol.at/beach-volleyball-jagerhofer-moechte-mit-major-in-wien-bleiben/6301507',
+      'https://volleynet.at/articles/769',
+      'https://www.nussli.com/en/projects/klagenfurt-beach-volleyball-major',
+      'https://beach-woerthersee.at',
+    ],
+  },
   readingTime: 4,
   excerpt:
     'Den Beach Volleyball Grand Slam in Klagenfurt gibt es nicht mehr: Das Turnier übersiedelte 2017 nach Wien. Am Wörthersee wird trotzdem wieder gebaggert, 2026 beim MASTERS der nationalen Tour in Pörtschach.',

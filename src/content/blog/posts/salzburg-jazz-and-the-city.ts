@@ -18,6 +18,16 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/salzburg-jazz-and-the-city/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.salzburg-altstadt.at/de/salzburgjazz',
+      'https://www.salzburgerland.com/de/magazin/es-jazzt-und-swingt-in-salzburg',
+      'https://www.salzburg24.at/anzeigen/jazzthecitysounds-15-bis-18-oktober-2026-art-339877',
+      'https://www.salzburg-altstadt.at/de/salzburgjazz/programm',
+      'https://salzburg.info/en/events/highlights/jazz-and-the-city',
+    ],
+  },
   readingTime: 5,
   excerpt:
     'Jedes Jahr im Oktober bespielt Jazz&TheCity sounds die Salzburger Altstadt: 2026 waren es von 15. bis 18. Oktober rund 60 Acts mit etwa 140 Musikerinnen und Musikern an 20 Spielorten, bei freiem Eintritt mitten im UNESCO-Welterbe.',

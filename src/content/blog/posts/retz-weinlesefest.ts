@@ -15,6 +15,12 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/retz-weinlesefest/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.weinviertel.at/retzer-land/retzer-weinlesefest',
+    ],
+  },
   readingTime: 5,
   excerpt:
     'Am letzten Septemberwochenende wird der Hauptplatz von Retz zum Festgelände: Hauermarkt, Großheuriger, zwei Weinbrunnen, Festumzug und Feuerwerk. Die 72. Ausgabe des Retzer Weinlesefests läuft vom 23. bis 26. September 2027.',

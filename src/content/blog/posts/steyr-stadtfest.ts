@@ -15,6 +15,13 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/steyr-stadtfest/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.steyr.at/stadtfest',
+      'https://www.tips.at/nachrichten/steyr/kultur/533794-steyrer-stadtfest-2021-abgesagt',
+    ],
+  },
   readingTime: 5,
   excerpt:
     'Das Steyr Stadtfest verwandelt die mittelalterliche Altstadt am Zusammenfluss von Enns und Steyr in eine bunte Festmeile. Musik, Kulinarik und Stadtleben unter freiem Himmel.',

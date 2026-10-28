@@ -19,6 +19,15 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/salzburger-festspiele/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.salzburgerfestspiele.at/',
+      'https://www.salzburgerfestspiele.at/wp-content/uploads/2026/08/abschlussaussendung_2026_de-1.pdf',
+      'https://www.salzburgerfestspiele.at/tickets',
+      'https://salzburg.info/de/salzburg/salzburger-festspiele/chronik',
+    ],
+  },
   readingTime: 7,
   excerpt:
     'Seit 1920 versammeln sich die besten Musikerinnen, Musiker, Dirigenten und Regisseure der Welt im Juli und August in Salzburg. Der nächste Festspielsommer läuft von 16. Juli bis 29. August 2027.',

@@ -17,6 +17,15 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/salzburger-dult/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.dult.at/',
+      'https://www.dult.at/fileadmin/Salzburger_Dult/2026/Presse/Pressemitteilung_vorab.pdf',
+      'https://www.dult.at/de/kontakt-anreise/anfahrt-parken/',
+      'https://www.salzburg24.at/news/salzburg/stadt/hitze-premieren-und-180000-besucher-das-war-die-salzburger-dult-2026-im-messezentrum-art-327478',
+    ],
+  },
   readingTime: 5,
   excerpt:
     'Einmal im Jahr, rund um Pfingsten, wird das Messezentrum Salzburg zur Volksfeststadt: Die Salzburger Dult bringt neun Tage Vergnügungspark, Festhalle, Thementage und Feuerwerk, bei freiem Eintritt. Die nächste Dult findet von 15. bis 23. Mai 2027 statt.',

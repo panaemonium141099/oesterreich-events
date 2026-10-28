@@ -19,6 +19,18 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/ars-electronica-festival/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://ars.electronica.art/festival',
+      'https://ars.electronica.art/negotiatinghumanity/de/time-locations/',
+      'https://ars.electronica.art/negotiatinghumanity/de/tickets/',
+      'https://www.derstandard.at/story/3000000286822/ars-electronica-2025-verzeichnet-besucherrekord',
+      'https://ars.electronica.art/negotiatinghumanity/de/',
+      'https://webarchive.ars.electronica.art/documents/Geschichte.pdf',
+      'https://www.news.at/technik/ars-electronica-2026-in-linz-ein-festival-an-mehr-als-40-standorten',
+    ],
+  },
   readingTime: 7,
   excerpt:
     'Das Ars Electronica Festival in Linz ist das weltweit führende Festival für digitale Kunst, Technologie und Gesellschaft. Jährlich im September treffen sich Künstler, Wissenschaftler und Visionäre aus aller Welt.',

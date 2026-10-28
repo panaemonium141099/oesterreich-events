@@ -16,6 +16,18 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/lehar-festival-bad-ischl/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.leharfestival.at',
+      'https://www.leharfestival.at/stuecke/2027-die-lustige-witwe/',
+      'https://www.leharfestival.at/wp-content/uploads/2026/04/PRESSEMAPPE_2026.pdf',
+      'https://www.leharfestival.at/wp-content/uploads/2026/07/Preise_2027.jpg',
+      'https://www.leharfestival.at/ueber-uns/geschichte/',
+      'https://www.leharfestival.at/besuch/',
+      'https://www.stadtmuseum.at/wp-content/uploads/2026/02/Folder-Leharvilla.pdf',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Im Kongress & TheaterHaus Bad Ischl erwacht jedes Jahr die Welt der Operette neu. Das Lehár Festival Bad Ischl feiert das Erbe des berühmten Komponisten mit opulenten Inszenierungen, internationalen Stars und dem Charme des Salzkammerguts.',

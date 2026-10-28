@@ -17,6 +17,15 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/grazer-aufsteirern/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.aufsteirern.at/festival',
+      'https://www.aufsteirern.at/festival/geschichte',
+      'https://www.aufsteirern.at/festival/programm',
+      'https://www.steiermark.com/de/Region-Graz/Urlaub-planen/Veranstaltungen/Aufsteirern-2026_ed_56351214',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Das Grazer Aufsteirern ist das herzlichste Volksfest der Steiermark. Im September strömen Tausende in Tracht in die Grazer Innenstadt, um gemeinsam zu musizieren, zu tanzen und steirische Gastfreundschaft zu erleben.',

@@ -16,6 +16,17 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/europaeisches-forum-alpbach/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.alpbach.org/efa26',
+      'https://www.alpbach.org/tickets',
+      'https://www.alpbach.org/blog/efa26-highlights',
+      'https://www.alpbach.org/about/purpose-history',
+      'https://www.alpbach.org/event/service',
+      'https://www.alpbach.org',
+    ],
+  },
   readingTime: 7,
   excerpt:
     'Das Europäische Forum Alpbach versammelt jedes Jahr im August Politik, Wissenschaft, Wirtschaft und junge Menschen aus ganz Europa im kleinen Tiroler Bergdorf Alpbach. Rund zwei Wochen Austausch über Europas Zukunft.',

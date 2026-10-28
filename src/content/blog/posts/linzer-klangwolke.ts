@@ -17,6 +17,14 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/linzer-klangwolke/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.brucknerhaus.at/das-haus/klangwolken/',
+      'https://www.tips.at/nachrichten/linz/kultur/722415-attheendlinz-linzer-klangwolke-2026-erzaehlt-von-untergang-und-neubeginn',
+      'https://www.tt.com/artikel/30942153/visualisierte-klangwolke-brachte-linz-den-weltuntergang',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Jedes Jahr im September verwandelt die Linzer Klangwolke den Donaupark in einen riesigen Klangraum aus Musik, Licht und Bildern. Die Klangwolke gibt es seit 1979, und der Eintritt ist frei.',

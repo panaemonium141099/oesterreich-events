@@ -18,6 +18,16 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/snowbombing-mayrhofen/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.snowbombing.com/',
+      'https://www.tirol.at/aktivitaeten/events/alle-events/snowbombing',
+      'https://inthesnow.com/25-years-of-snowbombing',
+      'https://www.snowbombing.com/experience/venues',
+      'https://www.snowbombing.com/book',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Snowbombing in Mayrhofen verbindet Skifahren im Zillertal mit Musik bis in die Nacht: tagsüber Pisten und Bergpartys, abends DJs und Live-Acts im Wald, auf der Straße und in Clubs. Die 27. Ausgabe findet von 5. bis 10. April 2027 statt.',

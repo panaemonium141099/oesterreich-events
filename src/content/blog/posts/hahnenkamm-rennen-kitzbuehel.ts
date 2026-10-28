@@ -19,6 +19,19 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/hahnenkamm-rennen-kitzbuehel/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://hahnenkamm.com/rennen-2027/sportprogramm-2027/',
+      'https://hahnenkamm.com/rennen-2027/ticket-shop/',
+      'https://hahnenkamm.com/rennen-2027/fragen-antworten/',
+      'https://hahnenkamm.com/en/news/thank-you-to-87-000-fans/',
+      'https://www.fis-ski.com/alpine-skiing/news/2026-27/manuel-feller-honoured-with-personal-gondola-in-kitzbuehel',
+      'https://hahnenkamm.com/rennstrecken/die-streif-abfahrt/',
+      'https://hahnenkamm.com/wissenswertes/hkr-die-chronik/',
+      'https://www.hahnenkamm.com',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Das Hahnenkamm-Rennen in Kitzbühel ist die begehrteste Trophäe im alpinen Skisport. Die Streif gilt als die schwierigste Abfahrtspiste der Welt, und das Rahmenprogramm macht Kitzbühel im Januar zur Partystadt.',

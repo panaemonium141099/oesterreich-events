@@ -17,6 +17,16 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/wiener-silvesterpfad/thumb.jpg',
   publishDate: '2026-03-31',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.wien.info/de/aktuell/weihnachten/silvester-358870',
+      'https://wienersilvesterpfad.at/',
+      'https://wienersilvesterpfad.at/faq/',
+      'https://www.vienna.at/rund-550-000-menschen-begruessten-beim-wiener-silvesterpfad-das-jahr-2026/9897704',
+      'https://www.leadersnet.at/news/46302',
+    ],
+  },
   readingTime: 5,
   excerpt:
     'Am 31. Dezember feiert Wien beim Silvesterpfad den Jahreswechsel unter freiem Himmel. Acht Stationen von der Freyung bis zum Prater, Hunderttausende Besucher und um Mitternacht der Donauwalzer.',

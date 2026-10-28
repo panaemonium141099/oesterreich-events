@@ -17,6 +17,14 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/klagenfurter-stadtfest/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.stadtrichter.at/altstadtzauber/',
+      'https://www.5min.at/klagenfurt/5202608070947/30-altstadtzauber-reinigungstrupps-halten-innenstadt-sauber/',
+      'https://www.stadtrichter.at/altstadtzauber/karte-und-programm/',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Das Stadtfest der Kärntner Landeshauptstadt heißt Altstadtzauber. Jeden Sommer bespielen Bands, Straßenkünstler und ein großer Flohmarkt drei Tage lang die Plätze und Gassen der Klagenfurter Altstadt.',

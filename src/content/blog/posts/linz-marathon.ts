@@ -16,6 +16,17 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/linz-marathon/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.linzmarathon.at',
+      'https://www.linzmarathon.at/de/bewerbe/oberbank-marathon',
+      'https://www.linzmarathon.at/en/news/details/blog.24-oberbank-linz-donau-marathon-2026',
+      'https://www.linzmarathon.at/de/bewerbe/linz-ag-viertelmarathon',
+      'https://www.linzmarathon.at/de/bewerbe/orlen-halbmarathon',
+      'https://www.linzmarathon.at/de/athleteninfo/labestationen',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Der Oberbank Linz Donau Marathon führt jedes Frühjahr Tausende Läuferinnen und Läufer von der voest-Autobahnbrücke durch Linz bis zum Hauptplatz. 2026 waren 21.401 Aktive am Start, die 25. Ausgabe folgt am 11. April 2027.',

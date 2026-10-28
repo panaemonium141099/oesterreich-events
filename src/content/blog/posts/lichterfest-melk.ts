@@ -15,6 +15,14 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/lichterfest-melk/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.stiftmelk.at',
+      'https://www.wachaukulturmelk.at',
+      'https://www.noe.gv.at/noe/35._Auflage_der_Internationalen_Barocktage_Stift_Melk.html',
+    ],
+  },
   readingTime: 3,
   excerpt:
     'Ein „Lichterfest Melk“ lässt sich in keiner offiziellen Quelle finden, weder beim Stift Melk noch bei Wachau Kultur Melk. Belegt sind dagegen die Internationalen Barocktage zu Pfingsten und die Sommerspiele Melk von Juni bis August.',
