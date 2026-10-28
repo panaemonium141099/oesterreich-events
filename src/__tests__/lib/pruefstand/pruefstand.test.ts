@@ -21,7 +21,7 @@ const row = (o: Partial<PruefRow> & { source_id: string }): PruefRow => ({
 
 const ref = (rates: Partial<AtReferenz['pooled']['rates']> = {}): AtReferenz => {
   const pooled = measureRows([row({ source_id: 'a' })]);
-  pooled.rates = { ...pooled.rates, garbageTitle: 0.01, noTimeOfDay: 0.6, noCoords: 0.01, duplicatesInRun: 0.02, ...rates };
+  pooled.rates = { ...pooled.rates, garbageTitle: 0.01, noTimeOfDay: 0.6, noCoords: 0.01, visibleNoCoords: 0.01, duplicatesInRun: 0.02, ...rates };
   return { measured_at: '2026-10-28', sources: ['x'], pooled, bySource: {} };
 };
 
@@ -38,6 +38,7 @@ describe('Prüfstand: Kennzahlen', () => {
     expect(m.quarantined).toBe(1);
     expect(m.quarantineReasons).toEqual({ no_location_evidence: 1 });
     expect(m.rates.noCoords).toBe(0.25);
+    expect(m.rates.visibleNoCoords).toBe(0); // in Quarantäne, nicht sichtbar
     expect(m.rates.noTimeOfDay).toBe(0.25);
     expect(m.rates.duplicatesInRun).toBe(0.5); // 2 und 4 tragen Name/Tag/Ort von 1
     expect(m.rates.visibleMunicipalService).toBe(0.25);
@@ -77,8 +78,8 @@ describe('Prüfstand: Schwellen und Bericht', () => {
 
   it('schlechter als AT reißt, gleich gut besteht', () => {
     const m = measureRows([row({ source_id: '1', latitude: null, longitude: null }), row({ source_id: '2', title: 'Kerwe' })]);
-    expect(evaluate(m, ref()).find(x => x.check === 'noCoords')?.ok).toBe(false);
-    expect(evaluate(m, ref({ noCoords: 0.5 })).find(x => x.check === 'noCoords')?.ok).toBe(true);
+    expect(evaluate(m, ref()).find(x => x.check === 'visibleNoCoords')?.ok).toBe(false);
+    expect(evaluate(m, ref({ visibleNoCoords: 0.5 })).find(x => x.check === 'visibleNoCoords')?.ok).toBe(true);
   });
 
   it('ohne Zeilen besteht nichts', () => {

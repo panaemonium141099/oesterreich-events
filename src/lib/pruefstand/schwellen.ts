@@ -14,9 +14,12 @@ export const MAX_VISIBLE_MUNICIPAL_SERVICE = 0;
 /**
  * Raten, die nicht schlechter als die AT-Referenz sein dürfen (gepoolter
  * Wert der Gemeinde-Scraper gem2go, gemeinde-registry, gemeinden-generic,
- * `data/pruefstand/at-referenz.json`).
+ * `data/pruefstand/at-referenz.json`). Koordinaten zählen nur an
+ * öffentlichen Zeilen: AT-Gemeindekalender haben immer einen
+ * Gemeinde-Mittelpunkt, ein DE-Amtskalender hält Termine ohne genannte
+ * Gemeinde zurück, und das ist richtig (fn-29.5).
  */
-export const RATES_VS_AT = ['garbageTitle', 'noTimeOfDay', 'noCoords', 'duplicatesInRun'] as const;
+export const RATES_VS_AT = ['garbageTitle', 'noTimeOfDay', 'visibleNoCoords', 'duplicatesInRun'] as const;
 export type RateVsAt = (typeof RATES_VS_AT)[number];
 
 export interface AtReferenz {

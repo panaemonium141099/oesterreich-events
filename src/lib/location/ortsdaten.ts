@@ -14,10 +14,10 @@ import { bundeslandToId } from '@/lib/bundeslaender';
 import { bundeslandFromPolygon } from '@/lib/eventim/bundesland-from-geo';
 import { loadGemeindenDe } from '@/lib/gemeinden/de';
 import { deLandToId } from '@/lib/gemeinden/laender-de';
-import { AT_GEMEINDE_INDEX, createGemeindeIndex, type GemeindeIndex } from './gemeinde-index';
+import { AT_GEMEINDE_INDEX, createGemeindeIndex, type GemeindeIndex, type GemeindeRef } from './gemeinde-index';
 import { deLandFromPolygon } from './land-de-from-geo';
 import { getBundeslandFromPLZ } from './plz-bundesland';
-import { allPlzReferenceDeEntries, isOfficialGermanPlz, landForPlzDe } from './plz-reference-de';
+import { allPlzReferenceDeEntries, isOfficialGermanPlz, landForPlzDe, postOrtGemeindeDe } from './plz-reference-de';
 
 export interface Box {
   latMin: number;
@@ -60,18 +60,29 @@ let de: Ortsdaten | null = null;
 
 function deOrtsdaten(): Ortsdaten {
   if (de) return de;
+  // Dieselben Ref-Objekte für Index und Ortsteil-Zuordnung (Vergleich per Identität).
+  let refs: Map<string, { ref: GemeindeRef; plzAll: readonly string[] }> | null = null;
+  const refsByAgs = () => {
+    if (!refs) {
+      refs = new Map();
+      for (const g of loadGemeindenDe()) {
+        refs.set(g.ags, {
+          ref: { name: g.name, plz: g.plz, bundesland: g.land, bezirk: g.kreis || null, lat: g.lat, lng: g.lng, amtsPlz: g.plz, statutarstadt: false },
+          plzAll: g.plzAll,
+        });
+      }
+    }
+    return refs;
+  };
   de = {
     country: 'DE',
     index: createGemeindeIndex({
-      *gemeinden() {
-        for (const g of loadGemeindenDe()) {
-          yield {
-            ref: { name: g.name, plz: g.plz, bundesland: g.land, bezirk: g.kreis || null, lat: g.lat, lng: g.lng, amtsPlz: g.plz, statutarstadt: false },
-            plzAll: g.plzAll,
-          };
-        }
-      },
+      gemeinden: () => refsByAgs().values(),
       postOrte: () => allPlzReferenceDeEntries(),
+      postOrtGemeinde: (plz, ort) => {
+        const ags = postOrtGemeindeDe(plz, ort);
+        return ags ? refsByAgs().get(ags)?.ref ?? null : null;
+      },
       isOfficialPlz: isOfficialGermanPlz,
       plzPattern: /^\d{5}$/,
     }),

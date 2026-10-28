@@ -73,3 +73,16 @@ export function findGemeindeDe(ref: { ags?: string | null; name: string; land: s
   const hits = byLandName!.get(`${ref.land}|${normalizeGemeindeName(ref.name)}`) ?? [];
   return hits.length === 1 ? hits[0] : null;
 }
+
+let byVerband: Map<string, GemeindeDe[]> | null = null;
+
+/** Alle Gemeinden eines Amts bzw. einer Verbands-, Samt- oder Verwaltungsgemeinschaft. */
+export function gemeindenDeByVerband(verbandKey: string): GemeindeDe[] {
+  if (!byVerband) {
+    byVerband = new Map();
+    for (const g of loadGemeindenDe()) {
+      if (g.verbandKey) byVerband.set(g.verbandKey, [...(byVerband.get(g.verbandKey) ?? []), g]);
+    }
+  }
+  return byVerband.get(verbandKey) ?? [];
+}

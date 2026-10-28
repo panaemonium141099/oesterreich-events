@@ -23,6 +23,8 @@ export interface PlzReferenceDeEntry {
   kreise: string[];
   /** Land-IDs aus `laender-de.ts`. */
   laender: string[];
+  /** Ort → AGS, wo der Ort genau einer Gemeinde angehört (Ortsteile über die VG250-Fläche). */
+  orteGemeinde?: Record<string, string>;
   grosskunde?: true;
 }
 
@@ -51,6 +53,20 @@ export function plzReferenceDe(plz: string): PlzReferenceDeEntry | null {
 /** Fünfstellig und in der Referenz bekannt (auch Großkunden-PLZ). */
 export function isOfficialGermanPlz(plz: string): boolean {
   return /^\d{5}$/.test(plz) && load().has(plz);
+}
+
+/**
+ * Gemeinde (AGS) eines Orts unter dieser PLZ („Mahlow", 15831 →
+ * Blankenfelde-Mahlow). Nur der Ortsname, wie die PLZ-Referenz ihn führt
+ * (Groß-/Kleinschreibung und Leerraum egal); sonst null.
+ */
+export function postOrtGemeindeDe(plz: string, ort: string): string | null {
+  const map = load().get(plz)?.orteGemeinde;
+  if (!map) return null;
+  const key = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').trim();
+  const k = key(ort);
+  for (const [o, ags] of Object.entries(map)) if (key(o) === k) return ags;
+  return null;
 }
 
 /** Land zur PLZ, nur wenn eindeutig und kein Großkunde. */

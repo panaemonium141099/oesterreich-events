@@ -21,6 +21,7 @@
  */
 import { createHash } from 'crypto';
 import { bundeslandToId } from '@/lib/bundeslaender';
+import { ONLINE_LOCATION_PATTERN } from '@/lib/quality/admission';
 import { normalizeGemeindeName, type GemeindeRef } from './gemeinde-index';
 import { inBox, ortsdatenFor, type Ortsdaten } from './ortsdaten';
 import {
@@ -62,7 +63,7 @@ const EU_BOX = { latMin: 35, latMax: 72, lngMin: -25, lngMax: 45 };
  *  gilt der Datensatz als widersprüchlich. */
 const CONFLICT_KM = 30;
 
-const ONLINE_PATTERN = /^(online|onlineevent|online-event|online event|virtuell|virtual|webinar|livestream|zoom)\b/i;
+const ONLINE_PATTERN = ONLINE_LOCATION_PATTERN;
 
 function hasText(s: string | null | undefined): s is string {
   return typeof s === 'string' && s.trim().length > 0;
@@ -371,11 +372,19 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
       // deklarierte Bundesland, nie über Reihenfolge oder Nähe.
       const key = cityText ? normalizeGemeindeName(cityText) : null;
       const byName = key ? refs.find(r => normalizeGemeindeName(r.name) === key) : undefined;
+      // Ortsteil, den die PLZ-Referenz einer Gemeinde zuordnet („Mahlow",
+      // 15831 → Blankenfelde-Mahlow); vor der Hauptgemeinde, sonst landete
+      // der Ortsteil in der Gemeinde mit der Amts-PLZ.
+      const byOrt = !byName && cityText ? od.index.gemeindeForPostOrt(plz, cityText) : null;
       const haupt = od.index.hauptgemeindeFuerPlz(plz);
       const byBl = declaredBl ? refs.filter(r => r.bundesland === declaredBl) : [];
       if (byName) {
         gemeinde = byName;
         gemeindeProvenance = 'registry';
+      } else if (byOrt) {
+        gemeinde = byOrt;
+        gemeindeProvenance = 'derived:plz';
+        evidence.push(`gemeinde:ortsteil_plz:${byOrt.name}`);
       } else if (haupt && (!declaredBl || haupt.bundesland === declaredBl)) {
         gemeinde = haupt;
         gemeindeProvenance = 'derived:plz';

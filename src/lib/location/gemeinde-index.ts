@@ -46,6 +46,9 @@ export interface GemeindeIndexSource {
   gemeinden(): Iterable<{ ref: GemeindeRef; plzAll: readonly string[] }>;
   postOrte(): Iterable<{ plz: string; orte: readonly string[] }>;
   isOfficialPlz(plz: string): boolean;
+  /** Gemeinde eines Post-Orts unter dieser PLZ, wenn die Referenz sie kennt
+   *  (DE: Ortsteile über die VG250-Fläche); dasselbe Ref-Objekt wie in `gemeinden()`. */
+  postOrtGemeinde?(plz: string, ort: string): GemeindeRef | null;
   /** Format der PLZ dieses Landes (AT vier, DE fünf Stellen). */
   plzPattern: RegExp;
 }
@@ -55,6 +58,8 @@ export interface GemeindeIndex {
   gemeindenByName(name: string): GemeindeRef[];
   gemeindenNamedByPlaceText(text: string | null | undefined, bundesland?: string | null, opts?: { exact?: boolean }): GemeindeRef[];
   hauptgemeindeFuerPlz(plz: string): GemeindeRef | null;
+  /** Gemeinde des Ortsteils, den die PLZ-Referenz unter dieser PLZ führt; sonst null. */
+  gemeindeForPostOrt(plz: string, ort: string): GemeindeRef | null;
   isKnownPlz(plz: string): boolean;
   plzCentroid(plz: string, preferName?: string | null): { ref: GemeindeRef | null; lat: number; lng: number; ambiguous: boolean } | null;
 }
@@ -230,7 +235,14 @@ export function createGemeindeIndex(src: GemeindeIndexSource): GemeindeIndex {
     return null;
   }
 
-  return { gemeindenByPlz, gemeindenByName, gemeindenNamedByPlaceText, hauptgemeindeFuerPlz, isKnownPlz, plzCentroid };
+  function gemeindeForPostOrt(plz: string, ort: string): GemeindeRef | null {
+    build();
+    const ref = src.postOrtGemeinde?.(plz, ort) ?? null;
+    // Nur eine Gemeinde, die diese PLZ auch führt.
+    return ref && gemeindenByPlz(plz).includes(ref) ? ref : null;
+  }
+
+  return { gemeindenByPlz, gemeindenByName, gemeindenNamedByPlaceText, hauptgemeindeFuerPlz, gemeindeForPostOrt, isKnownPlz, plzCentroid };
 }
 
 /** Österreich: Stammdatei `data/gemeinden-at.json` und RTR-PLZ-Tabelle. */

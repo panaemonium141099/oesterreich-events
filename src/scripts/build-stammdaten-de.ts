@@ -18,9 +18,13 @@
  *   UTM vereinfacht (Douglas-Peucker, 25 m), dann nach WGS84 umgerechnet
  *
  * Wie in Österreich wird nichts aufgelöst: Eine PLZ führt alle Orte und alle
- * Gemeinden als Menge. Einer Gemeinde wird eine PLZ nur zugeordnet, wenn
- * Destatis sie als PLZ des Gemeindeamts führt oder GeoNames den
- * Gemeindenamen unter dieser PLZ im selben Kreis nennt. Nähe zählt nicht.
+ * Gemeinden als Menge. Einer Gemeinde wird eine PLZ zugeordnet, wenn
+ * Destatis sie als PLZ des Gemeindeamts führt, GeoNames den Gemeindenamen
+ * unter dieser PLZ im selben Kreis nennt, oder der GeoNames-Punkt eines Orts
+ * dieser PLZ in der amtlichen Gemeindefläche (VG250) des Kreises liegt. Das
+ * trägt Ortsteile („Mahlow" unter 15831 → Blankenfelde-Mahlow, fn-29.5);
+ * vorher führten 1.755 PLZ keine Gemeinde. `orteGemeinde` hält je Ort die
+ * Gemeinde fest. Nähe allein zählt nicht.
  *
  * Aufruf: npx tsx src/scripts/build-stammdaten-de.ts [--fetch]
  *   --fetch  lädt die Rohdateien neu (sonst die vorhandenen in quellen/)
@@ -182,6 +186,49 @@ function gpkgToPolygons(blob: Uint8Array, tolMeters = 25): number[][][][] {
   return polys;
 }
 
+interface GemFlaeche { ags: string; polys: number[][][][]; box: [number, number, number, number] }
+
+function flaeche(ags: string, polys: number[][][][]): GemFlaeche {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const poly of polys) for (const [x, y] of poly[0]) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+  return { ags, polys, box: [x0, y0, x1, y1] };
+}
+
+/** Gerade-Ungerade-Regel über alle Ringe (Löcher inklusive). */
+function inPolygon(x: number, y: number, rings: number[][][]): boolean {
+  let inside = false;
+  for (const ring of rings) {
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const [xi, yi] = ring[i], [xj, yj] = ring[j];
+      if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+  }
+  return inside;
+}
+
+/** Gemeinde (AGS), in deren Fläche ein Punkt liegt; null außerhalb oder bei Überlappung. */
+function gemeindeLocator(flaechen: GemFlaeche[]): (lng: number, lat: number) => string | null {
+  const cell = (v: number) => Math.floor(v * 10);
+  const grid = new Map<string, GemFlaeche[]>();
+  for (const f of flaechen) {
+    for (let gx = cell(f.box[0]); gx <= cell(f.box[2]); gx++) {
+      for (let gy = cell(f.box[1]); gy <= cell(f.box[3]); gy++) {
+        const k = `${gx}:${gy}`;
+        grid.set(k, [...(grid.get(k) ?? []), f]);
+      }
+    }
+  }
+  return (lng, lat) => {
+    if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null;
+    const hits = new Set<string>();
+    for (const f of grid.get(`${cell(lng)}:${cell(lat)}`) ?? []) {
+      if (lng < f.box[0] || lng > f.box[2] || lat < f.box[1] || lat > f.box[3]) continue;
+      if (f.polys.some(p => inPolygon(lng, lat, p))) hits.add(f.ags);
+    }
+    return hits.size === 1 ? [...hits][0] : null;
+  };
+}
+
 // ── Namensabgleich ─────────────────────────────────────────────────────────
 /** „Neustadt a.d.Aisch, St" → „Neustadt a.d.Aisch" (Zusatz nach dem Komma ist der Status). */
 function displayName(amtlich: string): string {
@@ -240,6 +287,8 @@ interface PlzDe {
   gemeinden: string[];
   kreise: string[];
   laender: string[];
+  /** Ort → AGS, wo der Ort genau einer Gemeinde angehört (Name oder Fläche). */
+  orteGemeinde?: Record<string, string>;
   /** Nur Firmen-/Großkundeneinträge, kein Ort. */
   grosskunde?: true;
 }
@@ -292,7 +341,23 @@ async function main(): Promise<void> {
     });
   }
 
-  // ── GeoNames: PLZ → Orte, Kreise; Gemeinde nur über Namen im selben Kreis ──
+  // ── BKG VG250 öffnen: Gemeindeflächen für die Ortszuordnung, Länderflächen unten ──
+  const { DatabaseSync } = await import('node:sqlite');
+  const gpkgZip = unzip(raw.bkg);
+  const gpkgName = [...gpkgZip.keys()].find(k => k.endsWith('.gpkg'))!;
+  const tmp = join(RAW, 'vg250.gpkg');
+  writeFileSync(tmp, gpkgZip.get(gpkgName)!);
+  const db = new DatabaseSync(tmp, { readOnly: true });
+  const agsKnown = new Set(gemeinden.map(g => g.ags));
+  const gemFlaechen: GemFlaeche[] = [];
+  for (const r of db.prepare('SELECT AGS, geom FROM vg250_gem WHERE GF = 4').all() as { AGS: string; geom: Uint8Array }[]) {
+    // VG250 hat den Stand 31.12.; eine seither fusionierte Gemeinde fehlt bei Destatis und zählt nicht.
+    if (!agsKnown.has(r.AGS)) continue;
+    gemFlaechen.push(flaeche(r.AGS, gpkgToPolygons(r.geom, 5)));
+  }
+  const gemeindeAt = gemeindeLocator(gemFlaechen);
+
+  // ── GeoNames: PLZ → Orte, Kreise; Gemeinde über Namen im selben Kreis oder Fläche ──
   const gn = unzip(raw.geonames).get('DE.txt')!.toString('utf8').split(/\r?\n/).filter(Boolean).map(l => l.split('\t'));
   const byKreisKey = new Map<string, Map<string, GemeindeDe[]>>();
   const byKreisStem = new Map<string, Map<string, GemeindeDe[]>>();
@@ -303,15 +368,15 @@ async function main(): Promise<void> {
       m.set(g.kreisKey, inner);
     }
   }
-  const plz = new Map<string, { orte: Set<string>; gemeinden: Set<string>; kreise: Set<string>; laender: Set<string>; firmen: number; rows: number }>();
+  const plz = new Map<string, { orte: Set<string>; gemeinden: Set<string>; kreise: Set<string>; laender: Set<string>; orteGemeinde: Map<string, Set<string>>; firmen: number; rows: number }>();
   const entry = (p: string) => {
     let e = plz.get(p);
-    if (!e) { e = { orte: new Set(), gemeinden: new Set(), kreise: new Set(), laender: new Set(), firmen: 0, rows: 0 }; plz.set(p, e); }
+    if (!e) { e = { orte: new Set(), gemeinden: new Set(), kreise: new Set(), laender: new Set(), orteGemeinde: new Map(), firmen: 0, rows: 0 }; plz.set(p, e); }
     return e;
   };
-  let matchedExact = 0, matchedStem = 0;
+  let matchedExact = 0, matchedStem = 0, matchedFlaeche = 0;
   for (const r of gn) {
-    const [, p, place, , , , , , kreisKey] = r;
+    const [, p, place, , , , , , kreisKey, latS, lngS, accuracy] = r;
     if (!/^\d{5}$/.test(p) || !/^\d{5}$/.test(kreisKey ?? '')) continue;
     const e = entry(p);
     e.rows++;
@@ -326,7 +391,17 @@ async function main(): Promise<void> {
       hits = byKreisStem.get(kreisKey)?.get(stemKey(place)) ?? [];
       if (hits.length === 1) matchedStem++;
     }
-    if (hits.length === 1) e.gemeinden.add(hits[0].ags);
+    let ags = hits.length === 1 ? hits[0].ags : null;
+    // Ortsteil: Punkt in der Gemeindefläche, nur mit Ortspunkt (Genauigkeit 4
+    // oder 6, nicht geschätzt) und nur im Kreis des Eintrags.
+    if (!ags && (accuracy === '4' || accuracy === '6')) {
+      const hit = gemeindeAt(Number(lngS), Number(latS));
+      if (hit && hit.startsWith(kreisKey)) { ags = hit; matchedFlaeche++; }
+    }
+    if (ags) {
+      e.gemeinden.add(ags);
+      e.orteGemeinde.set(place, (e.orteGemeinde.get(place) ?? new Set<string>()).add(ags));
+    }
   }
   // PLZ des Gemeindeamts laut Destatis gilt immer.
   for (const g of gemeinden) {
@@ -346,17 +421,12 @@ async function main(): Promise<void> {
     gemeinden: [...e.gemeinden].sort(),
     kreise: [...e.kreise].sort(),
     laender: [...e.laender].sort(),
+    ...(e.orteGemeinde.size ? { orteGemeinde: Object.fromEntries([...e.orteGemeinde].filter(([, a]) => a.size === 1).map(([o, a]) => [o, [...a][0]]).sort(([x], [y]) => x.localeCompare(y))) } : {}),
     ...(e.orte.size === 0 && e.firmen > 0 ? { grosskunde: true as const } : {}),
   }));
 
   // ── BKG VG250: Länderflächen (GF 4 = Landfläche; Bodensee und Küstengewässer
   //    gehören zu keinem Land, ein Mittelpunkt dort fällt in die Toleranz der Gegenprobe) ──
-  const { DatabaseSync } = await import('node:sqlite');
-  const gpkgZip = unzip(raw.bkg);
-  const gpkgName = [...gpkgZip.keys()].find(k => k.endsWith('.gpkg'))!;
-  const tmp = join(RAW, 'vg250.gpkg');
-  writeFileSync(tmp, gpkgZip.get(gpkgName)!);
-  const db = new DatabaseSync(tmp, { readOnly: true });
   const gfs = db.prepare('SELECT GF, count(*) n FROM vg250_lan GROUP BY GF').all();
   console.log('vg250_lan GF:', JSON.stringify(gfs));
   const byLand = new Map<string, number[][][][]>();
@@ -389,6 +459,7 @@ async function main(): Promise<void> {
       plz_mehrere_laender: plzOut.filter(p => p.laender.length > 1).length,
       geonames_orte_exakt: matchedExact,
       geonames_orte_stamm: matchedStem,
+      geonames_orte_flaeche: matchedFlaeche,
       laender_flaechen: features.length,
     },
   };

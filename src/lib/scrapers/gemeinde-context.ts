@@ -22,6 +22,7 @@
 import type { ScrapedEvent } from '@/types/events';
 import { extractPlzFromAddress } from '@/lib/location/conservative-resolution';
 import { bundeslandToId } from '@/lib/bundeslaender';
+import { ortsdatenFor, type Ortsdaten } from '@/lib/location/ortsdaten';
 
 export interface GemeindeContext {
   name: string;
@@ -48,7 +49,11 @@ export function isRegionLabel(name: string | null | undefined): boolean {
   return BUNDESLAND_NAMES.has(name.trim().toLowerCase());
 }
 
-export function applyGemeindeContext<T extends ScrapedEvent>(event: T, g: GemeindeContext): T {
+/**
+ * `od`: Ortsdaten des Landes der Gemeinde (Standard Österreich; DE-Adapter
+ * übergeben `ortsdatenFor('DE')`, fn-29.5).
+ */
+export function applyGemeindeContext<T extends ScrapedEvent>(event: T, g: GemeindeContext, od: Ortsdaten = ortsdatenFor('AT')!): T {
   // Eine Adresse bzw. PLZ in einer anderen PLZ-Region (erste Stelle) als die
   // Gemeinde ist bei Gemeinde-Kalendern kein Veranstaltungsort, sondern
   // Beiwerk der Seite (Datenschutzbeauftragter in Wien, Agentur,
@@ -56,11 +61,12 @@ export function applyGemeindeContext<T extends ScrapedEvent>(event: T, g: Gemein
   // an Linzer Events, Prod 2026-09-14): Adresse, PLZ und Ort fallen weg,
   // der Kalender-Kontext bleibt. Eine andere PLZ derselben Region
   // (Nachbargemeinde) bleibt als Angabe der Quelle.
-  const claimedPlz = extractPlzFromAddress(event.address) ?? (event.postal_code && /^\d{4}$/.test(event.postal_code) ? event.postal_code : undefined);
+  const plzRe = new RegExp(String.raw`^\d{${od.plzDigits}}$`);
+  const claimedPlz = extractPlzFromAddress(event.address, od) ?? (event.postal_code && plzRe.test(event.postal_code) ? event.postal_code : undefined);
   if (claimedPlz && claimedPlz.charAt(0) !== g.plz.charAt(0)) {
     event = { ...event, address: undefined, postal_code: undefined, city: undefined };
   }
-  const addressPlz = extractPlzFromAddress(event.address);
+  const addressPlz = extractPlzFromAddress(event.address, od);
   const addressNamesOtherPlz = !!addressPlz && addressPlz !== g.plz;
   const hasOwnCoords =
     typeof event.latitude === 'number' && typeof event.longitude === 'number' &&
@@ -110,7 +116,7 @@ export function applyGemeindeContext<T extends ScrapedEvent>(event: T, g: Gemein
   // über den Ort eines Events und belegte über die PLZ den 1. Bezirk
   // (2026-10-07). Die PLZ der Gemeinde übernimmt dann der Resolver, als
   // übernommen gekennzeichnet (Provenienz 'registry').
-  out.postal_code = event.postal_code ?? (bundeslandToId(g.bundesland) === 'wien' ? undefined : g.plz);
+  out.postal_code = event.postal_code ?? (od.country === 'AT' && bundeslandToId(g.bundesland) === 'wien' ? undefined : g.plz);
   if (hasOwnCoords) {
     out.coords_precision = event.coords_precision ?? 'venue';
   } else {

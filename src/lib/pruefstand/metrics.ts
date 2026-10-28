@@ -40,6 +40,10 @@ export interface PruefMetrics {
     noTimeOfDay: number;
     municipalityPrecision: number;
     noCoords: number;
+    /** Öffentlich ohne Position: auf Karte und Listen unsichtbar. Eine Zeile
+     *  ohne belegten Ort in Quarantäne ist richtig (Qualitätsvertrag „Ort
+     *  korrekt oder Quarantäne") und zählt hier nicht. */
+    visibleNoCoords: number;
     visibleMunicipalService: number;
     duplicatesInRun: number;
   };
@@ -51,17 +55,23 @@ export function isPublished(row: Pick<PruefRow, 'publish_status'>): boolean {
   return PUBLISHED.has(row.publish_status ?? '');
 }
 
-/** Gleicher Name, gleicher Kalendertag, gleicher Ort im selben Lauf. */
+/**
+ * Gleicher Name, gleicher Beginn, gleicher Ort im selben Lauf. Der Beginn
+ * zählt mit Uhrzeit: zwei Vorstellungen am selben Tag (Führung 13 und 15 Uhr)
+ * sind verschiedene Events, so entscheidet auch der Dedup (harte
+ * Uhrzeit-Regel, dedup-scorer.ts). Ohne echte Uhrzeit zählt der Tag.
+ */
 function duplicateKey(r: PruefRow): string | null {
   if (!r.title || !r.start_date) return null;
   const d = new Date(r.start_date);
   if (isNaN(d.getTime())) return null;
-  return `${normalizeGemeindeName(r.title)}|${viennaCalendarDay(d)}|${normalizeGemeindeName(r.location_name ?? '')}`;
+  const when = hasTimeOfDay(r.start_date) ? d.toISOString().slice(0, 16) : viennaCalendarDay(d);
+  return `${normalizeGemeindeName(r.title)}|${when}|${normalizeGemeindeName(r.location_name ?? '')}`;
 }
 
 export function measureRows(rows: readonly PruefRow[]): PruefMetrics {
   const n = rows.length;
-  let published = 0, quarantined = 0, garbage = 0, noTime = 0, muni = 0, noCoords = 0, visibleService = 0, dup = 0;
+  let published = 0, quarantined = 0, garbage = 0, noTime = 0, muni = 0, noCoords = 0, visibleNoCoords = 0, visibleService = 0, dup = 0;
   const reasons: Record<string, number> = {};
   const seen = new Set<string>();
   for (const r of rows) {
@@ -75,7 +85,10 @@ export function measureRows(rows: readonly PruefRow[]): PruefMetrics {
     if (r.title && isGarbageTitle(r.title)) garbage++;
     if (!hasTimeOfDay(r.start_date)) noTime++;
     if (r.location_precision === 'municipality') muni++;
-    if (typeof r.latitude !== 'number' || typeof r.longitude !== 'number') noCoords++;
+    if (typeof r.latitude !== 'number' || typeof r.longitude !== 'number') {
+      noCoords++;
+      if (pub) visibleNoCoords++;
+    }
     if (pub && isMunicipalService(r.title)) visibleService++;
     const k = duplicateKey(r);
     if (k) {
@@ -91,6 +104,7 @@ export function measureRows(rows: readonly PruefRow[]): PruefMetrics {
       noTimeOfDay: rate(noTime),
       municipalityPrecision: rate(muni),
       noCoords: rate(noCoords),
+      visibleNoCoords: rate(visibleNoCoords),
       visibleMunicipalService: rate(visibleService),
       duplicatesInRun: rate(dup),
     },
