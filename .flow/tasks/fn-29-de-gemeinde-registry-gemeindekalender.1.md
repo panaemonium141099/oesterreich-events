@@ -11,9 +11,8 @@ Rahmenbedingungen: Der Qualitätsvertrag DE im Epic-Spec (`flowctl cat fn-29-de-
 - [ ] Stammdaten-Build reproduzierbar per npm-Skript
 
 ## Done summary
-TBD
-
+Deutsche Ortsstammdaten im Ein-System (PR #360): data/gemeinden-de.json (10.749 Gemeinden, Destatis), data/plz-de.json (10.845 PLZ als Mengen, GeoNames CC BY 4.0 + Amts-PLZ, 989 Großkunden markiert), data/stammdaten-de/laender-de.geojson (BKG VG250, 25 m vereinfacht; alle Gemeindemittelpunkte im eigenen Land), meta.json mit Quellen/Lizenzen/SHA-256. Builder npm run build:stammdaten:de ohne neue Abhängigkeit. Zugriff über src/lib/gemeinden/de.ts, laender-de.ts, location/plz-reference-de.ts, location/land-de-from-geo.ts. Wächter stammdaten-de.test.ts 13/13. OpenPLZ (ODbL) bewusst nicht verwendet.
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: ffcfca3255291e25976ed7ae781f0f501ccf0bcb
+- Tests: npx vitest run src/__tests__/lib/gemeinden/stammdaten-de.test.ts
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/360
