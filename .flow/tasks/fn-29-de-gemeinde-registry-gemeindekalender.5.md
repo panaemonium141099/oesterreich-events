@@ -14,9 +14,8 @@ Rahmenbedingungen: Der Qualitätsvertrag DE im Epic-Spec (`flowctl cat fn-29-de-
 - [ ] Erst nach bestandenem Prüfstand in den Nachtlauf
 
 ## Done summary
-TBD
-
+Adapter de-ionas gebaut und auf dem Prüfstand bestanden (PR #367): iCal-Exporte aller ionas-Feeds der DE-Registry, Amtskalender ordnen nur die vom Termin genannte Gemeinde zu, Feed-Dubletten zusammengefasst. Dazu DE-Stammdaten um Ortsteile ergänzt (GeoNames-Ort in VG250-Fläche, orteGemeinde), Resolver löst Ortsteile auf; Freigabevertrag: DE ohne Position → no_position, Muster-Orte → placeholder_location. Prüfstand: Dubletten nach Minute, Schwelle sichtbar ohne Koordinaten, AT-Referenz neu gemessen. Ergebnis: alle Schwellen eingehalten, Stichprobe 30/30. Nicht im Nachtlauf (fn-29.18).
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: ccfbcbc9
+- Tests: npx vitest run (3900 grün, 3 bekannte CRLF-Fälle), npm run pruefstand:de -- --adapter de-ionas --offline (Exit 0)
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/367
