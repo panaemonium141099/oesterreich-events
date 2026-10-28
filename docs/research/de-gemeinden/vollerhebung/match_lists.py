@@ -44,7 +44,7 @@ for c in hi:
         if near and dist(pos, (near[0]["lat"], near[0]["lon"])) < 4:
             hit = near[0]; hi_res["nur_koordinate"] += 1
     if hit:
-        hi_ags[hit["ags"]] = c["name"]; hi_res["treffer"] += 1
+        hi_ags[hit["ags"]] = c["id"]; hi_res["treffer"] += 1
     else:
         hi_res["kein_treffer"] += 1
 print("Heimat-Info", dict(hi_res), "eindeutige AGS", len(hi_ags))
@@ -61,7 +61,7 @@ for oid, slug in orte:
         # "Kobern-Gondorf" bleibt mit Bindestrich in Destatis, norm macht beides gleich
         mo_res["kein_treffer"] += 1; continue
     if len(cands) == 1:
-        mo_ags[cands[0]["ags"]] = slug; mo_res["eindeutig"] += 1
+        mo_ags[cands[0]["ags"]] = f"{oid}-{slug}"; mo_res["eindeutig"] += 1
     else:
         mo_res["mehrdeutig"] += 1; amb.append((slug, [g["land"] for g in cands]))
 print("meinOrt", len(orte), dict(mo_res), "eindeutige AGS", len(mo_ags))

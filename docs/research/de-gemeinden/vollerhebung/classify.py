@@ -8,6 +8,7 @@ p2 = {json.loads(l)["host"]: json.loads(l) for l in open(f"{D}/detect2.jsonl", e
 p3 = {json.loads(l)["host"]: json.loads(l) for l in open(f"{D}/detect3.jsonl", encoding="utf-8")}
 lm = json.load(open(f"{D}/list_matches.json", encoding="utf-8"))
 HI, MO = set(lm["heimatinfo"]), set(lm["meinort"])
+HI_ID, MO_ID = lm["heimatinfo"], lm["meinort"]
 
 def hk(u):
     return urllib.parse.urlsplit(u).netloc.lower().removeprefix("www.") if u else ""
@@ -88,10 +89,23 @@ for g in gem:
                  "klasse": cls, "integration": integ, "vb_host": vbh if vb_cls else "", "vb_klasse": vb_cls, "vb_integration": vb_int,
                  "meinort": int(g["ags"] in MO),
                  "amtsblatt_wittich": int("wittich" in m), "amtsblatt_nussbaum": int("nussbaum" in m),
-                 "event_url": b.get("event_url") or p3.get(host, {}).get("url", "") or "", "merkmale": " ".join(sorted(m))})
+                 "event_url": b.get("event_url") or p3.get(host, {}).get("url", "") or "", "merkmale": " ".join(sorted(m)),
+                 "vb_event_url": (p2.get(vbh, {}).get("event_url") or p3.get(vbh, {}).get("url", "") or "") if vb_cls else "",
+                 "heimatinfo_id": HI_ID.get(g["ags"], ""), "meinort_ort": MO_ID.get(g["ags"], "")})
 
 with open(f"{D}/gemeinden_klassifiziert.csv", "w", newline="", encoding="utf-8") as f:
     w = csv.DictWriter(f, fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
+
+def stufe(r):
+    c = r["klasse"][0]
+    if c in "ABCDE": return c
+    if r["vb_klasse"][:1] in tuple("ABCDE") and r["vb_klasse"]: return "V"
+    return "M" if r["meinort"] else "R"
+FINAL = ["ags", "land", "name", "ew", "kreis", "vb", "host", "stufe", "klasse", "integration", "vb_host", "vb_integration",
+         "meinort", "event_url", "vb_event_url", "heimatinfo_id", "meinort_ort"]
+with open(f"{D}/vollerhebung.csv", "w", newline="", encoding="utf-8") as f:
+    w = csv.DictWriter(f, fieldnames=FINAL, extrasaction="ignore"); w.writeheader()
+    w.writerows({**r, "stufe": stufe(r)} for r in rows)
 
 tot = len(rows)
 print("Gemeinden", tot)

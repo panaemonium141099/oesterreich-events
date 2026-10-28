@@ -192,6 +192,12 @@ node / next.js
   `district` (FK) führen nur AT-Werte, für DE bleiben sie leer, das Land
   steht in `location_resolution.gemeinde.bundesland`; ein DE-Wert dort würde
   ganze Schreib-Batches abweisen.
+- **DE-Gemeinde-Registry (fn-29.4):** `data/de-gemeinde-registry.json`, je
+  Gemeinde ein Eintrag (AGS, Stufe, Integration, Kalender-URL, Feed nur nach
+  bestätigtem Abruf, Ausweichweg Amt/VG bzw. meinOrt), gebaut von
+  `npm run build:registry:de [-- --feeds]` aus der Vollerhebungs-CSV
+  (`docs/research/de-gemeinden/data/`). Terminbuchung und Abfallkalender sind
+  nie Kalender-URL (`NON_EVENT_HOSTS`). Wächter `registry-de.test.ts`.
 - **DE-Prüfstand (fn-29.3):** jeder DE-Adapter vor dem Nachtlauf über
   `npm run pruefstand:de -- --adapter <name> [--offline] [--mit-belegen]`
   (Cache in `.pruefstand/`, derselbe Schreibweg wie der Sync ohne Schreiben,
