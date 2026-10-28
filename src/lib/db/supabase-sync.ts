@@ -325,7 +325,7 @@ async function prefetchExistingRows(
  * Namen, die Entscheidung liefert Position, PLZ, Gemeinde, Status,
  * Genauigkeit und die erlaubte Ausspielung. Kein Namensabgleich mehr.
  */
-function locationInputOf(event: ScrapedEvent, existingId?: string | null): LocationInput {
+export function locationInputOf(event: ScrapedEvent, existingId?: string | null): LocationInput {
   return {
     event_id: existingId ?? null,
     source_name: event.source_name,

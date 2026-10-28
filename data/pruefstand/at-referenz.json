@@ -1,0 +1,85 @@
+{
+  "measured_at": "2026-10-28T17:17:07.271Z",
+  "sources": [
+    "gem2go",
+    "gemeinde-registry",
+    "gemeinden-generic"
+  ],
+  "pooled": {
+    "n": 37817,
+    "published": 36594,
+    "quarantined": 1186,
+    "quarantineReasons": {
+      "start_too_far_ahead": 30,
+      "municipal_service": 1136,
+      "placeholder_location": 6,
+      "no_location_evidence": 14
+    },
+    "rates": {
+      "garbageTitle": 0.0014279292381733082,
+      "noTimeOfDay": 0.6093555808234392,
+      "municipalityPrecision": 0.7716106512943914,
+      "noCoords": 0.0026178702699843986,
+      "visibleMunicipalService": 0,
+      "duplicatesInRun": 0.016817833249596743
+    }
+  },
+  "bySource": {
+    "gem2go": {
+      "n": 9132,
+      "published": 8973,
+      "quarantined": 150,
+      "quarantineReasons": {
+        "start_too_far_ahead": 11,
+        "municipal_service": 136,
+        "placeholder_location": 3
+      },
+      "rates": {
+        "garbageTitle": 0,
+        "noTimeOfDay": 0.4610162067455103,
+        "municipalityPrecision": 0.7544897065265003,
+        "noCoords": 0.0020805957074025404,
+        "visibleMunicipalService": 0,
+        "duplicatesInRun": 0.03296101620674551
+      }
+    },
+    "gemeinde-registry": {
+      "n": 20857,
+      "published": 20199,
+      "quarantined": 631,
+      "quarantineReasons": {
+        "municipal_service": 613,
+        "placeholder_location": 1,
+        "start_too_far_ahead": 16,
+        "no_location_evidence": 1
+      },
+      "rates": {
+        "garbageTitle": 0.0022054945581819053,
+        "noTimeOfDay": 0.6705662367550462,
+        "municipalityPrecision": 0.7808409646641415,
+        "noCoords": 0.002253440092055425,
+        "visibleMunicipalService": 0,
+        "duplicatesInRun": 0.011027472790909527
+      }
+    },
+    "gemeinden-generic": {
+      "n": 7828,
+      "published": 7422,
+      "quarantined": 405,
+      "quarantineReasons": {
+        "municipal_service": 387,
+        "no_location_evidence": 13,
+        "placeholder_location": 2,
+        "start_too_far_ahead": 3
+      },
+      "rates": {
+        "garbageTitle": 0.001021972406745018,
+        "noTimeOfDay": 0.6193152784874808,
+        "municipalityPrecision": 0.7669902912621359,
+        "noCoords": 0.004215636177823199,
+        "visibleMunicipalService": 0,
+        "duplicatesInRun": 0.01341338783852836
+      }
+    }
+  }
+}

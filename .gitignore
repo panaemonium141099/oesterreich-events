@@ -125,3 +125,6 @@ _*.ts
 
 # Rohdateien der DE-Stammdaten (build-stammdaten-de.ts --fetch)
 data/stammdaten-de/quellen/
+
+# Prüfstand-Cache und Berichte (npm run pruefstand:de)
+.pruefstand/
