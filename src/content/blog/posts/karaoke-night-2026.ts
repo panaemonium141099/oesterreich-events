@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/karaoke-night-kulturverein-tik-21291517/?affiliate=J70",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/karaoke-night-kulturverein-tik-21291517/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Am 27. November 2026 wird die Stubo des Kulturvereins TiK in Dornbirn zur Karaoke-Bühne. Ob Sie selbst zum Mikrofon greifen oder lieber zuhören: Hier zählt der gemeinsame Abend.",
   "category": "Musik & Festival",

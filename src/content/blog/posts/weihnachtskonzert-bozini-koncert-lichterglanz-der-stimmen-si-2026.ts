@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/weihnachtskonzert-bozini-koncert-konzerthaus-klagenfurt-22207894/?affiliate=J70",
   "publishDate": "2026-10-19",
   "updatedDate": "2026-10-19",
+  "factSources": {
+    "checkedAt": "2026-10-19",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/weihnachtskonzert-bozini-koncert-konzerthaus-klagenfurt-22207894/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Am 4. Dezember 2026 wird das Konzerthaus Klagenfurt zum Klangraum für Advent auf Deutsch und Slowenisch: Chöre, Solostimmen und Big Band beim Weihnachtskonzert „Lichterglanz der Stimmen“.",
   "category": "Kultur & Tradition",

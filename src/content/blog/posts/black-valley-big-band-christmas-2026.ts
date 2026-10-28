@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/black-valley-big-band-christmas-ghegahalle-payerbach-22129930/?affiliate=J70",
   "publishDate": "2026-10-28",
   "updatedDate": "2026-10-28",
+  "factSources": {
+    "checkedAt": "2026-10-28",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/black-valley-big-band-christmas-ghegahalle-payerbach-22129930/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Die Black Valley Big Band aus dem südlichen Niederösterreich lädt am 26. November 2026 zum Weihnachtskonzert in die Ghegahalle Payerbach. Swing, Weihnachtsklassiker und Big-Band-Sound stimmen auf den Advent ein.",
   "category": "Musik & Festival",

@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/maria-theresia-das-musical-ronacher-21176684/?affiliate=J70",
   "publishDate": "2026-09-02",
   "updatedDate": "2026-09-02",
+  "factSources": {
+    "checkedAt": "2026-09-02",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/maria-theresia-das-musical-ronacher-21176684/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Tauchen Sie ein in die Welt Maria Theresias! Das brandneue Musical im Ronacher in Wien entführt Sie in das 18. Jahrhundert, wo Macht, Leidenschaft und ein starker Charakter die Geschichte neu schreiben. Eine monumentale Inszenierung erwartet Sie.",
   "category": "Kultur & Bühne",

@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/tom-walek-der-oe3-mikromann-live-gasthaus-straninger-hof-21904072/?affiliate=J70",
   "publishDate": "2026-09-16",
   "updatedDate": "2026-09-16",
+  "factSources": {
+    "checkedAt": "2026-09-16",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/tom-walek-der-oe3-mikromann-live-gasthaus-straninger-hof-21904072/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 1. Oktober 2026 steht Tom Walek im Gasthaus Straninger Hof auf der Bühne: die absurdesten Ö3-Mikromann-Fragen aus über 20 Jahren, Südpol-Anekdoten und Geschichten von \"Walek wandert\".",
   "category": "Kultur & Bühne",

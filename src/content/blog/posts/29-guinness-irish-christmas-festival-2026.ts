@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/29-guinness-irish-christmas-festival-buehne-im-hof-21604681/?affiliate=J70",
   "publishDate": "2026-10-24",
   "updatedDate": "2026-10-24",
+  "factSources": {
+    "checkedAt": "2026-10-24",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/29-guinness-irish-christmas-festival-buehne-im-hof-21604681/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Zur 29. Ausgabe bringt das Guinness Irish Christmas Festival Laoise Kelly, Cassie &amp; Maggie MacDonald und die McGoldrick Family am 7. und 8. Dezember in die Bühne im Hof nach St. Pölten.",
   "category": "Musik & Festival",

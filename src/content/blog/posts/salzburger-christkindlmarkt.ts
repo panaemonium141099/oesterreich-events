@@ -11,6 +11,12 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/salzburger-christkindlmarkt/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.salzburg.info/de/veranstaltungen/veranstaltungskalender/salzburger-christkindlmarkt-am-dom-und-residenzplatz_event_42164337',
+    ],
+  },
   readingTime: 5,
   excerpt:
     'Mitten in der barocken Altstadt Salzburgs leuchtet jeden Dezember der älteste Christkindlmarkt Österreichs. Zwischen Dom, Residenz und Festung Hohensalzburg entfaltet sich purer Advent-Zauber.',

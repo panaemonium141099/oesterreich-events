@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/symphonieorchester-vorarlberg-202627-montforthaus-feldkirch-21871055/?affiliate=J70",
   "publishDate": "2026-09-23",
   "updatedDate": "2026-09-23",
+  "factSources": {
+    "checkedAt": "2026-09-23",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/symphonieorchester-vorarlberg-202627-montforthaus-feldkirch-21871055/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Marzena Diakun dirigiert das Symphonieorchester Vorarlberg, Sebastian Klinger spielt Schumanns Cellokonzert, danach erklingt Dvořáks Neunte. Am 28. November 2026 im Montforthaus Feldkirch.",
   "category": "Kultur & Bühne",

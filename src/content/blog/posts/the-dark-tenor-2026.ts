@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/the-dark-tenor-symphonica-rock-meets-klassik-2026-vaz-st-poelten-20989262/?affiliate=J70",
   "publishDate": "2026-09-07",
   "updatedDate": "2026-09-07",
+  "factSources": {
+    "checkedAt": "2026-09-07",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/the-dark-tenor-symphonica-rock-meets-klassik-2026-vaz-st-poelten-20989262/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Tauchen Sie ein in die faszinierende Welt von The Dark Tenor! Am 20. November 2026 bringt Billy Andrews seine innovative Symphonica Tour ins VAZ St. Pölten. Eine atemberaubende Show, die Klassik und Rock neu definiert.",
   "category": "Musik & Festival",

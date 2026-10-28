@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/average-kayo-posthof-21401642/?affiliate=J70",
   "publishDate": "2026-09-23",
   "updatedDate": "2026-09-23",
+  "factSources": {
+    "checkedAt": "2026-09-23",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/average-kayo-posthof-21401642/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Average & Kayo stellen am 24. Oktober 2026 ihr gemeinsames Album „Krone richten“ im Posthof Linz vor. Mit dabei: die TTR Allstars. Alle Infos zu Tickets, Anreise und Programm.",
   "category": "Musik & Festival",

@@ -11,6 +11,14 @@ export const post: FestivalPost = {
   "ticketUrl": "https://shop.klangraum.at/webshop/webticket/eventlist",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://www.klangraum.at",
+      "https://www.derstandard.at/story/3000000260417/imago-dei-osterfestival-des-aufbruchs",
+      "https://shop.klangraum.at/webshop/webticket/eventlist"
+    ]
+  },
   "readingTime": 7,
   "excerpt": "Seit 1999 verwandelt Imago Dei die Wochen vor Ostern in Krems in ein Festival über Epochen, Kulturen und Religionen hinweg. Die Ausgabe 2027 läuft vom 12. bis 29. März im Klangraum Minoritenkirche, kuratiert von Albert Hosp.",
   "category": "Musik & Festival",

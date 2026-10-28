@@ -11,6 +11,13 @@ export const post: FestivalPost = {
   "heroImageCredit": "Foto: Winter Woodstock der Blasmusik",
   "publishDate": "2026-10-27",
   "updatedDate": "2026-10-27",
+  "factSources": {
+    "checkedAt": "2026-10-27",
+    "urls": [
+      "https://www.tt.com/artikel/30930500/rekordandrang-15-000-fans-kamen-zum-winter-woodstock-der-blasmusik-ins-brixental",
+      "https://www.kitzbueheler-alpen.com/de/bri/winterwoodstock.html"
+    ]
+  },
   "readingTime": 6,
   "excerpt": "Von 19. bis 21. März 2027 wird das Brixental wieder zur Blasmusikbühne: folkshilfe, Knallblech und die Kaiser Musikanten sind bestätigt, der Festivalpass kostet 139 Euro.",
   "category": "Musik & Festival",

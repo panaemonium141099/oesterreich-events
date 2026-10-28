@@ -11,6 +11,15 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.wienmodern.at/2026-kartenverkauf",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://www.wienmodern.at",
+      "https://www.wienmodern.at/2026-kalender",
+      "https://www.wienmodern.at/festivalpass",
+      "https://www.wienmodern.at/2026-kartenverkauf"
+    ]
+  },
   "readingTime": 6,
   "excerpt": "Wien Modern startet am 30. Oktober mit einem Stück, an dem die Donau mitkomponiert hat. Bis 30. November folgen Olga Neuwirth, Liza Lim, ein Schwerpunkt zu Elfriede Jelinek und Musik aus Wald, Fluss und Mülldeponie.",
   "category": "Musik & Festival",

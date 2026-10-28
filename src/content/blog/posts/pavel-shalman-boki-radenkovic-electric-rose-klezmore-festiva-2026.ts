@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/pavel-shalman-boki-radenkovic-electric-rose-klezmore-festival-sargfabrik-21849164/?affiliate=J70",
   "publishDate": "2026-09-16",
   "updatedDate": "2026-09-16",
+  "factSources": {
+    "checkedAt": "2026-09-16",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/pavel-shalman-boki-radenkovic-electric-rose-klezmore-festival-sargfabrik-21849164/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 12. November 2026 treffen in der Wiener Sargfabrik zwei Welten aufeinander: Pavel Shalman & Boki Radenković mit „Klezmer & Wir\" und das Projekt Electric Rose mit neu belebten jiddisch-ukrainischen Liedern.",
   "category": "Musik & Festival",

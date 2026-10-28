@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/jazz-for-kids-remise-bludenz-22147784/?affiliate=J70",
   "publishDate": "2026-10-09",
   "updatedDate": "2026-10-09",
+  "factSources": {
+    "checkedAt": "2026-10-09",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/jazz-for-kids-remise-bludenz-22147784/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Bekannte Kinderlieder bekommen einen Jazz-Twist: Beim Jazz & Groove Festival lädt „Jazz for Kids“ Kindergarten- und Volksschulkinder in die Remise Bludenz ein, um Rhythmus und Melodie spielerisch zu entdecken.",
   "category": "Musik & Festival",

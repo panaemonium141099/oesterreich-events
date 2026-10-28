@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/mc-yankoo-live-event-fabrik-graz-22028302/?affiliate=J70",
   "publishDate": "2026-09-06",
   "updatedDate": "2026-09-06",
+  "factSources": {
+    "checkedAt": "2026-09-06",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/mc-yankoo-live-event-fabrik-graz-22028302/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Die Event Fabrik Graz öffnet ihre Tore für MC Yankoo live! Freuen Sie sich auf eine unvergessliche Nacht mit den größten Balkan Hits, Club Sounds und Party Classics. Sichern Sie sich Ihr Ticket für dieses einzigartige Musikerlebnis in der Steiermark.",
   "category": "Musik & Festival",

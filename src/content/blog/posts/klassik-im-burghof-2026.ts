@@ -10,6 +10,14 @@ export const post: FestivalPost = {
   "heroImageCredit": "Foto: Klassik in Klagenfurt / F. Neumüller",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://www.klassikinklagenfurt.at",
+      "https://www.klagenfurt.at/fileadmin/user_upload/Klagenfurt_Kultur/News/2026/2026_Q3_KulturKalender.pdf",
+      "https://www.klassikinklagenfurt.at/sonderkonzerte/2026/08/12/fiorimusicali"
+    ]
+  },
   "readingTime": 7,
   "excerpt": "Im Sommer spielt Klassik im Burghof samstags um 11 Uhr im Arkadenhof des Museums Moderner Kunst Kärnten. Bis die Saison 2027 startet, lädt der Veranstalter am 8. Dezember 2026 zu einem barocken Adventkonzert in die Johanneskirche.",
   "category": "Musik & Festival",

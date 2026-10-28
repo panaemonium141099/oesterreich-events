@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/circus-theater-roncalli-circus-roncalli-2026-innsbruck-circus-theater-roncalli-innsbruck-20994030/?affiliate=J70",
   "publishDate": "2026-08-27",
   "updatedDate": "2026-08-27",
+  "factSources": {
+    "checkedAt": "2026-08-27",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/circus-theater-roncalli-circus-roncalli-2026-innsbruck-circus-theater-roncalli-innsbruck-20994030/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Der legendäre Circus Roncalli feiert sein 50-jähriges Jubiläum mit einer spektakulären Tournee und macht Halt in Innsbruck. Freuen Sie sich auf eine tierfreie Show voller Artistik, Poesie und Live-Musik, die Generationen begeistert.",
   "category": "Kultur & Bühne",

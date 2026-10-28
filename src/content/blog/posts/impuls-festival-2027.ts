@@ -10,6 +10,13 @@ export const post: FestivalPost = {
   "heroImageCredit": "Foto: TheRunnerUp, CC BY-SA 4.0, Wikimedia Commons (MUMUTH der Kunstuniversität Graz)",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://www.impuls.cc",
+      "https://www.steiermark.com/de/Region-Graz/Urlaub-planen/Veranstaltungen/impuls-Festival-Graz_ed_89866131"
+    ]
+  },
   "readingTime": 6,
   "excerpt": "Alle zwei Jahre wird Graz im Februar zur Festivalstadt der Neuen Musik. 2027 läuft das impuls Festival zum zehnten Mal, parallel zur Akademie mit Klangforum Wien, Beat Furrer und Clara Iannotta. Was dich erwartet.",
   "category": "Musik & Festival",

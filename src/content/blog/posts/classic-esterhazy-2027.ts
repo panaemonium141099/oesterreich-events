@@ -11,6 +11,15 @@ export const post: FestivalPost = {
   "ticketUrl": "https://tickets.panevent.at/webshop/webticket/seatmap?eventId=1993",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://esterhazy.at/classic-esterhazy/programm-classic-2027",
+      "https://www.news.at/corporate/schloss-esterhazy-wiener-philharmoniker-als-hoehepunkt-der-kommenden-konzertsaison-2027",
+      "https://www.weekend.at/bundesland/wien/wiener-philharmoniker-kroenen-schloss-esterhazy-2027",
+      "https://tickets.panevent.at/webshop/webticket/seatmap?eventId=1993"
+    ]
+  },
   "readingTime": 7,
   "excerpt": "Haydns 295. Geburtstag trifft auf Beethovens 200. Todestag: Die Saison 2027 von classic.Esterhazy führt von Jänner bis Dezember durch den Haydnsaal, mit den Wiener Philharmonikern, András Schiff und einer Messe am Ort ihrer Uraufführung.",
   "category": "Musik & Festival",

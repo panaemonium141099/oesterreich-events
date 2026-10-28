@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/genesis-lightshow-orgelkonzert-graz-herz-jesu-kirche-22292369/?affiliate=J70",
   "publishDate": "2026-10-27",
   "updatedDate": "2026-10-27",
+  "factSources": {
+    "checkedAt": "2026-10-27",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/genesis-lightshow-orgelkonzert-graz-herz-jesu-kirche-22292369/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 3. Jänner 2027 wird die Herz-Jesu-Kirche in Graz zur Projektionsfläche. GENESIS verbindet immersive Lichtkunst mit Live-Orgel, feiert hier seine Österreich-Premiere und kommt ganz ohne gesprochenes Wort aus.",
   "category": "Kultur & Bühne",

@@ -12,6 +12,12 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/innsbruck-christkindlmarkt/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.innsbruck.info/events/christkindlmaerkte-innsbruck.html',
+    ],
+  },
   readingTime: 5,
   excerpt:
     'Der Innsbrucker Christkindlmarkt gehört zu den schönsten Weihnachtsmärkten Österreichs. Auf dem historischen Marktplatz umrahmt von der Nordkette und der mittelalterlichen Altstadt entsteht jedes Jahr ein unvergesslicher Adventzauber.',

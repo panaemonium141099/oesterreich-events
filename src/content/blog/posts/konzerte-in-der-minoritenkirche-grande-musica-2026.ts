@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/konzerte-in-der-minoritenkirche-minoritenkirche-21734373/?affiliate=J70",
   "publishDate": "2026-09-13",
   "updatedDate": "2026-09-13",
+  "factSources": {
+    "checkedAt": "2026-09-13",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/konzerte-in-der-minoritenkirche-minoritenkirche-21734373/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 10. Oktober 2026 erklingen in der Wiener Minoritenkirche Mozarts Klarinettenquintett KV 581 und Tschaikowskis „Souvenir de Florence“ – rund 70 Minuten Kammermusik ohne Pause in gotischem Ambiente.",
   "category": "Kultur & Bühne",

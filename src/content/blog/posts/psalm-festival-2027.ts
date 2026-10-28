@@ -12,6 +12,15 @@ export const post: FestivalPost = {
   "ticketUrl": "https://shop.styriarte.com/webshop/webticket/shop",
   "publishDate": "2026-10-27",
   "updatedDate": "2026-10-27",
+  "factSources": {
+    "checkedAt": "2026-10-27",
+    "urls": [
+      "https://www.vienna.at/musikfestival-styriarte-auslastung-2026-bei-94-prozent/10350215",
+      "https://www.steiermark.com/de/Region-Graz/Urlaub-planen/Veranstaltungen/PSALM-Festival_ed_80790928",
+      "https://styriarte.com",
+      "https://shop.styriarte.com/webshop/webticket/shop"
+    ]
+  },
   "readingTime": 6,
   "excerpt": "PSALM, das Osterfestival der styriarte, wird 2027 um zwei Tage länger und läuft vom 19. bis 29. März in Graz. Was schon feststeht, was noch offen ist und wie du jetzt planst.",
   "category": "Musik & Festival",

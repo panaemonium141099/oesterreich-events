@@ -11,6 +11,16 @@ export const post: FestivalPost = {
   "ticketUrl": "https://tickets.landestheater-linz.at/kulturticket/webshop/webticket/shop?event=34026",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://www.musicasacra.at",
+      "https://www.tips.at/nachrichten/linz/kultur/736676-musica-sacra-bringt-die-linzer-kirchen-wieder-zum-klingen",
+      "https://www.musicasacra.at/verein",
+      "https://www.musicasacra.at/karten",
+      "https://tickets.landestheater-linz.at/kulturticket/webshop/webticket/shop?event=34026"
+    ]
+  },
   "readingTime": 7,
   "excerpt": "Seit 1987 bringt musica sacra geistliche Musik in Linzer Kirchen. Die Saison 2026/27 startet am 9. November mit Messiaen und bringt Adventmusik, Bachkantaten, C. P. E. Bachs Matthäuspassion und 14 Abende bis Mai.",
   "category": "Musik & Festival",

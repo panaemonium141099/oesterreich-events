@@ -10,6 +10,12 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/wien-christkindlmarkt/thumb.jpg',
   publishDate: '2026-03-31',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.wien.info/de/weihnachtsmarkt',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Jedes Jahr im November und Dezember verwandelt sich der Wiener Rathausplatz in ein leuchtendes Weihnachtsdorf. Glühwein, Lebkuchen und festliche Stimmung vor der prachtvollen Kulisse des Rathauses.',

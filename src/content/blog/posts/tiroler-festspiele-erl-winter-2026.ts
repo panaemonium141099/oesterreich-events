@@ -11,6 +11,15 @@ export const post: FestivalPost = {
   "ticketUrl": "https://tickets.tiroler-festspiele.at/webshop/webticket/eventlist",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://www.tiroler-festspiele.at/spielplan-karten",
+      "https://www.tiroler-festspiele.at/en/news/2026-07-27/the-tyrolean-festival-erls-successful-2026-summer-season-drew-13500-female-attendees",
+      "https://www.tiroler-festspiele.at",
+      "https://tickets.tiroler-festspiele.at/webshop/webticket/eventlist"
+    ]
+  },
   "readingTime": 7,
   "excerpt": "Vom Weihnachtsoratorium am 6. Dezember bis zum Dreikönigskonzert am 6. Jänner: Die Wintersaison der Tiroler Festspiele Erl bringt eine szenische La traviata, Verdis Nabucco konzertant, Donizettis Anna Bolena und Maria Agresta zu Silvester.",
   "category": "Musik & Festival",

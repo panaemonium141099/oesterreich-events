@@ -11,6 +11,15 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.folkart.at/tickets/",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://www.folkart.at",
+      "https://www.folkart.at/programm/",
+      "https://www.steiermark.com/en/Region-Graz/Vacation-planning/Events/Folk.Art-Festival-Graz_ed_84223079",
+      "https://www.folkart.at/tickets/"
+    ]
+  },
   "readingTime": 7,
   "excerpt": "Das folk.art Festival läuft noch bis 8. November 2026. Die dichteste Woche kommt erst: Floating Sofa Quartet, Cairo Steps, Baba Yaga im Dom im Berg und viele Gratiskonzerte in ganz Graz.",
   "category": "Musik & Festival",

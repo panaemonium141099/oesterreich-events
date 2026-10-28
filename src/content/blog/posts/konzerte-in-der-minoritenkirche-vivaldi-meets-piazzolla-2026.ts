@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/konzerte-in-der-minoritenkirche-minoritenkirche-21734460/?affiliate=J70",
   "publishDate": "2026-10-13",
   "updatedDate": "2026-10-13",
+  "factSources": {
+    "checkedAt": "2026-10-13",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/konzerte-in-der-minoritenkirche-minoritenkirche-21734460/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Venezianischer Barock und argentinischer Tango unter einem gotischen Gewölbe: Für den 19. Dezember 2026 ist „Vivaldi meets Piazzolla“ in der Wiener Minoritenkirche gelistet. Hier lesen Sie, was bekannt ist und was Sie vor dem Ticketkauf prüfen sollten.",
   "category": "Kultur & Bühne",

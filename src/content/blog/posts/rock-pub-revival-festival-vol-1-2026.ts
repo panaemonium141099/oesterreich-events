@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/rock-pub-revival-festival-vol-1-szene-wien-21553401/?affiliate=J70",
   "publishDate": "2026-09-14",
   "updatedDate": "2026-09-14",
+  "factSources": {
+    "checkedAt": "2026-09-14",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/rock-pub-revival-festival-vol-1-szene-wien-21553401/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Der Rock Pub ist längst Geschichte, seine Nächte sind es nicht. Am Freitag, 6. November 2026, feiert das Rock Pub Revival Festival Vol.1 in der Szene Wien seine allererste Ausgabe. Einlass: 19 Uhr.",
   "category": "Kultur & Tradition",

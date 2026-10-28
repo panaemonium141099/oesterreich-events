@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/krebshilfe-benefizkonzert-2026-altes-kino-rankweil-22263832/?affiliate=J70",
   "publishDate": "2026-10-25",
   "updatedDate": "2026-10-25",
+  "factSources": {
+    "checkedAt": "2026-10-25",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/krebshilfe-benefizkonzert-2026-altes-kino-rankweil-22263832/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Triefende Balladen, stampfender Rock'n'Roll und ein guter Zweck: Das Krebshilfe-Benefizensemble mit Bilgeri, Köhlmeier, Breznik und vielen mehr gastiert im Dezember im Alten Kino Rankweil.",
   "category": "Musik & Festival",

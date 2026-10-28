@@ -10,6 +10,14 @@ export const post: FestivalPost = {
   "heroImageCredit": "Foto: Elevate Festival / Clara Wildberger (Dom im Berg, 2026)",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://elevate.at/en/festival",
+      "https://service.graztourismus.at/en/events/event-calendar/elevate-festival_evt_3546",
+      "https://elevate.at"
+    ]
+  },
   "readingTime": 6,
   "excerpt": "Tagsüber Debatten über Klima und Gesellschaft, nachts Bass im Dom im Berg: Das Elevate Festival geht von 4. bis 7. März 2027 in seine 23. Ausgabe. Wie es entstand, was es kostet und was du wissen solltest.",
   "category": "Musik & Festival",

@@ -8,6 +8,12 @@ export const post: FestivalPost = {
   "heroImage": "/images/categories/fest-1.jpg",
   "publishDate": "2026-10-07",
   "updatedDate": "2026-10-07",
+  "factSources": {
+    "checkedAt": "2026-09-10",
+    "urls": [
+      "https://www.gasteinertal.com/gasteiner-perchtenlauf/"
+    ]
+  },
   "readingTime": 7,
   "excerpt": "Zwischen Mitte November und dem 6. Jänner ziehen Krampusse und Perchten durch Österreichs Orte, und viele wissen nicht genau, wer da eigentlich vor ihnen steht. Hier findest du für alle neun Bundesländer Läufe, Kulturtipps für die Abende dazwischen, den Unterschied zwischen Krampus und Percht und Tipps fürs Zuschauen mit Kindern.",
   "category": "Kultur & Tradition",

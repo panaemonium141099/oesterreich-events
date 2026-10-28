@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/palais-of-lights-a-candlelit-journey-palais-auersperg-21549947/?affiliate=J70",
   "publishDate": "2026-10-17",
   "updatedDate": "2026-10-17",
+  "factSources": {
+    "checkedAt": "2026-10-17",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/palais-of-lights-a-candlelit-journey-palais-auersperg-21549947/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Yiruma, Einaudi, Piazzolla und Coldplay bei Kerzenlicht: Palais of Lights macht das barocke Palais Auersperg in Wien am 8. November 2026 zur romantischen Bühne für Klassik und moderne Liebeslieder.",
   "category": "Kultur & Bühne",

@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/eventseries/weihnachten-mit-friedrich-von-thun-4126019/?affiliate=J70&cityname=Leoben",
   "publishDate": "2026-10-25",
   "updatedDate": "2026-10-25",
+  "factSources": {
+    "checkedAt": "2026-10-25",
+    "urls": [
+      "https://www.oeticket.com/eventseries/weihnachten-mit-friedrich-von-thun-4126019/?affiliate=J70&cityname=Leoben"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Am 17. Dezember 2026 liest Friedrich von Thun im Stadttheater Leoben weihnachtliche und heitere Texte von Kishon, Lindgren, Wilde und anderen. Am Akkordeon spielt Maria Reiter.",
   "category": "Kultur & Bühne",

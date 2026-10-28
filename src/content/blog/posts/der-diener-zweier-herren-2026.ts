@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/der-diener-zweier-herren-stadttheater-klagenfurt-stadttheater-klagenfurt-21925742/?affiliate=J70",
   "publishDate": "2026-09-19",
   "updatedDate": "2026-09-19",
+  "factSources": {
+    "checkedAt": "2026-09-19",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/der-diener-zweier-herren-stadttheater-klagenfurt-stadttheater-klagenfurt-21925742/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Ein hungriger Diener, zwei Herrschaften, ein einziges Chaos: Am 10. Oktober 2026 bringt das Stadttheater Klagenfurt Carlo Goldonis Lustspiel in drei Akten auf die Bühne. Beginn ist um 19:30 Uhr.",
   "category": "Kultur & Bühne",

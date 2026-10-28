@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/maria-und-die-fledermaus-theater-am-werk-im-kabelwerk-21867671/?affiliate=J70",
   "publishDate": "2026-09-08",
   "updatedDate": "2026-09-08",
+  "factSources": {
+    "checkedAt": "2026-09-08",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/maria-und-die-fledermaus-theater-am-werk-im-kabelwerk-21867671/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Tauchen Sie ein in die Welt von Tierärztin Maria und ihren tierischen Patienten, wenn „Maria und die Fledermaus“ im Theater am Werk Premiere feiert. Eine humorvolle Auseinandersetzung mit den Krisen unserer Zeit.",
   "category": "Kultur & Bühne",

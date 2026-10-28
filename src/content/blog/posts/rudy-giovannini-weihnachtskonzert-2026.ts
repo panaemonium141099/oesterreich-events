@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/rudy-giovannini-weihnachtskonzert-stadtsaal-mistelbach-19575518/?affiliate=J70",
   "publishDate": "2026-10-16",
   "updatedDate": "2026-10-16",
+  "factSources": {
+    "checkedAt": "2026-10-16",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/rudy-giovannini-weihnachtskonzert-stadtsaal-mistelbach-19575518/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Am 21. Dezember singt Rudy Giovannini im Stadtsaal Mistelbach: deutsche Weihnachtslieder, italienische Melodien, A-cappella-Momente und neue Titel seiner aktuellen Weihnachts-CD.",
   "category": "Musik & Festival",

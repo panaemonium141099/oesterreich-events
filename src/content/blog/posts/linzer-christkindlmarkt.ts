@@ -11,6 +11,13 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/linzer-christkindlmarkt/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://christkindlmarkt-linz.at/christkindlmarkt-linz',
+      'https://christkindlmarkt-linz.at/',
+    ],
+  },
   readingTime: 5,
   excerpt:
     'Der Linzer Christkindlmarkt am barocken Hauptplatz zählt zu den beliebtesten Adventmärkten Österreichs. Handwerk, Glühwein und Linzer Torte unter dem Licht tausender Weihnachtslichter.',

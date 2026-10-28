@@ -11,6 +11,13 @@ export const post: FestivalPost = {
   "ticketUrl": "https://lisztfestival.at/programm-tickets/kalender/alle-termine/",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://lisztfestival.at/programm-tickets/kalender/alle-termine/",
+      "https://www.lisztfestival.at"
+    ]
+  },
   "readingTime": 7,
   "excerpt": "Händels Messias, 70 Jahre Militärmusik Burgenland, Federspiel und ein Swingabend mit Benjamin Schmid: Das Liszt Festival Raiding füllt 2027 drei Wochenenden von März bis Juni im Konzertsaal am Geburtsort des Komponisten.",
   "category": "Musik & Festival",

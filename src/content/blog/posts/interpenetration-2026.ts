@@ -10,6 +10,12 @@ export const post: FestivalPost = {
   "heroImageCredit": "Foto: Jordi Trenzano Vilar / Interpenetration (Radio Report From The Dissidence)",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://interpenetration.net"
+    ]
+  },
   "readingTime": 6,
   "excerpt": "Von 5. November 2026 bis 20. Mai 2027 bringt die Grazer Reihe Interpenetration zwölf Doppelabende mit Klangforschern aus Peru, Slowenien und Österreich. Was dich erwartet und wie die Reihe entstanden ist.",
   "category": "Musik & Festival",

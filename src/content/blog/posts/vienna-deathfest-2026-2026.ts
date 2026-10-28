@@ -14,6 +14,13 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/vienna-deathfest-2026-arena-wien-21559579/?affiliate=J70",
   "publishDate": "2026-09-14",
   "updatedDate": "2026-09-14",
+  "factSources": {
+    "checkedAt": "2026-09-14",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/vienna-deathfest-2026-arena-wien-21559579/?affiliate=J70",
+      "https://arena.wien/Home/Programm-Detail/concert-id/48533"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Premiere für die härteste Nacht des Wiener Herbstes: Am 16. Oktober 2026 bringt das Vienna Deathfest Cytotoxin, Mastic Scum, Fleshless und mehr in die Kleine Halle der Arena Wien. Tickets ab 25 Euro.",
   "category": "Musik & Festival",

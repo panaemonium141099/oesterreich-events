@@ -14,6 +14,13 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/artist/gastein-sounds/?affiliate=J70",
   "publishDate": "2026-09-28",
   "updatedDate": "2026-09-28",
+  "factSources": {
+    "checkedAt": "2026-09-28",
+    "urls": [
+      "https://www.gastein.com/erlebnisse-events/veranstaltungen/top-events/gastein-sounds/",
+      "https://www.oeticket.com/artist/gastein-sounds/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Winter-Open-Air im Gasteinertal: Pizzera & Jaus, folkshilfe und KARL eröffnen am 11. Dezember 2026 die zweite Auflage von Ö3 Gastein Sounds an der Talstation Schlossalmbahn.",
   "category": "Musik & Festival",

@@ -10,6 +10,12 @@ export const post: FestivalPost = {
   "heroImageCredit": "Foto: Otto Normalverbraucher, CC BY-SA 2.0 AT, Wikimedia Commons (Metro Kino, Johannesgasse 4, Wien)",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://www.trickywomen.at"
+    ]
+  },
   "readingTime": 6,
   "excerpt": "Seit 2001 holt Tricky Women Animationsfilme von Frauen und genderqueeren Kunstschaffenden nach Wien. 2027 läuft das Festival von 10. bis 14. März, mit Preisen über 22.000 Euro. Programm, Tickets und Hintergründe.",
   "category": "Kultur & Tradition",

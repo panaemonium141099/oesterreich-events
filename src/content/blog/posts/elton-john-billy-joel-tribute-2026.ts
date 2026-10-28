@@ -14,6 +14,13 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/elton-john-billy-joel-tribute-das-vindobona-21528155/?affiliate=J70",
   "publishDate": "2026-09-05",
   "updatedDate": "2026-09-05",
+  "factSources": {
+    "checkedAt": "2026-09-05",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/elton-john-billy-joel-tribute-das-vindobona-21528155/?affiliate=J70",
+      "https://www.wien-ticket.at/de/ticket/148693/elton-john-billy-joel-tribute"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Tauchen Sie ein in die Welt von Elton John und Billy Joel! Mario Pecoraro präsentiert im Vindobona, Wien, einen Abend voller Emotionen und unvergesslicher Pop-Klassiker. Erleben Sie am 25. September 2026 eine Hommage an die größten Piano-Männer der Musikgeschichte.",
   "category": "Musik & Festival",

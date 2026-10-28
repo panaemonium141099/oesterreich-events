@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/kreisky-adieu-unsterblichkeit-rosentalroz-festival-kulturhaus-feistritz-im-rosental-22036199/?affiliate=J70",
   "publishDate": "2026-09-20",
   "updatedDate": "2026-09-20",
+  "factSources": {
+    "checkedAt": "2026-09-20",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/kreisky-adieu-unsterblichkeit-rosentalroz-festival-kulturhaus-feistritz-im-rosental-22036199/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 8. November 2026 beschließt Kreisky das Rosental/Rož Festival im Kulturhaus Feistritz: sieben Alben, 20 Bandjahre und ein Abend zwischen Krautrock, Noise und schwarzem Humor.",
   "category": "Kultur & Tradition",

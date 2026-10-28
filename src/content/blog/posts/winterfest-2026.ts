@@ -11,6 +11,15 @@ export const post: FestivalPost = {
   "ticketUrl": "https://shop.winterfest.at/",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://www.winterfest.at",
+      "https://www.vienna.at/salzburger-winterfest-heuer-mit-zirkuskunst-aus-japan/10507745",
+      "https://www.winterfest.at/info/",
+      "https://shop.winterfest.at/"
+    ]
+  },
   "readingTime": 7,
   "excerpt": "Vom 25. November bis 6. Jänner wird der Salzburger Volksgarten wieder zur Zeltstadt. Erstmals dabei sind eine Compagnie aus Japan und eine aus Südafrika, dazu jongliert Wes Peden zu Beats aus Achterbahngeräuschen.",
   "category": "Kultur & Bühne",

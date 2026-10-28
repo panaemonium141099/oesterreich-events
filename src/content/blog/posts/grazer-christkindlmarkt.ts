@@ -11,6 +11,12 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/grazer-christkindlmarkt/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.steiermark.com/de/Region-Graz/Urlaub-planen/Veranstaltungen/Christkindlmarkt-am-Hauptplatz_ed_26571865',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Der Grazer Christkindlmarkt am Hauptplatz gehört zu den schönsten Weihnachtsmärkten Österreichs. Mit dem illuminierten Rathaus als Kulisse und dem Duft von Punsch und gebrannten Mandeln ist er ein Erlebnis für alle Sinne.',

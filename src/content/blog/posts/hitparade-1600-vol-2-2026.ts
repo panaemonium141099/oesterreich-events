@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/hitparade-1600-vol-2-lorely-saal-22238833/?affiliate=J70",
   "publishDate": "2026-10-28",
   "updatedDate": "2026-10-28",
+  "factSources": {
+    "checkedAt": "2026-10-28",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/hitparade-1600-vol-2-lorely-saal-22238833/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 18. November 2026 bringt der Kulturverein Constellations die Hitparade 1600 zurück in den Lorely-Saal in Wien-Penzing. Frühbarocke Musik, präsentiert wie Chart-Hits, für ein junges Publikum.",
   "category": "Kultur & Bühne",

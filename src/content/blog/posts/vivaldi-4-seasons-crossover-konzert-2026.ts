@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/vivaldi-4-seasons-crossover-konzert-stadtsaal-mistelbach-22205591/?affiliate=J70",
   "publishDate": "2026-10-20",
   "updatedDate": "2026-10-20",
+  "factSources": {
+    "checkedAt": "2026-10-20",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/vivaldi-4-seasons-crossover-konzert-stadtsaal-mistelbach-22205591/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Vivaldis Vier Jahreszeiten mit Swing, Jazz und lateinamerikanischen Rhythmen: Die ungarische Band Swing à la Django gastiert am 28. November 2026 im Stadtsaal Mistelbach.",
   "category": "Musik & Festival",

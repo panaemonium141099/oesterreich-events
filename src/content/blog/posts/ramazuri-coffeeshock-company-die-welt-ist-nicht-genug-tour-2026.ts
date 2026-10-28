@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/ramazuri-coffeeshock-company-die-welt-ist-nicht-genug-tour-csello-cselley-muehle-oslip-22225353/?affiliate=J70",
   "publishDate": "2026-10-16",
   "updatedDate": "2026-10-16",
+  "factSources": {
+    "checkedAt": "2026-10-16",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/ramazuri-coffeeshock-company-die-welt-ist-nicht-genug-tour-csello-cselley-muehle-oslip-22225353/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 5. Dezember 2026 stehen Ramazuri und Coffeeshock Company in der Csello Mühle Oslip zum ersten Mal gemeinsam auf der Bühne. Ska-Punk trifft Super-Skunk-Rock-Reggae.",
   "category": "Musik & Festival",

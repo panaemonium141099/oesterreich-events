@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/jodokcello-world-tour-wiener-stadthalle-halle-f-21040013/?affiliate=J70",
   "publishDate": "2026-10-24",
   "updatedDate": "2026-10-24",
+  "factSources": {
+    "checkedAt": "2026-10-24",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/jodokcello-world-tour-wiener-stadthalle-halle-f-21040013/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Klassische Technik, Pop-Hits und ein selbst gebautes Cello: Jodokcello bringt seine World Tour am 3. Dezember 2026 in die Wiener Stadthalle. Es ist der einzige Österreich-Stopp.",
   "category": "Musik & Festival",

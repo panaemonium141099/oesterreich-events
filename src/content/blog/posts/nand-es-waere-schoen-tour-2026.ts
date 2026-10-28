@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/nand-es-waere-schoen-tour-flucc-21629499/?affiliate=J70",
   "publishDate": "2026-10-18",
   "updatedDate": "2026-10-18",
+  "factSources": {
+    "checkedAt": "2026-10-18",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/nand-es-waere-schoen-tour-flucc-21629499/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Nach seiner bislang längsten Pause kehrt nand auf die Bühne zurück. Am 24. November 2026 spielt der Würzburger im Duo-Setup im FLUCC Wien, als einziger Österreich-Stopp seiner „Es wäre schön\"-Tour.",
   "category": "Musik & Festival",

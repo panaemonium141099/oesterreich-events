@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/eventseries/voice-passion-3914790/?affiliate=J70&cityname=Leoben",
   "publishDate": "2026-10-23",
   "updatedDate": "2026-10-23",
+  "factSources": {
+    "checkedAt": "2026-10-23",
+    "urls": [
+      "https://www.oeticket.com/eventseries/voice-passion-3914790/?affiliate=J70&cityname=Leoben"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 15. Dezember 2026 bringen Lauren Francis und Franz Garlik die Klangwelten von Outlander, Vikings und The Last Kingdom nach Leoben. Musik, Videos und nordische Stimmung im Live Congress.",
   "category": "Musik & Festival",

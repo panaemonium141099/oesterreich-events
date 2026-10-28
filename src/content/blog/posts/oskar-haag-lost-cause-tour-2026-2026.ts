@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/oskar-haag-lost-cause-tour-fritz-club-21423874/?affiliate=J70",
   "publishDate": "2026-09-24",
   "updatedDate": "2026-09-24",
+  "factSources": {
+    "checkedAt": "2026-09-24",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/oskar-haag-lost-cause-tour-fritz-club-21423874/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 24. Oktober 2026 kommt Oskar Haag mit seiner Lost Cause Tour zurück in seine Heimatstadt: neue Songs, „Stargazing“ und „Surf Song“ live mit Band im Fritz Club Klagenfurt.",
   "category": "Musik & Festival",

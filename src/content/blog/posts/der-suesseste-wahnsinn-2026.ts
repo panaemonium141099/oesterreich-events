@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/der-suesseste-wahnsinn-gasthof-herbert-breinreich-21990742/?affiliate=J70",
   "publishDate": "2026-10-04",
   "updatedDate": "2026-10-04",
+  "factSources": {
+    "checkedAt": "2026-10-04",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/der-suesseste-wahnsinn-gasthof-herbert-breinreich-21990742/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Zwei Erzrivalinnen, eine Präsidentensuite und ein verzweifelter Hoteldirektor: Am 31. Oktober 2026 spielt KTK-Lampenfieber die Farce „Der süßeste Wahnsinn“ im Gasthaus Breinreich in Wittau.",
   "category": "Kultur & Bühne",

@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/design-district-living-lifestyle-messe-wiener-hofburg-22005937/?affiliate=J70",
   "publishDate": "2026-09-17",
   "updatedDate": "2026-09-17",
+  "factSources": {
+    "checkedAt": "2026-09-17",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/design-district-living-lifestyle-messe-wiener-hofburg-22005937/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Von 9. bis 11. Oktober 2026 verwandelt sich die Wiener Hofburg in eine große Bühne für Interior, Garten, Bad und Mobilität. Rund 250 bis 300 Marken zeigen, wie zeitgemäßes Wohnen aussieht.",
   "category": "Kultur & Tradition",

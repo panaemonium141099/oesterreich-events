@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/barfuss-im-park-schloss-albeck-21973209/?affiliate=J70",
   "publishDate": "2026-10-12",
   "updatedDate": "2026-10-12",
+  "factSources": {
+    "checkedAt": "2026-10-12",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/barfuss-im-park-schloss-albeck-21973209/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Neil Simons romantische Boulevardkomödie „Barfuß im Park“ gastiert beim Albecker Herbsttheater. Am 13. November 2026 um 19:30 Uhr hebt sich auf Schloss Albeck im Gurktal der Vorhang.",
   "category": "Kultur & Bühne",

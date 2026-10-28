@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/andreas-ferner-bro-fessor-checkst-du-stadttheater-wiener-neustadt-21605540/?affiliate=J70",
   "publishDate": "2026-10-18",
   "updatedDate": "2026-10-18",
+  "factSources": {
+    "checkedAt": "2026-10-18",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/andreas-ferner-bro-fessor-checkst-du-stadttheater-wiener-neustadt-21605540/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Eltern, die nicht mehr erziehen, aber sofort klagen, und Kinder ohne Frustrationstoleranz: Andreas Ferner bringt sein neues Soloprogramm am 19. November 2026 ins Stadttheater Wiener Neustadt.",
   "category": "Kultur & Bühne",

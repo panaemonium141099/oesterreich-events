@@ -35,6 +35,7 @@ import { startWorkflowRun, finishWorkflowRun, type WorkflowItem } from '../lib/r
 import { toViennaDate } from '../lib/utils/event-time';
 import { selectFestivalBlogCandidates, festivalBlogKey, toBlogLineup } from '../lib/festivals/upcoming';
 import { stripDashesDeep } from '../lib/blog/dashes';
+import { factSourceUrls } from '../lib/blog/fact-sources';
 import type { Festival, FestivalArtist } from '../types/festivals';
 
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -780,6 +781,14 @@ async function main(): Promise<void> {
     let slug = `${slugifyTitle(c.title)}-${year}`;
     if (knownSlugs.has(slug)) slug = `${slug}-${c.id.slice(0, 6)}`;
 
+    // Termin und Ort kommen aus der DB-Zeile; ohne Quelle, an der man sie
+    // nachprüfen kann, schreiben wir keinen Post (factSources-Pflicht).
+    const sources = factSourceUrls(c.source_url, c.ticket_url);
+    if (sources.length === 0) {
+      log('  Keine Quell-URL zum Termin — skip');
+      continue;
+    }
+
     try {
       // Hero ZUERST (billige HTTP-Checks): ohne brauchbares Bild sparen
       // wir uns die zwei teuren Gemini-Calls komplett.
@@ -836,6 +845,7 @@ async function main(): Promise<void> {
         ...(c.ticket_url ? { ticketUrl: c.ticket_url } : {}),
         publishDate: new Date().toISOString().slice(0, 10),
         updatedDate: new Date().toISOString().slice(0, 10),
+        factSources: { checkedAt: new Date().toISOString().slice(0, 10), urls: sources },
         readingTime: Math.max(4, Math.round(
           [draft.intro, draft.history, draft.whatToExpect].join(' ').split(/\s+/).length / 180,
         ) + 3),
@@ -986,6 +996,17 @@ async function main(): Promise<void> {
 // darauf wieder.
 
 type FestivalCandidate = Festival & { lineup: FestivalArtist[] };
+
+/** Belege aus data/festivals-upcoming.json; die Tabelle `festivals` speichert sie nicht. */
+function festivalSeedSources(slug: string): string[] {
+  try {
+    const seed = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'festivals-upcoming.json'), 'utf8')) as
+      Array<{ slug: string; sources?: string[] }>;
+    return seed.find(s => s.slug === slug)?.sources ?? [];
+  } catch {
+    return [];
+  }
+}
 
 async function fetchFestivalCandidates(
   supabase: SupabaseClient,
@@ -1166,6 +1187,15 @@ async function writeFestivalPosts(
     if (knownSlugs.has(slug)) slug = `${slug}-vorschau`;
     log(`Festival: "${f.canonical_name}" (${f.starts_at}..${f.ends_at}, ${f.state ?? '?'}, acts=${f.lineup.length}) → ${slug}`);
 
+    // Termin, Ort und Lineup stammen aus der kuratierten Seed-Datei; ihre
+    // Belege wandern als factSources in den Post (Pflicht, Wächter-Test).
+    const sources = factSourceUrls(festivalSeedSources(f.slug), f.website_url, f.ticket_url);
+    if (sources.length === 0) {
+      log('  Keine Quell-URL zum Termin — skip');
+      reportErrors.push(`"${f.canonical_name}": keine Quelle für den Termin`);
+      continue;
+    }
+
     try {
       const hero = await resolveHero(c, slug);
       if (!hero) {
@@ -1224,6 +1254,7 @@ async function writeFestivalPosts(
         ...(f.ticket_url ? { ticketUrl: f.ticket_url } : {}),
         publishDate: today,
         updatedDate: today,
+        factSources: { checkedAt: today, urls: sources },
         readingTime: Math.max(5, Math.round(
           [draft.intro, draft.history, draft.whatToExpect].join(' ').split(/\s+/).length / 180,
         ) + 3),
