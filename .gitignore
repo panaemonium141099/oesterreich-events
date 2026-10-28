@@ -122,3 +122,6 @@ _*.ts
 
 # Lauf-State der OpenAI-Batch-Uebersetzung (Server: /opt/app/state)
 /state/
+
+# Rohdateien der DE-Stammdaten (build-stammdaten-de.ts --fetch)
+data/stammdaten-de/quellen/

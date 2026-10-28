@@ -1,0 +1,33 @@
+{
+  "built_at": "2026-10-28T17:11:06.212Z",
+  "sources": {
+    "destatis": {
+      "url": "https://www.destatis.de/DE/Themen/Laender-Regionen/Regionales/Gemeindeverzeichnis/Administrativ/Archiv/GVAuszugQ/AuszugGV3QAktuell.xlsx?__blob=publicationFile",
+      "license": "Datenlizenz Deutschland Namensnennung 2.0 (dl-de/by-2-0), © Statistisches Bundesamt (Destatis)",
+      "gebietsstand": "30.09.2026",
+      "sha256": "45e979afe2e4354758e52f7b5b0c2a8167dd9db4a13585cec6acf17211f3b5f3"
+    },
+    "geonames": {
+      "url": "https://download.geonames.org/export/zip/DE.zip",
+      "license": "CC BY 4.0, GeoNames (www.geonames.org)",
+      "sha256": "f6012056021e8e6bc5b47197675ceb1319af9b2ce4e1c68103238c57b75a10ff"
+    },
+    "bkg": {
+      "url": "https://daten.gdz.bkg.bund.de/produkte/vg/vg250_ebenen_1231/aktuell/vg250_12-31.utm32s.gpkg.ebenen.zip",
+      "license": "© BKG (2026) dl-de/by-2-0, Datenquellen: https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_vg_nuts.pdf",
+      "stand": "31.12.2025",
+      "sha256": "df71d6a7ec0a0ca38e0559d9a90523a81c7948c74e7c7c3ddeab79041d1046f5"
+    }
+  },
+  "counts": {
+    "gemeinden": 10749,
+    "plz": 10845,
+    "plz_grosskunde": 989,
+    "plz_ohne_gemeinde": 1755,
+    "plz_mehrere_gemeinden": 1235,
+    "plz_mehrere_laender": 32,
+    "geonames_orte_exakt": 11902,
+    "geonames_orte_stamm": 107,
+    "laender_flaechen": 16
+  }
+}
