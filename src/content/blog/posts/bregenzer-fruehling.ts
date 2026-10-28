@@ -1,5 +1,13 @@
 import type { FestivalPost } from '../types';
 
+// Programm, Termine und Spielorte 2026 geprüft am 2026-10-27 gegen bregenzerfruehling.com
+// (Startseite mit Archiv, /programm), visitbregenz.com/en/events/event-series/bregenzer-fruehling
+// und die Programmankündigung auf raiffeisen.at (Raiba Bregenz, "Keep dreaming, baby").
+// Vorher falsch: Termin 13.3. bis 18.4.2026 (richtig 14.3. bis 11.6.), Website
+// bregenzerfruehling.at (ist heute eine Casino-Seite), erfundenes Lineup (Mamela Nyamza,
+// Tanzcompagnie Vorarlberg, Schule für Tanz; Emanuel Gat war 2025), "über 20 Vorstellungen
+// in fünf Wochen", Tanzpreis Vorarlberg, Workshops, Gründung 1989 als Festspiel-Ergänzung,
+// Preise "ab 20 €/35 €" und Zugzeiten ohne Beleg.
 export const post: FestivalPost = {
   slug: 'bregenzer-fruehling',
   title: 'Bregenzer Frühling',
@@ -7,76 +15,75 @@ export const post: FestivalPost = {
   heroImage: '/images/blog/bregenzer-fruehling/hero.jpg',
   thumbnailImage: '/images/blog/bregenzer-fruehling/thumb.jpg',
   publishDate: '2026-04-01',
-  updatedDate: '2026-04-01',
+  updatedDate: '2026-10-27',
   readingTime: 6,
   excerpt:
-    'Der Bregenzer Frühling ist das bedeutendste Tanzfestival Vorarlbergs. Jedes Jahr im März und April präsentiert es internationale und heimische Tanzcompagnien im Festspielhaus Bregenz.',
+    'Der Bregenzer Frühling ist das internationale Festival für zeitgenössischen Tanz in Bregenz. Jedes Jahr von März bis Juni zeigt es Gastspiele internationaler Compagnien im Festspielhaus Bregenz, dazu Produktionen an weiteren Bregenzer Spielorten.',
   category: 'Kultur & Tradition',
   categoryColor: 'bg-pink-600 text-white',
   keyFacts: {
-    dates: '13. März – 18. April 2026',
-    location: 'Festspielhaus Bregenz, Kunsthaus Bregenz',
+    dates: '14. März bis 11. Juni 2026 (Programm 2027 wird am 3. November 2026 vorgestellt)',
+    location: 'Festspielhaus Bregenz, Kunsthaus Bregenz, Theater KOSMOS',
     address: 'Platz der Wiener Symphoniker 1, 6900 Bregenz',
     genre: 'Zeitgenössischer Tanz, Ballett, Tanztheater',
-    price: 'ab 20 €',
-    website: 'https://www.bregenzerfruehling.at',
-    since: '1989',
+    price: 'je Vorstellung, Karten über tickets.visitbregenz.com',
+    website: 'https://www.bregenzerfruehling.com',
   },
   lineup: [
-    { name: 'Hofesh Shechter Company (UK)', role: 'headliner', stage: 'Großer Saal' },
-    { name: 'Tanzcompagnie Vorarlberg', role: 'special', stage: 'Großer Saal' },
-    { name: 'Mamela Nyamza (Südafrika)', role: 'headliner', stage: 'Werkstattbühne' },
-    { name: 'Studierende der Schule für Tanz (Abschluss)', role: 'support', stage: 'Werkstattbühne' },
-    { name: 'Emanuel Gat Dance (Israel/Frankreich)', role: 'special', stage: 'Großer Saal' },
+    { name: 'Marie Chouinard (Kanada): MAGNIFICAT und The Rite of Spring', role: 'headliner', stage: 'Festspielhaus', day: '14. März 2026' },
+    { name: 'Marie Chouinard (Kanada): In Museum', role: 'special', stage: 'Kunsthaus Bregenz', day: '15. März 2026' },
+    { name: 'Hofesh Shechter Company (Großbritannien): Theatre of Dreams', role: 'headliner', stage: 'Festspielhaus', day: '28. März 2026' },
+    { name: 'Nederlands Dans Theater 2 (Niederlande): Folkå und SAABA', role: 'headliner', stage: 'Festspielhaus', day: '7. Mai 2026' },
+    { name: 'Cloud Gate Dance Theatre of Taiwan: Sounding Light', role: 'headliner', stage: 'Festspielhaus', day: '29. Mai 2026' },
+    { name: 'aktionstheater ensemble (Österreich): HUMAN (Ich bin Mensch)', role: 'special', stage: 'Theater KOSMOS', day: 'ab 11. Juni 2026' },
   ],
-  lineupTitle: 'Programm-Highlights',
+  lineupTitle: 'Programm 2026',
   lineupNote:
-    'Das Programm 2026 steht auf bregenzerfruehling.at. Der Bregenzer Frühling vergibt regelmäßig den Tanzpreis Vorarlberg — Auszeichnung heimischer Tanzkünstler.',
+    'Programm 2026 laut bregenzerfruehling.com, Motto "Keep Dreaming, Baby". Das Programm 2027 wird am 3. November 2026 vorgestellt.',
   intro:
-    'Im März verwandelt sich Bregenz zur Tanzhauptstadt des Bodenseeraums. Der Bregenzer Frühling bringt seit 1989 internationale Tanzcompagnien in die Vorarlberger Landeshauptstadt — von zeitgenössischem Tanz über klassisches Ballett bis zu physischem Theater. Was das Festival besonders macht, ist seine Mischung: internationale Stargäste aus London, Tel Aviv und Johannesburg treffen auf die lokale Tanzszene Vorarlbergs. Das Publikum ist jung und neugierig — und erlebt Tanzkunst auf dem höchsten Niveau.',
-  historyTitle: 'Seit 1989: Tanz als Sprache des Frühlings',
+    'Von März bis Juni wird Bregenz zur Tanzbühne des Bodenseeraums. Der Bregenzer Frühling, veranstaltet von der Landeshauptstadt Bregenz, holt internationale Compagnien für zeitgenössischen Tanz ins Festspielhaus. 2026 waren das unter dem Motto "Keep Dreaming, Baby" Marie Chouinard aus Kanada, die Hofesh Shechter Company aus Großbritannien, das Nederlands Dans Theater 2 und das Cloud Gate Dance Theatre of Taiwan. Dazu kamen eine neue Arbeit des aktionstheater ensemble und eine Kooperation mit dem Kunsthaus Bregenz.',
+  historyTitle: 'Tanz als Sprache des Frühlings',
   history:
-    'Der Bregenzer Frühling wurde 1989 als Ergänzung zu den sommerlichen Bregenzer Festspielen gegründet, um auch in der Vorsaison ein bedeutendes Kulturprogramm anzubieten. Das Festival fokussiert seit Beginn auf zeitgenössischen Tanz — eine Entscheidung, die Bregenz früh als Ort positionierte, an dem neue Tanzformen exploriert werden. Im Laufe der Jahre hat sich das Festival zu einem festen Bestandteil des europäischen Tanzfestival-Netzwerks entwickelt.',
-  whatToExpectTitle: 'Was der Bregenzer Frühling 2026 bietet',
+    'Der Bregenzer Frühling fand 2026 laut Bregenz Tourismus zum 36. Mal statt. Im Archiv des Festivals stehen große Namen des zeitgenössischen Tanzes: Akram Khan Company, Company Wayne McGregor, Ballet Preljocaj, Israel Galván, L-E-V Dance Company von Sharon Eyal und Gai Behar, Emanuel Gat Dance und immer wieder das Nederlands Dans Theater 2. Viele Stücke sind in Bregenz als österreichische Erstaufführung zu sehen, das aktionstheater ensemble zeigt jedes Jahr eine neue Arbeit.',
+  whatToExpectTitle: 'Was der Bregenzer Frühling bietet',
   whatToExpect:
-    'Das Festival 2026 präsentiert über 20 Vorstellungen in fünf Wochen — von großen internationalen Produktionen im Großen Saal des Festspielhauses bis zu intimen Stücken auf der Werkstattbühne. Begleitend gibt es Workshops, Talks mit Choreografen und das Abschlusskonzert des Tanzzentrum Vorarlberg.',
+    'Das Festival 2026 umfasste sechs Programmpunkte zwischen 14. März und 11. Juni: vier Gastspiele internationaler Compagnien im Festspielhaus Bregenz, die Produktion "In Museum" im Kunsthaus Bregenz und eine neue Arbeit des aktionstheater ensemble im Theater KOSMOS.',
   whatToExpectList: [
-    'Internationale Tanzcompagnien aus Europa, Amerika und Afrika',
-    'Zeitgenössischer Tanz, Ballett und physisches Theater',
-    'Workshops für Amateure und Profis',
-    'Gespräche mit Choreografen nach ausgewählten Vorstellungen',
-    'Jugendprogramm: Tanzaufführungen für Schulklassen',
-    'Tanzpreis Vorarlberg: Auszeichnung heimischer Tanzkünstler',
+    'Internationale Compagnien, 2026 aus Kanada, Großbritannien, den Niederlanden und Taiwan',
+    'Zeitgenössischer Tanz im Festspielhaus Bregenz',
+    'Österreichische Erstaufführungen internationaler Produktionen',
+    'Jedes Jahr eine neue Arbeit des aktionstheater ensemble',
+    'Kooperation mit dem Kunsthaus Bregenz (2026: "In Museum")',
   ],
   practicalInfoTitle: 'Praktische Informationen',
   practicalInfo: [
     {
       icon: '🎟️',
       label: 'Tickets',
-      text: 'Vorverkauf online unter bregenzerfruehling.at. Preise ab 20 € für die Werkstattbühne, ab 35 € für den Großen Saal. Ermäßigungen für Studierende.',
+      text: 'Karten über bregenzerfruehling.com bzw. tickets.visitbregenz.com. Die Preise unterscheiden sich je Vorstellung.',
     },
     {
       icon: '🚂',
       label: 'Anreise',
-      text: 'Festspielhaus Bregenz liegt 10 min zu Fuß vom Bahnhof. EC und IC aus Innsbruck (1,5 h), Zürich (1,5 h). Parkplätze am Festspielhaus.',
+      text: 'Festspielhaus Bregenz liegt 10 min zu Fuß vom Bahnhof.',
     },
     {
       icon: '🎭',
       label: 'Dresscode',
-      text: 'Das Festival ist offen und informal. Smart casual ist angemessen — Tanz-Abende sind keine Premierengalas. Bequeme Schuhe empfohlen.',
+      text: 'Das Festival ist offen und informal. Smart casual ist angemessen, Tanz-Abende sind keine Premierengalas. Bequeme Schuhe empfohlen.',
     },
     {
       icon: '🌸',
       label: 'Frühlingserlebnis',
-      text: 'Bregenz im Frühjahr ist wunderschön — Bodenseepromenade, Pfänder und erste Frühlingsblüten ergänzen das Festivalprogramm.',
+      text: 'Bregenz im Frühjahr ist wunderschön: Bodenseepromenade, Pfänder und erste Frühlingsblüten ergänzen das Festivalprogramm.',
     },
   ],
   gallery: [],
   ctaText: 'Kulturevents in Vorarlberg entdecken',
   ctaLink: '/map?bundesland=Vorarlberg&category=Kultur',
-  seoTitle: 'Bregenzer Frühling 2026 – Tanzfestival Programm & Tickets',
+  seoTitle: 'Bregenzer Frühling 2026: Tanzfestival, Programm & Tickets',
   seoDescription:
-    'Bregenzer Frühling 2026 (13. März – 18. April): Internationales Tanzfestival am Bodensee. Zeitgenössischer Tanz & Ballett im Festspielhaus Bregenz.',
+    'Bregenzer Frühling 2026 (14. März bis 11. Juni): Zeitgenössischer Tanz mit Marie Chouinard, Hofesh Shechter Company, NDT 2 und Cloud Gate im Festspielhaus Bregenz.',
   keywords: [
     'Bregenzer Frühling 2026',
     'Tanzfestival Bregenz',
@@ -91,13 +98,13 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Bregenzer Frühling 2026',
-    startDate: '2026-03-13',
-    endDate: '2026-04-18',
+    startDate: '2026-03-14',
+    endDate: '2026-06-11',
     location: 'Festspielhaus Bregenz, Platz der Wiener Symphoniker 1, 6900 Bregenz, Austria',
     addressCountry: 'AT',
-    url: 'https://www.bregenzerfruehling.at',
+    url: 'https://www.bregenzerfruehling.com',
     description:
-      'Der Bregenzer Frühling ist das bedeutendste Tanzfestival Vorarlbergs mit internationalen Compagnien aus aller Welt — zeitgenössischer Tanz und Ballett am Bodensee.',
+      'Der Bregenzer Frühling ist das internationale Festival für zeitgenössischen Tanz in Bregenz, mit Gastspielen internationaler Compagnien im Festspielhaus Bregenz.',
     image:
       'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=1600&q=85&auto=format&fit=crop',
   },

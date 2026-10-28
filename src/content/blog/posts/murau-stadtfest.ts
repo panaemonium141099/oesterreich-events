@@ -1,103 +1,103 @@
 import type { FestivalPost } from '../types';
 
+// Geprüft am 2026-10-27 gegen murau.gv.at (Stadtgemeinde, Veranstaltungen),
+// steiermark.com und ausflugsziele.jetzt (Eintrag "Gasseln in der Murauer Altstadt",
+// 31.07.2026), meinbezirk.at (Bierstadtfest 2025, Artikel 31.01.2025) und murauerbier.at.
+// Im Kern falsch: Ein "Murauer Stadtfest" am 11. und 12. Juli 2026 ist nicht belegbar.
+// 11. und 12. Juli war der Termin des Bierstadtfests 2025 (530 Jahre Murauer Bier); für
+// 2026 und 2027 ist kein Bierstadtfest angekündigt. Das belegbare Altstadtfest 2026 war
+// das Gasseln am 31. Juli. Ebenfalls ohne Beleg und entfernt: Lineup und Bühnen
+// (Burggassen-Bühne, Biergarten-Bühne), Festzug, Kunsthandwerksmarkt, "seit den
+// 1990er-Jahren", "ca. 10.000 Besucher", Fahrzeit nach Graz. Website murau.at leitet
+// auf eine fremde Seite um (almnest-lachtal.at); die Stadtgemeinde ist murau.gv.at.
 export const post: FestivalPost = {
   slug: 'murau-stadtfest',
-  title: 'Murauer Stadtfest',
-  subtitle: 'Steirisches Flair im Murtal – das Stadtfest der Bierstadt Murau',
+  title: 'Feste in der Murauer Altstadt',
+  subtitle: 'Gasseln und Bierstadtfest: Feiern in der Bierstadt Murau',
   heroImage: '/images/blog/murau-stadtfest/hero.jpg',
   thumbnailImage: '/images/blog/murau-stadtfest/thumb.jpg',
   publishDate: '2026-04-01',
-  updatedDate: '2026-04-01',
+  updatedDate: '2026-10-27',
   readingTime: 6,
   excerpt:
-    'Das Murauer Stadtfest ist das gesellige Highlight des Murtals. Die mittelalterliche Altstadt von Murau verwandelt sich im Sommer in eine Festmeile mit Livemusik, regionaler Küche und Murauer Bier direkt vom Fass.',
+    'Ein eigenes „Murauer Stadtfest“ gibt es nicht. Gefeiert wird in der Murauer Altstadt beim Gasseln im Sommer und, in größeren Abständen, beim Bierstadtfest der Brauerei Murau.',
   category: 'Festivals & Feste',
   categoryColor: 'bg-amber-600 text-white',
   keyFacts: {
-    dates: '11.–12. Juli 2026',
-    location: 'Murauer Stadtplatz & Altstadt',
-    address: 'Stadtplatz 1, 8850 Murau, Steiermark',
-    genre: 'Stadtfest, Volksmusik, Kulinarik, Brauchtum',
-    price: 'Eintritt frei',
-    website: 'https://www.murau.at',
-    capacity: 'ca. 10.000 Besucherinnen und Besucher',
-    since: '1990er-Jahre',
+    dates: 'Gasseln: 31. Juli 2026 ab 15 Uhr (Termin 2027 folgt). Bierstadtfest: zuletzt 11. und 12. Juli 2025',
+    location: 'Murauer Altstadt',
+    address: 'Raffaltplatz, 8850 Murau, Steiermark',
+    genre: 'Altstadtfest, Volksmusik, Kulinarik, Brauchtum',
+    price: 'Gasseln: Eintritt frei',
+    website: 'https://www.murau.gv.at',
   },
-  lineup: [
-    { name: 'Murauer Stadtkapelle', role: 'headliner', stage: 'Stadtplatz-Hauptbühne' },
-    { name: 'Murtaler Volksmusikgruppen', role: 'support', stage: 'Burggassen-Bühne' },
-    { name: 'Steirische Trachtenmusik', role: 'support', stage: 'Biergarten-Bühne' },
-    { name: 'Lokal- und Regionalbands', role: 'support', stage: 'Stadtplatz-Hauptbühne' },
-  ],
+  lineup: [],
   lineupTitle: 'Programm-Highlights',
-  lineupNote:
-    'Das detaillierte Programm mit Bühnenzeiten und Acts wird ab Mai 2026 auf murau.at veröffentlicht.',
   intro:
-    'Im Herzen der obersteirischen Berge liegt eine der schönsten mittelalterlichen Kleinstädte der Steiermark: Murau, bekannt für sein romantisches Stadtbild und das traditionsreiche Murauer Bier. Wenn im Sommer das Stadtfest die Gassen füllt, erlebt man die steirische Gemeinschaftskultur von ihrer herzlichsten Seite: Nachbarn feiern miteinander, die Stadtkapelle spielt auf dem Hauptplatz, und das Fassungsvermögen des Biergartens wird auf eine herrliche Probe gestellt.',
-  historyTitle: 'Fest im Murtal: Tradition und Gemeinschaft',
+    'Im Herzen der obersteirischen Berge liegt eine der schönsten mittelalterlichen Kleinstädte der Steiermark: Murau, bekannt für sein romantisches Stadtbild und das traditionsreiche Murauer Bier. Ein jährliches Fest unter dem Namen „Murauer Stadtfest“ gibt es allerdings nicht. Das Altstadtfest heißt in Murau Gasseln: 2026 fand es am Freitag, 31. Juli, ab 15 Uhr statt, veranstaltet von der Stadtgemeinde Murau, bei freiem Eintritt.',
+  historyTitle: 'Bierstadt Murau: Gasseln und Bierstadtfest',
   history:
-    'Das Murauer Stadtfest hat sich aus lokalen Gemeinschaftsfesten entwickelt, die im Murtal seit Generationen gepflegt werden. In der mittelalterlichen Altstadt, deren historischer Stadtplatz und gut erhaltene Bürgerhäuser das Stadtbild prägen, finden Feste schon immer ihren natürlichen Rahmen. Das heutige Stadtfest bündelt Brauchtumspflege, Gastronomie und Unterhaltung zu einem Event, das die Bedeutung des Gemeinschaftslebens in der steirischen Region spiegelt.',
-  whatToExpectTitle: 'Ein Fest im Herz der Steiermark',
+    'Das Murauer Bier wird laut Brauerei seit 1495 gebraut. Zum 530-Jahr-Jubiläum lud die Brauerei Murau am 11. und 12. Juli 2025 zum Bierstadtfest in die Altstadt: Angekündigt waren fünf Bühnen mit 49 Bands, 26 Musikkapellen beim Umzug durch die Altstadt und rund 15.000 Besucherinnen und Besucher. Das Bierstadtfest findet nicht jährlich statt, ein Termin für 2026 oder 2027 ist nicht angekündigt. Das Gasseln beschreibt der Veranstaltungseintrag von Steiermark Tourismus als traditionelles Altstadtfest.',
+  whatToExpectTitle: 'Was das Gasseln bietet',
   whatToExpect:
-    'Das Murauer Stadtfest verbindet Volksmusik, regionale Küche und das berühmte Murauer Bier zu einem entspannten Sommerfest. Mehrere Bühnen auf dem Stadtplatz und in den Gassen sorgen für Unterhaltung, während die Gastgärten mit steirischen Spezialitäten locken. Das Fest richtet sich an alle Altersgruppen und lebt von seiner familiären, ungezwungenen Atmosphäre.',
+    'Beim Gasseln 2026 standen laut Veranstaltungseintrag Musik von steirischer Musi über Austropop bis Jazz, Schuhplattler, ein Saxofonist, Zauberer und Karikaturist, heimische Kulinarik, Kinderanimation, Kunsthandel und ein Glückshafen auf dem Programm. Am selben Tag gastierte ab 13 Uhr der Radio Steiermark Heimatsommer in Murau.',
   whatToExpectList: [
-    'Volksmusik und Blasmusik der Stadtkapelle Murau',
-    'Murauer Bier vom Fass direkt aus der traditionsreichen Stadtbrauerei',
-    'Steirische Köstlichkeiten: Schnitzel, Reindling und regionale Käse',
-    'Kunsthandwerksmarkt mit Produkten aus dem Murtal',
-    'Kinderprogramm und Tanzveranstaltungen',
-    'Festzug durch die historische Altstadt',
+    'Steirische Musi, Austropop und Jazz in der Altstadt',
+    'Schuhplattler, Zauberer und Karikaturist',
+    'Heimische Kulinarik und Murauer Bier',
+    'Kinderanimation',
+    'Kunsthandel und Glückshafen',
   ],
   practicalInfoTitle: 'Praktische Informationen',
   practicalInfo: [
     {
       icon: '🍺',
       label: 'Murauer Bier',
-      text: 'Das Murauer Bier aus der traditionsreichen Stadtbrauerei ist ein Pflichtgenuss auf dem Stadtfest – in verschiedenen Sorten vom Fass.',
+      text: 'Die Brauerei Murau am Raffaltplatz bietet mit der „Brauerei der Sinne“ Führungen durch Schaubrauerei und Museum an, ein guter Programmpunkt rund um einen Festbesuch.',
     },
     {
       icon: '🚗',
       label: 'Anreise',
-      text: 'Murau ist mit dem Auto über die B97 erreichbar. Regionalbahn ab Unzmarkt (Verbindung nach Graz, ca. 2 h).',
+      text: 'Murau liegt im oberen Murtal und ist mit dem Auto sowie mit der Murtalbahn der Steiermarkbahn erreichbar.',
     },
     {
       icon: '🏨',
       label: 'Unterkunft',
-      text: 'Gasthaus- und Pensionsangebot in Murau und im Murtal. Auch Campingmöglichkeiten entlang der Mur für Naturbegeisterte.',
+      text: 'Gasthaus- und Pensionsangebot in Murau und im Murtal. Bei großen Festen wie dem Bierstadtfest sind die Betten in Murau schnell vergeben, dann auf Nachbarorte wie St. Lambrecht, Neumarkt oder Oberwölz ausweichen.',
     },
     {
       icon: '🌲',
       label: 'Ausflugstipp',
-      text: 'Das Murtal bietet tolle Wanderungen und Radtouren – ideal zum Kombinieren mit dem Stadtfestbesuch.',
+      text: 'Das Murtal bietet tolle Wanderungen und Radtouren, ideal zum Kombinieren mit einem Festbesuch.',
     },
   ],
   gallery: [],
   ctaText: 'Events im Murtal entdecken',
   ctaLink: '/map?bundesland=Steiermark&category=Festival',
-  seoTitle: 'Murauer Stadtfest 2026 – Programm, Termin & Tipps',
+  seoTitle: 'Feste in Murau: Gasseln in der Altstadt und Bierstadtfest',
   seoDescription:
-    'Murauer Stadtfest 2026: Stadtfest in der malerischen Altstadt von Murau in der Steiermark. Volksmusik, steirische Küche und Murauer Bier. Eintritt frei.',
+    'Murau feiert in der Altstadt: Gasseln 2026 am 31. Juli mit Musik und Kulinarik bei freiem Eintritt, dazu das Bierstadtfest der Brauerei Murau.',
   keywords: [
-    'Murauer Stadtfest 2026',
-    'Stadtfest Murau',
+    'Murau Stadtfest',
+    'Gasseln Murau',
+    'Murau Altstadtfest',
+    'Bierstadtfest Murau',
     'Murau Steiermark',
     'Murauer Bier Fest',
     'Volksmusik Murtal',
     'Stadtfest Steiermark',
-    'Murau Altstadt Fest',
-    'Steirisches Stadtfest',
     'Murtal Event',
     'Obersteirisches Brauchtum',
   ],
   jsonLdEvent: {
-    name: 'Murauer Stadtfest 2026',
-    startDate: '2026-07-11',
-    endDate: '2026-07-12',
-    location: 'Stadtplatz Murau, 8850 Murau, Steiermark, Austria',
+    name: 'Gasseln in der Murauer Altstadt 2026',
+    startDate: '2026-07-31',
+    endDate: '2026-07-31',
+    location: 'Altstadt, Raffaltplatz, 8850 Murau, Steiermark, Austria',
     addressCountry: 'AT',
-    url: 'https://www.murau.at',
+    url: 'https://www.murau.gv.at',
     description:
-      'Das Murauer Stadtfest ist das gesellige Highlight des Murtals mit Volksmusik, regionaler Küche und Murauer Bier in der mittelalterlichen Altstadt von Murau.',
+      'Gasseln ist das traditionelle Altstadtfest von Murau mit Musik, Schuhplattlern, heimischer Kulinarik und Kinderanimation, Eintritt frei.',
     image:
       'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=1600&q=85&auto=format&fit=crop',
   },

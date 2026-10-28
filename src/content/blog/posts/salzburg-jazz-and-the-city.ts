@@ -1,59 +1,69 @@
 import type { FestivalPost } from '../types';
 
+// Termin 2026, Eintritt, Umfang, Programm und Website geprüft am 2026-10-27 gegen
+// salzburg-altstadt.at/de/salzburgjazz (Altstadtverband Salzburg, Ziel von
+// salzburgjazz.com), salzburg.info/en/events/highlights/jazz-and-the-city und
+// salzburgerland.com/de/magazin/es-jazzt-und-swingt-in-salzburg. Vorher stand hier im
+// April Geschätztes und Erfundenes: 22. bis 26. Oktober (tatsächlich 15. bis 18.10.),
+// fünf Tage mit über 100 Konzerten, Gründung 2002 durch eine „Salzburg Foundation“
+// (die Seite nennt nur „seit mehr als 25 Jahren“), 50.000 Besucher, Festival-Shuttle,
+// Website jazzandthecity.at (Domain existiert nicht) und ein ausgedachtes Line-up
+// (Paolo Fresu, Cory Henry, Susi Hyldgaard, Klangspuren Ensemble). Termin 2027 ist
+// noch nicht veröffentlicht.
 export const post: FestivalPost = {
   slug: 'salzburg-jazz-and-the-city',
   title: 'Jazz & The City Salzburg',
-  subtitle: 'Kostenloses Open-Air-Jazzfestival in den Gassen und Plätzen der Salzburger Altstadt',
+  subtitle: 'Musik-Entdeckerfestival bei freiem Eintritt in den Kirchen, Plätzen, Bars und Kellern der Salzburger Altstadt',
   heroImage: '/images/blog/salzburg-jazz-and-the-city/hero.jpg',
   thumbnailImage: '/images/blog/salzburg-jazz-and-the-city/thumb.jpg',
   publishDate: '2026-04-01',
-  updatedDate: '2026-04-01',
+  updatedDate: '2026-10-27',
   readingTime: 5,
   excerpt:
-    'Jedes Jahr im Oktober verwandelt sich Salzburg in eine Jazz-Metropole. Jazz & The City bespielt die Plätze, Gassen und Innenhöfe der Altstadt — kostenlos und mitten im UNESCO-Welterbe.',
+    'Jedes Jahr im Oktober bespielt Jazz&TheCity sounds die Salzburger Altstadt: 2026 waren es von 15. bis 18. Oktober rund 60 Acts mit etwa 140 Musikerinnen und Musikern an 20 Spielorten, bei freiem Eintritt mitten im UNESCO-Welterbe.',
   category: 'Musik & Konzerte',
   categoryColor: 'bg-blue-700 text-white',
   keyFacts: {
-    dates: '22.–26. Oktober 2026',
-    location: 'Altstadt Salzburg (multiple Bühnen)',
-    address: 'Mozartplatz 1, 5020 Salzburg',
-    genre: 'Jazz, Swing, Fusion, Weltmusik',
-    price: 'Eintritt frei (alle Stages)',
-    website: 'https://www.jazzandthecity.at',
-    capacity: 'bis zu 50.000 Besucher über 5 Tage',
-    since: '2002',
+    dates: '15. bis 18. Oktober 2026 (Pre-Opening am 14. Oktober). Termin 2027 folgt',
+    location: 'Altstadt Salzburg (rund 20 Spielorte)',
+    address: 'Altstadt, 5020 Salzburg',
+    genre: 'Jazz, Weltmusik, Singer-Songwriter, Neue Musik',
+    price: 'Eintritt frei (ohne Tickets, first come, first served)',
+    website: 'https://www.salzburg-altstadt.at/de/salzburgjazz',
   },
   lineup: [
-    { name: 'Paolo Fresu Quartet', role: 'headliner', stage: 'Mozartplatz' },
-    { name: 'Cory Henry & The Funk Apostles', role: 'headliner', stage: 'Residenzplatz' },
-    { name: 'Susi Hyldgaard Trio', role: 'special', stage: 'Tomaselli Galerie' },
-    { name: 'Klangspuren Ensemble', role: 'support', stage: 'Stiftskeller' },
-    { name: 'Local Jazz Talents Showcase', role: 'support', stage: 'Café Bazar' },
+    { name: 'Yemen Blues', role: 'headliner', stage: 'Residenzplatz' },
+    { name: 'Les Frères Smith', role: 'headliner', stage: 'Residenzplatz' },
+    { name: 'Noura Mint Seymali', role: 'special' },
+    { name: 'Bab L’ Bluz', role: 'special' },
+    { name: 'Ernst Molden & die Neuen Wiener Concert Schrammeln', role: 'special' },
+    { name: 'Andy Sheppard Trio', role: 'special' },
+    { name: 'Salzburg Mozarteum Marching Band', role: 'support', stage: 'Altstadt' },
   ],
   lineupNote:
-    'Das vollständige Line-up für 2026 wird im August bekannt gegeben. Der Eintritt zu allen Bühnen ist kostenlos — keine Tickets erforderlich.',
+    'Auswahl aus dem Programm 2026 laut Veranstalter (Reihen City Stories, The Soul of Jazz, The Art of Solo, String-Break und Open-Air-Bühne am Residenzplatz). Das Programm 2027 ist noch nicht veröffentlicht. Der Eintritt zu allen Programmpunkten ist frei, Tickets gibt es keine.',
   intro:
-    'Jazz & The City ist das herzlichste Musikfestival Österreichs: fünf Tage, über 100 Konzerte, mehr als 20 Spielorte — und das alles kostenlos inmitten der Salzburger UNESCO-Welterbe-Altstadt. Seit 2002 bespielt das Festival Plätze, Innenhöfe, Cafés, Kirchen und Galerien mit internationalem und lokalem Jazz. Was als kleines Stadtfest begann, zählt heute zu den bemerkenswertesten Gratis-Jazzfestivals Europas und zeigt, dass Hochkultur und Zugänglichkeit kein Widerspruch sein müssen.',
-  historyTitle: 'Aus dem Stadtleben geboren: Jazz in der Welterbe-Stadt',
+    'Jazz&TheCity sounds ist das Musikfestival der Salzburger Altstadt: vier Tage im Oktober, Konzerte in Kirchen, auf Plätzen, in Kellern, Bars und Cafés, und das alles bei freiem Eintritt. 2026 standen von 15. bis 18. Oktober rund 60 Acts mit etwa 140 Künstlerinnen und Künstlern an 20 Spielorten auf dem Programm, Motto „true moments“. Die Musikerinnen und Musiker kamen unter anderem aus den USA, Italien, Frankreich, Spanien, Kolumbien, dem Iran, Mauretanien, den Niederlanden, Marokko, dem Jemen, Israel und der Türkei, dazu viele aus Österreich.',
+  historyTitle: 'Seit über 25 Jahren Jazz in der Welterbe-Stadt',
   history:
-    'Jazz & The City entstand 2002 auf Initiative der Salzburg Foundation mit dem Ziel, den öffentlichen Raum der Altstadt mit zeitgenössischer Musik zu beleben. Die Idee war radikal einfach: Jazz nicht in Konzertsälen einsperren, sondern ihn in die Straßen bringen — dort, wo die Menschen täglich leben. Über die Jahre wuchs das Festival organisch: Neue Spielorte kamen hinzu, internationale Booking-Kontakte wurden aufgebaut, und die Reputation als Off-Festival zur großen Klassikszene Salzburgs etablierte sich. Heute ist Jazz & The City ein Fixpunkt im Herbstkalender der Stadt und zieht Jazzliebhaber aus ganz Europa an.',
-  whatToExpectTitle: 'Was Jazz & The City 2026 bietet',
+    'Jazz&TheCity ist laut Veranstalter seit mehr als 25 Jahren ein fixer Termin im Veranstaltungskalender der Salzburger Altstadt. Hinter dem Festival steht der Altstadtverband Salzburg. Über die Jahre hat es sich zu einem international bekannten Musik-Entdeckerfestival entwickelt; 2026 knüpfte ein Pre-Opening in ausgewählten Altstadt-Lokalen an die Anfänge des Festivals an. Kooperationspartner sind unter anderem die Universität Mozarteum, 2026 kam das Musikum Salzburg neu dazu.',
+  whatToExpectTitle: 'Was Jazz & The City bietet',
   whatToExpect:
-    'Das Festival bespielt über 20 Locations in der Altstadt — vom offenen Mozartplatz bis zum intimen Kellerwölbe. Morgens Frühstückskonzerte, mittags Innenhofshows, abends Galakonzerte: Jazz & The City ist ein 24-Stunden-Erlebnis. Das Line-up reicht von internationalem Mainstream-Jazz über Latin und Fusion bis zu experimentellen Grenzgängern.',
+    'Das Festival bespielt große und kleine Orte in Gehweite zueinander: 2026 unter anderem den Residenzplatz mit der Open-Air-Bühne, die Kollegienkirche, das DomQuartier, den Stieglkeller, die Universität Mozarteum, den Zwergelgartenpavillon und den Jazzit:Musik:Club. Das Programm ist in Reihen gegliedert, von Jazz über Weltmusik bis zu Solo- und Saitenprojekten, dazu Jazz-Brunch, Jazz-Frühschoppen und ein Kinderprogramm.',
   whatToExpectList: [
-    'Über 100 Konzerte an 5 Tagen — alle kostenlos',
-    'Mehr als 20 Spielorte: Plätze, Galerien, Innenhöfe, Kirchen, Cafés',
-    'Internationales Line-up: Europa, Amerika, Afrika, Lateinamerika',
-    'Frühstückskonzerte, Lunchshows und Late-Night-Sessions',
-    'Festival-Shuttle zwischen den Spielorten in der Altstadt',
-    'Lokale Kulinarik an allen Open-Air-Bühnen',
+    'Rund 60 Acts an 20 Spielorten (2026), alle bei freiem Eintritt',
+    'Open-Air-Bühne am Residenzplatz',
+    'Konzerte in Kirchen, Kellern, Bars und Cafés',
+    'Programmreihen: City Stories, The Soul of Jazz, The Art of Solo, String-Break',
+    'Hidden Tracks: geführte Rundgänge mit Musik',
+    'Jazz-Brunch, Jazz-Frühschoppen und Kinderprogramm',
   ],
   practicalInfoTitle: 'Praktische Infos für Festivalbesucher',
   practicalInfo: [
     {
       icon: '🎷',
       label: 'Eintritt',
-      text: 'Alle Konzerte sind kostenlos zugänglich. Kein Ticket, keine Reservierung erforderlich.',
+      text: 'Alle Programmpunkte sind frei zugänglich. Es gibt keine Tickets oder Zählkarten, es gilt „first come, first served“. Die Personenzahl je Spielort richtet sich nach den gesetzlichen Vorgaben.',
     },
     {
       icon: '🚂',
@@ -63,20 +73,20 @@ export const post: FestivalPost = {
     {
       icon: '🗺️',
       label: 'Festival-App',
-      text: 'Die offizielle Jazz & The City App zeigt alle Konzertzeiten, Locations und Live-Updates. Empfehlenswert für spontane Erkundungstouren.',
+      text: 'Die Altstadt Event-App (iOS und Android) zeigt das Programm, erstellt einen persönlichen Zeitplan und erinnert 15 Minuten vor Beginn an gemerkte Konzerte.',
     },
     {
       icon: '🧥',
       label: 'Wetter',
-      text: 'Oktober in Salzburg: 8–15 °C, möglicher Regen. Wetterfeste Jacke mitbringen, da viele Konzerte im Freien stattfinden.',
+      text: 'Oktober in Salzburg: 8 bis 15 °C, möglicher Regen. Wetterfeste Jacke mitbringen, da viele Konzerte im Freien stattfinden.',
     },
   ],
   gallery: [],
   ctaText: 'Musik-Events in Salzburg entdecken',
   ctaLink: '/map?bundesland=Salzburg&category=Musik',
-  seoTitle: 'Jazz & The City Salzburg 2026 – Programm & Tipps',
+  seoTitle: 'Jazz & The City Salzburg 2026: Programm & Tipps',
   seoDescription:
-    'Jazz & The City Salzburg 2026: 5 Tage, 100+ Konzerte, 20+ Locations — gratis in der Altstadt. Programm, Line-up und Tipps zum kostenlosen Jazzfestival.',
+    'Jazz & The City Salzburg 2026 von 15. bis 18. Oktober: rund 60 Acts an 20 Spielorten in der Altstadt, Eintritt frei. Programm, Spielorte und Tipps.',
   keywords: [
     'Jazz The City Salzburg 2026',
     'Jazzfestival Salzburg',
@@ -91,13 +101,13 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Jazz & The City Salzburg 2026',
-    startDate: '2026-10-22',
-    endDate: '2026-10-26',
-    location: 'Mozartplatz 1, 5020 Salzburg, Austria',
+    startDate: '2026-10-15',
+    endDate: '2026-10-18',
+    location: 'Residenzplatz, 5020 Salzburg, Austria',
     addressCountry: 'AT',
-    url: 'https://www.jazzandthecity.at',
+    url: 'https://www.salzburg-altstadt.at/de/salzburgjazz',
     description:
-      'Jazz & The City ist ein kostenloses Jazzfestival in der Salzburger Altstadt mit über 100 Konzerten an 20+ Locations über 5 Tage.',
+      'Jazz & The City ist ein Musikfestival bei freiem Eintritt in der Salzburger Altstadt mit rund 60 Acts an 20 Spielorten über vier Tage (2026).',
     image:
       'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=1600&q=85&auto=format&fit=crop',
   },

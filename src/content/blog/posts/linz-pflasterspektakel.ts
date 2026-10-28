@@ -1,54 +1,56 @@
 import type { FestivalPost } from '../types';
 
+// Termine 2026/2027, Umfang, Besucherzahl und Programmformate geprüft am 2026-10-27 gegen
+// pflasterspektakel.at (Startseite), pflasterspektakel.at/wp-content/uploads/Allgemeine-
+// Presseinfo_Linzer-Pflasterspektakel-2026.pdf und .../Bilanz_38_Pflasterspektakel.pdf
+// (Stadt Linz, Linz Kultur). Termin 23. bis 25. Juli 2026 war richtig. Vorher falsch:
+// Gründung "1985" (Stadt Linz nennt rund 40 Jahre, 2026 war die 38. Ausgabe; Gründungsjahr
+// in Quellen uneinheitlich, deshalb weggelassen), erfundenes Lineup (Circa, Gravity & Other
+// Myths, Les Grandes Personnes u. a.), "über 30 Länder", "mehr als 20 Auftrittsorte",
+// "ca. 100.000 Besucher" (2026: rund 250.000), "Europas größtes Straßenkunstfestival".
 export const post: FestivalPost = {
   slug: 'linz-pflasterspektakel',
   title: 'Linz Pflasterspektakel',
-  subtitle: 'Europas größtes Straßenkunstfestival mitten im Herzen von Linz',
+  subtitle: 'Eines der größten Straßenkunstfestivals Europas mitten im Herzen von Linz',
   heroImage: '/images/blog/linz-pflasterspektakel/hero.jpg',
   thumbnailImage: '/images/blog/linz-pflasterspektakel/thumb.jpg',
   publishDate: '2026-04-01',
-  updatedDate: '2026-04-01',
+  updatedDate: '2026-10-27',
   readingTime: 6,
   excerpt:
     'Drei Tage lang verwandeln Akrobaten, Clowns, Musiker und Zauberer die Linzer Innenstadt in eine riesige Freilichtbühne. Das Pflasterspektakel ist kostenlos, bunt und für alle.',
   category: 'Festivals',
   categoryColor: 'bg-orange-600 text-white',
   keyFacts: {
-    dates: '23.–25. Juli 2026',
-    location: 'Linzer Innenstadt (Hauptplatz, Landstraße, Promenadenstraße)',
-    address: 'Hauptplatz 1, 4020 Linz',
+    dates: '15. bis 17. Juli 2027 (2026: 23. bis 25. Juli)',
+    location: 'Linzer Innenstadt, rund 40 Spielorte (u. a. Altstadt, rund ums Schloss, Donaupark)',
+    address: 'Linzer Innenstadt, 4020 Linz',
     genre: 'Straßenkunst, Artistik, Musik, Theater',
-    price: 'Kostenlos (freiwillige Spende)',
+    price: 'Eintritt frei, Hutgeld für die Künstler',
     website: 'https://www.pflasterspektakel.at',
-    capacity: 'ca. 100.000 Besucher pro Ausgabe',
-    since: '1985',
+    capacity: 'rund 250.000 Besucher (2026)',
   },
   lineup: [
-    { name: 'Teatro Pavana (Spanien)', role: 'headliner', stage: 'Hauptplatz' },
-    { name: 'Circa (Australien)', role: 'headliner', stage: 'Donaulände' },
-    { name: 'Les Grandes Personnes (Frankreich)', role: 'special', stage: 'Landstraße' },
-    { name: 'Acrobuffos (USA)', role: 'special', stage: 'Promenadenstraße' },
-    { name: 'Kolektif Istanbul (Türkei)', role: 'support', stage: 'Graben' },
-    { name: 'Gravity & Other Myths (Australien)', role: 'special', stage: 'Hauptplatz' },
+    { name: 'Cia. Cop D’Ull: "Show to go", Stadtrundgang mit dem Clown-Paar', role: 'special', stage: 'Innenstadt', day: '2026' },
   ],
   lineupTitle: 'Programm-Highlights',
   lineupNote:
-    'Das vollständige Programm mit über 100 internationalen Gruppen wird im Juni veröffentlicht. Alle Aufführungen sind kostenlos und erfordern keine Reservierung.',
+    'Die Künstlerinnen und Künstler 2027 stellt die Stadt Linz laut Veranstalterin Mitte Juni vor. Auftrittszeiten und Spielorte wählen sie am Festivaltag selbst, sie stehen im täglichen Tagesprogramm. Alle Aufführungen sind kostenlos und erfordern keine Reservierung.',
   intro:
-    'Wenn die Linzer Innenstadt Mitte Juli plötzlich zu einer gigantischen Freilichtbühne wird, dann ist Pflasterspektakel-Zeit. Seit 1985 zieht das Festival jährlich über 100 internationale Straßenkünstler aus aller Welt nach Linz — Akrobaten, Clowns, Zauberer, Musiker und Theatermacher, die auf Plätzen, Gassen und Gehsteigen ihre Kunst zelebrieren. Was das Pflasterspektakel so besonders macht: Es ist komplett kostenlos. Wer möchte, wirft nach der Vorstellung eine Münze in den Hut — und bekommt dafür Weltklasseartistik mitten im Alltag.',
-  historyTitle: 'Seit 1985: Straßenkunst macht Linz zum internationalen Treffpunkt',
+    'Wenn die Linzer Innenstadt im Juli zur großen Freiluftbühne wird, dann ist Pflasterspektakel-Zeit. Über 100 Solokünstlerinnen, Solokünstler und Compagnien aus aller Welt zeigen drei Tage lang Akrobatik, Jonglage, Clownerie, Magie, Figurentheater, Feuershows und Musik auf Plätzen und in Gassen. Was das Pflasterspektakel so besonders macht: Der Eintritt ist frei. Wer möchte, gibt nach der Vorstellung Hutgeld und bekommt dafür Straßenkunst mitten im Alltag.',
+  historyTitle: 'Rund 40 Jahre Straßenkunst in Linz',
   history:
-    'Das Pflasterspektakel wurde 1985 von einer kleinen Gruppe Kulturbegeisterter ins Leben gerufen, die die Linzer Innenstadt beleben wollten. Was als bescheidenes Experiment begann, wuchs schnell zu einem der renommiertesten Straßenkunstfestivals Europas. Heute reisen Künstler aus über 30 Ländern an, und die Bewerberliste übertrifft die verfügbaren Plätze bei weitem. Das Festival hat maßgeblich dazu beigetragen, Linz als Kulturstadt zu positionieren — lange bevor die Stadt 2009 Europäische Kulturhauptstadt wurde.',
-  whatToExpectTitle: 'Was das Pflasterspektakel 2026 bietet',
+    'Das Linzer Pflasterspektakel wird von der Stadt Linz (Linz Kultur) veranstaltet und hat sich in rund 40 Jahren zu einem der bedeutendsten Straßenkunstfestivals Europas entwickelt. 2026 fand es zum 38. Mal statt: Vom 23. bis 25. Juli kamen laut Stadt rund 250.000 Besucherinnen und Besucher, mehr als 300 Künstlerinnen und Künstler aus über 40 Ländern traten auf. Neu waren Spielorte rund um das Schloss, das Kinderspektakel auf der Terrasse vor dem Schlossmuseum und die "Show to go", ein Stadtrundgang mit dem Clown-Paar Cia. Cop D’Ull. Rund die Hälfte der eingeladenen Künstlerinnen und Künstler feiert jedes Jahr ihre Premiere beim Pflasterspektakel.',
+  whatToExpectTitle: 'Was das Pflasterspektakel 2027 bietet',
   whatToExpect:
-    'An drei Tagen bespielen über 100 Gruppen und Solokünstler mehr als 20 Auftrittsorte in der Innenstadt. Von Hochseilakrobatik am Hauptplatz über Feuershow auf der Landstraße bis zu stiller Pantomime in kleinen Gassen — das Programm ist bewusst dezentral gestaltet, sodass jeder seinen eigenen Weg durch das Festival findet.',
+    'Das 39. Pflasterspektakel findet vom 15. bis 17. Juli 2027 statt, wie gewohnt von Donnerstag bis Samstag. 2026 wurden rund 40 Spielorte in der Innenstadt stündlich bespielt, insgesamt standen mehr als 800 Auftritte am Programm. Dazu kamen Revueshows im Spektakelzelt, der "Bildergarten" mit Straßenmalerei in der Altstadt und das Kinderspektakel im Donaupark.',
   whatToExpectList: [
-    'Über 100 internationale Gruppen aus mehr als 30 Ländern',
-    'Kostenloser Eintritt an allen Spielorten — Spenden willkommen',
-    'Feuershow und Großakrobatik auf dem Hauptplatz',
-    'Theater, Clownerie und Zauberei auf der Landstraße und im Graben',
-    'Musik aus aller Welt: Jazz, Flamenco, Balkan-Brass und mehr',
-    'Familienfreundliches Programm für alle Altersgruppen',
+    'Über 100 Solokünstlerinnen, Solokünstler und Compagnien, 2026 aus über 40 Ländern',
+    'Eintritt frei, Hutgeld für die Künstlerinnen und Künstler',
+    'Feuershows bei Einbruch der Dunkelheit',
+    'Revueshows "Kaleidoskopnachmittage" und "Kaleidoskopnächte" im Spektakelzelt',
+    'Über 25 Musik-Acts, Samba Session und musikalische Nightline in Innenstadtlokalen',
+    'Kinderspektakel mit Spiel- und Kreativstationen im Donaupark',
   ],
   practicalInfoTitle: 'Praktische Informationen',
   practicalInfo: [
@@ -65,22 +67,22 @@ export const post: FestivalPost = {
     {
       icon: '🗺️',
       label: 'Orientierung',
-      text: 'Das Festivalgelände erstreckt sich von Hauptplatz bis Graben. Programmhefte und Karten sind an Infoständen kostenlos erhältlich.',
+      text: 'Das Festival verteilt sich auf rund 40 Spielorte in der Innenstadt. Das Tagesprogramm mit Auftrittszeiten und Spielorten gibt es gedruckt am Festival.',
     },
     {
       icon: '🌤️',
       label: 'Wetter',
-      text: 'Das Festival findet bei (fast) jedem Wetter statt. Bei Regen weichen Künstler auf überdachte Bereiche aus. Leichte Regenjacke empfehlenswert.',
+      text: 'Das Pflasterspektakel ist ein Freiluftfestival. Für heiße Tage gab es 2026 Rückzugsorte wie die Spektakel-Rast in drei Kirchen und die Ruheinsel im Innenhof des Alten Rathauses.',
     },
   ],
   gallery: [],
   ctaText: 'Events in Oberösterreich entdecken',
   ctaLink: '/map?bundesland=Oberoesterreich&category=Festivals',
-  seoTitle: 'Linz Pflasterspektakel 2026 – Programm & Tipps',
+  seoTitle: 'Linz Pflasterspektakel 2027: Termin, Programm & Tipps',
   seoDescription:
-    'Linz Pflasterspektakel 2026: 3 Tage kostenlose Straßenkunst (23.–25. Juli). Über 100 internationale Künstler in der Linzer Innenstadt. Programm & Infos.',
+    'Linz Pflasterspektakel 2027 (15. bis 17. Juli): drei Tage Straßenkunst bei freiem Eintritt in der Linzer Innenstadt. 2026 kamen rund 250.000 Besucher.',
   keywords: [
-    'Linz Pflasterspektakel 2026',
+    'Linz Pflasterspektakel 2027',
     'Straßenkunstfestival Linz',
     'Pflasterspektakel Programm',
     'Straßenkunst Österreich',
@@ -92,14 +94,14 @@ export const post: FestivalPost = {
     'Pflasterspektakel Juli',
   ],
   jsonLdEvent: {
-    name: 'Linz Pflasterspektakel 2026',
-    startDate: '2026-07-23',
-    endDate: '2026-07-25',
-    location: 'Linzer Innenstadt, Hauptplatz 1, 4020 Linz, Austria',
+    name: 'Linz Pflasterspektakel 2027',
+    startDate: '2027-07-15',
+    endDate: '2027-07-17',
+    location: 'Linzer Innenstadt, 4020 Linz, Austria',
     addressCountry: 'AT',
     url: 'https://www.pflasterspektakel.at',
     description:
-      'Das Pflasterspektakel ist Europas größtes Straßenkunstfestival mit über 100 internationalen Künstlern in der Linzer Innenstadt — kostenlos für alle.',
+      'Das Linzer Pflasterspektakel ist eines der größten Straßenkunstfestivals Europas, mit über 100 Solokünstlern und Compagnien in der Linzer Innenstadt bei freiem Eintritt.',
     image:
       'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=1600&q=85&auto=format&fit=crop',
   },

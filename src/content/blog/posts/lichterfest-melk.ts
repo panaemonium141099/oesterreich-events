@@ -1,102 +1,79 @@
 import type { FestivalPost } from '../types';
 
+// Existenz, Termine und Programm geprüft am 2026-10-27 gegen stiftmelk.at (Startseite mit
+// Veranstaltungen), wachaukulturmelk.at (Festivalreihen in Melk), noe.gv.at
+// (Landeskorrespondenz zu den Internationalen Barocktagen 2026 und Presseinformation vom
+// 28.05.2026 zu den Sommerspielen Melk). Ein "Lichterfest Melk" ist bei keiner dieser Quellen
+// und in keiner Websuche zu finden. Vorher erfunden: das ganze Fest samt Termin 18./19.07.2026,
+// Gründungsjahr 1990, Lichtinstallationen, Lasershow, "Chor des Stifts Melk", Eintrittspreis.
+// Post neu geschrieben: sagt jetzt, dass es das Fest nicht gibt, und nennt belegte Sommerkultur.
 export const post: FestivalPost = {
   slug: 'lichterfest-melk',
-  title: 'Lichterfest Melk 2026',
-  subtitle: 'Wenn Licht und Wachau-Magie zu einem unvergesslichen Fest verschmelzen',
+  title: 'Lichterfest Melk: kein belegtes Fest',
+  subtitle: 'Was es in Melk im Sommer wirklich gibt: Barocktage, Sommerspiele und Konzerte im Stift',
   heroImage: '/images/blog/lichterfest-melk/hero.jpg',
   thumbnailImage: '/images/blog/lichterfest-melk/thumb.jpg',
   publishDate: '2026-04-01',
-  updatedDate: '2026-04-01',
-  readingTime: 5,
+  updatedDate: '2026-10-27',
+  readingTime: 3,
   excerpt:
-    'Das Lichterfest Melk verwandelt die Wachau jedes Jahr in ein Meer aus Kerzen und Lichtinstallationen. Mit dem Stift Melk als illuminierter Kulisse und dem Klang von Klassik und Folklore entsteht ein romantisches Sommererlebnis der besonderen Art.',
+    'Ein „Lichterfest Melk“ lässt sich in keiner offiziellen Quelle finden, weder beim Stift Melk noch bei Wachau Kultur Melk. Belegt sind dagegen die Internationalen Barocktage zu Pfingsten und die Sommerspiele Melk von Juni bis August.',
   category: 'Kultur & Bühne',
   categoryColor: 'bg-yellow-600 text-white',
   keyFacts: {
-    dates: 'Sommer 2026 (Juli/August)',
-    location: 'Stiftspark & Donauufer, Melk (Niederösterreich)',
+    dates: 'Kein Termin: ein Lichterfest Melk ist nicht belegt',
+    location: 'Stift Melk, Melk (Niederösterreich)',
     address: 'Abt-Berthold-Dietmayr-Str. 1, 3390 Melk',
-    genre: 'Lichtinstallationen, Klassik, Folklore, Kultur',
-    price: 'Eintritt frei oder symbolisch je nach Veranstaltung',
+    genre: 'Kultur im Stift Melk (Barocktage, Konzerte, Advent)',
+    price: 'je nach Veranstaltung',
     website: 'https://www.stiftmelk.at',
-    since: '1990',
   },
-  lineup: [
-    { name: 'Klassikkonzert im Stiftspark', role: 'headliner' },
-    { name: 'Folklore-Ensemble der Region', role: 'support' },
-    { name: 'Licht- und Lasershow am Stift', role: 'special' },
-    { name: 'Chor des Stifts Melk', role: 'support' },
-    { name: 'Lokale Musiker und Ensembles', role: 'support' },
-  ],
-  lineupTitle: 'Programm-Highlights',
-  lineupNote: 'Programm und genaue Termine werden im Sommer 2026 auf der Website des Stifts Melk veröffentlicht.',
+  lineup: [],
   intro:
-    'Wenn sich in den Sommerabenden tausende Lichter am Stift Melk spiegeln, das goldene Klosterlicht auf die Donau fällt und Musik durch den Stiftspark zieht, dann ist das Lichterfest Melk. In der UNESCO-Welterberegion Wachau gehört dieses stimmungsvolle Fest zu den romantischsten Sommerveranstaltungen Niederösterreichs. Familien, Paare und Kulturliebhaber kommen zusammen, um in einer Atmosphäre aus Geschichte, Natur und Lichtmagie zu versinken, die selten so harmonisch zusammenkommt.',
-  historyTitle: 'Licht und Stift — eine jahrzehntelange Tradition',
+    'Unter dem Namen „Lichterfest Melk“ kursiert im Netz die Beschreibung eines sommerlichen Lichterfests am Stift Melk. Wir haben das im Oktober 2026 geprüft: Weder das Stift Melk noch Wachau Kultur Melk, der Veranstalter der großen Festivals in der Stadt, noch die Pressestelle des Landes Niederösterreich kennen ein solches Fest. Diese Seite nannte früher einen Termin im Juli, ein Gründungsjahr und ein Programm mit Lichtinstallationen. Dafür gibt es keinen Beleg, deshalb haben wir diese Angaben entfernt.',
+  historyTitle: 'Was es in Melk tatsächlich gibt',
   history:
-    'Das Stift Melk, das hoch über der Donau thronende Benediktinerkloster, ist seit Jahrhunderten eines der bedeutendsten Kulturzentren Niederösterreichs. Das Lichterfest hat seine Wurzeln in regionalen Sommerfesten der Region und hat sich zu einer eigenständigen, liebevoll kuratierten Veranstaltungsreihe entwickelt. Die Kombination aus der dramatischen Lage des Stifts, dem Donauufer und der sanften Hügellandschaft der Wachau macht jede Lichternacht zu einem Tableau vivant aus Licht, Geschichte und Musik.',
-  whatToExpectTitle: 'Ein Abend zwischen Geschichte und Lichtmagie',
+    'Das Benediktinerstift Melk über der Donau gehört zum UNESCO-Welterbe Wachau. Wachau Kultur Melk veranstaltet in der Stadt die Internationalen Barocktage Stift Melk zu Pfingsten und die Sommerspiele Melk von Juni bis August. 2026 liefen die Barocktage vom 21. bis 25. Mai unter der künstlerischen Leitung von Michael Schade und dem Motto „[er]warten“. Die Sommerspiele Melk spielten 2026 in der Wachauarena „Das Ministerium der Wahrheit“ nach George Orwells „1984“, Premiere war am 17. Juni.',
+  whatToExpectTitle: 'Kultur am Stift Melk im Jahreslauf',
   whatToExpect:
-    'Beim Lichterfest Melk 2026 erleuchten Lichtinstallationen den Stiftspark und die Terrassenanlagen des Klosters. Konzerte unter freiem Himmel — von Klassik über Folklore bis zu Kammerjazz — begleiten die Gäste durch einen unvergesslichen Sommerabend. Entlang des Donauufers laden beleuchtete Promenaden zum Spaziergang ein, während die Gastronomie mit Wachauer Weinen und regionalen Speisen aufwartet.',
+    'Wer Musik in der Kulisse des Stifts sucht, findet sie bei den Barocktagen zu Pfingsten, bei Sommerkonzerten im Stift und im Advent. Für Herbst und Winter 2026 kündigt das Stift unter anderem das Adventsingen in der Stiftskirche am 29. November und 20. Dezember sowie „Musik und Wort im Advent“ am 12. Dezember im Kolomanisaal an. Aktuelle Termine stehen auf stiftmelk.at und wachaukulturmelk.at.',
   whatToExpectList: [
-    'Lichtinstallationen im Stiftspark und an der Stiftsfassade',
-    'Konzerte mit Klassik, Folklore und regionaler Musik',
-    'Stimmungsvoller Abendspaziergang entlang der Donau',
-    'Wachauer Weinverkostung und regionale Gastronomie',
-    'Fotografisch einzigartige Kulisse: illuminiertes Stift Melk über der Donau',
-    'Familienfreundlich — ideales Ausflugsziel mit Kindern',
+    'Internationale Barocktage Stift Melk: jedes Jahr zu Pfingsten',
+    'Sommerspiele Melk: Theater in der Wachauarena von Juni bis August',
+    'Adventsingen in der Stiftskirche: 29. November und 20. Dezember 2026',
+    'Musik und Wort im Advent: 12. Dezember 2026 im Kolomanisaal',
   ],
   practicalInfoTitle: 'Praktische Informationen',
   practicalInfo: [
     {
       icon: '🚂',
       label: 'Anreise mit der Bahn',
-      text: 'Direktzüge aus Wien und Linz — Melk liegt an der Westbahnstrecke (ca. 1 Std. ab Wien).',
+      text: 'Direktzüge aus Wien und Linz. Melk liegt an der Westbahnstrecke (ca. 1 Std. ab Wien).',
     },
     {
-      icon: '🚢',
-      label: 'Anreise mit dem Schiff',
-      text: 'Wachau-Schifffahrt ab Krems oder Wien mit Zwischenstopp Melk — besonders atmosphärisch.',
+      icon: '🚗',
+      label: 'Parken',
+      text: 'Der Besucherparkplatz des Stifts liegt an der Stiftsstraße in Melk.',
     },
     {
-      icon: '📸',
-      label: 'Fototipps',
-      text: 'Beste Fotos entstehen von der Donaubrücke mit Blick auf das illuminierte Stift — Stativ empfehlenswert.',
-    },
-    {
-      icon: '🍷',
-      label: 'Wachauer Weine',
-      text: 'Die Rieden rund um Melk produzieren exzellenten Grünen Veltliner und Riesling — Weinstand besuchen!',
+      icon: 'ℹ️',
+      label: 'Termine',
+      text: 'Programm und Karten für Barocktage und Sommerspiele unter wachaukulturmelk.at, Veranstaltungen im Stift unter stiftmelk.at.',
     },
   ],
   gallery: [],
   ctaText: 'Kulturevents in der Wachau entdecken',
   ctaLink: '/map?bundesland=Nieder%C3%B6sterreich&category=Kultur',
-  seoTitle: 'Lichterfest Melk 2026 – Lichtmagie in der Wachau',
+  seoTitle: 'Lichterfest Melk: gibt es nicht. Kultur am Stift Melk',
   seoDescription:
-    'Lichterfest Melk 2026: Illuminiertes Stift Melk, Konzerte und Wachau-Zauber. Termine, Programm und Tipps für das romantische Sommerfest in Niederösterreich.',
+    'Ein Lichterfest Melk ist in keiner offiziellen Quelle belegt. Was es wirklich gibt: Internationale Barocktage zu Pfingsten, Sommerspiele Melk und Advent im Stift Melk.',
   keywords: [
     'Lichterfest Melk',
-    'Stift Melk Festival',
-    'Wachau Sommerfest',
-    'Melk Lichterfest 2026',
-    'Niederösterreich Kulturveranstaltung',
-    'Lichtinstallationen Wachau',
+    'Stift Melk Veranstaltungen',
+    'Internationale Barocktage Stift Melk',
+    'Sommerspiele Melk',
     'Stift Melk Konzert',
-    'Donau Festival Niederösterreich',
-    'Sommerveranstaltung Wachau',
+    'Wachau Kultur',
+    'Niederösterreich Kulturveranstaltung',
   ],
-  jsonLdEvent: {
-    name: 'Lichterfest Melk 2026',
-    startDate: '2026-07-18',
-    endDate: '2026-07-19',
-    location: 'Stiftspark Melk, Abt-Berthold-Dietmayr-Str. 1, 3390 Melk, Austria',
-    addressCountry: 'AT',
-    url: 'https://www.stiftmelk.at',
-    description:
-      'Das Lichterfest Melk verwandelt das UNESCO-Welterbe Stift Melk und die Wachau in ein Licht- und Musikspektakel mit Konzerten und Installationen.',
-    image:
-      'https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1600&q=85&auto=format&fit=crop',
-  },
 };
