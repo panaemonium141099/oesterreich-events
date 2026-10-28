@@ -21,7 +21,7 @@ export const post: FestivalPost = {
     checkedAt: '2026-10-27',
     urls: [
       'https://www.montafon.at/montafoner-resonanzen/de',
-      'https://www.creativeaustria.at/en/2026/07/15/montafon-resonances-2026-montafon-vorarlberg/',
+      'https://www.creativeaustria.at/en/2026/07/15/montafon-resonances-2026-montafon-vorarlberg/',
     ],
   },
   readingTime: 4,

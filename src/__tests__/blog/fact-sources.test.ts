@@ -14,10 +14,9 @@ import type { FestivalPost } from '@/content/blog/types';
  * Posts kommen nie hinein.
  */
 const OHNE_BELEGE = new Set<string>([
-  // April-Batch (Spec fn-3, 2026-04-01): die übrigen 38 Posts sind seit dem Fakten-Audit 2026-10-27 belegt
-  'donauinselfest-2026', 'frequency-festival-2026', 'nova-rock-2026', 'kaiser-wiesn',
-  'vienna-city-marathon', 'viennale', 'wiener-festwochen', 'wiener-genussfestival',
-  'wiener-neujahrskonzert',
+  // April-Batch (Spec fn-3, 2026-04-01): die übrigen Posts sind seit dem Fakten-Audit 2026-10-27/28 belegt;
+  // diese drei gehörten nicht zum Audit
+  'donauinselfest-2026', 'frequency-festival-2026', 'nova-rock-2026',
   // Handgeschrieben am 2026-04-13 (Commit 54f3845e), nie gegen Quellen geprüft
   'electric-love-festival-2026', 'fest-der-freude-2026', 'glatt-und-verkehrt-2026', 'impulstanz-2026',
   'jazzfest-wien-2026', 'musikfestival-steyr-2026', 'narzissenfest-2026', 'poolbar-festival-2026',

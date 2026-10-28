@@ -22,7 +22,7 @@ export const post: FestivalPost = {
     checkedAt: '2026-10-27',
     urls: [
       'https://www.meinbezirk.at/klagenfurt/c-sport/laufende-informationen-zum-ironman-austria-2026_a8681292',
-      'https://de.wikipedia.org/wiki/Ironman_Austria',
+      'https://de.wikipedia.org/wiki/Ironman_Austria',
     ],
   },
   readingTime: 7,
