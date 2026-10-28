@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/konzerte-in-der-peterskirche-wien-peterskirche-20797592/?affiliate=J70",
   "publishDate": "2026-09-17",
   "updatedDate": "2026-09-17",
+  "factSources": {
+    "checkedAt": "2026-09-17",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/konzerte-in-der-peterskirche-wien-peterskirche-20797592/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Streicherklang im ersten Kuppelbau des barocken Wien: Das Classic Ensemble Vienna spielt in der Peterskirche die bekanntesten Werke von Vivaldi, Bach, Mozart und Schubert, rund 60 Minuten ohne Pause.",
   "category": "Kultur & Bühne",

@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/erotik-und-fetisch-messe-olympiahalle-22149378/?affiliate=J70",
   "publishDate": "2026-10-19",
   "updatedDate": "2026-10-19",
+  "factSources": {
+    "checkedAt": "2026-10-19",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/erotik-und-fetisch-messe-olympiahalle-22149378/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Von 27. bis 29. November 2026 kommt die Erotik- und Fetischmesse in die Olympiahalle Innsbruck. Laut Veranstalter gibt es bis zu 25 Live-Shows täglich. Eintritt ab 18, Tageskarte ab 20 Euro.",
   "category": "Kultur & Bühne",

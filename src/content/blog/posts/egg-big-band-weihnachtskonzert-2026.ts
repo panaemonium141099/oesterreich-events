@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/egg-big-band-weihnachtskonzert-kammgarn-kulturwerkstatt-21534801/?affiliate=J70",
   "publishDate": "2026-09-29",
   "updatedDate": "2026-09-29",
+  "factSources": {
+    "checkedAt": "2026-09-29",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/egg-big-band-weihnachtskonzert-kammgarn-kulturwerkstatt-21534801/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 12. Dezember 2026 spielt die 20-köpfige Egg Big Band ihr Weihnachtskonzert in der Kammgarn Hard. Mit Martina Breznik und Ralf Bramberger am Mikrofon wird es emotional und dynamisch, aber ohne Schmalz.",
   "category": "Musik & Festival",

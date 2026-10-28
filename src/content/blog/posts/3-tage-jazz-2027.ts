@@ -11,6 +11,16 @@ export const post: FestivalPost = {
   "ticketUrl": "https://tickets.jazzsaalfelden.com/organizer/tourismusverband-saalfelden-1?lang=de",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://jazzsaalfelden.com/en",
+      "https://www.jazzsaalfelden.com/de",
+      "https://www.salzburgerland.com/de/magazin/3-tage-jazz-im-winter-in-saalfelden-leogang",
+      "https://www.jazzsaalfelden.com",
+      "https://tickets.jazzsaalfelden.com/organizer/tourismusverband-saalfelden-1?lang=de"
+    ]
+  },
   "readingTime": 7,
   "excerpt": "Von 22. bis 24. Jänner 2027 feiert die Winterausgabe des Jazzfestivals Saalfelden ihre zehnte Ausgabe. Mit dabei: Henri Texier, das Trio Das Kapital und die Bassistin Helene Glüxam.",
   "category": "Musik & Festival",

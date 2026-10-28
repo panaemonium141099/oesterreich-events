@@ -11,6 +11,16 @@ export const post: FestivalPost = {
   "ticketUrl": "https://ticket.mozarteum.at",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://mozarteum.at/mozartwoche/",
+      "https://mozarteum.at/static/ca181ddf504281552ea62c7cdef0124f/MoWo_27_HP_WEB.pdf",
+      "https://www.srf.ch/radio-srf-2-kultur/srf-kulturclub/28-bis-31-januar-2027-mozartwoche-in-salzburg-ausgebucht-warteliste-verfuegbar",
+      "https://mozarteum.at/en/events/mozarts-cosi-fan-tutte",
+      "https://ticket.mozarteum.at"
+    ]
+  },
   "readingTime": 7,
   "excerpt": "Von 21. bis 31. Jänner 2027 feiert Salzburg Mozart und vier seiner Zeitgenossen: Così fan tutte mit Thomas Hampson im Haus für Mozart, Beethovens Neunte unter Christian Thielemann und 50 Programmpunkte in der ganzen Stadt.",
   "category": "Musik & Festival",

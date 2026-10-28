@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/fink-europe-tour-2026-rockhouse-salzburg-21414595/?affiliate=J70",
   "publishDate": "2026-08-27",
   "updatedDate": "2026-08-27",
+  "factSources": {
+    "checkedAt": "2026-08-27",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/fink-europe-tour-2026-rockhouse-salzburg-21414595/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Tauchen Sie ein in die einzigartige Klangwelt von Fink, wenn der britische Künstler am 22. Oktober 2026 das Rockhouse Salzburg mit seinem neuen Album \"The City Is Coming to Erase It All\" verzaubert. Ein Abend voller Folk, Blues und Indie erwartet Sie.",
   "category": "Musik & Festival",

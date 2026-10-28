@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/mc-bomber-die-serioese-tour-daswerk-21127787/?affiliate=J70",
   "publishDate": "2026-10-08",
   "updatedDate": "2026-10-08",
+  "factSources": {
+    "checkedAt": "2026-10-08",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/mc-bomber-die-serioese-tour-daswerk-21127787/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "MC Bomber kommt mit der seriösen Tour nach Wien. Am Samstag, 31. Oktober 2026, ist ab 19 Uhr Einlass. Tickets gibt es ab 37,50 Euro über Oeticket. Alle Infos auf einen Blick.",
   "category": "Musik & Festival",

@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/the-magic-forest-veranstaltungszentrum-forum-21515204/?affiliate=J70",
   "publishDate": "2026-10-22",
   "updatedDate": "2026-10-22",
+  "factSources": {
+    "checkedAt": "2026-10-22",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/the-magic-forest-veranstaltungszentrum-forum-21515204/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Was bleibt vom Menschen, wenn Maschinen uns alles abnehmen? „The Magic Forest“ stellt diese Frage im FoRum Rum mit Humor und Fantasie. Alle bekannten Infos zu Terminen, Tickets und Anreise.",
   "category": "Kultur & Bühne",

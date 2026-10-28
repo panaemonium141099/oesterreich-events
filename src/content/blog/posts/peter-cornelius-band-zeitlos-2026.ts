@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/peter-cornelius-band-zeitlos-helmut-list-halle-20640294/?affiliate=J70",
   "publishDate": "2026-09-01",
   "updatedDate": "2026-09-01",
+  "factSources": {
+    "checkedAt": "2026-09-01",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/peter-cornelius-band-zeitlos-helmut-list-halle-20640294/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Feiern Sie mit Peter Cornelius seinen 75. Geburtstag! Die Austropop-Ikone kommt mit seiner !ZEiTLOS!-Tour in die Helmut List Halle nach Graz und präsentiert unvergessliche Klassiker sowie neue Werke. Ein Abend voller Emotionen und virtuoser Gitarrenklänge erwartet Sie.",
   "category": "Musik & Festival",

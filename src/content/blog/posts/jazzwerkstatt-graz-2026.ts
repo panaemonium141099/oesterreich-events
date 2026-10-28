@@ -11,6 +11,15 @@ export const post: FestivalPost = {
   "ticketUrl": "https://jazzwerkstattgraz.at/tickets/",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://jazzwerkstattgraz.at/",
+      "https://jazzwerkstattgraz.at/programm",
+      "https://jazzwerkstattgraz.at/tickets/",
+      "https://jazzwerkstattgraz.at"
+    ]
+  },
   "readingTime": 6,
   "excerpt": "Von 26. bis 29. November 2026 zeigt die Jazzwerkstatt Graz bei shortcuts im Stockwerk, was die junge Szene gerade spielt: von Bach mit Trapbeats bis zu dadaistischen Duos. Festivalpass 45 Euro.",
   "category": "Musik & Festival",

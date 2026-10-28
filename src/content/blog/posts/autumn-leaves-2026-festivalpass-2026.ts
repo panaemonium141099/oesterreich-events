@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/autumn-leaves-2026-orpheum-extra-21947933/?affiliate=J70",
   "publishDate": "2026-09-30",
   "updatedDate": "2026-09-30",
+  "factSources": {
+    "checkedAt": "2026-09-30",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/autumn-leaves-2026-orpheum-extra-21947933/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Das Autumn Leaves Festival feiert seine 20. Ausgabe: Am 20. und 21. November 2026 spielen unter anderem Roo Panes, Elín Hall, Dave Lofts und Felix Kramer im Orpheum Extra in Graz.",
   "category": "Musik & Festival",

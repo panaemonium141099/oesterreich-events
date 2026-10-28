@@ -9,6 +9,13 @@ export const post: FestivalPost = {
   "heroImageCredit": "Foto: Palickap, CC BY-SA 4.0, Wikimedia Commons",
   "publishDate": "2026-09-18",
   "updatedDate": "2026-09-18",
+  "factSources": {
+    "checkedAt": "2026-09-10",
+    "urls": [
+      "https://www.christkindlmarkt.at/",
+      "https://www.wien.info/"
+    ]
+  },
   "readingTime": 8,
   "excerpt": "Von Bregenz bis Wien öffnen heuer wieder Christkindl- und Adventmärkte, und sie starten längst nicht alle am selben Tag. Hier findest du die geprüften Termine, die Öffnungszeiten für Wien und konkrete Tipps aus allen neun Bundesländern.",
   "category": "Kultur & Tradition",

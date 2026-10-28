@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/marin-alsop-horizonte-benefizkonzert-congress-center-baden-22033250/?affiliate=J70",
   "publishDate": "2026-09-15",
   "updatedDate": "2026-09-15",
+  "factSources": {
+    "checkedAt": "2026-09-15",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/marin-alsop-horizonte-benefizkonzert-congress-center-baden-22033250/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 4. Oktober 2026 leitet Marin Alsop die Webern Kammerphilharmonie im Congress Center Baden. Auf dem Programm stehen Montgomery, Copland und Dvořák, der gesamte Erlös fließt an Licht ins Dunkel.",
   "category": "Kultur & Bühne",

@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/hellbrunner-schlosskonzerte-schloss-hellbrunn-vier-jahreszeiten-zimmer-21073193/?affiliate=J70",
   "publishDate": "2026-10-02",
   "updatedDate": "2026-10-02",
+  "factSources": {
+    "checkedAt": "2026-10-02",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/hellbrunner-schlosskonzerte-schloss-hellbrunn-vier-jahreszeiten-zimmer-21073193/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Sopran-Arien aus Mozart-Opern, barocke Virtuosenwerke und frühe Cembalostücke: Die Hellbrunner Schlosskonzerte bringen am 27. Oktober 2026 Salzburger Hofmusik in das Vier-Jahreszeiten-Zimmer.",
   "category": "Kultur & Bühne",

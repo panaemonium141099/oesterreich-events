@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/konzerte-in-der-minoritenkirche-minoritenkirche-21734445/?affiliate=J70",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/konzerte-in-der-minoritenkirche-minoritenkirche-21734445/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Von \"Nessun dorma\" bis \"White Christmas\": Das Trio Caruso bringt einen italienischen Tenorabend in die Wiener Minoritenkirche. Was Sie über Programm, Tickets und Anreise wissen sollten.",
   "category": "Kultur & Bühne",

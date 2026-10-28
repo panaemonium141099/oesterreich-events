@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/vivaldi-die-vier-jahreszeiten-karlskirche-wien-karlskirche-21274271/?affiliate=J70",
   "publishDate": "2026-09-03",
   "updatedDate": "2026-09-03",
+  "factSources": {
+    "checkedAt": "2026-09-03",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/vivaldi-die-vier-jahreszeiten-karlskirche-wien-karlskirche-21274271/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Tauchen Sie ein in die Welt des Barock: Das Orchester 1756 präsentiert Vivaldis 'Vier Jahreszeiten' auf historischen Instrumenten in der atemberaubenden Karlskirche in Wien. Ein unvergessliches Klangerlebnis erwartet Sie.",
   "category": "Kultur & Bühne",

@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/falco-villa-fuehrung-falco-villa-22160041/?affiliate=J70",
   "publishDate": "2026-10-21",
   "updatedDate": "2026-10-21",
+  "factSources": {
+    "checkedAt": "2026-10-21",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/falco-villa-fuehrung-falco-villa-22160041/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Wohnzimmer, Schlafzimmer, Musikstudio: Bei der Führung durch die Falco Villa in Gars am Kamp gehen Sie durch das private Zuhause der Pop-Legende. Zum Abschluss gibt es ein Glas Champagner an der Studiobar.",
   "category": "Kultur & Tradition",

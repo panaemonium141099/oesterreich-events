@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/uod-okt-2026-gotischer-keller-innsbruck-22177290/?affiliate=J70",
   "publishDate": "2026-10-05",
   "updatedDate": "2026-10-05",
+  "factSources": {
+    "checkedAt": "2026-10-05",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/uod-okt-2026-gotischer-keller-innsbruck-22177290/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 15. Oktober 2026 wird der Gotische Keller der Hofburg Innsbruck zur Tanzfläche: Das Sowi Fest beschließt die UNI OPENING DAYS 2026 mit neuen Leuten, guter Musik und bester Stimmung.",
   "category": "Musik & Festival",

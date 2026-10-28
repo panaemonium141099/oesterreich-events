@@ -11,6 +11,19 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/32-internationaler-musiksommer-bad-schallerbach-atrium-bad-schallerbach-21732070/",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://www.ausflugsziele.jetzt/?p=304665",
+      "https://www.oberoesterreich.at/oesterreich-poi/detail/171651/internationaler-musiksommer-bad-schallerbach.html",
+      "https://www.musiksommerbadschallerbach.at/programm/",
+      "https://www.musiksommerbadschallerbach.at/programm/bad-schallerbacher-neujahrskonzert-2027-erwin-steinhauer-ooe-concert-schrammeln/",
+      "https://www.tips.at/nachrichten/grieskirchen/kultur/675236-grosse-kuenstler-bei-der-30-auflage-des-musiksommers-bad-schallerbach",
+      "https://www.musiksommerbadschallerbach.at/kurorchester/",
+      "https://www.musiksommerbadschallerbach.at",
+      "https://www.oeticket.com/noapp/event/32-internationaler-musiksommer-bad-schallerbach-atrium-bad-schallerbach-21732070/"
+    ]
+  },
   "readingTime": 7,
   "excerpt": "Der Internationale Musiksommer Bad Schallerbach spielt 2027 von Jänner bis Dezember. Los geht es am 10. Jänner mit Erwin Steinhauer und den OÖ. Concert Schrammeln, später kommen Voces8, Armin Wolf mit Peter Filzmaier und ein Beethovenschwerpunkt.",
   "category": "Musik & Festival",

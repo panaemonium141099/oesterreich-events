@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/onyourside-at-stadtsaal-feldkirchen-21946905/?affiliate=J70",
   "publishDate": "2026-09-24",
   "updatedDate": "2026-09-24",
+  "factSources": {
+    "checkedAt": "2026-09-24",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/onyourside-at-stadtsaal-feldkirchen-21946905/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Hardrock, Country und Alternative Metal für einen guten Zweck: Beim ersten ON YOUR SIDE Charity Festival in Feldkirchen fließt der gesamte Reinerlös an ein Waisenhaus in Kathmandu.",
   "category": "Musik & Festival",

@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/grand-festival-2026-magic-world-vienna-22108522/?affiliate=J70",
   "publishDate": "2026-10-14",
   "updatedDate": "2026-10-14",
+  "factSources": {
+    "checkedAt": "2026-10-14",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/grand-festival-2026-magic-world-vienna-22108522/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Kartenmagie, Mentalmagie und Comedy-Zauberei auf Weltniveau: Beim Grand Festival in der Magic World Vienna treten sieben internationale Ausnahmekünstler auf. Alle Infos zu Lineup, Tickets und Ermäßigungen.",
   "category": "Kultur & Bühne",

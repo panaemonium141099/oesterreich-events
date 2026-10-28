@@ -11,6 +11,13 @@ export const post: FestivalPost = {
   "ticketUrl": "https://akkordeonfestival.at/ticketinformationen/",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://www.akkordeonfestival.at",
+      "https://akkordeonfestival.at/ticketinformationen/"
+    ]
+  },
   "readingTime": 6,
   "excerpt": "Das Internationale Akkordeonfestival Wien geht 2027 in seine 28. Ausgabe. Programm und Motto folgen noch, der Vorverkauf startet am 1. Dezember 2026. Was du jetzt schon wissen kannst.",
   "category": "Musik & Festival",

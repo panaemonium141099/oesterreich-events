@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/stars-of-boogie-woogie-mit-daniel-ecklbauer-kulturpark-traun-21537584/?affiliate=J70",
   "publishDate": "2026-09-27",
   "updatedDate": "2026-09-27",
+  "factSources": {
+    "checkedAt": "2026-09-27",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/stars-of-boogie-woogie-mit-daniel-ecklbauer-kulturpark-traun-21537584/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Daniel Ecklbauer holt am 21. November 2026 Axel Zwingenberger, Richie Loidl, Clemens Vogler und weitere Boogie-Woogie-Größen in die Spinnerei Traun. Ein Abend voller Pianogroove und Blues.",
   "category": "Musik & Festival",

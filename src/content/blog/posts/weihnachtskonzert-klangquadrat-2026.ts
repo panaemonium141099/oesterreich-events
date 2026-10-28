@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/weihnachtskonzert-klangquadrat-schloss-albeck-22118928/?affiliate=J70",
   "publishDate": "2026-10-20",
   "updatedDate": "2026-10-20",
+  "factSources": {
+    "checkedAt": "2026-10-20",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/weihnachtskonzert-klangquadrat-schloss-albeck-22118928/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Am 13. Dezember 2026 lädt Schloss Albeck im Gurktal zum Weihnachtskonzert: Das Ensemble KlangQuadrat singt traditionelle Kärntner Winter- und Weihnachtslieder, begleitet von Harfe und Texten von Dagmar Sickl.",
   "category": "Kultur & Tradition",

@@ -11,6 +11,14 @@ export const post: FestivalPost = {
   "ticketUrl": "https://konzerthaus.at/de/resonanzen-alle-veranstaltungen",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://konzerthaus.at/resonanzen",
+      "https://konzerthaus.at/media/filer_public/16/37/16375e83-58df-4fd3-b3a4-2aa846cfa440/folder_resonanzen_2027.pdf",
+      "https://konzerthaus.at/de/resonanzen-alle-veranstaltungen"
+    ]
+  },
   "readingTime": 7,
   "excerpt": "Das Festival für Alte Musik im Wiener Konzerthaus widmet sich 2027 der menschlichen Hand: mit dem Dunedin Consort, Graindelavoix, Collegium 1704, Flamenco mit Buffet und der 33. Ausstellung Historischer Instrumentenbau.",
   "category": "Musik & Festival",

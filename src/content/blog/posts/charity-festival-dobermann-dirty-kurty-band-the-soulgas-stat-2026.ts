@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/onyourside-at-stadtsaal-feldkirchen-21946676/?affiliate=J70",
   "publishDate": "2026-10-15",
   "updatedDate": "2026-10-15",
+  "factSources": {
+    "checkedAt": "2026-10-15",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/onyourside-at-stadtsaal-feldkirchen-21946676/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Dobermann aus Turin, Badhoven, The Soul Gas Station und Dirty Kurty eröffnen am 30. Oktober das Charity Festival im Stadtsaal Feldkirchen. 100 % des Nettoerlöses gehen nach Nepal.",
   "category": "Musik & Festival",

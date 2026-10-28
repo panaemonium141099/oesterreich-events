@@ -33,6 +33,7 @@ import { readFileSync, writeFileSync, existsSync, appendFileSync, mkdirSync, rea
 import { join } from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { findCommonsPhoto, fetchImage, layoutFor } from '../lib/blog/hero-image';
+import { factSourceUrls } from '../lib/blog/fact-sources';
 import { claudeText, claudeJson, ClaudeRateLimitError } from '../lib/llm/claude-cli';
 import {
   SAISON_KALENDER, daysUntilDeadline, isDue, factsAreStale,
@@ -54,6 +55,7 @@ interface ResearchEvent {
   location_name: string | null;
   bundesland: string | null;
   price_text: string | null;
+  source_url: string | null;
 }
 
 async function researchEvents(spec: SaisonGuideSpec): Promise<ResearchEvent[]> {
@@ -69,7 +71,7 @@ async function researchEvents(spec: SaisonGuideSpec): Promise<ResearchEvent[]> {
 
   const { data, error } = await sb
     .from('events')
-    .select('title,start_date,location_name,bundesland,price_text,event_score,category')
+    .select('title,start_date,location_name,bundesland,price_text,source_url,event_score,category')
     .gte('start_date', from.toISOString())
     .lte('start_date', to.toISOString())
     .eq('publish_status', 'published')
@@ -293,6 +295,7 @@ function writePostFile(
   spec: SaisonGuideSpec,
   gen: Record<string, unknown>,
   hero: SaisonHero,
+  events: ResearchEvent[],
 ): string {
   const today = new Date().toISOString().slice(0, 10);
   // Die geprüften Fakten stehen als eigener practicalInfo-Block ganz oben —
@@ -311,6 +314,12 @@ function writePostFile(
     ...(hero.heroLayout === 'poster' ? { heroLayout: 'poster', heroImageWidth: hero.heroImageWidth } : {}),
     publishDate: today,
     updatedDate: today,
+    // Belege der Termine: Primärquellen der geprüften Fakten und die Quellen
+    // der DB-Events, aus denen der Entwurf Daten nehmen durfte (Gate oben).
+    factSources: {
+      checkedAt: spec.facts?.length && spec.factsVerified ? spec.factsVerified : today,
+      urls: factSourceUrls(spec.sources ?? [], events.map((e) => e.source_url)),
+    },
     readingTime: gen.readingTime ?? 7,
     excerpt: gen.excerpt,
     category: spec.category,
@@ -460,7 +469,7 @@ async function main() {
   }
 
   const hero = await resolveSaisonHero(spec);
-  const file = writePostFile(spec, gen, hero);
+  const file = writePostFile(spec, gen, hero, events);
   registerInIndex(spec);
 
   // Alte Fakten => ein Mensch schaut drauf, statt dass Vorjahrestermine

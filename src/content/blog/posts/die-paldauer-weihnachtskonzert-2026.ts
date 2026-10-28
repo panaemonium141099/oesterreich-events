@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/die-paldauer-weihnachtskonzert-vaz-st-poelten-21078913/?affiliate=J70",
   "publishDate": "2026-10-04",
   "updatedDate": "2026-10-04",
+  "factSources": {
+    "checkedAt": "2026-10-04",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/die-paldauer-weihnachtskonzert-vaz-st-poelten-21078913/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 10. Dezember 2026 machen Die Paldauer mit ihrer Weihnachtstournee im VAZ St. Pölten Station. Hier finden Sie alles zu Tickets, Einlass, Anreise und Parken.",
   "category": "Musik & Festival",

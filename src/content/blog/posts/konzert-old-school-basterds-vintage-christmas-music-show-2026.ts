@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/event/old-school-basterds-live-congress-leoben-21773768/?affiliate=J70",
   "publishDate": "2026-10-23",
   "updatedDate": "2026-10-23",
+  "factSources": {
+    "checkedAt": "2026-10-23",
+    "urls": [
+      "https://www.oeticket.com/event/old-school-basterds-live-congress-leoben-21773768/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 3. Dezember 2026 bringen die Old School Basterds ihre Vintage Christmas Music Show nach Leoben. Mit The Holy Horns, Weihnachtsklassikern im Stil von Elvis und Dean Martin und viel Rock'n'Roll.",
   "category": "Musik & Festival",

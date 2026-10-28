@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/jazz-wine-more-music-festival-veranstaltungszentrum-22036391/?affiliate=J70",
   "publishDate": "2026-10-22",
   "updatedDate": "2026-10-22",
+  "factSources": {
+    "checkedAt": "2026-10-22",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/jazz-wine-more-music-festival-veranstaltungszentrum-22036391/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 14. November 2026 feiert Jazz, Wine & More Premiere in Gumpoldskirchen. Der Samstagabend bringt die Vienna Big Band Unit, Musik von Joe Zawinul und eine Hommage an Johannes Fehring.",
   "category": "Musik & Festival",

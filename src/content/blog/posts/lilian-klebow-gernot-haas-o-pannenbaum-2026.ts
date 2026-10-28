@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/lilian-klebow-gernot-haas-o-pannenbaum-metropol-22119433/?affiliate=J70",
   "publishDate": "2026-09-28",
   "updatedDate": "2026-09-28",
+  "factSources": {
+    "checkedAt": "2026-09-28",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/lilian-klebow-gernot-haas-o-pannenbaum-metropol-22119433/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "SOKO-Star Lilian Klebow und Meisterparodist Gernot Haas machen den Advent zur Lachnummer: „O Pannenbaum!“ am 24. November 2026 im Wiener Metropol, mit Szenen, Liedern und Improvisation.",
   "category": "Kultur & Bühne",

@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/toni-moerwald-palazzo-wien-spiegelpalast-im-wiener-prater-21552574/?affiliate=J70",
   "publishDate": "2026-10-27",
   "updatedDate": "2026-10-27",
+  "factSources": {
+    "checkedAt": "2026-10-27",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/toni-moerwald-palazzo-wien-spiegelpalast-im-wiener-prater-21552574/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Zwischen Weihnachten und Silvester lädt Toni Mörwald PALAZZO in den Spiegelpalast im Wiener Prater. Sie erwarten ein Vier-Gänge-Menü, internationale Artisten, Comedy und eine Live-Band.",
   "category": "Kultur & Bühne",

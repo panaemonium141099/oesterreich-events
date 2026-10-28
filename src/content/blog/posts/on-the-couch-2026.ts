@@ -10,6 +10,13 @@ export const post: FestivalPost = {
   "heroImageCredit": "Foto: On the Couch",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://eberhard.klingt.org/projekte/on-the-couch/",
+      "https://www.musicaustria.at/wp-content/uploads/Liste_Festivals_2026-Stand-02.07.2026-ONLINE.pdf"
+    ]
+  },
   "readingTime": 7,
   "excerpt": "Seit gut einem Jahrzehnt holen Isabelle und Alexander J. Eberhard Neue Musik in ihr Studio im dritten Bezirk. Am 17. Dezember spielt dort das Trio Polyester, mit einem Gast der ersten Stunde am Kontrabass.",
   "category": "Musik & Festival",

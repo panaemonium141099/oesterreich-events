@@ -13,6 +13,13 @@ export const post: FestivalPost = {
   heroImageCredit: 'Foto: Alabama Extension, CC0, Wikimedia Commons',
   publishDate: '2026-09-10',
   updatedDate: '2026-09-10',
+  factSources: {
+    checkedAt: '2026-09-10',
+    urls: [
+      'https://www.bmb.gv.at/Themen/schule/schulpraxis/termine/ferientermine_26_27.html',
+      'https://www.nachtder1000lichter.at/',
+    ],
+  },
   readingTime: 7,
   excerpt:
     'Halloween 2026 fällt auf einen Samstag und liegt damit am Ende von zehn schulfreien Tagen. Gruselburgen, Kürbisschnitzen, Halloween-Partys und die ruhige Alternative: der Überblick über die Saison in ganz Österreich.',

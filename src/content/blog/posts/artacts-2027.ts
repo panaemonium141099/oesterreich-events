@@ -11,6 +11,15 @@ export const post: FestivalPost = {
   "ticketUrl": "https://kupfticket.com/events/artacts27",
   "publishDate": "2026-10-26",
   "updatedDate": "2026-10-26",
+  "factSources": {
+    "checkedAt": "2026-10-26",
+    "urls": [
+      "https://www.artacts.at",
+      "https://www.artacts.at/tickets/",
+      "https://www.kitzbueheler-alpen.com/de/stjo/artacts.html",
+      "https://kupfticket.com/events/artacts27"
+    ]
+  },
   "readingTime": 6,
   "excerpt": "Von 11. bis 14. März 2027 eröffnet artacts in St. Johann in Tirol die Festivalsaison für freien Jazz. Das Lineup kommt noch, der Ticketshop ist offen: Festivalpass 115 Euro im Vorverkauf.",
   "category": "Musik & Festival",

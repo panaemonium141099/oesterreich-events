@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/impulso-tenors-total-christmas-stadtsaal-mistelbach-21057208/?affiliate=J70",
   "publishDate": "2026-10-21",
   "updatedDate": "2026-10-21",
+  "factSources": {
+    "checkedAt": "2026-10-21",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/impulso-tenors-total-christmas-stadtsaal-mistelbach-21057208/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Laszlo Maleczky, German Gholami und Val Mihelčič kommen am 27. November 2026 in den Stadtsaal Mistelbach. Erwartet wird ein Abend zwischen Oper, Pop und Crossover. Ein Hinweis vorab: Zum Programmtitel gibt es unterschiedliche Angaben.",
   "category": "Musik & Festival",

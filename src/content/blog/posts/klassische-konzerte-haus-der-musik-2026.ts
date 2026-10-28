@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/klassische-konzerte-haus-der-musik-haus-der-musik-wien-innenhof-21460520/?affiliate=J70",
   "publishDate": "2026-09-03",
   "updatedDate": "2026-09-03",
+  "factSources": {
+    "checkedAt": "2026-09-03",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/klassische-konzerte-haus-der-musik-haus-der-musik-wien-innenhof-21460520/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Erleben Sie einen unvergesslichen Abend voller zeitloser Meisterwerke im historischen Haus der Musik in Wien. Das Wiener Klassik Ensemble präsentiert ein elegantes Programm mit Kompositionen von Mozart, Haydn und Beethoven in intimer Atmosphäre.",
   "category": "Musik & Festival",
