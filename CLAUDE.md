@@ -179,6 +179,13 @@ node / next.js
   Resolver verwirft eine PLZ gegen Ort UND Bundesland
   (`plz_contradicts_city`), ein PLZ-Mittelpunkt bestätigt seine PLZ nicht
   (`coords_from_plz`). MASTERPLAN §3.12.
+  Deutschland (fn-29.1) hat sein eigenes Ein-System: `data/gemeinden-de.json`
+  (Destatis, AGS/ARS, Kreis, Verband, Mittelpunkt), `data/plz-de.json`
+  (GeoNames CC BY 4.0 + Amts-PLZ, je PLZ Mengen, Großkunden markiert) und
+  `data/stammdaten-de/laender-de.geojson` (BKG VG250, dl-de/by-2-0); Zugriff
+  nur über `src/lib/gemeinden/de.ts`, `src/lib/location/plz-reference-de.ts`,
+  `land-de-from-geo.ts`; Build `npm run build:stammdaten:de [-- --fetch]`.
+  OpenPLZ (ODbL) nicht verwenden. Wächter `stammdaten-de.test.ts`.
 - **Nur Österreich (2026-10-08):** lasstreffen.at spielt ausschließlich
   Events mit `country = SITE_COUNTRY` (`src/lib/site-country.ts`, 'AT') aus.
   DE/CH-Events (Eventim) bleiben in der DB und im Import für spätere
