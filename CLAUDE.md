@@ -186,6 +186,12 @@ node / next.js
   nur über `src/lib/gemeinden/de.ts`, `src/lib/location/plz-reference-de.ts`,
   `land-de-from-geo.ts`; Build `npm run build:stammdaten:de [-- --fetch]`.
   OpenPLZ (ODbL) nicht verwenden. Wächter `stammdaten-de.test.ts`.
+- **DE-Prüfstand (fn-29.3):** jeder DE-Adapter vor dem Nachtlauf über
+  `npm run pruefstand:de -- --adapter <name> [--offline] [--mit-belegen]`
+  (Cache in `.pruefstand/`, derselbe Schreibweg wie der Sync ohne Schreiben,
+  Bericht mit Schwellen und 30er-Stichprobe in den PR). Schwellen in
+  `src/lib/pruefstand/schwellen.ts`, AT-Referenz `data/pruefstand/at-referenz.json`
+  (`npm run pruefstand:at-referenz`, nur lesend gegen Prod).
 - **Nur Österreich (2026-10-08):** lasstreffen.at spielt ausschließlich
   Events mit `country = SITE_COUNTRY` (`src/lib/site-country.ts`, 'AT') aus.
   DE/CH-Events (Eventim) bleiben in der DB und im Import für spätere
