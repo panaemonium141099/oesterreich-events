@@ -214,6 +214,8 @@ import { post as genesisLightshowOrgelkonzert2027 } from './posts/genesis-lights
 import { post as toniMoerwaldPalazzo2026 } from './posts/toni-moerwald-palazzo-2026';
 import { post as psalmFestival2027 } from './posts/psalm-festival-2027';
 import { post as winterWoodstockDerBlasmusik2027 } from './posts/winter-woodstock-der-blasmusik-2027';
+import { post as blackValleyBigBandChristmas2026 } from './posts/black-valley-big-band-christmas-2026';
+import { post as hitparade1600Vol22026 } from './posts/hitparade-1600-vol-2-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -438,6 +440,8 @@ export const ALL_POSTS: FestivalPost[] = [
   toniMoerwaldPalazzo2026,
   psalmFestival2027,
   winterWoodstockDerBlasmusik2027,
+  blackValleyBigBandChristmas2026,
+  hitparade1600Vol22026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
