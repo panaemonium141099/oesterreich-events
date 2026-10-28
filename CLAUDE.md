@@ -186,6 +186,12 @@ node / next.js
   nur über `src/lib/gemeinden/de.ts`, `src/lib/location/plz-reference-de.ts`,
   `land-de-from-geo.ts`; Build `npm run build:stammdaten:de [-- --fetch]`.
   OpenPLZ (ODbL) nicht verwenden. Wächter `stammdaten-de.test.ts`.
+  Resolver und Freigabevertrag wählen die Ortsdaten je Land über
+  `src/lib/location/ortsdaten.ts` (fn-29.2, gleiche Regeln für AT und DE,
+  andere Länder ohne Ableitungen). Die Spalten `bundesland` (CHECK) und
+  `district` (FK) führen nur AT-Werte, für DE bleiben sie leer, das Land
+  steht in `location_resolution.gemeinde.bundesland`; ein DE-Wert dort würde
+  ganze Schreib-Batches abweisen.
 - **DE-Prüfstand (fn-29.3):** jeder DE-Adapter vor dem Nachtlauf über
   `npm run pruefstand:de -- --adapter <name> [--offline] [--mit-belegen]`
   (Cache in `.pruefstand/`, derselbe Schreibweg wie der Sync ohne Schreiben,

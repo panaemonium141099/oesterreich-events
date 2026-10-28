@@ -130,18 +130,18 @@ export interface AdmissionVerdict {
 
 export interface AdmissionOptions {
   /**
-   * Punkt-in-Polygon-Auflösung Koordinate → Bundesland-ID. In Produktion
-   * `bundeslandFromPolygon` aus `@/lib/eventim/bundesland-from-geo`;
-   * im Test ein Stub. Fehlt sie, entfällt die Gegenprobe still.
+   * Punkt-in-Polygon-Auflösung Koordinate → Bundesland-ID des deklarierten
+   * Landes (AT: `bundeslandFromPolygon`, DE: `deLandFromPolygon`, beide über
+   * `ortsdatenFor`); im Test ein Stub. Fehlt sie, entfällt die Gegenprobe still.
    */
-  regionOf?: (lat: number, lng: number) => string | null;
+  regionOf?: (lat: number, lng: number, country: string) => string | null;
   /**
    * PLZ → Bundesland-ID. Dritte, von Koordinate UND Label unabhängige
    * Stimme: sie entscheidet, welche der beiden widersprüchlichen Angaben
    * der Ausreisser ist. In Produktion `getBundeslandFromPLZ` aus
    * `@/lib/location/plz-bundesland`.
    */
-  plzRegionOf?: (plz: string) => string | null;
+  plzRegionOf?: (plz: string, country: string) => string | null;
   /** Referenzzeitpunkt (Tests). Default: jetzt. */
   now?: Date;
 }
@@ -151,6 +151,11 @@ const AT_LAT_MIN = 46.3;
 const AT_LAT_MAX = 49.1;
 const AT_LNG_MIN = 9.5;
 const AT_LNG_MAX = 17.2;
+// Deutschland-Rahmen — identisch zu src/lib/location/ortsdaten.ts (fn-29.2).
+const DE_LAT_MIN = 47.2;
+const DE_LAT_MAX = 55.1;
+const DE_LNG_MIN = 5.8;
+const DE_LNG_MAX = 15.1;
 
 /**
  * Ortsnamen, die keinen Ort benennen. Ein Scraper, der hier landet, hat
@@ -271,6 +276,15 @@ export function isEndBeforeStart(startIso: string, endIso: string): boolean {
 
 function isOutsideAtBox(lat: number, lng: number): boolean {
   return lat < AT_LAT_MIN || lat > AT_LAT_MAX || lng < AT_LNG_MIN || lng > AT_LNG_MAX;
+}
+
+function isOutsideDeBox(lat: number, lng: number): boolean {
+  return lat < DE_LAT_MIN || lat > DE_LAT_MAX || lng < DE_LNG_MIN || lng > DE_LNG_MAX;
+}
+
+/** Länder mit Ortsdaten (fn-29.2): eigener Rahmen und eigene Gegenprobe. */
+function isOutsideCountryBox(country: string, lat: number, lng: number): boolean {
+  return country === 'DE' ? isOutsideDeBox(lat, lng) : isOutsideAtBox(lat, lng);
 }
 
 /**
@@ -422,7 +436,7 @@ export function evaluateAdmission(
     const lng = input.longitude!;
     const declaredCountry = (input.country ?? 'AT').toUpperCase();
 
-    if (declaredCountry === 'AT' && isOutsideAtBox(lat, lng)) {
+    if ((declaredCountry === 'AT' || declaredCountry === 'DE') && isOutsideCountryBox(declaredCountry, lat, lng)) {
       quarantines.push('coords_outside_declared_country');
     }
 
@@ -430,9 +444,9 @@ export function evaluateAdmission(
     // ein Ergebnis liefert UND ein Bundesland deklariert ist — ein
     // grenznaher Punkt ohne Polygon-Treffer bleibt unbewertet statt geraten.
     const regionOf = options.regionOf;
-    if (regionOf && hasText(input.bundesland) && !isOutsideAtBox(lat, lng)) {
+    if (regionOf && hasText(input.bundesland) && !isOutsideCountryBox(declaredCountry, lat, lng)) {
       const declared = input.bundesland!.trim().toLowerCase();
-      const actual = regionOf(lat, lng);
+      const actual = regionOf(lat, lng, declaredCountry);
 
       if (actual && actual !== declared) {
         // Zwei Angaben widersprechen sich; eine davon ist falsch. Statt zu
@@ -448,7 +462,7 @@ export function evaluateAdmission(
         // Nur 9 Fälle bleiben unauflösbar.
         const plzRegion =
           options.plzRegionOf && hasText(input.postal_code)
-            ? options.plzRegionOf(input.postal_code!.trim())
+            ? options.plzRegionOf(input.postal_code!.trim(), declaredCountry)
             : null;
 
         //
@@ -474,7 +488,7 @@ export function evaluateAdmission(
   }
 
   if (
-    (input.country ?? 'AT').toUpperCase() === 'AT' &&
+    ['AT', 'DE'].includes((input.country ?? 'AT').toUpperCase()) &&
     (hasForeignPlaceSignal(input.address) || hasForeignPlaceSignal(input.location_name))
   ) {
     quarantines.push('foreign_place_signal');

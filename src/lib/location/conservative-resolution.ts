@@ -21,16 +21,8 @@
  */
 import { createHash } from 'crypto';
 import { bundeslandToId } from '@/lib/bundeslaender';
-import {
-  gemeindenByName,
-  gemeindenByPlz,
-  gemeindenNamedByPlaceText,
-  hauptgemeindeFuerPlz,
-  isKnownAustrianPlz,
-  normalizeGemeindeName,
-  plzCentroid,
-  type GemeindeRef,
-} from './gemeinde-index';
+import { normalizeGemeindeName, type GemeindeRef } from './gemeinde-index';
+import { inBox, ortsdatenFor, type Ortsdaten } from './ortsdaten';
 import {
   LOCATION_RESOLUTION_VERSION,
   type AllowedOutputs,
@@ -63,9 +55,8 @@ export interface LocationInput {
   source_name?: string | null;
 }
 
-// Österreich-Bounding-Box wie in admission.ts / score-event.ts.
-const AT_BOX = { latMin: 46.3, latMax: 49.1, lngMin: 9.5, lngMax: 17.2 };
-// Grober Europa-Rahmen für Nicht-AT-Events.
+// Grober Europa-Rahmen für Länder ohne Ortsdaten (Rahmen für AT und DE in
+// ortsdaten.ts).
 const EU_BOX = { latMin: 35, latMax: 72, lngMin: -25, lngMax: 45 };
 /** Ab dieser Distanz zwischen Quellkoordinate und genannter PLZ-Gemeinde
  *  gilt der Datensatz als widersprüchlich. */
@@ -87,10 +78,6 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function inBox(lat: number, lng: number, b: typeof AT_BOX): boolean {
-  return lat >= b.latMin && lat <= b.latMax && lng >= b.lngMin && lng <= b.lngMax;
-}
-
 /** Hausnummer im Adresstext: „Straße 12", „Platz 3a", „Ritzenried 107". */
 export function hasHouseNumber(address: string | null | undefined): boolean {
   if (!hasText(address)) return false;
@@ -105,30 +92,30 @@ export function hasHouseNumber(address: string | null | undefined): boolean {
  * Buchstaben folgt (Hausnummern stehen am Ende eines Adressteils, PLZ vor
  * dem Ortsnamen oder am Teilende).
  */
-export function extractPlzFromAddress(address: string | null | undefined): string | null {
+export function extractPlzFromAddress(address: string | null | undefined, od: Ortsdaten = ortsdatenFor('AT')!): string | null {
   if (!hasText(address)) return null;
   const found = new Set<string>();
-  const re = /(?:^|[\s,;(])(\d{4})(?=[\s,;)]|$)/g;
+  const re = new RegExp(`(?:^|[\\s,;(])(\\d{${od.plzDigits}})(?=[\\s,;)]|$)`, 'g');
   let m: RegExpExecArray | null;
   while ((m = re.exec(address)) !== null) {
-    if (isKnownAustrianPlz(m[1])) found.add(m[1]);
+    if (od.index.isKnownPlz(m[1])) found.add(m[1]);
   }
   if (found.size !== 1) return null;
   return [...found][0];
 }
 
 /** „Flohmarkt in 1230 Wien" — Präposition „in", PLZ, großgeschriebener Ort. */
-export function extractPlzFromTitle(title: string | null | undefined): string | null {
+export function extractPlzFromTitle(title: string | null | undefined, od: Ortsdaten = ortsdatenFor('AT')!): string | null {
   if (!hasText(title)) return null;
-  const m = /\bin\s+(\d{4})\s+[A-ZÄÖÜ]/.exec(title);
+  const m = new RegExp(`\\bin\\s+(\\d{${od.plzDigits}})\\s+[A-ZÄÖÜ]`).exec(title);
   if (!m) return null;
-  return isKnownAustrianPlz(m[1]) ? m[1] : null;
+  return od.index.isKnownPlz(m[1]) ? m[1] : null;
 }
 
 /** Ortsname hinter einer PLZ im Adresstext („4020 Linz", „7083 Purbach am See"). */
-export function extractCityFromAddress(address: string | null | undefined): string | null {
+export function extractCityFromAddress(address: string | null | undefined, plzDigits: 4 | 5 = 4): string | null {
   if (!hasText(address)) return null;
-  const m = /\b\d{4}\s+([A-ZÄÖÜ][A-Za-zÄÖÜäöüß.\-]*(?:\s+(?:am|an|im|in|bei|ob|der|dem|und)\s+[A-ZÄÖÜ]?[A-Za-zÄÖÜäöüß.\-]*|\s+[A-ZÄÖÜ][A-Za-zÄÖÜäöüß.\-]*)*)/.exec(address);
+  const m = new RegExp(String.raw`\b\d{${plzDigits}}\s+([A-ZÄÖÜ][A-Za-zÄÖÜäöüß.\-]*(?:\s+(?:am|an|im|in|bei|ob|der|dem|und)\s+[A-ZÄÖÜ]?[A-Za-zÄÖÜäöüß.\-]*|\s+[A-ZÄÖÜ][A-Za-zÄÖÜäöüß.\-]*)*)`).exec(address);
   if (m) return m[1].trim().replace(/[,;]+$/, '');
   // Letzter Kommateil ohne Ziffern („Rennweg 2, Innsbruck").
   const parts = address.split(',').map(p => p.trim()).filter(Boolean);
@@ -253,13 +240,14 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
   const provenance: LocationDecision['provenance'] = {};
 
   const country = normalizeCountryCode(input.country);
-  const isAT = country === 'AT';
+  // Ortsdaten des Landes (AT, DE); andere Länder bekommen keine Ableitungen.
+  const od = ortsdatenFor(country);
   provenance.country = hasText(input.country) ? 'source' : 'default';
 
   const locationName = hasText(input.location_name) ? input.location_name.trim() : null;
   if (locationName) provenance.location_name = 'source';
 
-  const declaredBl = bundeslandToId(input.bundesland) ?? null;
+  const declaredBl = (od ? od.landId(input.bundesland) : bundeslandToId(input.bundesland)) ?? null;
   if (declaredBl) evidence.push(`bundesland:source:${declaredBl}`);
 
   const base = {
@@ -291,23 +279,23 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
     };
   }
 
-  // ── Genannte PLZ (nur AT) ──────────────────────────────────────────
+  // ── Genannte PLZ (Länder mit Ortsdaten) ───────────────────────────
   let plz: string | null = null;
-  if (isAT) {
+  if (od) {
     const src = hasText(input.postal_code) ? input.postal_code.trim() : null;
-    if (src && /^\d{4}$/.test(src)) {
-      if (isKnownAustrianPlz(src)) {
+    if (src && new RegExp(`^\\d{${od.plzDigits}}$`).test(src)) {
+      if (od.index.isKnownPlz(src)) {
         plz = src;
         provenance.postal_code = 'source';
         evidence.push(`plz:source:${src}`);
       } else {
-        rejected.push(`postal_code:${src}:unknown_at_plz`);
+        rejected.push(`postal_code:${src}:unknown_${od.country.toLowerCase()}_plz`);
       }
     } else if (src) {
-      rejected.push(`postal_code:${src}:not_4_digits`);
+      rejected.push(`postal_code:${src}:not_${od.plzDigits}_digits`);
     }
     if (!plz) {
-      const fromAddress = extractPlzFromAddress(input.address);
+      const fromAddress = extractPlzFromAddress(input.address, od);
       if (fromAddress) {
         plz = fromAddress;
         provenance.postal_code = 'address_text';
@@ -315,7 +303,7 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
       }
     }
     if (!plz) {
-      const fromTitle = extractPlzFromTitle(input.title);
+      const fromTitle = extractPlzFromTitle(input.title, od);
       if (fromTitle) {
         plz = fromTitle;
         provenance.postal_code = 'title_text';
@@ -323,12 +311,12 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
       }
     }
   } else if (hasText(input.postal_code)) {
-    // Ausländische PLZ bleibt Quellangabe, aber ohne österreichische Ableitungen.
+    // PLZ eines Landes ohne Ortsdaten bleibt Quellangabe, ohne Ableitungen.
     rejected.push(`postal_code:${input.postal_code.trim()}:foreign_country_${country}`);
   }
 
   // ── Genannter Ort (Quellfeld oder Adresstext) ─────────────────────
-  const cityText = hasText(input.city) ? input.city.trim() : extractCityFromAddress(input.address);
+  const cityText = hasText(input.city) ? input.city.trim() : extractCityFromAddress(input.address, od?.plzDigits ?? 4);
 
   // ── PLZ gegen genannten Ort und Bundesland ────────────────────────
   // Liegt die PLZ weder in der genannten Gemeinde noch im genannten
@@ -341,13 +329,13 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
   // Stützt eine Koordinate der Quelle die PLZ, bleibt sie: in Grenzregionen
   // nennt die Quelle den Ort des Tourismusverbands (Rußbach, Salzburg), das
   // Event liegt an der Koordinate jenseits der Grenze (Hornspitz, 4824 Gosau).
-  if (isAT && plz && cityText && declaredBl) {
-    const plzRefs = gemeindenByPlz(plz);
-    const namedRefs = gemeindenNamedByPlaceText(cityText, declaredBl, { exact: true });
-    const cityRefs = gemeindenNamedByPlaceText(cityText, declaredBl);
+  if (od && plz && cityText && declaredBl) {
+    const plzRefs = od.index.gemeindenByPlz(plz);
+    const namedRefs = od.index.gemeindenNamedByPlaceText(cityText, declaredBl, { exact: true });
+    const cityRefs = od.index.gemeindenNamedByPlaceText(cityText, declaredBl);
     const srcLat = typeof input.latitude === 'number' && Number.isFinite(input.latitude) ? input.latitude : null;
     const srcLng = typeof input.longitude === 'number' && Number.isFinite(input.longitude) ? input.longitude : null;
-    const centroid = plzCentroid(plz, cityText);
+    const centroid = od.index.plzCentroid(plz, cityText);
     const supportedByCoords =
       srcLat != null && srcLng != null && input.coords_precision !== 'region' && !!centroid && !centroid.ambiguous &&
       haversineKm(srcLat, srcLng, centroid.lat, centroid.lng) <= CONFLICT_KM;
@@ -371,8 +359,8 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
   let gemeinde: GemeindeRef | null = null;
   let gemeindeProvenance: Provenance | null = null;
   let plzAmbiguous = false;
-  if (isAT && plz) {
-    const refs = gemeindenByPlz(plz);
+  if (od && plz) {
+    const refs = od.index.gemeindenByPlz(plz);
     if (refs.length === 1) {
       gemeinde = refs[0];
       gemeindeProvenance = 'derived:plz';
@@ -383,7 +371,7 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
       // deklarierte Bundesland, nie über Reihenfolge oder Nähe.
       const key = cityText ? normalizeGemeindeName(cityText) : null;
       const byName = key ? refs.find(r => normalizeGemeindeName(r.name) === key) : undefined;
-      const haupt = hauptgemeindeFuerPlz(plz);
+      const haupt = od.index.hauptgemeindeFuerPlz(plz);
       const byBl = declaredBl ? refs.filter(r => r.bundesland === declaredBl) : [];
       if (byName) {
         gemeinde = byName;
@@ -402,23 +390,23 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
       }
     }
   }
-  if (isAT && !gemeinde && cityText) {
-    const hit = uniqueInBundesland(gemeindenByName(cityText), declaredBl);
+  if (od && !gemeinde && cityText) {
+    const hit = uniqueInBundesland(od.index.gemeindenByName(cityText), declaredBl);
     if (hit) {
       // Ohne PLZ nur mit Bundesland-Sperre; ohne Bundesland nur, wenn der
       // Name österreichweit eindeutig ist.
       gemeinde = hit;
       gemeindeProvenance = 'registry';
       evidence.push(`gemeinde:city_text:${hit.name}`);
-    } else if (gemeindenByName(cityText).length > 1) {
+    } else if (od.index.gemeindenByName(cityText).length > 1) {
       reasons.push('city_name_ambiguous');
     }
   }
-  if (isAT && !gemeinde && !plz && locationName && declaredBl) {
+  if (od && !gemeinde && !plz && locationName && declaredBl) {
     // Der Ortsname IST ein Gemeindename (Feratel „Galtür", Mozarteum
     // „Salzburg"): nur im deklarierten Bundesland, nur eindeutig, und der
     // Name wird dabei nicht verändert.
-    const hit = uniqueInBundesland(gemeindenByName(locationName), declaredBl);
+    const hit = uniqueInBundesland(od.index.gemeindenByName(locationName), declaredBl);
     if (hit) {
       gemeinde = hit;
       gemeindeProvenance = 'registry';
@@ -456,9 +444,9 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
   const srcLat = typeof input.latitude === 'number' && Number.isFinite(input.latitude) ? input.latitude : null;
   const srcLng = typeof input.longitude === 'number' && Number.isFinite(input.longitude) ? input.longitude : null;
   if (srcLat != null && srcLng != null && !(srcLat === 0 && srcLng === 0)) {
-    const box = isAT ? AT_BOX : EU_BOX;
+    const box = od ? od.box : EU_BOX;
     if (!inBox(srcLat, srcLng, box)) {
-      rejected.push(`coords:${srcLat.toFixed(4)},${srcLng.toFixed(4)}:outside_${isAT ? 'at' : 'eu'}_box`);
+      rejected.push(`coords:${srcLat.toFixed(4)},${srcLng.toFixed(4)}:outside_${od ? od.country.toLowerCase() : 'eu'}_box`);
     } else {
       lat = srcLat;
       lng = srcLng;
@@ -477,8 +465,8 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
   }
 
   // ── Widerspruch Quellkoordinate ↔ genannte PLZ ────────────────────
-  if (lat != null && lng != null && isAT && plz) {
-    const centroid = plzCentroid(plz, cityText ?? locationName);
+  if (lat != null && lng != null && od && plz) {
+    const centroid = od.index.plzCentroid(plz, cityText ?? locationName);
     if (centroid && !centroid.ambiguous) {
       const km = haversineKm(lat, lng, centroid.lat, centroid.lng);
       if (km > CONFLICT_KM) {
@@ -554,7 +542,7 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
   }
 
   // ── Kein Quellpunkt: Gemeinde-/PLZ-Mittelpunkt als Gebietsangabe ──
-  if (isAT && gemeinde) {
+  if (od && gemeinde) {
     const namedBySource =
       gemeindeProvenance === 'registry' ||
       (cityText ? normalizeGemeindeName(cityText) === normalizeGemeindeName(gemeinde.name) : false);
@@ -573,8 +561,8 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
       allowed: allowedFor('municipality_only', true, false, true),
     };
   }
-  if (isAT && plz && !plzAmbiguous) {
-    const centroid = plzCentroid(plz);
+  if (od && plz && !plzAmbiguous) {
+    const centroid = od.index.plzCentroid(plz);
     if (centroid && !centroid.ambiguous) {
       reasons.push('plz_centroid_from_table');
       provenance.latitude = 'derived:plz';

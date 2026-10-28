@@ -40,3 +40,29 @@ export function deLandById(id: string): DeLand | null {
 export function deLandByKey(key: string): DeLand | null {
   return BY_CODE.get(key.slice(0, 2)) ?? null;
 }
+
+const SHORT_CODES: Record<string, string> = {
+  bw: 'baden-wuerttemberg', by: 'bayern', be: 'berlin', bb: 'brandenburg', hb: 'bremen', hh: 'hamburg',
+  he: 'hessen', mv: 'mecklenburg-vorpommern', ni: 'niedersachsen', nw: 'nordrhein-westfalen', nrw: 'nordrhein-westfalen',
+  rp: 'rheinland-pfalz', rlp: 'rheinland-pfalz', sl: 'saarland', sn: 'sachsen', st: 'sachsen-anhalt',
+  sh: 'schleswig-holstein', th: 'thueringen',
+};
+
+function compact(s: string): string {
+  return s.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]/g, '');
+}
+
+const BY_COMPACT = new Map(DE_LAENDER.map(l => [compact(l.name), l.id]));
+
+/**
+ * Land-ID zu einer Quellangabe („Bayern", „Nordrhein-Westfalen", „NRW",
+ * „Baden-Wuerttemberg", „bayern"), sonst null. Nur für deutsche Events
+ * verwenden: „ST" ist hier Sachsen-Anhalt, nicht die Steiermark.
+ */
+export function deLandToId(raw: string | null | undefined): string | null {
+  if (!raw || !raw.trim()) return null;
+  const lc = raw.trim().toLowerCase();
+  if (SHORT_CODES[lc]) return SHORT_CODES[lc];
+  return BY_COMPACT.get(compact(raw)) ?? null;
+}

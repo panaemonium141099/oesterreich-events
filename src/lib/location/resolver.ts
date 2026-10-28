@@ -32,7 +32,7 @@
  */
 import { resolveConservativeLocation, hasHouseNumber, locationBasisHash, type LocationInput } from './conservative-resolution';
 import { gemeindenByPlz } from './gemeinde-index';
-import { plzCentroid } from './gemeinde-index';
+import { ortsdatenFor } from './ortsdaten';
 import type { LocationDecision, LocationPrecision } from './types';
 
 export const RESOLVER_VERSION = 2;
@@ -115,8 +115,9 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
 
 /** Passt eine Position zur genannten PLZ? (kein Urteil ohne PLZ) */
 function fitsPlz(decision: LocationDecision, lat: number, lng: number): { ok: boolean; km: number | null } {
-  if (!decision.postal_code || decision.country !== 'AT') return { ok: true, km: null };
-  const c = plzCentroid(decision.postal_code, decision.gemeinde?.name ?? decision.location_name);
+  const od = ortsdatenFor(decision.country);
+  if (!decision.postal_code || !od) return { ok: true, km: null };
+  const c = od.index.plzCentroid(decision.postal_code, decision.gemeinde?.name ?? decision.location_name);
   if (!c || c.ambiguous) return { ok: true, km: null };
   const km = haversineKm(lat, lng, c.lat, c.lng);
   return { ok: km <= CONFLICT_KM, km };
