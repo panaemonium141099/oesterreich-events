@@ -1,5 +1,5 @@
 {
-  "built_at": "2026-10-28T17:11:06.212Z",
+  "built_at": "2026-10-28T21:09:54.143Z",
   "sources": {
     "destatis": {
       "url": "https://www.destatis.de/DE/Themen/Laender-Regionen/Regionales/Gemeindeverzeichnis/Administrativ/Archiv/GVAuszugQ/AuszugGV3QAktuell.xlsx?__blob=publicationFile",
@@ -23,11 +23,12 @@
     "gemeinden": 10749,
     "plz": 10845,
     "plz_grosskunde": 989,
-    "plz_ohne_gemeinde": 1755,
-    "plz_mehrere_gemeinden": 1235,
+    "plz_ohne_gemeinde": 1547,
+    "plz_mehrere_gemeinden": 1351,
     "plz_mehrere_laender": 32,
     "geonames_orte_exakt": 11902,
     "geonames_orte_stamm": 107,
+    "geonames_orte_flaeche": 3431,
     "laender_flaechen": 16
   }
 }

@@ -52,6 +52,8 @@ export type AdmissionReason =
   | 'blocked_performer'
   // ── quarantine ──────────────────────────────────────────────────
   | 'no_location_evidence'
+  /** DE ohne Position (fn-29.5): Ort nicht belegt, auf Karte und Listen ohnehin unsichtbar. */
+  | 'no_position'
   | 'placeholder_location'
   | 'region_contradicts_coords'
   | 'coords_outside_declared_country'
@@ -174,6 +176,12 @@ const PLACEHOLDER_LOCATIONS = new Set([
   'wird bekanntgegeben', 'siehe beschreibung', 'k a', 'keine angabe',
   '-', '--', '?',
 ]);
+
+/** Platzhalter-Orte aus Vorlagen: Musterort, Musterstadt, Musterstraße, … */
+const SAMPLE_PLACE = /\bmuster(?:ort|stadt|dorf|gemeinde|stra(?:ß|ss)e|str\.|platz|weg|park)\b/i;
+
+/** Ortsname eines Online-Termins (auch der Resolver, Status `online`). */
+export const ONLINE_LOCATION_PATTERN = /^(online|onlineevent|online-event|online event|virtuell|virtual|webinar|livestream|zoom)\b/i;
 
 /** US-/CA-Bundesstaatskürzel — nur als Endsegment einer Adresse ausgewertet. */
 const FOREIGN_STATE_CODES = new Set([
@@ -419,6 +427,18 @@ export function evaluateAdmission(
     quarantines.push('no_location_evidence');
   }
 
+  // Deutschland (fn-29.5, Entscheidung 2026-10-28): ohne Position nicht
+  // veröffentlichen. Ein Ortsname ohne Gemeinde („Vereinsheim des HKC" im
+  // Amtskalender) ist kein Ort; was nicht sicher ist, wird nicht
+  // veröffentlicht. Online-Termine brauchen keine Position. Österreich
+  // bleibt unverändert.
+  if (
+    (input.country ?? '').toUpperCase() === 'DE' && !hasCoords && hasPlaceText &&
+    !ONLINE_LOCATION_PATTERN.test(input.location_name?.trim() ?? '')
+  ) {
+    quarantines.push('no_position');
+  }
+
   // Platzhalter-Ortsname ohne jede weitere Ortsangabe: der Scraper hat den
   // Ort nicht gefunden. Koordinaten zählen hier NICHT als Rettung — sie
   // stammen in genau diesen Fällen aus dem Platzhalter selbst
@@ -428,6 +448,16 @@ export function evaluateAdmission(
     if (PLACEHOLDER_LOCATIONS.has(norm) && !hasText(input.address) && !hasText(input.postal_code)) {
       quarantines.push('placeholder_location');
     }
+  }
+  // Mustertext einer Vorlage („Musterstraße 1, 12345 Musterort"): kein Ort,
+  // auch nicht mit PLZ. Dreis-Brück zeigte 2026-10 208 Demo-Termine der
+  // Kalendervorlage („Prost, Musterstadt!"), die der Kalender-Kontext sonst
+  // der Gemeinde zuordnete (fn-29.5).
+  if (
+    !quarantines.includes('placeholder_location') &&
+    (SAMPLE_PLACE.test(input.location_name ?? '') || SAMPLE_PLACE.test(input.address ?? ''))
+  ) {
+    quarantines.push('placeholder_location');
   }
 
   // ── 3. Widersprüche zwischen Ortsangaben ──────────────────────────

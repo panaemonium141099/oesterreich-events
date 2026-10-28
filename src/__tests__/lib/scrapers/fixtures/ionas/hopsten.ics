@@ -1,0 +1,388 @@
+BEGIN:VCALENDAR
+PRODID:-//IONAS//TVM//DE
+VERSION:2.0
+CALSCALE:GREGORIAN
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+LAST-MODIFIED:20201010T011803Z
+TZURL:http://tzurl.org/zoneinfo/Europe/Berlin
+X-LIC-LOCATION:Europe/Berlin
+X-PROLEPTIC-TZNAME:LMT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+005328
+TZOFFSETTO:+0100
+DTSTART:18930401T000000
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19160430T230000
+RDATE:19400401T020000
+RDATE:19430329T020000
+RDATE:19460414T020000
+RDATE:19470406T030000
+RDATE:19480418T020000
+RDATE:19490410T020000
+RDATE:19800406T020000
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19161001T010000
+RDATE:19421102T030000
+RDATE:19431004T030000
+RDATE:19441002T030000
+RDATE:19451118T030000
+RDATE:19461007T030000
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19170416T020000
+RRULE:FREQ=YEARLY;UNTIL=19180415T010000Z;BYMONTH=4;BYDAY=3MO
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19170917T030000
+RRULE:FREQ=YEARLY;UNTIL=19180916T010000Z;BYMONTH=9;BYDAY=3MO
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19440403T020000
+RRULE:FREQ=YEARLY;UNTIL=19450402T010000Z;BYMONTH=4;BYDAY=1MO
+END:DAYLIGHT
+BEGIN:DAYLIGHT
+TZNAME:CEMT
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0300
+DTSTART:19450524T020000
+RDATE:19470511T030000
+END:DAYLIGHT
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0300
+TZOFFSETTO:+0200
+DTSTART:19450924T030000
+RDATE:19470629T030000
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0100
+DTSTART:19460101T000000
+RDATE:19800101T000000
+END:STANDARD
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19471005T030000
+RRULE:FREQ=YEARLY;UNTIL=19491002T010000Z;BYMONTH=10;BYDAY=1SU
+END:STANDARD
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19800928T030000
+RRULE:FREQ=YEARLY;UNTIL=19950924T010000Z;BYMONTH=9;BYDAY=-1SU
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19810329T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19961027T030000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTAMP:20261028T203539Z
+DTSTART;TZID=Europe/Berlin:20261116T190000
+DTEND;TZID=Europe/Berlin:20261116T235900
+SUMMARY:Spieletreff Hopsten
+CREATED:20230414T094639Z
+LAST-MODIFIED:20230525T102825Z
+DESCRIPTION:Alle Spielbegeisterten sind herzlich eingeladen am offenen Sp
+ ieletreff in Hopsten teilzunehmen. \n\nGespielt werden Brett- und Karten
+ spiele. Spiele können gerne mitgebracht werden\, \n\nDer Eintritt ist fr
+ ei\, eine Anmeldung ist nicht erforderlich.
+LOCATION:Dreibrückenhof Schmiemann
+X-LOCATION-NAME:Dreibrückenhof Schmiemann
+X-STREET-ADDRESS:Marktstraße 6
+X-POSTAL-CODE:48496
+X-LOCALITY:Hopsten
+GEO:52.38406019116274;7.604951030899175
+X-ORGANIZER-NAME:Carmen Engfer
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=knipseline_pixelio.de:https://www.h
+ opsten.de/kalender/veranstaltungen-2023/2023-04-17-spieletreff-hopsten/4
+ 05584-web-r-by-knipseline-pixelio.de.jpg?cid=pjp.2hym
+UID:e7a27c10-fd27-4370-b5d7-5fb81fe735d0:2026-11-16
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203539Z
+DTSTART;TZID=Europe/Berlin:20261221T190000
+DTEND;TZID=Europe/Berlin:20261221T235900
+SUMMARY:Spieletreff Hopsten
+CREATED:20230414T094639Z
+LAST-MODIFIED:20230525T102825Z
+DESCRIPTION:Alle Spielbegeisterten sind herzlich eingeladen am offenen Sp
+ ieletreff in Hopsten teilzunehmen. \n\nGespielt werden Brett- und Karten
+ spiele. Spiele können gerne mitgebracht werden\, \n\nDer Eintritt ist fr
+ ei\, eine Anmeldung ist nicht erforderlich.
+LOCATION:Dreibrückenhof Schmiemann
+X-LOCATION-NAME:Dreibrückenhof Schmiemann
+X-STREET-ADDRESS:Marktstraße 6
+X-POSTAL-CODE:48496
+X-LOCALITY:Hopsten
+GEO:52.38406019116274;7.604951030899175
+X-ORGANIZER-NAME:Carmen Engfer
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=knipseline_pixelio.de:https://www.h
+ opsten.de/kalender/veranstaltungen-2023/2023-04-17-spieletreff-hopsten/4
+ 05584-web-r-by-knipseline-pixelio.de.jpg?cid=pjp.2hym
+UID:e7a27c10-fd27-4370-b5d7-5fb81fe735d0:2026-12-21
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203539Z
+DTSTART;TZID=Europe/Berlin:20270118T190000
+DTEND;TZID=Europe/Berlin:20270118T235900
+SUMMARY:Spieletreff Hopsten
+CREATED:20230414T094639Z
+LAST-MODIFIED:20230525T102825Z
+DESCRIPTION:Alle Spielbegeisterten sind herzlich eingeladen am offenen Sp
+ ieletreff in Hopsten teilzunehmen. \n\nGespielt werden Brett- und Karten
+ spiele. Spiele können gerne mitgebracht werden\, \n\nDer Eintritt ist fr
+ ei\, eine Anmeldung ist nicht erforderlich.
+LOCATION:Dreibrückenhof Schmiemann
+X-LOCATION-NAME:Dreibrückenhof Schmiemann
+X-STREET-ADDRESS:Marktstraße 6
+X-POSTAL-CODE:48496
+X-LOCALITY:Hopsten
+GEO:52.38406019116274;7.604951030899175
+X-ORGANIZER-NAME:Carmen Engfer
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=knipseline_pixelio.de:https://www.h
+ opsten.de/kalender/veranstaltungen-2023/2023-04-17-spieletreff-hopsten/4
+ 05584-web-r-by-knipseline-pixelio.de.jpg?cid=pjp.2hym
+UID:e7a27c10-fd27-4370-b5d7-5fb81fe735d0:2027-01-18
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203539Z
+DTSTART;TZID=Europe/Berlin:20270215T190000
+DTEND;TZID=Europe/Berlin:20270215T235900
+SUMMARY:Spieletreff Hopsten
+CREATED:20230414T094639Z
+LAST-MODIFIED:20230525T102825Z
+DESCRIPTION:Alle Spielbegeisterten sind herzlich eingeladen am offenen Sp
+ ieletreff in Hopsten teilzunehmen. \n\nGespielt werden Brett- und Karten
+ spiele. Spiele können gerne mitgebracht werden\, \n\nDer Eintritt ist fr
+ ei\, eine Anmeldung ist nicht erforderlich.
+LOCATION:Dreibrückenhof Schmiemann
+X-LOCATION-NAME:Dreibrückenhof Schmiemann
+X-STREET-ADDRESS:Marktstraße 6
+X-POSTAL-CODE:48496
+X-LOCALITY:Hopsten
+GEO:52.38406019116274;7.604951030899175
+X-ORGANIZER-NAME:Carmen Engfer
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=knipseline_pixelio.de:https://www.h
+ opsten.de/kalender/veranstaltungen-2023/2023-04-17-spieletreff-hopsten/4
+ 05584-web-r-by-knipseline-pixelio.de.jpg?cid=pjp.2hym
+UID:e7a27c10-fd27-4370-b5d7-5fb81fe735d0:2027-02-15
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203539Z
+DTSTART;TZID=Europe/Berlin:20270315T190000
+DTEND;TZID=Europe/Berlin:20270315T235900
+SUMMARY:Spieletreff Hopsten
+CREATED:20230414T094639Z
+LAST-MODIFIED:20230525T102825Z
+DESCRIPTION:Alle Spielbegeisterten sind herzlich eingeladen am offenen Sp
+ ieletreff in Hopsten teilzunehmen. \n\nGespielt werden Brett- und Karten
+ spiele. Spiele können gerne mitgebracht werden\, \n\nDer Eintritt ist fr
+ ei\, eine Anmeldung ist nicht erforderlich.
+LOCATION:Dreibrückenhof Schmiemann
+X-LOCATION-NAME:Dreibrückenhof Schmiemann
+X-STREET-ADDRESS:Marktstraße 6
+X-POSTAL-CODE:48496
+X-LOCALITY:Hopsten
+GEO:52.38406019116274;7.604951030899175
+X-ORGANIZER-NAME:Carmen Engfer
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=knipseline_pixelio.de:https://www.h
+ opsten.de/kalender/veranstaltungen-2023/2023-04-17-spieletreff-hopsten/4
+ 05584-web-r-by-knipseline-pixelio.de.jpg?cid=pjp.2hym
+UID:e7a27c10-fd27-4370-b5d7-5fb81fe735d0:2027-03-15
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203539Z
+DTSTART;TZID=Europe/Berlin:20270419T190000
+DTEND;TZID=Europe/Berlin:20270419T235900
+SUMMARY:Spieletreff Hopsten
+CREATED:20230414T094639Z
+LAST-MODIFIED:20230525T102825Z
+DESCRIPTION:Alle Spielbegeisterten sind herzlich eingeladen am offenen Sp
+ ieletreff in Hopsten teilzunehmen. \n\nGespielt werden Brett- und Karten
+ spiele. Spiele können gerne mitgebracht werden\, \n\nDer Eintritt ist fr
+ ei\, eine Anmeldung ist nicht erforderlich.
+LOCATION:Dreibrückenhof Schmiemann
+X-LOCATION-NAME:Dreibrückenhof Schmiemann
+X-STREET-ADDRESS:Marktstraße 6
+X-POSTAL-CODE:48496
+X-LOCALITY:Hopsten
+GEO:52.38406019116274;7.604951030899175
+X-ORGANIZER-NAME:Carmen Engfer
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=knipseline_pixelio.de:https://www.h
+ opsten.de/kalender/veranstaltungen-2023/2023-04-17-spieletreff-hopsten/4
+ 05584-web-r-by-knipseline-pixelio.de.jpg?cid=pjp.2hym
+UID:e7a27c10-fd27-4370-b5d7-5fb81fe735d0:2027-04-19
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203539Z
+DTSTART;TZID=Europe/Berlin:20270517T190000
+DTEND;TZID=Europe/Berlin:20270517T235900
+SUMMARY:Spieletreff Hopsten
+CREATED:20230414T094639Z
+LAST-MODIFIED:20230525T102825Z
+DESCRIPTION:Alle Spielbegeisterten sind herzlich eingeladen am offenen Sp
+ ieletreff in Hopsten teilzunehmen. \n\nGespielt werden Brett- und Karten
+ spiele. Spiele können gerne mitgebracht werden\, \n\nDer Eintritt ist fr
+ ei\, eine Anmeldung ist nicht erforderlich.
+LOCATION:Dreibrückenhof Schmiemann
+X-LOCATION-NAME:Dreibrückenhof Schmiemann
+X-STREET-ADDRESS:Marktstraße 6
+X-POSTAL-CODE:48496
+X-LOCALITY:Hopsten
+GEO:52.38406019116274;7.604951030899175
+X-ORGANIZER-NAME:Carmen Engfer
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=knipseline_pixelio.de:https://www.h
+ opsten.de/kalender/veranstaltungen-2023/2023-04-17-spieletreff-hopsten/4
+ 05584-web-r-by-knipseline-pixelio.de.jpg?cid=pjp.2hym
+UID:e7a27c10-fd27-4370-b5d7-5fb81fe735d0:2027-05-17
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203539Z
+DTSTART;TZID=Europe/Berlin:20270621T190000
+DTEND;TZID=Europe/Berlin:20270621T235900
+SUMMARY:Spieletreff Hopsten
+CREATED:20230414T094639Z
+LAST-MODIFIED:20230525T102825Z
+DESCRIPTION:Alle Spielbegeisterten sind herzlich eingeladen am offenen Sp
+ ieletreff in Hopsten teilzunehmen. \n\nGespielt werden Brett- und Karten
+ spiele. Spiele können gerne mitgebracht werden\, \n\nDer Eintritt ist fr
+ ei\, eine Anmeldung ist nicht erforderlich.
+LOCATION:Dreibrückenhof Schmiemann
+X-LOCATION-NAME:Dreibrückenhof Schmiemann
+X-STREET-ADDRESS:Marktstraße 6
+X-POSTAL-CODE:48496
+X-LOCALITY:Hopsten
+GEO:52.38406019116274;7.604951030899175
+X-ORGANIZER-NAME:Carmen Engfer
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=knipseline_pixelio.de:https://www.h
+ opsten.de/kalender/veranstaltungen-2023/2023-04-17-spieletreff-hopsten/4
+ 05584-web-r-by-knipseline-pixelio.de.jpg?cid=pjp.2hym
+UID:e7a27c10-fd27-4370-b5d7-5fb81fe735d0:2027-06-21
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203539Z
+DTSTART;TZID=Europe/Berlin:20270719T190000
+DTEND;TZID=Europe/Berlin:20270719T235900
+SUMMARY:Spieletreff Hopsten
+CREATED:20230414T094639Z
+LAST-MODIFIED:20230525T102825Z
+DESCRIPTION:Alle Spielbegeisterten sind herzlich eingeladen am offenen Sp
+ ieletreff in Hopsten teilzunehmen. \n\nGespielt werden Brett- und Karten
+ spiele. Spiele können gerne mitgebracht werden\, \n\nDer Eintritt ist fr
+ ei\, eine Anmeldung ist nicht erforderlich.
+LOCATION:Dreibrückenhof Schmiemann
+X-LOCATION-NAME:Dreibrückenhof Schmiemann
+X-STREET-ADDRESS:Marktstraße 6
+X-POSTAL-CODE:48496
+X-LOCALITY:Hopsten
+GEO:52.38406019116274;7.604951030899175
+X-ORGANIZER-NAME:Carmen Engfer
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=knipseline_pixelio.de:https://www.h
+ opsten.de/kalender/veranstaltungen-2023/2023-04-17-spieletreff-hopsten/4
+ 05584-web-r-by-knipseline-pixelio.de.jpg?cid=pjp.2hym
+UID:e7a27c10-fd27-4370-b5d7-5fb81fe735d0:2027-07-19
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203539Z
+DTSTART;TZID=Europe/Berlin:20270816T190000
+DTEND;TZID=Europe/Berlin:20270816T235900
+SUMMARY:Spieletreff Hopsten
+CREATED:20230414T094639Z
+LAST-MODIFIED:20230525T102825Z
+DESCRIPTION:Alle Spielbegeisterten sind herzlich eingeladen am offenen Sp
+ ieletreff in Hopsten teilzunehmen. \n\nGespielt werden Brett- und Karten
+ spiele. Spiele können gerne mitgebracht werden\, \n\nDer Eintritt ist fr
+ ei\, eine Anmeldung ist nicht erforderlich.
+LOCATION:Dreibrückenhof Schmiemann
+X-LOCATION-NAME:Dreibrückenhof Schmiemann
+X-STREET-ADDRESS:Marktstraße 6
+X-POSTAL-CODE:48496
+X-LOCALITY:Hopsten
+GEO:52.38406019116274;7.604951030899175
+X-ORGANIZER-NAME:Carmen Engfer
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=knipseline_pixelio.de:https://www.h
+ opsten.de/kalender/veranstaltungen-2023/2023-04-17-spieletreff-hopsten/4
+ 05584-web-r-by-knipseline-pixelio.de.jpg?cid=pjp.2hym
+UID:e7a27c10-fd27-4370-b5d7-5fb81fe735d0:2027-08-16
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203539Z
+DTSTART;TZID=Europe/Berlin:20270920T190000
+DTEND;TZID=Europe/Berlin:20270920T235900
+SUMMARY:Spieletreff Hopsten
+CREATED:20230414T094639Z
+LAST-MODIFIED:20230525T102825Z
+DESCRIPTION:Alle Spielbegeisterten sind herzlich eingeladen am offenen Sp
+ ieletreff in Hopsten teilzunehmen. \n\nGespielt werden Brett- und Karten
+ spiele. Spiele können gerne mitgebracht werden\, \n\nDer Eintritt ist fr
+ ei\, eine Anmeldung ist nicht erforderlich.
+LOCATION:Dreibrückenhof Schmiemann
+X-LOCATION-NAME:Dreibrückenhof Schmiemann
+X-STREET-ADDRESS:Marktstraße 6
+X-POSTAL-CODE:48496
+X-LOCALITY:Hopsten
+GEO:52.38406019116274;7.604951030899175
+X-ORGANIZER-NAME:Carmen Engfer
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=knipseline_pixelio.de:https://www.h
+ opsten.de/kalender/veranstaltungen-2023/2023-04-17-spieletreff-hopsten/4
+ 05584-web-r-by-knipseline-pixelio.de.jpg?cid=pjp.2hym
+UID:e7a27c10-fd27-4370-b5d7-5fb81fe735d0:2027-09-20
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203539Z
+DTSTART;TZID=Europe/Berlin:20271018T190000
+DTEND;TZID=Europe/Berlin:20271018T235900
+SUMMARY:Spieletreff Hopsten
+CREATED:20230414T094639Z
+LAST-MODIFIED:20230525T102825Z
+DESCRIPTION:Alle Spielbegeisterten sind herzlich eingeladen am offenen Sp
+ ieletreff in Hopsten teilzunehmen. \n\nGespielt werden Brett- und Karten
+ spiele. Spiele können gerne mitgebracht werden\, \n\nDer Eintritt ist fr
+ ei\, eine Anmeldung ist nicht erforderlich.
+LOCATION:Dreibrückenhof Schmiemann
+X-LOCATION-NAME:Dreibrückenhof Schmiemann
+X-STREET-ADDRESS:Marktstraße 6
+X-POSTAL-CODE:48496
+X-LOCALITY:Hopsten
+GEO:52.38406019116274;7.604951030899175
+X-ORGANIZER-NAME:Carmen Engfer
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=knipseline_pixelio.de:https://www.h
+ opsten.de/kalender/veranstaltungen-2023/2023-04-17-spieletreff-hopsten/4
+ 05584-web-r-by-knipseline-pixelio.de.jpg?cid=pjp.2hym
+UID:e7a27c10-fd27-4370-b5d7-5fb81fe735d0:2027-10-18
+END:VEVENT
+END:VCALENDAR

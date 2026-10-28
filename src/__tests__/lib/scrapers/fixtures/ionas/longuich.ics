@@ -1,0 +1,402 @@
+BEGIN:VCALENDAR
+PRODID:-//IONAS//TVM//DE
+VERSION:2.0
+CALSCALE:GREGORIAN
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+LAST-MODIFIED:20201010T011803Z
+TZURL:http://tzurl.org/zoneinfo/Europe/Berlin
+X-LIC-LOCATION:Europe/Berlin
+X-PROLEPTIC-TZNAME:LMT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+005328
+TZOFFSETTO:+0100
+DTSTART:18930401T000000
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19160430T230000
+RDATE:19400401T020000
+RDATE:19430329T020000
+RDATE:19460414T020000
+RDATE:19470406T030000
+RDATE:19480418T020000
+RDATE:19490410T020000
+RDATE:19800406T020000
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19161001T010000
+RDATE:19421102T030000
+RDATE:19431004T030000
+RDATE:19441002T030000
+RDATE:19451118T030000
+RDATE:19461007T030000
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19170416T020000
+RRULE:FREQ=YEARLY;UNTIL=19180415T010000Z;BYMONTH=4;BYDAY=3MO
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19170917T030000
+RRULE:FREQ=YEARLY;UNTIL=19180916T010000Z;BYMONTH=9;BYDAY=3MO
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19440403T020000
+RRULE:FREQ=YEARLY;UNTIL=19450402T010000Z;BYMONTH=4;BYDAY=1MO
+END:DAYLIGHT
+BEGIN:DAYLIGHT
+TZNAME:CEMT
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0300
+DTSTART:19450524T020000
+RDATE:19470511T030000
+END:DAYLIGHT
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0300
+TZOFFSETTO:+0200
+DTSTART:19450924T030000
+RDATE:19470629T030000
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0100
+DTSTART:19460101T000000
+RDATE:19800101T000000
+END:STANDARD
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19471005T030000
+RRULE:FREQ=YEARLY;UNTIL=19491002T010000Z;BYMONTH=10;BYDAY=1SU
+END:STANDARD
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19800928T030000
+RRULE:FREQ=YEARLY;UNTIL=19950924T010000Z;BYMONTH=9;BYDAY=-1SU
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19810329T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19961027T030000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTAMP:20261028T203540Z
+DTSTART;TZID=Europe/Berlin:20261111T174500
+DTEND;TZID=Europe/Berlin:20261111T174500
+SUMMARY:Martinsfeier und Martinszug
+CREATED:20260111T162013Z
+LAST-MODIFIED:20260111T172411Z
+DESCRIPTION:Wir feiern St. Martin mit einer Feier in der Pfarrkirche St. 
+ Laurentius\, anschließend Martinszug
+LOCATION:Pfarrkirche St. Laurentius
+X-LOCATION-NAME:Pfarrkirche St. Laurentius
+X-STREET-ADDRESS:Maximinstrasse
+X-ORGANIZER-NAME:Ortsgemeinde
+X-ORGANIZER-TELEPHONE:06502-1364
+X-ORGANIZER-ADDRESS-COUNTRY:Deutschland
+X-ORGANIZER-ADDRESS-POSTALCODE:54340
+X-ORGANIZER-ADDRESS-LOCALITY:Longuich
+X-ORGANIZER-ADDRESS-STREET:Maximinstrasse 18
+X-ORGANIZER-GEO:49.807735\;6.7720284
+X-IONAS-CATEGORY:Veranstaltung
+CATEGORIES:Veranstaltung,Verein,religiöse Veranstaltung
+ATTACH;FMTTYPE=image/jpeg:https://longuich.de/bilder/fotos-longuich/kirch
+ e280324.jpg?cid=6q2a.jfl4
+UID:c429c9b3-f292-48c8-8a75-22722fa6f053:2026-11-11
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203540Z
+DTSTART;TZID=Europe/Berlin:20261121T140000
+DTEND;TZID=Europe/Berlin:20261121T180000
+SUMMARY:Mindful Letters - Kalligrafie als kreative Auszeit
+CREATED:20260723T150847Z
+LAST-MODIFIED:20260723T152543Z
+DESCRIPTION:Kalligrafie als kreative Auszeit mit Watercolour&Mixed Media\
+ nBeschreibung: Der November schenkt uns die perfekte Atmosphäre für Konz
+ entration und Kreativität. Mindful Letters  ist eine Einladung\, Schrift
+  als Gestaltungsmittel zu erleben\, neue Mixed Media-Techniken auszuprob
+ ieren und in einen kreativen Flow einzutauchen. \n\nWas dich erwartet:\n
+ \nKalligrafie & bewusstes SchreibenImpulse & Inspiration für dein weiter
+ es kreatives ArbeitenGestaltung persönlicher AffirmationenEin  Nachmitta
+ g für Entschleunigung\, Fokus und kreativen Flow.\n\nKosten: Kursgebühr:
+  38\,- € + Materialunkostenbeitrag: 4\,- €\nOrt: Dorfgemeinschaftshaus L
+ onguich\, Maximinstr. 18\, Longuich (Parkplätze vorhanden)\nMaterial: bi
+ tte entsprechend der Materialliste mitbringen.\n\nDorfgemeinschaftshaus 
+ Longuich | Maximinstraße 18\nParkplätze vorhanden\n\nChristine Engel\, D
+ ipl.-Designerin \n\nengel@what2design.de\n\nTel: 0170-2302232\n\nAnmeldu
+ ng bis 1 Woche vor Kursbeginn. Max. Teilnehmerzahl: 5
+LOCATION:Dorfgemeinschaftshaus Longuich
+X-LOCATION-NAME:Dorfgemeinschaftshaus Longuich
+X-STREET-ADDRESS:Maximinstr. 18
+X-POSTAL-CODE:54340
+X-LOCALITY:Longuich
+X-COUNTRY:Deutschland
+X-ORGANIZER-NAME:
+CONTACT:Christine Engel\, Dipl.-Designerin \,engel@what2design.de
+X-CONTACT-GIVEN-NAME:Christine Engel\, Dipl.-Designerin 
+X-CONTACT-EMAIL:engel@what2design.de
+X-CONTACT-MOBILE:0170-2302232
+X-CONTACT-WEBSITE:http://www.what2design.de/
+URL:http://www.what2design.de/
+X-IONAS-CATEGORY:Workshop
+CATEGORIES:Workshop,Kalligrafie
+ATTACH;FMTTYPE=image/jpeg:https://longuich.de/bilder/fotos-veranstaltunge
+ n/handlettering1.jpg?cid=6ocd.iwm7
+UID:71098a23-0c88-459b-b9fe-6388f9d7d13a:2026-11-21
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203540Z
+DTSTART;TZID=Europe/Berlin:20261122T183000
+DTEND;TZID=Europe/Berlin:20261122T193000
+SUMMARY:Musik zumTagesausklang 
+CREATED:20260220T170451Z
+LAST-MODIFIED:20260220T171537Z
+DESCRIPTION:\"Barocke Glanzlichter – Musik aus Barock und Klassik\"Musik 
+ aus Barock und Klassik für Streicher\, Horn und Basso Continuo\n\nNach d
+ em Konzert besteht die Möglichkeit\, bei einem guten Glas Wein den Abend
+  im Gespräch mit den Künstlerinnen und Künstlern ausklingen zu lassen.
+LOCATION:Pfarrkirche St. Laurentius
+X-LOCATION-NAME:Pfarrkirche St. Laurentius
+X-STREET-ADDRESS:Maximinstrasse
+X-ORGANIZER-NAME:Ortsgemeinde
+X-ORGANIZER-ADDRESS-COUNTRY:Deutschland
+X-ORGANIZER-ADDRESS-POSTALCODE:54340
+X-ORGANIZER-ADDRESS-LOCALITY:Longuich
+X-ORGANIZER-ADDRESS-STREET:Maximinstrasse 18
+X-ORGANIZER-GEO:49.807735\;6.7720284
+CONTACT:FEMALE Katharina   Zey-Wortmann\,0651-99372715
+X-CONTACT-SALUTATION:FEMALE
+X-CONTACT-GIVEN-NAME:Katharina  
+X-CONTACT-FAMILY-NAME:Zey-Wortmann
+X-CONTACT-TELEPHONE:0651-99372715
+X-CONTACT-ADDRESS-COUNTRY:Deutschland
+X-CONTACT-ADDRESS-POSTALCODE:54290
+X-CONTACT-ADDRESS-LOCALITY:Trier
+X-CONTACT-ADDRESS-STREET:Weberbach 178
+X-IONAS-CATEGORY:Veranstaltung
+CATEGORIES:Veranstaltung,Konzert
+ATTACH:https://longuich.de/bilder/fotos-veranstaltungen/flyer-2.-halbjahr
+ -2026.jpeg?cid=74s7.n17g
+UID:353d93f7-9769-45b9-9415-1ac809bff277:2026-11-22
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203540Z
+DTSTART;TZID=Europe/Berlin:20261129T150000
+DTEND;TZID=Europe/Berlin:20261129T150000
+SUMMARY:Adventsfeier
+CREATED:20260111T171521Z
+LAST-MODIFIED:20260111T171628Z
+DESCRIPTION:Am Sonntag\, 29.11.2026 lädt die Jugendfeuerwehr Longuich ab 
+ 15:00 Uhr zu einer Adventsfeier am Feuerwehrgerätehaus Longuich ein. Bei
+  vorweihnachtlicher Atmosphäre mit geschmücktem Weihnachtsbaum gibt es W
+ affeln\, Kuchen – sowie Glühwein und Kinderpunsch. Unsere Nachwuchskräft
+ e freuen sich über zahlreiche Besucher.
+LOCATION:Feuerwehrgerätehaus Longuich
+X-LOCATION-NAME:Feuerwehrgerätehaus Longuich
+X-STREET-ADDRESS:Maiwiese 1
+X-POSTAL-CODE:54340
+X-LOCALITY:Longuich
+ORGANIZER;CN=Freiwillige Feuerwehr Longuich:mailto:schriftfuehrer@feuerwe
+ hr-longuich.de%20
+X-ORGANIZER-NAME:Freiwillige Feuerwehr Longuich
+X-ORGANIZER-EMAIL:schriftfuehrer@feuerwehr-longuich.de 
+X-ORGANIZER-WEBSITE:http://www.feuerwehr-longuich.de/
+URL:http://www.feuerwehr-longuich.de/
+X-IONAS-CATEGORY:Veranstaltung
+CATEGORIES:Veranstaltung,Advent/Weihnachten,Verein
+ATTACH;FMTTYPE=image/jpeg:https://longuich.de/bilder/fotos-veranstaltunge
+ n/adventsfeier-2024.jpg?cid=6t2g.kcmm
+UID:7db663b2-009e-41f4-bce3-adfe38e3cfe7:2026-11-29
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203540Z
+DTSTART;TZID=Europe/Berlin:20261129T150000
+DTEND;TZID=Europe/Berlin:20261129T150000
+SUMMARY:Adventsfeier kfd 
+CREATED:20260111T171639Z
+LAST-MODIFIED:20260111T171728Z
+DESCRIPTION:Am Sonntag\, 29.11.2026 lädt die kfd zur Adventsfeier ins Bür
+ gerhaus ein.
+LOCATION:Bürgerhaus Longuich
+X-LOCATION-NAME:Bürgerhaus Longuich
+X-STREET-ADDRESS:Maximinstr. 18
+X-POSTAL-CODE:54340
+X-LOCALITY:Longuich
+X-ORGANIZER-NAME:Kfd Longuich
+X-IONAS-CATEGORY:Veranstaltung
+CATEGORIES:Veranstaltung,Advent/Weihnachten,Verein
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=Andrea Wisser:https://longuich.de/b
+ ilder/fotos-ti/fototi2023-2.jpg?cid=6nmv.ix4p
+UID:ad332ee7-2c1f-439b-8dd8-fea4d418d70c:2026-11-29
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203540Z
+DTSTART;TZID=Europe/Berlin:20261205T140000
+DTEND;TZID=Europe/Berlin:20261205T180000
+SUMMARY:Weihnachtspost 
+CREATED:20260723T152612Z
+LAST-MODIFIED:20261022T085829Z
+DESCRIPTION:Handgeschriebene Weihnachtspost\, Stilvolle Karten & Geschenk
+ anhänger\n\nBeschreibung: Nichts berührt mehr als echte Post. In diesem 
+ Workshop gestalten wir individuelle Weihnachtskarten\, Umschläge und kle
+ ine Anhänger. Du lernst stimmungsvolle Schriftkombinationen\, winterlich
+ e Details und Techniken\, die deine Weihnachtspost zu etwas ganz Besonde
+ rem machen.\n\nDu lernst:\n\nModerne & klassische Weihnachts-Schriftzüge
+ Layout für Karten & UmschlägeVeredelungen mit Gold\, Weiß\, Siegelwachs 
+ oder feinen DetailsDie Teilnehmenden gehen mit fertiger Weihnachtspost n
+ ach Hause – und dem guten Gefühl\, dieses Jahr etwas wirklich Persönlich
+ es zu verschenken.\n\nKosten: Kursgebühr: 38\,- € + Materialunkostenbeit
+ rag: 4\,- €\nOrt: Dorfgemeinschaftshaus Longuich\, Maximinstr. 18\, Long
+ uich (Parkplätze vorhanden)\nMaterial: bitte entsprechend der Materialli
+ ste mitbringen.\n\nDorfgemeinschaftshaus Longuich | Maximinstraße 18\nPa
+ rkplätze vorhanden\n\nChristine Engel\, Dipl.-Designerin \n\nengel@what2
+ design.de\n\nTel: 0170-2302232\n\nAnmeldung bis 1 Woche vor Kursbeginn. 
+ Max. Teilnehmerzahl: 5
+LOCATION:Dorfgemeinschaftshaus Longuich
+X-LOCATION-NAME:Dorfgemeinschaftshaus Longuich
+X-STREET-ADDRESS:Maximinstr. 18
+X-POSTAL-CODE:54340
+X-LOCALITY:Longuich
+X-COUNTRY:Deutschland
+X-ORGANIZER-NAME:
+CONTACT:Christine Engel\, Dipl.-Designerin \,engel@what2design.de
+X-CONTACT-GIVEN-NAME:Christine Engel\, Dipl.-Designerin 
+X-CONTACT-EMAIL:engel@what2design.de
+X-CONTACT-MOBILE:0170-2302232
+X-CONTACT-WEBSITE:http://www.what2design.de/
+URL:http://www.what2design.de/
+X-IONAS-CATEGORY:Workshop
+CATEGORIES:Workshop,Kalligrafie
+ATTACH;FMTTYPE=image/jpeg:https://longuich.de/bilder/fotos-veranstaltunge
+ n/handlettering1.jpg?cid=6ocd.iwm7
+UID:aa139e79-8649-4ba9-ab9f-1ff819116906:2026-12-05
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203540Z
+DTSTART;TZID=Europe/Berlin:20261206T153000
+DTEND;TZID=Europe/Berlin:20261206T153000
+SUMMARY:Adventskonzert des Moselländischen Blasorchesters
+CREATED:20260111T171739Z
+LAST-MODIFIED:20261022T083211Z
+DESCRIPTION:Einstimmung auf Advent und Weihnachten mit dem MBO! Eintritt 
+ frei!
+LOCATION:Kirche St. Laurentius Longuich
+X-LOCATION-NAME:Kirche St. Laurentius Longuich
+X-STREET-ADDRESS:Maximinstrasse
+X-POSTAL-CODE:54340
+X-LOCALITY:Longuich
+X-COUNTRY:Deutschland
+X-ORGANIZER-NAME:Moselländisches Blasorchester
+CONTACT:FEMALE Verena Jung\,verena.jung@mb-longuich.de
+X-CONTACT-SALUTATION:FEMALE
+X-CONTACT-GIVEN-NAME:Verena
+X-CONTACT-FAMILY-NAME:Jung
+X-CONTACT-EMAIL:verena.jung@mb-longuich.de
+X-CONTACT-WEBSITE:http://www.mb-longuich.de/
+X-CONTACT-ADDRESS-COUNTRY:Deutschland
+X-CONTACT-ADDRESS-POSTALCODE:54340
+X-CONTACT-ADDRESS-LOCALITY:Longuich
+X-CONTACT-ADDRESS-STREET:Johannisstr. 3
+X-CONTACT-GEO:49.8058678\;6.776479052364067
+URL:http://www.mb-longuich.de/
+X-IONAS-CATEGORY:Konzert
+CATEGORIES:Konzert,Konzert,Advent/Weihnachten
+ATTACH;FMTTYPE=image/jpeg:https://longuich.de/bilder/fotos-veranstaltunge
+ n/plakatkonzertmbo061226.jpg?cid=779j.nnxg
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT="Foto: Andreas Scholer / ComCept.tv
+ ":https://longuich.de/bilder/fotos-longuich/2013-09-05-scholer-roemweins
+ tr-3161-neu.jpg?cid=6m44.icav
+UID:4ccacd48-0fa7-4819-9a00-33c7590961da:2026-12-06
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203540Z
+DTSTART;TZID=Europe/Berlin:20261224T000000
+DTEND;TZID=Europe/Berlin:20261224T000000
+SUMMARY:Weihnachtliche Klänge des Moselländischen Blasorchesters
+CREATED:20260111T172016Z
+LAST-MODIFIED:20260111T172114Z
+DESCRIPTION:Einstimmung auf Advent und Weihnachten mit dem MBO in den Str
+ assen von Longuich
+LOCATION:Strassen von Longuich
+X-LOCATION-NAME:Strassen von Longuich
+X-POSTAL-CODE:54340
+X-LOCALITY:Longuich
+X-COUNTRY:Deutschland
+X-ORGANIZER-NAME:Moselländisches Blasorchester
+CONTACT:FEMALE Verena Jung\,verena.jung@mb-longuich.de
+X-CONTACT-SALUTATION:FEMALE
+X-CONTACT-GIVEN-NAME:Verena
+X-CONTACT-FAMILY-NAME:Jung
+X-CONTACT-EMAIL:verena.jung@mb-longuich.de
+X-CONTACT-WEBSITE:http://www.mb-longuich.de/
+X-CONTACT-ADDRESS-COUNTRY:Deutschland
+X-CONTACT-ADDRESS-POSTALCODE:54340
+X-CONTACT-ADDRESS-LOCALITY:Longuich
+X-CONTACT-ADDRESS-STREET:Johannisstr. 3
+X-CONTACT-GEO:49.8058678\;6.776479052364067
+URL:http://www.mb-longuich.de/
+X-IONAS-CATEGORY:Konzert
+CATEGORIES:Konzert,Konzert,Advent/Weihnachten,Verein
+UID:3197ed8b-27be-4900-b517-4a877c82f8d8:2026-12-24
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203540Z
+DTSTART;VALUE=DATE:20270807
+DTEND;VALUE=DATE:20270810
+SUMMARY:25. Longuicher Weinstraßenkirmes
+CREATED:20261022T152222Z
+LAST-MODIFIED:20261022T152428Z
+DESCRIPTION:Die traditionelle Longuicher Weinstraßenkirmes findet in der 
+ Maximinstrasse von Samstag\, 07.08.27 bis Montag 09.08.27 statt. \n\nHie
+ r gehts zum FESTPROGRAMM 2026
+LOCATION:
+X-LOCATION-NAME:
+X-STREET-ADDRESS:Maximinstrasse
+X-POSTAL-CODE:54340
+X-LOCALITY:Longuich
+X-COUNTRY:Deutschland
+X-ORGANIZER-NAME:Ortsgemeinde Longuich
+CONTACT:Kevin Lieser
+X-CONTACT-GIVEN-NAME:Kevin
+X-CONTACT-FAMILY-NAME:Lieser
+X-CONTACT-ADDRESS-POSTALCODE:54340
+X-CONTACT-ADDRESS-LOCALITY:Longuich
+X-CONTACT-ADDRESS-STREET:Maximinstr. 18
+X-CONTACT-GEO:49.80773545\;6.77202835
+X-IONAS-CATEGORY:Veranstaltung
+CATEGORIES:Veranstaltung,Weinfest
+ATTACH;FMTTYPE=image/jpeg:https://longuich.de/bilder/fotos-kirmes-2026/im
+ g-7775.jpg?cid=76km.nj07
+UID:ca765de0-2ee5-4c03-853d-ced96df27e86:2027-08-07
+END:VEVENT
+END:VCALENDAR

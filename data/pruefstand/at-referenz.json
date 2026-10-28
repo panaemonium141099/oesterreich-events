@@ -1,33 +1,34 @@
 {
-  "measured_at": "2026-10-28T17:17:07.271Z",
+  "measured_at": "2026-10-28T21:02:41.571Z",
   "sources": [
     "gem2go",
     "gemeinde-registry",
     "gemeinden-generic"
   ],
   "pooled": {
-    "n": 37817,
-    "published": 36594,
-    "quarantined": 1186,
+    "n": 37715,
+    "published": 36493,
+    "quarantined": 1185,
     "quarantineReasons": {
       "start_too_far_ahead": 30,
-      "municipal_service": 1136,
+      "municipal_service": 1135,
       "placeholder_location": 6,
       "no_location_evidence": 14
     },
     "rates": {
-      "garbageTitle": 0.0014279292381733082,
-      "noTimeOfDay": 0.6093555808234392,
-      "municipalityPrecision": 0.7716106512943914,
-      "noCoords": 0.0026178702699843986,
-      "visibleMunicipalService": 0,
-      "duplicatesInRun": 0.016817833249596743
+      "garbageTitle": 0.0014317910645631712,
+      "noTimeOfDay": 0.6110035794776614,
+      "municipalityPrecision": 0.7722921914357682,
+      "noCoords": 0.002598435635688718,
+      "visibleNoCoords": 0.0010340713244067347,
+      "visibleMunicipalService": 0.0001060585973750497,
+      "duplicatesInRun": 0.01134826991913032
     }
   },
   "bySource": {
     "gem2go": {
-      "n": 9132,
-      "published": 8973,
+      "n": 9088,
+      "published": 8929,
       "quarantined": 150,
       "quarantineReasons": {
         "start_too_far_ahead": 11,
@@ -36,35 +37,37 @@
       },
       "rates": {
         "garbageTitle": 0,
-        "noTimeOfDay": 0.4610162067455103,
-        "municipalityPrecision": 0.7544897065265003,
-        "noCoords": 0.0020805957074025404,
+        "noTimeOfDay": 0.4632482394366197,
+        "municipalityPrecision": 0.7553917253521126,
+        "noCoords": 0.0019806338028169014,
+        "visibleNoCoords": 0.0005501760563380282,
         "visibleMunicipalService": 0,
-        "duplicatesInRun": 0.03296101620674551
+        "duplicatesInRun": 0.027838908450704226
       }
     },
     "gemeinde-registry": {
-      "n": 20857,
-      "published": 20199,
-      "quarantined": 631,
+      "n": 20807,
+      "published": 20150,
+      "quarantined": 630,
       "quarantineReasons": {
-        "municipal_service": 613,
+        "municipal_service": 612,
         "placeholder_location": 1,
         "start_too_far_ahead": 16,
         "no_location_evidence": 1
       },
       "rates": {
-        "garbageTitle": 0.0022054945581819053,
-        "noTimeOfDay": 0.6705662367550462,
-        "municipalityPrecision": 0.7808409646641415,
-        "noCoords": 0.002253440092055425,
-        "visibleMunicipalService": 0,
-        "duplicatesInRun": 0.011027472790909527
+        "garbageTitle": 0.0022107944441774404,
+        "noTimeOfDay": 0.6721776325275147,
+        "municipalityPrecision": 0.7816119575142981,
+        "noCoords": 0.0022588551929639063,
+        "visibleNoCoords": 0.0008170327293699236,
+        "visibleMunicipalService": 0.00019224299514586436,
+        "duplicatesInRun": 0.003508434661412025
       }
     },
     "gemeinden-generic": {
-      "n": 7828,
-      "published": 7422,
+      "n": 7820,
+      "published": 7414,
       "quarantined": 405,
       "quarantineReasons": {
         "municipal_service": 387,
@@ -73,12 +76,13 @@
         "start_too_far_ahead": 3
       },
       "rates": {
-        "garbageTitle": 0.001021972406745018,
-        "noTimeOfDay": 0.6193152784874808,
-        "municipalityPrecision": 0.7669902912621359,
-        "noCoords": 0.004215636177823199,
+        "garbageTitle": 0.0010230179028132991,
+        "noTimeOfDay": 0.6199488491048594,
+        "municipalityPrecision": 0.7671355498721227,
+        "noCoords": 0.00421994884910486,
+        "visibleNoCoords": 0.002173913043478261,
         "visibleMunicipalService": 0,
-        "duplicatesInRun": 0.01341338783852836
+        "duplicatesInRun": 0.013043478260869565
       }
     }
   }

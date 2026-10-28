@@ -210,6 +210,12 @@ node / next.js
   .de/.ch-Seiten. Jede öffentliche events-Abfrage filtert das Land selbst;
   Bundesland/Bezirk/Umkreis reichen nicht. Wächter:
   `src/__tests__/lib/site-country-guard.test.ts` (Ausnahmen mit Begründung).
+  DE-Zeilen ohne Position hält der Freigabevertrag zurück (`no_position`,
+  außer online; fn-29.5, auch Eventim-DE). DE-Ortsteile („Mahlow“ unter
+  15831) löst der Resolver über `orteGemeinde` in `data/plz-de.json` auf
+  (GeoNames-Ort in der VG250-Gemeindefläche). Gemeinde-Adapter für DE stehen
+  in `src/lib/scrapers/de/` (nicht im Nachtlauf vor bestandenem Prüfstand,
+  `npm run pruefstand:de`, Befunde `docs/research/de-gemeinden/adapter-*.md`).
 - `src/app/page.tsx` — Landing: statische ISR-Shell (KEIN cookies()/auth im
   RSC-Pfad — Personalisierung client-seitig via `/api/me/landing` +
   `PersonalizedMatches`); Datenqueries über cookie-freien Anon-Client

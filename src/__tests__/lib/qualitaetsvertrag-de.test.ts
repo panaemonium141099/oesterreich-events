@@ -65,6 +65,20 @@ describe('Freigabevertrag DE', () => {
     expect(v.reasons).toContain('foreign_place_signal');
   });
 
+  it('Demo-Termin einer Kalendervorlage: Quarantäne, auch mit PLZ (Dreis-Brück „Prost, Musterstadt!")', () => {
+    const v = evaluateAdmission(
+      { title: 'Prost, Musterstadt! Die Bierbörse kommt', start_date: '2027-09-26T09:09:00Z', location_name: 'Musterort', postal_code: '54552', country: 'DE', latitude: 50.26, longitude: 6.83 },
+      opts,
+    );
+    expect(v.reasons).toContain('placeholder_location');
+    expect(evaluateAdmission({ title: 'Fest', start_date: '2027-09-26T09:00:00Z', location_name: 'Musterhaus Müller', country: 'DE', latitude: 50.26, longitude: 6.83 }, opts).reasons).not.toContain('placeholder_location');
+  });
+
+  it('Österreich unverändert: Ortsname ohne Position bleibt zulässig', () => {
+    const v = evaluateAdmission({ title: 'Konzert', start_date: '2027-03-01T18:00:00Z', location_name: 'Pfarrsaal', country: 'AT' }, opts);
+    expect(v.reasons).not.toContain('no_position');
+  });
+
   it('Österreich unverändert: Koordinate in Deutschland bei AT-Event bleibt Quarantäne', () => {
     const v = evaluateAdmission({ title: 'Konzert', start_date: '2027-03-01T18:00:00Z', location_name: 'Halle', country: 'AT', latitude: 50.39, longitude: 7.39 }, opts);
     expect(v.reasons).toContain('coords_outside_declared_country');
@@ -96,6 +110,24 @@ describe('Schreibweg DE', () => {
     const row = rowOf({ title: 'Gelber Sack Abfuhr', location_name: 'Plaidt', postal_code: '56637' });
     expect(row.location_resolution.admission?.reasons).toContain('municipal_service');
     expect(row.publish_status).not.toBe('published');
+  });
+
+  it('Ortsteil unter geteilter PLZ: Gemeinde über die PLZ-Referenz (15831 Mahlow → Blankenfelde-Mahlow, nicht Schönefeld)', () => {
+    const row = rowOf({ location_name: 'Ev. Gemeindezentrum Mahlow', address: 'Rathenaustraße 45, 15831 Mahlow', city: 'Mahlow', postal_code: '15831' });
+    expect(row.location_resolution.gemeinde?.name).toBe('Blankenfelde-Mahlow');
+    expect(row.latitude).not.toBeNull();
+    // Selchow unter derselben PLZ gehört zu Schönefeld.
+    expect(rowOf({ location_name: 'Dorfkirche', address: '15831 Selchow', city: 'Selchow', postal_code: '15831' }).location_resolution.gemeinde?.name).toBe('Schönefeld');
+  });
+
+  it('ohne Position nicht öffentlich (Amtskalender ohne Gemeinde), online schon', () => {
+    const held = rowOf({ location_name: 'Vereinsheim des HKC', city: undefined, postal_code: undefined });
+    expect(held.latitude).toBeNull();
+    expect(held.location_resolution.admission?.reasons).toContain('no_position');
+    expect(held.publish_status).not.toMatch(/^published/);
+    const online = rowOf({ title: 'Mein Europa', location_name: 'Online via Zoom' });
+    expect(online.location_resolution.admission?.reasons ?? []).not.toContain('no_position');
+    expect(online.publish_status).toMatch(/^published/);
   });
 
   it('Österreich unverändert: Bundesland und Bezirk aus der Gemeinde', () => {

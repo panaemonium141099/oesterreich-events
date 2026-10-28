@@ -50,7 +50,8 @@ async function main(): Promise<void> {
   // Erst nach dem Cache laden: Module, die beim Import fetch binden, sehen so den Cache.
   const { getScraperByName } = await import('../lib/scrapers');
   const { filterValidEvents, locationInputOf, normalizeEventTimestamps, toSupabaseRow } = await import('../lib/db/supabase-sync');
-  const scraper = getScraperByName(adapter);
+  const { getDeScraperByName } = await import('../lib/scrapers/de');
+  const scraper = getDeScraperByName(adapter) ?? getScraperByName(adapter);
   if (!scraper) throw new Error(`Adapter ${adapter} unbekannt`);
 
   const scraped = await scraper.scrape();
