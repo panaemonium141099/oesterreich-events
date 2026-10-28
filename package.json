@@ -88,6 +88,7 @@
     "blog:autowriter": "tsx --env-file=.env.local src/scripts/blog-autowriter.ts",
     "build:stammdaten": "tsx src/scripts/build-gemeinden-master.ts && tsx src/scripts/build-plz-ort-slugs.ts",
     "build:stammdaten:de": "tsx src/scripts/build-stammdaten-de.ts",
+    "build:registry:de": "tsx src/scripts/build-de-registry.ts",
     "pruefstand:de": "tsx --env-file-if-exists=.env.local src/scripts/pruefstand-de.ts",
     "pruefstand:at-referenz": "tsx --env-file=.env.local src/scripts/pruefstand-at-referenz.ts"
   },

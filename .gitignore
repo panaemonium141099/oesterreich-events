@@ -128,3 +128,6 @@ data/stammdaten-de/quellen/
 
 # Prüfstand-Cache und Berichte (npm run pruefstand:de)
 .pruefstand/
+
+# Feed-Lauf der DE-Registry (npm run build:registry:de -- --feeds)
+.registry-cache/
