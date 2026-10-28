@@ -18,6 +18,18 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/innsbruck-festwochen-alte-musik/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.altemusik.at/en/the-festwochen/watch-read-listen/news/the-programme-for-the-50th-innsbrucker-festwochen-has-been-published',
+      'https://www.altemusik.at/de/ihr-besuch/spielstaetten',
+      'https://www.altemusik.at/de/ihr-besuch/tickets-ermaessigungen',
+      'https://www.altemusik.at/en/press/press-releases/detail/programme-presentation-01122025',
+      'https://www.altemusik.at/de/die-festwochen/geschichte',
+      'https://papageno.hu/english/news/2026/03/50th-innsbrucker-festwochen-der-alten-musik-programme/',
+      'https://www.altemusik.at/de/ihr-besuch/faq',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Die Innsbrucker Festwochen der Alten Musik gelten als eine der wichtigsten Adressen für Barockmusik weltweit. Jährlich im Sommer erklingt Alte Musik in einzigartigen historischen Innsbrucker Spielorten.',

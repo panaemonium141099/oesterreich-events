@@ -18,6 +18,18 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/bregenz-festspiele/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://bregenzerfestspiele.com/de',
+      'https://pressefoyer.at/media/hbinxmzv/2_press-release_provisional-attendance-figures-for-2026.pdf',
+      'https://bregenzerfestspiele.com/en/festspielzeit/80-years-new-ground',
+      'https://pressefoyer.at/en/news/final-figures-2026/',
+      'https://de.wikipedia.org/wiki/Bregenzer_Festspiele',
+      'https://chronik.bregenzerfestspiele.com/en/tickets-visit/faq',
+      'https://bregenzerfestspiele.com/en/festspielzeit/la-traviata-seebuhne',
+    ],
+  },
   readingTime: 7,
   excerpt:
     'Die Bregenzer Festspiele sind weltberühmt für ihre spektakuläre Seebühne auf dem Bodensee. Jeden Sommer erlebt das Publikum dort Oper unter freiem Himmel, direkt über dem Wasser.',

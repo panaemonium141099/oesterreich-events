@@ -17,6 +17,17 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/styriarte-graz/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.steiermark.com/de/Region-Graz/Urlaub-planen/Veranstaltungen/Styriarte_ed_75776609',
+      'https://www.steiermark.com/lp/pl/Urlop-letni/Region-Graz/Helmut-List-Halle_isd_74306196',
+      'https://austria-forum.org/af/AustriaWiki/Styriarte',
+      'https://styriarte.com/en/productions/de-profundis',
+      'https://styriarte.com/en/news/styriarte-2026-a-festival-in-review',
+      'https://www.kaernten.at/nachhaltiges-kaernten/informationen/koralmbahn',
+    ],
+  },
   readingTime: 7,
   excerpt:
     'Das styriarte Graz verbindet historische Aufführungspraxis mit dem Geist Nikolaus Harnoncourts. Jeden Sommer im Juni und Juli spielt das Festival in Grazer Sälen, im Schloss Eggenberg und an besonderen Orten der Steiermark. Die nächste Ausgabe läuft vom 25. Juni bis 25. Juli 2027.',

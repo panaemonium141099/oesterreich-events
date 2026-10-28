@@ -16,6 +16,16 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/wiesen-fest/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.onelovefestival.at/de/about',
+      'https://www.onelovefestival.at',
+      'https://www.wiesen.at',
+      'https://www.news.at/news/one-love-wiesen-feiert-50-jahre-festivalkultur-mit-reggae',
+      'https://www.onelovefestival.at/de/camping',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Das One Love Festival in Wiesen im Bezirk Mattersburg bezeichnet sich selbst als Österreichs größtes Reggae-Festival. Seit 2019 bringt es Reggae, Roots und Dub auf das Festivalgelände Wiesen, die nächste Ausgabe läuft am 6. und 7. August 2027.',

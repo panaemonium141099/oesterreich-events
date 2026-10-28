@@ -17,6 +17,17 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/wiener-opernball/thumb.jpg',
   publishDate: '2026-03-31',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.opernball.at/',
+      'https://www.wien.info/de/aktuell/veranstaltungen/wiener-opernball-2026-935294',
+      'https://www.opernball.at/karten/',
+      'https://www.opernball.at/ueber-den-ball/',
+      'https://www.opernball.at/ballabend/2026/',
+      'https://www.opernball.at/ballabend/',
+    ],
+  },
   readingTime: 7,
   excerpt:
     'Der Wiener Opernball ist das gesellschaftliche Ereignis des Jahres, eine Nacht in der k.k. Hofoper mit Weltprominenz, Debutantinnen und dem berühmtesten Parkett Europas.',

@@ -18,6 +18,13 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/ironman-austria-klagenfurt/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.meinbezirk.at/klagenfurt/c-sport/laufende-informationen-zum-ironman-austria-2026_a8681292',
+      'https://de.wikipedia.org/wiki/Ironman_Austria',
+    ],
+  },
   readingTime: 7,
   excerpt:
     'Der IRONMAN Austria in Klagenfurt zählt zu den beliebtesten Langdistanz-Triathlons der Welt. Der Startschuss fällt im Wörthersee beim Strandbad Klagenfurt, die Laufstrecke führt bis in die Klagenfurter Innenstadt.',

@@ -16,6 +16,15 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/bregenzer-fruehling/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.bregenzerfruehling.com/programm',
+      'https://www.bregenzerfruehling.com',
+      'https://visitbregenz.com/en/events/event-series/bregenzer-fruehling',
+      'https://www.raiffeisen.at/vorarlberg/raiba-in-bregenz/de/meine-bank/aktuelles/bregenzer-fruehling-2026---keep-dreaming--baby-.html',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Der Bregenzer Frühling ist das internationale Festival für zeitgenössischen Tanz in Bregenz. Jedes Jahr von März bis Juni zeigt es Gastspiele internationaler Compagnien im Festspielhaus Bregenz, dazu Produktionen an weiteren Bregenzer Spielorten.',

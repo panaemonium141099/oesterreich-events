@@ -17,6 +17,17 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/villacher-fasching/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.visitvillach.at/en/villach-carnival.html',
+      'https://villacher-fasching.at/veranstaltungen/',
+      'https://villacher-fasching.at/faschingssamstag/',
+      'https://de.wikipedia.org/wiki/Villacher_Fasching',
+      'https://villacher-fasching.at/',
+      'https://villach.at/ccv',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Der Villacher Fasching ist Österreichs bekanntestes Faschingsevent und eines der größten Karnevalspektakel im deutschsprachigen Raum. Wochenlang regieren Narren, Kostüme und überschäumende Gaudi die Stadt an der Drau.',

@@ -20,6 +20,16 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/tiroler-volksschauspiele-telfs/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://de.wikipedia.org/wiki/Tiroler_Volksschauspiele',
+      'https://www.volksschauspiele.at/kontakt',
+      'https://www.falter.at/festival/24870/tiroler-volksschauspiele-telfs-2026',
+      'https://service.volksschauspiele.at/download/?ids=3164',
+      'https://www.meinbezirk.at/telfs/c-lokales/telfs-versank-in-einem-urauffuehrungs-feuernacht-spektakel_a8824687',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Seit 1982 ist Telfs jeden Sommer Schauplatz der Tiroler Volksschauspiele. 2026 brachte das Festival die Uraufführung von Felix Mitterers „Feuernacht“ in der Südtiroler Siedlung, mit Live-Musik von Herbert Pixner.',

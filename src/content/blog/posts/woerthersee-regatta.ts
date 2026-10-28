@@ -16,6 +16,13 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/woerthersee-regatta/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://kyck.at/wp-content/uploads/2026/02/Regattakalender-2026.pdf',
+      'https://www.yca.at',
+    ],
+  },
   readingTime: 5,
   excerpt:
     'Eine einzelne große „Wörthersee Regatta“ gibt es nicht, dafür einen dichten Regattasommer: Acht Segelclubs am See laden von April bis September zu Wettfahrten, mit dem Wörthersee Cup und der Wörthersee-Segelwoche des Union Yacht Club Wörthersee als Höhepunkten.',

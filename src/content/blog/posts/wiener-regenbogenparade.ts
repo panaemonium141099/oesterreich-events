@@ -16,6 +16,16 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/wiener-regenbogenparade/thumb.jpg',
   publishDate: '2026-03-31',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://wien.orf.at/stories/3357887/',
+      'https://www.vienna.at/rainbow-parade-brings-vienna-city-center-to-a-standstill-extensive-closures-on-saturday/10243544',
+      'https://hosiwien.at/regenbogenparade/',
+      'https://www.wien.info/de/sehen-erleben/lgbt/regenbogenparade-geschichte-356350',
+      'https://www.derstandard.at/story/3000000301476/vienna-pride-2026-regenbogenparade-am-13-juni-in-wien',
+    ],
+  },
   readingTime: 5,
   excerpt:
     'Jedes Jahr im Juni bewegt die Wiener Regenbogenparade (Pride) laut Veranstaltern über 300.000 Menschen auf der Wiener Ringstraße. Ein Fest der Vielfalt, der Sichtbarkeit und des Feierns.',

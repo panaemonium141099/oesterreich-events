@@ -16,6 +16,13 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/linz-pflasterspektakel/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://pflasterspektakel.at/wp-content/uploads/Bilanz_38_Pflasterspektakel.pdf',
+      'https://pflasterspektakel.at/wp-content/uploads/Allgemeine-Presseinfo_Linzer-Pflasterspektakel-2026.pdf',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Drei Tage lang verwandeln Akrobaten, Clowns, Musiker und Zauberer die Linzer Innenstadt in eine riesige Freilichtbühne. Das Pflasterspektakel ist kostenlos, bunt und für alle.',

@@ -18,6 +18,17 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/carinthian-summer-ossiach/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://carinthischersommer.at/',
+      'https://carinthischersommer.at/unser-sommer/chronik/',
+      'https://carinthischersommer.at/programm/',
+      'https://www.vienna.at/carinthischer-sommer-erzielte-2026-auslastung-von-96-prozent/10362938',
+      'https://carinthischersommer.at/ihr-besuch/verkaufsinformationen/',
+      'https://carinthischersommer.at/ihr-besuch/spielstaetten/',
+    ],
+  },
   readingTime: 7,
   excerpt:
     'Der Carinthische Sommer ist eines der traditionsreichsten Klassikfestivals Österreichs. Gespielt wird in der Stiftskirche Ossiach, im Congress Center Villach und an weiteren Orten in Kärnten.',

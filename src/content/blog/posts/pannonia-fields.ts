@@ -15,6 +15,13 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/pannonia-fields/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.novarock.at',
+      'https://www.vienna.at/nova-rock-2026-how-to-successfully-travel-from-vienna-to-nickelsdorf/10239974',
+    ],
+  },
   readingTime: 3,
   excerpt:
     'Ein „Pannonia Fields Electronic Festival“ in Nickelsdorf lässt sich in keiner Quelle finden. Das Gelände Pannonia Fields II ist die Heimat von Nova Rock, Österreichs großem Rock- und Metal-Festival im Juni.',

@@ -18,6 +18,16 @@ export const post: FestivalPost = {
   thumbnailImage: '/images/blog/grafenegg-festival/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-10-27',
+  factSources: {
+    checkedAt: '2026-10-27',
+    urls: [
+      'https://www.grafenegg.com/en/mediatheque/sommer-2026/2251',
+      'https://de.wikipedia.org/wiki/Grafenegg_Festival',
+      'https://www.grafenegg.com/en/programme-tickets/festival-eroffnung/50588',
+      'https://www.news.at/specials/grafenegg-festival-2026-grosses-finale-mit-internationalen-klassikstars',
+      'https://www.grafenegg.com/en/anreise',
+    ],
+  },
   readingTime: 6,
   excerpt:
     'Inmitten des romantischen Schlossparks Grafenegg vereinen sich Weltklasse-Orchester, renommierte Solisten und eine einzigartige Freiluftbühne zu einem der bedeutendsten Klassikfestivals Mitteleuropas.',
