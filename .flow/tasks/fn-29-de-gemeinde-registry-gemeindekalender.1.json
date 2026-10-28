@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-28T16:58:14.893625Z",
+  "depends_on": [],
+  "epic": "fn-29-de-gemeinde-registry-gemeindekalender",
+  "id": "fn-29-de-gemeinde-registry-gemeindekalender.1",
+  "priority": 1,
+  "spec_path": ".flow/tasks/fn-29-de-gemeinde-registry-gemeindekalender.1.md",
+  "status": "todo",
+  "title": "DE-Stammdaten im Ein-System (Gemeinden, Kreise, L\u00e4nder, PLZ)",
+  "updated_at": "2026-10-28T16:58:15.275582Z"
+}
