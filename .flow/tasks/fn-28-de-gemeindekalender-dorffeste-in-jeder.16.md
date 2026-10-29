@@ -32,9 +32,14 @@ Ergebnisdatei: `docs/research/de-gemeinden/15-hamburg.md`.
 
 
 ## Done summary
-TBD
-
+Bericht docs/research/de-gemeinden/15-hamburg.md plus 15-hamburg-anfragen.md (PR #390, gemergt).
+Stichprobe 30 Stadtteile aus 99 Einheiten der Statistikamt-Nord-Daten (Seed 28016).
+Zentraler Weg: Veranstaltungsdatenbank Hamburg & Metropolregion (Hamburg Tourismus, imx), täglicher XML-Feed laut Betreiber kostenfrei mit Nutzungsvereinbarung, 9.038 Veranstaltungen mit Ort Hamburg, aber kaum Stadtteilfeste.
+Stadtteilfeste verstreut: Hauptfundort FF 5, Bürger-/Heimatverein 6, Stadtteilkultur 5, Portal 3, Kirche 3, Marketing 2, Schützenverein 1, nirgends 5 von 30; Terminfeed nur 4 von 30 (Tribe 3, MEC 1).
+feuerwehr-hamburg.de bündelt alle 86 Wehren (1.423 Terminbeiträge, 5 kommende), lückenhaft; hamburg.de-Redaktionsliste 13 Laternenumzüge.
+destination.one 0 von 30; Transparenzportal nur Sondermittel-Beschlüsse; Bezirksämter ohne Kalender; Abendblatt sperrt Claude-Bots.
+Nächster Schritt: Nutzungsvereinbarung mit Hamburg Tourismus anfragen.
 ## Evidence
-- Commits:
+- Commits: b1e598e80d30ed930e8f3767d9e4113da8189dd2
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/390
