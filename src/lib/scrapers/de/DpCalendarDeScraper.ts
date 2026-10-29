@@ -14,6 +14,20 @@ import { parseDpIcs, type DpEvent } from './dpcalendar';
 import { parseEmLocation } from './em';
 import { collapseSourceDuplicates, terminContext } from './kontext';
 
+/**
+ * Terminseite: `URL` des Termins, wenn sie auf derselben Website liegt
+ * (Seestermühe, Birgel, Masserberg …); eine fremde Website ist die des
+ * Veranstalters (Poyenberg „irishfolk-poyenberg.de"). Importierte Kalender
+ * (Bramstedtlund `id=i-1`, Google-Spiegel) und Mehlbek führen keinen
+ * Terminlink: dann die Kalenderseite (fn-29.7, 2026-10-29).
+ */
+export function dpDetailUrl(url: string | undefined, g: FeedGroup): string {
+  try {
+    if (url && new URL(url).host.replace(/^www\./, '') === new URL(g.feedUrl).host.replace(/^www\./, '')) return new URL(url).href;
+  } catch { /* kein gültiger Link */ }
+  return g.pageUrl;
+}
+
 export class DpCalendarDeScraper extends DeFeedScraper {
   readonly name = 'de-dpcalendar';
 
@@ -37,7 +51,7 @@ export class DpCalendarDeScraper extends DeFeedScraper {
     const base: ScrapedEvent = {
       source_name: this.name,
       source_id: `dp-${new URL(g.feedUrl).host}-${ev.uid}-${ev.localDate}`,
-      source_url: ev.url && /^https?:\/\//.test(ev.url) ? ev.url : g.pageUrl,
+      source_url: dpDetailUrl(ev.url, g),
       title: ev.title,
       description: ev.description,
       start_date: ev.start,

@@ -32,7 +32,15 @@
  * REIN, kein I/O.
  */
 
-export type MunicipalServiceKind = 'waste' | 'consultation' | 'klimaticket' | 'dorfservice';
+export type MunicipalServiceKind = 'waste' | 'consultation' | 'klimaticket' | 'dorfservice' | 'office_closed';
+
+/**
+ * Schließung der Verwaltung („Meldeamt geschlossen", Rosenthal am Rennsteig,
+ * fn-29.7): ein Verwaltungswort und „geschlossen" als ganzes Wort;
+ * „Geschlossene Gesellschaft im Rathaus" ist eine Veranstaltung.
+ */
+const OFFICE_RE = /\b(?:\w*amt|rathaus|b[üu]rgerb[üu]ro|b[üu]rgerservice|verwaltung|gemeindeb[üu]ro|bauhof)\b/i;
+const CLOSED_RE = /\bgeschlossen\b/i;
 
 /** Abfuhr, Sammelstellen und Sammelaktionen der Abfallwirtschaft. */
 const WASTE_RE = new RegExp(
@@ -86,7 +94,7 @@ const EVENT_FORMAT_RE = new RegExp(
 );
 
 /** Sprechtage, Sprechstunden, Beratungstage (Sozial-, Bau-, Notar-, ÖGK-, SVS-…). */
-const CONSULTATION_RE = /sprechtag|sprechstunde|beratungstag/i;
+const CONSULTATION_RE = /sprechtag|sprechstunde|beratungstag|beratungstermin/i;
 
 /** „Klimaticket", „VOR-KlimaTicket", „Klimaticket Ö" als ganzer Titel. */
 const KLIMATICKET_ONLY_RE = /^(?:(?:vor|oö|nö|ö)[- ]?)?klima[- ]?ticket(?:\s+(?:ö|österreich|vor|oö|nö|classic|region))?$/i;
@@ -120,6 +128,7 @@ export function municipalServiceKind(title: string | null | undefined): Municipa
   if (CONSULTATION_RE.test(t)) return 'consultation';
   if (KLIMATICKET_ONLY_RE.test(core) || KLIMATICKET_LENDING_RE.test(t)) return 'klimaticket';
   if (DORFSERVICE_ONLY_RE.test(core)) return 'dorfservice';
+  if (OFFICE_RE.test(t) && CLOSED_RE.test(t)) return 'office_closed';
 
   const waste =
     WASTE_RE.test(t) ||

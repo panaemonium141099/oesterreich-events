@@ -1,0 +1,3206 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:DPCALENDAR
+CALSCALE:GREGORIAN
+X-WR-TIMEZONE:UTC
+X-WR-CALNAME:Veranstaltungen
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20241115T120000
+DTEND;TZID=UTC:20241115T130000
+RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20241220T235900Z
+UID:86DB9D75-935B-48A2-BAB0-5D016428E8D4
+SUMMARY:Mittagstisch
+CREATED:20241015T083349Z
+DTSTAMP:20241015T083349Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/mittagstisch.html
+DESCRIPTION:Wirtshaus an der Lahn auf Initiative von ,,Wir im Quartier Weimar"\NWo: Bürgerhausgaststätte, Wolfshäuser Str. 1 Roth
+X-ALT-DESC;FMTTYPE=text/html:<p>Wirtshaus an der Lahn auf Initiative von ,,Wir im Quartier Weimar"</p><p><strong>Wo: </strong>Bürgerhausgaststätte, Wolfshäuser Str. 1 Roth</p>
+LAST-MODIFIED:20241104T142947Z
+SEQUENCE:1749358
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20241122T120000
+DTEND;TZID=UTC:20241122T130000
+UID:86DB9D75-935B-48A2-BAB0-5D016428E8D4
+RECURRENCE-ID:20241122T120000Z
+SUMMARY:Mittagstisch
+CREATED:20241015T083349Z
+DTSTAMP:20241015T083349Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/mittagstisch-1732276800.html
+DESCRIPTION:Wirtshaus an der Lahn auf Initiative von ,,Wir im Quartier Weimar"\NWo: Bürgerhausgaststätte, Wolfshäuser Str. 1 Roth
+X-ALT-DESC;FMTTYPE=text/html:<p>Wirtshaus an der Lahn auf Initiative von ,,Wir im Quartier Weimar"</p><p><strong>Wo: </strong>Bürgerhausgaststätte, Wolfshäuser Str. 1 Roth</p>
+LAST-MODIFIED:20241104T143123Z
+SEQUENCE:1749454
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20241116
+DTEND;VALUE=DATE:20241117
+UID:EECF6FCB-1B6C-43F2-84B2-2E57E5C28B93
+SUMMARY:Laternenumzug
+CREATED:20241015T082143Z
+DTSTAMP:20241015T082143Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/laternenumzug.html
+DESCRIPTION:KZV, Bürger‐ und KulturvereinWenkbach e. V.
+X-ALT-DESC;FMTTYPE=text/html:<p>KZV, Bürger‐ und Kulturverein<br>Wenkbach e. V.</p>
+LAST-MODIFIED:20241015T083558Z
+SEQUENCE:855
+X-ACCESS:1
+X-HITS:1
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20241117
+DTEND;VALUE=DATE:20241118
+UID:A4C22DB3-709A-4E5F-889C-CAD1D5FCC3A1
+SUMMARY:Volkstrauertag Gedenkveranstaltung
+CREATED:20241015T082828Z
+DTSTAMP:20241015T082828Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/volkstrauertag-gedenkveranstaltung.html
+DESCRIPTION:Kirchengemeinde Roth\NWo: Kirche Roth Ehrenmal
+X-ALT-DESC;FMTTYPE=text/html:<p>Kirchengemeinde Roth</p><p><strong>Wo:</strong> Kirche Roth Ehrenmal</p>
+LAST-MODIFIED:20241104T142037Z
+SEQUENCE:1749129
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20241119T143000
+DTEND;TZID=UTC:20241119T160000
+RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20241217T235900Z
+UID:F34FCFEC-7167-4458-9507-D9FA458AF1FD
+SUMMARY:motorisches + mentales Training
+CREATED:20241015T084923Z
+DTSTAMP:20241015T084923Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/motorisches-mentales-training.html
+DESCRIPTION:Alzheimer Gesellschaft Marburg‐Biedenkopf e.V.\NTel: +49 6421 690393 oder +49 15906756020\NWo: ,,Alte Schule" Kulturhaus Roth, Im Wiesengrund 6 (barriererfreier Zugang)
+X-ALT-DESC;FMTTYPE=text/html:<p>Alzheimer Gesellschaft Marburg‐Biedenkopf e.V.</p><p>Tel: +49 6421 690393 oder +49 15906756020</p><p><strong>Wo: </strong>,,Alte Schule" Kulturhaus Roth, Im Wiesengrund 6 (barriererfreier Zugang)</p>
+LAST-MODIFIED:20241104T143027Z
+SEQUENCE:1748464
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20241120T150000
+DTEND;TZID=UTC:20241120T170000
+RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20241218T235900Z
+UID:C26BCFBE-5F50-4207-9392-4A60DC444633
+SUMMARY:Digitalsprechstunde: Umgang mit Smartphone, Computer, etc.
+CREATED:20241015T085410Z
+DTSTAMP:20241015T085410Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/digitalsprechstunde-umgang-mit-smartphone-computer-etc.html
+DESCRIPTION:"Wir im Quartier Weimar"\NWo: Bürgerhaus Niederweimar, Herborner Str. 36 (Foyer)
+X-ALT-DESC;FMTTYPE=text/html:<p>"Wir im Quartier Weimar"</p><p><strong>Wo: </strong>Bürgerhaus Niederweimar, Herborner Str. 36 (Foyer)</p>
+LAST-MODIFIED:20241104T143106Z
+SEQUENCE:1748216
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20241121T143000
+DTEND;TZID=UTC:20241121T164500
+UID:E4D0D791-A910-4E89-8BDE-CEB7F65004CF
+SUMMARY:Seniorennachmittag "Durch das Land der Pharaonen"
+CREATED:20241015T090105Z
+DTSTAMP:20241015T090105Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/seniorennachmittag-durch-das-land-der-pharaonen.html
+DESCRIPTION:vhs Marburg‐Biedenkopf\NWo: Bürgerhaus Niederwalgern, Bergstr. 3
+X-ALT-DESC;FMTTYPE=text/html:<p>vhs Marburg‐Biedenkopf</p><p><strong>Wo: </strong>Bürgerhaus Niederwalgern, Bergstr. 3</p>
+LAST-MODIFIED:20241104T142503Z
+SEQUENCE:1747438
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20241124T131500
+DTEND;TZID=UTC:20241124T141500
+UID:4DFA6ED2-7BD6-47B9-A557-BC076DD5A689
+SUMMARY:Andacht
+CREATED:20241015T090204Z
+DTSTAMP:20241015T090204Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/andacht.html
+DESCRIPTION:Kirchengemeinde Roth\NWo: Friedhofshalle Roth
+X-ALT-DESC;FMTTYPE=text/html:<p>Kirchengemeinde Roth</p><p>Wo: Friedhofshalle Roth</p>
+LAST-MODIFIED:20241015T090204Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20241130T090000
+DTEND;TZID=UTC:20241130T100000
+UID:FA57550C-7DA4-40FC-85AB-587A48D0A4C6
+SUMMARY:Glühweinabend 750 Jahre Wolfshausen
+CREATED:20241015T091300Z
+DTSTAMP:20241015T091300Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/gluehweinabend-750-jahre-wolfshausen.html
+DESCRIPTION:Förderverein für Bürgerhilfe Weimar e.V.\NWo: Bürgerhaus Wolfshausen
+X-ALT-DESC;FMTTYPE=text/html:<p>Förderverein für Bürgerhilfe Weimar e.V.</p><p><strong>Wo: </strong>Bürgerhaus Wolfshausen</p>
+LAST-MODIFIED:20241104T142603Z
+SEQUENCE:1746783
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20241130T140000
+DTEND;TZID=UTC:20241130T150000
+UID:A1944808-DC57-4315-8B66-0243BF11A010
+SUMMARY:Weihnachtsmarkt
+CREATED:20241015T091528Z
+DTSTAMP:20241015T091528Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/weihnachtsmarkt.html
+DESCRIPTION:Verein zur Förderung, Niederwalgerns e.V.\NWo: Niederwalgern
+X-ALT-DESC;FMTTYPE=text/html:<p>Verein zur Förderung, Niederwalgerns e.V.</p><p><strong>Wo: </strong>Niederwalgern</p>
+LAST-MODIFIED:20241104T142652Z
+SEQUENCE:1746684
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20241202T143000
+DTEND;TZID=UTC:20241202T163000
+UID:8010FBDF-E237-45E3-9066-4F9C6053FFE0
+SUMMARY:Spielnachmittag
+CREATED:20241015T091629Z
+DTSTAMP:20241015T091629Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielnachmittag.html
+DESCRIPTION:AWO\NWo: Bürgerhaus
+X-ALT-DESC;FMTTYPE=text/html:<p>AWO</p><p><strong>Wo: </strong>Bürgerhaus</p>
+LAST-MODIFIED:20241104T142745Z
+SEQUENCE:1746676
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20241205T193000
+DTEND;TZID=UTC:20241205T203000
+UID:97DF374B-8245-4D8B-8A3B-F16F929E3D6C
+SUMMARY:Stammtisch
+CREATED:20241015T091811Z
+DTSTAMP:20241015T091811Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/stammtisch.html
+DESCRIPTION:Rassegeflügelzuchtverein Niederwalgern\NWo: Pizza La Toscana, Niederwalgern
+X-ALT-DESC;FMTTYPE=text/html:<p>Rassegeflügelzuchtverein Niederwalgern</p><p><strong>Wo: </strong>Pizza La Toscana, Niederwalgern</p>
+LAST-MODIFIED:20241104T142923Z
+SEQUENCE:1746672
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20241211T190000
+DTEND;TZID=UTC:20241211T200000
+UID:20CBD904-2BE5-41F2-B0AA-5C89C61C52AE
+SUMMARY:Ortsbeiratssitzung
+CREATED:20241015T091918Z
+DTSTAMP:20241015T091918Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/ortsbeiratssitzung.html
+DESCRIPTION:Ortsbeirat Wenkbach
+X-ALT-DESC;FMTTYPE=text/html:<p>Ortsbeirat Wenkbach</p>
+LAST-MODIFIED:20241015T091918Z
+SEQUENCE:0
+LOCATION:Dorfstraße 8\, 35096 Wenkbach\, Hessen\, Deutschland
+GEO:50.74626545;8.71806256
+X-LOCATION-DISPLAYNAME:Bürgerhaus Wenkbach
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20241215T143000
+DTEND;TZID=UTC:20241215T153000
+UID:8F83C6E2-0480-4CC7-A98A-D97761F8C8EA
+SUMMARY:Adventsfeier
+CREATED:20241015T092026Z
+DTSTAMP:20241015T092026Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/adventsfeier.html
+DESCRIPTION:AWO
+X-ALT-DESC;FMTTYPE=text/html:<p>AWO</p>
+LAST-MODIFIED:20241015T092026Z
+SEQUENCE:0
+LOCATION:Herborner Straße\, 35096 Niederweimar\, Hessen\, Deutschland
+GEO:50.75941520;8.73288190
+X-LOCATION-DISPLAYNAME:Niederweimar, Bürgerhaus
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20241228T090000
+DTEND;TZID=UTC:20241228T100000
+UID:49B9819F-563B-4606-A2C2-1337D75D158C
+SUMMARY:Jahresabschlusswanderung
+CREATED:20241015T092314Z
+DTSTAMP:20241015T092314Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/jahresabschlusswanderung.html
+DESCRIPTION:Feuerwehr Roth
+X-ALT-DESC;FMTTYPE=text/html:<p>Feuerwehr Roth</p>
+LAST-MODIFIED:20241015T092314Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250212T150000
+DTEND;TZID=UTC:20250212T170000
+RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20250226T235900Z
+UID:76D9C2F4-1588-4C7D-B9BA-C125071BD8A1
+SUMMARY:Digitalsprechstunde: Umgang mit Smartphone, Computer, etc.
+CREATED:20250213T160433Z
+DTSTAMP:20250213T160433Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/digitalsprechstunde-umgang-mit-smartphone-computer-etc-2.html
+DESCRIPTION:\N\NWER?\N"Wir im Quartier Weimar"\N\N\NWO?\NBürgerhaus NiederweimarHerborner Str. 36 (Foyer)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col-md"><p><strong>WER?</strong></p><p>"Wir im Quartier Weimar"</p></div><div class="col-md"><p><strong>WO?</strong></p><p>Bürgerhaus Niederweimar<br>Herborner Str. 36 (Foyer)</p></div></div>
+LAST-MODIFIED:20250217T135622Z
+SEQUENCE:337909
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250218T143000
+DTEND;TZID=UTC:20250218T160000
+RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20250225T235900Z
+UID:17CFC3EA-FA24-4BEF-A5FE-4EC77C5EEAE9
+SUMMARY:motorisches + mentales Training
+CREATED:20250213T155253Z
+DTSTAMP:20250213T155253Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/motorisches-mentales-training-2.html
+DESCRIPTION:\N\NWER?\NAlzheimer Gesellschaft\NMarburg-Biedenkopf e.V.\NTelefon: +49 6421 690393 oder +49 159 06756020\N\N\NWO?\N"Alte Schule" Kulturhaus RothIm Wiesengrund 6(barrierefreier Zugang)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col-md"><p><strong>WER?</strong></p><p>Alzheimer Gesellschaft</p><p>Marburg-Biedenkopf e.V.</p><p>Telefon: +49 6421 690393 oder +49 159 06756020</p></div><div class="col-md"><p><strong>WO?</strong></p><p>"Alte Schule" Kulturhaus Roth<br>Im Wiesengrund 6<br>(barrierefreier Zugang)</p></div></div>
+LAST-MODIFIED:20250217T140715Z
+SEQUENCE:339262
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250220T143000
+DTEND;TZID=UTC:20250220T164500
+UID:570D9C0C-1351-4DB0-9EBD-66CF10998122
+SUMMARY:Seniorennachmittag "Der Burgwald, ein bedrohtes Paradies?"
+CREATED:20250213T160924Z
+DTSTAMP:20250213T160924Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/seniorennachmittag-der-burgwald-ein-bedrohtes-paradies.html
+DESCRIPTION:\N\NWER?\Nvhs Marburg-Biedenkopf\N\N\NWO?\NEv. Pfarramt Am Wiesengarten 6 Niederwalgern\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col-md"><p><strong>WER?</strong></p><p>vhs Marburg-Biedenkopf</p></div><div class="col-md"><p><strong>WO?</strong></p><p>Ev. Pfarramt<br> Am Wiesengarten 6 Niederwalgern</p></div></div>
+LAST-MODIFIED:20250217T133239Z
+SEQUENCE:336195
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250221T120000
+DTEND;TZID=UTC:20250221T130000
+RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20250228T235900Z
+UID:DCC004F6-F88E-43AB-B22A-942788D02515
+SUMMARY:Mittagstisch
+CREATED:20250213T161315Z
+DTSTAMP:20250213T161315Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/mittagstisch-3.html
+DESCRIPTION:\N\NWER?\NWirtshaus an der Lahn auf Initiative von ,,Wir im Quartier Weimar"\N\N\NWO?\NWirtshaus an der Lahn,  Bürgerhausgaststätte\NWolfshäuser Str. 1, Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col-md"><p><strong>WER?</strong></p><p>Wirtshaus an der Lahn auf Initiative von ,,Wir im Quartier Weimar"</p></div><div class="col-md"><p><strong>WO?</strong></p><p>Wirtshaus an der Lahn,&nbsp; Bürgerhausgaststätte</p><p>Wolfshäuser Str. 1, Roth</p></div></div>
+LAST-MODIFIED:20250218T130048Z
+SEQUENCE:420453
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250222T200000
+DTEND;TZID=UTC:20250222T220000
+UID:889DCC4E-EEB5-4016-8CBF-43DCFD936F7D
+SUMMARY:Anna Schäfer - Schlafende Hunde
+CREATED:20250217T133124Z
+DTSTAMP:20250217T133124Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/anna-schaefer-schlafende-hunde.html
+DESCRIPTION:\N\NWER?\NKultur- und Förderverein ALTE KIRCHE Niederweimar e.V.\N\N\NWO?\NALTE KIRCHE Niederweimar Lindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col-md"><p><strong>WER?</strong></p><p>Kultur- und Förderverein ALTE KIRCHE Niederweimar e.V.</p></div><div class="col-md"><p><strong>WO?</strong></p><p>ALTE KIRCHE<br> Niederweimar <br>Lindenweg 13</p></div></div>
+LAST-MODIFIED:20250217T133124Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250228
+DTEND;VALUE=DATE:20250301
+UID:DE403ED5-410F-4948-87BE-8553F54DDBDE
+SUMMARY:Faschings-Veranstaltung
+CREATED:20250217T133713Z
+DTSTAMP:20250217T133713Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/faschings-veranstaltung.html
+DESCRIPTION:\N\NWER?\NKarnevalsverein Roth\N\N\NWO?\NBürgerhaus Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col-md"><p><strong>WER?</strong></p><p>Karnevalsverein Roth</p></div><div class="col-md"><p><strong>WO?</strong></p><p>Bürgerhaus Roth</p></div></div>
+LAST-MODIFIED:20250217T133717Z
+SEQUENCE:4
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250302
+DTEND;VALUE=DATE:20250303
+UID:98DCBE36-6E44-4F7D-8553-DB2E7450B193
+SUMMARY:Traditionelles Grünkohlessen
+CREATED:20250217T133908Z
+DTSTAMP:20250217T133908Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/traditionelles-gruenkohlessen.html
+DESCRIPTION:\N\NWER?\NFörderverein für Bürgerhilfe e.V.\N\N\NWO?\NBürgerhaus Wolfshausen\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col-md"><p><strong>WER?</strong></p><p>Förderverein für Bürgerhilfe e.V.</p></div><div class="col-md"><p><strong>WO?</strong></p><p>Bürgerhaus Wolfshausen</p></div></div>
+LAST-MODIFIED:20250217T133908Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250304T143000
+DTEND;TZID=UTC:20250304T163000
+UID:3EE3C6FD-86DE-4C86-82DD-81811418D8C8
+SUMMARY:Spielenachmittag
+CREATED:20250217T134041Z
+DTSTAMP:20250217T134041Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag.html
+DESCRIPTION:\N\NWER?\NAWO\N\N\NWO?\NBürgerhaus Niederweimar\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col-md"><p><strong>WER?</strong></p><p>AWO</p></div><div class="col-md"><p><strong>WO?</strong></p><p>Bürgerhaus Niederweimar</p></div></div>
+LAST-MODIFIED:20250217T134041Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250304T143000
+DTEND;TZID=UTC:20250304T160000
+RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20251231T235900Z
+UID:5596843E-EA15-4F88-9D12-888A180E763C
+SUMMARY:motorisches + mentales Training
+CREATED:20250217T141152Z
+DTSTAMP:20250217T141152Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/motorisches-mentales-training-4.html
+DESCRIPTION:\N\NWER?\NAlzheimer Gesellschaft Marburg-Biedenkopf e.V.\NTelefon: +49 6421 690393 oder +49 159 06756020\N\N\NWO?\N,,Alte Schule" Kulturhaus Roth, Im Wiesengrund 6 (barriererfreier Zugang)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Alzheimer Gesellschaft Marburg-Biedenkopf e.V.</p><p>Telefon: +49 6421 690393 oder +49 159 06756020</p></div><div class="col"><p><strong>WO?</strong></p><p>,,Alte Schule" Kulturhaus Roth, Im Wiesengrund 6 (barriererfreier Zugang)</p></div></div>
+LAST-MODIFIED:20251126T154336Z
+SEQUENCE:24370304
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250305T150000
+DTEND;TZID=UTC:20250305T170000
+RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20251219T235900Z
+UID:C8378DC0-76F5-4B41-9232-E655CE83DB00
+SUMMARY:Digitalsprechstunde: Umgang mit Smartphone, Computer, etc.
+CREATED:20250213T160545Z
+DTSTAMP:20250213T160545Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/digitalsprechstunde-umgang-mit-smartphone-computer-etc-3.html
+DESCRIPTION:\N\NWER?\N"Wir im Quartier Weimar"\N\N\NWO?\NBürgerhaus Niederweimar, Herborner Str. 36 (Foyer)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>"Wir im Quartier Weimar"</p></div><div class="col"><p><strong>WO?</strong></p><p>Bürgerhaus Niederweimar, Herborner Str. 36 (Foyer)</p></div></div>
+LAST-MODIFIED:20251126T154158Z
+SEQUENCE:24708973
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250307T120000
+DTEND;TZID=UTC:20250307T130000
+RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20251228T235900Z
+UID:A27C96A4-793D-44E2-8D77-2B4A55C51C67
+SUMMARY:Mittagstisch
+CREATED:20250213T161410Z
+DTSTAMP:20250213T161410Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/mittagstisch-4.html
+DESCRIPTION:\N\NWER?\NWirtshaus an der Lahn auf Initiative von ,,Wir im Quartier Weimar"\N\N\NWO?\NWirtshaus an der Lahn, Bürgerhausgaststätte\NWolfshäuser Str. 1, Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Wirtshaus an der Lahn auf Initiative von ,,Wir im Quartier Weimar"</p></div><div class="col"><p><strong>WO?</strong></p><p>Wirtshaus an der Lahn, Bürgerhausgaststätte</p><p>Wolfshäuser Str. 1, Roth</p></div></div>
+LAST-MODIFIED:20251126T154237Z
+SEQUENCE:24708507
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250307T190000
+DTEND;TZID=UTC:20250307T200000
+UID:F8323C96-966D-4ADA-BB8B-5FB39A0CC59C
+SUMMARY:JHV
+CREATED:20250217T134348Z
+DTSTAMP:20250217T134348Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/jhv.html
+DESCRIPTION:\N\NWER?\NWaldinteressenten Roth/Argenstein/Wenkbach\N\N\NWO?\NBürgerhaus Roth, Wolfshäuser Str. 1 (kleiner Saal)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Waldinteressenten Roth/Argenstein/Wenkbach</p></div><div class="col"><p><strong>WO?</strong></p><p>Bürgerhaus Roth, Wolfshäuser Str. 1 (kleiner Saal)</p></div></div>
+LAST-MODIFIED:20250307T091800Z
+SEQUENCE:1539252
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250307T190000
+DTEND;TZID=UTC:20250307T200000
+UID:38952742-B86B-49B5-9DE4-24163E370B2E
+SUMMARY:Weltgebetstag
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/weltgebetstag.html
+DESCRIPTION:\NWer : Kirchengemeinde Roth\N Wo : "Alte Schule" Kulturhaus Roth Im Wiesengrund 6 (barrierefreier Zugang)\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col">Wer : Kirchengemeinde Roth</div><div class="col">&nbsp;Wo : "Alte Schule" Kulturhaus Roth Im Wiesengrund 6 (barrierefreier Zugang)</div></div>
+LAST-MODIFIED:20250307T093038Z
+SEQUENCE:397
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250309T200000
+DTEND;TZID=UTC:20250309T210000
+UID:C07DBB5B-7A89-4D85-9481-056CA88E37C6
+SUMMARY:JHV
+CREATED:20250217T134718Z
+DTSTAMP:20250217T134718Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/jhv-2.html
+DESCRIPTION:\N\NWER?\NSC Roth/Argenstein\N\N\NWO?\NSportheim Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col-md"><p><strong>WER?</strong></p><p>SC Roth/Argenstein</p></div><div class="col-md"><p><strong>WO?</strong></p><p>Sportheim Roth</p></div></div>
+LAST-MODIFIED:20250217T140132Z
+SEQUENCE:854
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250310T143000
+DTEND;TZID=UTC:20250310T163000
+UID:1ADFD6DE-E24B-42C2-8597-D716606C1D66
+SUMMARY:Spielenachmittag
+CREATED:20250217T142323Z
+DTSTAMP:20250217T142323Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-2.html
+DESCRIPTION:\N\NWER?\NAWO\N\N\NWO?\NBürgerhaus Niederweimar\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>AWO</p></div><div class="col"><p><strong>WO?</strong></p><p>Bürgerhaus Niederweimar</p></div></div>
+LAST-MODIFIED:20250310T084400Z
+SEQUENCE:1794037
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250315
+DTEND;VALUE=DATE:20250316
+UID:5E686A86-B571-467F-9801-9E213B4293A6
+SUMMARY:Pokalschießen der Ortsvereine und Gruppen aus Niederweimar
+CREATED:20250217T134525Z
+DTSTAMP:20250217T134525Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/pokalschiessen-der-ortsvereine-und-gruppen-aus-niederweimar.html
+DESCRIPTION:\N\NWER?\NSchützenverein 1964, Niederweimar e.V.\N\N\NWO?\NSchützenhaus in der Schützenstraße\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Schützenverein 1964, Niederweimar e.V.</p></div><div class="col"><p><strong>WO?</strong></p><p>Schützenhaus in der Schützenstraße</p></div></div>
+LAST-MODIFIED:20250307T091159Z
+SEQUENCE:1538794
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250320T143000
+DTEND;TZID=UTC:20250320T164500
+UID:C7FD2330-3CCE-4565-A8E0-0DF6BFC2A82E
+SUMMARY:Seniorennachmittag "Plötzlich Pflegebedürftig- und jetzt?"
+CREATED:20250217T135226Z
+DTSTAMP:20250217T135226Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/seniorennachmittag-ploetzlich-pflegebeduerftig-und-jetzt.html
+DESCRIPTION:\N\NWER?\Nvhs Marburg-Biedenkopf\N\N\NWO?\NBürgerhaus Roth, Wolfshäuser Str. 1 (kleiner Saal)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>vhs Marburg-Biedenkopf</p></div><div class="col"><p><strong>WO?</strong></p><p>Bürgerhaus Roth, Wolfshäuser Str. 1 (kleiner Saal)</p></div></div>
+LAST-MODIFIED:20250310T085911Z
+SEQUENCE:1796805
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250321T193000
+DTEND;TZID=UTC:20250321T203000
+UID:F7720C38-3E48-4088-B412-07DBDA1CA28C
+SUMMARY:Gemeinsame JHV der Einsatzabteilungen
+CREATED:20250217T134931Z
+DTSTAMP:20250217T134931Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/gemeinsame-jhv-der-einsatzabteilungen.html
+DESCRIPTION:\N\NWER?\NFeuerwehr Weimar (Lahn)\N\N\NWO?\NBürgerhaus Niederweimar\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Feuerwehr Weimar (Lahn)</p></div><div class="col"><p><strong>WO?</strong></p><p>Bürgerhaus Niederweimar</p></div></div>
+LAST-MODIFIED:20250310T085619Z
+SEQUENCE:1796808
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250413T150000
+DTEND;TZID=UTC:20250413T160000
+UID:BAA78AAB-7314-4CE0-B2D4-89321CF3FFE6
+SUMMARY:"Familiengottesdienst"	
+CREATED:20250409T080413Z
+DTSTAMP:20250409T080413Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/familien-gottesdienst.html
+DESCRIPTION:\N\NWER?\N\N\N\NGroßkirchspiel  Lahntal I und II\N\N\N\N\N\NWO?\NKirche Roth und Kulturhaus "Alte Schule" Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><table border="0"><tbody><tr><td colspan="3">Großkirchspiel&nbsp;&nbsp;Lahntal I und II</td></tr></tbody></table></div><div class="col"><p><strong>WO?</strong></p><p>Kirche Roth und Kulturhaus "Alte Schule" Roth</p></div></div>
+LAST-MODIFIED:20250409T084311Z
+SEQUENCE:2338
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250419T190000
+DTEND;TZID=UTC:20250419T200000
+UID:7805D430-8911-4E14-874B-FB0AE2AB8F28
+SUMMARY:Osterfeuer in  Roth
+CREATED:20250409T081523Z
+DTSTAMP:20250409T081523Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/osterfeuer-in-roth.html
+DESCRIPTION:\N\NWer\NFeuerwehr Roth\N\N\NWo\NMultifunktionsplatz hinter dem Bürgerhaus Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>Wer</strong></p><p>Feuerwehr Roth</p></div><div class="col"><p><strong>Wo</strong></p><p>Multifunktionsplatz&nbsp;hinter dem Bürgerhaus Roth</p></div></div>
+LAST-MODIFIED:20250409T084424Z
+SEQUENCE:1741
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250420T080000
+DTEND;TZID=UTC:20250420T090000
+UID:27803A7A-4265-421B-AA9B-32738DAA3022
+SUMMARY:Osternacht mit Posaunenchor
+CREATED:20250409T081741Z
+DTSTAMP:20250409T081741Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/osternacht-mit-posaunenchor.html
+DESCRIPTION:\N\NWer\NKirchengemeinde Roth\N\N\NWo\NKirche Roth und Kulturhaus "Alte Schule" Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>Wer</strong></p><p>Kirchengemeinde Roth</p></div><div class="col"><p><strong>Wo</strong></p><p>Kirche Roth und Kulturhaus "Alte Schule" Roth</p></div></div>
+LAST-MODIFIED:20250409T081741Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250423T143000
+DTEND;TZID=UTC:20250423T153000
+UID:56A51CAC-339D-42D9-B829-E4197A0E3A1A
+SUMMARY:SITZ- & Cafeklatsch- Gymnastik
+CREATED:20250409T082038Z
+DTSTAMP:20250409T082038Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sitz-cafeklatsch-gymnastik.html
+DESCRIPTION:\N\NWer\NSC-Roth Argenstein\N\N\NWo\N,,Alte Schule" Kulturhaus Roth Im Wiesengrund 6  (barriererfreier Zugang)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>Wer</strong></p><p><strong><span>SC-Roth Argenstein</span></strong></p></div><div class="col"><p><strong>Wo</strong></p><p>,,Alte Schule" Kulturhaus Roth<br /> Im Wiesengrund 6&nbsp;&nbsp;(barriererfreier Zugang)</p></div></div>
+LAST-MODIFIED:20250409T084515Z
+SEQUENCE:1477
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250424T143000
+DTEND;TZID=UTC:20250424T164500
+UID:B22E1DFA-10DA-43F7-AA3C-F494656BC91E
+SUMMARY:Seniorennachmittag "Schlösser, Burgen, Wehrkirchen u. Adelssitze (Filmvortrag) 
+CREATED:20250217T143040Z
+DTSTAMP:20250217T143040Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/seniorennachmittag-schloesser-burgen-wehrkirchen-u-adelssitze-filmvortrag.html
+DESCRIPTION:\N\NWER?\Nvhs Marburg-Biedenkopf\N\N\NWO?\NBürgerhaus Wenkbach, Dorfstraße 8\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>vhs Marburg-Biedenkopf</p></div><div class="col"><p><strong>WO?</strong></p><p>Bürgerhaus Wenkbach, Dorfstraße 8</p></div></div>
+LAST-MODIFIED:20250409T082854Z
+SEQUENCE:4384694
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250425T200000
+DTEND;TZID=UTC:20250425T220000
+UID:98216A95-8C1B-4021-8977-8D15DE6585D5
+SUMMARY:Musik von Klassik  bis Jazz
+CREATED:20250217T142543Z
+DTSTAMP:20250217T142543Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/musik-von-klassik-bis-jazz.html
+DESCRIPTION:\N\NWER?\NKultur- und Förderverein, ALTE KIRCHE, Niederweimar e.V.\N\N\NWO?\N,,Alte Schule" Kulturhaus Roth, Im Wiesengrund 6 (barriererfreier Zugang) \N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Kultur- und Förderverein, ALTE KIRCHE, Niederweimar e.V.</p></div><div class="col"><p><strong>WO?</strong></p><p>,,Alte Schule" Kulturhaus Roth, Im Wiesengrund 6 (barriererfreier Zugang)&nbsp;</p></div></div>
+LAST-MODIFIED:20250409T084640Z
+SEQUENCE:4386057
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250509T200000
+DTEND;TZID=UTC:20250509T220000
+UID:FD464EAE-8247-4E1F-92A4-EDCBE29C8695
+SUMMARY:Sternenklang  über dem Atlantik
+CREATED:20250217T143158Z
+DTSTAMP:20250217T143158Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sternenklang-ueber-dem-atlantik.html
+DESCRIPTION:\N\NWER?\NKultur- und Förderverein, ALTE KIRCHE, Niederweimar e.V.\N\N\NWO?\NALTE KIRCHE, Niederweimar e.V., Lindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Kultur- und Förderverein, ALTE KIRCHE, Niederweimar e.V.</p></div><div class="col"><p><strong>WO?</strong></p><p>ALTE KIRCHE, Niederweimar e.V., Lindenweg 13</p></div></div>
+LAST-MODIFIED:20250409T083346Z
+SEQUENCE:4384908
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250509T200000
+DTEND;TZID=UTC:20250509T210000
+UID:9F57D46C-E4CC-4286-8153-2BAF6EAE8792
+SUMMARY:JHV Karnevalsverein Roth
+CREATED:20250217T143310Z
+DTSTAMP:20250217T143310Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/jhv-4.html
+DESCRIPTION:\N\NWER?\NKarnevalsverein Roth\N\N\NWO?\N,,Alte Schule" Kulturhaus Roth, Im Wiesengrund 6, (barriererfreier Zugang)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Karnevalsverein Roth</p></div><div class="col"><p><strong>WO?</strong></p><p>,,Alte Schule" Kulturhaus Roth, Im Wiesengrund 6,&nbsp;(barriererfreier Zugang)</p></div></div>
+LAST-MODIFIED:20250409T083224Z
+SEQUENCE:4384754
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250511
+DTEND;VALUE=DATE:20250512
+UID:84D4DB11-F70B-4625-A88C-562374130220
+SUMMARY:Muttertagsfahrt ins Grüne der Awo
+CREATED:20250409T083537Z
+DTSTAMP:20250409T083537Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/muttertagsfahrt-ins-gruene.html
+LAST-MODIFIED:20250409T083537Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250516T200000
+DTEND;TZID=UTC:20250516T220000
+UID:2920ED89-771A-449C-B42D-179D7190680C
+SUMMARY:Give peace a chance
+CREATED:20250217T152022Z
+DTSTAMP:20250217T152022Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/give-peace-a-chance.html
+DESCRIPTION:\N\NWER?\NKultur- und Förderverein, ALTE KIRCHE, Niederweimar e.V.\N\N\NWO?\NALTE KIRCHE, Niederweimar e.V., Lindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Kultur- und Förderverein, ALTE KIRCHE, Niederweimar e.V.</p></div><div class="col"><p><strong>WO?</strong></p><p>ALTE KIRCHE, Niederweimar e.V., Lindenweg 13</p></div></div>
+LAST-MODIFIED:20250409T083744Z
+SEQUENCE:4382242
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250522
+DTEND;VALUE=DATE:20250523
+UID:DDCF56FB-B9ED-4B2E-A549-DBA005D4EFE6
+SUMMARY:Nachmittagsfahrt zum botanischen Garten
+CREATED:20250409T083537Z
+DTSTAMP:20250409T083537Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/nachmittagsfahrt-zum-botanischen-garten.html
+LAST-MODIFIED:20250409T083850Z
+SEQUENCE:193
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250529T110000
+DTEND;TZID=UTC:20250529T120000
+UID:03DBEE23-D219-4EE7-BA91-ED5A384B1350
+SUMMARY:Bratpartie in Roth
+CREATED:20250217T150407Z
+DTSTAMP:20250217T150407Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/bratpartie.html
+DESCRIPTION:\N\NWER?\NWanderverein Roth\N\N\NWO?\NAlter Sportplatz (Ortseingang Roth aus Richtung Wenkbach)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Wanderverein Roth</p></div><div class="col"><p><strong>WO?</strong></p><p>Alter Sportplatz&nbsp;(Ortseingang Roth aus Richtung Wenkbach)</p></div></div>
+LAST-MODIFIED:20250409T085012Z
+SEQUENCE:4383965
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250602T143000
+DTEND;TZID=UTC:20250602T163000
+UID:069E7818-157D-4FEE-9151-D5E8C4002859
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-6.html
+DESCRIPTION:\N\N\N\NWer\NAWO\N\N\N\NFamilienzentrum Niederweimar (ehemaliges Sparkassengbäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO</p></td><td colspan="3"><p></p><p>Familienzentrum Niederweimar<br /> (ehemaliges Sparkassengbäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T120717Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250607T180000
+DTEND;TZID=UTC:20250607T233000
+UID:880D8487-7739-4F85-B0F5-8276145EB7E1
+SUMMARY:Pfingstbaumfest
+CREATED:20250217T151041Z
+DTSTAMP:20250217T151041Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/pfingstbaumfest.html
+DESCRIPTION:\N\NWER?\NBurschen- und Mädchenschaft Roth\N\N\NWO?\NLahnbrücke Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Burschen- und Mädchenschaft Roth</p></div><div class="col"><p><strong>WO?</strong></p><p>Lahnbrücke Roth</p></div></div>
+LAST-MODIFIED:20250522T121152Z
+SEQUENCE:8110871
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250611T143000
+DTEND;TZID=UTC:20250611T153000
+UID:689FE58E-43E7-4553-A606-FBA8AE0B8331
+SUMMARY:SITZ- & Cafeklatsch- Gymnastik
+CREATED:20250522T120852Z
+DTSTAMP:20250522T120852Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sitz-cafeklatsch-gymnastik-4.html
+DESCRIPTION:\N\N\N\NWer\NSC-Roth Argenstein\N\N\NWo\N,Alte Schule" Kulturhaus Roth  Im Wiesengrund 6 (barriererfreier  Zugang) \N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer</p><p>SC-Roth Argenstein</p></td><td colspan="3"><p>Wo</p><p>,Alte Schule" Kulturhaus Roth<br /> &nbsp;Im Wiesengrund 6<br /> (barriererfreier&nbsp; Zugang)&nbsp;</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T120852Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250615T103000
+DTEND;TZID=UTC:20250615T113000
+UID:33944E7D-5D88-4956-8B0F-B0B8A3D2BAFF
+SUMMARY:Konfirmation in Roth
+CREATED:20250522T120940Z
+DTSTAMP:20250522T120940Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/konfirmation-in-roth.html
+DESCRIPTION:Wo: Kirche Roth
+X-ALT-DESC;FMTTYPE=text/html:<p>Wo: Kirche Roth</p>
+LAST-MODIFIED:20250522T120940Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250619T110000
+DTEND;TZID=UTC:20250619T120000
+UID:8223E1C4-BC5D-4778-9E46-8D00B56FEAC3
+SUMMARY:Frühschoppen
+CREATED:20250217T151041Z
+DTSTAMP:20250217T151041Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/fruehschoppen-2.html
+DESCRIPTION:\N\NWER?\NBurschen- und Mädchenschaft Roth\N\N\NWO?\NMultifunktionsplatz hinter dem Bürgerhaus Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Burschen- und Mädchenschaft Roth</p></div><div class="col"><p><strong>WO?</strong></p><p>Multifunktionsplatz hinter dem Bürgerhaus Roth</p></div></div>
+LAST-MODIFIED:20250522T121125Z
+SEQUENCE:8110844
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250620T200000
+DTEND;TZID=UTC:20250620T210000
+UID:74510296-F4F5-4B04-9333-53C4DC7BBE80
+SUMMARY:Kirmes	
+CREATED:20250217T151041Z
+DTSTAMP:20250217T151041Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/kirmes.html
+DESCRIPTION:\N\NWER?\NBurschen- und Mädchenschaft Roth\N\N\NWO?\NMultifunktionsplatz hinter dem Bürgerhaus Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Burschen- und Mädchenschaft Roth</p></div><div class="col"><p><strong>WO?</strong></p><p>Multifunktionsplatz hinter dem Bürgerhaus Roth</p></div></div>
+LAST-MODIFIED:20250522T121308Z
+SEQUENCE:8110947
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250625T143000
+DTEND;TZID=UTC:20250625T153000
+UID:E8E4A213-A6B5-4BF4-8B7A-994B01D5A0B1
+SUMMARY:SITZ- & Cafeklatsch- Gymnastik
+CREATED:20250522T120852Z
+DTSTAMP:20250522T120852Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sitz-cafeklatsch-gymnastik-5.html
+DESCRIPTION:\N\N\N\NWer\NSC-Roth Argenstein\N\N\NWo\N,Alte Schule" Kulturhaus Roth  Im Wiesengrund 6 (barriererfreier  Zugang) \N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer</p><p>SC-Roth Argenstein</p></td><td colspan="3"><p>Wo</p><p>,Alte Schule" Kulturhaus Roth<br /> &nbsp;Im Wiesengrund 6<br /> (barriererfreier&nbsp; Zugang)&nbsp;</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T121417Z
+SEQUENCE:325
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250626T143000
+DTEND;TZID=UTC:20250626T164500
+UID:0A3D23BF-B503-4241-8929-53B8E14C0D8D
+SUMMARY:"Natur und Landschaft im Allnatal"
+CREATED:20250217T152500Z
+DTSTAMP:20250217T152500Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/natur-und-landschaft-im-allnatal.html
+DESCRIPTION:\N\NWER?\Nvhs Marburg-Biedenkopf\N\N\NWO?\N\N\N\NBürgerhaus Hermershausen Herbener Straße 5\N\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>vhs Marburg-Biedenkopf</p></div><div class="col"><p><strong>WO?</strong></p><table border="0"><tbody><tr><td colspan="3">Bürgerhaus Hermershausen Herbener Straße 5</td></tr></tbody></table></div></div>
+LAST-MODIFIED:20250522T121828Z
+SEQUENCE:8110408
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250629T103000
+DTEND;TZID=UTC:20250629T113000
+UID:61CEC3FD-366F-4E5B-ADC3-C85EE819B640
+SUMMARY:Jubelkonfirmation
+CREATED:20250522T122025Z
+DTSTAMP:20250522T122025Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/jubelkonfirmation.html
+DESCRIPTION:\N\N\N\NWer:\NKirchengemeinde Roth\N\N\NWo:\NKirche Roth\N\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table class="table"><tbody><tr><td><p>Wer:</p><p>Kirchengemeinde Roth</p></td><td><p>Wo:</p><p>Kirche Roth</p></td></tr></tbody></table><p></p>
+LAST-MODIFIED:20250522T122025Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250629T130000
+DTEND;TZID=UTC:20250629T170000
+UID:6C8D64D5-C94C-4480-BD0D-F5726D8E2B55
+SUMMARY:Kirchgartenfest
+CREATED:20250217T155339Z
+DTSTAMP:20250217T155339Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/kirchgartenfest.html
+DESCRIPTION:\N\NWER?\NKultur- und Förderverein, ALTE KIRCHE, Niederweimar e.V.\N\N\NWO?\NALTE KIRCHE, Niederweimar e.V., Lindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Kultur- und Förderverein, ALTE KIRCHE, Niederweimar e.V.</p></div><div class="col"><p><strong>WO?</strong></p><p>ALTE KIRCHE, Niederweimar e.V., Lindenweg 13</p></div></div>
+LAST-MODIFIED:20250522T122116Z
+SEQUENCE:8108857
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250705T150000
+DTEND;TZID=UTC:20250705T160000
+UID:E3B6961B-4514-467B-B74D-4EE4C54C6C58
+SUMMARY:Königsschießen
+CREATED:20250218T114905Z
+DTSTAMP:20250218T114905Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/koenigsschiessen.html
+DESCRIPTION:\N\NWER?\NSchützenverein 1964 Niederweimar e.V.\N\N\NWO?\NVereinsgelände an der Addi-Meischt-Allee\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Schützenverein 1964 Niederweimar e.V.</p></div><div class="col"><p><strong>WO?</strong></p><p>Vereinsgelände an der&nbsp;Addi-Meischt-Allee</p></div></div>
+LAST-MODIFIED:20250522T123554Z
+SEQUENCE:8038009
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250707T143000
+DTEND;TZID=UTC:20250707T163000
+UID:939D6606-61BC-4788-8948-0BA5C3711D7A
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-7.html
+DESCRIPTION:\N\N\N\NWer\NAWO\N\N\N\NFamilienzentrum Niederweimar (ehemaliges Sparkassengbäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO</p></td><td colspan="3"><p></p><p>Familienzentrum Niederweimar<br /> (ehemaliges Sparkassengbäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T123637Z
+SEQUENCE:1760
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250709T143000
+DTEND;TZID=UTC:20250709T153000
+UID:DDCB1DCC-D6F4-4B0A-887E-EF82508EFA4E
+SUMMARY:SITZ- & Cafeklatsch- Gymnastik
+CREATED:20250522T120852Z
+DTSTAMP:20250522T120852Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sitz-cafeklatsch-gymnastik-6.html
+DESCRIPTION:\N\N\N\NWer\NSC-Roth Argenstein\N\N\NWo\N,Alte Schule" Kulturhaus Roth  Im Wiesengrund 6 (barriererfreier  Zugang) \N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer</p><p>SC-Roth Argenstein</p></td><td colspan="3"><p>Wo</p><p>,Alte Schule" Kulturhaus Roth<br /> &nbsp;Im Wiesengrund 6<br /> (barriererfreier&nbsp; Zugang)&nbsp;</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T123723Z
+SEQUENCE:1711
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250713T140000
+DTEND;TZID=UTC:20250713T170000
+UID:3E31B427-BD84-48EE-8AA3-CA432BA7E3DE
+SUMMARY:"Aus der Badewanne auf die Bühne"
+CREATED:20250522T113827Z
+DTSTAMP:20250522T113827Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/aus-der-badewanne-auf-die-buehne.html
+DESCRIPTION:\N\N\N\NWer\NKultur- und Förderverein  ALTE KIRCHE  Niederweimar e.V.\N\N\NWo\NALTE KIRCHE  Niederweimar  Lindenweg 13\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer</p><p>Kultur- und Förderverein<br /> &nbsp;ALTE KIRCHE<br /> &nbsp;Niederweimar e.V.</p></td><td colspan="3"><p>Wo</p><p>ALTE KIRCHE<br /> &nbsp;Niederweimar<br /> &nbsp;Lindenweg 13</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T124020Z
+SEQUENCE:3713
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250802T140000
+DTEND;TZID=UTC:20250803T150000
+UID:A2BBF792-F319-4640-AA20-2454094699A1
+SUMMARY:KK-Schützenverein 1925 in Niederwalgern
+CREATED:20250704T152320Z
+DTSTAMP:20250704T152320Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/kk-schuetzenverein-1925-in-niederwalgern.html
+DESCRIPTION:\N\NWER?\NKK-Schützenverein 1925 in Niederwalgern\N\N\NWO?\NSchützenhaus Niederwalgern\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col-md"><p><strong>WER?</strong></p><p>KK-Schützenverein 1925 in Niederwalgern</p></div><div class="col-md"><p><strong>WO?</strong></p><p>Schützenhaus Niederwalgern</p></div></div>
+LAST-MODIFIED:20250826T081247Z
+SEQUENCE:4553367
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-IMAGE-INTRO:https://www.gemeinde-weimar.de/images/100 JahreKK-SV.webp
+X-IMAGE-INTRO-CAPTION:Flyer 
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250802T200000
+DTEND;TZID=UTC:20250803T210000
+UID:CFD79106-2ECA-4D40-94AE-A35BFCE7B57C
+SUMMARY:Dorfmarkt Wenkbach
+CREATED:20250704T152320Z
+DTSTAMP:20250704T152320Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/dorfmarkt-wenkbach.html
+DESCRIPTION:\N\NWER?\NKZV Bürger- und Kulturverein Wenkbach\NInfos unter https://www.gemeinde-weimar.de/images/FlyerDorfmarkt%20.pdf\N\N\N\NWO/Was ?\NDorfmitte Wenkbach\N02.08.2025 Smash-Eventband Einlass ab 18:00 Uhr\N03.08.2025 ab 09:30 Uhr Festgottesdienst, Frühschoppen, Markttreiben & Darbietungen\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col-md"><p><strong>WER?</strong></p><p>KZV Bürger- und Kulturverein Wenkbach</p><p><i>Infos unter&nbsp;<a href="https://www.gemeinde-weimar.de/images/FlyerDorfmarkt%20.pdf">https://www.gemeinde-weimar.de/images/FlyerDorfmarkt%20.pdf</a></i></p><p></p></div><div class="col-md"><p><strong>WO/Was ?</strong></p><p>Dorfmitte Wenkbach</p><p>02.08.2025&nbsp;Smash-Eventband Einlass ab 18:00 Uhr</p><p>03.08.2025 ab 09:30 Uhr&nbsp;Festgottesdienst, Frühschoppen, Markttreiben &amp; Darbietungen</p></div></div>
+LAST-MODIFIED:20250721T123042Z
+SEQUENCE:1458442
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-IMAGE-INTRO-CAPTION:Flyer 
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250804T143000
+DTEND;TZID=UTC:20250804T163000
+UID:9C182410-98EB-4195-961A-B1BB6B83AB83
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-8.html
+DESCRIPTION:\N\N\N\NWer\NAWO\N\N\NWo\NFamilienzentrum Niederweimar (ehemaliges Sparkassengbäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO</p></td><td colspan="3"><p>Wo</p><p>Familienzentrum Niederweimar<br /> (ehemaliges Sparkassengbäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T124124Z
+SEQUENCE:2047
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250814T143000
+DTEND;TZID=UTC:20250814T153000
+UID:B02E45DB-CB0D-4292-A2A4-14A5C60E470D
+SUMMARY:Treffen AWO
+CREATED:20250522T124246Z
+DTSTAMP:20250522T124246Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/treffen-awo.html
+DESCRIPTION:\N\N\N\NWer\NAWO\N\N\NWo\NNiederweimarer See\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO</p></td><td colspan="3"><p>Wo</p><p>Niederweimarer See</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T124246Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250822T000000
+DTEND;TZID=UTC:20250822T010000
+UID:12D603D4-4DAB-4D61-92C8-2F2D47118943
+SUMMARY:Ausflug nach Herborn
+CREATED:20250522T124246Z
+DTSTAMP:20250522T124246Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/ausflug-nach-herborn.html
+DESCRIPTION:\N\N\N\NWer\NAWO\N\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO</p></td><td colspan="3"></td></tr></tbody></table>
+LAST-MODIFIED:20250522T124505Z
+SEQUENCE:139
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250823T000000
+DTEND;TZID=UTC:20250823T010000
+UID:C65743A9-DC1C-4DCD-9E50-82BAF633B40F
+SUMMARY:Sommerturnier
+CREATED:20250218T120152Z
+DTSTAMP:20250218T120152Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sommerturnier.html
+DESCRIPTION:\N\NWER?\NSchützenverein 1964, Niederweimar e.V.\N\N\NWO?\NVereinsgelände an der Addi-Meischt-Allee\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Schützenverein 1964, Niederweimar e.V.</p></div><div class="col"><p><strong>WO?</strong></p><p>Vereinsgelände&nbsp;an der Addi-Meischt-Allee</p></div></div>
+LAST-MODIFIED:20250522T124808Z
+SEQUENCE:8037976
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250823T130000
+DTEND;TZID=UTC:20250823T140000
+UID:85310899-96F2-453A-88B7-A66556E6B367
+SUMMARY:50-jähriges Jubiläum 	
+CREATED:20250522T124633Z
+DTSTAMP:20250522T124633Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/50-jaehriges-jubilaeum.html
+DESCRIPTION:\N\N\N\NWer :\NJugendfeuerwehr Argenstein\N\N\NWo:\NArgenstein  FFW-Gerätehaus\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer :</p><p>Jugendfeuerwehr&nbsp;Argenstein</p></td><td colspan="3"><p>Wo:</p><p>Argenstein&nbsp;&nbsp;FFW-Gerätehaus</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T124633Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250823T160000
+DTEND;TZID=UTC:20250823T170000
+UID:0CA97A1C-20D3-41F9-99E4-F4A296EFA67E
+SUMMARY:Sommerfest in Wolfshausen
+CREATED:20250803T120152Z
+DTSTAMP:20250803T120152Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sommerfest.html
+DESCRIPTION:\N\NWER?\NFörderverein für Bürgerhilfe Weimar e.V\N\N\N\N\N\NWO?\NMehrgenerationenplatz am Ortseingang Wolfshausen\N\NAlle sind herzlich willkommen zu einem chilligen Beisammensein bei Spiel, Spass und netten Gesprächen😎. Für die Kinder werden eine Hüpfburg und diverse Spielgeräte zur Verfüngung stehen.\NAb 17 Uhr beginnt dann das 1. Wolfshäuser Bouletunier. Geplant ist die selbstständige Bildung von Zweierteams, die dann gegeneinander antreten. Der genaue Turnierverlauf wird noch bekannt gegeben. Meldeschluss ist am 23.08.205 um 17 Uhr. Gerne auch vorab per Mail, WhatsApp, Signal etc.. Kugeln sind vorhanden, es können aber selbstverständlich auch die eigenen mitgebracht werden.\NFür das leibliche Wohl werden ab 16 Uhr Kaffee und frische Waffeln, später verschiedene Leckereien vom Grill gereicht. Kühle Getränke runden das ganze ab.\NDer Erlös kommt einem gemeinnützigen Zweck zu Gute\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Förderverein für Bürgerhilfe Weimar e.V</p><div class="row" data-wf-columns="1"><div class="col"></div></div></div><div class="col"><p><strong>WO?</strong></p><p>Mehrgenerationenplatz am Ortseingang Wolfshausen</p><hr id="system-readmore"><p>Alle sind herzlich willkommen zu einem chilligen Beisammensein bei Spiel, Spass und netten Gesprächen😎. Für die Kinder werden eine Hüpfburg und diverse Spielgeräte zur Verfüngung stehen.</p><p>Ab 17 Uhr beginnt dann das 1. Wolfshäuser Bouletunier. Geplant ist die selbstständige Bildung von Zweierteams, die dann gegeneinander antreten. Der genaue Turnierverlauf wird noch bekannt gegeben. Meldeschluss ist am 23.08.205 um 17 Uhr. Gerne auch vorab per Mail, WhatsApp, Signal etc.. Kugeln sind vorhanden, es können aber selbstverständlich auch die eigenen mitgebracht werden.</p><p>Für das leibliche Wohl werden ab 16 Uhr Kaffee und frische Waffeln, später verschiedene Leckereien vom Grill gereicht. Kühle Getränke runden das ganze ab.</p><p>Der Erlös kommt einem gemeinnützigen Zweck zu Gute</p></div></div>
+LAST-MODIFIED:20250804T075300Z
+SEQUENCE:71468
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250824T170000
+DTEND;TZID=UTC:20250824T180000
+UID:DF027F99-59AA-47EA-8FE5-F74C9343CA96
+SUMMARY:Gottesdienst  "in anderer Form"
+CREATED:20250522T124915Z
+DTSTAMP:20250522T124915Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/gottesdienst-in-anderer-form.html
+DESCRIPTION:\N\N\N\NWER\NKirchengemeinde Roth\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p><strong>WER</strong></p><p>Kirchengemeinde&nbsp;Roth</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T124915Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250829T200000
+DTEND;TZID=UTC:20250829T220000
+UID:2B132C9F-6398-414A-9C9A-BF662296DD61
+SUMMARY:Lieder aus der tiefsten Provinz	
+CREATED:20250522T125037Z
+DTSTAMP:20250522T125037Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/lieder-aus-der-tiefsten-provinz.html
+DESCRIPTION:\N\N\N\NWER\NKultur- und FördervereinALTE KIRCHE  Niederweimar e.V.\N\N\NWO\NALTE KIRCHE  NiederweimarLindenweg 13\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>WER</p><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;&nbsp;Niederweimar e.V.</p></td><td colspan="3"><p>WO</p><p>ALTE KIRCHE&nbsp;&nbsp;Niederweimar<br />Lindenweg 13</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T125037Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250901T143000
+DTEND;TZID=UTC:20250901T163000
+UID:BA3ADB51-388B-4AA9-94CA-602063F1B633
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-9.html
+DESCRIPTION:\N\N\N\NWer\NAWO\N\N\NWo\NFamilienzentrum Niederweimar (ehemaliges Sparkassengbäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO</p></td><td colspan="3"><p>Wo</p><p>Familienzentrum Niederweimar<br /> (ehemaliges Sparkassengbäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T125129Z
+SEQUENCE:2652
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250905T200000
+DTEND;TZID=UTC:20250905T203000
+UID:6E359D30-58BD-4907-AD8E-5EF7BBDA6B71
+SUMMARY:Porgy & Bess	
+CREATED:20250217T155339Z
+DTSTAMP:20250217T155339Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/porgy-bess.html
+DESCRIPTION:\N\NWER?\NKultur- und Förderverein, ALTE KIRCHE, Niederweimar e.V.\N\N\NWO?\NALTE KIRCHE, Niederweimar e.V., Lindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Kultur- und Förderverein, ALTE KIRCHE, Niederweimar e.V.</p></div><div class="col"><p><strong>WO?</strong></p><p>ALTE KIRCHE, Niederweimar e.V., Lindenweg 13</p></div></div>
+LAST-MODIFIED:20250522T125259Z
+SEQUENCE:8110760
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250919T183000
+DTEND;TZID=UTC:20250919T193000
+UID:D4B6573B-F5FD-49EB-A65F-BA4B5A6C6784
+SUMMARY:"Open House" - Veranstaltung zum Erhalt des Bürgerhauses 
+CREATED:20250218T120152Z
+DTSTAMP:20250218T120152Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/open-house.html
+DESCRIPTION:\N\NWER?\NOrtsbeirat und interessierte Bürger Wolfshausen\N\N\NWO?\NBürgerhaus Wolfshausen\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Ortsbeirat und interessierte Bürger&nbsp;Wolfshausen</p></div><div class="col"><p><strong>WO?</strong></p><p>Bürgerhaus&nbsp;Wolfshausen</p></div></div>
+LAST-MODIFIED:20250820T070640Z
+SEQUENCE:15793488
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250920T120000
+DTEND;TZID=UTC:20250920T130000
+UID:7C54A8D1-D6B3-408B-A474-AA4A08B9908F
+SUMMARY:Frauenfrühstück mit Frau Christine Adler	
+CREATED:20250522T125403Z
+DTSTAMP:20250522T125403Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/frauenfruehstueck-mit-frau-christine-adler.html
+DESCRIPTION:\N\N\N\NWER\NKirchengemeinde Roth\N\N\NWO\NBürgerhaus Roth\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>WER</p><p>Kirchengemeinde Roth</p></td><td colspan="3"><p>WO</p><p>Bürgerhaus Roth</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T125403Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20250925T143000
+DTEND;TZID=UTC:20250925T153000
+UID:3CDBE5BE-CFC5-48D1-9316-47046EBA1E4F
+SUMMARY:Filmvortrag (Herr Krantz)
+CREATED:20250218T121213Z
+DTSTAMP:20250218T121213Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/filmvortrag-herr-krantz.html
+DESCRIPTION:\N\NWER?\NAWO\N\N\NWO?\NBürgerhaus Niederweimar Herborner Straße 36\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>AWO</p></div><div class="col"><p><strong>WO?</strong></p><p>Bürgerhaus Niederweimar Herborner Straße 36</p></div></div>
+LAST-MODIFIED:20250522T125508Z
+SEQUENCE:8037775
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251006T143000
+DTEND;TZID=UTC:20251006T163000
+UID:997ED3A2-1175-427A-8EDA-2B37E16A9C51
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-10.html
+DESCRIPTION:\N\N\N\NWer\NAWO\N\N\NWo\NFamilienzentrum Niederweimar (ehemaliges Sparkassengbäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO</p></td><td colspan="3"><p>Wo</p><p>Familienzentrum Niederweimar<br /> (ehemaliges Sparkassengbäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T125546Z
+SEQUENCE:2909
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251011T140000
+DTEND;TZID=UTC:20251011T170000
+UID:874BC810-7077-46AE-B867-94C6EE81D0FD
+SUMMARY:Insektenfreundliche Gärten
+CREATED:20250522T124246Z
+DTSTAMP:20250522T124246Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/insektenfreundliche-gaerten.html
+DESCRIPTION:\N\N\N\NWer \NGlashüpfer e.V. Germershäuser Str. 51 35096 Weimar (Lahn)                                            \N\NMax. 15 Teilner*innen, bitte vorher per Mail anmelden!glashuepferev@posteo.de\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 797px; height: 116px;"><tbody><tr><td colspan="3"><p><strong>Wer&nbsp;</strong></p><p>Glashüpfer e.V.<br /> Germershäuser Str. 51<br /> 35096 Weimar (Lahn)&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p></td><td colspan="3">Max. 15 Teilner*innen, bitte vorher per Mail anmelden!<br />glashuepferev@posteo.de</td></tr></tbody></table>
+LAST-MODIFIED:20250813T072747Z
+SEQUENCE:7152301
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251011T160000
+DTEND;TZID=UTC:20251011T170000
+UID:DB0DCFDF-295C-400B-A99C-C45C43A37973
+SUMMARY:Oktoberfest
+CREATED:20250218T122859Z
+DTSTAMP:20250218T122859Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/oktoberfest.html
+DESCRIPTION:\N\NWER?\NBurschen- und Mädchenschaft Roth\N\N\NWO?\N\N\N\NMultifunktionsplatz Bürgerhaus Roth\N\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Burschen- und Mädchenschaft Roth</p></div><div class="col"><p><strong>WO?</strong></p><table border="0"><tbody><tr><td colspan="3">Multifunktionsplatz&nbsp;Bürgerhaus Roth</td></tr></tbody></table></div></div>
+LAST-MODIFIED:20250522T125638Z
+SEQUENCE:8036859
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251024T130000
+DTEND;TZID=UTC:20251024T170000
+UID:20A317F0-FE99-4EB1-8BDD-A89D706D096F
+SUMMARY:Songs of the moon
+CREATED:20250217T155339Z
+DTSTAMP:20250217T155339Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/songs-of-the-moon.html
+DESCRIPTION:\N\NWER?\NKultur- und Förderverein, ALTE KIRCHE, Niederweimar e.V.\N\N\NWO?\NALTE KIRCHE, Niederweimar e.V., Lindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Kultur- und Förderverein, ALTE KIRCHE, Niederweimar e.V.</p></div><div class="col"><p><strong>WO?</strong></p><p>ALTE KIRCHE, Niederweimar e.V., Lindenweg 13</p></div></div>
+LAST-MODIFIED:20250522T125740Z
+SEQUENCE:8111041
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251026T131500
+DTEND;TZID=UTC:20251026T141500
+UID:BAE1A942-A4EB-47F5-9829-D1844D690E6A
+SUMMARY:"Kirchen - Vorstandswahl"	
+CREATED:20250218T124734Z
+DTSTAMP:20250218T124734Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/kirchen-vorstandswahl.html
+DESCRIPTION:\N\NWER?\NKirchengemeinde\N\N\NWO?\NGemeindesaal Roth (Dammstraße 6)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Kirchengemeinde</p></div><div class="col"><p><strong>WO?</strong></p><p>Gemeindesaal Roth&nbsp;(Dammstraße 6)</p></div></div>
+LAST-MODIFIED:20250522T130018Z
+SEQUENCE:8035964
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251103T143000
+DTEND;TZID=UTC:20251103T163000
+UID:7720B67E-B07C-458C-8C6E-DD9176A4C21E
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-11.html
+DESCRIPTION:\N\N\N\NWer\NAWO\N\N\NWO\NBürgerhaus Niederweimar\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO</p></td><td colspan="3"><p>WO</p><p>Bürgerhaus&nbsp;Niederweimar</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T130841Z
+SEQUENCE:3684
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251107T173000
+DTEND;TZID=UTC:20251107T180000
+UID:F13BBF21-3FD5-4562-8DED-72ADB78810FC
+SUMMARY:Infoabend zum Thema Erben – Vererben – Schenken, oder was?
+CREATED:20250522T125037Z
+DTSTAMP:20250522T125037Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/infoabend-zum-thema-erben-vererben-schenken-oder-was.html
+DESCRIPTION:\N\N\N\NWER\NVdK Ortsverband Weimar/Lahn \Nweitere Informationen im Flyer VDK- herunterladen\N\N\NWO\NAlte Schule Roth – KulturzentrumIm Wiesengrund 6 – 35096 Weimar (Lahn) OT Roth!\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>WER</p><p>VdK Ortsverband Weimar/Lahn&nbsp;</p><p>weitere Informationen im Flyer&nbsp;<a href="https://www.gemeinde-weimar.de/images/Vereine/vdk.pdf">VDK- herunterladen</a></p></td><td colspan="3"><p>WO</p><p>Alte Schule Roth – Kulturzentrum<br />Im Wiesengrund 6 – 35096 Weimar (Lahn) OT Roth!</p></td></tr></tbody></table>
+LAST-MODIFIED:20251022T125648Z
+SEQUENCE:13219571
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251108T093000
+DTEND;TZID=UTC:20251108T103000
+UID:AABA19E4-6757-4414-92B3-3A24F616FFA4
+SUMMARY:Frühstückstreff
+CREATED:20250217T152124Z
+DTSTAMP:20250217T152124Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/fruehstueckstreff.html
+DESCRIPTION:\N\NWER?\NAWO\N\N\NWO?\NBürgerhaus, Niederweimar\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>AWO</p></div><div class="col"><p><strong>WO?</strong></p><p>Bürgerhaus, Niederweimar</p></div></div>
+LAST-MODIFIED:20250522T130150Z
+SEQUENCE:8113226
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251108T130000
+DTEND;TZID=UTC:20251108T140000
+UID:5A7E34A4-5B8B-4960-9B6D-7270485CE31F
+SUMMARY:St.-Martins-Umzug	
+CREATED:20250522T130303Z
+DTSTAMP:20250522T130303Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/st-martins-umzug.html
+DESCRIPTION:\N\N\N\NWER\NKindergarten Roth\N\N\NWO\NTreffpunkt Kirche Roth\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>WER</p><p>Kindergarten Roth</p></td><td colspan="3"><p>WO</p><p>Treffpunkt&nbsp;Kirche Roth</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T130303Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251108T183000
+DTEND;TZID=UTC:20251108T193000
+UID:CDAC3805-BA67-4B63-A11D-A5801A6555D7
+SUMMARY:"Gedenkstunde  an die Reichspogromnacht"	
+CREATED:20250522T130409Z
+DTSTAMP:20250522T130409Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/gedenkstunde-an-die-reichspogromnacht.html
+DESCRIPTION:\N\N\N\NWER\NArbeitskreis Landsynagoge Roth\N\N\NWO\NSynagoge Roth\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>WER</p><p>Arbeitskreis Landsynagoge Roth</p></td><td colspan="3"><p>WO</p><p>Synagoge Roth</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T130409Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20251110
+DTEND;VALUE=DATE:20251111
+UID:2C2CF76E-211B-43B8-820D-B526718AF184
+SUMMARY:Terminabsprache
+CREATED:20250218T123520Z
+DTSTAMP:20250218T123520Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/terminabsprache.html
+DESCRIPTION:\N\NWER?\Nörtliche Vereine von Roth\N\N\NWO?\N\N\N\Nab 19:00 Uhr Nebenraum Bürgerhausgaststätte\N\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>örtliche Vereine von Roth</p></div><div class="col"><p><strong>WO?</strong></p><table border="0"><tbody><tr><td colspan="3">ab 19:00 Uhr Nebenraum Bürgerhausgaststätte</td></tr></tbody></table></div></div>
+LAST-MODIFIED:20250522T130543Z
+SEQUENCE:8037023
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251114T190000
+DTEND;TZID=UTC:20251114T200000
+UID:F690A59E-2620-451D-A33E-E18F41D0436F
+SUMMARY:SOIRÉE CHOCOLAT  - Eine (be)sinnliche Reise rund um die Welt
+CREATED:20251029T102401Z
+DTSTAMP:20251029T102401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/soiree-chocolat-eine-be-sinnliche-reise-rund-um-die-welt.html
+DESCRIPTION:\N\N\N\NWer:\NVHS Marburg Biedenkopf\N\N\NWO:\NCafeteria , Gesamtschule Niederwalgern mit Anmeldung\Nunter Info & Anmeldung\N\N\N\N\NBuchautor Jürgen Bluhm folgt in seinem aufwendig produzierten Live-Vortrag dem Zauber der Schokolade in die tropischen Regenwälder Amerikas.\N\NAuf seiner Reise in die Heimat der Kakaobäume spürt er den wertvollsten Samen der Welt und der Erfindung ihrer Veredlung nach. Dabei folgt er der zentralen Frage: Kann man mit Schokolade die Welt retten?\NAuf vier Genussetappen erfahren Sie das Terroir der Kakaobäume und lernen die Menschen hinter der Schokolade kennen. Schnuppern, tasten und schmecken Sie sich über drei Kontinente und erleben Sie, wie aus kleinen Kakaobohnen handwerklich hergestellte Schokoladen werden.\NKakao ist der Rohstoff für eines der beliebtesten Lebensmittel und zugleich abhängig von einem hochsensiblen ökologischen System. Der Erhalt der Regenwälder ist nicht nur für die Herstellung von Schokolade existenziell – das Glück der Menschen hängt auch in tieferem Sinne daran. Die Soirée Chocolat offenbart bislang verborgene Seiten der Schokolade. In ihrem Geschmack verbinden sich die Wunder der Natur, die Geschichte ihrer Erfinder und der Gedanke einer globalen Nachbarschaft.\NDie Soirée Chocolat vermittelt die Lernziele für Nachhaltige Entwicklung am Beispiel der Schokolade. Der bildgewaltige Vortrag ist eine Liebeserklärung an die schützenswerte Artenvielfalt der tropischen Regenwälder und eine Hommage an die Menschen, denen wir den Genuss der Schokolade verdanken.\N\NVon der Entdeckung des Kakaos zur fairen Schokolade • Noch nie wurde die Geschichte der Schokolade so spannend erzählt • Namhafte Fotojournalisten illustrieren die Reise in die Welt der Schokolade\N\NÜber den Autor: Jürgen Bluhm folgte im Alter von 20 Jahren dem Ruf der weiten Welt, ohne zu ahnen, dass er ausgerechnet in der Heimat der Schokolade sein neues Zuhause finden würde. In den tropischen Wäldern Mittelamerikas besuchte er verwunschene Tempel, spürte seltene Kakaobäume auf und sprach mit Archäologen. Die geheimnisvolle Hochkultur der Maya faszinierte ihn und zog in ihren Bann. Zurück in Deutschland machte Jürgen Bluhm sich daran, der Natur und den Menschen eine Stimme zu verleihen.\N
+X-ALT-DESC;FMTTYPE=text/html:<table class="table"><tbody><tr><td><p>Wer:</p><p>VHS Marburg Biedenkopf</p></td><td><p>WO:</p><p>Cafeteria , Gesamtschule Niederwalgern mit Anmeldung</p><p>unter <a href="https://www.vhs-marburg-biedenkopf.de/programm/politik-gesellschaft-umwelt/kurs/SOIRE-CHOCOLAT-Eine-besinnliche-Reise-um-die-Welt/AS11201WE#inhalt" target="_blank" rel="noopener">Info &amp; Anmeldung</a></p></td></tr></tbody></table><p>Buchautor Jürgen Bluhm folgt in seinem aufwendig produzierten Live-Vortrag dem Zauber der Schokolade in die tropischen Regenwälder Amerikas.</p><hr id="system-readmore"><p>Auf seiner Reise in die Heimat der Kakaobäume spürt er den wertvollsten Samen der Welt und der Erfindung ihrer Veredlung nach. Dabei folgt er der zentralen Frage: Kann man mit Schokolade die Welt retten?</p><p>Auf vier Genussetappen erfahren Sie das Terroir der Kakaobäume und lernen die Menschen hinter der Schokolade kennen. Schnuppern, tasten und schmecken Sie sich über drei Kontinente und erleben Sie, wie aus kleinen Kakaobohnen handwerklich hergestellte Schokoladen werden.</p><p>Kakao ist der Rohstoff für eines der beliebtesten Lebensmittel und zugleich abhängig von einem hochsensiblen ökologischen System. Der Erhalt der Regenwälder ist nicht nur für die Herstellung von Schokolade existenziell – das Glück der Menschen hängt auch in tieferem Sinne daran. Die Soirée Chocolat offenbart bislang verborgene Seiten der Schokolade. In ihrem Geschmack verbinden sich die Wunder der Natur, die Geschichte ihrer Erfinder und der Gedanke einer globalen Nachbarschaft.</p><p>Die Soirée Chocolat vermittelt die Lernziele für Nachhaltige Entwicklung am Beispiel der Schokolade. Der bildgewaltige Vortrag ist eine Liebeserklärung an die schützenswerte Artenvielfalt der tropischen Regenwälder und eine Hommage an die Menschen, denen wir den Genuss der Schokolade verdanken.</p><ul><li>Von der Entdeckung des Kakaos zur fairen Schokolade • Noch nie wurde die Geschichte der Schokolade so spannend erzählt • Namhafte Fotojournalisten illustrieren die Reise in die Welt der Schokolade</li></ul><p>Über den Autor: Jürgen Bluhm folgte im Alter von 20 Jahren dem Ruf der weiten Welt, ohne zu ahnen, dass er ausgerechnet in der Heimat der Schokolade sein neues Zuhause finden würde. In den tropischen Wäldern Mittelamerikas besuchte er verwunschene Tempel, spürte seltene Kakaobäume auf und sprach mit Archäologen. Die geheimnisvolle Hochkultur der Maya faszinierte ihn und zog in ihren Bann. Zurück in Deutschland machte Jürgen Bluhm sich daran, der Natur und den Menschen eine Stimme zu verleihen.</p><p></p>
+LAST-MODIFIED:20251029T102956Z
+SEQUENCE:355
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20251116
+DTEND;VALUE=DATE:20251117
+UID:DBEB7152-5C4C-42F9-BF82-BC3E3D8359B8
+SUMMARY:Volkstrauertag Gedenkveranstaltung
+CREATED:20250218T124405Z
+DTSTAMP:20250218T124405Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/volkstrauertag-gedenkveranstaltung-2.html
+DESCRIPTION:\N\NWER?\NKirchengemeinde Roth\N\N\NWO?\NKirche Roth Ehrenmal\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Kirchengemeinde Roth</p></div><div class="col"><p><strong>WO?</strong></p><p>Kirche Roth Ehrenmal</p></div></div>
+LAST-MODIFIED:20250522T130621Z
+SEQUENCE:8036536
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251122T131500
+DTEND;TZID=UTC:20251122T141500
+UID:219470A0-D36A-4370-995A-E407AF5DEFA4
+SUMMARY:Andacht	
+CREATED:20250522T130728Z
+DTSTAMP:20250522T130728Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/andacht-2.html
+DESCRIPTION:\N\N\N\NWER\NKirchengemeinde Roth\N\N\NWO\NFriedhofshalle Roth\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>WER</p><p>Kirchengemeinde Roth</p></td><td colspan="3"><p>WO</p><p>Friedhofshalle&nbsp;Roth</p></td></tr></tbody></table>
+LAST-MODIFIED:20251229T143835Z
+SEQUENCE:19099867
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251201T143000
+DTEND;TZID=UTC:20251201T163000
+UID:B867201B-F72A-40B0-BA30-731206A89235
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-12.html
+DESCRIPTION:\N\N\N\NWer\NAWO\N\N\NWO\NFamilienzentrum Niederweimar (ehemaliges Sparkassengebäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO</p></td><td colspan="3"><p>WO</p><p>Familienzentrum Niederweimar (ehemaliges Sparkassengebäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T130826Z
+SEQUENCE:3669
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251207T150000
+DTEND;TZID=UTC:20251207T160000
+UID:3B7AEABE-FBCB-4AC3-89A5-95D4ABB0B24A
+SUMMARY:Adventsnachmittag	
+CREATED:20250522T131012Z
+DTSTAMP:20250522T131012Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/adventsnachmittag.html
+DESCRIPTION:\N\N\N\NWER\NBeirat "Alte Schule" Kulturhaus Roth\N\N\NWO\N,,Alte Schule" Kulturhaus Roth  Im Wiesengrund 6 (barriererfreier  Zugang) \N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>WER</p><p>Beirat "Alte Schule" Kulturhaus Roth</p></td><td colspan="3"><p>WO</p><p>,,Alte Schule" Kulturhaus Roth<br /> &nbsp;Im Wiesengrund 6<br /> (barriererfreier&nbsp; Zugang)&nbsp;</p></td></tr></tbody></table>
+LAST-MODIFIED:20250522T131012Z
+SEQUENCE:0
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20251214T143000
+DTEND;TZID=UTC:20251214T153000
+UID:C01383BC-F2D8-40D6-8D25-0870A1385194
+SUMMARY:"Senioren Adventsfeier"	
+CREATED:20250218T125618Z
+DTSTAMP:20250218T125618Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/senioren-adventsfeier.html
+DESCRIPTION:\N\NWER?\NAWO\N\N\NWO?\N\N\N\NFamilienzentrum Niederweimar (ehemaliges Sparkassengebäude)\N\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>AWO</p></div><div class="col"><p><strong>WO?</strong></p><table border="0"><tbody><tr><td colspan="3">Familienzentrum Niederweimar (ehemaliges Sparkassengebäude)</td></tr></tbody></table></div></div>
+LAST-MODIFIED:20250522T131109Z
+SEQUENCE:8036091
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20251228
+DTEND;VALUE=DATE:20251229
+UID:797AC7EA-829A-40B9-8D6A-A342EFE31387
+SUMMARY:Jahresabschlusswanderung
+CREATED:20250218T125831Z
+DTSTAMP:20250218T125831Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/jahresabschlusswanderung-2.html
+DESCRIPTION:\N\NWER?\NFeuerwehr Roth\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Feuerwehr Roth</p></div><div class="col"></div></div>
+LAST-MODIFIED:20250522T131141Z
+SEQUENCE:8035990
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260101T190000
+DTEND;TZID=UTC:20260101T200000
+UID:038984F6-2C74-428B-9241-D9A5549684E6
+SUMMARY:Gottesdienst mit Neujahrsempfang
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/gottesdienst-mit-neujahrsempfang.html
+DESCRIPTION:\NWer : Kirchengemeinde Roth\N Kirche Roth\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col">Wer : Kirchengemeinde Roth</div><div class="col">&nbsp;Kirche Roth</div></div>
+LAST-MODIFIED:20251229T095649Z
+SEQUENCE:25662768
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260102T120000
+DTEND;TZID=UTC:20260102T130000
+RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20261224T235900Z
+UID:56F3E090-AEE4-4B7E-954B-7BF7E611864C
+SUMMARY:Mittagstisch 2026
+CREATED:20250213T161410Z
+DTSTAMP:20250213T161410Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/mittagstisch-6.html
+DESCRIPTION:\N\NWER?\NWirtshaus an der Lahn auf Initiative von ,,Wir im Quartier Weimar"\N\N\NWO?\NWirtshaus an der Lahn, Bürgerhausgaststätte\NWolfshäuser Str. 1, Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Wirtshaus an der Lahn auf Initiative von ,,Wir im Quartier Weimar"</p></div><div class="col"><p><strong>WO?</strong></p><p>Wirtshaus an der Lahn, Bürgerhausgaststätte</p><p>Wolfshäuser Str. 1, Roth</p></div></div>
+LAST-MODIFIED:20251229T144313Z
+SEQUENCE:27556143
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260105T143000
+DTEND;TZID=UTC:20260105T163000
+UID:B8DEBA1D-043F-474E-8BA1-6FC54A2F08B0
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-13.html
+DESCRIPTION:\N\N\N\NWer\NAWO                                            \N\N\NWO\NFamilienzentrum Niederweimar (ehemaliges Sparkassengebäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p></td><td colspan="3"><p>WO</p><p>Familienzentrum Niederweimar (ehemaliges Sparkassengebäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20251229T131851Z
+SEQUENCE:19098694
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260106T143000
+DTEND;TZID=UTC:20260106T160000
+RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20261231T235900Z
+UID:E0E6AC3D-06EC-432C-9A57-3167439B1C4B
+SUMMARY:motorisches + mentales Training
+CREATED:20250217T141152Z
+DTSTAMP:20250217T141152Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/motorisches-mentales-training-5.html
+DESCRIPTION:\N\NWER?\NAlzheimer Gesellschaft Marburg-Biedenkopf e.V.\NTelefon: +49 6421 690393 oder +49 159 06756020\N\N\NWO?\N,,Alte Schule" Kulturhaus Roth, Im Wiesengrund 6 (barriererfreier Zugang)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Alzheimer Gesellschaft Marburg-Biedenkopf e.V.</p><p>Telefon: +49 6421 690393 oder +49 159 06756020</p></div><div class="col"><p><strong>WO?</strong></p><p>,,Alte Schule" Kulturhaus Roth, Im Wiesengrund 6 (barriererfreier Zugang)</p></div></div>
+LAST-MODIFIED:20251229T131609Z
+SEQUENCE:27212657
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260107T150000
+DTEND;TZID=UTC:20260107T170000
+RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20261230T235900Z
+EXDATE:20260812T150000Z,20260819T150000Z,20260826T150000Z,20260902T150000Z,20260909T150000Z,20260916T150000Z,20260923T150000Z,20260930T150000Z,20261007T150000Z,20261014T150000Z,20261021T150000Z,20261028T150000Z,20261104T150000Z,20261111T150000Z,20261118T150000Z,20261125T150000Z,20261202T150000Z,20261209T150000Z,20261216T150000Z,20261223T150000Z
+UID:8AB1DCC5-E9F2-4135-A886-DD61E458E858
+SUMMARY:Digitalsprechstunde: Umgang mit Smartphone, Computer, etc.
+CREATED:20250213T160545Z
+DTSTAMP:20250213T160545Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/digitalsprechstunde-umgang-mit-smartphone-computer-etc-4.html
+DESCRIPTION:\N\NWER?\N"Wir im Quartier Weimar"\N-bitte bis zum Vortag telefonisch anmelden-               06421-6003-0\N\N\NWO?\NBürgerhaus Niederweimar, Herborner Str. 36 (Foyer)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>"Wir im Quartier Weimar"</p><p>-bitte bis zum Vortag telefonisch anmelden-<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;06421-6003-0</p></div><div class="col"><p><strong>WO?</strong></p><p>Bürgerhaus Niederweimar, Herborner Str. 36 (Foyer)</p></div></div>
+LAST-MODIFIED:20260213T072541Z
+SEQUENCE:31504796
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260109
+DTEND;VALUE=DATE:20260110
+UID:D44EFCBF-A9DC-46E9-940E-9675B834B23F
+SUMMARY:Gemütliches Beisammensein
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/gemuetliches-beisammensein.html
+DESCRIPTION:\N\NWer :\NPosaunenchor Roth/Wolfshausen\N\N\N WO\NKirche Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Posaunenchor Roth/Wolfshausen</p></div><div class="col"><p>&nbsp;WO</p><p>Kirche&nbsp;Roth</p></div></div>
+LAST-MODIFIED:20251229T132512Z
+SEQUENCE:25675271
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260110
+DTEND;VALUE=DATE:20260111
+UID:6F559069-25D3-49DB-A46C-9E8412671DEC
+SUMMARY:Weihnachtsbaumsammlung
+CREATED:20250522T124633Z
+DTSTAMP:20250522T124633Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/weihnachtsbaum.html
+DESCRIPTION:\N\N\N\NWer :\NJugendfeuerwehren\N\N\NWo:\Nalle Ortsteile\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer :</p><p>Jugendfeuerwehren</p></td><td colspan="3"><p>Wo:</p><p>alle Ortsteile</p></td></tr></tbody></table>
+LAST-MODIFIED:20251229T100455Z
+SEQUENCE:19084702
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260112
+DTEND;VALUE=DATE:20260113
+UID:41809AC7-563A-441A-81D3-FED155689124
+SUMMARY:"überregionale Gebetswoche"	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/ueberregionale-gebetswoche.html
+DESCRIPTION:\NWer : Kirchengemeinde Roth\N Wo : "Alte Schule" Kulturhaus Roth Im Wiesengrund 6 (barrierefreier Zugang)\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col">Wer : Kirchengemeinde Roth</div><div class="col">&nbsp;Wo : "Alte Schule" Kulturhaus Roth Im Wiesengrund 6 (barrierefreier Zugang)</div></div>
+LAST-MODIFIED:20251229T100614Z
+SEQUENCE:25663333
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260117T160000
+DTEND;TZID=UTC:20260117T170000
+UID:72B1607E-0ADA-4F57-9A28-E4002DD0E651
+SUMMARY:"Jahreshauptversammlung"	
+CREATED:20250218T122859Z
+DTSTAMP:20250218T122859Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/jahreshauptversammlung.html
+DESCRIPTION:\N\NWER?\NBurschen- und Mädchenschaft Roth\N\N\NWO?\NBürgerhaus Roth (Nebenraum Gaststätte)\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p><strong>WER?</strong></p><p>Burschen- und Mädchenschaft Roth</p></div><div class="col"><p><strong>WO?</strong></p>Bürgerhaus Roth&nbsp;(Nebenraum Gaststätte)</div></div>
+LAST-MODIFIED:20251229T101518Z
+SEQUENCE:27121579
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260118
+DTEND;VALUE=DATE:20260119
+UID:59E0FAD4-BB7E-437D-A3DF-BE90214B9DB3
+SUMMARY:Abschlussgottesdienst
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/abschlussgottesdienst.html
+DESCRIPTION:\N\NWer :\NAllianzgebetswoche mit Pfarrerin Rauh undPastor Schwesinger\N\N\N WO\NBürgerhaus Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Allianzgebetswoche mit <br />Pfarrerin Rauh und<br />Pastor Schwesinger</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus Roth</p></div></div>
+LAST-MODIFIED:20251229T101710Z
+SEQUENCE:25663989
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260122T143000
+DTEND;TZID=UTC:20260122T164500
+UID:E8FD5C9C-13D1-4236-94BE-ECD80767CF62
+SUMMARY:Seniorennachmittag
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/seniorennachmittag-7.html
+DESCRIPTION:\N\NWer :\Nvhs Marburg-Biedenkopf\N\N\N WO\NBürgerhaus Hermershausen Herbener Straße 5\N"Ohne Medien geht es nicht - Medienkompetenz im dritten Lebensalter"\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>vhs Marburg-Biedenkopf</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus&nbsp;Hermershausen&nbsp;Herbener Straße 5</p><p>"Ohne Medien geht es nicht - Medienkompetenz im dritten Lebensalter"</p></div></div>
+LAST-MODIFIED:20251229T132750Z
+SEQUENCE:25675429
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260128T143000
+DTEND;TZID=UTC:20260128T153000
+UID:FDB90103-4034-4CCF-86C6-4BC49505C6E6
+SUMMARY:SITZ- & Cafeklatsch- Gymnastik
+CREATED:20250522T120852Z
+DTSTAMP:20250522T120852Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sitz-cafeklatsch-gymnastik-7.html
+DESCRIPTION:\N\N\N\NWer\NSC-Roth Argenstein\N\N\NWo\N,Alte Schule" Kulturhaus Roth Im Wiesengrund 6(barriererfreier  Zugang) \N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer</p><p>SC-Roth Argenstein</p></td><td colspan="3"><p>Wo</p><p>,Alte Schule" Kulturhaus Roth<br />&nbsp;Im Wiesengrund 6<br />(barriererfreier&nbsp; Zugang)&nbsp;</p></td></tr></tbody></table>
+LAST-MODIFIED:20260106T084518Z
+SEQUENCE:19773386
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260131
+DTEND;VALUE=DATE:20260201
+UID:0D36EA0C-A4AB-4EB1-9C37-908391F58C46
+SUMMARY:"Jahreshauptversammlung"	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/jahreshauptversammlung-2.html
+DESCRIPTION:\N\NWer :\NFFW-Einsatzabteilung  Roth\N\N\N WO\NFeuerwehr Gerätehaus Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>FFW-Einsatzabteilung&nbsp;&nbsp;Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Feuerwehr&nbsp;Gerätehaus Roth</p></div></div>
+LAST-MODIFIED:20251229T101823Z
+SEQUENCE:25664062
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260202T143000
+DTEND;TZID=UTC:20260202T163000
+UID:AA0E8C89-ABF3-46CE-AE76-DD61BB2E96A0
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-14.html
+DESCRIPTION:\N\N\N\NWer\NAWO                                            \N\N\NWO\NFamilienzentrum Niederweimar (ehemaliges Sparkassengebäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p></td><td colspan="3"><p>WO</p><p>Familienzentrum Niederweimar (ehemaliges Sparkassengebäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20251229T131938Z
+SEQUENCE:19098741
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260207T093000
+DTEND;TZID=UTC:20260207T120000
+UID:206448B9-B6C0-4CE8-A58F-0A3752303F8F
+SUMMARY:Frühstückstreff
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/fruehstueckstreff-3.html
+DESCRIPTION:\N\NWER:\NAWO\N\N\N WO\NBürgerhaus NiederweimarHerborner Str. 36 \N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>AWO</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus Niederweimar<br />Herborner Str. 36&nbsp;</p></div></div>
+LAST-MODIFIED:20251229T133000Z
+SEQUENCE:25675559
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260211T143000
+DTEND;TZID=UTC:20260211T153000
+UID:98C90BB9-FD8A-43A5-A387-90B8F37B3D80
+SUMMARY:SITZ- & Cafeklatsch- Gymnastik
+CREATED:20250522T120852Z
+DTSTAMP:20250522T120852Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sitz-cafeklatsch-gymnastik-8.html
+DESCRIPTION:\N\N\N\NWer\NSC-Roth Argenstein\N\N\NWo\N,Alte Schule" Kulturhaus Roth Im Wiesengrund 6(barriererfreier  Zugang) \N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer</p><p>SC-Roth Argenstein</p></td><td colspan="3"><p>Wo</p><p>,Alte Schule" Kulturhaus Roth<br />&nbsp;Im Wiesengrund 6<br />(barriererfreier&nbsp; Zugang)&nbsp;</p></td></tr></tbody></table>
+LAST-MODIFIED:20260106T084553Z
+SEQUENCE:19773421
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260213
+DTEND;VALUE=DATE:20260217
+UID:A23923CA-51DC-4828-8AEF-7B2F0F4F48FA
+SUMMARY:Faschings-Veranstaltung
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/faschings-veranstaltung-2.html
+DESCRIPTION:\N\NWer :\NKarnevalsverein  Roth\N\N\N WO\NBürgerhaus Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Karnevalsverein&nbsp;&nbsp;Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus Roth</p></div></div>
+LAST-MODIFIED:20251229T101957Z
+SEQUENCE:25664156
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260215T103000
+DTEND;TZID=UTC:20260215T103000
+UID:9EFD955C-CAF2-4C5A-8C8D-83794BD6D929
+SUMMARY:Ehrengottesdienst
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/ehrengottesdienst.html
+DESCRIPTION:\N\NWer :\NPosaunenchor Roth/Wolfshausen\N\N\N WO\NKirche Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Posaunenchor Roth/Wolfshausen</p></div><div class="col"><p>&nbsp;WO</p><p>Kirche&nbsp;Roth</p></div></div>
+LAST-MODIFIED:20251229T104212Z
+SEQUENCE:25665491
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260217
+DTEND;VALUE=DATE:20260218
+UID:356E4A57-D6D0-4760-A400-3731AE9619DB
+SUMMARY:Kinderfasching	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/kinderfasching.html
+DESCRIPTION:\N\NWer :\NKZV Bürger- und Kulturverein Wenkbach e.V.\N\N\N WO\NUmzug durch das Dorf\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>KZV&nbsp;Bürger- und Kulturverein Wenkbach e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>Umzug durch das Dorf</p></div></div>
+LAST-MODIFIED:20251229T104321Z
+SEQUENCE:25665560
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260225T143000
+DTEND;TZID=UTC:20260225T153000
+UID:03072DE1-66C8-4AFB-ADFA-989AA0582CAD
+SUMMARY:SITZ- & Cafeklatsch- Gymnastik
+CREATED:20250522T120852Z
+DTSTAMP:20250522T120852Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sitz-cafeklatsch-gymnastik-9.html
+DESCRIPTION:\N\N\N\NWer\NSC-Roth Argenstein\N\N\NWo\N,Alte Schule" Kulturhaus Roth Im Wiesengrund 6(barriererfreier  Zugang) \N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer</p><p>SC-Roth Argenstein</p></td><td colspan="3"><p>Wo</p><p>,Alte Schule" Kulturhaus Roth<br />&nbsp;Im Wiesengrund 6<br />(barriererfreier&nbsp; Zugang)&nbsp;</p></td></tr></tbody></table>
+LAST-MODIFIED:20260106T084600Z
+SEQUENCE:19773428
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260225T200000
+DTEND;TZID=UTC:20260225T200000
+UID:D0B44EB5-E390-4FE2-8E6A-C9E3D27D1D57
+SUMMARY:Wanderpokalschießen
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/wanderpokalschiessen.html
+DESCRIPTION:\N\NWer :\NSchützenverein 1964 Niederweimar e.V.\N\N\N WO\NWilhelm Muth Haus Niederweimar\NTrainingsmöglichkeit Wanderpokalschießen für Ortsvereine und Gruppen \N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Schützenverein 1964&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>Wilhelm Muth Haus Niederweimar</p><p>Trainingsmöglichkeit Wanderpokalschießen für Ortsvereine und Gruppen&nbsp;</p></div></div>
+LAST-MODIFIED:20251229T104503Z
+SEQUENCE:25665662
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260226T143000
+DTEND;TZID=UTC:20260226T164500
+UID:1537AA99-FCD7-46B4-A1DB-A1F3B101A4DB
+SUMMARY:Seniorennachmittag
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/seniorennachmittag.html
+DESCRIPTION:\N\NWer :\Nvhs Marburg-Biedenkopf\N\N\N WO\NBürgerhaus Niederwalgern Bergstraße 3 \N"Das Leben in Mittelasien und warum die Menschen als Geflüchtete zu uns kommen"\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>vhs Marburg-Biedenkopf</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus Niederwalgern&nbsp;Bergstraße 3&nbsp;</p><p>"Das Leben in Mittelasien und warum die Menschen als Geflüchtete zu uns kommen"</p></div></div>
+LAST-MODIFIED:20251229T104642Z
+SEQUENCE:25665761
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260227T200000
+DTEND;TZID=UTC:20260227T200000
+UID:BE756053-997E-4C2C-AC3C-F99518B7A57E
+SUMMARY:Wanderpokalschießen
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/wanderpokalschiessen-2.html
+DESCRIPTION:\N\NWer :\NSchützenverein 1964 Niederweimar e.V.\N\N\N WO\NWilhelm Muth Haus Niederweimar\NTrainingsmöglichkeit Wanderpokalschießen für Ortsvereine und Gruppen \N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Schützenverein 1964&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>Wilhelm Muth Haus Niederweimar</p><p>Trainingsmöglichkeit Wanderpokalschießen für Ortsvereine und Gruppen&nbsp;</p></div></div>
+LAST-MODIFIED:20251229T104723Z
+SEQUENCE:25665802
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260227T200000
+DTEND;TZID=UTC:20260227T200000
+UID:62C6BD2D-C418-4CA4-9575-EDF346354E91
+SUMMARY:Jahreshauptversammlung
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/jahreshauptversammlung-3.html
+DESCRIPTION:\N\NWer :\NWaldinteressenten Roth/Argenstein/Wenkbach\N\N\N WO\NBürgerhaus Roth (kleiner Saal)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Waldinteressenten Roth/Argenstein/Wenkbach</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus Roth<br />&nbsp;(kleiner Saal)</p></div></div>
+LAST-MODIFIED:20251229T104812Z
+SEQUENCE:25665851
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260302T143000
+DTEND;TZID=UTC:20260302T163000
+UID:B257A485-662E-41CB-AF89-B88C5A9097BF
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-15.html
+DESCRIPTION:\N\N\N\NWer\NAWO                                            \N\N\NWO\NFamilienzentrum Niederweimar (ehemaliges Sparkassengebäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p></td><td colspan="3"><p>WO</p><p>Familienzentrum Niederweimar (ehemaliges Sparkassengebäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20251229T132000Z
+SEQUENCE:19098763
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260307T140000
+DTEND;TZID=UTC:20260307T140000
+UID:F8BD0AEF-68F1-4337-BD74-26D87903A57C
+SUMMARY:Wanderpokalschießen
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/wanderpokalschiessen-3.html
+DESCRIPTION:\N\NWer :\NSchützenverein 1964 Niederweimar e.V.\N\N\N WO\NWilhelm Muth Haus Niederweimar\NTrainingsmöglichkeit Wanderpokalschießen für Ortsvereine und Gruppen \N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Schützenverein 1964&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>Wilhelm Muth Haus Niederweimar</p><p>Trainingsmöglichkeit Wanderpokalschießen für Ortsvereine und Gruppen&nbsp;</p></div></div>
+LAST-MODIFIED:20251229T104901Z
+SEQUENCE:25665900
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260311T143000
+DTEND;TZID=UTC:20260311T153000
+UID:1F51D765-E75B-4F87-959C-2C650856AF97
+SUMMARY:SITZ- & Cafeklatsch- Gymnastik
+CREATED:20250522T120852Z
+DTSTAMP:20250522T120852Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sitz-cafeklatsch-gymnastik-10.html
+DESCRIPTION:\N\N\N\NWer\NSC-Roth Argenstein\N\N\NWo\N,Alte Schule" Kulturhaus Roth Im Wiesengrund 6(barriererfreier  Zugang) \N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer</p><p>SC-Roth Argenstein</p></td><td colspan="3"><p>Wo</p><p>,Alte Schule" Kulturhaus Roth<br />&nbsp;Im Wiesengrund 6<br />(barriererfreier&nbsp; Zugang)&nbsp;</p></td></tr></tbody></table>
+LAST-MODIFIED:20260106T084608Z
+SEQUENCE:19773436
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260313T200000
+DTEND;TZID=UTC:20260313T220000
+UID:6A21F4FC-0601-4534-B6DA-BDF046F8D385
+SUMMARY:Trio Viserunky	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/trio-viserunky.html
+DESCRIPTION:\N\NWer :\NKultur- und FördervereinALTE KIRCHE  Niederweimar e.V.\N\N\N WO\NALTE KIRCHE  NiederweimarLindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>ALTE KIRCHE&nbsp;&nbsp;Niederweimar<br />Lindenweg 13</p></div></div>
+LAST-MODIFIED:20251229T105154Z
+SEQUENCE:25666073
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260314T190000
+DTEND;TZID=UTC:20260314T190000
+UID:E6E7B3FA-EDDD-466F-912B-9F20A0E2CBA1
+SUMMARY:Jahreshauptversammlung
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/jahreshauptversammlung-4.html
+DESCRIPTION:\N\NWer :\NFeuerwehrverein Roth\N\N\N WO\NFeuerwehrgerätehaus\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Feuerwehrverein&nbsp;Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Feuerwehrgerätehaus</p></div></div>
+LAST-MODIFIED:20251229T133336Z
+SEQUENCE:25675775
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260320T190000
+DTEND;TZID=UTC:20260320T190000
+UID:9D6AB41D-009F-4949-AA2C-6659E5F4D13C
+SUMMARY:Jahreshauptversammlung
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/jahreshauptversammlung-7.html
+DESCRIPTION:\N\NWer :\NSG Niederwalgern/Wenkbach e.V.-Turnabteilung-\N\N\N WO\NPizzeria Toskana(Nebenraum)Niederwalgern\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>SG Niederwalgern/Wenkbach e.V.<br />-Turnabteilung-</p></div><div class="col"><p>&nbsp;WO</p><p>Pizzeria Toskana<br />(Nebenraum)<br />Niederwalgern</p></div></div>
+LAST-MODIFIED:20260213T072314Z
+SEQUENCE:29627953
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260322T143000
+DTEND;TZID=UTC:20260322T143000
+UID:7D64972C-8F31-40C6-97E4-012E632C1470
+SUMMARY:Jahreshauptversammlung
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/jahreshauptversammlung-5.html
+DESCRIPTION:\N\NWer :\NAWO\N\N\N WO\NBürgerhaus NiederweimarHerborner Str. 36 \N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>AWO</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus Niederweimar<br />Herborner Str. 36&nbsp;</p></div></div>
+LAST-MODIFIED:20251229T105704Z
+SEQUENCE:25666383
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260325T143000
+DTEND;TZID=UTC:20260325T153000
+UID:680EE618-336A-41CD-90F6-8F8DA6903CBC
+SUMMARY:SITZ- & Cafeklatsch- Gymnastik
+CREATED:20250522T120852Z
+DTSTAMP:20250522T120852Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sitz-cafeklatsch-gymnastik-11.html
+DESCRIPTION:\N\N\N\NWer\NSC-Roth Argenstein\N\N\NWo\N,Alte Schule" Kulturhaus Roth Im Wiesengrund 6(barriererfreier  Zugang) \N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer</p><p>SC-Roth Argenstein</p></td><td colspan="3"><p>Wo</p><p>,Alte Schule" Kulturhaus Roth<br />&nbsp;Im Wiesengrund 6<br />(barriererfreier&nbsp; Zugang)&nbsp;</p></td></tr></tbody></table>
+LAST-MODIFIED:20260106T084614Z
+SEQUENCE:19773442
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260326T143000
+DTEND;TZID=UTC:20260326T164500
+UID:A2937F4C-36E4-4323-846B-22D58CC7EC8C
+SUMMARY:Seniorennachmittag
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/seniorennachmittag-2.html
+DESCRIPTION:\N\NWer :\Nvhs Marburg-Biedenkopf\N\N\N WO\NBürgerhaus Roth Wolfshäuser Str. 1  (kleiner Saal) \Nunter dem Motto Seniorennachmittag "Hörgesundheit ist Gehirngesundheit"\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>vhs Marburg-Biedenkopf</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus Roth&nbsp;Wolfshäuser Str. 1&nbsp; <br />(kleiner Saal)&nbsp;</p><p>unter dem Motto&nbsp;Seniorennachmittag "Hörgesundheit ist Gehirngesundheit"</p></div></div>
+LAST-MODIFIED:20251229T110036Z
+SEQUENCE:25666595
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260327T200000
+DTEND;TZID=UTC:20260327T220000
+UID:590F672E-0EFE-47E1-B9E0-1CC2F4A9A9B3
+SUMMARY:"Deja-Simons Quartett  feat. Ulla Keller"	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/deja-simons-quartett-feat-ulla-keller.html
+DESCRIPTION:\N\NWer :\NKultur- und FördervereinALTE KIRCHE  Niederweimar e.V.\N\N\N WO\NALTE KIRCHE  Niederweimar Lindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>ALTE KIRCHE&nbsp;&nbsp;Niederweimar<br />&nbsp;Lindenweg 13</p></div></div>
+LAST-MODIFIED:20251229T110150Z
+SEQUENCE:25666669
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260328T193000
+DTEND;TZID=UTC:20260328T193000
+UID:CF5B6011-7D51-4B4D-9FE4-6DB1B7063E44
+SUMMARY:SC-Roth Argenstein
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sc-roth-argenstein.html
+DESCRIPTION:\N\NWer :\NSport-Club 1945 Roth/Argenstein\N\N\N WO\NSportheim Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Sport-Club 1945 Roth/Argenstein</p></div><div class="col"><p>&nbsp;WO</p><p>Sportheim Roth</p></div></div>
+LAST-MODIFIED:20260223T081206Z
+SEQUENCE:30494885
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260404T180000
+DTEND;TZID=UTC:20260404T200000
+UID:0F96C13B-8937-458E-8BC8-B9D69382752D
+SUMMARY:Osterfeuer
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/osterfeuer-3.html
+DESCRIPTION:\N\NWer :\NFeuerwehr Roth\N\N\N WO\NMultifunktionsplatz hinter dem Bürgerhaus Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Feuerwehr Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Multifunktionsplatz hinter dem Bürgerhaus&nbsp;Roth</p></div></div>
+LAST-MODIFIED:20251229T110302Z
+SEQUENCE:25666741
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260404T180000
+DTEND;TZID=UTC:20260404T200000
+UID:49D9BB96-F329-4C5F-9782-150C966E8ECB
+SUMMARY:Osterfeuer
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/osterfeuer-4.html
+DESCRIPTION:\N\NWer :\NKZV, Bürger- und Kulturverein Wenkbach e.V.\N\N\N WO\NParkplatz Bürgerhaus\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>KZV, Bürger- und Kulturverein Wenkbach e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>Parkplatz Bürgerhaus</p></div></div>
+LAST-MODIFIED:20251229T110330Z
+SEQUENCE:25666769
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260405T060000
+DTEND;TZID=UTC:20260405T080000
+UID:5E255C6C-E53D-402E-98EA-7555055C3E94
+SUMMARY:Osternacht
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/osternacht.html
+DESCRIPTION:\N\NWer :\NKirchengemeinde Roth\N\N\N WO\NKirche Roth und Kulturhaus "Alte Schule" Roth\NOsternacht mit anschließendem Osterfrühstück\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Kirchengemeinde Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Kirche Roth und Kulturhaus "Alte Schule" Roth</p><p>Osternacht mit anschließendem Osterfrühstück</p></div></div>
+LAST-MODIFIED:20251229T142021Z
+SEQUENCE:25678580
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260408T143000
+DTEND;TZID=UTC:20260408T153000
+UID:0B0E23AE-C55D-4297-8647-423082D79E73
+SUMMARY:SITZ- & Cafeklatsch- Gymnastik
+CREATED:20250522T120852Z
+DTSTAMP:20250522T120852Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sitz-cafeklatsch-gymnastik-12.html
+DESCRIPTION:\N\N\N\NWer\NSC-Roth Argenstein\N\N\NWo\N,Alte Schule" Kulturhaus Roth Im Wiesengrund 6(barriererfreier  Zugang) \N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer</p><p>SC-Roth Argenstein</p></td><td colspan="3"><p>Wo</p><p>,Alte Schule" Kulturhaus Roth<br />&nbsp;Im Wiesengrund 6<br />(barriererfreier&nbsp; Zugang)&nbsp;</p></td></tr></tbody></table>
+LAST-MODIFIED:20260106T084622Z
+SEQUENCE:19773450
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260413T143000
+DTEND;TZID=UTC:20260413T163000
+UID:918B6E11-9FBB-4834-BDD5-EB6337405789
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-16.html
+DESCRIPTION:\N\N\N\NWer\NAWO                                            \N\N\NWO\NFamilienzentrum Niederweimar (ehemaliges Sparkassengebäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p></td><td colspan="3"><p>WO</p><p>Familienzentrum Niederweimar (ehemaliges Sparkassengebäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20251229T132015Z
+SEQUENCE:19098778
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260416T143000
+DTEND;TZID=UTC:20260416T164500
+UID:28DFFD10-7E03-497B-9732-84248C7C96A6
+SUMMARY:Seniorennachmittag 
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/seniorennachmittag-3.html
+DESCRIPTION:\N\NWer :\Nvhs Marburg-Biedenkopf\N\N\N WO\NBürgerhaus Wenkbach Dorfstraße 8\N"Der Strumpfweg - wie die Marburger warme Füße bekamen" (Film)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>vhs Marburg-Biedenkopf</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus Wenkbach <br />Dorfstraße 8</p><p><br />"Der Strumpfweg - wie die Marburger warme Füße bekamen" (Film)</p></div></div>
+LAST-MODIFIED:20251229T110654Z
+SEQUENCE:25666973
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260418T200000
+DTEND;TZID=UTC:20260418T221500
+UID:18AB30AA-6068-4157-8C69-B9260DF158ED
+SUMMARY:"Jahreshauptversammlung"	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/jahreshauptversammlung-6.html
+DESCRIPTION:\N\NWer :\NSchützenverein 1964Niederweimar e.V.\N\N\N WO\NWilhelm Muth Haus\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Schützenverein 1964<br />Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>Wilhelm Muth Haus</p></div></div>
+LAST-MODIFIED:20251229T110804Z
+SEQUENCE:25667043
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260422T143000
+DTEND;TZID=UTC:20260422T153000
+UID:C5252C73-8508-47A3-888A-B037C90736F2
+SUMMARY:SITZ- & Cafeklatsch- Gymnastik
+CREATED:20250522T120852Z
+DTSTAMP:20250522T120852Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sitz-cafeklatsch-gymnastik-13.html
+DESCRIPTION:\N\N\N\NWer\NSC-Roth Argenstein\N\N\NWo\N,Alte Schule" Kulturhaus Roth Im Wiesengrund 6(barriererfreier  Zugang) \N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0"><tbody><tr><td colspan="3"><p>Wer</p><p>SC-Roth Argenstein</p></td><td colspan="3"><p>Wo</p><p>,Alte Schule" Kulturhaus Roth<br />&nbsp;Im Wiesengrund 6<br />(barriererfreier&nbsp; Zugang)&nbsp;</p></td></tr></tbody></table>
+LAST-MODIFIED:20260106T084629Z
+SEQUENCE:19773457
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260424T200000
+DTEND;TZID=UTC:20260424T220000
+UID:CB67F499-B44B-45BD-8E25-712923CE9F41
+SUMMARY:Ignatz Netzer
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/ignatz-netzer.html
+DESCRIPTION:\N\NWer :\NKultur- und FördervereinALTE KIRCHE Niederweimar e.V.\N\N\N WO\NAlte Kirche NiederweimarLindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>Alte Kirche&nbsp;Niederweimar<br />Lindenweg 13</p></div></div>
+LAST-MODIFIED:20251229T110913Z
+SEQUENCE:25667112
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260430
+DTEND;VALUE=DATE:20260501
+UID:1D73D78A-67E5-4728-B46A-06C61373F467
+SUMMARY:"Maibaumaufstellung"	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/maibaumaufstellung.html
+DESCRIPTION:\N\NWer :\NFreiwillige Feuerwehr Wenkbach e.V.\N\N\N WO\NDorfgemeinschaftshausWenkbach (Vorplatz)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Freiwillige Feuerwehr&nbsp;Wenkbach e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>Dorfgemeinschaftshaus<br />Wenkbach (Vorplatz)</p></div></div>
+LAST-MODIFIED:20251229T111021Z
+SEQUENCE:25667180
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260504T143000
+DTEND;TZID=UTC:20260504T163000
+UID:31B20DA8-6762-4078-BC9F-B0B6EA2A616E
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-17.html
+DESCRIPTION:\N\N\N\NWer\NAWO                                            \N\N\NWO\NFamilienzentrum Niederweimar (ehemaliges Sparkassengebäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p></td><td colspan="3"><p>WO</p><p>Familienzentrum Niederweimar (ehemaliges Sparkassengebäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20251229T132117Z
+SEQUENCE:19098840
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260508T200000
+DTEND;TZID=UTC:20260508T220000
+UID:C5DD2BEF-B730-497A-8EEE-9E86B9791FEC
+SUMMARY:"""Get Happy"" Swing, Jazz &  Evergreens"	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/get-happy-swing-jazz-evergreens.html
+DESCRIPTION:\N\NWer :\NKultur- und Förderverein ALTE KIRCHE  Niederweimar e.V.\N\N\N WO\NALTE KIRCHE Niederweimar Lindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Kultur- und Förderverein<br />&nbsp;ALTE KIRCHE&nbsp;&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>ALTE KIRCHE&nbsp;Niederweimar<br />&nbsp;Lindenweg 13</p></div></div>
+LAST-MODIFIED:20251229T111154Z
+SEQUENCE:25667273
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260510
+DTEND;VALUE=DATE:20260511
+UID:0099AF66-E091-4910-BEB7-265913A98DC3
+SUMMARY:Jubelkonfirmation 
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/jubelkonfirmation-2.html
+DESCRIPTION:\N\NWer :\NKirchengemeinde Roth\N\N\N WO\NKirche Roth\NJubelkonfirmation der Jahrgänge 1956, 1961, 1966 und 1976\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Kirchengemeinde&nbsp;Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Kirche Roth</p><p>Jubelkonfirmation der Jahrgänge<br />&nbsp;1956, 1961,&nbsp;1966 und 1976</p><p></p><p></p></div></div>
+LAST-MODIFIED:20251229T111332Z
+SEQUENCE:25667371
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260510
+DTEND;VALUE=DATE:20260511
+UID:59D843AF-816B-4A01-B89C-2F1F606D7813
+SUMMARY:Muttertagsfahrt
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/muttertagsfahrt.html
+DESCRIPTION:\N\NWer :\NAWO\N\N\N WO\NFahrt mit Firma Becker\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>AWO</p></div><div class="col"><p>&nbsp;WO</p><p>Fahrt mit Firma&nbsp;Becker</p><p></p><p></p></div></div>
+LAST-MODIFIED:20251229T111421Z
+SEQUENCE:25667420
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260514T110000
+DTEND;TZID=UTC:20260514T110000
+UID:4A3010D1-BE86-4F3B-ACB5-FDC5F3E653AA
+SUMMARY:Bratpartie
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/bratpartie-2.html
+DESCRIPTION:\N\NWer :\NWanderverein Roth\N\N\N WO\NAlter Sportplatz  (Ortseingang Roth  Richtung Wenkbach)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Wanderverein Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Alter Sportplatz&nbsp;&nbsp;(Ortseingang Roth&nbsp;&nbsp;Richtung Wenkbach)</p><p></p><p></p></div></div>
+LAST-MODIFIED:20251229T111541Z
+SEQUENCE:25667500
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260523T180000
+DTEND;TZID=UTC:20260523T180000
+UID:F231284B-7220-48F3-9A6D-307C133D2727
+SUMMARY:"Pfingstbaum- Fest"	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/pfingstbaum-fest.html
+DESCRIPTION:\N\NWer :\NBurschen-  und Mädchenschaft Roth\N\N\N WO\NLahnbrücke Roth\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Wer :</p><p>Burschen-&nbsp;&nbsp;und Mädchenschaft&nbsp;Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Lahnbrücke Roth</p><p></p></div></div>
+LAST-MODIFIED:20251229T111643Z
+SEQUENCE:25667562
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260529T200000
+DTEND;TZID=UTC:20260529T213000
+UID:ACD0CC60-C852-4D30-9B77-44D81EE5A1B1
+SUMMARY:"""Fang nie was mit Verwandtschaft an"" Kabarettlieder"	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/fang-nie-was-mit-verwandtschaft-an-kabarettlieder.html
+DESCRIPTION:\N\NKultur- und FördervereinALTE KIRCHE  Niederweimar e.V.\N\N\N WO\NAlte Kirche NiederweimarLindenweg 13\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>Alte Kirche&nbsp;Niederweimar<br />Lindenweg 13</p><p></p></div></div>
+LAST-MODIFIED:20251229T111803Z
+SEQUENCE:25667642
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260601T143000
+DTEND;TZID=UTC:20260601T163000
+UID:BC062131-2C65-426B-BE40-D5F0917B6789
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-18.html
+DESCRIPTION:\N\N\N\NWer\NAWO                                            \N\N\NWO\NFamilienzentrum Niederweimar (ehemaliges Sparkassengebäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p></td><td colspan="3"><p>WO</p><p>Familienzentrum Niederweimar (ehemaliges Sparkassengebäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20251229T132131Z
+SEQUENCE:19098854
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260604T110000
+DTEND;TZID=UTC:20260604T123000
+UID:E39147E8-3E0E-4A2F-9624-3FF0C60156FB
+SUMMARY:Frühschoppen
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/fruehschoppen-3.html
+DESCRIPTION:\N\NWER:\NBurschen-u. Mädchenschaft Roth\N\N\N WO\NMultifunktionsplatz hinter dem Bürgerhaus Roth\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Burschen-u. Mädchenschaft Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Multifunktionsplatz hinter dem Bürgerhaus Roth</p><p></p></div></div>
+LAST-MODIFIED:20251229T112234Z
+SEQUENCE:25667913
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260605T200000
+DTEND;TZID=UTC:20260605T213000
+UID:C77AA3DB-C161-43E6-B243-6438AF38F169
+SUMMARY:Kirmes
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/kirmes-2.html
+DESCRIPTION:\N\NWER:\NBurschen-u. Mädchenschaft Roth\N\N\N WO\NMultifunktionsplatz hinter dem Bürgerhaus Roth\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Burschen-u. Mädchenschaft Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Multifunktionsplatz hinter dem Bürgerhaus Roth</p><p></p></div></div>
+LAST-MODIFIED:20251229T112542Z
+SEQUENCE:25668101
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260607
+DTEND;VALUE=DATE:20260608
+UID:87CB21CD-C905-4D25-93CF-DDC7D354A6DF
+SUMMARY:"Konfirmation in Roth mit Pfarrer Hahn"	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/konfirmation-in-roth-mit-pfarrer-hahn.html
+DESCRIPTION:\N\NWER:\NKirchengemeinde Roth\N\N\N WO\NKirche Roth\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Kirchengemeinde Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Kirche Roth</p><p></p></div></div>
+LAST-MODIFIED:20251229T113933Z
+SEQUENCE:25668932
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260612T200000
+DTEND;TZID=UTC:20260612T220000
+UID:F6AEB044-E937-41E8-85FC-55AB7A62EF05
+SUMMARY:Coming home	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/coming-home.html
+DESCRIPTION:\N\NWER:\NKultur- und FördervereinALTE KIRCHE  Niederweimar e.V.\N\N\N WO\NALTE KIRCHE NiederweimarLindenweg 13\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>ALTE KIRCHE&nbsp;Niederweimar<br />Lindenweg 13</p><p></p></div></div>
+LAST-MODIFIED:20251229T114057Z
+SEQUENCE:25669016
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260625T143000
+DTEND;TZID=UTC:20260625T164500
+UID:D130D284-E3AE-4688-887E-763421F7CE6C
+SUMMARY:Seniorennachmittag
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/seniorennachmittag-4.html
+DESCRIPTION:\N\NWER:\Nvhs Marburg-Biedenkopf\N\N\N WO\NBürgerhaus Hermershausen Herbener Straße 5\N"Was der Bauer nicht kennt, dass isst er nicht"\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>vhs Marburg-Biedenkopf</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus Hermershausen Herbener Straße 5</p><p>"Was der Bauer nicht kennt, dass isst er nicht"</p><p></p></div></div>
+LAST-MODIFIED:20251229T114222Z
+SEQUENCE:25669101
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260628T143000
+DTEND;TZID=UTC:20260628T164500
+UID:BCEBAE74-9C42-4615-BE8F-4DA4AD588F6D
+SUMMARY:Gottesdienst des Kooperationsraumes FLOW mit Pfarrerin Rauh	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/gottesdienst-des-kooperationsraumes-flow-mit-pfarrerin-rauh.html
+DESCRIPTION:\N\NWER:\N\N\N\N WO\Nnoch nicht bekannt\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p></p></div><div class="col"><p>&nbsp;WO</p><p>noch nicht bekannt</p></div></div>
+LAST-MODIFIED:20251229T114303Z
+SEQUENCE:25669142
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260704T150000
+DTEND;TZID=UTC:20260704T171500
+UID:2B41A7C0-8C55-4681-8FFC-1B848BC84812
+SUMMARY:Königsschießen
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/koenigsschiessen-2.html
+DESCRIPTION:\N\NWER:\NSchützenverein 1964 Niederweimar e.V.\N\N\N WO\NVereinsgelände an der Addi-Meischt-Allee\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Schützenverein 1964&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>Vereinsgelände an der&nbsp;Addi-Meischt-Allee</p></div></div>
+LAST-MODIFIED:20251229T114412Z
+SEQUENCE:25669211
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260706T143000
+DTEND;TZID=UTC:20260706T163000
+UID:748B2D97-F90E-4DD8-B8CD-FF038408A90A
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-19.html
+DESCRIPTION:\N\N\N\NWer\NAWO                                            \N\N\NWO\NFamilienzentrum Niederweimar (ehemaliges Sparkassengebäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p></td><td colspan="3"><p>WO</p><p>Familienzentrum Niederweimar (ehemaliges Sparkassengebäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20251229T132144Z
+SEQUENCE:19098867
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260710T200000
+DTEND;TZID=UTC:20260710T213000
+UID:231DDDA9-7008-49C8-B86C-96C009B85226
+SUMMARY:"Blind-Date neues Programm"	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/blind-date-neues-programm.html
+DESCRIPTION:\N\NWER:\NKultur- und FördervereinALTE KIRCHE Niederweimar e.V.\N\N\N WO\NALTE KIRCHE NiederweimarLindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>ALTE KIRCHE&nbsp;Niederweimar<br />Lindenweg 13</p></div></div>
+LAST-MODIFIED:20251229T114530Z
+SEQUENCE:25669289
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260711
+DTEND;VALUE=DATE:20260713
+UID:F9030757-3AEB-4077-A4BB-088EEB4BB752
+SUMMARY:Arbeitskreis Landsynagoge
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/arbeitskreis-landsynagoge.html
+DESCRIPTION:\N\NWER:\NArbeitskreis Landsynagoge30-jähriges Jubiläum\N\N\N WO\Nin und vor der Landsynagoge Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Arbeitskreis Landsynagoge<br />30-jähriges Jubiläum</p></div><div class="col"><p>&nbsp;WO</p><p>in und vor der&nbsp;Landsynagoge Roth</p></div></div>
+LAST-MODIFIED:20251229T114656Z
+SEQUENCE:25669375
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260724T200000
+DTEND;TZID=UTC:20260724T211500
+UID:74A339AB-3F87-46AD-AC9F-06AC43B64BCC
+SUMMARY:"Angebissen" literarisch-musikalische Revue	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/blind-date-neues-programm-2.html
+DESCRIPTION:\N\NWER:\NKultur- und FördervereinALTE KIRCHE Niederweimar e.V.\N\N\N WO\NALTE KIRCHE NiederweimarLindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>ALTE KIRCHE&nbsp;Niederweimar<br />Lindenweg 13</p></div></div>
+LAST-MODIFIED:20251229T114739Z
+SEQUENCE:25669418
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260801
+DTEND;VALUE=DATE:20260803
+UID:269B158A-A54D-4AC3-818C-8C344B3E18EA
+SUMMARY:Dorfmarkt Wenkbach	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/dorfmarkt-wenkbach-2.html
+DESCRIPTION:\N\NWER:\NKZV Bürger- und Kulturverein Wenkbach\N\N\N WO\NDorfmitte Wenkbach\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>KZV Bürger- und Kulturverein Wenkbach</p></div><div class="col"><p>&nbsp;WO</p><p>Dorfmitte&nbsp;Wenkbach</p></div></div>
+LAST-MODIFIED:20251229T114838Z
+SEQUENCE:25669477
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260803T143000
+DTEND;TZID=UTC:20260803T163000
+UID:F9D7269C-1BB5-45D3-8819-4C9068BDF62C
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-20.html
+DESCRIPTION:\N\N\N\NWer\NAWO                                            \N\N\NWO\NFamilienzentrum Niederweimar (ehemaliges Sparkassengebäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p></td><td colspan="3"><p>WO</p><p>Familienzentrum Niederweimar (ehemaliges Sparkassengebäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20251229T132200Z
+SEQUENCE:19098883
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260813T093000
+DTEND;TZID=UTC:20260813T120000
+UID:86BC615C-45D0-468F-AD44-86E2C0547EB8
+SUMMARY:Frühstückstreff
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/fruehstueckstreff-2.html
+DESCRIPTION:\N\NWER:\NAWO\N\N\N WO\NBürgerhaus NiederweimarHerborner Str. 36 \N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>AWO</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus Niederweimar<br />Herborner Str. 36&nbsp;</p></div></div>
+LAST-MODIFIED:20251229T125802Z
+SEQUENCE:25673641
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260813T143000
+DTEND;TZID=UTC:20260813T143000
+UID:A08C227B-9201-425E-8C5F-AC9D0D2EDB08
+SUMMARY:Treffen AWO
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/treffen-awo-2.html
+DESCRIPTION:\N\NWER:\NAWO\N\N\N WO\NSeepark Niederweimar\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>AWO</p></div><div class="col"><p>&nbsp;WO</p><p>Seepark Niederweimar</p></div></div>
+LAST-MODIFIED:20251229T125835Z
+SEQUENCE:25673674
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260815T140000
+DTEND;TZID=UTC:20260815T140000
+UID:38FA2FD5-79BE-42D7-90E9-8E2ECBB5F301
+SUMMARY:Sommerturnier
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/sommerturnier-2.html
+DESCRIPTION:\N\NWER:\NSchützenverein 1964 Niederweimar e.V.\N\N\N WO\NVereinsgelände an der Addi-Meischt-Allee\Nfür alle Mitglieder und Gäste\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Schützenverein 1964 Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>Vereinsgelände&nbsp;an der Addi-Meischt-Allee</p><p>für alle Mitglieder und Gäste</p></div></div>
+LAST-MODIFIED:20251229T115109Z
+SEQUENCE:25669628
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260816
+DTEND;VALUE=DATE:20260817
+UID:FFD616F6-4D1C-4864-A683-511DF7FAB544
+SUMMARY:Kirchgartenfest  2026
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/kirchgartenfest-2026.html
+DESCRIPTION:\N\NWER:\NKultur- und FördervereinALTE KIRCHE  Niederweimar e.V.\N\N\N WO\NALTE KIRCHE  NiederweimarLindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>ALTE KIRCHE&nbsp;&nbsp;Niederweimar<br />Lindenweg 13</p></div></div>
+LAST-MODIFIED:20251229T115302Z
+SEQUENCE:25669741
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260905T120000
+DTEND;TZID=UTC:20260905T140000
+UID:164B9D5B-406B-4E51-80C3-6010CAC80EA7
+SUMMARY:KZV  Jubiläumsjungtierschau
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/kzv-jubilaeumsjungtierschau.html
+DESCRIPTION:\N\NWER:\NKZV H532 Niederweimar\N\N\N WO\NVereinsheim an der Allna\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>KZV H532 Niederweimar</p></div><div class="col"><p>&nbsp;WO</p><p>Vereinsheim an der Allna</p></div></div>
+LAST-MODIFIED:20260806T125727Z
+SEQUENCE:44681606
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-IMAGE-FULL:https://www.gemeinde-weimar.de/images/Vereine/kzv.jpg
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260907T143000
+DTEND;TZID=UTC:20260907T163000
+UID:E8780370-BD54-4EE1-A085-B2B52C958146
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-21.html
+DESCRIPTION:\N\N\N\NWer\NAWO                                            \N\N\NWO\NFamilienzentrum Niederweimar (ehemaliges Sparkassengebäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p></td><td colspan="3"><p>WO</p><p>Familienzentrum Niederweimar (ehemaliges Sparkassengebäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20251229T132211Z
+SEQUENCE:19098894
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260912T200000
+DTEND;TZID=UTC:20260912T220000
+UID:BF008129-13FA-4A13-9D1A-FC21BE5D40D7
+SUMMARY:"""Niemals in New York""  Musik-Comedy- Show"
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/niemals-in-new-york-musik-comedy-show.html
+DESCRIPTION:\N\NWER:\NKultur- und FördervereinALTE KIRCHE  Niederweimar e.V.\N\N\N WO\NALTE KIRCHE  NiederweimarLindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>ALTE KIRCHE&nbsp;&nbsp;Niederweimar<br />Lindenweg 13</p></div></div>
+LAST-MODIFIED:20251229T115639Z
+SEQUENCE:25669958
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260918T200000
+DTEND;TZID=UTC:20260918T220000
+UID:BC394771-6BB9-4955-A14B-4B0E2ACA0076
+SUMMARY:"Chansonquartett Trulleberg"	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/chansonquartett-trulleberg.html
+DESCRIPTION:\N\NWER:\NKultur- und FördervereinALTE KIRCHE  Niederweimar e.V.\N\N\N WO\NALTE KIRCHE  NiederweimarLindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>ALTE KIRCHE&nbsp;&nbsp;Niederweimar<br />Lindenweg 13</p></div></div>
+LAST-MODIFIED:20251229T115705Z
+SEQUENCE:25669984
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20260926T180000
+DTEND;TZID=UTC:20260926T191500
+UID:2FEAAE6E-E332-4AB1-BBAB-EBAD044F0A13
+SUMMARY:"""Gabriel Cassiaux"" (1791-1813) Vortrag"
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/gabriel-cassiaux-1791-1813-vortrag.html
+DESCRIPTION:\N\NWER:\NKultur- und FördervereinALTE KIRCHE  Niederweimar e.V.\N\N\N WO\NALTE KIRCHE  NiederweimarLindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>ALTE KIRCHE&nbsp;&nbsp;Niederweimar<br />Lindenweg 13</p></div></div>
+LAST-MODIFIED:20251229T115745Z
+SEQUENCE:25670024
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20261003
+DTEND;VALUE=DATE:20261004
+UID:961B4C8D-894B-4421-B999-3854908A2438
+SUMMARY:Oktoberfest
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/oktoberfest-2.html
+DESCRIPTION:\N\NWER:\NKZV, Bürger- und Kulturverein Wenkbach e.V.\N\N\N WO\NParkplatz Bürgerhaus\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>KZV, Bürger- und Kulturverein Wenkbach e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>Parkplatz&nbsp;Bürgerhaus</p></div></div>
+LAST-MODIFIED:20251229T120006Z
+SEQUENCE:25670165
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261005T143000
+DTEND;TZID=UTC:20261005T163000
+UID:FC4A3ABB-4D48-40B7-A274-5EBBA3A09201
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-22.html
+DESCRIPTION:\N\N\N\NWer\NAWO                                            \N\N\NWO\NFamilienzentrum Niederweimar (ehemaliges Sparkassengebäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p></td><td colspan="3"><p>WO</p><p>Familienzentrum Niederweimar (ehemaliges Sparkassengebäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20251229T132224Z
+SEQUENCE:19098907
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261010T160000
+DTEND;TZID=UTC:20261010T171500
+UID:245B75DC-BB94-4DA7-B426-E6226038E353
+SUMMARY:Oktoberfest
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/oktoberfest-3.html
+DESCRIPTION:\N\NWER:\NBurschen- und Mädchenschaft Roth\N\N\N WO\NMultifunktionsplatz hinter demBürgerhaus Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Burschen- und Mädchenschaft Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Multifunktionsplatz&nbsp;hinter dem<br />Bürgerhaus Roth</p></div></div>
+LAST-MODIFIED:20251229T115941Z
+SEQUENCE:25670140
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261018T140000
+DTEND;TZID=UTC:20261018T160000
+UID:1010217A-41E5-47B7-803E-6C06679582E6
+SUMMARY:"Eltern-Kind Lego Workshop"
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/eltern-kind-lego-workshop.html
+DESCRIPTION:\N\NWER:\NKultur- und FördervereinALTE KIRCHE  Niederweimar e.V.\N\N\N WO\NALTE KIRCHE  NiederweimarLindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>ALTE KIRCHE&nbsp;&nbsp;Niederweimar<br />Lindenweg 13</p></div></div>
+LAST-MODIFIED:20251229T125135Z
+SEQUENCE:25673254
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261029T143000
+DTEND;TZID=UTC:20261029T164500
+UID:C5F1B2B0-68C5-421A-8629-0385D15D9276
+SUMMARY:Seniorennachmittag
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/seniorennachmittag-5.html
+DESCRIPTION:\N\NWER:\Nvhs Marburg-Biedenkopf\N\N\N WO\NBürgerhaus Roth Wolfshäuser Str. 1\N"Teneriffa - Insel des ewigen Frühlings"\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>vhs Marburg-Biedenkopf</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus Roth&nbsp;Wolfshäuser Str. 1</p><p>"Teneriffa - Insel des ewigen Frühlings"</p></div></div>
+LAST-MODIFIED:20251229T125331Z
+SEQUENCE:25673370
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261030T200000
+DTEND;TZID=UTC:20261030T213000
+UID:D5823BF0-4C51-4B88-BBC7-0901F64C3AFB
+SUMMARY:"Angst im Dunkeln" Lesung mit Toni  Castell
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/angst-im-dunkeln-lesung-mit-toni-castell.html
+DESCRIPTION:\N\NWER:\NKultur- und FördervereinALTE KIRCHE  Niederweimar e.V.\N\N\N WO\NALTE KIRCHE  NiederweimarLindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>ALTE KIRCHE&nbsp;&nbsp;Niederweimar<br />Lindenweg 13</p></div></div>
+LAST-MODIFIED:20251229T125445Z
+SEQUENCE:25673444
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20261031
+DTEND;VALUE=DATE:20261101
+UID:18C9F8BF-BA3C-4BBF-ADBB-C2EE7AA3215A
+SUMMARY:Halloween
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/halloween.html
+DESCRIPTION:\N\NWER:\NKZV, Bürger- und Kulturverein Wenkbach e.V.\N\N\N WO\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>KZV, Bürger- und Kulturverein Wenkbach e.V.</p></div><div class="col"><p>&nbsp;WO</p><p></p></div></div>
+LAST-MODIFIED:20251229T125625Z
+SEQUENCE:25673544
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261031T200000
+DTEND;TZID=UTC:20261031T220000
+UID:B8867785-4519-4A66-B699-9840495152CA
+SUMMARY:"Stilles Leben"
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/stilles-leben.html
+DESCRIPTION:\N\NWER:\NKultur- und FördervereinALTE KIRCHE  Niederweimar e.V.\N\N\N WO\NALTE KIRCHE  NiederweimarLindenweg 13\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Kultur- und Förderverein<br />ALTE KIRCHE&nbsp;&nbsp;Niederweimar e.V.</p></div><div class="col"><p>&nbsp;WO</p><p>ALTE KIRCHE&nbsp;&nbsp;Niederweimar<br />Lindenweg 13</p></div></div>
+LAST-MODIFIED:20251229T125542Z
+SEQUENCE:25673501
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261102T143000
+DTEND;TZID=UTC:20261102T163000
+UID:540DBCDC-CFA9-4E47-AEF6-274A282DD571
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-23.html
+DESCRIPTION:\N\N\N\NWer\NAWO                                            \N\N\NWO\NFamilienzentrum Niederweimar (ehemaliges Sparkassengebäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p></td><td colspan="3"><p>WO</p><p>Familienzentrum Niederweimar (ehemaliges Sparkassengebäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20251229T132237Z
+SEQUENCE:19098920
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261107T093000
+DTEND;TZID=UTC:20261107T120000
+UID:92751959-22C0-4068-800D-BAEB4A600C9E
+SUMMARY:Frühstückstreff
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/fruehstueckstreff-5.html
+DESCRIPTION:\N\NWER:\NAWO\N\N\N WO\NBürgerhaus NiederweimarHerborner Str. 36 \N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>AWO</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus Niederweimar<br />Herborner Str. 36&nbsp;</p></div></div>
+LAST-MODIFIED:20251229T143724Z
+SEQUENCE:25679603
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261108T180000
+DTEND;TZID=UTC:20261108T180000
+UID:866CB0CE-2BA8-4753-94D9-C7122D67FEA0
+SUMMARY:Gedenkstunde an die Reichspogromnacht
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/gedenkstunde-an-die-reichspogromnacht-2.html
+DESCRIPTION:\N\NWER:\NArbeitskreis Landsynagoge\N\N\N WO\NSynagoge Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Arbeitskreis Landsynagoge</p></div><div class="col"><p>&nbsp;WO</p><p>Synagoge Roth</p></div></div>
+LAST-MODIFIED:20251229T130026Z
+SEQUENCE:25673785
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261109T190000
+DTEND;TZID=UTC:20261109T190000
+UID:CC38960E-F6F3-46C9-85F5-5BDF3EEA6D83
+SUMMARY:Terminabsprache
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/terminabsprache-2.html
+DESCRIPTION:\N\NWER:\Nörtliche Vereine Roth\N\N\N WO\NNebenraum Bürgerhausgaststätte Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>örtliche Vereine Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Nebenraum Bürgerhausgaststätte Roth</p></div></div>
+LAST-MODIFIED:20251229T130125Z
+SEQUENCE:25673844
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261111T173000
+DTEND;TZID=UTC:20261111T193000
+UID:46E54354-791F-460F-8294-56D99EF5C37A
+SUMMARY:"St.-Martins- Umzug"
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/st-martins-umzug-2.html
+DESCRIPTION:\N\NWER:\NKindergarten Roth\N\N\N WO\NKirche Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Kindergarten&nbsp;Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Kirche Roth</p></div></div>
+LAST-MODIFIED:20251229T130235Z
+SEQUENCE:25673914
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261115T173000
+DTEND;TZID=UTC:20261115T193000
+UID:50B738C3-E0B8-472D-A6A9-D6E30FB21884
+SUMMARY:"Gedenk- Veranstaltung Volkstrauertag"
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/gedenk-veranstaltung-volkstrauertag.html
+DESCRIPTION:\N\NWER:\NKirchengemeinde Roth\N\N\N WO\NEhrenmal an der Kirche in Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Kirchengemeinde&nbsp;Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Ehrenmal an der Kirche&nbsp;in Roth</p></div></div>
+LAST-MODIFIED:20251229T130330Z
+SEQUENCE:25673969
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261127T143000
+DTEND;TZID=UTC:20261127T164500
+UID:5C3CA1E9-E7F0-4312-B96C-D9AB60A6501B
+SUMMARY:Seniorennachmittag
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/seniorennachmittag-6.html
+DESCRIPTION:\N\NWER:\Nvhs Marburg-Biedenkopf\N\N\N WO\NBürgerhaus Niederwalgern Bergstraße 3\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>vhs Marburg-Biedenkopf</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus Niederwalgern Bergstraße 3</p></div></div>
+LAST-MODIFIED:20251229T130445Z
+SEQUENCE:25674044
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261206T150000
+DTEND;TZID=UTC:20261206T171500
+UID:AC44BD55-7996-4AA9-80E7-799FC1782AC7
+SUMMARY:Adventsnachmittag
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/adventsnachmittag-2.html
+DESCRIPTION:\N\NWER:\NBeirat "Alte Schule" Kulturhaus Roth\N\N\N WO\N,,Alte Schule" Kulturhaus Roth Im Wiesengrund 6(barriererfreier  Zugang)\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Beirat "Alte Schule" Kulturhaus Roth</p></div><div class="col"><p>&nbsp;WO</p><p>,,Alte Schule" Kulturhaus Roth<br />&nbsp;Im Wiesengrund 6<br />(barriererfreier&nbsp; Zugang)</p></div></div>
+LAST-MODIFIED:20251229T130741Z
+SEQUENCE:25674220
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261207T143000
+DTEND;TZID=UTC:20261207T163000
+UID:D23E640B-C29C-45D8-95EF-050F41616E02
+SUMMARY:Spielenachmittag
+CREATED:20250522T120717Z
+DTSTAMP:20250522T120717Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/spielenachmittag-24.html
+DESCRIPTION:\N\N\N\NWer\NAWO                                            \N\N\NWO\NFamilienzentrum Niederweimar (ehemaliges Sparkassengebäude)\N\N\N\N
+X-ALT-DESC;FMTTYPE=text/html:<table border="0" style="width: 949px; height: 54px;"><tbody><tr><td colspan="3"><p>Wer</p><p>AWO&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p></td><td colspan="3"><p>WO</p><p>Familienzentrum Niederweimar (ehemaliges Sparkassengebäude)</p></td></tr></tbody></table>
+LAST-MODIFIED:20251229T132252Z
+SEQUENCE:19098935
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261212T180000
+DTEND;TZID=UTC:20261212T201500
+UID:F5D1AEFB-A623-42F5-976C-CF2271CEFB25
+SUMMARY:Weihnachtsfeier
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/weihnachtsfeier.html
+DESCRIPTION:\N\NWER:\NFFW-Einsatzleitung Roth\N\N\N WO\NFFW-Gerätehaus Roth\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>FFW-Einsatzleitung&nbsp;Roth</p></div><div class="col"><p>&nbsp;WO</p><p>FFW-Gerätehaus&nbsp;Roth</p></div></div>
+LAST-MODIFIED:20251229T130648Z
+SEQUENCE:25674167
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261213T150000
+DTEND;TZID=UTC:20261213T171500
+UID:7D4107F0-C4AE-4EAD-8814-1D2143F3FAFC
+SUMMARY:Senioren Adventsnachmittag
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/senioren-adventsnachmittag.html
+DESCRIPTION:\N\NWER:\NAWO in Kooperation mit der evangelischen Kirche\N\N\N WO\NBürgerhaus NiederweimarHerborner Str. 36\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>AWO in Kooperation mit der evangelischen Kirche</p></div><div class="col"><p>&nbsp;WO</p><p>Bürgerhaus Niederweimar<br />Herborner Str. 36</p></div></div>
+LAST-MODIFIED:20251229T130841Z
+SEQUENCE:25674280
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20261228T100000
+DTEND;TZID=UTC:20261228T121500
+UID:FFCB406E-DFCA-41A7-B83A-40FE3C55A308
+SUMMARY:Winterwanderung	
+CREATED:20250307T092401Z
+DTSTAMP:20250307T092401Z
+URL:https://www.gemeinde-weimar.de/leben-in-weimar-lahn/leben/veranstaltungskalender/winterwanderung.html
+DESCRIPTION:\N\NWER:\NFeuerwehr Roth\N\N\N WO\NFeuerwehr Gerätehaus\N\N
+X-ALT-DESC;FMTTYPE=text/html:<div class="row" data-wf-columns="1"><div class="col"><p>WER:</p><p>Feuerwehr Roth</p></div><div class="col"><p>&nbsp;WO</p><p>Feuerwehr&nbsp;Gerätehaus</p></div></div>
+LAST-MODIFIED:20251229T130937Z
+SEQUENCE:25674336
+X-ACCESS:1
+X-HITS:0
+X-COLOR:10a115
+X-SHOW-END-TIME:0
+END:VEVENT
+END:VCALENDAR

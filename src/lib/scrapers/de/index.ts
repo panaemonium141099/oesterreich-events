@@ -10,8 +10,9 @@ import { TribeDeScraper } from './TribeDeScraper';
 import { EventsManagerDeScraper } from './EventsManagerDeScraper';
 import { MecDeScraper } from './MecDeScraper';
 import { DpCalendarDeScraper } from './DpCalendarDeScraper';
+import { ICagendaDeScraper, JEventsDeScraper } from './JoomlaDeScraper';
 
-export const DE_SCRAPERS: BaseScraper[] = [new IonasDeScraper(), new NolisDeScraper(), new TribeDeScraper(), new EventsManagerDeScraper(), new MecDeScraper(), new DpCalendarDeScraper()];
+export const DE_SCRAPERS: BaseScraper[] = [new IonasDeScraper(), new NolisDeScraper(), new TribeDeScraper(), new EventsManagerDeScraper(), new MecDeScraper(), new DpCalendarDeScraper(), new JEventsDeScraper(), new ICagendaDeScraper()];
 
 export function getDeScraperByName(name: string): BaseScraper | undefined {
   return DE_SCRAPERS.find(s => s.name === name);

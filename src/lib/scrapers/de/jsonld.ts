@@ -24,11 +24,26 @@ export interface LdEvent {
   postalCode?: string;
   locality?: string;
   organizer?: string;
+  image?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   lat?: number;
   lng?: number;
 }
 
 type Json = Record<string, unknown>;
+
+/** `image` als URL, Liste oder ImageObject; das erste mit URL, Maße wenn angegeben. */
+function image(v: unknown): Pick<LdEvent, 'image' | 'imageWidth' | 'imageHeight'> {
+  const first = Array.isArray(v) ? v[0] : v;
+  if (typeof first === 'string') return first.trim() ? { image: first.trim() } : {};
+  if (!first || typeof first !== 'object') return {};
+  const o = first as Json;
+  const url = typeof o.url === 'string' ? o.url : typeof o.contentUrl === 'string' ? o.contentUrl : undefined;
+  if (!url?.trim()) return {};
+  const w = Number(o.width), h = Number(o.height);
+  return { image: url.trim(), ...(w > 0 && h > 0 ? { imageWidth: w, imageHeight: h } : {}) };
+}
 
 const str = (v: unknown): string | undefined => {
   if (typeof v !== 'string') return undefined;
@@ -107,6 +122,7 @@ export function toLdEvent(o: Json): LdEvent | null {
     locationName: str(loc?.name),
     ...address(loc),
     organizer: str(org?.name),
+    ...image(o.image),
     ...(geo && Number.isFinite(lat) && Number.isFinite(lng) && !(lat === 0 && lng === 0) ? { lat, lng } : {}),
   };
 }

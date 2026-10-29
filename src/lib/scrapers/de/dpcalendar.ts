@@ -35,8 +35,12 @@ function text(v: unknown): string | undefined {
   return t || undefined;
 }
 
-/** Ganztägig: node-ical legt das Datum auf lokale Mitternacht des Prozesses. */
-const localDay = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+/**
+ * Ganztägig: node-ical legt das Datum auf lokale Mitternacht des Prozesses.
+ * Zwölf Stunden später ist in jeder Zone zwischen UTC−12 und UTC+12 noch
+ * derselbe UTC-Kalendertag, ohne Datums-Getter der Laufzeitzone.
+ */
+const localDay = (d: Date) => new Date(d.getTime() + 12 * 3_600_000).toISOString().slice(0, 10);
 
 const addDays = (date: string, n: number) => {
   const d = new Date(`${date}T12:00:00Z`);
@@ -44,8 +48,18 @@ const addDays = (date: string, n: number) => {
   return d.toISOString().slice(0, 10);
 };
 
+/**
+ * `TZID=UTC` schreibt DPCalendar, wenn die Website auf Zeitzone UTC steht;
+ * gemeint ist die Ortszeit (Weimar (Lahn) „Angst im Dunkeln" 20:00 UTC,
+ * Seite 20:00; ebenso Mehlbek, Birgel, Oersdorf, Poyenberg, 2026-10-29).
+ * Echte UTC-Zeiten (`Z`, Google-Spiegel Bramstedtlund) bleiben UTC.
+ */
+export function wallTimeForUtcTzid(icsText: string): string {
+  return icsText.replace(/;TZID=(?:"UTC"|UTC|Etc\/UTC|GMT):/g, ';TZID=Europe/Berlin:');
+}
+
 export function parseDpIcs(icsText: string, from: Date, to: Date): DpEvent[] {
-  const data = ical.sync.parseICS(icsText);
+  const data = ical.sync.parseICS(wallTimeForUtcTzid(icsText));
   const out: DpEvent[] = [];
   for (const c of Object.values(data)) {
     if (!c || c.type !== 'VEVENT') continue;
