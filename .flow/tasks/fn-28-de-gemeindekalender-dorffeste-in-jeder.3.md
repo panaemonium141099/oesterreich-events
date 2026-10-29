@@ -35,9 +35,15 @@ Ergebnisdatei: `docs/research/de-gemeinden/02-bayern.md`.
 
 
 ## Done summary
-TBD
-
+`docs/research/de-gemeinden/02-bayern.md` plus Anhang `02-bayern-anfragen.md` (PR #369).
+Stichprobe 30 Gemeinden unter 10.000 EW (Destatis 30.09.2026, `random.Random(20261027)`):
+Hauptfundort 18 × eigene Website, 3 × VGem, 7 × PDF, 2 × Tourismus, 2 × Heimat-Info, 1 × nirgends;
+20 von 30 maschinenlesbar, Dorffest bei 24 belegt. Generics: Heimat-Info (5/30 mit Terminen,
+507 bayerische Einträge), communice web/inixmedia (5/30, Eigenangabe 500 Installationen),
+RCE-Event (4/30), The Events Calendar (3/30), open2c. destination.one 6/30, BayernCloud steckt
+dort als DataCycleProxy. Abgleich mit der Vollerhebung: 18 von 30 abweichend, Zuordnung heißt
+nicht Termine. Offen für den User: Anfragen inixmedia und RCE Medien, Bayern-Zahl ins WITTICH-Gespräch.
 ## Evidence
-- Commits:
+- Commits: 3913e0a2
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/369
