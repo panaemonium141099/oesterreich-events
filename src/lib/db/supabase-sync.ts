@@ -175,7 +175,8 @@ export function normalizeTicketUrl(raw: string | null | undefined): string | nul
   return url.toString();
 }
 
-function getSupabaseAdminClient() {
+/** Service-Role-Client des Schreibpfads (auch für den Künstler-Schritt des Eventim-Imports). */
+export function getSupabaseAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {

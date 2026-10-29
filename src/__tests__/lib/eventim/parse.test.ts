@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { parseEventimFeed } from '@/lib/eventim/parse';
-import type { EventimSeries, EventimEvent } from '@/lib/eventim/types';
+import { parseEventimFeed, seriesArtists, type EventimArtistsByEvent } from '@/lib/eventim/parse';
+import type { EventimSeries, EventimEvent, EventimArtist } from '@/lib/eventim/types';
 
 const NOW = '2026-06-16T00:00:00.000Z';
 
@@ -117,5 +117,60 @@ describe('parseEventimFeed: Platzhalter-Koordinaten des Feeds (fn-25)', () => {
 
   it('Säle eines Hauses (zwei Straßenschreibweisen) bleiben Venue-Koordinaten', () => {
     for (const id of ['M1', 'M2', 'M3']) expect(out.find(x => x.source_id === id)!.coords_precision).toBe('venue');
+  });
+});
+
+describe('parseEventimFeed: Serien-Künstler je Event (fn-30)', () => {
+  const artist = (over: Partial<EventimArtist> = {}): EventimArtist => ({
+    artistId: 'ART-1', artistName: 'Bilderbuch', artistImage: 'https://img/bilderbuch.jpg',
+    evoLink: 'https://www.oeticket.com/artist/bilderbuch/?affiliate=J70', ...over,
+  });
+  const feed: EventimSeries[] = [
+    {
+      esId: 'S1', esName: 'Tour', esCategories: [{ category: '1A' }],
+      artists: [
+        artist(),
+        artist({ artistId: 'ART-2', artistName: '  Wanda ', artistImage: undefined, evoLink: undefined }),
+        artist({ artistId: 'ART-3', artistName: '   ' }),          // leerer Name: verworfen
+        artist({ artistId: '', artistName: 'Ohne ID' }),           // leere ID: verworfen (Primärschlüssel)
+        artist({ artistId: 'ART-1', artistName: 'Bilderbuch (Dublette)' }), // zweite Zeile derselben ID
+      ],
+      events: [
+        baseEvent({ eventId: 'K1' }),
+        baseEvent({ eventId: 'K2', eventCountry: 'DE' }),
+        baseEvent({ eventId: 'K-PAST', eventDateIso8601: '2020-01-01T20:00:00.000+01:00' }),
+      ],
+    },
+    { esId: 'S2', esName: 'Ohne Künstler', esCategories: [{ category: '1A' }], events: [baseEvent({ eventId: 'N1' })] },
+    { esId: 'S3', esName: 'Nur leere', esCategories: [{ category: '1A' }], artists: [artist({ artistName: '' })], events: [baseEvent({ eventId: 'N2' })] },
+  ];
+
+  it('liefert je übernommenem Event die bereinigten Serien-Künstler, auch für DE', () => {
+    const artists: EventimArtistsByEvent = new Map();
+    const out = parseEventimFeed(feed, NOW, undefined, artists);
+    expect(out.map((e) => e.source_id).sort()).toEqual(['K1', 'K2', 'N1', 'N2']);
+    expect([...artists.keys()].sort()).toEqual(['K1', 'K2']);
+    expect(artists.get('K1')).toEqual([
+      { artistId: 'ART-1', artistName: 'Bilderbuch', artistImage: 'https://img/bilderbuch.jpg', evoLink: 'https://www.oeticket.com/artist/bilderbuch/?affiliate=J70' },
+      { artistId: 'ART-2', artistName: 'Wanda', artistImage: undefined, evoLink: undefined },
+    ]);
+    expect(artists.get('K2')).toEqual(artists.get('K1'));
+  });
+
+  it('Serien ohne Künstler und verworfene Events liefern keinen Eintrag', () => {
+    const artists: EventimArtistsByEvent = new Map();
+    parseEventimFeed(feed, NOW, undefined, artists);
+    expect(artists.has('N1')).toBe(false);
+    expect(artists.has('N2')).toBe(false);
+    expect(artists.has('K-PAST')).toBe(false);
+    expect(seriesArtists(feed[1])).toEqual([]);
+  });
+
+  it('ScrapedEvent bleibt unverändert: kein Künstler-Feld, gleiche Zeilen mit und ohne Sammler', () => {
+    const artists: EventimArtistsByEvent = new Map();
+    const withCollector = parseEventimFeed(feed, NOW, undefined, artists);
+    const without = parseEventimFeed(feed, NOW);
+    expect(withCollector).toEqual(without);
+    for (const e of withCollector) expect(Object.keys(e)).not.toContain('artists');
   });
 });
