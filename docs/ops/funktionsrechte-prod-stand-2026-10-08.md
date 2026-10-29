@@ -110,3 +110,18 @@ get_artist_appearances und match_exact_artist_title liefern 42501.
 Zehn Tabellen in public haben kein RLS, anon hat dort INSERT, UPDATE und
 DELETE: analytics_daily, district_canonical, event_map_points_payload,
 source_runs, sources, workflow_runs und vier snap_20260914_*-Tabellen.
+
+## Nachtrag 2026-10-29 (fn-30, Startseite als Tagesausgabe)
+
+Neue Tabelle `event_artists` (`20261029200000_event_artists.sql`): RLS an,
+Select-Policy `event_artists_public_read` für anon und authenticated
+(`using (true)`), keine Schreib-Policy; `grant all` nur an service_role (der
+Eventim-Import schreibt mit Service-Key). Die Startseite liest die Tabelle mit
+dem Anon-Client über das Embedding `events!inner`, deshalb nach der Migration
+`NOTIFY pgrst, 'reload schema'`, sonst fehlt der FK im Schema-Cache.
+
+`event_counts_for_stats` bleibt öffentlich und lesend
+(`20261029200200_stats_country_total.sql` legt die MV `event_stats_cache` mit
+dem Feld `country_total` neu an und wiederholt REVOKE/GRANT der RPC). Die MV
+selbst bleibt für anon und authenticated gesperrt, nur service_role liest sie
+direkt. Wächter: `src/__tests__/db/tagesausgabe-migrations.test.ts`.

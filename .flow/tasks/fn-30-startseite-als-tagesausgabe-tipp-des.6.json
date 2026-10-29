@@ -1,0 +1,17 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-29T19:48:30.616503Z",
+  "depends_on": [
+    "fn-30-startseite-als-tagesausgabe-tipp-des.3",
+    "fn-30-startseite-als-tagesausgabe-tipp-des.5"
+  ],
+  "epic": "fn-30-startseite-als-tagesausgabe-tipp-des",
+  "id": "fn-30-startseite-als-tagesausgabe-tipp-des.6",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-30-startseite-als-tagesausgabe-tipp-des.6.md",
+  "status": "todo",
+  "title": "Unterbau: Programmliste, Wochenende, Region, Festivals/Blog, Freizeit, Newsletter-Zeile; alte Sektionen und i18n entfernen; /entdecken von/bis",
+  "updated_at": "2026-10-29T19:52:10.912080Z"
+}

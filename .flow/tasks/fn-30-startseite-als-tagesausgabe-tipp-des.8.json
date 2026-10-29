@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-29T19:48:31.905964Z",
+  "depends_on": [],
+  "epic": "fn-30-startseite-als-tagesausgabe-tipp-des",
+  "id": "fn-30-startseite-als-tagesausgabe-tipp-des.8",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-30-startseite-als-tagesausgabe-tipp-des.8.md",
+  "status": "todo",
+  "title": "Shelf-Spur ohne \u00dcberhang auf /entdecken, Hubs, Thema, Studenten",
+  "updated_at": "2026-10-29T19:51:47.367710Z"
+}

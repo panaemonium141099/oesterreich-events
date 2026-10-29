@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-29T19:48:31.323311Z",
+  "depends_on": [
+    "fn-30-startseite-als-tagesausgabe-tipp-des.1"
+  ],
+  "epic": "fn-30-startseite-als-tagesausgabe-tipp-des",
+  "id": "fn-30-startseite-als-tagesausgabe-tipp-des.7",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-30-startseite-als-tagesausgabe-tipp-des.7.md",
+  "status": "todo",
+  "title": "Admin: Tipp des Tages buchen (kind, sponsor_name, Wiener Tag, 409, revalidate) + Cron revalidate-landing",
+  "updated_at": "2026-10-29T19:52:11.603894Z"
+}

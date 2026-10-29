@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Landing B: Heute in Österreich</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* Kopf in der Grammatik von /entdecken: Titel links, Datum rechts, darunter Suche und Top-Picks */
+.top{padding:30px 0 6px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.top h1{margin:0;font-size:48px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.top p{margin:0 0 6px;text-align:right;font-size:14px;color:var(--ink50);line-height:1.5}
+.top p b{display:block;color:var(--ink);font-weight:700;font-size:16px}
+.sb{margin:18px 0 22px}
+.band{margin-top:36px;padding:20px 22px 22px;border-radius:18px;background:linear-gradient(135deg,rgba(245,185,66,.14),rgba(245,185,66,.03) 60%,transparent);border:1px solid rgba(245,185,66,.22)}
+.band .shelf{margin-top:0}
+.band .track{margin:0 -22px;padding:0 22px 6px;scroll-padding-left:22px}
+.band .hd span{color:var(--ink70)}
+@media(max-width:720px){.top{padding-top:22px}.top h1{font-size:38px}.top p{text-align:left}.top p b{display:inline;margin-right:6px}.band{padding:14px 14px 16px}.band .track{margin:0 -14px;padding:0 14px 6px}}
+</style></head><body>
+<script src="data.js"></script>
+<script>document.write(NAV)</script>
+
+<main class="wrap">
+  <div class="top">
+    <h1>Bleib ned daham.</h1>
+    <p><b id="h-day"></b><span id="h-count"></span> Events · ganz Österreich</p>
+  </div>
+  <div class="sb">
+    <div class="searchbar">⌕ Künstler, Event oder Ort<b>Suchen</b></div>
+    <div class="chips"><span class="chip on">Überall</span><span class="chip">Wien</span><span class="chip">Graz</span><span class="chip">Linz</span><span class="chip">Salzburg</span><span class="chip">Innsbruck</span><span class="chip">Klagenfurt</span><span class="chip ghost">Ort wählen</span></div>
+  </div>
+
+  <section class="picks" id="picks"></section>
+
+  <section class="band" id="band"></section>
+
+  <div id="body"></div>
+</main>
+<script>
+document.getElementById('h-day').textContent = `${TODAY.weekday}, ${TODAY.date}`;
+document.getElementById('h-count').textContent = TODAY.count;
+document.getElementById('picks').innerHTML =
+  pick(PICKS[0], true, { label: PICKS[0].tag }) + PICKS.slice(1).map(e => pick(e, false)).join('');
+document.getElementById('band').innerHTML =
+  shelf(`${SEASON.kicker}: ${SEASON.title}`, '☀️ ' + SEASON.weather, SEASON.more, SEASON_PICKS.map(card).join(''));
+document.getElementById('body').innerHTML = renderBody({ season: false });
+document.write(TABBAR);
+</script>
+</body></html>

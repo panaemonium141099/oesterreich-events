@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Landing D: Tagesausgabe</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* Tagesausgabe: Datumszeile wie ein Zeitungskopf, darunter eine Bühne aus vier ungleichen
+   Karten mit je einer Rolle (Tipp des Tages = ein Veranstalter pro Tag, Saison, Karte, Künstler).
+   Darunter wechseln die Formen: Programmliste, Poster-Spur, zweispaltige Listen. */
+.mast{padding:26px 0 18px;display:grid;grid-template-columns:1fr auto;gap:18px 40px;align-items:end}
+.mast .date{font-size:13.5px;color:var(--ink50);margin:0 0 10px}
+.mast .date b{color:var(--ink);font-weight:600}
+.mast h1{margin:0;font-size:46px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.mast .searchbar{width:420px}
+@media(max-width:1000px){.mast{grid-template-columns:1fr}.mast .searchbar{width:100%}}
+@media(max-width:720px){.mast{padding-top:18px}.mast h1{font-size:38px}}
+
+/* Bühne */
+.stage{display:grid;grid-template-columns:1.45fr 1fr 1fr;grid-template-rows:256px 256px;gap:12px;margin-top:10px}
+.stage>*{min-width:0}
+.tip{grid-row:span 2;position:relative;border-radius:18px;overflow:hidden;background:var(--elev);display:block}
+.tip img{width:100%;height:100%;object-fit:cover}
+.tip .ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 30%,rgba(5,5,6,.96) 100%)}
+.tip .lab{position:absolute;left:16px;top:14px;display:flex;gap:6px;align-items:center}
+.tip .lab b{font-size:11.5px;font-weight:800;color:#0a0a0c;background:var(--sand);padding:5px 9px;border-radius:6px}
+.tip .lab span{font-size:11px;color:rgba(255,255,255,.75);background:rgba(10,10,12,.55);backdrop-filter:blur(6px);padding:5px 8px;border-radius:6px}
+.tip .tx{position:absolute;left:20px;right:20px;bottom:18px}
+.tip h2{margin:0;font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1.05;color:#fff}
+.tip p{margin:8px 0 0;font-size:14px;color:rgba(255,255,255,.78)}
+.tip .cta{display:flex;align-items:center;gap:14px;margin-top:14px}
+.tip .cta b{background:#fff;color:#0a0a0c;font-size:13.5px;font-weight:700;padding:10px 16px;border-radius:999px;white-space:nowrap}
+.tip .cta span{font-size:13px;color:rgba(255,255,255,.72)}
+.tip .org{position:absolute;right:16px;top:14px;font-size:11.5px;color:rgba(255,255,255,.7)}
+
+.sea{grid-row:span 2;border-radius:18px;border:1px solid var(--h2);background:var(--elev);padding:16px 14px 12px;display:flex;flex-direction:column}
+.sea .k{font-size:11.5px;font-weight:700;color:var(--amber);margin:0 0 4px}
+.sea h2{margin:0;font-size:19px;font-weight:800;letter-spacing:-.025em;line-height:1.15}
+.sea .w{margin:6px 0 10px;font-size:12.5px;color:var(--ink50)}
+.sea .list{flex:1;display:flex;flex-direction:column;justify-content:space-evenly;min-height:0}
+.sea a.row{display:grid;grid-template-columns:46px minmax(0,1fr);gap:10px;align-items:center;padding:6px 6px;margin:0 -6px;border-radius:10px;min-width:0}
+.sea a.row>span{min-width:0}
+.sea a.row:hover{background:var(--h1)}
+.sea a.row img{width:46px;height:46px;border-radius:9px;object-fit:cover}
+.sea a.row b{display:block;font-size:13.5px;font-weight:700;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sea a.row small{display:block;font-size:12px;color:var(--ink50);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sea a.row em{font-style:normal;color:var(--amber);font-weight:700;margin-right:5px}
+.sea .more{padding-top:10px;font-size:13px;font-weight:700;color:var(--ink70)}
+
+.map{position:relative;border-radius:18px;overflow:hidden;background:#101014;display:block}
+.map img{width:100%;height:100%;object-fit:cover;opacity:.9}
+.map .ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,5,6,.1),rgba(5,5,6,.78))}
+.map .tx{position:absolute;left:16px;right:16px;bottom:14px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.map h2{margin:0;font-size:17px;font-weight:800;letter-spacing:-.02em}
+.map p{margin:3px 0 0;font-size:12.5px;color:var(--ink70)}
+.map b{flex:none;background:#fff;color:#0a0a0c;font-size:12.5px;font-weight:700;padding:8px 12px;border-radius:999px}
+
+.art{border-radius:18px;border:1px solid var(--h2);background:var(--elev);padding:14px 14px 10px;display:flex;flex-direction:column}
+.art .k{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.art h2{margin:0;font-size:15px;font-weight:800;letter-spacing:-.02em}
+.art .k a{margin-left:auto;font-size:12px;font-weight:700;color:var(--ink70)}
+.art .row{display:grid;grid-template-columns:36px minmax(0,1fr) 88px;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--h1)}
+.art .row>span{min-width:0}
+.art .row:first-of-type{border-top:0}
+.art .row img{width:36px;height:36px;border-radius:50%;object-fit:cover}
+.art .row b{display:block;font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.art .row small{display:block;font-size:11.5px;color:var(--ink50);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.art .row button{width:88px;height:30px;font-size:12px;font-weight:700;padding:0;border-radius:999px;border:1px solid var(--h4);color:var(--ink);text-align:center;white-space:nowrap}
+.art .row button.on{background:var(--amber);border-color:var(--amber);color:#0a0a0c}
+.art .hint{margin:6px 0 0;font-size:11.5px;color:var(--ink50)}
+
+@media(max-width:1000px){.stage{grid-template-columns:1fr 1fr;grid-template-rows:auto}.tip{grid-column:span 2;grid-row:auto;height:360px}.sea{grid-row:auto}.map{height:220px}}
+@media(max-width:720px){.stage{grid-template-columns:1fr}.tip{grid-column:auto;height:320px}.tip h2{font-size:26px}.map{height:180px}}
+
+/* Programm heute: dichte Zeilen in zwei Spalten */
+.prog{margin-top:40px}
+.prog .hd{display:flex;align-items:baseline;gap:12px;margin-bottom:10px}
+.prog h2{margin:0;font-size:21px;font-weight:800;letter-spacing:-.03em}
+.prog .hd span{font-size:13.5px;color:var(--ink50)}
+.prog .hd a{margin-left:auto;font-size:13px;font-weight:700;color:var(--ink70)}
+.prog .cols{display:grid;grid-template-columns:1fr 1fr;gap:0 40px}
+.prog .r{display:grid;grid-template-columns:44px 46px 1fr auto;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--h2)}
+.prog .r:nth-child(1),.prog .r:nth-child(2){border-top:0}
+.prog .r .t{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink70)}
+.prog .r img{width:46px;height:46px;border-radius:8px;object-fit:cover}
+.prog .r b{display:block;font-size:14px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog .r small{display:block;font-size:12px;color:var(--ink50);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog .r .p{font-size:12.5px;font-weight:700;color:var(--ink70);white-space:nowrap}
+.prog .r .p.free{color:var(--go)}
+.prog .r .min{min-width:0}
+@media(max-width:720px){.prog .cols{grid-template-columns:1fr}.prog .r:nth-child(2){border-top:1px solid var(--h2)}.prog .hd span{display:none}.prog h2{white-space:nowrap}.tip .cta span{display:none}}
+
+/* Zwei Listen nebeneinander: Festivals, Blog */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px}
+.duo>*{min-width:0}
+.duo h2{margin:0 0 8px;font-size:21px;font-weight:800;letter-spacing:-.03em}
+.duo .hd{display:flex;align-items:baseline;gap:12px}
+.duo .hd a{margin-left:auto;font-size:13px;font-weight:700;color:var(--ink70)}
+.duo .li{display:grid;grid-template-columns:92px 1fr;gap:14px;align-items:center;padding:10px 0;border-top:1px solid var(--h2)}
+.duo .li:first-of-type{border-top:0}
+.duo .li img{width:92px;height:64px;border-radius:10px;object-fit:cover}
+.duo .li b{display:block;font-size:14.5px;font-weight:700;letter-spacing:-.01em;line-height:1.25}
+.duo .li small{display:block;font-size:12.5px;color:var(--ink50);margin-top:2px}
+.duo .li small.lu{color:var(--ink70)}
+@media(max-width:720px){.duo{grid-template-columns:1fr;gap:28px}}
+</style></head><body>
+<script src="data.js"></script>
+<script>document.write(NAV)</script>
+
+<main class="wrap">
+  <header class="mast">
+    <div>
+      <p class="date"><b id="h-day"></b> · ☀️ 12° in Wien · <b id="h-count"></b> Events in Österreich</p>
+      <h1>Bleib ned daham.</h1>
+    </div>
+    <div class="searchbar">⌕ Künstler, Event oder Ort<b>Suchen</b></div>
+  </header>
+
+  <section class="stage" id="stage"></section>
+
+  <section class="prog" id="prog"></section>
+
+  <div id="weekend"></div>
+  <div id="region"></div>
+
+  <section class="duo" id="duo"></section>
+
+  <div id="rain"></div>
+
+  <section class="rowline">
+    <div><h2>Freitags die besten Events deiner Region</h2><p>Einmal pro Woche, ohne Konto, jederzeit abbestellbar.</p></div>
+    <form onsubmit="return false"><input id="nl-mail" type="email" placeholder="deine@email.at"><select id="nl-region"><option>Ganz Österreich</option><option>Wien</option><option>Steiermark</option></select><button class="btn" type="submit">Anmelden</button></form>
+  </section>
+
+  <footer>
+    <div class="fl"><a href="#">Über uns</a><a href="#">Blog</a><a href="#">Freizeit & Ausflüge</a><a href="#">Karte</a><a href="#">Event inserieren</a><a href="#">Für Firmen</a><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">Datenquellen</a><a href="#">Kontakt</a></div>
+    <p>Die Seite ist in Entwicklung. Fehler bitte an dev@glatzdev.com.</p>
+    <p>© 2026 LassTreffen.at</p>
+  </footer>
+</main>
+
+<script>
+document.getElementById('h-day').textContent = `${TODAY.weekday}, ${TODAY.date}`;
+document.getElementById('h-count').textContent = TODAY.count;
+
+const TIP = PICKS[0]; // Boost-Platz: ein Veranstalter pro Tag (landing_features)
+const MAP_PINS = [[16.37,48.21],[13.62,47.71],[9.64,47.27],[13.04,47.81],[14.31,46.62],[14.42,48.04],[14.03,48.16],[15.43,47.07],[13.49,48.21],[16.37,48.19],[16.33,48.2]]
+  .map(([x,y]) => `pin-s+d4b896(${x},${y})`).join(',');
+const MAP_URL = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/${MAP_PINS}/13.5,47.65,5.55,0/640x520@2x?access_token=MAPBOX_TOKEN_HIER_EINTRAGEN&logo=false&attribution=false`;
+const ARTISTS = [
+  { n: 'Dardan', img: TONIGHT[0].img, when: 'Heute 20:00 · Gasometer, Wien' },
+  { n: 'Poxrucker Sisters', img: TONIGHT[2].img, when: 'Heute 19:30 · Bad Ischl' },
+  { n: 'Conchita Wurst', img: PICKS[1].img, when: 'Sa 20:00 · Globe Wien', on: true },
+];
+
+document.getElementById('stage').innerHTML = `
+<a class="tip" href="#">
+  <img src="${TIP.img}" alt=""><div class="ov"></div>
+  <div class="lab"><b>Tipp des Tages</b><span>Gesponsert</span></div>
+  <span class="org">Wiener Stadthalle</span>
+  <div class="tx"><h2>${TIP.t}</h2><p>Heute ab 13:30 · Wiener Stadthalle, Halle D · bis 1. November</p>
+  <div class="cta"><b>Tickets ab 29 €</b><span>Qualifikation heute, Hauptfeld ab Samstag</span></div></div>
+</a>
+<aside class="sea">
+  <p class="k">${SEASON.kicker}</p><h2>${SEASON.title}</h2><p class="w">☀️ ${SEASON.weather}</p>
+  <div class="list">${SEASON_PICKS.slice(0,6).map(e => `<a class="row" href="#"><img src="${e.img}" alt=""><span><b>${e.t}</b><small>${e.tip ? '<em>Tipp</em>' : ''}${e.day}${e.time ? ' · ' + e.time : ''} · ${e.venue}</small></span></a>`).join('')}</div>
+  <a class="more" href="#">${SEASON.more} ›</a>
+</aside>
+<a class="map" href="#">
+  <img src="${MAP_URL}" alt=""><div class="ov"></div>
+  <div class="tx"><div><h2>Heute auf der Karte</h2><p>Von Rankweil bis Wien, Standort erlauben für deine Nähe</p></div><b>Karte öffnen</b></div>
+</a>
+<section class="art">
+  <div class="k"><h2>Diese Woche live</h2><a href="#">Alle Künstler ›</a></div>
+  ${ARTISTS.map(a => `<div class="row"><img src="${a.img}" alt=""><span><b>${a.n}</b><small>${a.when}</small></span><button type="button" class="${a.on ? 'on' : ''}">${a.on ? 'Folgst du' : 'Folgen'}</button></div>`).join('')}
+  <p class="hint">Folgen heißt: eine Mail, sobald ein neuer Termin in Österreich auftaucht.</p>
+</section>`;
+
+const row = (e) => `<div class="r"><span class="t">${e.time}</span><img src="${e.img}" alt=""><span class="min"><b>${e.t}</b><small>${[e.venue, e.city].filter(Boolean).join(' · ')}</small></span><span class="p${e.price === 'Gratis' ? ' free' : ''}">${e.price || ''}</span></div>`;
+const tonight = [...TONIGHT].sort((a, b) => a.time.localeCompare(b.time));
+document.getElementById('prog').innerHTML = `
+<div class="hd"><h2>Heute Abend</h2><span>Donnerstag, ab 17 Uhr</span><a href="#">Ganzes Programm ›</a></div>
+<div class="cols">${tonight.map(row).join('')}</div>`;
+
+document.getElementById('weekend').innerHTML = shelf('Dieses Wochenende', 'Fr 30. Okt. bis So 1. Nov.', 'Alle anzeigen', WEEKEND.map(card).join(''));
+document.getElementById('region').innerHTML = shelf('Nach Region', '', '', REGIONS.map(regionTile).join(''));
+
+const li = (img, t, s1, s2) => `<a class="li" href="#"><img src="${img}" alt="" loading="lazy"><span><b>${t}</b><small>${s1}</small>${s2 ? `<small class="lu">${s2}</small>` : ''}</span></a>`;
+document.getElementById('duo').innerHTML = `
+<div><div class="hd"><h2>Festivals</h2><a href="#">Alle Festivals ›</a></div>${FESTIVALS.slice(0,4).map(f => li(f.img, f.t, `${f.when} · ${f.city}`, f.lineup)).join('')}</div>
+<div><div class="hd"><h2>Aus dem Blog</h2><a href="#">Alle Beiträge ›</a></div>${BLOG.map(p => li(p.img, p.t, p.meta)).join('')}</div>`;
+
+document.getElementById('rain').innerHTML = shelf('Bei Regen', 'Ausflüge unter Dach', 'Alle Freizeitaktivitäten', ACTIVITIES.map(actCard).join(''));
+document.write(TABBAR);
+</script>
+</body></html>

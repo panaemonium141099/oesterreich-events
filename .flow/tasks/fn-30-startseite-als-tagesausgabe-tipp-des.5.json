@@ -1,0 +1,17 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-29T19:48:29.986829Z",
+  "depends_on": [
+    "fn-30-startseite-als-tagesausgabe-tipp-des.3",
+    "fn-30-startseite-als-tagesausgabe-tipp-des.4"
+  ],
+  "epic": "fn-30-startseite-als-tagesausgabe-tipp-des",
+  "id": "fn-30-startseite-als-tagesausgabe-tipp-des.5",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-30-startseite-als-tagesausgabe-tipp-des.5.md",
+  "status": "todo",
+  "title": "B\u00fchne: Masthead mit DateLine, TipOfDay, MapTile, SeasonCard-Anpassung, page.tsx",
+  "updated_at": "2026-10-29T19:52:09.646802Z"
+}
