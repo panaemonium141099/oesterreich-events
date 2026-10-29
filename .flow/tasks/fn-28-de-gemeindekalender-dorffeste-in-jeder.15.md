@@ -33,9 +33,8 @@ Ergebnisdatei: `docs/research/de-gemeinden/14-berlin.md`.
 
 
 ## Done summary
-TBD
-
+Berlin-Bericht docs/research/de-gemeinden/14-berlin.md (PR #394). Stichprobe 30 von 97 Ortsteilen (ALKIS, Seed 28015). kulturdaten.berlin ist eine Kopie des offenen Landeskalenders berlin.de/land/kalender/json.php (1.749 Veranstaltungen, Lizenz nicht belegt, kaum Kiezfeste). Einzige offen lizenzierte Festliste: Senatsliste Straßen- und Volksfeste (CC BY, 10 von 30 Ortsteilen). destination.one 0 von 30. Kiezfeste verteilt auf Stadtteilzentren (10), Vereine (8), Bezirksamtsseiten (5), QM/BENN (4), Kiezblog/Ortsportal (2), nirgends (1). Priorität: Senatsliste, Landeskalender nach Erlaubnis, Registry mit Plugin-Detektor. Lücke: Feuerwehr-Tage der offenen Tür ohne Quelle.
 ## Evidence
-- Commits:
+- Commits: fc25a2db
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/394
