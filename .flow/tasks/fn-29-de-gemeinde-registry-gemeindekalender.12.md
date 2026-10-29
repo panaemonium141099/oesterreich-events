@@ -14,9 +14,8 @@ Rahmenbedingungen: Der Qualitätsvertrag DE im Epic-Spec (`flowctl cat fn-29-de-
 - [ ] Erst nach bestandenem Prüfstand in den Nachtlauf
 
 ## Done summary
-TBD
-
+Adapter `de-hwveranstaltung` (Hirsch & Wölfl) auf master (PR #402): Kalenderlisten aller 429 hwext-Kalender seitenweise, Ort über den Kalender-Kontext, Wandzeit Europe/Berlin, Bilder nur mit Freigabe durch robots.txt, ältere Modulversionen ohne Detailseite erkannt und nicht gelesen. Prüfstand 2026-10-29: 18.913 Termine, öffentlich 17.898, alle Schwellen bestanden, Stichprobe 30 von 30, Dorffeste (Kirbe TV Tischardt, Dorffest Böhmenkirch und Kaisersbach) gegen die Quelle geprüft. Bericht docs/research/de-gemeinden/adapter-hwveranstaltung.md. Nicht im Nachtlauf (fn-29.18).
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: 232962e90182723e016504e7ee1fc6f8b800ada1
+- Tests: npx vitest run src/__tests__/lib/scrapers/hw-de.test.ts (19 grün), npm run pruefstand:de -- --adapter de-hwveranstaltung (Schwellen bestanden)
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/402
