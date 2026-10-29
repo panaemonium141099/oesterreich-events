@@ -1,0 +1,194 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//wp-events-plugin.com//7.4.12//EN
+TZID:Europe/Berlin
+X-WR-TIMEZONE:Europe/Berlin
+BEGIN:VEVENT
+UID:278@leiblfing.de
+DTSTART;TZID=Europe/Berlin:20261030T190000
+DTEND;TZID=Europe/Berlin:20261030T224500
+DTSTAMP:20261023T054038Z
+URL:https://www.leiblfing.de/veranstaltungen/opernstudio-der-bayerischen-s
+ taatsoper-muenchen-2/
+SUMMARY:Opernstudio der Bayerischen Staatsoper München
+DESCRIPTION:
+LOCATION:Max Frank Saal\, Mitterweg 1 \, Leiblfing\, 94339\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Mitterweg 1 \, Leiblfing\, 
+ 94339\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Max Frank Saal:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:289@leiblfing.de
+DTSTART;TZID=Europe/Berlin:20261104T183000
+DTEND;TZID=Europe/Berlin:20261104T183000
+DTSTAMP:20261027T141010Z
+URL:https://www.leiblfing.de/veranstaltungen/informationsveranstaltung-win
+ denergie/
+SUMMARY:Informationsveranstaltung Windenergie
+DESCRIPTION:Aktuelle Informationen zum Stand aktueller Windenergie-Projekte
+  in der Region
+LOCATION:Pfarrheim Leiblfing\, Schulstr. 1 \, Leiblfing\, 94339\, Deutschla
+ nd
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schulstr. 1 \, Leiblfing\, 
+ 94339\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Pfarrheim Leiblfing:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:287@leiblfing.de
+DTSTART;TZID=Europe/Berlin:20261107T193000
+DTEND;TZID=Europe/Berlin:20261107T193000
+DTSTAMP:20261023T053720Z
+URL:https://www.leiblfing.de/veranstaltungen/11941/
+SUMMARY:Watterturnier der KLJB Leiblfing
+DESCRIPTION:Die KLJB Leiblfing veranstaltet am 07.11.2026 ein Watterturnier
+ .\n\nSpielbeginn: 19:30 Uhr\n\nAnmeldung: 18:00 Uhr bis 19:00 Uhr. Eine An
+ meldung ist nur mit Partner möglich.
+END:VEVENT
+BEGIN:VEVENT
+UID:286@leiblfing.de
+DTSTART;TZID=Europe/Berlin:20261114T170000
+DTEND;TZID=Europe/Berlin:20261114T220000
+DTSTAMP:20260918T101430Z
+URL:https://www.leiblfing.de/veranstaltungen/traditioneller-kathreintanz-3
+ /
+SUMMARY:Traditioneller Kathreintanz
+DESCRIPTION:Für Jung und Alt\, alle Bürgerinnen und Bürger der ILE Gäub
+ oden Gemeinden sind wieder zum traditionellen Kathreintanz eingeladen. Die
+  Hof- und Dorfkapelle spielt wieder ohne Verstärker auf! Tischreservierun
+ g unter Tel. 09427 / 586
+LOCATION:Gasthaus Holzer-Rappl\, Leiblfingstr. 17\, Leiblfing\, 94339\, Deu
+ tschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Leiblfingstr. 17\, Leiblfin
+ g\, 94339\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Gasthaus Holzer-Rappl:g
+ eo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:284@leiblfing.de
+DTSTART;TZID=Europe/Berlin:20261119T193000
+DTEND;TZID=Europe/Berlin:20261119T193000
+DTSTAMP:20261023T054014Z
+URL:https://www.leiblfing.de/veranstaltungen/jahreshauptversammlung-kinder
+ warenbasar-leiblfing-e-v/
+SUMMARY:Jahreshauptversammlung Kinderwarenbasar Leiblfing e.V.
+DESCRIPTION:
+LOCATION:Pfarrheim\, Schulstr. 1\, Leiblfing\, 94339\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schulstr. 1\, Leiblfing\, 9
+ 4339\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Pfarrheim:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:288@leiblfing.de
+DTSTART;TZID=Europe/Berlin:20261122T120000
+DTEND;TZID=Europe/Berlin:20261122T120000
+DTSTAMP:20261020T114436Z
+URL:https://www.leiblfing.de/veranstaltungen/jahresabschlussversammlung-vd
+ k-ortsverband-leiblfing/
+SUMMARY:Jahresabschlussversammlung VdK Ortsverband Leiblfing
+DESCRIPTION:Gemeinsames Mittagessen und Ehrung langjähriger Mitglieder. \n
+ \nAnmeldung unter 09427/1367 oder 09427/1554
+LOCATION:Gasthaus Groß\, Straubinger Str. 19\, Leiblfing\, 94339\, Deutsch
+ land
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Straubinger Str. 19\, Leibl
+ fing\, 94339\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Gasthaus Groß:geo:0
+ ,0
+END:VEVENT
+BEGIN:VEVENT
+UID:279@leiblfing.de
+DTSTART;TZID=Europe/Berlin:20261205T200000
+DTEND;TZID=Europe/Berlin:20261205T220000
+DTSTAMP:20261023T054109Z
+URL:https://www.leiblfing.de/veranstaltungen/home-for-christmas-weihnachts
+ konzert/
+SUMMARY:Home For Christmas – Weihnachtskonzert
+DESCRIPTION:
+LOCATION:Max Frank Saal\, Mitterweg 1 \, Leiblfing\, 94339\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Mitterweg 1 \, Leiblfing\, 
+ 94339\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Max Frank Saal:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:243@leiblfing.de
+DTSTART;TZID=Europe/Berlin:20261219T000000
+DTEND;TZID=Europe/Berlin:20261220T000000
+DTSTAMP:20251030T091326Z
+URL:https://www.leiblfing.de/veranstaltungen/gluehkindlfest-ff-ober-nieder
+ sunzing/
+SUMMARY:Glühkindlfest FF Ober- Niedersunzing
+DESCRIPTION:
+END:VEVENT
+BEGIN:VEVENT
+UID:283@leiblfing.de
+DTSTART;TZID=Europe/Berlin;VALUE=DATE:20270606
+DTEND;TZID=Europe/Berlin;VALUE=DATE:20270607
+DTSTAMP:20260813T151023Z
+URL:https://www.leiblfing.de/veranstaltungen/feuerwehrwest-ff-leiblfing/
+SUMMARY:Feuerwehrwest FF Leiblfing
+DESCRIPTION:
+END:VEVENT
+BEGIN:VEVENT
+UID:194@leiblfing.de
+DTSTART;TZID=Europe/Berlin;VALUE=DATE:20270702
+DTEND;TZID=Europe/Berlin;VALUE=DATE:20270706
+DTSTAMP:20240830T054051Z
+URL:https://www.leiblfing.de/veranstaltungen/50-jaehriges-gruendungsfest-s
+ portschuetzen-hankofen/
+SUMMARY:50-jähriges Gründungsfest Sportschützen Hankofen
+DESCRIPTION:
+END:VEVENT
+BEGIN:VEVENT
+UID:260@leiblfing.de
+DTSTART;TZID=Europe/Berlin:20280715T000000
+DTEND;TZID=Europe/Berlin:20280716T000000
+DTSTAMP:20251030T090755Z
+URL:https://www.leiblfing.de/veranstaltungen/150-jaehriges-gruendungsfest-
+ der-freiwilligen-feuerwehr-metting/
+SUMMARY:150-jähriges Gründungsfest der Freiwilligen Feuerwehr Metting
+DESCRIPTION:
+END:VEVENT
+BEGIN:VEVENT
+UID:285@leiblfing.de
+DTSTART;TZID=Europe/Berlin;VALUE=DATE:20290531
+DTEND;TZID=Europe/Berlin;VALUE=DATE:20290604
+DTSTAMP:20260914T081848Z
+URL:https://www.leiblfing.de/veranstaltungen/oldtimertreffen-der-oldtimerf
+ reunde-schwimmbach-e-v/
+SUMMARY:Oldtimertreffen der Oldtimerfreunde Schwimmbach e.V.
+DESCRIPTION:
+END:VEVENT
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+X-LIC-LOCATION:Europe/Berlin
+BEGIN:STANDARD
+DTSTART:20261025T020000
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:20270328T030000
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+TZNAME:CEST
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20271031T020000
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:20280326T030000
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+TZNAME:CEST
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20281029T020000
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:20290325T030000
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+TZNAME:CEST
+END:DAYLIGHT
+END:VTIMEZONE
+END:VCALENDAR

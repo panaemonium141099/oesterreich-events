@@ -7,8 +7,9 @@ import type { BaseScraper } from '../BaseScraper';
 import { IonasDeScraper } from './IonasDeScraper';
 import { NolisDeScraper } from './NolisDeScraper';
 import { TribeDeScraper } from './TribeDeScraper';
+import { EventsManagerDeScraper } from './EventsManagerDeScraper';
 
-export const DE_SCRAPERS: BaseScraper[] = [new IonasDeScraper(), new NolisDeScraper(), new TribeDeScraper()];
+export const DE_SCRAPERS: BaseScraper[] = [new IonasDeScraper(), new NolisDeScraper(), new TribeDeScraper(), new EventsManagerDeScraper()];
 
 export function getDeScraperByName(name: string): BaseScraper | undefined {
   return DE_SCRAPERS.find(s => s.name === name);

@@ -1,0 +1,477 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//wp-events-plugin.com//7.4.12//EN
+TZID:Europe/Berlin
+X-WR-TIMEZONE:Europe/Berlin
+BEGIN:VEVENT
+UID:854@bergenhusen.de
+DTSTART;TZID=Europe/Berlin;VALUE=DATE:20261030
+DTEND;TZID=Europe/Berlin;VALUE=DATE:20261031
+DTSTAMP:20260308T091009Z
+URL:https://bergenhusen.de/events/reitergemeinschaft-arbeitsdienst-7/
+SUMMARY:Reitergemeinschaft   Arbeitsdienst
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/logo_transparent-c757d3e4-84ef8e6f@160w.jpg
+CATEGORIES:Vereinsaktivitäten
+LOCATION:Reithalle\, Stuten 5\, Bergenhusen\, 24861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Stuten 5\, Bergenhusen\, 24
+ 861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Reithalle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:882@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261030T190000
+DTEND;TZID=Europe/Berlin:20261030T190000
+DTSTAMP:20260308T101426Z
+URL:https://bergenhusen.de/events/ffw-laternelaufen/
+SUMMARY:FFw Laternelaufen
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/feuerwehr_wappen-35a2acf9-84ef8e6f@160w.jpg
+CATEGORIES:Vereinsaktivitäten
+LOCATION:FFw Gerätehaus\, Bäckerstroot 5\, Bergenhusen\, 24861\, Deutschl
+ and
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Bäckerstroot 5\, Bergenhus
+ en\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=FFw Gerätehaus:geo:0,
+ 0
+END:VEVENT
+BEGIN:VEVENT
+UID:822@bergenhusen.de
+DTSTART;TZID=Europe/Berlin;VALUE=DATE:20261031
+DTEND;TZID=Europe/Berlin;VALUE=DATE:20261101
+DTSTAMP:20260308T082113Z
+URL:https://bergenhusen.de/events/reitergemeinschaft-halloween-ralley/
+SUMMARY:Reitergemeinschaft   Halloween Ralley
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/logo_transparent-c757d3e4-84ef8e6f@160w.jpg
+CATEGORIES:Vereinsaktivitäten
+LOCATION:Reithalle\, Stuten 5\, Bergenhusen\, 24861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Stuten 5\, Bergenhusen\, 24
+ 861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Reithalle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:879@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261106T190000
+DTEND;TZID=Europe/Berlin:20261106T190000
+DTSTAMP:20260308T100920Z
+URL:https://bergenhusen.de/events/vogelgilde-jahreshauptversammlung/
+SUMMARY:Vogelgilde Jahreshauptversammlung
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/wappen_vogelgilde-2df88a5b-84ef8e6f@160w.jpg
+CATEGORIES:Vereinsaktivitäten
+LOCATION:Bistro Storchenschnabel\, Dörpstroot 17\, Bergenhusen\, 24861\, D
+ eutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Dörpstroot 17\, Bergenhuse
+ n\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Bistro Storchenschnabel
+ :geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:883@bergenhusen.de
+DTSTART;TZID=Europe/Berlin;VALUE=DATE:20261107
+DTEND;TZID=Europe/Berlin;VALUE=DATE:20261108
+DTSTAMP:20260308T101530Z
+URL:https://bergenhusen.de/events/ffw-feuerwehrball/
+SUMMARY:FFw Feuerwehrball
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/feuerwehr_wappen-35a2acf9-84ef8e6f@160w.jpg
+CATEGORIES:Vereinsaktivitäten
+LOCATION:Cafe´ Landgasthof Hoier Boier\, Dörpstroot 12a\, Bergenhusen\, 2
+ 4861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Dörpstroot 12a\, Bergenhus
+ en\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Cafe´ Landgasthof Hoi
+ er Boier:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:765@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261108T130000
+DTEND;TZID=Europe/Berlin:20261108T150000
+DTSTAMP:20260129T183014Z
+URL:https://bergenhusen.de/events/von-knicks-und-keltischen-feldern-2/
+SUMMARY:Von Knicks und "Keltischen Feldern"
+DESCRIPTION:Bereits seit Jahrtausenden besiedeln Menschen die Landschaft St
+ apelholm\, davon zeugen z. B. noch heute sichtbare vorgeschichtliche Grabh
+ ügel und Ackerfluren (sog. celtic fields). Unser Wald- und Dorfrundgang w
+ idmet sich daher nicht nur dem mittelalterlichen „Beveringhusen“\, son
+ dern auch der wechselseitigen Beziehung von Mensch und Umwelt von der Stei
+ nzeit bis ins 14. Jahrhundert.\n\nKosten: Erwachsene 10 €\, Kinder 5 €
+ \n\nHinweis: Die Exkursion findet mit Privat-PKW statt\, ggf. werden vor O
+ rt Fahrgemeinschaften gebildet.
+CATEGORIES:Michael-Otto-Institut im NABU
+LOCATION:NABU\, Michael-Otto-Institut im NABU\, Goosstroot 1\, Bergenhusen\
+ , SH\, 24861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Michael-Otto-Institut im NA
+ BU\, Goosstroot 1\, Bergenhusen\, SH\, 24861\, Deutschland;X-APPLE-RADIUS=
+ 100;X-TITLE=NABU:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:871@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261112T193000
+DTEND;TZID=Europe/Berlin:20261112T193000
+DTSTAMP:20260308T095427Z
+URL:https://bergenhusen.de/events/landfrauen-weinprobe-mit-dem-weingut-car
+ oline-klumb-aus-langenlonsheim/
+SUMMARY:Landfrauen  Weinprobe mit dem Weingut Caroline Klumb aus Langenlons
+ heim
+DESCRIPTION:Gemeindehaus bei der Kirche Stapel
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/landfrauen-logo-5408ec70-84ef8e6f@160w.jpg
+CATEGORIES:Vereinsaktivitäten
+LOCATION:"laut Anhang"\, laut Anhang\, laut Anhang\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=laut Anhang\, laut Anhang\,
+  Deutschland;X-APPLE-RADIUS=100;X-TITLE=\"laut Anhang\":geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:780@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261113T105000
+DTEND;TZID=Europe/Berlin:20261113T112500
+DTSTAMP:20260129T190309Z
+URL:https://bergenhusen.de/events/fahrbuecherei-122/
+SUMMARY:Fahrbücherei
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/Fahrbücherei.jpg
+CATEGORIES:Fahrbücherei
+LOCATION:Grundschule\, Hersbarg 2\, Bergenhusen\, 24861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Hersbarg 2\, Bergenhusen\, 
+ 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Grundschule:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:789@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261113T113500
+DTEND;TZID=Europe/Berlin:20261113T115000
+DTSTAMP:20260129T184934Z
+URL:https://bergenhusen.de/events/fahrbuecherei-131/
+SUMMARY:Fahrbücherei
+DESCRIPTION:
+CATEGORIES:Fahrbücherei
+LOCATION:Lüttensee 19\, Lüttensee 19\, Bergenhusen\, 24861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Lüttensee 19\, Bergenhusen
+ \, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Lüttensee 19:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:798@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261113T150500
+DTEND;TZID=Europe/Berlin:20261113T154500
+DTSTAMP:20260129T185159Z
+URL:https://bergenhusen.de/events/fahrbuecherei-140/
+SUMMARY:Fahrbücherei
+DESCRIPTION:
+CATEGORIES:Fahrbücherei
+LOCATION:Dorfplatz\, Bäckerstroot 1\, Bergenhusen\, 24861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Bäckerstroot 1\, Bergenhus
+ en\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Dorfplatz:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:823@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261113T190000
+DTEND;TZID=Europe/Berlin:20261113T190000
+DTSTAMP:20260308T092818Z
+URL:https://bergenhusen.de/events/reitergemeinschaft-gruenkohlessen/
+SUMMARY:Reitergemeinschaft   Grünkohlessen
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/logo_transparent-c757d3e4-84ef8e6f@160w.jpg
+CATEGORIES:Vereinsaktivitäten
+LOCATION:Reithalle\, Stuten 5\, Bergenhusen\, 24861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Stuten 5\, Bergenhusen\, 24
+ 861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Reithalle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:884@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261114T093000
+DTEND;TZID=Europe/Berlin:20261114T093000
+DTSTAMP:20260308T101638Z
+URL:https://bergenhusen.de/events/ffw-hydrantenpflege/
+SUMMARY:FFw Hydrantenpflege
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/feuerwehr_wappen-35a2acf9-84ef8e6f@160w.jpg
+CATEGORIES:Vereinsaktivitäten
+LOCATION:FFw Gerätehaus\, Bäckerstroot 5\, Bergenhusen\, 24861\, Deutschl
+ and
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Bäckerstroot 5\, Bergenhus
+ en\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=FFw Gerätehaus:geo:0,
+ 0
+END:VEVENT
+BEGIN:VEVENT
+UID:873@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261114T190000
+DTEND;TZID=Europe/Berlin:20261114T190000
+DTSTAMP:20260308T095846Z
+URL:https://bergenhusen.de/events/heimatverein-gruenkohlessen/
+SUMMARY:Heimatverein Grünkohlessen
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2026/0
+ 3/HMV_Wappen_2025-300ppi.jpg
+CATEGORIES:Vereinsaktivitäten
+LOCATION:Cafe´ Landgasthof Hoier Boier\, Dörpstroot 12a\, Bergenhusen\, 2
+ 4861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Dörpstroot 12a\, Bergenhus
+ en\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Cafe´ Landgasthof Hoi
+ er Boier:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:893@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261115T100000
+DTEND;TZID=Europe/Berlin:20261115T100000
+DTSTAMP:20260308T103853Z
+URL:https://bergenhusen.de/events/volkstrauertag-gottesdienst-mit-kranznie
+ derlegung/
+SUMMARY:Volkstrauertag Gottesdienst mit Kranzniederlegung
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2026/0
+ 3/DSC_0859-scaled.jpg
+LOCATION:Kirche Bergenhusen\, Kirche Bergenhusen\, Poststroot 1a\, Bergenhu
+ sen\, 24861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirche Bergenhusen\, Postst
+ root 1a\, Bergenhusen\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Kir
+ che Bergenhusen:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:888@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261124T130000
+DTEND;TZID=Europe/Berlin:20261124T130000
+DTSTAMP:20260308T102338Z
+URL:https://bergenhusen.de/events/drk-ortsverein-einkaufsfahrt-kiel-weihna
+ chtsmarkt/
+SUMMARY:DRK Ortsverein   Einkaufsfahrt Kiel\, Weihnachtsmarkt
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/DRK-Logo_aLzM-6ba447a8-84ef8e6f@160w.jpg
+CATEGORIES:Vereinsaktivitäten
+LOCATION:Cafe´ Landgasthof Hoier Boier\, Dörpstroot 12a\, Bergenhusen\, 2
+ 4861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Dörpstroot 12a\, Bergenhus
+ en\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Cafe´ Landgasthof Hoi
+ er Boier:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:843@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261124T190000
+DTEND;TZID=Europe/Berlin:20261124T190000
+DTSTAMP:20260308T085250Z
+URL:https://bergenhusen.de/events/sitzung-gemeindevertretung-3/
+SUMMARY:Sitzung Gemeindevertretung
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/cropped-500px-Bergenhusen_Wappen.svg_.png
+CATEGORIES:Gemeinde
+LOCATION:gemäß Aushang\, gemäß Aushang\, Bergenhusen\, 24861\, Deutschl
+ and
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=gemäß Aushang\, Bergenhus
+ en\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=gemäß Aushang:geo:0,
+ 0
+END:VEVENT
+BEGIN:VEVENT
+UID:836@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261125T113000
+DTEND;TZID=Europe/Berlin:20261125T113000
+DTSTAMP:20260308T084119Z
+URL:https://bergenhusen.de/events/essen-in-gemeinschaft-23/
+SUMMARY:Essen in Gemeinschaft
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/cropped-500px-Bergenhusen_Wappen.svg_.png
+CATEGORIES:Gemeinde
+LOCATION:Cafe´ Landgasthof Hoier Boier\, Dörpstroot 12a\, Bergenhusen\, 2
+ 4861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Dörpstroot 12a\, Bergenhus
+ en\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Cafe´ Landgasthof Hoi
+ er Boier:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:844@bergenhusen.de
+DTSTART;TZID=Europe/Berlin;VALUE=DATE:20261128
+DTEND;TZID=Europe/Berlin;VALUE=DATE:20261129
+DTSTAMP:20260308T085406Z
+URL:https://bergenhusen.de/events/weihnachtsmarkt-mit-adventsausstellung/
+SUMMARY:Weihnachtsmarkt mit Adventsausstellung
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/cropped-500px-Bergenhusen_Wappen.svg_.png
+CATEGORIES:Gemeinde
+LOCATION:Gemeindehaus "Alte Meierei"\, Bäckerstroot 5\, Bergenhusen\, 2486
+ 1\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Bäckerstroot 5\, Bergenhus
+ en\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Gemeindehaus \"Alte Me
+ ierei\":geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:855@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261128T100000
+DTEND;TZID=Europe/Berlin:20261128T100000
+DTSTAMP:20260308T091052Z
+URL:https://bergenhusen.de/events/reitergemeinschaft-arbeitsdienst-8/
+SUMMARY:Reitergemeinschaft   Arbeitsdienst
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/logo_transparent-c757d3e4-84ef8e6f@160w.jpg
+CATEGORIES:Vereinsaktivitäten
+LOCATION:Reithalle\, Stuten 5\, Bergenhusen\, 24861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Stuten 5\, Bergenhusen\, 24
+ 861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Reithalle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:889@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261204T143000
+DTEND;TZID=Europe/Berlin:20261204T143000
+DTSTAMP:20260308T102452Z
+URL:https://bergenhusen.de/events/drk-ortsverein-adventsfeier/
+SUMMARY:DRK Ortsverein   Adventsfeier
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/DRK-Logo_aLzM-6ba447a8-84ef8e6f@160w.jpg
+CATEGORIES:Vereinsaktivitäten
+LOCATION:Cafe´ Landgasthof Hoier Boier\, Dörpstroot 12a\, Bergenhusen\, 2
+ 4861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Dörpstroot 12a\, Bergenhus
+ en\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Cafe´ Landgasthof Hoi
+ er Boier:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:824@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261206T140000
+DTEND;TZID=Europe/Berlin:20261206T140000
+DTSTAMP:20260308T092933Z
+URL:https://bergenhusen.de/events/reitergemeinschaft-nikolausfeier-mit-bin
+ go/
+SUMMARY:Reitergemeinschaft   Nikolausfeier mit Bingo
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/logo_transparent-c757d3e4-84ef8e6f@160w.jpg
+CATEGORIES:Vereinsaktivitäten
+LOCATION:Reithalle\, Stuten 5\, Bergenhusen\, 24861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Stuten 5\, Bergenhusen\, 24
+ 861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Reithalle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:872@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261210T193000
+DTEND;TZID=Europe/Berlin:20261210T193000
+DTSTAMP:20260308T095537Z
+URL:https://bergenhusen.de/events/landfrauen-weinachtsfeier/
+SUMMARY:Landfrauen  Weinachtsfeier
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/landfrauen-logo-5408ec70-84ef8e6f@160w.jpg
+CATEGORIES:Vereinsaktivitäten
+LOCATION:Frahm´s Gasthof\, Hauptstraße 107\, Dörpstedt / Bünge\, 24869\
+ , Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Hauptstraße 107\, Dörpste
+ dt / Bünge\, 24869\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Frahm´s Gast
+ hof:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:781@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261211T105000
+DTEND;TZID=Europe/Berlin:20261211T112500
+DTSTAMP:20260129T190349Z
+URL:https://bergenhusen.de/events/fahrbuecherei-123/
+SUMMARY:Fahrbücherei
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/Fahrbücherei.jpg
+CATEGORIES:Fahrbücherei
+LOCATION:Grundschule\, Hersbarg 2\, Bergenhusen\, 24861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Hersbarg 2\, Bergenhusen\, 
+ 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Grundschule:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:790@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261211T113500
+DTEND;TZID=Europe/Berlin:20261211T115000
+DTSTAMP:20260129T184947Z
+URL:https://bergenhusen.de/events/fahrbuecherei-132/
+SUMMARY:Fahrbücherei
+DESCRIPTION:
+CATEGORIES:Fahrbücherei
+LOCATION:Lüttensee 19\, Lüttensee 19\, Bergenhusen\, 24861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Lüttensee 19\, Bergenhusen
+ \, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Lüttensee 19:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:799@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261211T150500
+DTEND;TZID=Europe/Berlin:20261211T154500
+DTSTAMP:20260129T185214Z
+URL:https://bergenhusen.de/events/fahrbuecherei-141/
+SUMMARY:Fahrbücherei
+DESCRIPTION:
+CATEGORIES:Fahrbücherei
+LOCATION:Dorfplatz\, Bäckerstroot 1\, Bergenhusen\, 24861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Bäckerstroot 1\, Bergenhus
+ en\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Dorfplatz:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:766@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261213T143000
+DTEND;TZID=Europe/Berlin:20261213T163000
+DTSTAMP:20260129T183124Z
+URL:https://bergenhusen.de/events/wintergaeste-gaense-schwaene-enten-co/
+SUMMARY:Wintergäste: Gänse\, Schwäne\, Enten & Co.
+DESCRIPTION:Jedes Jahr im Winter rasten tausende Gänse\, Enten und Schwän
+ e sowie verschiedene Watvögel in der Eider-Treene-Sorge-Niederung (ETS). 
+ Bei einer kurzen PKW-Exkursion zu den Futterplätzen bieten leistungsstark
+ e Spektive gute Sicht auf zahlreiche Vogelarten. Anschließend beobachten 
+ wir gemeinsam das Spektakel\, wenn sich in der Dämmerung die Vögel zu ih
+ ren Schlafplätzen zurückziehen. Bei einem Heißgetränk erhalten Sie int
+ eressante Informationen über Reiserouten\, Brutplätze und Besonderheiten
+  unserer Wintergäste.\n\nKosten: Erwachsene 10 €\, Kinder 5 €\nBitte 
+ mitbringen: Wetterfeste Kleidung\, festes Schuhwerk\, Fernglas (falls vorh
+ anden).\n\nHinweis: Die Exkursion findet mit Privat-PKW statt\, ggf. werde
+ n vor Ort Fahrgemeinschaften gebildet.
+CATEGORIES:Michael-Otto-Institut im NABU
+LOCATION:NABU\, Michael-Otto-Institut im NABU\, Goosstroot 1\, Bergenhusen\
+ , SH\, 24861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Michael-Otto-Institut im NA
+ BU\, Goosstroot 1\, Bergenhusen\, SH\, 24861\, Deutschland;X-APPLE-RADIUS=
+ 100;X-TITLE=NABU:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:837@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20261230T113000
+DTEND;TZID=Europe/Berlin:20261230T113000
+DTSTAMP:20260308T084159Z
+URL:https://bergenhusen.de/events/essen-in-gemeinschaft-24/
+SUMMARY:Essen in Gemeinschaft
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/cropped-500px-Bergenhusen_Wappen.svg_.png
+CATEGORIES:Gemeinde
+LOCATION:Cafe´ Landgasthof Hoier Boier\, Dörpstroot 12a\, Bergenhusen\, 2
+ 4861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Dörpstroot 12a\, Bergenhus
+ en\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Cafe´ Landgasthof Hoi
+ er Boier:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:839@bergenhusen.de
+DTSTART;TZID=Europe/Berlin:20270127T113000
+DTEND;TZID=Europe/Berlin:20270127T113000
+DTSTAMP:20260308T084603Z
+URL:https://bergenhusen.de/events/essen-in-gemeinschaft-26/
+SUMMARY:Essen in Gemeinschaft
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://bergenhusen.de/wp-content/uploads/2020/0
+ 3/cropped-500px-Bergenhusen_Wappen.svg_.png
+CATEGORIES:Gemeinde
+LOCATION:Cafe´ Landgasthof Hoier Boier\, Dörpstroot 12a\, Bergenhusen\, 2
+ 4861\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Dörpstroot 12a\, Bergenhus
+ en\, 24861\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Cafe´ Landgasthof Hoi
+ er Boier:geo:0,0
+END:VEVENT
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+X-LIC-LOCATION:Europe/Berlin
+BEGIN:STANDARD
+DTSTART:20261025T020000
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+END:STANDARD
+END:VTIMEZONE
+END:VCALENDAR
