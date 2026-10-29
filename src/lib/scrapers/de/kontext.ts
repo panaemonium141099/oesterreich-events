@@ -6,7 +6,9 @@
  * ordnet Termine nur der Gemeinde zu, die der Termin selbst nennt.
  */
 import type { GemeindeContext } from '../gemeinde-context';
-import { gemeindeDeByAgs, gemeindenDeByVerband, type GemeindeDe } from '@/lib/gemeinden/de';
+import { gemeindeDeByAgs, gemeindenDeByVerband, loadGemeindenDe, type GemeindeDe } from '@/lib/gemeinden/de';
+import { normalizeGemeindeName } from '@/lib/location/gemeinde-name';
+import { plzReferenceDe } from '@/lib/location/plz-reference-de';
 import { singleGemeinde, type FeedGroup } from '@/lib/registry-de/load';
 
 /**
@@ -35,18 +37,108 @@ const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
  * „Amt Duvensee-Nord" nennt nicht Duvensee.
  */
 export function namedMember(ev: { title: string; locationName?: string }, candidates: GemeindeDe[]): GemeindeDe | null {
+  const hits = namedGemeinden(ev, candidates, 'any');
+  return hits.length === 1 ? hits[0] : null;
+}
+
+/**
+ * Alle Gemeinden, die der Termin nennt. `full`: nur mit Zusatz
+ * („Allendorf (Lumda)" auch als „Allendorf / Lumda" oder „Allendorf an der
+ * Lumda"); `any`: auch der Name ohne Zusatz.
+ */
+function namedGemeinden(ev: { title: string; locationName?: string }, candidates: GemeindeDe[], mode: 'full' | 'any'): GemeindeDe[] {
   const hits = new Map<string, GemeindeDe>();
   for (const g of candidates) {
-    const names = new Set([g.name, g.name.replace(/\s*\([^)]*\)\s*$/, '')]);
+    const m = /^(.*?)\s*\(([^)]*)\)\s*$/.exec(g.name);
+    const names = m
+      ? [String.raw`${escapeRe(m[1])}\s*(?:\(\s*${escapeRe(m[2])}\s*\)|/\s*${escapeRe(m[2])}|(?:an der|am|a\.\s?d\.)\s+${escapeRe(m[2])})`, ...(mode === 'any' ? [escapeRe(m[1])] : [])]
+      : mode === 'any' ? [escapeRe(g.name)] : [];
     for (const n of names) {
-      const word = String.raw`${escapeRe(n)}(?!\p{L}|-\p{L})`;
+      const word = String.raw`${n}(?!\p{L}|-\p{L})`;
       if (
         new RegExp(String.raw`(?<![\p{L}-])${word}`, 'u').test(ev.locationName ?? '') ||
         new RegExp(String.raw`(?:^|\s)(?:in|im|zu|bei|aus|nach)\s+${word}`, 'iu').test(ev.title)
       ) hits.set(g.ags, g);
     }
   }
-  return hits.size === 1 ? [...hits.values()][0] : null;
+  return [...hits.values()];
+}
+
+const NEAR_KM = 30;
+
+function km(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const r = (d: number) => (d * Math.PI) / 180;
+  const h = Math.sin(r(b.lat - a.lat) / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(r(b.lng - a.lng) / 2) ** 2;
+  return 12742 * Math.asin(Math.sqrt(h));
+}
+
+const nearCache = new Map<string, GemeindeDe[]>();
+function nearbyGemeinden(gem: GemeindeDe): GemeindeDe[] {
+  let n = nearCache.get(gem.ags);
+  if (!n) {
+    n = loadGemeindenDe().filter(x => x.ags !== gem.ags && km(gem, x) <= NEAR_KM);
+    nearCache.set(gem.ags, n);
+  }
+  return n;
+}
+
+let byName: Map<string, GemeindeDe[]> | null = null;
+function gemeindenNamed(name: string): GemeindeDe[] {
+  if (!byName) {
+    byName = new Map();
+    for (const x of loadGemeindenDe()) {
+      const k = normalizeGemeindeName(x.name);
+      byName.set(k, [...(byName.get(k) ?? []), x]);
+    }
+  }
+  return byName.get(normalizeGemeindeName(name)) ?? [];
+}
+
+/**
+ * Orte, die die PLZ-Referenz dieser Gemeinde zuordnet (eigene Ortsteile),
+ * und die Teile eines zusammengesetzten Namens („Neuenkirchen-Vörden":
+ * Neuenkirchen ist dort Ortsteil, nicht die Nachbargemeinde gleichen Namens).
+ */
+function ownOrte(gem: GemeindeDe): Set<string> {
+  const out = new Set([normalizeGemeindeName(gem.name)]);
+  for (const part of gem.name.split(/\s*[-/]\s*/)) if (part.length >= 3) out.add(normalizeGemeindeName(part));
+  for (const p of gem.plzAll) {
+    for (const [ort, ags] of Object.entries(plzReferenceDe(p)?.orteGemeinde ?? {})) {
+      if (ags === gem.ags) out.add(normalizeGemeindeName(ort));
+    }
+  }
+  return out;
+}
+
+/**
+ * Nennt ein Termin ohne Adresse im Kalender einer Gemeinde eine ANDERE
+ * Gemeinde, ist der Kalender nicht sein Ort (fn-29.7: „Nikelsmarkt
+ * Allendorf / Lumda" im Marburger Kalender, „Kirchenkonzert in Nördlingen"
+ * in Reimlingen, „Berlinreise" mit Ort „Berlin" in Bornheim).
+ *
+ * - Ortsname gleich der eigenen Gemeinde oder einem eigenen Ortsteil
+ *   (PLZ-Referenz): `undefined`, der Kalender gilt.
+ * - Ortsname oder Titel („in X") nennt genau eine Gemeinde im Umkreis von
+ *   30 km: diese.
+ * - Ortsname ist genau der Name einer ferneren Gemeinde: `null`, kein Ort
+ *   (der Freigabevertrag hält den Termin zurück).
+ */
+export function otherGemeindeNamed(gem: GemeindeDe, ev: { title: string; locationName?: string }): GemeindeDe | null | undefined {
+  const own = ownOrte(gem);
+  const loc = ev.locationName?.trim();
+  if (loc && own.has(normalizeGemeindeName(loc))) return undefined;
+  const near = nearbyGemeinden(gem).filter(x => !own.has(normalizeGemeindeName(x.name)));
+  // Der eigene Name im Termin („Sporthalle Groß Rheide") geht vor.
+  if (namedMember(ev, [gem])) return undefined;
+  // Mit Zusatz zuerst („Allendorf / Lumda" bei Marburg: Allendorf (Lumda),
+  // nicht Allendorf (Eder)); bleibt es mehrdeutig, ist es nicht der Kalenderort.
+  const full = namedGemeinden(ev, near, 'full');
+  if (full.length === 1) return full[0];
+  const any = namedGemeinden(ev, near, 'any');
+  if (any.length === 1) return any[0];
+  if (any.length > 1) return null;
+  if (loc && gemeindenNamed(loc).some(x => x.ags !== gem.ags) && !own.has(normalizeGemeindeName(loc))) return null;
+  return undefined;
 }
 
 export interface FeedTermin {
@@ -96,7 +188,11 @@ export function terminContext(
   const members = [...g.own, ...g.viaVerband];
   const single = ownGemeinde ? singleGemeinde(g) : null;
   const named = !single && !ev.hasOwnPlace ? namedMember(ev, feedGemeinden(members)) : null;
-  const gem = single ? gemeindeDeByAgs(single.ags) : named;
+  let gem = single ? gemeindeDeByAgs(single.ags) : named;
+  if (single && gem && !ev.hasOwnPlace) {
+    const other = otherGemeindeNamed(gem, ev);
+    gem = other === undefined ? gem : other;
+  }
   if (gem) return { name: gem.name, plz: gem.plz, lat: gem.lat, lng: gem.lng, bundesland: gem.land, bezirk: null };
   const lands = new Set(members.map(e => e.land));
   const anyMember = members.length ? gemeindeDeByAgs(members[0].ags) : null;
