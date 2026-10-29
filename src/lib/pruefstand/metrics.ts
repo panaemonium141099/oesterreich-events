@@ -24,7 +24,7 @@ export interface PruefRow {
   longitude?: number | null;
   location_precision?: string | null;
   publish_status?: string | null;
-  location_resolution?: { admission?: { decision?: string; reasons?: string[] } } | null;
+  location_resolution?: { status?: string; admission?: { decision?: string; reasons?: string[] } } | null;
 }
 
 export interface PruefMetrics {
@@ -42,7 +42,8 @@ export interface PruefMetrics {
     noCoords: number;
     /** Öffentlich ohne Position: auf Karte und Listen unsichtbar. Eine Zeile
      *  ohne belegten Ort in Quarantäne ist richtig (Qualitätsvertrag „Ort
-     *  korrekt oder Quarantäne") und zählt hier nicht. */
+     *  korrekt oder Quarantäne") und zählt hier nicht, ein Online-Termin
+     *  braucht keine Position und zählt auch nicht (fn-29.6). */
     visibleNoCoords: number;
     visibleMunicipalService: number;
     duplicatesInRun: number;
@@ -87,7 +88,7 @@ export function measureRows(rows: readonly PruefRow[]): PruefMetrics {
     if (r.location_precision === 'municipality') muni++;
     if (typeof r.latitude !== 'number' || typeof r.longitude !== 'number') {
       noCoords++;
-      if (pub) visibleNoCoords++;
+      if (pub && r.location_resolution?.status !== 'online') visibleNoCoords++;
     }
     if (pub && isMunicipalService(r.title)) visibleService++;
     const k = duplicateKey(r);

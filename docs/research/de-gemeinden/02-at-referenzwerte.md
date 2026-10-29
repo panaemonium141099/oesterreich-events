@@ -15,12 +15,13 @@ geliefert, kein verwaister Altbestand), `publish_status <> 'duplicate'`.
 
 | Quelle | Zeilen | Müll-Titel | ohne Uhrzeit | ohne Koordinaten | sichtbar ohne Koordinaten | Gemeinde-Mittelpunkt | sichtbare Gemeinde-Dienste | Dubletten in der Quelle |
 |---|---|---|---|---|---|---|---|---|
-| gem2go | 9.088 | 0,0 % | 46,3 % | 0,2 % | 0,06 % | 75,5 % | 0 | 2,8 % |
-| gemeinde-registry | 20.807 | 0,2 % | 67,2 % | 0,2 % | 0,08 % | 78,2 % | 4 | 0,4 % |
-| gemeinden-generic | 7.820 | 0,1 % | 62,0 % | 0,4 % | 0,22 % | 76,7 % | 0 | 1,3 % |
-| **gepoolt** | **37.715** | **0,1 %** | **61,1 %** | 0,3 % | **0,10 %** | 77,2 % | 4 (Schwelle DE: 0) | **1,1 %** |
+| gem2go | 9.088 | 0,0 % | 46,3 % | 0,2 % | 0,01 % | 75,5 % | 0 | 2,8 % |
+| gemeinde-registry | 20.807 | 0,2 % | 67,2 % | 0,2 % | 0,06 % | 78,2 % | 4 | 0,4 % |
+| gemeinden-generic | 7.820 | 0,1 % | 62,0 % | 0,4 % | 0,18 % | 76,7 % | 0 | 1,3 % |
+| **gepoolt** | **37.715** | **0,1 %** | **61,1 %** | 0,3 % | **0,07 %** | 77,2 % | 4 (Schwelle DE: 0) | **1,1 %** |
 
-Zweite Messung 2026-10-28 21:02 UTC (fn-29.5). Die vier sichtbaren Gemeinde-Dienste
+Dritte Messung 2026-10-28 21:53 UTC (fn-29.6, Online-Termine zählen bei „sichtbar ohne
+Koordinaten“ nicht mehr; fn-29.5 maß mit ihnen 0,10 %). Die vier sichtbaren Gemeinde-Dienste
 der gemeinde-registry sind „Restabfall“-Termine, die die Nachprüfung seit fn-29.2
 hält, sobald sie im Nachtlauf läuft.
 
@@ -38,6 +39,7 @@ Quelle gezählt, weil Treffer zwischen Quellen erst der Dedup auflöst.
 * **sichtbar ohne Koordinaten:** öffentlich und ohne Position. Schwelle. AT-Gemeinde-
   kalender haben immer den Gemeinde-Mittelpunkt, ein DE-Amtskalender hält Termine
   ohne genannte Gemeinde zurück; deshalb zählt nur, was öffentlich würde (fn-29.5).
+  Online-Termine brauchen keine Position und zählen nicht (fn-29.6).
 * **Gemeinde-Mittelpunkt:** `location_precision = 'municipality'`. Nur Information,
   keine Schwelle (abhängig von der Quelle, nicht vom Adapter).
 * **sichtbare Gemeinde-Dienste:** öffentlich und `isMunicipalService`. Schwelle 0.

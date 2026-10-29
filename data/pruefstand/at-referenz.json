@@ -1,5 +1,5 @@
 {
-  "measured_at": "2026-10-28T21:02:41.571Z",
+  "measured_at": "2026-10-28T21:53:22.754Z",
   "sources": [
     "gem2go",
     "gemeinde-registry",
@@ -20,7 +20,7 @@
       "noTimeOfDay": 0.6110035794776614,
       "municipalityPrecision": 0.7722921914357682,
       "noCoords": 0.002598435635688718,
-      "visibleNoCoords": 0.0010340713244067347,
+      "visibleNoCoords": 0.000742410181625348,
       "visibleMunicipalService": 0.0001060585973750497,
       "duplicatesInRun": 0.01134826991913032
     }
@@ -40,7 +40,7 @@
         "noTimeOfDay": 0.4632482394366197,
         "municipalityPrecision": 0.7553917253521126,
         "noCoords": 0.0019806338028169014,
-        "visibleNoCoords": 0.0005501760563380282,
+        "visibleNoCoords": 0.00011003521126760564,
         "visibleMunicipalService": 0,
         "duplicatesInRun": 0.027838908450704226
       }
@@ -60,7 +60,7 @@
         "noTimeOfDay": 0.6721776325275147,
         "municipalityPrecision": 0.7816119575142981,
         "noCoords": 0.0022588551929639063,
-        "visibleNoCoords": 0.0008170327293699236,
+        "visibleNoCoords": 0.0006247897342240592,
         "visibleMunicipalService": 0.00019224299514586436,
         "duplicatesInRun": 0.003508434661412025
       }
@@ -80,7 +80,7 @@
         "noTimeOfDay": 0.6199488491048594,
         "municipalityPrecision": 0.7671355498721227,
         "noCoords": 0.00421994884910486,
-        "visibleNoCoords": 0.002173913043478261,
+        "visibleNoCoords": 0.0017902813299232737,
         "visibleMunicipalService": 0,
         "duplicatesInRun": 0.013043478260869565
       }
