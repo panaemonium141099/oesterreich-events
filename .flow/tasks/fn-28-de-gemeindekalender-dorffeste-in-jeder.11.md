@@ -24,18 +24,17 @@ recherchieren. Ergebnis als eigener Branch mit PR auf master.
 
 Ergebnisdatei: `docs/research/de-gemeinden/10-brandenburg.md`.
 ## Acceptance
-- [ ] `docs/research/de-gemeinden/10-brandenburg.md` nach dem Format im Epic-Spec
-- [ ] Stichprobe: 30 Gemeinden unter 10.000 Einwohnern, reproduzierbar gezogen, je Eintrag Fundort der Veranstaltungen mit Link, Plattform/CMS und destination.one-Treffer
-- [ ] Jeder Generic (mehrfach in der Stichprobe oder laut Betreiber viele Gemeinden): Zugriffsweg, echte Felder aus Probe, Lizenz/AGB/robots, Zahl der Gemeinden belegt oder als Stichprobenanteil
-- [ ] Dorffest-Test mit belegtem Beispiel je Quelle
-- [ ] Priorisierte Integrationsliste für Brandenburg mit nächstem Schritt, Lücken benannt
-- [ ] Keine Konten/Formulare/Mails, wenige GETs je Host, ohne Gedankenstriche, PR auf master
+- [x] `docs/research/de-gemeinden/10-brandenburg.md` nach dem Format im Epic-Spec
+- [x] Stichprobe: 30 Gemeinden unter 10.000 Einwohnern, reproduzierbar gezogen, je Eintrag Fundort der Veranstaltungen mit Link, Plattform/CMS und destination.one-Treffer
+- [x] Jeder Generic (mehrfach in der Stichprobe oder laut Betreiber viele Gemeinden): Zugriffsweg, echte Felder aus Probe, Lizenz/AGB/robots, Zahl der Gemeinden belegt oder als Stichprobenanteil
+- [x] Dorffest-Test mit belegtem Beispiel je Quelle
+- [x] Priorisierte Integrationsliste für Brandenburg mit nächstem Schritt, Lücken benannt
+- [x] Keine Konten/Formulare/Mails, wenige GETs je Host, ohne Gedankenstriche, PR auf master
 
 
 ## Done summary
-TBD
-
+Ergebnis `docs/research/de-gemeinden/10-brandenburg.md` (PR #382). Stichprobe 30 Gemeinden unter 10.000 EW (Destatis 30.09.2026, Seed 281112) gegen die Vollerhebung geprüft (26/30 bestätigt). verwaltungsportal.de ist der Generic (17/30; 215 Gemeinden auf 128 Websites), das Amt ist die Kalenderebene (17 von 24 amtsangehörigen nur über den Amtskalender). TMB-Veranstaltungsdatenbank nimmt nicht-touristische Termine für Ämter und Gemeinden auf, XML-Schnittstelle nur auf Anfrage; reiseland-brandenburg.de 5.590 Veranstaltungsseiten gegenüber 494 TMB-Terminen in destination.one open-data. Dorffest-Test 16/30, destination.one 7/30, TMB 7/30. Priorisierte Liste, Lücken und zwei Anfragen (TMB, Förderverein) im Bericht.
 ## Evidence
-- Commits:
+- Commits: b3f6dcd059692eb1ea7e56c6035b57c877b32761
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/382
