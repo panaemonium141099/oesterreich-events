@@ -26,12 +26,12 @@ recherchieren. Ergebnis als eigener Branch mit PR auf master.
 
 Ergebnisdatei: `docs/research/de-gemeinden/01-rheinland-pfalz.md`.
 ## Acceptance
-- [ ] `docs/research/de-gemeinden/01-rheinland-pfalz.md` nach dem Format im Epic-Spec
-- [ ] Stichprobe: 30 Gemeinden unter 10.000 Einwohnern, reproduzierbar gezogen, je Eintrag Fundort der Veranstaltungen mit Link, Plattform/CMS und destination.one-Treffer
-- [ ] Jeder Generic (mehrfach in der Stichprobe oder laut Betreiber viele Gemeinden): Zugriffsweg, echte Felder aus Probe, Lizenz/AGB/robots, Zahl der Gemeinden belegt oder als Stichprobenanteil
-- [ ] Dorffest-Test mit belegtem Beispiel je Quelle
-- [ ] Priorisierte Integrationsliste für Rheinland-Pfalz mit nächstem Schritt, Lücken benannt
-- [ ] Keine Konten/Formulare/Mails, wenige GETs je Host, ohne Gedankenstriche, PR auf master
+- [x] `docs/research/de-gemeinden/01-rheinland-pfalz.md` nach dem Format im Epic-Spec
+- [x] Stichprobe: 30 Gemeinden unter 10.000 Einwohnern, reproduzierbar gezogen, je Eintrag Fundort der Veranstaltungen mit Link, Plattform/CMS und destination.one-Treffer
+- [x] Jeder Generic (mehrfach in der Stichprobe oder laut Betreiber viele Gemeinden): Zugriffsweg, echte Felder aus Probe, Lizenz/AGB/robots, Zahl der Gemeinden belegt oder als Stichprobenanteil
+- [x] Dorffest-Test mit belegtem Beispiel je Quelle
+- [x] Priorisierte Integrationsliste für Rheinland-Pfalz mit nächstem Schritt, Lücken benannt
+- [x] Keine Konten/Formulare/Mails, wenige GETs je Host, ohne Gedankenstriche, PR auf master
 
 
 ## Done summary
