@@ -717,6 +717,11 @@ Boost 29 € / Business-Abo 49 €/M / Live-Anbindung ab 199 € auf
 (0 Leads). Die Outreach-Maschine (Discovery→Enrich→Draft→Send, läuft täglich) ist der
 Vertriebskanal; ihr Verkaufsargument sind die Klickzahlen aus 7.1.2
 („dein Event hatte X Aufrufe — für 29 € heben wir es hervor").
+Seit fn-30 (2026-10-29) gibt es dazu den **Tipp des Tages** auf der Startseite:
+ein buchbarer Platz je Wiener Kalendertag (`landing_features.kind =
+'sponsored'`, Buchung über `/admin/boost`, Pflicht-Label „Anzeige“ plus
+Sponsorname nach § 26 MedienG / § 6 ECG, Klicks als `landing_tip_click`);
+Abrechnung weiterhin manuell, kein Checkout (§10.2 Punkt 5).
 
 ### 7.3 Weitere Quellen (Reihenfolge nach Realismus)
 
@@ -856,6 +861,26 @@ kleinen APIs treffen lassen.
    /api/me/landing-Call (60-Tage-Fenster begrenzt sie inhaltlich).
 4. Middleware-Session-Refresh auf die Routen beschränken, die ihn wirklich brauchen
    (auth-gated Seiten), statt auf jede Seite. *(offen)*
+5. **Tagesausgabe (fn-30, 2026-10-29): Mitternacht und Buchungen.** Die
+   Startseite rechnet in Wiener Kalendertagen (Datumszeile, Tipp des Tages,
+   Programm „Heute Abend“), bleibt aber eine ISR-Shell mit `revalidate = 3600`.
+   Zwei Wege halten sie frisch: `/api/admin/landing-feature` ruft nach jeder
+   Buchung `revalidateLanding()` (`src/lib/landing/revalidate-landing.ts`:
+   `/[locale]` als Seitenmuster plus `/` und `/en`), und
+   `GET /api/cron/revalidate-landing` (Bearer `CRON_SECRET` Pflicht, fail
+   closed) macht dasselbe um **00:05 Europe/Vienna**. *Ops, noch einzurichten:*
+   Timer `lt-cron@revalidate-landing.timer` auf Hetzner nach dem Muster der
+   anderen `lt-cron@`-Timer (curl auf `127.0.0.1:3000/api/cron/revalidate-landing`
+   mit Bearer), `OnCalendar=*-*-* 00:05:00 Europe/Vienna` (die übrigen Timer
+   laufen in UTC; hier zählt die Wiener Mitternacht, sonst springt der Tag bei
+   Sommer-/Winterzeit eine Stunde zu früh oder zu spät). `vercel.json` hat
+   keine Crons mehr. Buchungen: `landing_features.kind` (`sponsored` = Tipp
+   des Tages, ein Platz je Wiener Tag, Pflicht `sponsor_name`, Überschneidung
+   → 409; `editorial` = Saison-Karte wie bisher), Admin-UI `/admin/boost`
+   (Art, Sponsor, Tag, Status aktiv/geplant/abgelaufen/nicht sichtbar).
+   Voraussetzung in Prod: Migration `20261029200100_landing_features_kind.sql`
+   plus `NOTIFY pgrst, 'reload schema'`, sonst antwortet PostgREST auf
+   `kind`/`sponsor_name` mit 400 und die Route mit 500.
 
 ### 10.3 Filter & Karte: Queries eliminieren statt beschleunigen
 
