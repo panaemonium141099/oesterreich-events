@@ -36,6 +36,7 @@ import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import type { ActivitySearchMatch } from '@/lib/activities/public-types';
 import type { Event } from '@/types/events';
 import { gradientFor } from './category-gradient';
+import { ShelfTrack } from './shelf-ui';
 import { buildUnderstoodChips, type ParsedSummary } from './smart-chips';
 import { planSmartShelves } from './smart-shelves';
 import { buildConciergeLine, buildRefineChips } from './smart-summary';
@@ -243,9 +244,7 @@ function Shelf({ title, sub, children }: { title: string; sub?: string; children
           <button type="button" aria-label="Weiter scrollen" onClick={() => scroll(1)} className="w-[30px] h-[30px] rounded-full border border-[var(--v4-hairline-3)] grid place-items-center text-[13px] text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)]">›</button>
         </div>
       </div>
-      <div ref={track} className="flex gap-3.5 overflow-x-auto thin-scroll snap-x -mx-4 px-4 md:-mx-14 md:px-14 pb-1.5 [scroll-padding-left:16px] md:[scroll-padding-left:56px]">
-        {children}
-      </div>
+      <ShelfTrack trackRef={track} label={title}>{children}</ShelfTrack>
     </section>
   );
 }

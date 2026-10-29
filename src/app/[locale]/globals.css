@@ -1107,3 +1107,16 @@ button:active, a:active, [role="button"]:active {
 }
 @media (min-width: 720px) { .v4-poster-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 1000px) { .v4-poster-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+/* Regal-Spur (Shelf, shelf-ui.tsx; fn-30.8): endet an der Inhaltskante, kein
+   Überhang. Der Fokusring liegt innen, weil der Scroll-Container ihn am
+   linken und rechten Rand sonst abschneidet. Auf dem Handy zeigt ein Verlauf
+   am rechten Rand, dass rechts noch Karten liegen (data-more setzt die
+   Komponente, solange die Spur weiter scrollt); der Desktop hat die Pfeile. */
+.v4-shelf-track > :focus-visible { outline-offset: -3px; }
+@media (max-width: 767px) {
+  .v4-shelf-track[data-more] {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent);
+  }
+}
