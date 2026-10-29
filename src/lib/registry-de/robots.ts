@@ -6,7 +6,7 @@
  */
 interface Rule { allow: boolean; pattern: string }
 
-function groups(txt: string): Map<string, Rule[]> {
+function groups(txt: string, delays?: Map<string, number>): Map<string, Rule[]> {
   const out = new Map<string, Rule[]>();
   let agents: string[] = [];
   let inRules = false;
@@ -25,9 +25,23 @@ function groups(txt: string): Map<string, Rule[]> {
       inRules = true;
       if (key === 'disallow' && val === '') continue;
       for (const a of agents) out.get(a)!.push({ allow: key === 'allow', pattern: val });
+    } else if (key === 'crawl-delay') {
+      inRules = true;
+      const s = Number(val.replace(',', '.'));
+      if (delays && Number.isFinite(s) && s >= 0) for (const a of agents) delays.set(a, s);
     }
   }
   return out;
+}
+
+/** Crawl-delay in Sekunden für `userAgentToken` (eigene Gruppe, sonst `*`), sonst null. */
+export function robotsCrawlDelay(robotsTxt: string | null, userAgentToken: string): number | null {
+  if (!robotsTxt) return null;
+  const delays = new Map<string, number>();
+  const g = groups(robotsTxt, delays);
+  const token = userAgentToken.toLowerCase();
+  const own = [...g.keys()].find(a => a !== '*' && token.includes(a));
+  return own ? delays.get(own) ?? null : delays.get('*') ?? null;
 }
 
 function matches(pattern: string, path: string): number {

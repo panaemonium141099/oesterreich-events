@@ -5,8 +5,9 @@
  */
 import type { BaseScraper } from '../BaseScraper';
 import { IonasDeScraper } from './IonasDeScraper';
+import { NolisDeScraper } from './NolisDeScraper';
 
-export const DE_SCRAPERS: BaseScraper[] = [new IonasDeScraper()];
+export const DE_SCRAPERS: BaseScraper[] = [new IonasDeScraper(), new NolisDeScraper()];
 
 export function getDeScraperByName(name: string): BaseScraper | undefined {
   return DE_SCRAPERS.find(s => s.name === name);

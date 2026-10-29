@@ -44,6 +44,15 @@ describe('Prüfstand: Kennzahlen', () => {
     expect(m.rates.visibleMunicipalService).toBe(0.25);
   });
 
+  it('sichtbar ohne Koordinaten: Online-Termine zählen nicht', () => {
+    const m = measureRows([
+      row({ source_id: '1', latitude: null, longitude: null, location_resolution: { status: 'online' } }),
+      row({ source_id: '2', title: 'Kerwe', latitude: null, longitude: null, location_resolution: { status: 'region_only' } }),
+    ]);
+    expect(m.rates.noCoords).toBe(1);
+    expect(m.rates.visibleNoCoords).toBe(0.5);
+  });
+
   it('poolt nach n gewichtet, Dubletten bleiben je Quelle', () => {
     const a = measureRows([row({ source_id: '1' }), row({ source_id: '2' })]);
     const b = measureRows([row({ source_id: '1', title: 'Kirmes' }), row({ source_id: '2', title: 'Kerwe' })]);

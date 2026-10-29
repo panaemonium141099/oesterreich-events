@@ -111,7 +111,7 @@ describe('ionas: Termin → Zeile', () => {
 
 describe('ionas: Quelle und Amtskalender', () => {
   it('derselbe Termin zweimal im Feed: einer bleibt (Bad Honnef „Bilderbuchkino")', async () => {
-    const { collapseSourceDuplicates } = await import('@/lib/scrapers/de/IonasDeScraper');
+    const { collapseSourceDuplicates } = await import('@/lib/scrapers/de/kontext');
     const a = { uid: 'b', localDate: '2026-11-18', start: '2026-11-18T15:00:00.000Z', allDay: false, title: 'Bilderbuchkino in der Stadtbücherei', locationName: 'Stadtbücherei' };
     const b = { ...a, uid: 'a' };
     const c = { ...a, uid: 'c', start: '2026-11-18T17:00:00.000Z' };
@@ -119,7 +119,7 @@ describe('ionas: Quelle und Amtskalender', () => {
   });
 
   it('Mitgliedsgemeinde nur, wenn genau eine im Titel steht, nie aus einem Bindestrich-Namen', async () => {
-    const { namedMember, feedGemeinden } = await import('@/lib/scrapers/de/IonasDeScraper');
+    const { namedMember, feedGemeinden } = await import('@/lib/scrapers/de/kontext');
     const members = feedGemeinden([{ ags: '01053025' }, { ags: '01053039' }]); // Duvensee, Groß Boden
     expect(namedMember({ title: 'Laternenumzug in Duvensee' }, members)?.name).toBe('Duvensee');
     expect(namedMember({ title: 'Grünkohlessen' }, members)).toBeNull();
@@ -131,7 +131,7 @@ describe('ionas: Quelle und Amtskalender', () => {
   });
 
   it('Amtskalender: Name ohne Klammerzusatz („Ahlden (Aller)")', async () => {
-    const { namedMember, feedGemeinden } = await import('@/lib/scrapers/de/IonasDeScraper');
+    const { namedMember, feedGemeinden } = await import('@/lib/scrapers/de/kontext');
     expect(namedMember({ title: 'Adventsmarkt in Ahlden' }, feedGemeinden([{ ags: '03358001' }]))?.name).toBe('Ahlden (Aller)');
   });
 });
