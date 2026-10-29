@@ -49,9 +49,8 @@ is not null`.
       Select-Policy für anon hat (Muster aus bestehenden Migrations-Tests, sonst neu anlegen).
 - [ ] Kommentar in der Migration nennt `NOTIFY pgrst, 'reload schema'` als Pflichtschritt.
 ## Done summary
-TBD
-
+Drei Migrationen als Dateien (event_artists mit PK/FK-Cascade/Indizes/RLS/Select-Policy/service_role-Grant; landing_features.kind + sponsor_name mit Checks, Bestand editorial; event_stats_cache neu mit country_total nur AT/published/kommend, RPC unveraendert lesend), jede mit NOTIFY pgrst als Pflichtschritt. Typen fuer landing_features und event_artists in database.ts, Waechter-Test tagesausgabe-migrations.test.ts, Ops-Nachtrag in funktionsrechte-prod-stand-2026-10-08.md. Ausfuehrung in Prod steht noch aus (Dashboard/MCP).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: f4730f1fee778a9da8bc1e9f1a5fab77c43bdc78
+- Tests: npx vitest run src/__tests__/db (tagesausgabe-migrations 14/14, security-definer-grants gruen), npx tsc --noEmit (0 Fehler ausserhalb vorbestehender Test-Dateien), npm test (3939/3941; 2 vorbestehende CRLF-Textvergleiche auf Windows: search-event-ids-migration, sheet-css-guard; patch-next-static-search-nav SyntaxError vorbestehend)
 - PRs:
