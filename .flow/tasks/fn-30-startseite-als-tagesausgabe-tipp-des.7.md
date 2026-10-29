@@ -16,6 +16,14 @@ Mitternacht erneuert. Größe M.
   Hinweis auf das belegte Event. `editorial`: wie bisher (Fenster `until`).
 - Validierung: Event muss `published`, `country = SITE_COUNTRY` und am Buchungstag nicht
   vorbei sein; sonst 422.
+- Schema aus Task 1 (`supabase/migrations/20261029200100_landing_features_kind.sql`): `kind`
+  Default `editorial` (die Route verlässt sich bis zu diesem Task auf den Default), Checks
+  `landing_features_kind_check` und `landing_features_sponsor_name_check` (sponsored ohne
+  `sponsor_name` scheitert in der DB mit 23514, die Route prüft vorher auf 400), Index
+  `landing_features_kind_active_idx (kind, starts_at, ends_at)` für die 409-Prüfung. Typ in
+  `src/types/database.ts` (`kind: 'sponsored' | 'editorial'`). Migration in Prod noch nicht
+  ausgeführt; ohne sie antwortet PostgREST auf `kind`/`sponsor_name` mit 400.
+  <!-- Updated by plan-sync: fn-30.1 Migrationsname, Constraint-/Indexnamen, Prod-Ausführung offen -->
 - `/admin/boost` (`src/app/[locale]/admin/boost/page.tsx:59-70, 169-176, 323-376`): Felder
   Art (Anzeige/Redaktion), Sponsorname, Tag; Liste zeigt aktive und künftige Buchungen mit
   Status (aktiv, geplant, abgelaufen, Event nicht mehr sichtbar). Client-Helfer

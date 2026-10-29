@@ -20,6 +20,11 @@ Zeilen, die der Feed nicht mehr nennt. Größe M.
   artist_id) entdoppeln (Postgres bricht sonst mit „cannot affect row a second time“ ab).
   Fehlende Zeilen je Event löschen (`.delete().eq('event_id', id).not('artist_id', 'in', …)`
   oder delete+insert je Event); Events werden nie gelöscht, der Cascade greift nicht.
+- Tabelle und Typ liegen vor: `supabase/migrations/20261029200000_event_artists.sql`,
+  `Database['public']['Tables']['event_artists']` in `src/types/database.ts`. Die Migration ist
+  in Prod noch NICHT ausgeführt (Dashboard/MCP + `NOTIFY pgrst, 'reload schema'`); vor dem
+  ersten echten Import-Lauf nötig, sonst wird der Künstler-Schritt jeden Lauf rot.
+  <!-- Updated by plan-sync: fn-30.1 lieferte die Migration nur als Datei, Prod-Ausführung offen -->
 - Aufrufer: `src/scripts/import-eventim.ts:96` (GH-Action, Dry-Run bei 91) und
   `src/app/api/cron/eventim/route.ts:37`. Dry-Run schreibt keine Künstler. Fehler im
   Künstler-Schritt machen den Lauf rot, lassen den Event-Import aber gültig.
