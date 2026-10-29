@@ -23,18 +23,22 @@ recherchieren. Ergebnis als eigener Branch mit PR auf master.
 
 Ergebnisdatei: `docs/research/de-gemeinden/12-sachsen-anhalt.md`.
 ## Acceptance
-- [ ] `docs/research/de-gemeinden/12-sachsen-anhalt.md` nach dem Format im Epic-Spec
-- [ ] Stichprobe: 30 Gemeinden unter 10.000 Einwohnern, reproduzierbar gezogen, je Eintrag Fundort der Veranstaltungen mit Link, Plattform/CMS und destination.one-Treffer
-- [ ] Jeder Generic (mehrfach in der Stichprobe oder laut Betreiber viele Gemeinden): Zugriffsweg, echte Felder aus Probe, Lizenz/AGB/robots, Zahl der Gemeinden belegt oder als Stichprobenanteil
-- [ ] Dorffest-Test mit belegtem Beispiel je Quelle
-- [ ] Priorisierte Integrationsliste für Sachsen-Anhalt mit nächstem Schritt, Lücken benannt
-- [ ] Keine Konten/Formulare/Mails, wenige GETs je Host, ohne Gedankenstriche, PR auf master
+- [x] `docs/research/de-gemeinden/12-sachsen-anhalt.md` nach dem Format im Epic-Spec
+- [x] Stichprobe: 30 Gemeinden unter 10.000 Einwohnern, reproduzierbar gezogen, je Eintrag Fundort der Veranstaltungen mit Link, Plattform/CMS und destination.one-Treffer
+- [x] Jeder Generic (mehrfach in der Stichprobe oder laut Betreiber viele Gemeinden): Zugriffsweg, echte Felder aus Probe, Lizenz/AGB/robots, Zahl der Gemeinden belegt oder als Stichprobenanteil
+- [x] Dorffest-Test mit belegtem Beispiel je Quelle
+- [x] Priorisierte Integrationsliste für Sachsen-Anhalt mit nächstem Schritt, Lücken benannt
+- [x] Keine Konten/Formulare/Mails, wenige GETs je Host, ohne Gedankenstriche, PR auf master
 
 
 ## Done summary
-TBD
-
+Sachsen-Anhalt recherchiert: docs/research/de-gemeinden/12-sachsen-anhalt.md (PR #380).
+Stichprobe 30 Gemeinden < 10.000 EW (Seed 28013), Vollerhebung nachgeprüft (19 bestätigt, 8 korrigiert, 3 nicht erreichbar).
+Einheitsgemeinden 11/11 mit Fest im eigenen Kalender (9/11 mit Ortsteil-Terminen), VG-Mitgliedsgemeinden 2/19.
+Generics: verwaltungsportal.de 12/30 (JSON-LD addressLocality "Gemeinde OT Ortsteil"), GeoCMS brain-SCC (43 der 63 bundesweit in ST), iKISS.
+SAiNT (IMG): Daten CC, API-Bedingungen 3.1 a verbieten Erlöse, Quellen laut Schema Outdooractive und BrainSCC; schriftliche Anfrage durch User nötig.
+destination.one: 544 Termine im Land, 2/30 Gemeinden mit Treffer.
 ## Evidence
-- Commits:
+- Commits: cd962bc8f18241b4760ab8205ef507a8d85937d2
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/380
