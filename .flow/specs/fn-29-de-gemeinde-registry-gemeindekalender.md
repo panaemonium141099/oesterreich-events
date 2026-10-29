@@ -43,8 +43,12 @@ unbekannt; was nicht sicher ist, wird nicht veröffentlicht.
    Begriffe ergänzt (z. B. Ortsgemeinderat, Gelber Sack, Bürgersprechstunde), belegt
    aus echten Proben der Adapter.
 6. **Inhalt nur aus der Quelle:** keine KI-Beschreibungen (MASTERPLAN §6), Kategorie
-   nur über den deterministischen Classifier. Bilder nur mit belegtem Nutzungsrecht,
-   im Zweifel ohne Bild.
+   nur über den deterministischen Classifier. Bilder (Entscheidung des Users
+   2026-10-29, ersetzt „nur mit belegtem Nutzungsrecht"): das Bild der Quelle wird
+   übernommen, am Bild stehen die Website (`image_credit`) und der Link auf die
+   Detailseite des Termins (`source_url`, Hero der Detailseite). Logo, Wappen,
+   Vektorgrafik, KI-Bild und Platzhalter (ein Bild an drei verschiedenen Terminen
+   eines Feeds) fallen weg: `src/lib/scrapers/de/bild.ts`.
 7. **Identität und Bestand:** `source_id` stabil und nie aus gekürzten Strings;
    bei Wechsel `previous_source_id`. Rückzug (`withdrawal`), Nachprüfung
    (`admission_recheck`) und Dedup (`dedup-engine.ts`, Belege statt Quellenregeln)

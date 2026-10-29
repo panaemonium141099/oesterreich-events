@@ -4,6 +4,7 @@
  * beim Adapter. REIN, kein I/O.
  */
 import { toUtcInstant } from '@/lib/pipeline/normalize-date';
+import { looksLikeImageFile } from './bild';
 
 export interface Prop { params: Record<string, string>; value: string }
 export type VEvent = Map<string, Prop>;
@@ -56,6 +57,20 @@ export function icalText(m: VEvent, k: string): string | undefined {
   const v = m.get(k)?.value;
   const t = v ? unescapeText(v) : '';
   return t || undefined;
+}
+
+/**
+ * Bild des Termins aus `ATTACH`: mit `FMTTYPE=image/…` (ionas) oder als
+ * Bilddatei ohne Typangabe (Events Manager). Prüfung auf Logo, Wappen und
+ * Platzhalter in `bild.ts`.
+ */
+export function icalImage(m: VEvent): string | undefined {
+  const p = m.get('ATTACH');
+  const v = p?.value.trim();
+  if (!p || !v || p.params.VALUE === 'BINARY') return undefined;
+  const typed = (p.params.FMTTYPE ?? '').toLowerCase();
+  if (typed && !typed.startsWith('image/')) return undefined;
+  return typed || looksLikeImageFile(v) ? v : undefined;
 }
 
 const BERLIN_DAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' });

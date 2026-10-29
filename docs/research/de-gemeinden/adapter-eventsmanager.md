@@ -17,8 +17,9 @@ Nachtlauf (fn-29.18).
 | Koordinate in `X-APPLE-STRUCTURED-LOCATION` (`geo:Breite,Länge`), oft 0,0 | Laubach | übernommen, 0,0 nicht |
 | Serien bis Jahre im Voraus | Gommersheim „Maibaum stellen“ bis 2034 | Horizont des Freigabevertrags (3 Jahre) hält sie zurück |
 
-`source_id` = `em-<Host>-<UID>-<Termintag>`, Quelle die Detailseite aus `URL`, keine
-Bilder.
+`source_id` = `em-<Host>-<UID>-<Termintag>`, Quelle die Detailseite aus `URL`. Bild aus
+`ATTACH` mit der Website als Bildnachweis, ohne Logo, Wappen und Platzhalter
+(`bild.ts`, seit 2026-10-29).
 
 ## Ergebnis
 

@@ -12,7 +12,8 @@ import { ortsdatenFor } from '@/lib/location/ortsdaten';
 import { feedGroups, type FeedGroup } from '@/lib/registry-de/load';
 import type { ScrapedEvent } from '@/types/events';
 import { DeFeedScraper } from './feed-scraper';
-import { ionasIcsUrl, parseIonasIcs, type IonasEvent } from './ionas';
+import { imageCredit, imageUrl, withoutPlaceholderImages } from './bild';
+import { ionasDetailUrl, ionasIcsUrl, parseIonasIcs, type IonasEvent } from './ionas';
 import { collapseSourceDuplicates, terminContext } from './kontext';
 
 export class IonasDeScraper extends DeFeedScraper {
@@ -27,7 +28,7 @@ export class IonasDeScraper extends DeFeedScraper {
     for (const g of groups) {
       const ics = await this.fetchFeed(ionasIcsUrl(g.feedUrl, from, to));
       if (ics == null) continue;
-      const events = collapseSourceDuplicates(parseIonasIcs(ics));
+      const events = withoutPlaceholderImages(collapseSourceDuplicates(parseIonasIcs(ics)));
       all.push(...events.map(ev => this.toScraped(ev, g)));
     }
     this.log(`${groups.length} Feeds, ${all.length} Termine`);
@@ -36,10 +37,12 @@ export class IonasDeScraper extends DeFeedScraper {
 
   toScraped(ev: IonasEvent, g: FeedGroup): ScrapedEvent {
     const address = [ev.street, [ev.postalCode, ev.locality].filter(Boolean).join(' ')].filter(Boolean).join(', ') || undefined;
+    const image = imageUrl(ev.image);
+    const sourceUrl = ionasDetailUrl(g.feedUrl, ev.attach) ?? g.pageUrl;
     const base: ScrapedEvent = {
       source_name: this.name,
       source_id: `ionas-${ev.uid}-${ev.localDate}`,
-      source_url: g.pageUrl,
+      source_url: sourceUrl,
       title: ev.title,
       description: ev.description,
       start_date: ev.start,
@@ -50,6 +53,7 @@ export class IonasDeScraper extends DeFeedScraper {
       city: ev.locality,
       organizer: ev.organizer,
       category: ev.category,
+      ...(image ? { image_url: image, image_credit: imageCredit(sourceUrl) } : {}),
       country: 'DE',
       ...(ev.lat != null && ev.lng != null ? { latitude: ev.lat, longitude: ev.lng, coords_precision: 'venue' as const } : {}),
     };
