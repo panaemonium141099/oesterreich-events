@@ -51,6 +51,12 @@ Abschluss: Dokumentation, Prod-Prüfungen und Verifikation der gesamten Tagesaus
   <!-- Updated by plan-sync: fn-30.2 Künstler-Schritt rot bis Migration in Prod -->
 - `next build && next start`: `x-nextjs-cache: HIT` auf `/` und `/en`; Screenshots Desktop
   1440 und Handy 390 für `/`, `/entdecken`, `/wien`; `/admin/boost` Buchung und 409.
+  Offen aus Task 8 (kein Dev-Server im Worktree): Sichtprüfung der Regal-Spur
+  (`ShelfTrack`, `.v4-shelf-track`) auf `/entdecken`, `/wien`, `/thema/<slug>`, `/studenten`:
+  rechte Spurkante = Inhaltskante per `getBoundingClientRect`, erste Karte bündig, Fokusring
+  nicht abgeschnitten, Handy-Verlauf bei `data-more`, kein horizontales Scrollen; Screenshots
+  in den PR.
+  <!-- Updated by plan-sync: fn-30.8 Sichtprüfung der Spur offen, hier nachzuholen -->
 - Analytics: `landing_tip_click`, `landing_map_open`, `landing_artist_follow` kommen in
   `analytics_events` an (Dev-Check gegen die Route).
 - fn-19: Abhängigkeit auf fn-30 setzen (`flowctl epic add-dep`).

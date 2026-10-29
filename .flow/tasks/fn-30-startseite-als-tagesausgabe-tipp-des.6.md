@@ -25,6 +25,12 @@ Untere Hälfte der Tagesausgabe, Entfernen der alten Sektionen und `von`/`bis` a
   `src/components/Discover/v4/shelf-ui.tsx` (Client-Komponenten, rendern im Server-HTML);
   `RegionTile` → `/{bundesland}` mit `BUNDESLAENDER` (`src/lib/bundeslaender.ts:16`) und
   `/images/regions/<id>.jpg`. „Alle anzeigen“ → `/entdecken?von=<fr>&bis=<so>`.
+  Stand nach Task 8: `Shelf`-Props unverändert; die Spur ist jetzt die exportierte
+  `ShelfTrack({ trackRef, label, children })` (endet an der Inhaltskante, `role="region"` mit
+  Regaltitel, `data-more` + Handy-Verlauf über `.v4-shelf-track` in `globals.css`). Eine eigene
+  Querscroll-Spur (falls `ActivitiesShelf` nicht `Shelf` nimmt) über `ShelfTrack`, ohne
+  negative Ränder oder `scroll-padding-left`.
+  <!-- Updated by plan-sync: fn-30.8 Spur als ShelfTrack ausgelagert, kein Überhang -->
 - `/entdecken`: `deriveInitialFilters` (`src/app/[locale]/entdecken/page.tsx:40-68`) lernt
   `von`/`bis` (ISO-Datum → `dateFrom`/`dateTo` in `EventFilters`, Muster `saison`); der
   `listModeKey` nimmt beide auf. Sonst keine Änderung an `/entdecken`.
