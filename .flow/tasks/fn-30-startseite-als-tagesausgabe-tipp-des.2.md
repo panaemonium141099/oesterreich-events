@@ -50,9 +50,8 @@ Zeilen, die der Feed nicht mehr nennt. Größe M.
       Event-Upsert zurückzunehmen.
 - [ ] `npm test` grün.
 ## Done summary
-TBD
-
+Der Eventim-Import liest die Serien-Künstler des PFT-Feeds als Nebenergebnis von parseEventimFeed (Map source_id → Künstler, ScrapedEvent/rawContentHash unverändert) und schreibt sie nach dem Event-Upsert über src/lib/db/event-artists-sync.ts nach event_artists: Event-IDs in Chunks ≤ 200, Upsert onConflict (event_id, artist_id) in Batches ≤ 500 ohne Dubletten, Löschen der je Event nicht mehr genannten Zeilen. Dry-Run schreibt nichts; ein Fehler im Künstler-Schritt macht Script (Exit 1) und Cron-Route (500) rot, ohne den Event-Import zurückzunehmen. Voraussetzung vor dem ersten echten Lauf: Migration 20261029200000_event_artists.sql in Prod ausführen und den PostgREST-Schema-Cache neu laden.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: d1a0818862bc1a18c0429bef1f7922d010a31fcc
+- Tests: npx vitest run src/__tests__/lib/eventim, npx tsc --noEmit -p tsconfig.json, npm test (33 Timeouts unter Last, alle in Isolation grün; bekannte CRLF-Fehler search-event-ids-migration/sheet-css-guard und Windows-SyntaxError in patch-next-static-search-nav.test.ts sind fremd)
 - PRs:
