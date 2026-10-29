@@ -1,0 +1,1107 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"></head><body>
+<!--TYPO3SEARCH_begin-->
+                        <div class="contentelement">
+<div class="hwveranstaltung">
+	
+    
+        <h3>Veranstaltungen</h3>
+    
+
+    
+
+    
+            <div class="filterblock">
+                <form name="suche" action="/tourismus-kultur/veranstaltungskalender?no_cache=1&amp;tx_hwveranstaltung_hwveranstalt%5Bcontroller%5D=VeranstaltungFrontend&amp;cHash=d854e63e0f57f526a3c8bbd2ad781d9f" method="post">
+<div>
+<input type="hidden" name="tx_hwveranstaltung_hwveranstalt[__referrer][@extension]" value="Hwveranstaltung" />
+<input type="hidden" name="tx_hwveranstaltung_hwveranstalt[__referrer][@vendor]" value="HW" />
+<input type="hidden" name="tx_hwveranstaltung_hwveranstalt[__referrer][@controller]" value="VeranstaltungFrontend" />
+<input type="hidden" name="tx_hwveranstaltung_hwveranstalt[__referrer][@action]" value="list" />
+<input type="hidden" name="tx_hwveranstaltung_hwveranstalt[__referrer][arguments]" value="YTowOnt98853d058b377d68625258e44d551b27b3e3b61f8" />
+<input type="hidden" name="tx_hwveranstaltung_hwveranstalt[__referrer][@request]" value="a:4:{s:10:&quot;@extension&quot;;s:15:&quot;Hwveranstaltung&quot;;s:11:&quot;@controller&quot;;s:21:&quot;VeranstaltungFrontend&quot;;s:7:&quot;@action&quot;;s:4:&quot;list&quot;;s:7:&quot;@vendor&quot;;s:2:&quot;HW&quot;;}d2649d52f277ef1621494cedf674a0afa46d962d" />
+<input type="hidden" name="tx_hwveranstaltung_hwveranstalt[__trustedProperties]" value="a:1:{s:5:&quot;suche&quot;;a:4:{s:8:&quot;volltext&quot;;i:1;s:5:&quot;start&quot;;i:1;s:4:&quot;ende&quot;;i:1;s:4:&quot;kat1&quot;;a:4:{i:0;i:1;i:1;i:1;i:2;i:1;i:3;i:1;}}}ee669593f8bebb7594cbcac1b2e38d75baaeb66d" />
+</div>
+
+                    <fieldset>
+                        <label for="volltext">
+                            Volltextsuche:
+                        </label>
+                        <input placeholder="Suchbegriff eingeben..." class="hwsearch" id="volltext" type="text" name="tx_hwveranstaltung_hwveranstalt[suche][volltext]" value="" />
+                    </fieldset>
+                    <div id="erweiterte_suche" class="suche-inaktiv">
+                        <button aria-label="Geöffnet Erweiterte Suche" role="button" id="link_erweiterte_suche" aria-pressed="false">Erweiterte Suche</button>
+                        <div id="content_erweiterte_suche">
+                            <fieldset class="date">
+                                <h3>
+                                    Zeitraum
+                                </h3>
+                                <div class="date_from">
+                                    <label for="formFieldVon">
+                                        Von:
+                                    </label>
+                                    <input data-parsley-trigger="change" data-parsley-id="6271" data-parsley-required-message="Bitte geben Sie ein Startdatum für Ihre Suche an." class="von-datum datePickerField" id="formFieldVon" type="text" name="tx_hwveranstaltung_hwveranstalt[suche][start]" value="" />
+                                    <ul class="parsley-errors-list" id="parsley-id-6271">
+
+                                    </ul>
+                                </div>
+                                <div class="date_to">
+                                    <label for="formFieldBis">
+                                        Bis:
+                                    </label>
+                                    <input data-parsley-trigger="change" data-parsley-id="1123" data-parsley-required-message="Bitte geben Sie ein Enddatum für Ihre Suche an." class="bis-datum datePickerField" id="formFieldBis" type="text" name="tx_hwveranstaltung_hwveranstalt[suche][ende]" value="" />
+                                    <ul class="parsley-errors-list" id="parsley-id-1123">
+
+                                    </ul>
+                                </div>
+                            </fieldset>
+                            
+                                    <div class="abschnitt">
+                                        <fieldset class="kat1">
+                                            <h3>
+                                                Kategorie
+                                            </h3>
+                                            <ul>
+                                                
+                                                    <li class="check_1">
+                                                        <input type="hidden" name="tx_hwveranstaltung_hwveranstalt[suche][kat1]" value="" /><input id="check_1" type="checkbox" name="tx_hwveranstaltung_hwveranstalt[suche][kat1][]" value="1" />
+                                                        <label for="check_1">
+                                                            Feste &amp; Feiern
+                                                        </label>
+                                                    </li>
+                                                
+                                                    <li class="check_2">
+                                                        <input id="check_2" type="checkbox" name="tx_hwveranstaltung_hwveranstalt[suche][kat1][]" value="2" />
+                                                        <label for="check_2">
+                                                            Kunst &amp; Kultur
+                                                        </label>
+                                                    </li>
+                                                
+                                                    <li class="check_3">
+                                                        <input id="check_3" type="checkbox" name="tx_hwveranstaltung_hwveranstalt[suche][kat1][]" value="3" />
+                                                        <label for="check_3">
+                                                            Sitzungstermine
+                                                        </label>
+                                                    </li>
+                                                
+                                                    <li class="check_4">
+                                                        <input id="check_4" type="checkbox" name="tx_hwveranstaltung_hwveranstalt[suche][kat1][]" value="4" />
+                                                        <label for="check_4">
+                                                            Sonstige
+                                                        </label>
+                                                    </li>
+                                                
+                                            </ul>
+                                        </fieldset>
+                                    </div>
+                                
+                        </div>
+                    </div>
+                    <input title="Suchen" type="submit" value="Suchen" />
+                    
+                </form>
+            </div>
+        
+
+    
+    
+
+    <div class="list_module">
+        
+                
+
+
+                    
+                        
+<div class="einzeleintrag kalenderKatId1">
+
+
+    
+    
+            <h4 class="titel">Weinfest SV Schlierstadt</h4>
+        
+
+    
+    
+        
+                
+            
+    
+
+
+
+    
+    <div class="datum">
+        <span class="reader_icon">Datum </span>
+        06.11.2026
+        
+    </div>
+
+
+    
+    
+            <div class="uhrzeit">
+                00:00 Uhr
+                
+            </div>
+        
+
+
+    
+    
+
+
+    
+    
+        <span class="reader_icon">Veranstalter </span>
+        <div class="veranstalter">SV Schlierstadt, Abt. Fußball</div>
+    
+
+    
+    
+        <span class="reader_icon">Veranstaltungsort </span>
+        <div class="ort"> Mehrzweckhalle Schlierstadt</div>
+    
+
+    
+    
+
+
+    
+    
+        <div class="homepage">
+            <a href="http://www.sv-schlierstadt.de/" class="external-link" title="Weiter zur Homepage - Link öffnet im neuen Fenster" target="_blank">Weiter zur Homepage</a>
+        </div>
+    
+
+
+    
+    
+        <div class="kategorie">
+            <span class="reader_icon">Kategorien </span>
+            
+                
+                        <span class="catUid1">Feste &amp; Feiern</span>
+                    
+            
+        </div>
+    
+
+
+    
+    
+        <div
+            id="hw_map1357"
+            class="hw_map"
+            data-lat="49.44955577140407"
+            data-lng="9.361059665679932"
+            data-bezeichnung="Weinfest SV Schlierstadt"
+            data-strasse="In den Weinbergen"
+            data-hausnummer="1"
+            data-plz="74706"
+            data-ort="Osterburken"
+        ></div>
+    
+
+
+    
+    
+
+            
+
+        
+
+</div>
+
+                    
+                        
+<div class="einzeleintrag kalenderKatId1">
+
+
+    
+    
+            <h4 class="titel">Weinfest SV Schlierstadt</h4>
+        
+
+    
+    
+        
+                
+            
+    
+
+
+
+    
+    <div class="datum">
+        <span class="reader_icon">Datum </span>
+        07.11.2026
+        
+    </div>
+
+
+    
+    
+            <div class="uhrzeit">
+                00:00 Uhr
+                
+            </div>
+        
+
+
+    
+    
+
+
+    
+    
+        <span class="reader_icon">Veranstalter </span>
+        <div class="veranstalter">SV Schlierstadt, Abt. Fußball</div>
+    
+
+    
+    
+        <span class="reader_icon">Veranstaltungsort </span>
+        <div class="ort"> Mehrzweckhalle Schlierstadt</div>
+    
+
+    
+    
+
+
+    
+    
+        <div class="homepage">
+            <a href="http://www.sv-schlierstadt.de/" class="external-link" title="Weiter zur Homepage - Link öffnet im neuen Fenster" target="_blank">Weiter zur Homepage</a>
+        </div>
+    
+
+
+    
+    
+        <div class="kategorie">
+            <span class="reader_icon">Kategorien </span>
+            
+                
+                        <span class="catUid1">Feste &amp; Feiern</span>
+                    
+            
+        </div>
+    
+
+
+    
+    
+        <div
+            id="hw_map1358"
+            class="hw_map"
+            data-lat="49.44955577140407"
+            data-lng="9.361059665679932"
+            data-bezeichnung="Weinfest SV Schlierstadt"
+            data-strasse="In den Weinbergen"
+            data-hausnummer="1"
+            data-plz="74706"
+            data-ort="Osterburken"
+        ></div>
+    
+
+
+    
+    
+
+            
+
+        
+
+</div>
+
+                    
+                        
+<div class="einzeleintrag kalenderKatId1">
+
+
+    
+    
+            <h4 class="titel">Weinfest SV Schlierstadt</h4>
+        
+
+    
+    
+        
+                
+            
+    
+
+
+
+    
+    <div class="datum">
+        <span class="reader_icon">Datum </span>
+        08.11.2026
+        
+    </div>
+
+
+    
+    
+            <div class="uhrzeit">
+                00:00 Uhr
+                
+            </div>
+        
+
+
+    
+    
+
+
+    
+    
+        <span class="reader_icon">Veranstalter </span>
+        <div class="veranstalter">SV Schlierstadt, Abt. Fußball</div>
+    
+
+    
+    
+        <span class="reader_icon">Veranstaltungsort </span>
+        <div class="ort"> Mehrzweckhalle Schlierstadt</div>
+    
+
+    
+    
+
+
+    
+    
+        <div class="homepage">
+            <a href="http://www.sv-schlierstadt.de/" class="external-link" title="Weiter zur Homepage - Link öffnet im neuen Fenster" target="_blank">Weiter zur Homepage</a>
+        </div>
+    
+
+
+    
+    
+        <div class="kategorie">
+            <span class="reader_icon">Kategorien </span>
+            
+                
+                        <span class="catUid1">Feste &amp; Feiern</span>
+                    
+            
+        </div>
+    
+
+
+    
+    
+        <div
+            id="hw_map1359"
+            class="hw_map"
+            data-lat="49.44955577140407"
+            data-lng="9.361059665679932"
+            data-bezeichnung="Weinfest SV Schlierstadt"
+            data-strasse="In den Weinbergen"
+            data-hausnummer="1"
+            data-plz="74706"
+            data-ort="Osterburken"
+        ></div>
+    
+
+
+    
+    
+
+            
+
+        
+
+</div>
+
+                    
+                        
+<div class="einzeleintrag kalenderKatId4">
+
+
+    
+    
+            <h4 class="titel">Podiumsdiskussion „Künstliche Intelligenz: Chancen und Gefahren</h4>
+        
+
+    
+    
+        
+                
+            
+    
+
+
+
+    
+    <div class="datum">
+        <span class="reader_icon">Datum </span>
+        12.11.2026
+        
+    </div>
+
+
+    
+    
+            <div class="uhrzeit">
+                00:00 Uhr
+                
+            </div>
+        
+
+
+    
+    
+
+
+    
+    
+        <span class="reader_icon">Veranstalter </span>
+        <div class="veranstalter">Mediathek Osterburken</div>
+    
+
+    
+    
+
+    
+    
+
+
+    
+    
+        <div class="homepage">
+            <a href="https://www.osterburken.de/buerger-werkstatt/mediathek" class="external-link" title="Weiter zur Homepage - Link öffnet im neuen Fenster" target="_blank">Weiter zur Homepage</a>
+        </div>
+    
+
+
+    
+    
+        <div class="kategorie">
+            <span class="reader_icon">Kategorien </span>
+            
+                
+                        <span class="catUid4">Sonstige</span>
+                    
+            
+        </div>
+    
+
+
+    
+    
+
+
+    
+    
+
+            
+
+        
+
+</div>
+
+                    
+                        
+<div class="einzeleintrag kalenderKatId1">
+
+
+    
+    
+            <h4 class="titel">Faschenachtseröffnung</h4>
+        
+
+    
+    
+        
+                
+            
+    
+
+
+
+    
+    <div class="datum">
+        <span class="reader_icon">Datum </span>
+        13.11.2026
+        
+    </div>
+
+
+    
+    
+            <div class="uhrzeit">
+                19:31 Uhr
+                
+            </div>
+        
+
+
+    
+    
+
+
+    
+    
+        <span class="reader_icon">Veranstalter </span>
+        <div class="veranstalter">Elferrat Osterburken</div>
+    
+
+    
+    
+        <span class="reader_icon">Veranstaltungsort </span>
+        <div class="ort"> Baulandhalle Osterburken</div>
+    
+
+    
+    
+
+
+    
+    
+
+
+    
+    
+        <div class="kategorie">
+            <span class="reader_icon">Kategorien </span>
+            
+                
+                        <span class="catUid1">Feste &amp; Feiern</span>
+                    
+            
+        </div>
+    
+
+
+    
+    
+
+
+    
+    
+
+            
+
+        
+
+</div>
+
+                    
+                        
+<div class="einzeleintrag kalenderKatId4">
+
+
+    
+    
+            <h4 class="titel">Filmabend des Städtepartnerschaftsvereins</h4>
+        
+
+    
+    
+        
+                
+            
+    
+
+
+
+    
+    <div class="datum">
+        <span class="reader_icon">Datum </span>
+        15.11.2026
+        
+    </div>
+
+
+    
+    
+            <div class="uhrzeit">
+                00:00 Uhr
+                
+            </div>
+        
+
+
+    
+    
+
+
+    
+    
+        <span class="reader_icon">Veranstalter </span>
+        <div class="veranstalter">MGT und Mediathek</div>
+    
+
+    
+    
+
+    
+    
+
+
+    
+    
+
+
+    
+    
+        <div class="kategorie">
+            <span class="reader_icon">Kategorien </span>
+            
+                
+                        <span class="catUid4">Sonstige</span>
+                    
+            
+        </div>
+    
+
+
+    
+    
+
+
+    
+    
+
+            
+
+        
+
+</div>
+
+                    
+                        
+<div class="einzeleintrag kalenderKatId4">
+
+
+    
+    
+            <h4 class="titel">Volkstrauertag</h4>
+        
+
+    
+    
+        
+                
+            
+    
+
+
+
+    
+    <div class="datum">
+        <span class="reader_icon">Datum </span>
+        15.11.2026
+        
+    </div>
+
+
+    
+    
+            <div class="uhrzeit">
+                00:00 Uhr
+                
+            </div>
+        
+
+
+    
+    
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+    
+    
+
+
+    
+    
+        <div class="kategorie">
+            <span class="reader_icon">Kategorien </span>
+            
+                
+                        <span class="catUid4">Sonstige</span>
+                    
+            
+        </div>
+    
+
+
+    
+    
+
+
+    
+    
+
+            
+
+        
+
+</div>
+
+                    
+                        
+<div class="einzeleintrag kalenderKatId4">
+
+
+    
+    
+            <h4 class="titel">Autorenlesung mit „Krimipfarrer“ Stefan Albert</h4>
+        
+
+    
+    
+        
+                
+            
+    
+
+
+
+    
+    <div class="datum">
+        <span class="reader_icon">Datum </span>
+        20.11.2026
+        
+    </div>
+
+
+    
+    
+            <div class="uhrzeit">
+                00:00 Uhr
+                
+            </div>
+        
+
+
+    
+    
+
+
+    
+    
+        <span class="reader_icon">Veranstalter </span>
+        <div class="veranstalter">Mediathek Osterburken</div>
+    
+
+    
+    
+
+    
+    
+
+
+    
+    
+        <div class="homepage">
+            <a href="https://www.osterburken.de/buerger-werkstatt/mediathek" class="external-link" title="Weiter zur Homepage - Link öffnet im neuen Fenster" target="_blank">Weiter zur Homepage</a>
+        </div>
+    
+
+
+    
+    
+        <div class="kategorie">
+            <span class="reader_icon">Kategorien </span>
+            
+                
+                        <span class="catUid4">Sonstige</span>
+                    
+            
+        </div>
+    
+
+
+    
+    
+
+
+    
+    
+
+            
+
+        
+
+</div>
+
+                    
+                        
+<div class="einzeleintrag kalenderKatId2">
+
+
+    
+    
+            <h4 class="titel">Kulturkommode Osterburken, Wildes Holz (Blockflöten-Rebellion)</h4>
+        
+
+    
+    
+        
+                
+            
+    
+
+
+
+    
+    <div class="datum">
+        <span class="reader_icon">Datum </span>
+        21.11.2026
+        
+    </div>
+
+
+    
+    
+            <div class="uhrzeit">
+                20:00 Uhr
+                
+            </div>
+        
+
+
+    
+    
+
+
+    
+    
+        <span class="reader_icon">Veranstalter </span>
+        <div class="veranstalter">Kulturkommode Osterburken</div>
+    
+
+    
+    
+        <span class="reader_icon">Veranstaltungsort </span>
+        <div class="ort"> Baulandhalle</div>
+    
+
+    
+    
+
+
+    
+    
+        <div class="homepage">
+            <a href="https://kulturkommode.de/" class="external-link" title="Weiter zur Homepage - Link öffnet im neuen Fenster" target="_blank">Weiter zur Homepage</a>
+        </div>
+    
+
+
+    
+    
+        <div class="kategorie">
+            <span class="reader_icon">Kategorien </span>
+            
+                
+                        <span class="catUid2">Kunst &amp; Kultur</span>
+                    
+            
+        </div>
+    
+
+
+    
+    
+
+
+    
+    
+
+            
+
+                    
+                    
+                        <div class="details-link zurueck"><a href="/tourismus-kultur/veranstaltungskalender?tx_hwveranstaltung_hwveranstalt%5Baction%5D=show&amp;tx_hwveranstaltung_hwveranstalt%5Bcontroller%5D=VeranstaltungFrontend&amp;tx_hwveranstaltung_hwveranstalt%5BcurrentPage%5D=1&amp;tx_hwveranstaltung_hwveranstalt%5Bid%5D=762&amp;tx_hwveranstaltung_hwveranstalt%5BlistAction%5D=list&amp;tx_hwveranstaltung_hwveranstalt%5Bsearch%5D=nope&amp;tx_hwveranstaltung_hwveranstalt%5Btid%5D=1397&amp;cHash=46976221dd7c26c6844c9302c1ca259a">Details einblenden</a></div>
+                            <div class="beschreibung" style="display: none;">
+                            <p>Wildes Holz lädt zur Block Party! Ihr neues Programm feiert die Musik, das Leben, die Vielfalt, die Eigenheiten, dieseltsamen Angewohnheiten, die schrulligen Ticks, den Holzrock, dieBlockflöte. Ja, die Blockflöte, das Party-Instrument par excellence, ein Muss für jeden Partygänger! Die drei Wilden zeigen, wo der Holz-Hammer hängt,denn jetzt wird Pop-und Rockmusik endlich auf „richtigen“ Instrumenten gespielt. Aber auch Klassiker wieBach,Vivaldi und Telemann erleben ein ungeahntes Revival. Kraftvolle akustische Musik gepaart mit beiläufigem Witzund Selbstironie sind die Markenzeichen von Wildes Holz. Dabei überrascht immer wieder, welch atemberaubendeKlänge sie aus ihren Instrumenten herauszuholen vermögen–und was neben der Blockflöte eine akustischeGitarre und ein Kontrabass so alles aushalten können...</p>
+<p>Man darf gespannt sein auf die drei einzigartigen Musiker Tobias Reisige, Johannes Behr sowie Markus Conradsund ihreParty-Mucke aus vier Jahrhunderten, dargeboten auf drei einfachen Holzinstrumenten mit dem schonlegendären Wildes-Holz-Furor! „Wildes Holz sind ein Synonym für beste Livemusik, für eingefangene gute Launeund rotzige Spielfreude. Die Band ist rhythmisch auf Zack, spielt druckvoll von der Leber weg mit hinreißendemDrive.", begeistert sich auch das Blockflöten-Fachmagazin „Der Windkanal“. Eigens arrangierte Rock-und Pop-Songs, in die Moderne übersetzte klassische Werke, temperamentvolle Eigenkompositionenund überraschendeMedleys garantieren einen turbulenten Abend mit einer der vielleicht buntesten Wundertüten der deutschen Musikszene.</p>
+                        </div>
+                    
+
+            
+
+        
+
+</div>
+
+                    
+                        
+<div class="einzeleintrag kalenderKatId3">
+
+
+    
+    
+            <h4 class="titel">Jahreshauptversammlung Kulturkommode</h4>
+        
+
+    
+    
+        
+                
+            
+    
+
+
+
+    
+    <div class="datum">
+        <span class="reader_icon">Datum </span>
+        22.11.2026
+        
+    </div>
+
+
+    
+    
+            <div class="uhrzeit">
+                00:00 Uhr
+                
+            </div>
+        
+
+
+    
+    
+
+
+    
+    
+        <span class="reader_icon">Veranstalter </span>
+        <div class="veranstalter">Kulturkommode Osterburken</div>
+    
+
+    
+    
+
+    
+    
+
+
+    
+    
+        <div class="homepage">
+            <a href="https://kulturkommode.de/" class="external-link" title="Weiter zur Homepage - Link öffnet im neuen Fenster" target="_blank">Weiter zur Homepage</a>
+        </div>
+    
+
+
+    
+    
+        <div class="kategorie">
+            <span class="reader_icon">Kategorien </span>
+            
+                
+                        <span class="catUid3">Sitzungstermine</span>
+                    
+            
+        </div>
+    
+
+
+    
+    
+
+
+    
+    
+
+            
+
+        
+
+</div>
+
+                    
+                
+
+
+	
+	
+		<ul class="pager">
+
+			<!-- First -->
+			
+				
+
+					
+			
+
+			<!-- Previous -->
+			
+				
+
+					
+			
+
+			<!-- Numbered pages -->
+			
+				
+						<li class="current">
+							<span>1</span>
+						</li>
+					
+			
+				
+						<li>
+							
+									<a title="Seite 2" href="/tourismus-kultur/veranstaltungskalender?tx_hwveranstaltung_hwveranstalt%5B%40widget_0%5D%5BcurrentPage%5D=2&amp;tx_hwveranstaltung_hwveranstalt%5B%40widget_0%5D%5Bsearch%5D=nope&amp;cHash=52647a96461cadda6a52c0e0b78b64e5">
+										2
+									</a>
+								
+						</li>
+					
+			
+
+			<!-- Next -->
+			
+				
+						<li class="next">
+							<a title="Seite weiter" href="/tourismus-kultur/veranstaltungskalender?tx_hwveranstaltung_hwveranstalt%5B%40widget_0%5D%5BcurrentPage%5D=2&amp;tx_hwveranstaltung_hwveranstalt%5B%40widget_0%5D%5Bsearch%5D=nope&amp;cHash=52647a96461cadda6a52c0e0b78b64e5">
+								 
+							</a>
+						</li>
+					
+			
+
+			<!-- Last -->
+			
+				
+						<li class="last">
+							<a title="Letzte Seite" href="/tourismus-kultur/veranstaltungskalender?tx_hwveranstaltung_hwveranstalt%5B%40widget_0%5D%5BcurrentPage%5D=2&amp;tx_hwveranstaltung_hwveranstalt%5B%40widget_0%5D%5Bsearch%5D=nope&amp;cHash=52647a96461cadda6a52c0e0b78b64e5">
+								 
+							</a>
+						</li>
+					
+			
+		</ul>
+	
+
+
+
+
+
+
+            
+    </div>
+
+</div>
+</div>
+                        <!--TYPO3SEARCH_end-->
+</body></html>
