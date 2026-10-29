@@ -33,9 +33,14 @@ Ergebnisdatei: `docs/research/de-gemeinden/09-sachsen.md`.
 
 
 ## Done summary
-TBD
+Sachsen recherchiert, Ergebnis in docs/research/de-gemeinden/09-sachsen.md (PR #384, gemergt).
 
+- Stichprobe 30 von 352 Gemeinden unter 10.000 EW (Destatis 30.09.2026, random.Random(281014)), je Gemeinde Fundort, Plattform, Link, destination.one-Treffer und Dorffest-Test; Vollerhebung nachgeprüft (Stufe weicht bei 4 von 30 ab).
+- Generics: verwaltungsportal.de mit "Sachsen vernetzt" (11/30, 84 Gemeinden laut Vollerhebung), NOLIS-iCal (20 Gemeinden in den Kreisen Leipzig, Nordsachsen, Mittelsachsen), SaTourN = destination.one open-data (1.089 Termine, 7/30, nur CC-lizenzierter Teil), Riedel-Verlag (117 Titel, nur per Mail), Tribe/MEC (MEC-Feed unter /feed/?post_type=mec-events), Freizeitkalender Vogtlandkreis (Vertrag), kalender.evlks.de (offenes XML/JSON, Nebenquelle), Munipolis (API per robots gesperrt).
+- Landesbefund: 29 Gemeindeseiten im Landesnetz V4SN sperren alle Crawler per robots.txt.
+- Dorffest-Test: 21/30 mit Fest in greifbarer Quelle, 2 nur PDF/Bild, 7 ohne.
+- Priorisierte Liste, Lücken und Anfrageliste in der Datei.
 ## Evidence
-- Commits:
+- Commits: 89643b2b
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/384
