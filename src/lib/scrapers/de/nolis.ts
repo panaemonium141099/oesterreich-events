@@ -41,7 +41,7 @@ export interface NolisEvent {
   lng?: number;
 }
 
-const STREET = /(stra(ß|ss)e|str\.|weg|platz|allee|gasse|ring|damm|chaussee|ufer|markt|hof|berg|feld)\b.*\d|\d+\s*[a-z]?$/i;
+export const STREET = /(stra(ß|ss)e|str\.|weg|platz|allee|gasse|ring|damm|chaussee|ufer|markt|hof|berg|feld)\b.*\d|\d+\s*[a-z]?$/i;
 
 /**
  * `LOCATION` zerlegen: „Kindergarten Falkennest, Falkenstraße 9L,\n22885
@@ -100,12 +100,12 @@ type IcalDate = NonNullable<ReturnType<typeof parseIcalDate>>;
  * EINSCHLIESSLICH (Rheder Weihnachtsmarkt DTEND 05.12. 23:00Z, Seite „Do.,
  * 03.12. bis So., 06.12."), anders als `VALUE=DATE`.
  */
-function asDayIfMidnight(d: IcalDate | null): IcalDate | null {
+export function asDayIfMidnight(d: IcalDate | null): IcalDate | null {
   if (!d || d.allDay || BERLIN_TIME.format(new Date(d.iso)) !== '00:00:00') return d;
   return { iso: d.date, date: d.date, allDay: true };
 }
 
-function nolisEnd(s: IcalDate, e: IcalDate | null): string | undefined {
+export function nolisEnd(s: IcalDate, e: IcalDate | null): string | undefined {
   if (!e) return undefined;
   if (s.allDay) return e.date > s.date ? e.date : undefined;
   // Uhrzeit bis Mitternacht: Ende unbekannt statt eines erfundenen 00:00.
