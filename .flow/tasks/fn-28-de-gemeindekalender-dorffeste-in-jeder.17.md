@@ -23,18 +23,24 @@ recherchieren. Ergebnis als eigener Branch mit PR auf master.
 
 Ergebnisdatei: `docs/research/de-gemeinden/16-bremen.md`.
 ## Acceptance
-- [ ] `docs/research/de-gemeinden/16-bremen.md` nach dem Format im Epic-Spec
-- [ ] Stichprobe: 30 Ortsteile/Stadtteile, je Eintrag Fundort der Veranstaltungen mit Link, Plattform/CMS und destination.one-Treffer
-- [ ] Jeder Generic (mehrfach in der Stichprobe oder laut Betreiber viele Gemeinden): Zugriffsweg, echte Felder aus Probe, Lizenz/AGB/robots, Zahl der Gemeinden belegt oder als Stichprobenanteil
-- [ ] Dorffest-Test mit belegtem Beispiel je Quelle
-- [ ] Priorisierte Integrationsliste für Bremen mit nächstem Schritt, Lücken benannt
-- [ ] Keine Konten/Formulare/Mails, wenige GETs je Host, ohne Gedankenstriche, PR auf master
+- [x] `docs/research/de-gemeinden/16-bremen.md` nach dem Format im Epic-Spec
+- [x] Stichprobe: 30 Ortsteile/Stadtteile, je Eintrag Fundort der Veranstaltungen mit Link, Plattform/CMS und destination.one-Treffer
+- [x] Jeder Generic (mehrfach in der Stichprobe oder laut Betreiber viele Gemeinden): Zugriffsweg, echte Felder aus Probe, Lizenz/AGB/robots, Zahl der Gemeinden belegt oder als Stichprobenanteil
+- [x] Dorffest-Test mit belegtem Beispiel je Quelle
+- [x] Priorisierte Integrationsliste für Bremen mit nächstem Schritt, Lücken benannt
+- [x] Keine Konten/Formulare/Mails, wenige GETs je Host, ohne Gedankenstriche, PR auf master
 
 
 ## Done summary
-TBD
+Bremen und Bremerhaven recherchiert, Ergebnis docs/research/de-gemeinden/16-bremen.md (+ 16-bremen-anfragen.md), PR #388.
 
+- Stichprobe 30 von 112 amtlichen Ortsteilen (WFS Landesamt GeoInformation, CC BY 4.0), Seed 28017, Blockland und Borgfeld als Zusatz.
+- Stadt Bremen: bremen.de-Kalender der WFB, mindestens 928 Termine in 46 von 88 Ortsteilen; § 6 Abs. 2 der Nutzungsbedingungen erlaubt Weitergabe an Kooperationspartner, kein offener Feed (Cloudflare, iCal per robots gesperrt). Nächster Schritt Kooperationsanfrage WFB (inkl. der-bremer-norden.de).
+- Bremerhaven: destination.one open-data 172 Events in 18 von 24 Ortsteilen, Lizenzmix CC0/CC BY/CC BY-SA.
+- Ortsämter: SixCMS, CC BY-NC-ND, nur Sitzungen und PDF-Newsletter. Dorffeste der Bremer Dörfer in keiner offenen Sammelquelle.
+- Stichprobenabdeckung: bremen.de 12/30, + destination.one 17/30, + Stadtteilportale 22/30, + Ortsamt-PDF 24/30.
+- Dorffest-Test: belegt für alle priorisierten Quellen; kirche-bremen.de (nicht priorisiert) ohne Beispiel.
 ## Evidence
-- Commits:
+- Commits: 7ce137ec
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/388

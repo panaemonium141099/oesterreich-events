@@ -291,7 +291,7 @@ Landessicht:
 | Ortsamt Osterholz, Newsletter 08/2026 (G5) | „Hoffest im Stadtleben Ellener Hof“ 26.08.2026, „Familienfest Aktiv für Osterholz“ 19.08.2026 | Stadtteilfest |
 | blockland.de (G6) | „Blocklander Hobby Kunst Markt“ 22.11.2026; „Block Land Partie 2027“ 12.09.2027, Heimatverein Blockland, Landpartie mit Oldtimertreffen | Dorffest |
 | borgfelder-forum.de (G6) | „Blaue Stunde im Ratsspiekerpark“, Kulturforum Borgfeld, 14.11.2026, mit Glühwein und Punsch | Dorffest (Advent) |
-| kirche-bremen.de (G6) | nicht durchgeführt | |
+| kirche-bremen.de (G6) | kein Beispiel gefunden: 9 Termine auf der Startseite ohne Fest, Sitemap (514 URLs) ohne Veranstaltungsseiten, Websuche ohne Treffer; die Kalendersuche der Seite nicht genutzt | nicht bestanden, Quelle nicht priorisiert |
 
 **Gegenprobe bremen.de:** In den 928 Veranstaltungen tragen 0 Titel „Feuerwehr“, 0
 „Schützen“, 0 „Ernte“, 0 „Straßenfest“, 0 „Stadtteilfest“; 1 „Laterne“, 5 Weihnachtsmarkt
