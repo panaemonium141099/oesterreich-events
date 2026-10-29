@@ -18,7 +18,7 @@ export abstract class DeFeedScraper extends BaseScraper {
     super();
   }
 
-  private async robotsTxt(origin: string): Promise<string | null> {
+  protected async robotsTxt(origin: string): Promise<string | null> {
     if (this.robots.has(origin)) return this.robots.get(origin)!;
     let txt: string | null = null;
     try {
