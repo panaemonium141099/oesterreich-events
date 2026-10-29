@@ -74,7 +74,7 @@ scheitert. Status in eckigen Klammern; 000 = keine Verbindung.
 | mbq-bremerhaven.de | `/robots.txt` [200], `/` [200], `/termine` [200] | |
 | www.bremerhaven.de | `/robots.txt` [200]; wegen `Disallow: /` keine weiteren Abrufe | |
 | www.feuerwehr.bremerhaven.de | `/robots.txt` | [302] |
-| www.kirche-bremen.de | `/robots.txt` [200], `/` [200], eine Veranstaltungsseite [200] | |
+| www.kirche-bremen.de | `/robots.txt` [200], `/` [200], eine Veranstaltungsseite [200], `/sitemap.xml` [200] | |
 
 ## Open Data
 
