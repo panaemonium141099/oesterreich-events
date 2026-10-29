@@ -48,9 +48,8 @@ Mitternacht erneuert. Größe M.
       (Test mit gemocktem `revalidatePath`); MASTERPLAN nennt den 00:05-Timer.
 - [ ] `npm test` grün.
 ## Done summary
-TBD
-
+/api/admin/landing-feature bucht den Tipp des Tages: kind sponsored|editorial, sponsorName und day Pflicht bei sponsored, Fenster = Wiener Kalendertag (viennaDayRange), zweite sponsored-Buchung desselben Tages für ein anderes Event 409 mit belegtem Event, 400/422-Validierung (published, AT, am Buchungstag nicht vorbei), revalidateLanding() nach jeder Änderung. Neu GET /api/cron/revalidate-landing (Bearer CRON_SECRET, fail closed, / und /en) für 00:05 Wien; /admin/boost zeigt Art, Sponsor, Tag und Status (aktiv, geplant, abgelaufen, Event nicht mehr sichtbar) und bucht künftige Tage; MASTERPLAN §10.2 Punkt 5 und §7.2 mit Ops-Notiz (lt-cron@revalidate-landing.timer noch einzurichten, Migration 20261029200100 in Prod noch offen).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 0c62c57a478b2524d79b6350e35603e80e382e29
+- Tests: npx vitest run src/__tests__/api/admin-landing-feature.test.ts src/__tests__/cron/revalidate-landing.test.ts, npx vitest run src/__tests__/lib/site-country-guard.test.ts src/__tests__/lib/v4 src/__tests__/nur-oesterreich, npx vitest run (3990 passed, nur die 3 bekannten Windows-Fehler)
 - PRs:

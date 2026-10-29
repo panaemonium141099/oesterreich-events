@@ -6,6 +6,17 @@ Untere Hälfte der Tagesausgabe, Entfernen der alten Sektionen und `von`/`bis` a
 `/entdecken`. Größe M. Vorlage Mockup D (`.prog`, `.duo`, `.rowline`, Regale).
 
 ## Kontext
+- Datenquelle (Task 3, `src/lib/v4/get-landing-data.ts`): `data.program` (`Event[]`, schon
+  auf heutigen Wiener Tag, ab 17:00, bekannte Startzeit und Uhrzeit sortiert), `data.today`
+  (für `von`/`bis` der Programmliste), `data.weekend` + `data.weekendRange` (`{ from, to }`,
+  läuft das Wochenende, ist `from` = heute), `data.festivals` (`LandingFestival`: `acts:
+  string[]`, `image_url` immer gesetzt inkl. Kategorie-Fallback, `href` = V2-URL des
+  Elternevents sonst `/festivals/<slug>`; für den Link `/festivals/<slug>` aus `slug` bauen),
+  `data.posts` (`LandingPost`: `slug, title, subtitle, image, publishDate, category,
+  readingTime`; `pickPosts` schiebt Posts zu gelisteten Festivals nur nach hinten),
+  `data.activities` (`LandingActivity`: `id, slug, name, tags, town, bundesland, setting,
+  price_hint, images`, schon auf darstellbare Bilder gefiltert, 8 Stück).
+  <!-- Updated by plan-sync: fn-30.3 Feldnamen von LandingData -->
 - Programmliste `ProgramList` (RSC-Markup, Client-Insel blendet nach Laden Zeilen aus, deren
   Start > 60 min zurückliegt, und den Abschnitt bei leer): zwei Spalten Desktop, Uhrzeit mit
   `tabular-nums`, 46-px-Bild (`EventImage`), Titel, Ort, Preis (`priceBadge`). Link „Ganzes
@@ -37,6 +48,12 @@ Untere Hälfte der Tagesausgabe, Entfernen der alten Sektionen und `von`/`bis` a
   `Festivals`, `MapPreview`, `HowItWorks`, `RegionHubs`, `Matches`, `AnonTeaser`, `Weather`,
   `Onboarding`). Vorher `grep` auf jede Komponente (z. B. `V4FestivalCard` bleibt,
   `festivals/page.tsx`). `cta_artist_search` darf nicht mehr vorkommen.
+  Stand nach Task 3: `ArtistTeaserV4`, `WeekendSection`, `ConcertsSection` rendert `page.tsx`
+  nicht mehr (nur Dateien, Exporte, Tests übrig); `ArtistTeaserV4.tsx` definiert den Typ
+  `LandingArtist` jetzt selbst (in `get-landing-data.ts` entfernt) und geht mit der Datei.
+  `FestivalsSection` läuft noch mit `data.festivals`.
+  <!-- Updated by plan-sync: fn-30.3 entfernte page.tsx-Sektionen und LandingArtist-Typ -->
+
 
 **Files:** `src/app/[locale]/page.tsx`, `src/components/Landing/v4/ProgramList.tsx`,
 `FestivalsBlog.tsx`, `ActivitiesShelf.tsx`, `NewsletterRow.tsx` (neu), `index.ts`,

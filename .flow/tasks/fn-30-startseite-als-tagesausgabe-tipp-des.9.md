@@ -20,6 +20,15 @@ Abschluss: Dokumentation, Prod-Prüfungen und Verifikation der gesamten Tagesaus
 - `docs/design/landing-redesign/README.md`: Zeile „Implementiert: PR #…, Datum“.
 - EXPLAIN der Künstler-Rotation und des Programm-Pools gegen Prod (nur lesend, über MCP oder
   Dashboard), Ergebnis im PR.
+  Abfrageformen aus `src/lib/v4/get-landing-data.ts` (Task 3): Rotation (Label `artists`) =
+  `events` mit `artists:event_artists!inner(...)`, `country = 'AT'`,
+  `publish_status = 'published' OR duplicate_of IS NOT NULL`, `start_date` von jetzt bis
+  Beginn Wiener Tag + 7, `ORDER BY event_score DESC LIMIT 120` (danach Primaries per
+  `.in('id', …)`); Programm (Label `program`) = `events` published, `country`, `start_date`
+  von 17:00 Wien bis Ende Wiener Tag, `ORDER BY event_score DESC LIMIT 60`. Auswahl-Logik
+  in `src/lib/v4/landing-picks.ts`, Karten-URL in `src/lib/v4/map-static-url.ts` (für den
+  CLAUDE.md-Eintrag der Landing).
+  <!-- Updated by plan-sync: fn-30.3 tatsächliche Abfrageformen und Dateien der Datenschicht -->
 - Voraussetzung: die drei Migrationen aus Task 1 (`20261029200000_event_artists.sql`,
   `20261029200100_landing_features_kind.sql`, `20261029200200_stats_country_total.sql`) liegen
   nur als Dateien vor und sind in Prod noch nicht ausgeführt; vor EXPLAIN und Prod-Checks im

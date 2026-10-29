@@ -9,9 +9,20 @@ Kachel „Diese Woche live“ als Client-Insel mit Folgen/Entfolgen, dazu `follo
 - `src/app/api/me/landing/route.ts`: Auth über `getLandingContext()`
   (`src/lib/v4/get-landing-context.ts:25`), anonym `{signedIn:false, …}` mit `no-store`,
   eingeloggt `private, max-age=60`. Ergänzen: `followedLive` (gefolgte Künstler mit Termin in
-  7 Wiener Tagen aus `event_artists` + `events!inner` mit `country`, `publish_status`; Felder
-  artist_id, artist_name, artist_image, evo_link, Event mit `EVENT_URL_COLUMNS`) und
-  `followedNames` (alle gefolgten Namen, normalisiert).
+  7 Wiener Tagen; DB-Spalten artist_id, artist_name, artist_image, evo_link, Event mit
+  `EVENT_URL_COLUMNS`) und `followedNames` (alle gefolgten Namen, normalisiert).
+- Die statische Rotation kommt als `data.artistsLive: LandingArtistLive[]` aus
+  `getLandingData()`; der Typ liegt in `src/lib/v4/landing-picks.ts` und ist camelCase:
+  `{ artistId, name, image, evoLink, event }`. `followedLive` liefert dieselbe Form, damit
+  `ArtistsLive` beide Listen ohne Umbau mischt. Abfragemuster der Rotation
+  (`get-landing-data.ts`, Label `artists`): `events` mit
+  `artists:event_artists!inner(artist_id, artist_name, artist_image, evo_link)`, `country`,
+  `.or('publish_status.eq.published,duplicate_of.not.is.null')`, Fenster jetzt bis
+  `viennaDayStart(addViennaDays(today, 7))`; unterdrückte Eventim-Zeilen über
+  `unresolvedPrimaryIds` + Primaries-Nachladen auflösen, Auswahl je Künstler wie
+  `pickArtistsLive` (beides exportiert aus `landing-picks.ts`).
+  <!-- Updated by plan-sync: fn-30.3 Rotation liest events + event_artists!inner, Typ LandingArtistLive camelCase -->
+
 - Abgleich in JS mit `normalizeArtistName` aus `src/lib/artist-matching.ts:98` auf beiden
   Seiten (`followed_artists.artist_name_normalized` ist nur `lower()`; drei Normalisierer im
   Repo, dieser ist der des Follow-Pfads).

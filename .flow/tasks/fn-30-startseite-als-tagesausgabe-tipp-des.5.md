@@ -15,16 +15,28 @@ Künstler-Kachel; `page.tsx` setzt sie zusammen. Größe M. Vorlage Mockup D
   heutigen Tag liefert; Platz reservieren), Zahl aus `countryTotal` gerundet. `DateLine`
   rechnet nach dem Laden den Wiener Tag neu (Mitternacht) und meldet ihn an die Programmliste
   (Task 6) über ein kleines Context/Event.
+- Datenquelle (Task 3, `src/lib/v4/get-landing-data.ts`): `data.today` (Wiener Tag),
+  `data.countryTotal` (`number | null`, bei null keine Zahl), `data.tip` (`LandingTip | null`:
+  `{ event, kind, sponsorName }`; `pickTip` liefert nur `sponsored` oder `auto`, editorial-Pins
+  landen in der Saison), `data.season.picks` (`Event & { featured: boolean }`),
+  `data.artistsLive`, `data.mapPins` (`MapPin[]`, schon gerundet/gekappt).
+  `page.tsx` rendert `ArtistTeaserV4`, `WeekendSection`, `ConcertsSection` schon nicht mehr.
+  <!-- Updated by plan-sync: fn-30.3 Feldnamen von LandingData -->
 - `TipOfDay`: Bild über `EventImage` mit `preload` (LCP), Label „Tipp des Tages“, bei
   `kind='sponsored'` „Anzeige“ + `sponsorName`, zweite Zeile `sponsorName` sonst
   `location_name`, Knopf „Tickets ab …“ (`priceBadge`, `src/lib/v4/price-badge.ts:21`) sonst
   „Zum Event“ → `buildEventUrlV2`; `data-track="landing_tip_click"`, `data-track-id`,
   `data-track-kind`.
 - `SeasonCard` (`src/components/Landing/v4/SeasonCard.tsx`): 6 Picks, Liste füllt die Karte,
-  Ellipsis, „Tipp“-Badge nur für `editorial`-Pins.
+  Ellipsis, „Tipp“-Badge nur für `editorial`-Pins (= `featured: true` der Picks).
 - `MapTile`: plain `<img>` mit `srcset` aus `map-static-url.ts` (Task 3), Logo an,
   Attributionszeile „© Mapbox © OpenStreetMap · Karte verbessern“ mit Links unter der Kachel,
   Fallback ohne Token/Bildfehler, `data-track="landing_map_open"`.
+  `mapStaticImage(data.mapPins, { token: process.env.NEXT_PUBLIC_MAPBOX_TOKEN, width, height })`
+  liefert `{ src, srcSet }` (1x/2x) oder `null` ohne Token (→ Fallback). Die Bild-URL setzt
+  `attribution=false`, die Textzeile ist deshalb Pflicht; Link-Ziele aus
+  `MAPBOX_ATTRIBUTION_LINKS` (`mapbox`, `osm`, `improve`).
+  <!-- Updated by plan-sync: fn-30.3 API von map-static-url.ts -->
 - `ArtistsLive` aus Task 4 einsetzen; ohne Pool Karte zwei Zeilen hoch.
 - Raster: Desktop `1.45fr 1fr 1fr`, Zeilen 256 px; < 1000 px zwei Spalten; < 720 px eine
   Spalte (Tipp 320 px, Karte 180 px). Kein horizontales Scrollen.
