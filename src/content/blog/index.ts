@@ -216,6 +216,8 @@ import { post as psalmFestival2027 } from './posts/psalm-festival-2027';
 import { post as winterWoodstockDerBlasmusik2027 } from './posts/winter-woodstock-der-blasmusik-2027';
 import { post as blackValleyBigBandChristmas2026 } from './posts/black-valley-big-band-christmas-2026';
 import { post as hitparade1600Vol22026 } from './posts/hitparade-1600-vol-2-2026';
+import { post as konzertZumJahresausklangPhilharmonicEnsemble2026 } from './posts/konzert-zum-jahresausklang-philharmonic-ensemble-2026';
+import { post as konzerteInDerMinoritenkircheItalienischeBarockGala2026 } from './posts/konzerte-in-der-minoritenkirche-italienische-barock-gala-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -442,6 +444,8 @@ export const ALL_POSTS: FestivalPost[] = [
   winterWoodstockDerBlasmusik2027,
   blackValleyBigBandChristmas2026,
   hitparade1600Vol22026,
+  konzertZumJahresausklangPhilharmonicEnsemble2026,
+  konzerteInDerMinoritenkircheItalienischeBarockGala2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
