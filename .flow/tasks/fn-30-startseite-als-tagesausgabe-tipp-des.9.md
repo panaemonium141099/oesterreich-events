@@ -17,6 +17,16 @@ Abschluss: Dokumentation, Prod-Prüfungen und Verifikation der gesamten Tagesaus
   <!-- Updated by plan-sync: fn-30.2 Schreibmodul und Fehlerverhalten des Künstler-Schritts -->
 - MASTERPLAN §10.2 (Badges-Satz streichen, `followedLive`), §7.2 (Tipp des Tages als
   Boost-Platz, Kennzeichnung „Anzeige“), Ops-Notiz Cron 00:05.
+  Stand nach Task 7: §7.2 (Absatz „Tipp des Tages“) und §10.2 Punkt 5 (Mitternacht und
+  Buchungen: `revalidateLanding()` aus `src/lib/landing/revalidate-landing.ts`,
+  `GET /api/cron/revalidate-landing`, Timer 00:05 Europe/Vienna, `landing_features.kind`,
+  `/admin/boost`) sind schon geschrieben; hier nur prüfen, nicht neu schreiben. Offen in §10.2
+  bleiben der Badges-Satz und `followedLive`.
+  Ops, noch offen: systemd-Timer `lt-cron@revalidate-landing.timer` auf Hetzner
+  (`OnCalendar=*-*-* 00:05:00 Europe/Vienna`, curl mit Bearer `CRON_SECRET` auf
+  `127.0.0.1:3000/api/cron/revalidate-landing`); einrichten lassen oder im PR als offen nennen.
+  `vercel.json` hat keine Crons mehr. Für CLAUDE.md: die Cron-Route in den Betriebs-Abschnitt.
+  <!-- Updated by plan-sync: fn-30.7 hat §7.2 und §10.2 Punkt 5 schon geschrieben, Timer offen -->
 - `docs/design/landing-redesign/README.md`: Zeile „Implementiert: PR #…, Datum“.
 - EXPLAIN der Künstler-Rotation und des Programm-Pools gegen Prod (nur lesend, über MCP oder
   Dashboard), Ergebnis im PR.
