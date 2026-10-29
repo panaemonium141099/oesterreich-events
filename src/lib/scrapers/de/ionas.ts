@@ -11,7 +11,7 @@
  * Wiederholungen kommen als einzelne VEVENTs (keine RRULE in 709 geprüften
  * Terminen aus 10 Feeds). REIN, kein I/O.
  */
-import { icalEnd, icalText, parseIcalDate, readVEvents, type VEvent } from './ical';
+import { icalEnd, icalImage, icalText, parseIcalDate, readVEvents, type VEvent } from './ical';
 
 export interface IonasEvent {
   /** UID ohne Datumsanhang (eine UID kann mehrere Termine tragen). */
@@ -31,6 +31,10 @@ export interface IonasEvent {
   locality?: string;
   organizer?: string;
   category?: string;
+  /** `ATTACH` wie geliefert (zeigt auch die Detailseite, `ionasDetailUrl`). */
+  attach?: string;
+  /** Bild des Termins, anfangs `attach`; Logo und Platzhalter prüft `bild.ts`. */
+  image?: string;
   lat?: number;
   lng?: number;
 }
@@ -64,6 +68,8 @@ function toEvent(m: VEvent): IonasEvent | null {
     locality: text(m, 'X-LOCALITY'),
     organizer: text(m, 'X-ORGANIZER-NAME'),
     category: text(m, 'CATEGORIES') ?? text(m, 'X-IONAS-CATEGORY'),
+    attach: icalImage(m),
+    image: icalImage(m),
     ...(hasGeo ? { lat: geo![0], lng: geo![1] } : {}),
   };
 }
@@ -78,4 +84,30 @@ export function ionasIcsUrl(eventsJsonUrl: string, from: string, to: string): st
   u.searchParams.set('start', from);
   u.searchParams.set('end', to);
   return u.href;
+}
+
+/**
+ * Detailseite eines Termins. ionas legt das Bild eines Termins im Ordner
+ * seiner Seite ab: Bild `…/kalender/2026-amt/november/2026-10-29-frauen-gesundheitstag/frauengesundheitstag.png`,
+ * Seite `…/2026-10-29-frauen-gesundheitstag/` (Amt Sandesneben-Nusse; 12 von
+ * 12 Proben auf Hilden, Vaterstetten, Daaden-Herdorf, Mutterstadt,
+ * Dannstadt-Schauernheim, Lauterecken-Wolfstein mit dem Titel des Termins,
+ * 2026-10-29). Liegt das Bild anderswo (`/bilder/…`) oder fehlt es, gibt es
+ * keine Detailseite, die Quelle ist dann die Kalenderseite.
+ */
+export function ionasDetailUrl(eventsJsonUrl: string, attach: string | undefined): string | undefined {
+  if (!attach) return undefined;
+  let img: URL, feed: URL;
+  try {
+    img = new URL(attach);
+    feed = new URL(eventsJsonUrl);
+  } catch {
+    return undefined;
+  }
+  if (img.host !== feed.host) return undefined;
+  const parts = img.pathname.split('/');
+  const folder = parts.slice(0, -1).join('/') + '/';
+  const base = feed.pathname.replace(/[^/]*$/, '');
+  if (!folder.startsWith(base) || !/^\d{4}-\d{2}-\d{2}-[^/]+$/.test(parts[parts.length - 2] ?? '')) return undefined;
+  return `${img.origin}${folder}`;
 }

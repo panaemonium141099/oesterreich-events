@@ -19,7 +19,10 @@ Seiten je Kalender). Er steht in `DE_SCRAPERS`, nicht im Nachtlauf (fn-29.18).
 | Detailseite leitet teils auf die Terminliste um | Fuchstal `/termin/weihnachtsfeier/` → 301 `/termine/` | Quelle bleibt die Termin-URL der REST-Antwort |
 | robots.txt sperrt die REST-Route | gemeinde-wolken.eu, wehlen-online.de | ausgelassen |
 
-Kosten (`cost`) gehen nach `price_text`, Bilder nicht (Nutzungsrecht nicht belegt).
+Kosten (`cost`) gehen nach `price_text`. Das Beitragsbild (`image`, mit Maßen) wird mit
+der Website als Bildnachweis übernommen, ohne Logo, Wappen und Platzhalter (`bild.ts`,
+seit 2026-10-29). Titel mit HTML werden zu Text; ein durchgestrichener Titel (Artlenburg
+„Pausiert: <s>Spiele-Abend</s>") heißt, der Termin findet nicht statt.
 `source_id` = `tribe-<Host>-<Post-ID>`.
 
 ## Kalenderort und andere Gemeinde (alle DE-Adapter, `de/kontext.ts`)

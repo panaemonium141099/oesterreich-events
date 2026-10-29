@@ -13,7 +13,10 @@ nicht im Nachtlauf; den schaltet erst fn-29.18 frei.
   exklusiv. Gegenprobe Remagen: `events.json` der Seite zeigt 31.3.2027 09:00, die Zeile
   auch.
 * `source_id` = UID + Termintag (die UID trägt das Anlagedatum, nicht den Termin).
-* Keine Bilder (Nutzungsrecht nicht belegt), Quelle ist die Kalenderseite der Gemeinde.
+* Bild aus `ATTACH` mit der Website als Bildnachweis, ohne Logo, Wappen und Platzhalter
+  (`bild.ts`, seit 2026-10-29). Quelle ist die Detailseite des Termins: der Ordner, in
+  dem ionas sein Bild ablegt (12 von 12 Proben auf 6 Websites); ohne solches Bild die
+  Kalenderseite der Gemeinde.
 * Ein Feed, den genau eine Gemeinde führt, gibt deren Kontext (Ort, PLZ, Mittelpunkt
   als Gebietsangabe). Ein Amtskalender gibt keinen Ort: der Termin bekommt eine
   Gemeinde nur, wenn er selbst eine nennt, im Ortsnamen als ganzes Wort oder im Titel
