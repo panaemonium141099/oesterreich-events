@@ -165,13 +165,10 @@ describe('hwveranstaltung: Kalender der Registry', () => {
 
 describe('hwveranstaltung: Bilder und robots.txt', () => {
   // robots.txt der Kunden (Ammerbuch, 2026-10-29, Auszug).
-  const robots = 'User-agent: *
-Disallow: /*.png$
-Disallow: /*.jpg$
-Disallow: /*.jpeg$
-Disallow: /fileadmin/Dateien/
-Disallow: /fileadmin/_processed_/
-';
+  const robots = [
+    'User-agent: *', 'Disallow: /*.png$', 'Disallow: /*.jpg$', 'Disallow: /*.jpeg$',
+    'Disallow: /fileadmin/Dateien/', 'Disallow: /fileadmin/_processed_/',
+  ].join('\n');
   it('gesperrte Bildendung auch in Großbuchstaben, Pfad unter /fileadmin/Dateien/', () => {
     expect(imageAllowed(robots, 'https://www.ammerbuch.de/fileadmin/Kalenderbilder/Zehntscheuer_Reusten/Kino.JPG')).toBe(false);
     expect(imageAllowed(robots, 'https://www.frickenhausen.de/fileadmin/Dateien/Gemeinde_Frickenhausen/Bilder/News/kalender-678x381.webp')).toBe(false);
