@@ -23,18 +23,24 @@ recherchieren. Ergebnis als eigener Branch mit PR auf master.
 
 Ergebnisdatei: `docs/research/de-gemeinden/13-saarland.md`.
 ## Acceptance
-- [ ] `docs/research/de-gemeinden/13-saarland.md` nach dem Format im Epic-Spec
-- [ ] Stichprobe: alle 52 Gemeinden, je Eintrag Fundort der Veranstaltungen mit Link, Plattform/CMS und destination.one-Treffer
-- [ ] Jeder Generic (mehrfach in der Stichprobe oder laut Betreiber viele Gemeinden): Zugriffsweg, echte Felder aus Probe, Lizenz/AGB/robots, Zahl der Gemeinden belegt oder als Stichprobenanteil
-- [ ] Dorffest-Test mit belegtem Beispiel je Quelle
-- [ ] Priorisierte Integrationsliste für Saarland mit nächstem Schritt, Lücken benannt
-- [ ] Keine Konten/Formulare/Mails, wenige GETs je Host, ohne Gedankenstriche, PR auf master
+- [x] `docs/research/de-gemeinden/13-saarland.md` nach dem Format im Epic-Spec
+- [x] Stichprobe: alle 52 Gemeinden, je Eintrag Fundort der Veranstaltungen mit Link, Plattform/CMS und destination.one-Treffer
+- [x] Jeder Generic (mehrfach in der Stichprobe oder laut Betreiber viele Gemeinden): Zugriffsweg, echte Felder aus Probe, Lizenz/AGB/robots, Zahl der Gemeinden belegt oder als Stichprobenanteil
+- [x] Dorffest-Test mit belegtem Beispiel je Quelle
+- [x] Priorisierte Integrationsliste für Saarland mit nächstem Schritt, Lücken benannt
+- [x] Keine Konten/Formulare/Mails, wenige GETs je Host, ohne Gedankenstriche, PR auf master
 
 
 ## Done summary
-TBD
+Saarland komplett geprüft (alle 52 Gemeinden statt Stichprobe), Ergebnis in docs/research/de-gemeinden/13-saarland.md (PR #386), Anfragen in 13-saarland-anfragen.md.
 
+- mein.toubiz der Tourismus Zentrale Saarland ist laut Präsentation der Landeshauptstadt die zentrale Landesdatenbank, gepflegt von allen Landkreisen und einzelnen Kommunen. destination.one open-data führt davon 382 Saarland-Termine (import_source_tta-toubiz, CC-BY 271, CC-BY-SA 111), aber nur eine Teilmenge (Weiskirchen 29 gegen 5). Nächster Schritt: Zugang bei der TZS anfragen.
+- WITTICH: Amts- oder Mitteilungsblatt für 43 von 52 Gemeinden (Sitemap wittich.de), meinOrt 29 von 52; für 5 Gemeinden einziger Weg.
+- Saarland-Generic one4vision (TYPO3, *14v): 14 Gemeinde-Websites, 7 mit terminplaner14v.
+- 31 von 52 Gemeinden mit lesbarem Kalender und kommenden Terminen (6 Feeds: ionas, Tribe-REST; 25 HTML), 6 nur toubiz, 15 ohne lesbaren Kalender.
+- Dorffest-Test je Quelle belegt (Kerb Niederbexbach, Adventsfest Löschbezirk Rappweiler-Zwalbach, Kirmes Limbach, Berschweiler Kerb, Amtsblatt Oberthal).
+- Vollerhebung nachgeprüft und korrigiert (Großrosseln, Mettlach, Bous, Nohfelden, Lebach, Wadern, Losheim, Saarlouis, Homburg).
 ## Evidence
-- Commits:
+- Commits: f233ef66564e3ec149e4aeaa890c8ff38b7f5d56
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/386
