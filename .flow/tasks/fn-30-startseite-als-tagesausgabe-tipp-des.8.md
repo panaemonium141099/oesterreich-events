@@ -26,9 +26,8 @@ Größe S.
       der Seite.
 - [ ] `npm test` grün.
 ## Done summary
-TBD
-
+Die Regal-Spur (`ShelfTrack` in `shelf-ui.tsx`, auch vom lokalen Shelf des V4SmartPlanner genutzt) endet an der Inhaltskante: negative Ränder und scroll-padding entfernt, erste Karte bündig links, snap-x bleibt, pt-1/pb-1.5 für Fokusringe, `role="region"` mit Regaltitel; `data-more` steht, solange rechts noch Karten liegen, und globals.css blendet damit auf dem Handy rechts per mask-image aus (Fokusring innen, Desktop behält die Pfeile). Offen für den Orchestrator: Sichtprüfung mit getBoundingClientRect und Screenshots auf /entdecken, /wien, /thema/<slug>, /studenten (kein Dev-Server im Worktree).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: b5c98a5ab914d4a35d8c45798b8bce5962d409b5
+- Tests: npx vitest run src/__tests__/components/discover/v4/shelf-ui.test.tsx src/__tests__/components/discover/v4/V4EntdeckenSmartMode.test.tsx, npx vitest run src/__tests__/components/discover src/__tests__/hubs src/__tests__/components/events/sheet-css-guard.test.ts, npx vitest run (308/310 Dateien gruen; nur die bekannten Windows-Ausfaelle search-event-ids-migration.test.ts und patch-next-static-search-nav.test.ts)
 - PRs:
