@@ -1,7 +1,13 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import type { LandingArtist } from '@/lib/v4/get-landing-data';
 import { V4Badge } from '@/components/Events/v4';
+
+/** Statische Teaser-Zeile; die Landing liefert seit fn-30 keine Künstlerliste mehr (Kachel „Diese Woche live"). */
+export interface LandingArtist {
+  name: string;
+  genre?: string | null;
+  slug?: string | null;
+}
 
 interface ArtistTeaserV4Props {
   artists: LandingArtist[];

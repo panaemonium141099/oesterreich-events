@@ -15,11 +15,8 @@
 
 import {
   HeroV4,
-  ArtistTeaserV4,
   PersonalizedMatches,
-  WeekendSection,
   WeatherSection,
-  ConcertsSection,
   FestivalsSection,
   MapPreview,
   HowItWorks,
@@ -90,12 +87,11 @@ export default async function LandingPage({
 
       <main className="flex-1">
         <HeroV4 season={data.season}/>
-        <ArtistTeaserV4 artists={data.popularArtists}/>
         <PersonalizedMatches/>
-        <WeekendSection events={data.todayWeekend}/>
+        {/* fn-30: Künstler-Teaser, Wochenende und Konzerte kommen als
+            Bühne/Programm/Wochenend-Spur der Tagesausgabe zurück (Tasks 5/6). */}
         {/* Wetter-reaktiv (fn-19): rendert nur bei Regen/Hitze, client-only */}
         <WeatherSection/>
-        <ConcertsSection events={data.concerts}/>
         <FestivalsSection festivals={data.festivals}/>
         <NewsletterSignup/>
         <RegionHubsSection/>

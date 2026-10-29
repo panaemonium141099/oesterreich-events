@@ -33,7 +33,9 @@ vi.mock('@supabase/supabase-js', () => {
     });
     return proxy;
   };
-  return { createClient: () => ({ from: (t: string) => chain(t) }) };
+  // event_counts_for_stats() liefert die Event-Zahl; ohne Stub fiele die Abfrage als Fehler aus.
+  const rpc = () => Promise.resolve({ data: { country_total: 88123 }, error: null });
+  return { createClient: () => ({ from: (t: string) => chain(t), rpc }) };
 });
 
 import { getLandingData } from '@/lib/v4/get-landing-data';
@@ -61,6 +63,6 @@ describe('Landing: gescheiterte Abfragen werden nicht als leere Sektion gecacht'
     seasonFailures = 3;
     const d = await getLandingData();
     expect(d.season.picks).toEqual([]);
-    expect(d.popularArtists.length).toBeGreaterThan(0);
+    expect(d.countryTotal).toBe(88123);
   });
 });
