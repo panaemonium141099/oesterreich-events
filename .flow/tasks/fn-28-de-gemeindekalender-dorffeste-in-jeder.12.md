@@ -33,9 +33,8 @@ Ergebnisdatei: `docs/research/de-gemeinden/11-nordrhein-westfalen.md`.
 
 
 ## Done summary
-TBD
-
+Bericht docs/research/de-gemeinden/11-nordrhein-westfalen.md (PR #391, gemergt). Stichprobe 30 von 52 NRW-Gemeinden unter 10.000 EW (Destatis 30.09.2026, Seed 28012) plus Ergänzung 10 aus 10.000 bis unter 50.000 EW. Generics: ionas TVM, NOLIS (Münsterland), Heimat-Info (22 Kommunen, Kreis Düren 14 von 15, nur mit WITTICH-Lizenz), Weblication, active-City, Datenportal Münsterland (Basic-Auth, CC-BY-SA), evangelische Kalender EKiR und neu veranstaltungen-ekvw.de. Dorffest in der Hauptquelle 19 von 30 (mit destination.one 23), destination.one-Treffer 18 von 30. Offene Daten: aktuelle Festdaten nur Grevenbroich (CC0), robots sperrt /api/ bei Rhein-Kreis Neuss und Open.NRW. Priorisierte Liste mit 12 Integrationen, Lücken und vier Anfragen für den User. Sechs Abrufe gesperrter Pfade vor robots-Auswertung offengelegt.
 ## Evidence
-- Commits:
+- Commits: a3621a721895ab85f17fc94430094941510babe8
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/391
