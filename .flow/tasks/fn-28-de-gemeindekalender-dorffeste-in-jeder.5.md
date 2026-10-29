@@ -25,18 +25,23 @@ recherchieren. Ergebnis als eigener Branch mit PR auf master.
 
 Ergebnisdatei: `docs/research/de-gemeinden/04-baden-wuerttemberg.md`.
 ## Acceptance
-- [ ] `docs/research/de-gemeinden/04-baden-wuerttemberg.md` nach dem Format im Epic-Spec
-- [ ] Stichprobe: 30 Gemeinden unter 10.000 Einwohnern, reproduzierbar gezogen, je Eintrag Fundort der Veranstaltungen mit Link, Plattform/CMS und destination.one-Treffer
-- [ ] Jeder Generic (mehrfach in der Stichprobe oder laut Betreiber viele Gemeinden): Zugriffsweg, echte Felder aus Probe, Lizenz/AGB/robots, Zahl der Gemeinden belegt oder als Stichprobenanteil
-- [ ] Dorffest-Test mit belegtem Beispiel je Quelle
-- [ ] Priorisierte Integrationsliste für Baden-Württemberg mit nächstem Schritt, Lücken benannt
-- [ ] Keine Konten/Formulare/Mails, wenige GETs je Host, ohne Gedankenstriche, PR auf master
+- [x] `docs/research/de-gemeinden/04-baden-wuerttemberg.md` nach dem Format im Epic-Spec
+- [x] Stichprobe: 30 Gemeinden unter 10.000 Einwohnern, reproduzierbar gezogen, je Eintrag Fundort der Veranstaltungen mit Link, Plattform/CMS und destination.one-Treffer
+- [x] Jeder Generic (mehrfach in der Stichprobe oder laut Betreiber viele Gemeinden): Zugriffsweg, echte Felder aus Probe, Lizenz/AGB/robots, Zahl der Gemeinden belegt oder als Stichprobenanteil
+- [x] Dorffest-Test mit belegtem Beispiel je Quelle
+- [x] Priorisierte Integrationsliste für Baden-Württemberg mit nächstem Schritt, Lücken benannt
+- [x] Keine Konten/Formulare/Mails, wenige GETs je Host, ohne Gedankenstriche, PR auf master
 
 
 ## Done summary
-TBD
+Baden-Württemberg recherchiert, Ergebnis in docs/research/de-gemeinden/04-baden-wuerttemberg.md (PR #371).
 
+- Stichprobe 40 Gemeinden unter 10.000 EW aus dem Destatis-Auszug 30.09.2026 (839 Kandidaten, random.Random(20261027).sample), je Gemeinde Fundort mit Link, Hersteller, Feed, Amtsblatt-Verlag, Tourismus-Widget, destination.one-Treffer und Abgleich mit der Vollerhebung (28 von 40 gleich, 7 abweichend mit Grund).
+- 34 von 40 veröffentlichen auf der eigenen Website mit Vereinsterminen, 5 über toubiz-Tourismusportale, 1 über ein Ortsportal, keine nirgends.
+- Generics: Hirsch & Wölfl hwveranstaltung (neu, 15/40, Vollerhebung 345 BW), Cross7 (120), Komm.ONE RSS (137), cEasy (92), verwaltungsportal.de (34), toubiz (Token je Kunde, Lizenz je Datensatz), NUSSBAUM (10/40 belegt, Lizenz offen); je Zugriffsweg, echte Felder, robots/Lizenz.
+- destination.one: 0 von 40; BW im Fenster 400 Events, 18 Weihnachtsmärkte, 1 Weinfest, kein Feuerwehrfest/Hocketse/Dorffest/Kirbe.
+- Dorffest-Test mit belegtem Beispiel je Quelle; priorisierte Integrationsliste, Lücken, Anfragenliste im Anhang (ein robots.txt-Verstoß offen benannt).
 ## Evidence
-- Commits:
+- Commits: fbcc4ec72059ee12b1e8d963aec419e9dfa759b7
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/371
