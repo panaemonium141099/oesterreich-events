@@ -35,9 +35,15 @@ Ergebnisdatei: `docs/research/de-gemeinden/01-rheinland-pfalz.md`.
 
 
 ## Done summary
-TBD
+Ergebnis `docs/research/de-gemeinden/01-rheinland-pfalz.md` (PR #372, gemergt), Anfragen im Anhang `01-rheinland-pfalz-anfragen.md`, Scan aller 170 Verwaltungen in `data/rp-verwaltungen-2026-10.csv`.
 
+* Stichprobe 30 Gemeinden unter 10.000 EW aus dem Destatis-Auszug 30.09.2026, Seed 20261027, je Gemeinde Fundort mit Link, Plattform, destination.one-Treffer, meinOrt, Fest.
+* ionas (Chamaeleon GmbH, Montabaur) ist der RP-Generic: 106 von 123 VG-Startseiten, 31 von 41 verbandsfreien, 1.857 von 2.300 Gemeinden über ihre Verwaltung. TVM-Feeds offen (events.json, event.ics); in 39 Feeds 9.423 künftige Termine, davon 79,5 % Deskline RPT (UUID), 1.932 eigene. Hinweis für `de-ionas`: Deskline-Termine abgrenzen.
+* Fest belegt bei 11 von 30 (mit Vereinsfesten 15), über Feed/API 9; destination.one 5 von 30, rlpDirekt 0 von 30; WITTICH-Amtsblatt 24 von 30, meinOrt-Liste 17 von 30.
+* Deskline `mosel`: 1.926 Termine, 77 Festtitel, Dorffeste, die destination.one fehlen.
+* Abgleich mit der Vollerhebung: 15 von 30 bestätigt, 5 formal, 9 abweichend, 1 nicht prüfbar.
+* Priorisierte Liste: ionas TVM, WITTICH, Deskline RPT, destination.one, Tribe, VG-PDF, Kleinere.
 ## Evidence
-- Commits:
+- Commits: 3a59ac20
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/372
