@@ -7,9 +7,14 @@ Abschluss: Dokumentation, Prod-Prüfungen und Verifikation der gesamten Tagesaus
 ## Kontext
 - CLAUDE.md: Eintrag `src/app/page.tsx` (Pfad `src/app/[locale]/page.tsx`, Sektionen der
   Tagesausgabe, `PersonalizedMatches` weg), `src/app/api/me/landing/route.ts` (`followedLive`,
-  `followedNames`), Eventim-Absatz (`event_artists`), `fuer-firmen`-Zeile (Tipp des Tages über
+  `followedNames`), Eventim-Absatz (`event_artists`: geschrieben nach dem Event-Upsert von
+  `syncEventArtists` in `src/lib/db/event-artists-sync.ts`, Künstler als Nebenergebnis
+  `EventimArtistsByEvent` von `parseEventimFeed`, alle Feed-Länder; ein Fehler im
+  Künstler-Schritt macht `import-eventim.ts` mit Exit 1 und die Cron-Route mit 500 rot, der
+  Event-Import bleibt gültig), `fuer-firmen`-Zeile (Tipp des Tages über
   `/api/admin/landing-feature`, `kind='sponsored'`), „Bekannte Issues“ Karten-Badges-Absatz
   streichen, API-Rechte-Absatz um `event_artists`-Policy ergänzen.
+  <!-- Updated by plan-sync: fn-30.2 Schreibmodul und Fehlerverhalten des Künstler-Schritts -->
 - MASTERPLAN §10.2 (Badges-Satz streichen, `followedLive`), §7.2 (Tipp des Tages als
   Boost-Platz, Kennzeichnung „Anzeige“), Ops-Notiz Cron 00:05.
 - `docs/design/landing-redesign/README.md`: Zeile „Implementiert: PR #…, Datum“.
@@ -21,6 +26,10 @@ Abschluss: Dokumentation, Prod-Prüfungen und Verifikation der gesamten Tagesaus
   Dashboard/MCP ausführen, danach `NOTIFY pgrst, 'reload schema'`. Ops-Nachtrag zur
   `event_artists`-Policy steht schon in `docs/ops/funktionsrechte-prod-stand-2026-10-08.md`.
   <!-- Updated by plan-sync: fn-30.1 lieferte Migrationen nur als Datei, Prod-Ausführung offen -->
+  Solange `20261029200000_event_artists.sql` in Prod fehlt, endet jeder Eventim-Import
+  (`import-eventim.yml` alle 6 h, `/api/cron/eventim`) wegen des Künstler-Schritts rot; die
+  Kachel „Diese Woche live“ und `followedLive` bleiben leer, bis danach ein Import gelaufen ist.
+  <!-- Updated by plan-sync: fn-30.2 Künstler-Schritt rot bis Migration in Prod -->
 - `next build && next start`: `x-nextjs-cache: HIT` auf `/` und `/en`; Screenshots Desktop
   1440 und Handy 390 für `/`, `/entdecken`, `/wien`; `/admin/boost` Buchung und 409.
 - Analytics: `landing_tip_click`, `landing_map_open`, `landing_artist_follow` kommen in

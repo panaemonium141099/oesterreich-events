@@ -62,9 +62,8 @@ weil beides dieselbe Datei und Tests teilt; bei Überlauf die Abfragen abspalten
 - [ ] `hubs-seo.test.ts`, `landing-query-failures.test.ts`, `season-picks.test.ts`,
       `landing-url-columns.test.ts` auf die neue Form angepasst und grün; `npm test` grün.
 ## Done summary
-TBD
-
+getLandingData() liefert die Tagesausgabe (today, countryTotal, tip, season 6, program, weekend + weekendRange, artistsLive, festivals mit acts, posts, activities, mapPins); todayWeekend/concerts/popularArtists/FALLBACK_ARTISTS sind weg. Die Auswahl-Logik liegt pur und getestet in src/lib/v4/landing-picks.ts (Tipp → Saison → Programm → Wochenende ohne Dubletten, Wiener Tage), die Karten-URL in src/lib/v4/map-static-url.ts. Künstler-Rotation liest events + event_artists!inner (Score-Sortierung auf der Basistabelle) statt event_artists + events!inner. page.tsx: ArtistTeaserV4/WeekendSection/ConcertsSection vorerst entfernt (Tasks 5/6 bringen die neuen Komponenten), ArtistTeaserV4 trägt einen eigenen Typ. Nicht committet: .agents/, .codex/ (fremde Tooling-Ordner) und der Plan-Sync in .flow/tasks/…9.md.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: b47c5f1d681f6d6944aad9b0e491d3e0d5b756fc
+- Tests: npx vitest run src/__tests__/lib/v4 src/__tests__/nur-oesterreich src/__tests__/lib/site-country-guard.test.ts src/test/landing-selection.test.ts (19 Dateien, 208 Tests grün), npx vitest run (Gesamtsuite: 3978 grün, 3 bekannte Windows-Fehler in search-event-ids-migration, sheet-css-guard, patch-next-static-search-nav; hubs-seo lief unter Last in den 5-s-Timeout und ist mit 20 s Timeout isoliert grün), npx tsc --noEmit (identisch zur Baseline: 24 vorbestehende Fehler nur in Testdateien, keine in den geänderten Dateien)
 - PRs:
