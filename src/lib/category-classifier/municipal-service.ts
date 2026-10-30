@@ -54,6 +54,8 @@ const WASTE_RE = new RegExp(
     // Deutsche Entsprechungen (fn-29.2): Restabfall = Restmüll, Blaue Tonne =
     // Papiertonne, Schadstoffmobil und Problemabfall = Problemstoff.
     'restabfall', 'blaue\\s+tonne', 'schadstoffmobil', 'problemabfall',
+    // „Annahme Gartenabfälle" (Rantrum, Kompostieranlage, fn-29.16).
+    'gartenabf[äa]ll',
     'wertstoff[- ]?(?:hof|sammel|zentrum|insel)', 'recycling[- ]?(?:hof|zentrum)', 'deponie',
     '(?:papier|bio|rest)[- ]?tonne', 'papier\\s*-?\\s*(?:rote\\s+)?tonne', 'rote\\s+tonne',
     'gelbe(?:r|n|\\(r\\))?\\s+(?:s[äa]ck|tonne)',

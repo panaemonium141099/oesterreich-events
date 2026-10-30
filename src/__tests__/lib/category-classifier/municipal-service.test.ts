@@ -31,6 +31,8 @@ describe('municipalServiceKind', () => {
       'Autowrackentsorgung', 'Grün- und Strauchschnitt', 'Abgabemöglichkeit Grünmüll', 'Landwirtschaftsfoliensammlung',
       // DE (fn-29.8): communice Wacken 07.11.2026
       'Laubannahme',
+      // DE-Prüfstand fn-29.16 (Bergfeld 2026-10-29)
+      'Laubannahme der Gemeinde auf der Masche', 'Annahme Gartenabfälle',
     ]) {
       expect(municipalServiceKind(t), t).toBe('waste');
     }
@@ -60,6 +62,8 @@ describe('municipalServiceKind', () => {
       // Gemeinschafts-Aktionen
       'Flurreinigung', 'Müllsammelaktion für Kinder', 'Müllsammelaktion', 'Plogging - Bewegung und Müll sammeln',
       'Repair Café', 'Gesunde Gemeinde: Yoga für Anfänger', 'Gesunde Gemeinde',
+      'Im Jugendzentrum Flechtingen legen wir mit unserem Herbstlaub-Druck los', 'Silvester-Schießen der Eichenlaubschützen',
+      'Vortrag: Kompostieren von Gartenabfällen',
       // Stücke und Vorträge mit Müll-Wörtern
       'Topolina rettet den Müll', 'Kasperl und der Müll', 'Klumpat der Mülltroll',
       'Recycling Reloaded – Was du über Müll wissen musst!', 'More than Recycling. Die Ausstellung zur Kreislaufwirtschaft',

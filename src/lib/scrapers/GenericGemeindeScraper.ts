@@ -47,7 +47,7 @@ function findDates(text: string): string[] {
 }
 
 /** Linktexte, die kein Event benennen ("mehr Informationen" o. ä.). */
-const GENERIC_LINK_TEXT = /^(mehr( informationen| infos?| erfahren| lesen)?|weiter(lesen)?|details?|zur veranstaltung|read more)\W*$/i;
+export const GENERIC_LINK_TEXT = /^(mehr( informationen| infos?| erfahren| lesen)?|weiter(lesen)?|details?|zur veranstaltung|read more)\W*$/i;
 
 interface GemeindeEventPage {
   gemeinde: GemeindeStammdaten & { website: string; region?: boolean };
