@@ -37,14 +37,27 @@
   },
   "Landing": {
     "devNotice": "Diese Seite ist noch in Entwicklung — technische Fehler sind möglich. Feedback bitte an",
-    "Hero": {
-      "badge": "Events in Österreich",
+    "Masthead": {
       "title": "Bleib ned daham.",
-      "subtitle": "Von der Stadthalle bis zum Feuerwehrfest im Nachbardorf: über 80.000 Events in ganz Österreich. Die Couch kommt auch ohne dich zurecht.",
-      "ctaArtists": "Künstler suchen",
-      "ctaToday": "Heute & Wochenende",
-      "ctaSmart": "Frag die KI",
-      "trendLabel": "Trend:"
+      "weatherVienna": "{temp}° in Wien",
+      "over": "über {count}",
+      "eventsCount": "Events in Österreich"
+    },
+    "Tip": {
+      "label": "Tipp des Tages",
+      "ad": "Anzeige",
+      "ticketsFrom": "Tickets ab {price} €",
+      "tickets": "Tickets {price}",
+      "free": "Eintritt frei",
+      "toEvent": "Zum Event",
+      "bookHint": "Dein Event hier?",
+      "book": "Tipp des Tages buchen"
+    },
+    "Map": {
+      "title": "Heute auf der Karte",
+      "subtitle": "Alle Events von heute auf einen Blick, von Bregenz bis Wien.",
+      "open": "Karte öffnen",
+      "improve": "Karte verbessern"
     },
     "Season": {
       "featured": "Tipp",

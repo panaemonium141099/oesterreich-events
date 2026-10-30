@@ -1,20 +1,28 @@
 /**
- * Landing page — v4 redesign, statische Shell (§10.2, 2026-07-08).
+ * Startseite als Tagesausgabe (fn-30), statische Shell (§10.2).
  *
  * WIRKLICH fully static/ISR: kein cookies(), kein auth, keine
  * personalisierten Queries im RSC-Pfad. getLandingData() nutzt einen
- * cookie-freien Anon-Client → dieselbe gecachte HTML für ALLE Besucher
- * (auch eingeloggte — vorher kippte getLandingContext() die Route für
- * sie in einen Per-Request-Render mit 8 Roundtrips).
+ * cookie-freien Anon-Client → dieselbe gecachte HTML für ALLE Besucher.
  *
- * Personalisierung (YouTube-Muster): <PersonalizedMatches/> rendert den
- * Anon-Teaser im statischen HTML und tauscht client-seitig via
- * /api/me/landing auf die Künstler-Matches um — nur wenn ein Auth-Cookie
- * sichtbar ist; anonyme Besucher feuern keinen Request.
+ * Kopf (Masthead: Datumszeile, H1, Suche) und Bühne (Tipp des Tages,
+ * Saison, Karte, Diese Woche live) nach Mockup D
+ * (docs/design/landing-redesign/d-tagesausgabe.html). Client-Inseln:
+ * DateLine (Wetter, Mitternacht), SeasonWeather, ArtistsLive
+ * (Personalisierung nur mit sb-Cookie über /api/me/landing).
+ *
+ * Raster der Bühne: Desktop (lg) `1.45fr 1fr 1fr`, zwei Zeilen à 256 px,
+ * Tipp und Saison zwei Zeilen hoch; Tablet (md) zwei Spalten, Tipp über
+ * die volle Breite; Handy eine Spalte (Tipp 320 px, Karte 180 px). Ohne
+ * Künstler-Pool wird die Karte zwei Zeilen hoch.
  */
 
 import {
-  HeroV4,
+  Masthead,
+  TipOfDay,
+  SeasonCard,
+  MapTile,
+  ArtistsLive,
   PersonalizedMatches,
   WeatherSection,
   FestivalsSection,
@@ -24,9 +32,8 @@ import {
 } from '@/components/Landing/v4';
 import type { Metadata } from 'next';
 import { hasLocale } from 'next-intl';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 import { bilingualAlternates } from '@/lib/seo/canonical';
-import { Onboarding } from '@/components/Landing/Onboarding';
 import { AuthErrorToast } from '@/components/Landing/AuthErrorToast';
 import { Footer } from '@/components/Legal/Footer';
 import { getLandingData } from '@/lib/v4/get-landing-data';
@@ -63,34 +70,40 @@ export default async function LandingPage({
     ? rawLocale
     : routing.defaultLocale;
   setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: 'Landing' });
   const data = await getLandingData();
+  const hasArtists = data.artistsLive.length > 0;
 
   return (
     <div className="min-h-screen text-[var(--v4-ink)] bg-[var(--v4-surface)] flex flex-col">
-      <Onboarding/>
       <AuthErrorToast/>
 
-      <div
-        role="status"
-        className="z-30 mx-auto mt-6 max-w-[95%] md:max-w-2xl rounded-full border border-amber-300/30 bg-amber-500/10 px-4 py-2 text-center text-[12.5px] leading-tight text-amber-100 backdrop-blur-sm"
-      >
-        {t('devNotice')}{' '}
-        <a
-          href="mailto:dev@glatzdev.com?subject=lasstreffen.at%20Feedback"
-          className="font-semibold underline decoration-amber-300/60 underline-offset-2 hover:text-amber-50"
-        >
-          dev@glatzdev.com
-        </a>
-        .
-      </div>
-
       <main className="flex-1">
-        <HeroV4 season={data.season}/>
+        <div className="mx-auto max-w-[1180px] px-4 md:px-14">
+          <Masthead today={data.today} countryTotal={data.countryTotal}/>
+
+          <section
+            className="mt-2.5 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-[1.45fr_1fr_1fr] lg:grid-rows-[256px_256px] [&>*]:min-w-0"
+            data-testid="landing-stage"
+          >
+            {data.tip && (
+              <TipOfDay
+                tip={data.tip}
+                className="h-[320px] md:col-span-2 md:h-[360px] lg:col-span-1 lg:row-span-2 lg:h-auto"
+              />
+            )}
+            <SeasonCard season={data.season} className="md:row-span-2"/>
+            <MapTile
+              pins={data.mapPins}
+              tall={!hasArtists}
+              className={hasArtists ? 'h-[180px] md:h-[220px] lg:h-auto' : 'h-[180px] md:h-auto md:row-span-2'}
+            />
+            {hasArtists && <ArtistsLive artists={data.artistsLive}/>}
+          </section>
+        </div>
+
         <PersonalizedMatches/>
-        {/* fn-30: Künstler-Teaser, Wochenende und Konzerte kommen als
-            Bühne/Programm/Wochenend-Spur der Tagesausgabe zurück (Tasks 5/6). */}
-        {/* Wetter-reaktiv (fn-19): rendert nur bei Regen/Hitze, client-only */}
+        {/* fn-30: Programm, Wochenende, Region, Festivals/Blog, Freizeit,
+            Newsletter und Footer-Hinweis folgen in Task 6. */}
         <WeatherSection/>
         <FestivalsSection festivals={data.festivals}/>
         <NewsletterSignup/>
