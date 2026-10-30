@@ -23,6 +23,7 @@ import { type V4EntdeckenMode } from '@/components/Events/v4';
 import type { EventFilters } from '@/types/events';
 import { seasonById, seasonEndDate } from '@/lib/landing/seasons';
 import { resolveCategoryParam } from '@/lib/category-classifier/taxonomy';
+import { isoDayParam } from '@/lib/landing/day-labels';
 
 function resolveMode(raw: string | null): V4EntdeckenMode {
   if (raw === 'smart') return 'smart';
@@ -65,6 +66,14 @@ function deriveInitialFilters(
     out.dateTo = seasonEndDate(season);
     out.topicLabel = seasonLabel(season.id);
   }
+  // Tagesbereich der Startseite (fn-30): „Ganzes Programm" und „Alle
+  // anzeigen" verlinken /entdecken?von=<Tag>&bis=<Tag> (Wiener
+  // Kalendertage). Nur gültige Tage; ein ausdrücklicher Bereich geht einem
+  // Saisonende vor.
+  const von = isoDayParam(search.get('von'));
+  if (von) out.dateFrom = von;
+  const bis = isoDayParam(search.get('bis'));
+  if (bis) out.dateTo = bis;
   return Object.keys(out).length > 0 ? out : undefined;
 }
 
@@ -122,6 +131,8 @@ function EntdeckenInner() {
     initialFilters?.placeName ?? '',
     initialFilters?.placePostalCode ?? '',
     initialFilters?.tags?.join(',') ?? '',
+    initialFilters?.dateFrom ?? '',
+    initialFilters?.dateTo ?? '',
   ].join('|');
 
   return (

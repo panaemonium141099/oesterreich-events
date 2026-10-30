@@ -2,7 +2,7 @@
  * V4FestivalCard — compact festival card.
  *
  * Layout: small image header, festival name, date range, optional
- * lineup-match indicator. Used in FestivalsSection.
+ * lineup-match indicator. Used on /festivals.
  *
  * URL-Handling:
  *   `festival.href` kommt pre-built vom landing-loader (siehe

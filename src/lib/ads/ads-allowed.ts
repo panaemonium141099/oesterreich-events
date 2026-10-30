@@ -11,7 +11,7 @@
  * Warum nicht ueber useAuth(): Der AuthProvider haengt seit fn-15.5 nur an
  * eingeloggten Routen, die Anzeigen liegen aber auch auf Blog und
  * Aktivitaeten (anonyme Routen ohne Provider). Deshalb dieselbe Heuristik
- * wie Middleware und PersonalizedMatches:
+ * wie Middleware und ArtistsLive:
  *
  *   - Kein sb-*-auth-token-Cookie  -> anonym, Anzeigen sofort erlaubt,
  *                                     KEIN Request (99 % des Traffics).

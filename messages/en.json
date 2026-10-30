@@ -36,7 +36,7 @@
     "home": "Home"
   },
   "Landing": {
-    "devNotice": "This site is still under development — technical glitches are possible. Please send feedback to",
+    "devNotice": "This site is still under development, technical glitches are possible. Please send feedback to",
     "Masthead": {
       "title": "Don't just stay home.",
       "weatherVienna": "{temp}° in Vienna",
@@ -124,116 +124,51 @@
       "hint": "We'll let you know as soon as a new date shows up.",
       "error": "That didn't work, please try again."
     },
-    "ArtistTeaser": {
-      "badge": "Favourite artists · signed-in only",
-      "title": "Never miss a show by your favourite artists.",
-      "text": "Search for an artist, follow them, and we'll show you concerts and festival slots in Austria.",
-      "cta": "Go to your favourite artists",
-      "note": "Opens the artists page. Following requires an account.",
-      "popular": "Popular in Austria"
+    "Program": {
+      "title": "Tonight",
+      "sub": "{day}, from 5 pm",
+      "all": "Full programme"
     },
-    "Weekend": {
-      "title": "Today & weekend",
-      "viewAll": "View all events",
-      "empty": "No events in the next 7 days right now."
+    "Shelves": {
+      "weekend": "This weekend",
+      "region": "By region",
+      "showAll": "Show all",
+      "range": "{from} to {to}"
     },
-    "Concerts": {
-      "eyebrow": "Live in Austria",
-      "title": "Concerts this week",
-      "viewAll": "All concerts"
+    "FestivalsBlog": {
+      "festivals": "Festivals",
+      "allFestivals": "All festivals",
+      "blog": "From the blog",
+      "allPosts": "All posts"
     },
-    "Festivals": {
-      "eyebrow": "Coming up · line-ups available",
-      "title": "Festivals with line-up",
-      "viewAll": "All festivals"
-    },
-    "MapPreview": {
-      "eyebrow": "Map",
-      "title": "Events near you",
-      "open": "Open map",
-      "alt": "Map of Austria with event markers in Vienna, Eisenstadt, Salzburg, Linz, Graz and Innsbruck",
-      "loading": "Loading map …",
-      "legendTickets": "Tickets available",
-      "legendLineup": "Artist in line-up",
-      "legendPlan": "In your plan"
-    },
-    "HowItWorks": {
-      "eyebrow": "How it works",
-      "title": "Up and running in three steps",
-      "step1Title": "Follow artists",
-      "step1Text": "Search and follow your favourite artists. We scan concerts and festival slots across Austria.",
-      "step2Title": "Get tickets",
-      "step2Text": "When a show pops up, you jump straight to the official ticket shop. The purchase happens with the vendor.",
-      "step3Title": "Plan your night",
-      "step3Text": "Save ticket status, directions and reminders in your plan. Three pings are usually enough."
+    "Activities": {
+      "title": "Indoor day out",
+      "rainTitle": "Rainy day",
+      "sub": "Things to do across Austria",
+      "all": "All things to do",
+      "imageCredit": "Photo:",
+      "cardFallback": "Things to do"
     },
     "Newsletter": {
-      "eyebrow": "Every week · free · unsubscribe anytime",
-      "title": "The best events in your region — in your inbox on Fridays",
-      "text": "No account needed. Once a week we send you a hand-picked selection for the weekend — and nothing else.",
+      "title": "The best events in your region, once a week",
+      "text": "No account needed, unsubscribe anytime.",
       "emailPlaceholder": "your@email.com",
       "regionAria": "Choose region",
       "regionAll": "All of Austria",
       "submit": "Subscribe",
       "submitting": "One moment …",
       "doneFallback": "Please confirm your subscription in your inbox.",
-      "errorFallback": "Subscription failed — please try again later.",
-      "networkError": "Network error — please try again.",
+      "errorFallback": "Subscription failed. Please try again later.",
+      "networkError": "Network error. Please try again.",
       "privacyNote": "Double opt-in: your subscription only becomes active after e-mail confirmation. Unsubscribe anytime with one click in every mail. Details in the",
       "privacyLink": "privacy policy"
     },
-    "RegionHubs": {
-      "eyebrow": "By district · all of Austria",
-      "title": "Events in your state",
-      "intro": "Pick your state — we'll show you <b>all events</b> there, or narrow it down to a single <b>district</b>.",
-      "sectionAria": "Events by state",
-      "tileAria": "{name} — pick a district or see all events",
-      "districtCount": "{count} districts",
-      "credit": "State photos: Wikimedia Commons · CC BY/BY-SA ·",
-      "creditLink": "Image credits",
-      "sheetAria": "{name} — events",
-      "close": "Close",
-      "bundesland": "State",
-      "allEventsIn": "View all events in {name}",
-      "opensFiltered": "Opens the discover list, filtered to {name}.",
-      "orDistrict": "or narrow down by district",
-      "choose": "Choose"
-    },
-    "Matches": {
-      "eyebrow": "Your favourite artists · playing soon",
-      "title": "Shows by your favourite artists",
-      "viewAll": "All shows",
-      "empty": "No shows found yet — follow more artists.",
-      "searchArtists": "Search artists"
-    },
-    "AnonTeaser": {
-      "eyebrow": "Personalisation · sign in",
-      "title": "Who are your favourite artists?",
-      "text": "Follow artists — we'll notify you about their dates in Austria.",
-      "sub": "Concerts, open airs, festival slots. No need to keep checking.",
-      "cta": "Search artists"
-    },
-    "Weather": {
-      "rainKicker": "{mm} mm of rain forecast",
-      "rainTitle": "Rainy {day}? Your indoor line-up",
-      "heatKicker": "Heatwave weekend",
-      "heatTitle": "{temp}° on {day} — time to hit the water",
-      "viennaFallback": "Weather for Vienna",
-      "cardFallback": "Leisure & day trips",
-      "imageCredit": "Image:",
-      "moreLink": "All leisure activities"
+    "Organizer": {
+      "title": "Organising an event yourself?",
+      "text": "List your event for free. With the tip of the day you reach even more people.",
+      "submit": "List your event for free",
+      "boost": "Book the tip of the day"
     }
-  },
-  "Onboarding": {
-    "slide1Title": "Discover",
-    "slide1Text": "Thousands of events across Austria",
-    "slide2Title": "Save",
-    "slide2Text": "Bookmark your favourites",
-    "slide3Title": "Meet up",
-    "slide3Text": "Plan with friends",
-    "skip": "Skip",
-    "next": "Next",
-    "start": "Let's go"
   },
   "Footer": {
     "rights": "All rights reserved.",

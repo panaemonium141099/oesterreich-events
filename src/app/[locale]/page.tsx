@@ -5,11 +5,17 @@
  * personalisierten Queries im RSC-Pfad. getLandingData() nutzt einen
  * cookie-freien Anon-Client → dieselbe gecachte HTML für ALLE Besucher.
  *
- * Kopf (Masthead: Datumszeile, H1, Suche) und Bühne (Tipp des Tages,
- * Saison, Karte, Diese Woche live) nach Mockup D
- * (docs/design/landing-redesign/d-tagesausgabe.html). Client-Inseln:
- * DateLine (Wetter, Mitternacht), SeasonWeather, ArtistsLive
- * (Personalisierung nur mit sb-Cookie über /api/me/landing).
+ * Aufbau nach Mockup D (docs/design/landing-redesign/d-tagesausgabe.html):
+ * Kopf (Masthead: Datumszeile, H1, Suche), Bühne (Tipp des Tages, Saison,
+ * Karte, Diese Woche live), darunter in fester Reihenfolge Heute Abend
+ * (Programmliste), Dieses Wochenende, Nach Region, Festivals + Blog,
+ * Freizeit, Newsletter-Zeile, Für Veranstalter, Footer mit Hinweiszeile.
+ *
+ * Client-Inseln: DateLine (Wetter, Mitternacht), SeasonWeather, ArtistsLive
+ * (einziger Leser von /api/me/landing, nur mit sb-Cookie), ProgramListIsland
+ * (abgelaufene Zeilen ausblenden), ActivitiesShelf (Titel nach Wetter),
+ * NewsletterRow (Formular). Regale laufen über die Bausteine von /entdecken
+ * (shelf-ui.tsx), damit beide Seiten gleich aussehen.
  *
  * Raster der Bühne: Desktop (lg) `1.45fr 1fr 1fr`, zwei Zeilen à 256 px,
  * Tipp und Saison zwei Zeilen hoch; Tablet (md) zwei Spalten, Tipp über
@@ -23,12 +29,14 @@ import {
   SeasonCard,
   MapTile,
   ArtistsLive,
-  PersonalizedMatches,
-  WeatherSection,
-  FestivalsSection,
-  MapPreview,
-  HowItWorks,
-  NewsletterSignup,
+  ProgramList,
+  WeekendShelf,
+  RegionShelf,
+  FestivalsBlog,
+  ActivitiesShelf,
+  NewsletterRow,
+  OrganizerRow,
+  DevNotice,
 } from '@/components/Landing/v4';
 import type { Metadata } from 'next';
 import { hasLocale } from 'next-intl';
@@ -37,7 +45,6 @@ import { bilingualAlternates } from '@/lib/seo/canonical';
 import { AuthErrorToast } from '@/components/Landing/AuthErrorToast';
 import { Footer } from '@/components/Legal/Footer';
 import { getLandingData } from '@/lib/v4/get-landing-data';
-import { RegionHubsSection } from '@/components/Landing/v4/RegionHubsSection';
 import { routing } from '@/i18n/routing';
 
 export const revalidate = 3600;
@@ -99,20 +106,18 @@ export default async function LandingPage({
             />
             {hasArtists && <ArtistsLive artists={data.artistsLive}/>}
           </section>
-        </div>
 
-        <PersonalizedMatches/>
-        {/* fn-30: Programm, Wochenende, Region, Festivals/Blog, Freizeit,
-            Newsletter und Footer-Hinweis folgen in Task 6. */}
-        <WeatherSection/>
-        <FestivalsSection festivals={data.festivals}/>
-        <NewsletterSignup/>
-        <RegionHubsSection/>
-        <MapPreview/>
-        <HowItWorks/>
+          <ProgramList events={data.program} today={data.today}/>
+          <WeekendShelf events={data.weekend} range={data.weekendRange}/>
+          <RegionShelf/>
+          <FestivalsBlog festivals={data.festivals} posts={data.posts}/>
+          <ActivitiesShelf activities={data.activities}/>
+          <NewsletterRow/>
+          <OrganizerRow/>
+        </div>
       </main>
 
-      <Footer/>
+      <Footer notice={<DevNotice/>}/>
     </div>
   );
 }
