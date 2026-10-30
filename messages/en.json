@@ -132,6 +132,8 @@
     "Shelves": {
       "weekend": "This weekend",
       "region": "By region",
+      "dorffeste": "Village festivals",
+      "dorffesteSub": "Church fairs, beer tents and village parties in the next {days} days",
       "showAll": "Show all",
       "range": "{from} to {to}"
     },

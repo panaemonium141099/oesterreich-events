@@ -32,7 +32,7 @@ vi.mock('next/image', () => ({
   },
 }));
 
-import { RegionShelf, WeekendShelf, rangeHref } from '@/components/Landing/v4/LandingShelves';
+import { DorffesteShelf, RegionShelf, WeekendShelf, rangeHref } from '@/components/Landing/v4/LandingShelves';
 import { FestivalsBlog } from '@/components/Landing/v4/FestivalsBlog';
 import { ActivitiesShelf, ACTIVITIES_HREF } from '@/components/Landing/v4/ActivitiesShelf';
 import { NewsletterRow } from '@/components/Landing/v4/NewsletterRow';
@@ -76,6 +76,19 @@ describe('WeekendShelf / RegionShelf', () => {
 
   it('entfällt ohne Wochenend-Events', () => {
     const { container } = render(<WeekendShelf events={[]} range={{ from: '2026-10-30', to: '2026-11-01' }}/>);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('Dorffeste: Regal mit Fenster im Untertitel und Link auf das Thema, entfällt ohne Events', () => {
+    render(<DorffesteShelf events={[event('d1', { title: 'Palfauer Kirtag' }), event('d2', { title: 'Weinfest Gols' })]}/>);
+    const shelf = screen.getByTestId('dorffeste-shelf');
+    expect(within(shelf).getByRole('heading', { level: 2, name: 'Dorffeste' })).toBeInTheDocument();
+    expect(shelf).toHaveTextContent('Kirtag, Zeltfest, Frühschoppen in den nächsten 30 Tagen');
+    expect(within(shelf).getByRole('link', { name: 'Alle anzeigen' })).toHaveAttribute('href', '/entdecken?thema=dorffeste');
+    expect(within(shelf).getByRole('link', { name: /Palfauer Kirtag/ })).toBeInTheDocument();
+    expect(within(shelf).getByRole('link', { name: /Weinfest Gols/ })).toBeInTheDocument();
+
+    const { container } = render(<DorffesteShelf events={[]}/>);
     expect(container).toBeEmptyDOMElement();
   });
 

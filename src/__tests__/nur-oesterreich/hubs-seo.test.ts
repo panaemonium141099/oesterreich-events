@@ -166,8 +166,8 @@ describe('Startseite: alle Sektionen nur AT', () => {
     expect(data.weekend).toEqual([]);
     expect(data.artistsLive).toEqual([]);
 
-    // tipSharp, tip, season, program, pins, weekendSharp, weekend, artists
-    expect(eventChains()).toHaveLength(8);
+    // tipSharp, tip, season, program, pins, weekendSharp, weekend, dorffesteSharp, dorffeste, artists
+    expect(eventChains()).toHaveLength(10);
     for (const chain of eventChains()) {
       expect(eqArgs(chain)).toContainEqual(['country', SITE_COUNTRY]);
     }

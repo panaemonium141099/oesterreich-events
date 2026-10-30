@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Steuerbarer Supabase-Mock: jede Abfrage auf `events` mit `overlaps` (die
-// Saison-Abfrage) scheitert `seasonFailures`-mal, danach liefert sie Daten.
+// Steuerbarer Supabase-Mock: jede Abfrage auf `events` mit `overlaps` ohne
+// `or` (die Saison-Abfrage; Dorffeste filtern zusätzlich per `or` auf den
+// Titel) scheitert `seasonFailures`-mal, danach liefert sie Daten.
 let seasonFailures = 0;
 let seasonCalls = 0;
 // Optionale Quellen (Buchung, Künstler) dürfen die Seite nicht blockieren.
@@ -14,13 +15,14 @@ const seasonRow = {
 vi.mock('@supabase/supabase-js', () => {
   const chain = (table: string): unknown => {
     let isSeason = false;
+    let hasOr = false;
     const proxy: unknown = new Proxy(() => {}, {
       get(_t, prop) {
         if (prop === 'then') {
           let result: { data: unknown[] | null; error: { message: string } | null } = { data: [], error: null };
           if (optionalFailures && (table === 'landing_features' || table === 'event_artists')) {
             result = { data: null, error: { message: `column ${table}.kind does not exist` } };
-          } else if (table === 'events' && isSeason) {
+          } else if (table === 'events' && isSeason && !hasOr) {
             seasonCalls++;
             result = seasonFailures > 0
               ? (seasonFailures--, { data: null, error: { message: 'canceling statement due to statement timeout' } })
@@ -31,6 +33,7 @@ vi.mock('@supabase/supabase-js', () => {
         }
         return () => {
           if (prop === 'overlaps') isSeason = true;
+          if (prop === 'or') hasOr = true;
           return proxy;
         };
       },

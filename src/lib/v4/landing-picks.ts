@@ -24,12 +24,14 @@ import {
 } from '@/lib/utils/event-time';
 import { normalizeBundesland, toBlogLineup } from '@/lib/festivals/upcoming';
 import { hasRenderableImage } from '@/lib/activities/indexability';
+import { isDorffestTitle } from '@/lib/landing/dorffeste';
 
 // ─── Größen der Ausgabe ──────────────────────────────────────────────────
 
 export const SEASON_COUNT = 6;
 export const PROGRAM_COUNT = 10;
 export const WEEKEND_COUNT = 8;
+export const DORFFESTE_COUNT = 8;
 export const ARTISTS_LIVE_COUNT = 3;
 export const FESTIVALS_COUNT = 4;
 export const POSTS_COUNT = 4;
@@ -270,6 +272,22 @@ export function pickWeekend(pool: Event[], excludeIds: Set<string>, count = WEEK
   return uniqueByTitleAndImage(pool.filter(e => !excludeIds.has(e.id))).slice(0, count);
 }
 
+// ─── Dorffeste ───────────────────────────────────────────────────────────
+
+/**
+ * Dorffeste: aus dem Pool (Fest-Tags, 30 Tage, per arrangeBySharpness
+ * geordnet) nur Zeilen, deren Titel nach Fest klingt; die besten `count`
+ * nach Schärfe/Score, ohne Dubletten und ohne Events der vorigen Regale,
+ * angezeigt in Terminfolge (das Regal ist eine Vorschau auf die nächsten
+ * Wochen, keine Rangliste).
+ */
+export function pickDorffeste(pool: Event[], excludeIds: Set<string>, count = DORFFESTE_COUNT): Event[] {
+  const fests = pool.filter(e => !excludeIds.has(e.id) && isDorffestTitle(e.title));
+  return uniqueByTitleAndImage(fests)
+    .slice(0, count)
+    .sort((a, b) => a.start_date.localeCompare(b.start_date) || (b.event_score ?? 0) - (a.event_score ?? 0));
+}
+
 // ─── Gesamtauswahl ───────────────────────────────────────────────────────
 
 export interface LandingSelectionInput {
@@ -282,6 +300,8 @@ export interface LandingSelectionInput {
   programPool: Event[];
   /** Wochenend-Fenster, bereits per arrangeBySharpness geordnet. */
   weekendPool: Event[];
+  /** Fest-Tags der nächsten 30 Tage, bereits per arrangeBySharpness geordnet. */
+  dorffestePool?: Event[];
   today: string;
   now: Date;
 }
@@ -291,9 +311,10 @@ export interface LandingSelection {
   season: Array<Event & { featured: boolean }>;
   program: Event[];
   weekend: Event[];
+  dorffeste: Event[];
 }
 
-/** Tipp → Saison → Programm → Wochenende, kein Event doppelt. */
+/** Tipp → Saison → Programm → Wochenende → Dorffeste, kein Event doppelt. */
 export function pickLandingSelection(input: LandingSelectionInput): LandingSelection {
   const { pins, today, now } = input;
   const used = new Set<string>();
@@ -311,8 +332,11 @@ export function pickLandingSelection(input: LandingSelectionInput): LandingSelec
   for (const e of program) used.add(e.id);
 
   const weekend = pickWeekend(input.weekendPool, used);
+  for (const e of weekend) used.add(e.id);
 
-  return { tip, season, program, weekend };
+  const dorffeste = pickDorffeste(input.dorffestePool ?? [], used);
+
+  return { tip, season, program, weekend, dorffeste };
 }
 
 // ─── Diese Woche live (Künstler-Rotation) ────────────────────────────────

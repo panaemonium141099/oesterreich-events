@@ -5,6 +5,7 @@ import {
   festivalActs,
   pickActivities,
   pickArtistsLive,
+  pickDorffeste,
   pickLandingSelection,
   pickPosts,
   pickProgram,
@@ -139,9 +140,40 @@ describe('pickLandingSelection: Tipp → Saison → Programm → Wochenende ohne
     expect(sel.season.map(e => e.id).sort()).toEqual(['E', 'S1', 'S2']);
     expect(sel.program.map(e => e.id)).toEqual(['P1', 'P2']);
     expect(sel.weekend.map(e => e.id)).toEqual(['W1', 'W2']);
+    expect(sel.dorffeste).toEqual([]);
 
     const all = [sel.tip!.event, ...sel.season, ...sel.program, ...sel.weekend].map(e => e.id);
     expect(new Set(all).size).toBe(all.length);
+  });
+
+  it('Dorffeste kommen nach dem Wochenende und wiederholen kein Event', () => {
+    const W1 = ev('W1', { title: 'Kirtag Palfau', start_date: '2026-11-07T18:00:00Z' });
+    const D1 = ev('D1', { title: 'Dorffest Spannberg', start_date: '2026-11-21T14:00:00Z' });
+    const sel = pickLandingSelection({
+      pins: [], tipPool: [], seasonPool: [], programPool: [],
+      weekendPool: [W1],
+      dorffestePool: [W1, D1],
+      today: TODAY,
+      now: NOW,
+    });
+    expect(sel.weekend.map(e => e.id)).toEqual(['W1']);
+    expect(sel.dorffeste.map(e => e.id)).toEqual(['D1']);
+  });
+});
+
+describe('pickDorffeste', () => {
+  it('nur Fest-Titel, ohne Dubletten, die besten nach Pool-Reihenfolge, Ausgabe in Terminfolge', () => {
+    const pool = [
+      ev('spaet', { title: 'Weinfest Gols', start_date: '2026-11-28T16:00:00Z', event_score: 60 }),
+      ev('streu', { title: 'Sparefroh Weltspartag', event_score: 59 }),
+      ev('frueh', { title: 'Palfauer Kirtag', start_date: '2026-11-08T10:00:00Z', event_score: 55 }),
+      ev('dublette', { title: 'Weinfest Gols', start_date: '2026-11-29T16:00:00Z', image_url: 'https://img/spaet.jpg', event_score: 50 }),
+      ev('mitte', { title: 'Zeltfest Leonding', start_date: '2026-11-14T19:00:00Z', event_score: 40 }),
+      ev('rest', { title: 'Oktoberfest Linz', start_date: '2026-11-20T19:00:00Z', event_score: 30 }),
+    ];
+    expect(pickDorffeste(pool, new Set(), 3).map(e => e.id)).toEqual(['frueh', 'mitte', 'spaet']);
+    expect(pickDorffeste(pool, new Set(['frueh']), 3).map(e => e.id)).toEqual(['mitte', 'rest', 'spaet']);
+    expect(pickDorffeste([], new Set())).toEqual([]);
   });
 
   it('ein editorial-Pin, der schon Tipp ist, wiederholt sich nicht in der Saison', () => {
