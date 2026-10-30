@@ -14,9 +14,8 @@ Rahmenbedingungen: Der Qualitätsvertrag DE im Epic-Spec (`flowctl cat fn-29-de-
 - [ ] Erst nach bestandenem Prüfstand in den Nachtlauf
 
 ## Done summary
-TBD
-
+Adapter de-allgemein (src/lib/scrapers/de/AllgemeinDeScraper.ts, allgemein.ts, datum.ts) für die Integrationen jsonld, html_generic, js_oder_feed: JSON-LD, Mikrodaten, sonst Listen mit Datum über dieselben Module wie in AT. Prüfstand auf frischem Cache (2026-10-30): alle automatischen Schwellen erreicht, Stichprobe 30/30 (achte Runde), Dorffeste Holzheim und Hetzerath gegen die Quelle geprüft. 555 Gemeinden mit öffentlichen Terminen, davon 499 aus Stufe E; Ausschlüsse mit Begründung in docs/research/de-gemeinden/adapter-allgemein.md. Nicht im Nachtlauf (fn-29.18).
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: bf1c0e69
+- Tests: src/__tests__/lib/scrapers/allgemein-de.test.ts, src/__tests__/lib/category-classifier/municipal-service.test.ts
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/415
