@@ -9,7 +9,7 @@
  * Koordinate in `X-APPLE-STRUCTURED-LOCATION` (`geo:Breite,Länge`, oft 0,0).
  * REIN, kein I/O.
  */
-import { icalEnd, icalText, parseIcalDate, readVEvents, type VEvent } from './ical';
+import { icalEnd, icalImage, icalText, parseIcalDate, readVEvents, type VEvent } from './ical';
 import { asDayIfMidnight, nolisEnd, STREET } from './nolis';
 
 export interface EmEvent {
@@ -27,6 +27,8 @@ export interface EmEvent {
   postalCode?: string;
   locality?: string;
   category?: string;
+  /** Bild aus `ATTACH` (Logo/Platzhalter prüft `bild.ts`). */
+  image?: string;
   lat?: number;
   lng?: number;
 }
@@ -121,6 +123,7 @@ function toEvent(m: VEvent): EmEvent | null {
     description: icalText(m, 'DESCRIPTION'),
     ...parseEmLocation(icalText(m, 'LOCATION')),
     category: icalText(m, 'CATEGORIES')?.split(',')[0]?.trim() || undefined,
+    image: icalImage(m),
     ...(g ?? {}),
   };
 }

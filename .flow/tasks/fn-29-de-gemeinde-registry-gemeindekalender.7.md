@@ -14,9 +14,8 @@ Rahmenbedingungen: Der Qualitätsvertrag DE im Epic-Spec (`flowctl cat fn-29-de-
 - [ ] Erst nach bestandenem Prüfstand in den Nachtlauf
 
 ## Done summary
-TBD
-
+Alle sechs Plugins aus fn-29.7 gebaut und auf dem Prüfstand bestanden: Tribe (PR #396), Events Manager (PR #397), MEC, DPCalendar, JEvents, iCagenda (PR #399). Je Adapter Stichprobe gegen die Detailseiten und ein Dorffest gegen die Quellseite. Dazu für alle DE-Adapter: Kalenderort gegen genannte Gemeinde (kontext.ts), JSON-LD-Leser, HTML-Abruf über fetchHtml mit robots.txt und Crawl-delay; Registry verwirft Plugin-Dateien als Kalender-URL; Gemeinde-Dienste um Verwaltungsschließung und Beratungstermin ergänzt. Nicht im Nachtlauf (fn-29.18). Rest für fn-29.16: 21 JEvents-Gemeinden ohne Feed, 11 iCagenda-Websites ohne RSS.
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: 011bd241
+- Tests: npx vitest run (3960 grün; 3 CRLF-Fälle, Timeouts unter Last einzeln grün), npm run pruefstand:de für de-tribe, de-eventsmanager, de-mec, de-dpcalendar, de-jevents, de-icagenda
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/396, https://github.com/panaemonium141099/oesterreich-events/pull/397, https://github.com/panaemonium141099/oesterreich-events/pull/399

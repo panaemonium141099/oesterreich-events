@@ -18,7 +18,7 @@ export abstract class DeFeedScraper extends BaseScraper {
     super();
   }
 
-  private async robotsTxt(origin: string): Promise<string | null> {
+  protected async robotsTxt(origin: string): Promise<string | null> {
     if (this.robots.has(origin)) return this.robots.get(origin)!;
     let txt: string | null = null;
     try {
@@ -31,14 +31,28 @@ export abstract class DeFeedScraper extends BaseScraper {
     return txt;
   }
 
-  /** Feed lesen, wenn robots.txt ihn erlaubt; sonst null (mit Logeintrag). */
-  protected async fetchFeed(url: string): Promise<string | null> {
+  /** robots.txt prüfen und die Pause einhalten; false, wenn gesperrt. */
+  private async gate(url: string): Promise<boolean> {
     const robots = await this.robotsTxt(new URL(url).origin);
     if (!robotsAllows(robots, url, UA_TOKEN)) {
       this.log(`robots.txt sperrt ${url}`);
-      return null;
+      return false;
     }
     await this.sleep(Math.max(this.delayMs, (robotsCrawlDelay(robots, UA_TOKEN) ?? 0) * 1000));
+    return true;
+  }
+
+  /** HTML-Seite über `BaseScraper.fetchHtml` (nur HTML, Größengrenze), wenn robots.txt sie erlaubt. */
+  protected async fetchHtmlPage(url: string): Promise<string | null> {
+    if (!(await this.gate(url))) return null;
+    const { html } = await this.fetchHtml(url);
+    if (html == null) this.log(`nicht lesbar: ${url}`);
+    return html;
+  }
+
+  /** Feed lesen, wenn robots.txt ihn erlaubt; sonst null (mit Logeintrag). */
+  protected async fetchFeed(url: string): Promise<string | null> {
+    if (!(await this.gate(url))) return null;
     try {
       return await this.fetchPage(url);
     } catch (e) {

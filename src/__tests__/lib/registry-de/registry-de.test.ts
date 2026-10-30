@@ -125,6 +125,10 @@ describe('Registry-Aufbau', () => {
     expect(eventPageUrl('https://www.terminland.de/sg-hage/')).toBeNull();
     expect(eventPageUrl('https://termine-reservieren.de/termine/gronau/')).toBeNull();
     expect(eventPageUrl('https://kuddewoerde.orts.app/veranstaltungen/')).toBe('https://kuddewoerde.orts.app/veranstaltungen/');
+    // Plugin-Dateien sind keine Kalenderseite (MEC Drage, fn-29.7).
+    expect(eventPageUrl('https://gemeinde-drage.de/wp-content/plugins/modern-events-calendar-lite/assets/css/iconfonts.css?ver=7.27.0')).toBeNull();
+    expect(eventPageUrl('https://www.juist.de/x/slider.system.js?fp=d6b8')).toBeNull();
+    expect(eventPageUrl('https://www.dollerup.de/termine/')).toBe('https://www.dollerup.de/termine/');
   });
 
   it('Diff ohne checked_at', () => {

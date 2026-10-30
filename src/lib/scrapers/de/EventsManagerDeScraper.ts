@@ -11,6 +11,7 @@ import { feedGroups, type FeedGroup } from '@/lib/registry-de/load';
 import type { ScrapedEvent } from '@/types/events';
 import { DeFeedScraper } from './feed-scraper';
 import { emCompleteDays, parseEmIcs, type EmEvent } from './em';
+import { imageCredit, imageUrl, withoutPlaceholderImages } from './bild';
 import { collapseSourceDuplicates, terminContext } from './kontext';
 
 export class EventsManagerDeScraper extends DeFeedScraper {
@@ -25,7 +26,7 @@ export class EventsManagerDeScraper extends DeFeedScraper {
       const events = parseEmIcs(ics);
       const complete = emCompleteDays(events);
       if (complete.length !== events.length) this.log(`Grenze erreicht: ${g.feedUrl} (${events.length} Termine, letzter Tag ausgelassen)`);
-      all.push(...collapseSourceDuplicates(complete).map(ev => this.toScraped(ev, g)));
+      all.push(...withoutPlaceholderImages(collapseSourceDuplicates(complete)).map(ev => this.toScraped(ev, g)));
     }
     this.log(`${groups.length} Feeds, ${all.length} Termine`);
     return all;
@@ -33,10 +34,12 @@ export class EventsManagerDeScraper extends DeFeedScraper {
 
   toScraped(ev: EmEvent, g: FeedGroup): ScrapedEvent {
     const address = [ev.street, [ev.postalCode, ev.locality].filter(Boolean).join(' ')].filter(Boolean).join(', ') || undefined;
+    const sourceUrl = ev.url ?? g.pageUrl;
+    const image = imageUrl(ev.image);
     const base: ScrapedEvent = {
       source_name: this.name,
       source_id: `em-${new URL(g.feedUrl).host}-${ev.uid}-${ev.localDate}`,
-      source_url: ev.url ?? g.pageUrl,
+      source_url: sourceUrl,
       title: ev.title,
       description: ev.description,
       start_date: ev.start,
@@ -46,6 +49,7 @@ export class EventsManagerDeScraper extends DeFeedScraper {
       postal_code: ev.postalCode,
       city: ev.locality,
       category: ev.category,
+      ...(image ? { image_url: image, image_credit: imageCredit(sourceUrl) } : {}),
       country: 'DE',
       ...(ev.lat != null && ev.lng != null ? { latitude: ev.lat, longitude: ev.lng, coords_precision: 'venue' as const } : {}),
     };

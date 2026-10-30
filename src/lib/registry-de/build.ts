@@ -76,8 +76,12 @@ export const NON_EVENT_HOSTS: ReadonlyMap<string, string> = new Map([
 export function eventPageUrl(raw: string | null): string | null {
   if (!raw) return null;
   try {
-    const h = new URL(raw).hostname.replace(/^www\./, '');
+    const u = new URL(raw);
+    const h = u.hostname.replace(/^www\./, '');
     for (const host of NON_EVENT_HOSTS.keys()) if (h === host || h.endsWith(`.${host}`)) return null;
+    // Eine Datei des Plugins ist keine Kalenderseite (MEC: `…/assets/css/frontend.min.css`
+    // als Kalender-URL von Drage, Echternacherbrück, Theilheim, Bad Frankenhausen; fn-29.7).
+    if (/\.(css|js|json|png|jpe?g|gif|svg|webp|woff2?|ttf|ico)$/i.test(u.pathname)) return null;
     return raw;
   } catch {
     return null;

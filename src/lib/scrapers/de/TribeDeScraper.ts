@@ -11,6 +11,7 @@ import { ortsdatenFor } from '@/lib/location/ortsdaten';
 import { feedGroups, type FeedGroup } from '@/lib/registry-de/load';
 import type { ScrapedEvent } from '@/types/events';
 import { DeFeedScraper } from './feed-scraper';
+import { imageCredit, imageUrl, withoutPlaceholderImages } from './bild';
 import { collapseSourceDuplicates, terminContext } from './kontext';
 import { parseTribePage, tribePageUrl, type TribeEvent } from './tribe';
 
@@ -42,7 +43,7 @@ export class TribeDeScraper extends DeFeedScraper {
         if (page >= p.totalPages) break;
         if (page === MAX_PAGES) this.log(`abgeschnitten nach ${MAX_PAGES} Seiten: ${g.feedUrl}`);
       }
-      all.push(...collapseSourceDuplicates(events).map(ev => this.toScraped(ev, g)));
+      all.push(...withoutPlaceholderImages(collapseSourceDuplicates(events)).map(ev => this.toScraped(ev, g)));
     }
     this.log(`${groups.length} Feeds, ${all.length} Termine`);
     return all;
@@ -50,6 +51,7 @@ export class TribeDeScraper extends DeFeedScraper {
 
   toScraped(ev: TribeEvent, g: FeedGroup): ScrapedEvent {
     const address = [ev.street, [ev.postalCode, ev.locality].filter(Boolean).join(' ')].filter(Boolean).join(', ') || undefined;
+    const image = imageUrl(ev.image);
     const base: ScrapedEvent = {
       source_name: this.name,
       source_id: `tribe-${new URL(g.feedUrl).host}-${ev.uid}`,
@@ -65,6 +67,11 @@ export class TribeDeScraper extends DeFeedScraper {
       organizer: ev.organizer,
       category: ev.category,
       price_text: ev.priceText,
+      ...(image ? {
+        image_url: image,
+        image_credit: imageCredit(ev.url),
+        ...(ev.imageWidth ? { image_width: ev.imageWidth, image_height: ev.imageHeight } : {}),
+      } : {}),
       country: 'DE',
       ...(ev.lat != null && ev.lng != null ? { latitude: ev.lat, longitude: ev.lng, coords_precision: 'venue' as const } : {}),
     };

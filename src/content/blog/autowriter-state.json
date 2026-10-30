@@ -707,6 +707,18 @@
       "slug": "konzerte-in-der-minoritenkirche-italienische-barock-gala-2026",
       "title": "Konzerte in der Minoritenkirche - Italienische Barock-Gala",
       "writtenAt": "2026-10-29T00:51:06.300Z"
+    },
+    {
+      "eventId": "9eb30302-03e9-41b6-a898-cbe189f3db8b",
+      "slug": "pumuckl-das-weihnachtsfest-2026",
+      "title": "Pumuckl - Das Weihnachtsfest",
+      "writtenAt": "2026-10-30T00:51:28.918Z"
+    },
+    {
+      "eventId": "33f7094f-de13-45f2-88b1-c34fe48e813c",
+      "slug": "bach-bei-nacht-klavierkonzert-stefan-donner-2026",
+      "title": "Bach bei Nacht - Klavierkonzert - Stefan Donner",
+      "writtenAt": "2026-10-30T00:52:38.033Z"
     }
   ],
   "stayGuides": [
@@ -743,6 +755,7 @@
     "psalm-festival-graz:2027-03-19",
     "winter-woodstock-der-blasmusik:2027-03-19",
     "osterfestspiele-salzburg:2027-03-20",
-    "guitar-festival-rust:2027-03-21"
+    "guitar-festival-rust:2027-03-21",
+    "full-metal-mountain:2027-03-29"
   ]
 }

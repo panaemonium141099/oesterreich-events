@@ -87,7 +87,9 @@ describe('ionas: Termin → Zeile', () => {
   it('Amtskalender: Ort und PLZ aus dem Termin, kein Gemeinde-Mittelpunkt der Amtsseite', () => {
     const ev = parseIonasIcs(fx('amt-sn.ics')).find(e => e.title === 'Amts-Senioren-Kaffee in Steinhorst')!;
     const s = scraper.toScraped(ev, amt);
-    expect(s).toMatchObject({ country: 'DE', city: 'Steinhorst', postal_code: '23847', address: 'Schulstraße 3, 23847 Steinhorst', location_name: 'Multifunktionshaus', source_url: 'https://www.amt-sn.de/kalender/' });
+    expect(s).toMatchObject({ country: 'DE', city: 'Steinhorst', postal_code: '23847', address: 'Schulstraße 3, 23847 Steinhorst', location_name: 'Multifunktionshaus' });
+    // Detailseite des Termins aus dem Ordner seines Bildes (de-bild.test.ts).
+    expect(s.source_url).toBe('https://www.amt-sn.de/kalender/2026-amt/oktober/2026-10-29-amts-senioren-kaffee-in-steinhorst/');
     expect(s.latitude).toBeUndefined();
     const row = toSupabaseRow(s, new Map(), new Map()).row as unknown as { postal_code: string; location_resolution: { gemeinde: { name: string } | null }; bundesland: string | null };
     expect(row.postal_code).toBe('23847');
@@ -103,9 +105,12 @@ describe('ionas: Termin → Zeile', () => {
     expect(s.coords_precision).toBe('municipality');
   });
 
-  it('keine Bilder (Nutzungsrecht nicht belegt)', () => {
+  it('Bild der Quelle mit Website als Bildnachweis (Entscheidung 2026-10-29, vorher ohne Bild)', () => {
     const ev = parseIonasIcs(fx('parchim.ics'))[0];
-    expect(scraper.toScraped(ev, amt).image_url).toBeUndefined();
+    const s = scraper.toScraped(ev, amt);
+    expect(s.image_url).toMatch(/^https:\/\/www\.parchim\.de\/de\/kalender\/termine-extern\//);
+    // Bildnachweis ist die Website, auf der der Termin steht (hier die Amtsseite der Testgruppe).
+    expect(s.image_credit).toBe(new URL(s.source_url!).host.replace(/^www\./, ''));
   });
 });
 

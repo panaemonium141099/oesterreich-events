@@ -28,6 +28,10 @@ export interface TribeEvent {
   organizer?: string;
   category?: string;
   priceText?: string;
+  /** Beitragsbild des Termins (Logo/Platzhalter prüft `bild.ts`). */
+  image?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   lat?: number;
   lng?: number;
 }
@@ -49,6 +53,8 @@ interface RawEvent {
   venue?: RawVenue | RawVenue[];
   organizer?: { organizer?: string }[];
   categories?: { name?: string }[];
+  /** `false` ohne Beitragsbild. */
+  image?: { url?: string; width?: number; height?: number } | false;
 }
 
 export interface TribePage { events: TribeEvent[]; totalPages: number }
@@ -72,9 +78,17 @@ export function parseTribePage(json: string): TribePage {
   return { events, totalPages: j.total_pages ?? 1 };
 }
 
+/**
+ * Durchgestrichener Titel heißt: findet nicht statt (Artlenburg
+ * `<b>Pausiert:</b> <s>Spiele-Abend Windmühle Artlenburg</s>`, 2026-10-29).
+ */
+const STRUCK = /<(s|del|strike)\b[^>]*>/i;
+
 function toEvent(e: RawEvent): TribeEvent | null {
-  const title = clean(e.title);
-  if (!title || !e.url || !e.start_date || e.hide_from_listings) return null;
+  if (!e.url || !e.start_date || e.hide_from_listings || STRUCK.test(e.title ?? '')) return null;
+  // Der Titel kann HTML tragen (Artlenburg `<b><span style=…>…</span></b>`).
+  const title = clean(htmlToText(e.title ?? ''));
+  if (!title) return null;
   const localDate = e.start_date.slice(0, 10);
   let start: string, end: string | undefined;
   // 00:00 ohne Ende oder bis 00:00 ist „ohne Uhrzeit" (Kaiser-Wilhelm-Koog
@@ -115,6 +129,10 @@ function toEvent(e: RawEvent): TribeEvent | null {
     organizer: clean(e.organizer?.[0]?.organizer),
     category: clean(e.categories?.[0]?.name),
     priceText: clean(e.cost),
+    ...(e.image && e.image.url ? {
+      image: e.image.url,
+      ...(e.image.width && e.image.height ? { imageWidth: e.image.width, imageHeight: e.image.height } : {}),
+    } : {}),
     ...(hasGeo ? { lat, lng } : {}),
   };
 }

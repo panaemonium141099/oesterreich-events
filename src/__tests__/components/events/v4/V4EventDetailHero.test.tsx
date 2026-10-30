@@ -48,4 +48,19 @@ describe('V4EventDetailHero', () => {
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
     expect(document.querySelector('img')).toBeNull();
   });
+
+  it('Bildnachweis am Bild: Website und Quellpfad mit Link auf die Seite des Termins', () => {
+    const sourceUrl = 'https://www.amt-sn.de/kalender/2026-amt/oktober/2026-10-29-amts-senioren-kaffee-in-steinhorst/';
+    render(<V4EventDetailHero {...baseProps} imageCredit={{ credit: 'amt-sn.de', sourceUrl }}/>);
+    const credit = screen.getByTestId('hero-image-credit');
+    expect(credit.textContent).toContain('amt-sn.de');
+    const link = credit.querySelector('a')!;
+    expect(link.getAttribute('href')).toBe(sourceUrl);
+    expect(link.textContent).toBe('amt-sn.de/kalender/2026-amt/oktober/2026-10-29-amts-senioren-kaffee-in-steinhorst');
+  });
+
+  it('kein Bildnachweis ohne Bild', () => {
+    render(<V4EventDetailHero {...baseProps} imageUrl={null} imageCredit={{ credit: 'amt-sn.de', sourceUrl: 'https://www.amt-sn.de/' }}/>);
+    expect(screen.queryByTestId('hero-image-credit')).toBeNull();
+  });
 });
