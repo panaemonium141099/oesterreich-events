@@ -57,9 +57,8 @@ oder bestehend erweitern), `src/__tests__/components/artists-live.test.tsx` (neu
       `aria-pressed`; `data-track="landing_artist_follow"` mit `data-track-id` = Künstlername.
 - [ ] DE- und EN-Texte vorhanden; `npm test` grün.
 ## Done summary
-TBD
-
+`/api/me/landing` liefert eingeloggt `followedLive` (gefolgte Künstler mit Eventim-Termin in sieben Wiener Tagen, Form `LandingArtistLive`, ilike-Vorauswahl plus JS-Abgleich über `normalizeArtistName`, Primary-Auflösung) und `followedNames`; anonym bleibt die Antwort unverändert mit `no-store`. Neue Client-Insel `ArtistsLive` (exportiert aus `src/components/Landing/v4/index.ts`) zeigt die Rotation statisch, personalisiert nur mit sb-Cookie, gefolgte zuerst, rotierte gefolgte als „Folgst du“, Folgen/Entfolgen optimistisch mit Rückrollen bei Nicht-2xx, anonym Login-Link mit `redirect=/`; i18n `Landing.ArtistsLive` in de und en; Normalisierer client-sicher nach `src/lib/artists/normalize-name.ts` verschoben (Re-Export aus `artist-matching`).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: fe4b2c09385e4264c3fc0753aa5630445a987cf0
+- Tests: npx vitest run src/__tests__/lib/v4/followed-live.test.ts src/__tests__/api/me-landing.test.ts src/__tests__/components/artists-live.test.tsx src/__tests__/lib/v4/landing-url-columns.test.ts src/__tests__/lib/site-country-guard.test.ts src/__tests__/api/artists.test.ts, npx vitest run (Vollsuite: 4021 passed; rot nur die bekannten Windows-Dateien search-event-ids-migration und patch-next-static-search-nav sowie 5000-ms-Timeouts unter Last, die isoliert gruen sind), npx tsc --noEmit (keine Fehler in geaenderten Dateien)
 - PRs:
