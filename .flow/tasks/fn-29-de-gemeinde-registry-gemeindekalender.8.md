@@ -14,9 +14,12 @@ Rahmenbedingungen: Der Qualitätsvertrag DE im Epic-Spec (`flowctl cat fn-29-de-
 - [ ] Erst nach bestandenem Prüfstand in den Nachtlauf
 
 ## Done summary
-TBD
+Adapter de-communice gebaut und gemergt (PR #410). Vorab geprüft: keine Lizenz nötig (robots.txt der Kalender frei, Herausgeber laut Impressum Gemeinde/Amt, inixmedia nur Realisierung, keine Nutzungsbedingungen für Dritte; die Bayern-Anfrage betraf nur einen zentralen Export).
 
+Liest die Kalenderliste (beide Vorlagen) aller 187 Registry-Seiten (155 Kalender), Jahr mehrtägiger Termine aus dem iCal des Termins, Verbund-Websites mit gemeinsamer Datenbank zusammengefasst (Ort nur aus Etikett/Ort/Titel). Atom-Feed bewusst nicht genutzt (Anlagezeit statt Uhrzeit).
+
+Prüfstand: 3.179 Termine, Schwellen bestanden (Gemeinde-Dienste 0, Müll 0,0 %, Dubletten 0,0 %), Stichprobe 30/30. Dorffeste gegen Quelle: Dorffest der Ortsvereine Großkarolinenfeld, Weihnachtsmarkt Westermoor. Bericht docs/research/de-gemeinden/adapter-communice.md. Nicht im Nachtlauf (fn-29.18).
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: a0fafaf9
+- Tests: src/__tests__/lib/scrapers/communice-de.test.ts, src/__tests__/lib/category-classifier/municipal-service.test.ts
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/410
