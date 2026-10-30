@@ -24,7 +24,7 @@ import {
 } from '@/lib/utils/event-time';
 import { normalizeBundesland, toBlogLineup } from '@/lib/festivals/upcoming';
 import { hasRenderableImage } from '@/lib/activities/indexability';
-import { isDorffestTitle } from '@/lib/landing/dorffeste';
+import { isDorffestEvent } from '@/lib/landing/dorffeste';
 
 // ─── Größen der Ausgabe ──────────────────────────────────────────────────
 
@@ -275,14 +275,14 @@ export function pickWeekend(pool: Event[], excludeIds: Set<string>, count = WEEK
 // ─── Dorffeste ───────────────────────────────────────────────────────────
 
 /**
- * Dorffeste: aus dem Pool (Fest-Tags, 30 Tage, per arrangeBySharpness
- * geordnet) nur Zeilen, deren Titel nach Fest klingt; die besten `count`
+ * Dorffeste: aus dem Pool (Fest-Tags oder Fest-Wort, 30 Tage, per
+ * arrangeBySharpness geordnet) nur Zeilen, die `isDorffestEvent` bestehen; die besten `count`
  * nach Schärfe/Score, ohne Dubletten und ohne Events der vorigen Regale,
  * angezeigt in Terminfolge (das Regal ist eine Vorschau auf die nächsten
  * Wochen, keine Rangliste).
  */
 export function pickDorffeste(pool: Event[], excludeIds: Set<string>, count = DORFFESTE_COUNT): Event[] {
-  const fests = pool.filter(e => !excludeIds.has(e.id) && isDorffestTitle(e.title));
+  const fests = pool.filter(e => !excludeIds.has(e.id) && isDorffestEvent(e));
   return uniqueByTitleAndImage(fests)
     .slice(0, count)
     .sort((a, b) => a.start_date.localeCompare(b.start_date) || (b.event_score ?? 0) - (a.event_score ?? 0));
