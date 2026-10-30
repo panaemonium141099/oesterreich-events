@@ -10,7 +10,7 @@ Sprache sprechen.
 Umgesetzt wird **D Tagesausgabe** (`d-tagesausgabe.html`). A, B und C bleiben als verworfene
 Varianten liegen (zu nah am Regal-Template, Karte und Künstler folgen fehlten).
 
-**Implementiert: Branch `claude/landing-page-redesign-e6dafa`, 2026-10-30, PR folgt**
+**Implementiert: PR #404, live seit 2026-10-30** (Migrationen in Prod ausgeführt, Timer aktiv, erster Eventim-Import mit 13.009 Künstler-Zeilen)
 (Epic fn-30, `src/app/[locale]/page.tsx`, Komponenten in `src/components/Landing/v4/`).
 
 - Kopf: Datumszeile mit Wetter und Event-Zahl, Slogan „Bleib ned daham.“, Suche.

@@ -870,7 +870,7 @@ kleinen APIs treffen lassen.
    Buchung `revalidateLanding()` (`src/lib/landing/revalidate-landing.ts`:
    `/[locale]` als Seitenmuster plus `/` und `/en`), und
    `GET /api/cron/revalidate-landing` (Bearer `CRON_SECRET` Pflicht, fail
-   closed) macht dasselbe um **00:05 Europe/Vienna**. *Ops, noch einzurichten:*
+   closed) macht dasselbe um **00:05 Europe/Vienna**. *Ops, eingerichtet am 2026-10-30 (`lt-cron@revalidate-landing.timer`, erster Lauf manuell geprüft):*
    Timer `lt-cron@revalidate-landing.timer` auf Hetzner nach dem Muster der
    anderen `lt-cron@`-Timer (curl auf `127.0.0.1:3000/api/cron/revalidate-landing`
    mit Bearer), `OnCalendar=*-*-* 00:05:00 Europe/Vienna` (die übrigen Timer

@@ -158,7 +158,7 @@ node / next.js
   `revalidateLanding()` (`src/lib/landing/revalidate-landing.ts`) neu, damit
   die Tagesausgabe nach Mitternacht den neuen Wiener Tag zeigt; geplant
   `OnCalendar=*-*-* 00:05:00 Europe/Vienna` (die übrigen Timer laufen in
-  UTC). Der Timer ist auf Hetzner noch einzurichten (MASTERPLAN §10.2 Punkt 5).
+  UTC). Timer seit 2026-10-30 aktiv (MASTERPLAN §10.2 Punkt 5).
 - **Cloudflare (seit 2026-10-21) vor lasstreffen.at + www** (Free: Bot Fight
   Mode, WAF-Regeln, Cache nur statische Pfade); `api.lasstreffen.at` bleibt
   DNS-only. Caddy liest die Client-IP aus `CF-Connecting-IP` nur von
