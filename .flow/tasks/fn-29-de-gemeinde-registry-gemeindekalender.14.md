@@ -14,9 +14,8 @@ Rahmenbedingungen: Der Qualitätsvertrag DE im Epic-Spec (`flowctl cat fn-29-de-
 - [ ] Erst nach bestandenem Prüfstand in den Nachtlauf
 
 ## Done summary
-TBD
-
+Adapter `de-typo3` (Typo3DeScraper.ts, contao.ts, typo3.ts, cms-termin.ts) liest 271 Kalenderseiten der Merkmale contao_events, calendarize, events2, sfeventmgt, txnews. Contao über datetime/Linktitel/times=, TYPO3-Extensions über Detail-Links (calendarize mit parseCalendarizeTerm aus calendarize-card.ts, events2 per JSON-LD der Detailseite), Schema.org-Events der Seite. tx_news-Listen werden nicht gelesen (Nachrichtendatum). Prüfstand 2026-10-30: 2.947 geliefert, 2.440 geschrieben, 2.285 öffentlich, 88 Websites; 0 sichtbare Gemeinde-Dienste, Müll 0,0 %, ohne Uhrzeit 20,0 %, sichtbar ohne Koordinaten 0,0 %, Dubletten 0,0 %; Stichprobe 30/30. Dorffeste gegen Quelle: Gründungsfest FF Eberspoint, Babinger Waldfest (Markt Velden), Kirmes Pustleben (Bleicherode). 27 Golden-Tests aus 12 Gemeinden. Bericht docs/research/de-gemeinden/adapter-typo3.md. Nicht im Nachtlauf (fn-29.18).
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: 42a7c164
+- Tests: src/__tests__/lib/scrapers/typo3-de.test.ts (27), npm run pruefstand:de -- --adapter de-typo3 --offline: Schwellen bestanden, Stichprobe 30/30
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/413
