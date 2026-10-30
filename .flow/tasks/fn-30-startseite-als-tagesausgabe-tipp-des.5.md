@@ -69,3 +69,12 @@ TBD
 - Commits:
 - Tests:
 - PRs:
+
+## Ergänzung (User, 2026-10-30): Veranstalter-Hinweis im Tipp
+Wenn kein Veranstalter gebucht hat (`tip.kind !== 'sponsored'`), zeigt die Tipp-Karte unten
+rechts eine kleine Zeile „Dein Event hier? Tipp des Tages buchen“ als Link auf `/fuer-firmen`
+(`data-track="landing_tip_book"`). Bei gebuchtem Tag entfällt die Zeile. Text in de und en.
+
+Acceptance-Ergänzung:
+- [ ] Ohne Buchung zeigt die Tipp-Karte den Link „Tipp des Tages buchen“ auf `/fuer-firmen`,
+      mit Buchung nicht (Test).

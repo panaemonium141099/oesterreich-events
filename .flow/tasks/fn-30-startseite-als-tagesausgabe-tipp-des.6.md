@@ -86,3 +86,15 @@ TBD
 - Commits:
 - Tests:
 - PRs:
+
+## Ergänzung (User, 2026-10-30): Zeile „Für Veranstalter“
+Vor dem Footer, nach der Newsletter-Zeile, eine weitere `rowline` im selben Stil: links
+„Du veranstaltest selbst?“ mit einem Satz (Events kostenlos eintragen, Tipp des Tages für
+mehr Reichweite), rechts zwei Knöpfe: „Event kostenlos eintragen“ → `/event-inserieren`
+(`data-track="landing_organizer_submit"`, gefüllt) und „Tipp des Tages buchen“ →
+`/fuer-firmen` (`data-track="landing_organizer_boost"`, Outline). Handy: Knöpfe untereinander.
+Footer behält „Event inserieren“ und „Für Firmen“. Texte in de und en, ohne Gedankenstriche.
+
+Acceptance-Ergänzung:
+- [ ] Zeile „Für Veranstalter“ steht zwischen Newsletter und Footer mit beiden Links und
+      `data-track`-Markern; 390 px ohne horizontales Scrollen.
