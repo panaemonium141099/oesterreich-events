@@ -102,9 +102,10 @@ Abschluss: Dokumentation, Prod-Prüfungen und Verifikation der gesamten Tagesaus
 - [ ] Drei neue `data-track`-Marker erzeugen Zeilen in `analytics_events` (Dev-Check).
 - [ ] fn-19 hängt von fn-30 ab; `npm test` grün.
 ## Done summary
-TBD
+Doku nachgezogen: CLAUDE.md (Landing-Eintrag `src/app/[locale]/page.tsx` mit Bühne, Sektionen, Datenschicht, data-track; `/api/me/landing` mit followedLive/followedNames; Eventim-Absatz um `event_artists` samt Fehlerverhalten; Cron-Absatz auf Hetzner `lt-cron@`-Timer plus `revalidate-landing` 00:05 Wien; fuer-firmen-Zeile mit Tipp des Tages; Karten-Badges-Absatz gestrichen; API-Rechte um `event_artists`-Policy), MASTERPLAN §10.2 Punkt 1 (PersonalizedMatches und Badges-Satz raus, ArtistsLive/followedLive), §7.2 und §10.2 Punkt 5 geprüft (schon korrekt), README-Status „Implementiert: Branch claude/landing-page-redesign-e6dafa, 2026-10-30, PR folgt“ und Label „Anzeige“. fn-19 hängt bereits von fn-30 ab (geprüft). `npm test`: grün bis auf die bekannten Windows-Fälle, hubs-seo isoliert grün. `next build`: `/[locale]` ist ● (SSG/ISR) mit `/de` und `/en`, revalidate 3600; kein ƒ. Beim Build gegen die konfigurierte DB meldete die Landing `column landing_features.kind does not exist` und `Could not find a relationship between 'events' and 'event_artists'`: die drei fn-30.1-Migrationen sind in Prod noch nicht ausgeführt, die Seite rendert mit Fallbacks.
 
+OFFEN (nicht erledigt, bewusst nicht abgehakt): EXPLAIN Rotation/Programm gegen Prod (kein Zugriff), `x-nextjs-cache: HIT` per `next start` + curl, Screenshots Desktop 1440 / Handy 390 für `/`, `/entdecken`, `/wien` sowie Sichtprüfung der Regal-Spur auf `/entdecken`, `/wien`, `/thema/<slug>`, `/studenten` und von Kopf und Bühne, `/admin/boost` Buchung + 409, Dev-Check der `data-track`-Marker in `analytics_events`, Hetzner-Timer `lt-cron@revalidate-landing.timer`, Migrationen in Prod ausführen + `NOTIFY pgrst, 'reload schema'`.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: ec955938005a85ab9729b08fb2734f4a5c3241f4
+- Tests: npm test -- --reporter=dot (312/315 Dateien, 4059/4064 Tests; rot nur die bekannten Windows-Fälle search-event-ids-migration.test.ts und patch-next-static-search-nav.test.ts sowie hubs-seo.test.ts per Timeout unter Volllast), npx vitest run src/__tests__/nur-oesterreich/hubs-seo.test.ts (11/11 grün, isoliert), npx next build (Exit 0; Routen-Tabelle: ● /[locale] mit /de und /en, revalidate 1h, expire 1y; prerender-manifest.json /de und /en initialRevalidateSeconds 3600, srcRoute /[locale]; / wird per localePrefix as-needed aus /de bedient)
 - PRs:
