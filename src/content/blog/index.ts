@@ -222,6 +222,7 @@ import { post as osterfestspieleSalzburg2027 } from './posts/osterfestspiele-sal
 import { post as internationalGuitarFestivalRust2027 } from './posts/international-guitar-festival-rust-2027';
 import { post as pumucklDasWeihnachtsfest2026 } from './posts/pumuckl-das-weihnachtsfest-2026';
 import { post as bachBeiNachtKlavierkonzertStefanDonner2026 } from './posts/bach-bei-nacht-klavierkonzert-stefan-donner-2026';
+import { post as fullMetalMayrhofen2027 } from './posts/full-metal-mayrhofen-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -454,6 +455,7 @@ export const ALL_POSTS: FestivalPost[] = [
   internationalGuitarFestivalRust2027,
   pumucklDasWeihnachtsfest2026,
   bachBeiNachtKlavierkonzertStefanDonner2026,
+  fullMetalMayrhofen2027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
