@@ -4,6 +4,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // Saison-Abfrage) scheitert `seasonFailures`-mal, danach liefert sie Daten.
 let seasonFailures = 0;
 let seasonCalls = 0;
+// Optionale Quellen (Buchung, Künstler) dürfen die Seite nicht blockieren.
+let optionalFailures = false;
 const seasonRow = {
   id: 's1', slug: 'sturmfest', title: 'Sturmfest', start_date: new Date(Date.now() + 86_400_000).toISOString(),
   publish_status: 'published', tags: ['weinfest'], category: 'Märkte & Feste',
@@ -16,7 +18,9 @@ vi.mock('@supabase/supabase-js', () => {
       get(_t, prop) {
         if (prop === 'then') {
           let result: { data: unknown[] | null; error: { message: string } | null } = { data: [], error: null };
-          if (table === 'events' && isSeason) {
+          if (optionalFailures && (table === 'landing_features' || table === 'event_artists')) {
+            result = { data: null, error: { message: `column ${table}.kind does not exist` } };
+          } else if (table === 'events' && isSeason) {
             seasonCalls++;
             result = seasonFailures > 0
               ? (seasonFailures--, { data: null, error: { message: 'canceling statement due to statement timeout' } })
@@ -42,7 +46,7 @@ import { getLandingData } from '@/lib/v4/get-landing-data';
 
 describe('Landing: gescheiterte Abfragen werden nicht als leere Sektion gecacht', () => {
   const phase = process.env.NEXT_PHASE;
-  beforeEach(() => { seasonCalls = 0; vi.spyOn(console, 'error').mockImplementation(() => {}); });
+  beforeEach(() => { seasonCalls = 0; optionalFailures = false; vi.spyOn(console, 'error').mockImplementation(() => {}); });
   afterEach(() => { process.env.NEXT_PHASE = phase; vi.restoreAllMocks(); });
 
   it('ein Timeout wird wiederholt und die Saison-Karte ist gefüllt', async () => {
@@ -64,5 +68,15 @@ describe('Landing: gescheiterte Abfragen werden nicht als leere Sektion gecacht'
     const d = await getLandingData();
     expect(d.season.picks).toEqual([]);
     expect(d.countryTotal).toBe(88123);
+  });
+
+  it('zur Laufzeit rendert die Seite ohne Buchung und Künstler weiter (Migrationen fehlen)', async () => {
+    delete process.env.NEXT_PHASE;
+    seasonFailures = 0;
+    optionalFailures = true;
+    const d = await getLandingData();
+    expect(d.season.picks.map((p) => p.id)).toEqual(['s1']);
+    expect(d.artistsLive).toEqual([]);
+    expect(d.tip?.kind ?? 'auto').not.toBe('sponsored');
   });
 });

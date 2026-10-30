@@ -123,6 +123,18 @@ const emptyLanding = (now: Date = new Date()): LandingData => {
 const isBuildPhase = () => process.env.NEXT_PHASE === 'phase-production-build';
 
 /**
+ * Quellen, deren Ausfall die Seite nicht blockieren darf: Buchung (Tipp
+ * fällt auf die redaktionelle Wahl zurück), Künstler-Kachel (entfällt) und
+ * die Event-Zahl. Sie hängen an den fn-30-Migrationen (`landing_features.kind`,
+ * `event_artists`, `country_total`); fehlen die in einer Umgebung, rendert die
+ * Startseite trotzdem, statt dass ein Deploy ohne letzte gute Seite die
+ * Fehlerseite zeigt (Befund 2026-10-30 im Dev-Server gegen die alte DB).
+ * Alle anderen Abfragen werfen zur Laufzeit weiter, Next behält dann die
+ * letzte gute Seite.
+ */
+const OPTIONAL_SOURCES = new Set(['featured', 'artists', 'artistPrimaries', 'stats']);
+
+/**
  * Single entry point der Startseite. Abfragen parallel über einen
  * cookie-freien Anon-Key-Client (STATISCH-SICHER: createServerSupabaseClient
  * liest cookies() und würde die Route aus dem ISR-Cache kippen). Alle
@@ -152,8 +164,11 @@ export async function getLandingData(now: Date = new Date()): Promise<LandingDat
       return emptyLanding(now);
     }
     if (result.failed.length > 0) {
-      if (!isBuildPhase()) throw new Error(`[landing] Abfragen gescheitert: ${result.failed.join(', ')}`);
-      console.error(`[landing] Abfragen im Build gescheitert, Sektionen leer: ${result.failed.join(', ')}`);
+      const fatal = result.failed.filter(label => !OPTIONAL_SOURCES.has(label));
+      if (fatal.length > 0 && !isBuildPhase()) {
+        throw new Error(`[landing] Abfragen gescheitert: ${result.failed.join(', ')}`);
+      }
+      console.error(`[landing] Abfragen gescheitert, Sektionen leer: ${result.failed.join(', ')}`);
     }
     return result.data;
   } catch (err) {
