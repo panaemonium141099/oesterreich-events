@@ -1,13 +1,15 @@
 /**
- * Saison-Karte im Landing-Hero (ersetzt 2026-09-24 die drei
- * Anleitungs-Karten). Zeigt, was gerade Saison hat: erst die im Admin
- * gepinnten Events (/admin/boost, Tabelle landing_features), dann die
- * stündlich rotierende Auswahl aus getLandingData(). Die Wetterzeile
- * kommt client-seitig dazu (SeasonWeather), der Rest ist statisches HTML.
+ * Saison-Karte der Bühne (fn-30.5, Mockup D `.sea`). Zeigt, was gerade
+ * Saison hat: erst die im Admin gepinnten Events (/admin/boost, Tabelle
+ * landing_features, `kind = 'editorial'`), dann die stündlich rotierende
+ * Auswahl aus getLandingData(). Sechs Picks, die Liste füllt die Karte
+ * (space-evenly), Titel und Zeile mit Ellipsis (min-width 0), das
+ * „Tipp"-Badge nur für editorial-Pins (`featured`). Die Wetterzeile kommt
+ * client-seitig dazu (SeasonWeather), der Rest ist statisches HTML.
  */
 
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link as LocaleLink } from '@/i18n/navigation';
 import { EventImage } from '@/components/Events/EventImage';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
@@ -15,82 +17,79 @@ import { formatEventDate } from '@/lib/utils/event-time';
 import type { LandingSeason } from '@/lib/v4/get-landing-data';
 import { SeasonWeather } from './SeasonWeather';
 
-function shortDate(iso: string): string {
-  return formatEventDate({ start_date: iso }, 'de-AT', {
-    weekday: 'short', day: 'numeric', month: 'short',
-  }).label;
-}
-
-export function SeasonCard({ season }: { season: LandingSeason }) {
+export function SeasonCard({ season, className }: { season: LandingSeason; className?: string }) {
   const t = useTranslations('Landing.Season');
+  const locale = useLocale();
+  const intl = locale === 'de' ? 'de-AT' : 'en-GB';
 
   return (
-    <div
-      className="rounded-3xl border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] p-4 md:p-5"
+    <aside
+      className={`flex min-h-0 flex-col rounded-[18px] border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] px-3.5 pb-3 pt-4 ${className ?? ''}`}
       data-testid="season-card"
     >
-      <div className="mb-3.5 flex flex-col gap-1.5">
-        <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[var(--v4-ink-50)]">
+      <div className="flex flex-col gap-1">
+        <p className="m-0 text-[11.5px] font-bold text-[var(--v4-match)]">
           {t(`${season.seasonId}.kicker`)}
         </p>
-        <h2 className="text-[20px] md:text-[22px] font-bold leading-tight tracking-[-0.02em] text-[var(--v4-ink)]">
+        <h2 className="m-0 text-[19px] font-extrabold leading-[1.15] tracking-[-0.025em] text-[var(--v4-ink)]">
           {t(`${season.seasonId}.title`)}
         </h2>
         <SeasonWeather/>
       </div>
 
       {season.picks.length > 0 && (
-        <ul className="flex flex-col gap-2">
-          {season.picks.map(ev => (
-            <li key={ev.id}>
-              <Link
-                href={buildEventUrlV2(ev)}
-                className="press-haptic flex items-center gap-3 rounded-2xl p-2 -mx-2 hover:bg-[var(--v4-hairline-1)] transition-colors"
-                data-track={ev.featured ? 'landing_season_featured' : 'landing_season_pick'}
-                data-track-id={ev.id}
-              >
-                <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-[var(--v4-surface)] flex-shrink-0">
-                  <EventImage
-                    src={ev.image_url}
-                    category={ev.category}
-                    title={ev.title}
-                    bundesland={ev.bundesland}
-                    imageWidth={ev.image_width}
-                    alt={ev.title}
-                    wrapperClassName="absolute inset-0"
-                    sizes="56px"
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[var(--v4-ink-50)]">
-                    {shortDate(ev.start_date)}
-                    {ev.featured && (
-                      <span className="ml-2 rounded-full bg-[rgba(245,185,66,0.14)] px-1.5 py-0.5 text-[9.5px] tracking-[0.12em] text-[var(--v4-match)]">
-                        {t('featured')}
-                      </span>
-                    )}
-                  </p>
-                  <h3 className="text-[14px] font-semibold leading-snug text-[var(--v4-ink)] line-clamp-1">
-                    {ev.title}
-                  </h3>
-                  {ev.location_name && (
-                    <p className="text-[12px] text-[var(--v4-ink-70)] line-clamp-1">{ev.location_name}</p>
-                  )}
-                </div>
-              </Link>
-            </li>
-          ))}
+        <ul className="mt-1.5 flex min-h-0 flex-1 flex-col justify-evenly">
+          {season.picks.map(ev => {
+            const { date, time } = formatEventDate(ev, intl, { weekday: 'short', day: 'numeric', month: 'short' });
+            const meta = [time ? `${date} · ${time}` : date, ev.location_name].filter(Boolean).join(' · ');
+            return (
+              <li key={ev.id} className="min-w-0">
+                <Link
+                  href={buildEventUrlV2(ev)}
+                  className="press-haptic -mx-1.5 grid grid-cols-[46px_minmax(0,1fr)] items-center gap-2.5 rounded-[10px] px-1.5 py-1.5 transition-colors hover:bg-[var(--v4-hairline-1)]"
+                  data-track={ev.featured ? 'landing_season_featured' : 'landing_season_pick'}
+                  data-track-id={ev.id}
+                >
+                  <div className="relative h-[46px] w-[46px] flex-shrink-0 overflow-hidden rounded-[9px] bg-[var(--v4-surface)]">
+                    <EventImage
+                      src={ev.image_url}
+                      category={ev.category}
+                      title={ev.title}
+                      bundesland={ev.bundesland}
+                      imageWidth={ev.image_width}
+                      alt={ev.title}
+                      wrapperClassName="absolute inset-0"
+                      sizes="46px"
+                    />
+                  </div>
+                  <span className="min-w-0">
+                    <span className="block truncate text-[13.5px] font-bold leading-[1.25] text-[var(--v4-ink)]" data-testid="season-pick-title">
+                      {ev.title}
+                    </span>
+                    <span className="mt-0.5 block truncate text-[12px] text-[var(--v4-ink-50)]">
+                      {ev.featured && (
+                        <em className="mr-1.5 not-italic font-bold text-[var(--v4-match)]" data-testid="season-featured">
+                          {t('featured')}
+                        </em>
+                      )}
+                      {meta}
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
 
       <LocaleLink
         href={`/entdecken?saison=${season.seasonId}`}
-        className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)]"
+        className="inline-flex items-center gap-1 pt-2.5 text-[13px] font-bold text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)]"
         data-track="landing_season_more"
       >
         {t(`${season.seasonId}.more`)}
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        <span aria-hidden="true">›</span>
       </LocaleLink>
-    </div>
+    </aside>
   );
 }

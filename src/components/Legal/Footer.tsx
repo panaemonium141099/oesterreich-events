@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { viennaFields } from '@/lib/utils/event-time';
@@ -27,7 +28,12 @@ function AttrLink({ href, children }: { href: string; children: React.ReactNode 
   );
 }
 
-export function Footer() {
+/**
+ * `notice`: optionale Hinweiszeile über dem Kleingedruckten. Die Startseite
+ * trägt hier den Entwicklungs-Hinweis (fn-30.6, vorher ein Banner über dem
+ * Kopf); der Footer ist auf mehreren Seiten im Einsatz, deshalb per Prop.
+ */
+export function Footer({ notice }: { notice?: ReactNode } = {}) {
   const t = useTranslations('Footer');
   return (
     // pb-32 (= 8rem) prevents the fixed SocialNav pill at `bottom-0 mb-4`
@@ -99,6 +105,11 @@ export function Footer() {
             abgesetzt: Lizenzhinweise und Copyright bilden einen eigenen
             Block und konkurrieren nicht mehr mit den Links um die Breite. */}
         <div className="mt-8 pt-6 border-t border-white/[0.04] flex flex-col items-center gap-3">
+          {notice && (
+            <p className="text-xs text-white/30 text-center" data-testid="footer-notice">
+              {notice}
+            </p>
+          )}
           <DataAttribution />
           <p className="text-xs text-white/25 text-center">
             &copy; {viennaFields(new Date()).year} LassTreffen.at. {t('rights')}

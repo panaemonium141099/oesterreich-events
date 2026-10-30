@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Landing C: Einstiege</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* Suche zuerst, dann sechs Einstiegskacheln mit echten Bildern; Saison ist eine der Kacheln */
+.top{padding:40px 0 0;max-width:720px}
+.top h1{margin:0 0 8px;font-size:56px;font-weight:800;letter-spacing:-.04em;line-height:.98}
+.top p{margin:0 0 20px;font-size:16px;color:var(--ink70)}
+.top p b{color:var(--ink);font-weight:600}
+.entries{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:170px;gap:12px;margin-top:26px}
+.en{position:relative;border-radius:16px;overflow:hidden;background:var(--elev);display:block}
+.en img{width:100%;height:100%;object-fit:cover}
+.en .ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,5,6,.1),rgba(5,5,6,.9))}
+.en .tx{position:absolute;left:16px;right:16px;bottom:14px}
+.en h3{margin:0;font-size:20px;font-weight:800;letter-spacing:-.025em;color:#fff}
+.en p{margin:4px 0 0;font-size:12.5px;color:rgba(255,255,255,.72)}
+.en .n{position:absolute;right:12px;top:10px;font-size:12px;font-weight:700;color:rgba(255,255,255,.85);background:rgba(10,10,12,.55);backdrop-filter:blur(6px);padding:4px 8px;border-radius:6px}
+.en.season{grid-column:span 2}
+.en.season h3{font-size:26px}
+.en.season .tag{display:inline-block;font-size:11.5px;font-weight:700;color:#0a0a0c;background:var(--amber);padding:4px 8px;border-radius:6px;margin-bottom:8px}
+.en.map{background:#101014}
+.en.map svg{position:absolute;inset:0;width:100%;height:100%}
+@media(max-width:720px){.top{padding-top:26px}.top h1{font-size:42px}.top p{font-size:14px}.entries{grid-template-columns:1fr 1fr;grid-auto-rows:132px}.en h3{font-size:17px}.en.season h3{font-size:21px}.en .n{display:none}.en p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+</style></head><body>
+<script src="data.js"></script>
+<script>document.write(NAV)</script>
+
+<main class="wrap">
+  <div class="top">
+    <h1>Bleib ned daham.</h1>
+    <p><b id="h-count"></b> Events in ganz Österreich, vom Konzert in der Stadthalle bis zum Feuerwehrfest im Nachbardorf.</p>
+    <div class="searchbar">⌕ Was, wo oder wer?<b>Suchen</b></div>
+  </div>
+
+  <section class="entries" id="entries"></section>
+
+  <div id="body"></div>
+</main>
+<script>
+document.getElementById('h-count').textContent = TODAY.count;
+const S = SEASON_PICKS[0];
+document.getElementById('entries').innerHTML = `
+<a class="en season" href="#"><img src="${S.img}" alt=""><div class="ov"></div><div class="tx"><span class="tag">${SEASON.kicker}</span><h3>${SEASON.title}</h3><p>${S.t}, ${S.day} · und ${SEASON_PICKS.length - 1} weitere Saison-Tipps</p></div></a>
+<a class="en" href="#"><img src="${PICKS[0].img}" alt=""><div class="ov"></div><span class="n">Do 29. Okt.</span><div class="tx"><h3>Heute Abend</h3><p>${PICKS[0].t} und mehr</p></div></a>
+<a class="en" href="#"><img src="${WEEKEND[1].img}" alt=""><div class="ov"></div><span class="n">Fr bis So</span><div class="tx"><h3>Dieses Wochenende</h3><p>${WEEKEND[1].t}, ${WEEKEND[2].t}</p></div></a>
+<a class="en" href="#"><img src="${TONIGHT[0].img}" alt=""><div class="ov"></div><div class="tx"><h3>Konzerte</h3><p>${TONIGHT[0].t}, ${TONIGHT[2].t}</p></div></a>
+<a class="en map" href="#">
+  <svg viewBox="0 0 300 170" aria-hidden="true"><defs><radialGradient id="g" cx="50%" cy="50%"><stop offset="0" stop-color="rgba(212,184,150,.35)"/><stop offset="1" stop-color="rgba(212,184,150,0)"/></radialGradient></defs>
+  <rect width="300" height="170" fill="#101014"/><ellipse cx="150" cy="85" rx="150" ry="80" fill="url(#g)"/>
+  <g fill="none" stroke="rgba(255,255,255,.14)" stroke-width="1"><path d="M20 90 Q 80 40 150 70 T 290 60"/><path d="M10 120 Q 100 110 160 130 T 290 110"/><path d="M60 20 Q 120 60 140 150"/></g>
+  <g fill="var(--sand)"><circle cx="228" cy="62" r="5"/><circle cx="196" cy="118" r="4"/><circle cx="120" cy="72" r="4"/><circle cx="150" cy="60" r="3.5"/><circle cx="66" cy="96" r="3.5"/><circle cx="236" cy="92" r="3"/></g></svg>
+  <div class="ov"></div><div class="tx"><h3>In meiner Nähe</h3><p>Karte öffnen</p></div></a>
+`;
+document.getElementById('body').innerHTML = renderBody({ season: true });
+document.write(TABBAR);
+</script>
+</body></html>

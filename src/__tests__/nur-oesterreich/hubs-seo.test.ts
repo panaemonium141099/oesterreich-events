@@ -51,7 +51,9 @@ vi.mock('@supabase/supabase-js', () => {
     });
     return builder;
   };
-  return { createClient: () => ({ from: (t: string) => makeChain(t) }) };
+  // Die Startseite liest die Event-Zahl per RPC (event_counts_for_stats).
+  const rpc = () => Promise.resolve({ data: { country_total: 0 }, error: null });
+  return { createClient: () => ({ from: (t: string) => makeChain(t), rpc }) };
 });
 
 // Durchreichen: geprüft werden die Abfragen, nicht das Next-Caching.
@@ -147,7 +149,7 @@ beforeEach(() => {
 });
 
 describe('Startseite: alle Sektionen nur AT', () => {
-  it('Wochenende, Konzerte und Saison filtern auf das Land, DE-Events fallen raus', async () => {
+  it('Tipp, Saison, Programm, Wochenende und Künstler filtern auf das Land, DE-Events fallen raus', async () => {
     const { getLandingData } = await import('@/lib/v4/get-landing-data');
     // Simple Plan (DE) hatte den höchsten Score der Woche.
     state.rowsFor = (chain) => chain.table === 'events'
@@ -156,17 +158,21 @@ describe('Startseite: alle Sektionen nur AT', () => {
 
     const data = await getLandingData();
 
-    expect(data.todayWeekend.map((e) => e.id)).toEqual(['at-1']);
-    expect(data.concerts.map((e) => e.id)).toEqual(['at-1']);
-    // at-1 steht schon im Wochenende; ohne Länderfilter käme de-1 hier rein.
+    // Der Tipp wählt zuerst; ohne Länderfilter stünde de-1 hier.
+    expect(data.tip?.event.id).toBe('at-1');
+    expect(data.tip?.kind).toBe('auto');
+    // at-1 steht schon im Tipp; ohne Länderfilter käme de-1 in Saison und Wochenende.
     expect(data.season.picks).toEqual([]);
+    expect(data.weekend).toEqual([]);
+    expect(data.artistsLive).toEqual([]);
 
-    // weekendSharp, weekend, concertsSharp, concerts, season
-    expect(eventChains()).toHaveLength(5);
+    // tipSharp, tip, season, program, pins, weekendSharp, weekend, artists
+    expect(eventChains()).toHaveLength(8);
     for (const chain of eventChains()) {
       expect(eqArgs(chain)).toContainEqual(['country', SITE_COUNTRY]);
     }
-  });
+    // Erster Import der Datenschicht lädt die 64 Blogposts mit; unter Suite-Last > 5 s.
+  }, 20_000);
 
   it('Admin-Pins und Festival-Elternevents nur aus dem Land der Seite', async () => {
     const { getLandingData } = await import('@/lib/v4/get-landing-data');
@@ -174,8 +180,10 @@ describe('Startseite: alle Sektionen nur AT', () => {
 
     const featured = state.chains.find((c) => c.table === 'landing_features')!;
     expect(eqArgs(featured)).toContainEqual(['event.country', SITE_COUNTRY]);
+    expect(eqArgs(featured)).toContainEqual(['event.publish_status', 'published']);
     const festivals = state.chains.find((c) => c.table === 'festivals')!;
     expect(eqArgs(festivals)).toContainEqual(['parent_event.country', SITE_COUNTRY]);
+    expect(eqArgs(festivals)).toContainEqual(['date_status', 'confirmed']);
   });
 });
 

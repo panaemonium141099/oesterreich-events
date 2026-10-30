@@ -16,7 +16,8 @@ vi.mock('@supabase/supabase-js', () => {
     });
     return proxy;
   };
-  return { createClient: () => ({ from: (t: string) => chain(t) }) };
+  const rpc = () => Promise.resolve({ data: { country_total: 0 }, error: null });
+  return { createClient: () => ({ from: (t: string) => chain(t), rpc }) };
 });
 
 import { getLandingData } from '@/lib/v4/get-landing-data';

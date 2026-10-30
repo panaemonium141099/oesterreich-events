@@ -1,7 +1,8 @@
 import type { ScrapedEvent } from '@/types/events';
 import { downloadEventimFeed } from './feed-client';
-import { parseEventimFeed, type NotBookableStats } from './parse';
+import { parseEventimFeed, type NotBookableStats, type EventimArtistsByEvent } from './parse';
 import type { EventimSeries } from './types';
+import type { EventArtistsSyncResult } from '@/lib/db/event-artists-sync';
 
 /**
  * Shared Eventim import logic, used by both the CLI script
@@ -16,10 +17,12 @@ import type { EventimSeries } from './types';
 export async function fetchAndParseEventim(
   nowIso: string,
   notBookable?: NotBookableStats,
+  /** Wird, wenn uebergeben, je Event mit den Serien-Kuenstlern befuellt (fn-30). */
+  artists?: EventimArtistsByEvent,
 ): Promise<ScrapedEvent[]> {
   const series = await downloadEventimFeed();
   console.log(feedFieldReport(series));
-  return parseEventimFeed(series, nowIso, notBookable);
+  return parseEventimFeed(series, nowIso, notBookable, artists);
 }
 
 /**
@@ -60,6 +63,17 @@ export interface EventimUpsertResult {
   errors: number;
   filtered: number;
   batches: number;
+  /** Künstler-Schritt (fn-30); fehlt, wenn keine Künstler übergeben wurden. */
+  artists?: EventArtistsSyncResult;
+  /** Fehler des Künstler-Schritts. Der Event-Upsert davor bleibt gültig; der
+   *  Aufrufer beendet den Lauf rot (Exit ≠ 0 bzw. HTTP 500). */
+  artistsError?: string;
+}
+
+export interface EventimUpsertOptions {
+  /** Serien-Künstler je source_id aus `parseEventimFeed`; ohne Angabe
+   *  bleibt `event_artists` unberührt. */
+  artists?: EventimArtistsByEvent;
 }
 
 /**
@@ -70,8 +84,9 @@ export interface EventimUpsertResult {
 export async function upsertEventimEvents(
   events: ScrapedEvent[],
   log: (msg: string) => void = () => {},
+  options: EventimUpsertOptions = {},
 ): Promise<EventimUpsertResult> {
-  const { syncEventsToSupabase, beginScrapeRun, finishScrapeRun } = await import('@/lib/db/supabase-sync');
+  const { syncEventsToSupabase, beginScrapeRun, finishScrapeRun, getSupabaseAdminClient } = await import('@/lib/db/supabase-sync');
   const BATCH = 500;
   let upserted = 0;
   let errors = 0;
@@ -105,7 +120,19 @@ export async function upsertEventimEvents(
       error_message: errorMessages.size > 0 ? [...errorMessages].join(' | ').slice(0, 1000) : null,
     });
   }
-  return { upserted, errors, filtered, batches };
+  const result: EventimUpsertResult = { upserted, errors, filtered, batches };
+  if (options.artists) {
+    // fn-30: Künstler je Event NACH dem Event-Upsert, damit die Event-IDs
+    // stehen. Ein Fehler hier nimmt den Event-Import nicht zurück.
+    try {
+      const { syncEventArtists } = await import('@/lib/db/event-artists-sync');
+      result.artists = await syncEventArtists(getSupabaseAdminClient(), events, options.artists, { log });
+    } catch (err) {
+      result.artistsError = err instanceof Error ? err.message : String(err);
+      log(`Künstler-Schritt fehlgeschlagen: ${result.artistsError}`);
+    }
+  }
+  return result;
 }
 
 /** Feed credentials present? The cron skips gracefully when they aren't configured. */

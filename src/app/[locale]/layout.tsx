@@ -373,7 +373,7 @@ export default async function RootLayout({
         {/* KEIN statisches `view-transition-name` hier: der Name macht das
             Element zu einem Stacking-Context (z-index auto), und dann liegt
             jedes `position: fixed`-Overlay innerhalb der Seiten (Filter-
-            Sheets, Dialoge, Admin-Drawer, Onboarding) unter V4TopNav (z-30)
+            Sheets, Dialoge, Admin-Drawer) unter V4TopNav (z-30)
             und V4TabBar (z-25), egal wie hoch sein eigenes z-index ist —
             der Admin-Hamburger war so mobil nicht anklickbar (Mobile-Audit
             2026-10-22). RouteTransitions setzt den Namen nur für die Dauer

@@ -717,6 +717,11 @@ Boost 29 € / Business-Abo 49 €/M / Live-Anbindung ab 199 € auf
 (0 Leads). Die Outreach-Maschine (Discovery→Enrich→Draft→Send, läuft täglich) ist der
 Vertriebskanal; ihr Verkaufsargument sind die Klickzahlen aus 7.1.2
 („dein Event hatte X Aufrufe — für 29 € heben wir es hervor").
+Seit fn-30 (2026-10-29) gibt es dazu den **Tipp des Tages** auf der Startseite:
+ein buchbarer Platz je Wiener Kalendertag (`landing_features.kind =
+'sponsored'`, Buchung über `/admin/boost`, Pflicht-Label „Anzeige“ plus
+Sponsorname nach § 26 MedienG / § 6 ECG, Klicks als `landing_tip_click`);
+Abrechnung weiterhin manuell, kein Checkout (§10.2 Punkt 5).
 
 ### 7.3 Weitere Quellen (Reihenfolge nach Realismus)
 
@@ -841,14 +846,16 @@ kleinen APIs treffen lassen.
    `page.tsx` ruft kein `getLandingContext()` mehr; `getLandingData()` nutzt
    einen cookie-freien Anon-Client → `/` ist wieder echte ISR-Route
    (verifiziert: `.next/prerender-manifest.json` enthält `/` mit
-   `initialRevalidateSeconds: 3600`). Neue Route `GET /api/me/landing`
-   liefert Matches + Badge-ID-Sets; `<PersonalizedMatches/>` (Client)
-   rendert den Anon-Teaser im statischen HTML und tauscht nur bei
-   sichtbarem `sb-*`-Cookie auf die Matches-Sektion (anonyme Besucher
-   feuern keinen Request). Bewusster Trade-off: personalisierte
-   Karten-Badges (inplan/match/lineup) erscheinen auf der Landing vorerst
-   nicht mehr server-seitig; die ID-Sets liegen in der API für spätere
-   Client-Hydration.
+   `initialRevalidateSeconds: 3600`). Route `GET /api/me/landing`: seit
+   fn-30 (2026-10-29) ist die Kachel „Diese Woche live“ (`ArtistsLive`,
+   Client) ihr einziger Leser und ruft sie nur bei sichtbarem
+   `sb-*`-Cookie (anonyme Besucher feuern keinen Request). Die Route
+   liefert `followedLive` (gefolgte Künstler mit Eventim-Termin in den
+   nächsten 7 Tagen aus `event_artists`, Abgleich in JS über
+   `normalizeArtistName`) und `followedNames`; die Kachel zeigt gefolgte
+   Künstler zuerst und füllt aus der stündlichen Rotation auf drei auf.
+   `matches` und die ID-Sets (`savedEventIds`, `artistMatchEventIds`,
+   `lineupMatchEventIds`) liefert sie weiter, ohne Leser.
 2. ✅ **Doppeltes `auth.getUser()`** — durch (1) miterledigt: die Landing
    ruft gar kein getUser mehr; nur die Middleware macht den einen Refresh.
 3. ~~`.limit(8)`~~ — obsolet: die unbegrenzte notifications-Query läuft
@@ -856,6 +863,26 @@ kleinen APIs treffen lassen.
    /api/me/landing-Call (60-Tage-Fenster begrenzt sie inhaltlich).
 4. Middleware-Session-Refresh auf die Routen beschränken, die ihn wirklich brauchen
    (auth-gated Seiten), statt auf jede Seite. *(offen)*
+5. **Tagesausgabe (fn-30, 2026-10-29): Mitternacht und Buchungen.** Die
+   Startseite rechnet in Wiener Kalendertagen (Datumszeile, Tipp des Tages,
+   Programm „Heute Abend“), bleibt aber eine ISR-Shell mit `revalidate = 3600`.
+   Zwei Wege halten sie frisch: `/api/admin/landing-feature` ruft nach jeder
+   Buchung `revalidateLanding()` (`src/lib/landing/revalidate-landing.ts`:
+   `/[locale]` als Seitenmuster plus `/` und `/en`), und
+   `GET /api/cron/revalidate-landing` (Bearer `CRON_SECRET` Pflicht, fail
+   closed) macht dasselbe um **00:05 Europe/Vienna**. *Ops, noch einzurichten:*
+   Timer `lt-cron@revalidate-landing.timer` auf Hetzner nach dem Muster der
+   anderen `lt-cron@`-Timer (curl auf `127.0.0.1:3000/api/cron/revalidate-landing`
+   mit Bearer), `OnCalendar=*-*-* 00:05:00 Europe/Vienna` (die übrigen Timer
+   laufen in UTC; hier zählt die Wiener Mitternacht, sonst springt der Tag bei
+   Sommer-/Winterzeit eine Stunde zu früh oder zu spät). `vercel.json` hat
+   keine Crons mehr. Buchungen: `landing_features.kind` (`sponsored` = Tipp
+   des Tages, ein Platz je Wiener Tag, Pflicht `sponsor_name`, Überschneidung
+   → 409; `editorial` = Saison-Karte wie bisher), Admin-UI `/admin/boost`
+   (Art, Sponsor, Tag, Status aktiv/geplant/abgelaufen/nicht sichtbar).
+   Voraussetzung in Prod: Migration `20261029200100_landing_features_kind.sql`
+   plus `NOTIFY pgrst, 'reload schema'`, sonst antwortet PostgREST auf
+   `kind`/`sponsor_name` mit 400 und die Route mit 500.
 
 ### 10.3 Filter & Karte: Queries eliminieren statt beschleunigen
 

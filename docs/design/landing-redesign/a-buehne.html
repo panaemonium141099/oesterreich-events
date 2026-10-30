@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Landing A: Saison-Bühne</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* Bühne: ein großes Saisonbild über die volle Breite, Slogan und Suche darauf, Saison-Picks als Panel */
+.stage{position:relative;min-height:560px;display:flex;align-items:flex-end;overflow:hidden;border-bottom:1px solid var(--h2)}
+.stage .bg{position:absolute;inset:0}
+.stage .bg img{width:100%;height:100%;object-fit:cover;object-position:center 40%}
+.stage .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,12,.35) 0%,rgba(10,10,12,.15) 30%,rgba(10,10,12,.9) 78%,#0a0a0c 100%),linear-gradient(90deg,rgba(10,10,12,.55) 0%,rgba(10,10,12,0) 55%)}
+.stage .wrap{position:relative;width:100%;display:grid;grid-template-columns:1.1fr 400px;gap:40px;align-items:end;padding-top:120px;padding-bottom:36px}
+.stage .wrap>*{min-width:0}
+.stage h1{margin:0 0 10px;font-size:64px;font-weight:800;letter-spacing:-.04em;line-height:.98}
+.stage .sub{margin:0 0 22px;font-size:16px;color:var(--ink70)}
+.stage .sub b{color:var(--ink);font-weight:600}
+.panel{background:rgba(20,20,22,.78);backdrop-filter:blur(14px);border:1px solid var(--h3);border-radius:18px;padding:16px 16px 12px}
+.panel .k{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.panel .k h2{margin:0;font-size:17px;font-weight:800;letter-spacing:-.025em}
+.panel .k span{font-size:12.5px;color:var(--ink50)}
+.panel .k small{margin-left:auto;font-size:12px;color:var(--ink50)}
+.panel a.row{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;padding:8px 6px;border-radius:12px}
+.panel a.row:hover{background:var(--h1)}
+.panel a.row img{width:52px;height:52px;border-radius:10px;object-fit:cover}
+.panel a.row b{display:block;font-size:14px;font-weight:700;letter-spacing:-.01em;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.panel a.row small{display:block;font-size:12px;color:var(--ink50);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.panel a.row em{font-style:normal;color:var(--amber);font-weight:700;margin-right:6px}
+.panel .more{display:block;margin:6px 6px 0;padding-top:10px;border-top:1px solid var(--h2);font-size:13px;font-weight:700;color:var(--ink70)}
+.credit{position:absolute;right:16px;top:12px;font-size:11px;color:rgba(255,255,255,.55)}
+@media(max-width:1000px){.stage .wrap{grid-template-columns:1fr;padding-top:90px}.stage h1{font-size:52px}}
+@media(max-width:720px){.stage{min-height:0}.stage .wrap{padding-top:150px;padding-bottom:20px;gap:18px}.stage h1{font-size:42px}.stage .sub{font-size:14px}.panel{padding:12px}}
+</style></head><body>
+<script src="data.js"></script>
+<script>document.write(NAV)</script>
+
+<section class="stage">
+  <div class="bg"><img id="stage-img" alt=""></div>
+  <span class="credit" id="stage-credit"></span>
+  <div class="wrap">
+    <div>
+      <h1>Bleib ned daham.</h1>
+      <p class="sub"><b id="h-day"></b> · <b id="h-count"></b> Events in ganz Österreich</p>
+      <div class="searchbar">⌕ Künstler, Event oder Ort<b>Suchen</b></div>
+      <div class="chips"><span class="chip on">Heute Abend</span><span class="chip">Wochenende</span><span class="chip amber">Halloween</span><span class="chip">Gratis</span><span class="chip">In meiner Nähe</span><span class="chip ghost">Konzerte</span><span class="chip ghost">Kabarett</span></div>
+    </div>
+    <aside class="panel" id="panel"></aside>
+  </div>
+</section>
+
+<main class="wrap" id="body"></main>
+<script>
+document.getElementById('stage-img').src = SEASON.stage;
+document.getElementById('stage-credit').textContent = 'Foto: ' + SEASON.stageCredit;
+document.getElementById('h-day').textContent = `${TODAY.weekday}, ${TODAY.date}`;
+document.getElementById('h-count').textContent = TODAY.count;
+document.getElementById('panel').innerHTML =
+  `<div class="k"><h2>${SEASON.kicker}: ${SEASON.title}</h2><small>☀️ ${SEASON.weather}</small></div>` +
+  SEASON_PICKS.slice(0, 4).map(e => `<a class="row" href="#"><img src="${e.img}" alt=""><span><b>${e.t}</b><small>${e.tip ? '<em>Tipp</em>' : ''}${e.day}${e.time ? ' · ' + e.time : ''} · ${[e.venue, e.city].filter(Boolean).join(', ')}</small></span></a>`).join('') +
+  `<a class="more" href="#">${SEASON.more} ›</a>`;
+document.getElementById('body').innerHTML = renderBody({ season: false });
+document.write(TABBAR);
+</script>
+</body></html>

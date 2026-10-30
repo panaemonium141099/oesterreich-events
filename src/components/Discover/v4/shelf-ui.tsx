@@ -3,14 +3,15 @@
 /**
  * Bausteine der Regale (Variante „Regale", 2026-10-22): Regal mit
  * Querscroll-Spur, Poster-Karte und Top-Pick-Kachel. Geteilt von
- * /entdecken (V4EntdeckenShelves) und den SEO-Hubs (HubShelves,
- * HubEventGrid), damit beide gleich aussehen.
+ * /entdecken (V4EntdeckenShelves, V4SmartPlanner), den SEO-Hubs
+ * (HubShelves, HubEventGrid), /thema und /studenten, damit alle gleich
+ * aussehen.
  *
  * Client-Komponenten wegen Scroll-Knöpfen und Bild-Fallback; sie rendern
  * trotzdem im Server-HTML, die Links bleiben für Google sichtbar.
  */
 
-import { useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
@@ -63,13 +64,52 @@ export function Shelf({ title, sub, onAll, allHref, allLabel, children }: {
           <button type="button" aria-label={t('scrollForward')} onClick={() => scroll(1)} className="w-[30px] h-[30px] rounded-full border border-[var(--v4-hairline-3)] grid place-items-center text-[13px] text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)]">›</button>
         </div>
       </div>
-      <div
-        ref={track}
-        className="flex gap-3.5 overflow-x-auto thin-scroll snap-x -mx-4 px-4 md:-mx-14 md:px-14 pb-1.5 [scroll-padding-left:16px] md:[scroll-padding-left:56px]"
-      >
-        {children}
-      </div>
+      <ShelfTrack trackRef={track} label={title}>{children}</ShelfTrack>
     </section>
+  );
+}
+
+/**
+ * Querscroll-Spur eines Regals. Sie endet an der rechten Inhaltskante
+ * (kein Überhang über den Seitenrahmen mehr, fn-30.8); die erste Karte
+ * sitzt bündig links. Dass die Spur weiter scrollt, zeigen auf dem Desktop
+ * die Pfeile und auf dem Handy ein Verlauf am rechten Rand: `data-more`
+ * steht, solange rechts noch Karten liegen (CSS `.v4-shelf-track` in
+ * globals.css, dort auch der innen liegende Fokusring, den die Spur sonst
+ * am Rand abschneidet). Ohne JavaScript bleibt der Hinweis stehen.
+ */
+export function ShelfTrack({ trackRef, label, children }: {
+  trackRef: RefObject<HTMLDivElement | null>;
+  /** Regaltitel, benennt die Spur für Screenreader. */
+  label: string;
+  children: ReactNode;
+}) {
+  const [more, setMore] = useState(true);
+  const update = useCallback(() => {
+    const el = trackRef.current;
+    if (el) setMore(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+  }, [trackRef]);
+  // Neu messen, wenn andere Karten in der Spur liegen (Filterwechsel,
+  // Skeleton gegen Inhalt) oder die Spur selbst breiter wird.
+  useEffect(() => { update(); }, [children, update]);
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [trackRef, update]);
+  return (
+    <div
+      ref={trackRef}
+      role="region"
+      aria-label={label}
+      data-more={more || undefined}
+      onScroll={update}
+      className="v4-shelf-track flex gap-3.5 overflow-x-auto thin-scroll snap-x pt-1 pb-1.5"
+    >
+      {children}
+    </div>
   );
 }
 

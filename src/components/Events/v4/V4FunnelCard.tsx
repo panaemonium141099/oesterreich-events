@@ -1,7 +1,7 @@
 /**
  * V4FunnelCard — Landing-Hero CTA card.
  *
- * Used 3x in HeroV4 as the right-column stack (Künstler folgen /
+ * Ursprünglich 3x im Landing-Hero als rechte Spalte (Künstler folgen /
  * Events entdecken / Abend planen). Not a card-for-events; this is a
  * primary nav CTA that happens to be styled like an info row.
  *

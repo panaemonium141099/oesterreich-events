@@ -1,15 +1,19 @@
 /**
- * v4 Landing sections. Phase 2: composed into src/app/page.tsx.
+ * Bausteine der Startseite als Tagesausgabe (fn-30): Kopf und Bühne
+ * (Masthead, TipOfDay, SeasonCard, MapTile, ArtistsLive) sowie der
+ * Unterbau (ProgramList, WeekendShelf, RegionShelf, FestivalsBlog,
+ * ActivitiesShelf, NewsletterRow, OrganizerRow, DevNotice).
  */
-export { HeroV4 } from './HeroV4';
-export { ArtistTeaserV4 } from './ArtistTeaserV4';
-export { MatchesSection } from './MatchesSection';
-export { AnonFollowTeaser } from './AnonFollowTeaser';
-export { PersonalizedMatches } from './PersonalizedMatches';
-export { NewsletterSignup } from './NewsletterSignup';
-export { WeekendSection } from './WeekendSection';
-export { ConcertsSection } from './ConcertsSection';
-export { FestivalsSection } from './FestivalsSection';
-export { MapPreview } from './MapPreview';
-export { HowItWorks } from './HowItWorks';
-export { WeatherSection } from './WeatherSection';
+export { Masthead } from './Masthead';
+export { DateLine } from './DateLine';
+export { TipOfDay } from './TipOfDay';
+export { SeasonCard } from './SeasonCard';
+export { MapTile } from './MapTile';
+export { ArtistsLive } from './ArtistsLive';
+export { ProgramList } from './ProgramList';
+export { WeekendShelf, RegionShelf } from './LandingShelves';
+export { FestivalsBlog } from './FestivalsBlog';
+export { ActivitiesShelf } from './ActivitiesShelf';
+export { NewsletterRow } from './NewsletterRow';
+export { OrganizerRow } from './OrganizerRow';
+export { DevNotice } from './DevNotice';

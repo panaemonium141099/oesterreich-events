@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchAndParseEventim, upsertEventimEvents, hasEventimCredentials } from '@/lib/eventim/import';
+import type { EventimArtistsByEvent } from '@/lib/eventim/parse';
 
 /**
  * Daily Eventim PFT-feed import.
@@ -33,9 +34,16 @@ export async function GET(request: Request) {
 
   const start = Date.now();
   try {
-    const events = await fetchAndParseEventim(new Date().toISOString());
-    const r = await upsertEventimEvents(events, (m) => console.log('[cron:eventim]', m));
-    const body = { ok: true, durationMs: Date.now() - start, parsed: events.length, ...r };
+    // fn-30: Serien-Künstler je Event für event_artists.
+    const artists: EventimArtistsByEvent = new Map();
+    const events = await fetchAndParseEventim(new Date().toISOString(), undefined, artists);
+    const r = await upsertEventimEvents(events, (m) => console.log('[cron:eventim]', m), { artists });
+    const body = { ok: !r.artistsError, durationMs: Date.now() - start, parsed: events.length, ...r };
+    if (r.artistsError) {
+      // Event-Import gültig, Künstler-Schritt rot: der Lauf meldet den Fehler.
+      console.error('[cron:eventim] Künstler-Schritt fehlgeschlagen', body);
+      return NextResponse.json(body, { status: 500 });
+    }
     console.log('[cron:eventim] done', body);
     return NextResponse.json(body);
   } catch (err) {

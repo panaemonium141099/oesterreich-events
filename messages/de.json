@@ -36,15 +36,28 @@
     "home": "Startseite"
   },
   "Landing": {
-    "devNotice": "Diese Seite ist noch in Entwicklung — technische Fehler sind möglich. Feedback bitte an",
-    "Hero": {
-      "badge": "Events in Österreich",
+    "devNotice": "Die Seite ist in Entwicklung, technische Fehler sind möglich. Feedback bitte an",
+    "Masthead": {
       "title": "Bleib ned daham.",
-      "subtitle": "Von der Stadthalle bis zum Feuerwehrfest im Nachbardorf: über 80.000 Events in ganz Österreich. Die Couch kommt auch ohne dich zurecht.",
-      "ctaArtists": "Künstler suchen",
-      "ctaToday": "Heute & Wochenende",
-      "ctaSmart": "Frag die KI",
-      "trendLabel": "Trend:"
+      "weatherVienna": "{temp}° in Wien",
+      "over": "über {count}",
+      "eventsCount": "Events in Österreich"
+    },
+    "Tip": {
+      "label": "Tipp des Tages",
+      "ad": "Anzeige",
+      "ticketsFrom": "Tickets ab {price} €",
+      "tickets": "Tickets {price}",
+      "free": "Eintritt frei",
+      "toEvent": "Zum Event",
+      "bookHint": "Dein Event hier?",
+      "book": "Tipp des Tages buchen"
+    },
+    "Map": {
+      "title": "Heute auf der Karte",
+      "subtitle": "Alle Events von heute auf einen Blick, von Bregenz bis Wien.",
+      "open": "Karte öffnen",
+      "improve": "Karte verbessern"
     },
     "Season": {
       "featured": "Tipp",
@@ -99,116 +112,63 @@
         "more": "Mehr Sommerfeste"
       }
     },
-    "ArtistTeaser": {
-      "badge": "Lieblingskünstler · nur eingeloggt",
-      "title": "Verpasse keinen Auftritt deiner Lieblingskünstler.",
-      "text": "Such einen Künstler, folge ihm und wir zeigen dir Konzerte und Festival-Slots in Österreich.",
-      "cta": "Zu deinen Lieblingskünstlern",
-      "note": "Öffnet die Künstler-Seite. Folgen erfordert eine Anmeldung.",
-      "popular": "Beliebt in Österreich"
+    "ArtistsLive": {
+      "title": "Diese Woche live",
+      "all": "Alle Künstler",
+      "follow": "Folgen",
+      "following": "Folgst du",
+      "followAria": "{name} folgen",
+      "unfollowAria": "{name} entfolgen",
+      "today": "Heute",
+      "tomorrow": "Morgen",
+      "hint": "Wir sagen dir Bescheid, sobald ein neuer Termin auftaucht.",
+      "error": "Das hat nicht geklappt, bitte noch einmal versuchen."
     },
-    "Weekend": {
-      "title": "Heute & Wochenende",
-      "viewAll": "Alle Events ansehen",
-      "empty": "Aktuell keine Events im 7-Tage-Fenster."
+    "Program": {
+      "title": "Heute Abend",
+      "sub": "{day}, ab 17 Uhr",
+      "all": "Ganzes Programm"
     },
-    "Concerts": {
-      "eyebrow": "Live in Österreich",
-      "title": "Konzerte diese Woche",
-      "viewAll": "Alle Konzerte"
+    "Shelves": {
+      "weekend": "Dieses Wochenende",
+      "region": "Nach Region",
+      "showAll": "Alle anzeigen",
+      "range": "{from} bis {to}"
     },
-    "Festivals": {
-      "eyebrow": "Demnächst · Line-ups verfügbar",
-      "title": "Festivals mit Line-up",
-      "viewAll": "Alle Festivals"
+    "FestivalsBlog": {
+      "festivals": "Festivals",
+      "allFestivals": "Alle Festivals",
+      "blog": "Aus dem Blog",
+      "allPosts": "Alle Beiträge"
     },
-    "MapPreview": {
-      "eyebrow": "Karte",
-      "title": "Events in deiner Nähe",
-      "open": "Karte öffnen",
-      "alt": "Karte von Österreich mit Event-Markern in Wien, Eisenstadt, Salzburg, Linz, Graz und Innsbruck",
-      "loading": "Karte wird geladen …",
-      "legendTickets": "Tickets verfügbar",
-      "legendLineup": "Künstler im Line-up",
-      "legendPlan": "In deinem Plan"
-    },
-    "HowItWorks": {
-      "eyebrow": "So geht's",
-      "title": "In drei Schritten unterwegs",
-      "step1Title": "Künstler folgen",
-      "step1Text": "Such und folge deine Lieblingskünstler. Wir scannen Konzerte und Festival-Slots in Österreich.",
-      "step2Title": "Tickets sichern",
-      "step2Text": "Wenn ein Auftritt auftaucht, springst du direkt zum offiziellen Ticketshop. Kauf erfolgt beim Anbieter.",
-      "step3Title": "Abend planen",
-      "step3Text": "Speichere Ticketstatus, Anreise und Reminder in deinem Plan. Drei Pings reichen meistens."
+    "Activities": {
+      "title": "Ausflug unter Dach",
+      "rainTitle": "Bei Regen",
+      "sub": "Freizeit in ganz Österreich",
+      "all": "Alle Freizeitaktivitäten",
+      "imageCredit": "Bild:",
+      "cardFallback": "Freizeit & Ausflug"
     },
     "Newsletter": {
-      "eyebrow": "Jede Woche · kostenlos · jederzeit abbestellbar",
-      "title": "Die besten Events deiner Region — freitags im Postfach",
-      "text": "Kein Account nötig. Wir schicken dir einmal pro Woche eine handverlesene Auswahl fürs Wochenende — und sonst nichts.",
+      "title": "Die besten Events deiner Region, einmal pro Woche",
+      "text": "Ohne Konto, jederzeit abbestellbar.",
       "emailPlaceholder": "deine@email.at",
       "regionAria": "Region wählen",
       "regionAll": "Ganz Österreich",
       "submit": "Anmelden",
       "submitting": "Einen Moment …",
       "doneFallback": "Bitte bestätige die Anmeldung in deinem Postfach.",
-      "errorFallback": "Anmeldung fehlgeschlagen — bitte später erneut versuchen.",
-      "networkError": "Netzwerkfehler — bitte erneut versuchen.",
+      "errorFallback": "Anmeldung fehlgeschlagen. Bitte später erneut versuchen.",
+      "networkError": "Netzwerkfehler. Bitte erneut versuchen.",
       "privacyNote": "Double-Opt-in: Die Anmeldung wird erst nach Bestätigung per E-Mail aktiv. Abmeldung jederzeit mit einem Klick in jeder Mail. Details in der",
       "privacyLink": "Datenschutzerklärung"
     },
-    "RegionHubs": {
-      "eyebrow": "Nach Bezirk · ganz Österreich",
-      "title": "Events in deinem Bundesland",
-      "intro": "Wähle dein Bundesland — dann zeigen wir dir <b>alle Events</b> dort, oder du grenzt direkt auf einen <b>Bezirk</b> ein.",
-      "sectionAria": "Events nach Bundesland",
-      "tileAria": "{name} — Bezirk wählen oder alle Events",
-      "districtCount": "{count} Bezirke",
-      "credit": "Bundesland-Bilder: Wikimedia Commons · CC BY/BY-SA ·",
-      "creditLink": "Bildnachweis",
-      "sheetAria": "{name} — Events",
-      "close": "Schließen",
-      "bundesland": "Bundesland",
-      "allEventsIn": "Alle Events in {name} ansehen",
-      "opensFiltered": "Öffnet die Entdecken-Liste, gefiltert auf {name}.",
-      "orDistrict": "oder nach Bezirk eingrenzen",
-      "choose": "Auswählen"
-    },
-    "Matches": {
-      "eyebrow": "Deine Lieblingskünstler · spielen demnächst",
-      "title": "Auftritte deiner Lieblingskünstler",
-      "viewAll": "Alle Auftritte",
-      "empty": "Noch keine Auftritte gefunden — folge weiteren Künstlern.",
-      "searchArtists": "Künstler suchen"
-    },
-    "AnonTeaser": {
-      "eyebrow": "Personalisierung · meld dich an",
-      "title": "Wer sind deine Lieblingskünstler?",
-      "text": "Folge Künstler — wir benachrichtigen dich bei Österreich-Terminen.",
-      "sub": "Konzerte, Open Airs, Festival-Slots. Du brauchst nicht ständig nachschauen.",
-      "cta": "Künstler suchen"
-    },
-    "Weather": {
-      "rainKicker": "{mm} mm Regen angesagt",
-      "rainTitle": "Sauwetter am {day}? Dein Indoor-Programm",
-      "heatKicker": "Hitze-Wochenende",
-      "heatTitle": "{temp}° am {day} — ab ins Wasser",
-      "viennaFallback": "Wetter für Wien",
-      "cardFallback": "Freizeit & Ausflug",
-      "imageCredit": "Bild:",
-      "moreLink": "Alle Freizeitaktivitäten"
+    "Organizer": {
+      "title": "Du veranstaltest selbst?",
+      "text": "Trag dein Event kostenlos ein. Mit dem Tipp des Tages erreichst du noch mehr Leute.",
+      "submit": "Event kostenlos eintragen",
+      "boost": "Tipp des Tages buchen"
     }
-  },
-  "Onboarding": {
-    "slide1Title": "Entdecke",
-    "slide1Text": "Tausende Events in ganz Österreich",
-    "slide2Title": "Merke",
-    "slide2Text": "Speichere deine Favoriten",
-    "slide3Title": "Triff dich",
-    "slide3Text": "Plane mit Freunden",
-    "skip": "Uberspringen",
-    "next": "Weiter",
-    "start": "Los geht's"
   },
   "Footer": {
     "rights": "Alle Rechte vorbehalten.",
