@@ -14,9 +14,10 @@ Rahmenbedingungen: Der Qualitätsvertrag DE im Epic-Spec (`flowctl cat fn-29-de-
 - [ ] Erst nach bestandenem Prüfstand in den Nachtlauf
 
 ## Done summary
-TBD
+Adapter `de-kommone` (Komm.ONE Online-Suite) auf master per PR #408 (Squash b84d8a71). Liest die Terminliste der dvv-Zusatzmodule aller `komm1`-Einträge seitenweise (bis 10 Seiten), RSS nur zum Finden der Liste oder als Ersatz; vier Listenvorlagen, freie Uhrzeiten, Ort als vCard oder Freitext. Abrufe nacheinander, 2 s Abstand, wechselnd zwischen den Websites (Crawl-delay 30 je Website). fetchHtml hat dafür den Schalter `charset`.
 
+Prüfstand: geliefert 3.474, geschrieben 3.421, öffentlich 3.338, Quarantäne 83 (municipal_service 74). Schwellen bestanden (0 sichtbare Gemeinde-Dienste, Müll 0,0 %, ohne Uhrzeit 20,5 %, sichtbar ohne Koordinaten 0,0 %, Dubletten 0,1 %). Stichprobe 30/30 gegen die Detailseiten. Dorffeste geprüft: „Schwieberdinger Kirbe“ (Schwieberdingen), „Kerwefest“ (Bruchsal-Helmsheim). Bericht docs/research/de-gemeinden/adapter-kommone.md. Nicht im Nachtlauf (fn-29.18). Offen: 41 Registry-Seiten ohne Veranstaltungsmodul.
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: b84d8a71bcdac24a486481a84f5e8cf7f518f522
+- Tests: src/__tests__/lib/scrapers/kommone-de.test.ts, src/__tests__/lib/scrapers/fetch-html.test.ts, npm run pruefstand:de -- --adapter de-kommone
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/408
