@@ -24,6 +24,8 @@ import type { EventFilters } from '@/types/events';
 import { seasonById, seasonEndDate } from '@/lib/landing/seasons';
 import { resolveCategoryParam } from '@/lib/category-classifier/taxonomy';
 import { isoDayParam } from '@/lib/landing/day-labels';
+import { DORFFEST_TAGS, DORFFESTE_DAYS, DORFFESTE_THEMA } from '@/lib/landing/dorffeste';
+import { addViennaDays, viennaToday } from '@/lib/utils/event-time';
 
 function resolveMode(raw: string | null): V4EntdeckenMode {
   if (raw === 'smart') return 'smart';
@@ -34,6 +36,7 @@ function resolveMode(raw: string | null): V4EntdeckenMode {
 function deriveInitialFilters(
   search: URLSearchParams,
   seasonLabel: (id: string) => string,
+  themaLabel: (id: string) => string,
 ): Partial<EventFilters> | undefined {
   // Pick up the common URL filter params if present. This is best-effort:
   // most users will land on /entdecken with no params. Deep-links from
@@ -66,6 +69,13 @@ function deriveInitialFilters(
     out.dateTo = seasonEndDate(season);
     out.topicLabel = seasonLabel(season.id);
   }
+  // Dorffeste-Regal der Startseite (?thema=dorffeste): die Fest-Tags,
+  // begrenzt auf das Fenster des Regals.
+  if (search.get('thema') === DORFFESTE_THEMA) {
+    out.tags = [...DORFFEST_TAGS];
+    out.dateTo = addViennaDays(viennaToday(), DORFFESTE_DAYS - 1);
+    out.topicLabel = themaLabel(DORFFESTE_THEMA);
+  }
   // Tagesbereich der Startseite (fn-30): „Ganzes Programm" und „Alle
   // anzeigen" verlinken /entdecken?von=<Tag>&bis=<Tag> (Wiener
   // Kalendertage). Nur gültige Tage; ein ausdrücklicher Bereich geht einem
@@ -95,7 +105,8 @@ function EntdeckenInner() {
     ? initialBlParam.split(',').map((s) => s.trim()).filter(Boolean)
     : undefined;
   const tSeason = useTranslations('Landing.Season');
-  const initialFilters = deriveInitialFilters(search, (id) => tSeason(`${id}.title`));
+  const tShelves = useTranslations('Landing.Shelves');
+  const initialFilters = deriveInitialFilters(search, (id) => tSeason(`${id}.title`), (id) => tShelves(id));
 
   // Tab-Wechsel schreibt in die URL — list-Modus unparametrisiert, damit
   // /entdecken eine saubere URL hat; Smart-Modus persistiert ?mode=smart.

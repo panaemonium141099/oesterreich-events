@@ -132,6 +132,8 @@
     "Shelves": {
       "weekend": "Dieses Wochenende",
       "region": "Nach Region",
+      "dorffeste": "Dorffeste",
+      "dorffesteSub": "Kirtag, Zeltfest, Frühschoppen in den nächsten {days} Tagen",
       "showAll": "Alle anzeigen",
       "range": "{from} bis {to}"
     },

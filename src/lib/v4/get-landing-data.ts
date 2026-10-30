@@ -27,6 +27,7 @@ import {
   type LandingTip,
 } from './landing-picks';
 import { collectMapPins, type MapPin } from './map-static-url';
+import { DORFFEST_TAGS, DORFFEST_TITLE_FILTER, DORFFESTE_DAYS } from '@/lib/landing/dorffeste';
 
 // Reine Auswahl-Logik lebt in landing-picks.ts; die bisherigen Importpfade
 // bleiben für Tests und Komponenten gültig.
@@ -82,6 +83,8 @@ export interface LandingData {
   weekend: Event[];
   /** Fr bis So in Wiener Tagen, für den Link nach /entdecken?von=&bis=. */
   weekendRange: { from: string; to: string };
+  /** Dorffeste der nächsten 30 Tage (Fest-Tags + Fest im Titel), in Terminfolge. */
+  dorffeste: Event[];
   artistsLive: LandingArtistLive[];
   festivals: LandingFestival[];
   posts: LandingPost[];
@@ -111,6 +114,7 @@ const emptyLanding = (now: Date = new Date()): LandingData => {
     program: [],
     weekend: [],
     weekendRange: weekendWindow(today),
+    dorffeste: [],
     artistsLive: [],
     festivals: [],
     posts: [],
@@ -215,6 +219,7 @@ const SEASON_POOL = 40;
 const PROGRAM_POOL = 60;
 const PINS_POOL = 60;
 const WEEKEND_POOL = 40;
+const DORFFESTE_POOL = 40;
 const ARTISTS_POOL = 120;
 const FESTIVALS_POOL = 48;
 const ACTIVITIES_POOL = 40;
@@ -237,6 +242,7 @@ async function getLandingDataInner(now: Date): Promise<{ data: LandingData; fail
   const weekendRange = weekendWindow(today);
   const weekendStart = weekendRange.from === today ? now : viennaDayStart(weekendRange.from);
   const weekendEnd = viennaDayRange(weekendRange.to).end;
+  const dorffesteEnd = viennaDayRange(addViennaDays(today, DORFFESTE_DAYS - 1)).end;
 
   // Spalten, die die Karten brauchen. image_width MUSS mit: ohne sie greift
   // die MIN_TRUSTED_EVENT_IMAGE_WIDTH-Regel in EventImage nicht und 222px-
@@ -266,13 +272,20 @@ async function getLandingDataInner(now: Date): Promise<{ data: LandingData; fail
 
   const tipBase = () => publishedAt().gte('start_date', nowIso).lt('start_date', next7Start.toISOString());
   const weekendBase = () => publishedAt().gte('start_date', weekendStart.toISOString()).lte('start_date', weekendEnd.toISOString());
+  // Dorffeste: Fest-Tags (GIN-Index idx_events_tags_published_gin) UND ein
+  // Fest-Wort im Titel; die Tags allein streuen (dorffeste.ts).
+  const dorffesteBase = () => publishedAt()
+    .gte('start_date', nowIso)
+    .lte('start_date', dorffesteEnd.toISOString())
+    .overlaps('tags', [...DORFFEST_TAGS])
+    .or(DORFFEST_TITLE_FILTER);
 
   const season = currentSeason(now);
   const failed: string[] = [];
 
   const [
     tipSharpRes, tipRes, featuredRes, seasonRes, programRes, pinsRes,
-    weekendSharpRes, weekendRes, artistsRes, festivalsRes, activitiesRes, statsRes,
+    weekendSharpRes, weekendRes, dorffesteSharpRes, dorffesteRes, artistsRes, festivalsRes, activitiesRes, statsRes,
   ] = await Promise.all([
     // Tipp-Fallback: bestgescortes Event mit scharfem Bild der nächsten 7 Tage.
     withRetry('tipSharp', () => byScore(sharp(tipBase())).limit(TIP_POOL), failed),
@@ -317,6 +330,9 @@ async function getLandingDataInner(now: Date): Promise<{ data: LandingData; fail
     // Wochenende: Fr bis So (Wiener Tage), ab jetzt, wenn das Wochenende läuft.
     withRetry('weekendSharp', () => byScore(sharp(weekendBase())).limit(WEEKEND_POOL), failed),
     withRetry('weekend', () => byScore(weekendBase()).limit(WEEKEND_POOL), failed),
+    // Dorffeste: 30 Tage voraus, scharfe Bilder zuerst wie beim Wochenende.
+    withRetry('dorffesteSharp', () => byScore(sharp(dorffesteBase())).limit(DORFFESTE_POOL), failed),
+    withRetry('dorffeste', () => byScore(dorffesteBase()).limit(DORFFESTE_POOL), failed),
     // Diese Woche live: Events der nächsten 7 Tage mit Feed-Künstlern
     // (event_artists!inner), Pool nach Score. Die Eventim-Zeile kann durch
     // den Dedup unterdrückt sein (duplicate_of): dann zählt der sichtbare
@@ -385,6 +401,7 @@ async function getLandingDataInner(now: Date): Promise<{ data: LandingData; fail
       .sort((a, b) => Number(titleMatchesSeason(b.title, season)) - Number(titleMatchesSeason(a.title, season))),
     programPool: rows<Event>(programRes),
     weekendPool: arrangeBySharpness(weekendSharpRes.data, weekendRes.data),
+    dorffestePool: arrangeBySharpness(dorffesteSharpRes.data, dorffesteRes.data),
     today,
     now,
   });
@@ -478,6 +495,7 @@ async function getLandingDataInner(now: Date): Promise<{ data: LandingData; fail
       program: selection.program,
       weekend: selection.weekend,
       weekendRange,
+      dorffeste: selection.dorffeste,
       artistsLive,
       festivals,
       posts: pickPosts(ALL_POSTS, festivals, today),

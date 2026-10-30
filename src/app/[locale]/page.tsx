@@ -8,7 +8,7 @@
  * Aufbau nach Mockup D (docs/design/landing-redesign/d-tagesausgabe.html):
  * Kopf (Masthead: Datumszeile, H1, Suche), Bühne (Tipp des Tages, Saison,
  * Karte, Diese Woche live), darunter in fester Reihenfolge Heute Abend
- * (Programmliste), Dieses Wochenende, Nach Region, Festivals + Blog,
+ * (Programmliste), Dieses Wochenende, Dorffeste, Nach Region, Festivals + Blog,
  * Freizeit, Newsletter-Zeile, Für Veranstalter, Footer mit Hinweiszeile.
  *
  * Client-Inseln: DateLine (Wetter, Mitternacht), SeasonWeather, ArtistsLive
@@ -31,6 +31,7 @@ import {
   ArtistsLive,
   ProgramList,
   WeekendShelf,
+  DorffesteShelf,
   RegionShelf,
   FestivalsBlog,
   ActivitiesShelf,
@@ -109,6 +110,7 @@ export default async function LandingPage({
 
           <ProgramList events={data.program} today={data.today}/>
           <WeekendShelf events={data.weekend} range={data.weekendRange}/>
+          <DorffesteShelf events={data.dorffeste}/>
           <RegionShelf/>
           <FestivalsBlog festivals={data.festivals} posts={data.posts}/>
           <ActivitiesShelf activities={data.activities}/>
