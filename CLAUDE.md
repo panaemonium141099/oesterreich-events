@@ -118,6 +118,17 @@ node / next.js
   `toBlogLineup`: Acts ohne Rolle rendert die Blogseite nicht.
 - **GitHub Actions `import-eventim.yml`** (alle 6 h): PFT-Feed-Import mit
   Affiliate-Links. Secrets: `EVENTIM_FEED_USER`/`EVENTIM_FEED_PASS`.
+  Seit fn-30 (2026-10-29) füllt der Import auch `event_artists`: die
+  Serien-Künstler des Feeds (`EventimArtistsByEvent`, Nebenergebnis von
+  `parseEventimFeed`, alle Feed-Länder) schreibt `syncEventArtists`
+  (`src/lib/db/event-artists-sync.ts`) NACH dem Event-Upsert je Event als
+  Ersatz: Upsert auf `(event_id, artist_id)` in Batches ≤ 500, Lookup
+  `.in('source_id', …)` ≤ 200, Löschen der Zeilen, die der Feed nicht mehr
+  nennt. Schlägt der Künstler-Schritt fehl, bleibt der Event-Import gültig,
+  aber `import-eventim.ts` endet mit Exit 1 und `/api/cron/eventim`
+  antwortet 500. Voraussetzung in Prod: `20261029200000_event_artists.sql`
+  plus `NOTIFY pgrst, 'reload schema'`; bis dahin ist jeder Lauf rot und die
+  Kachel „Diese Woche live“ bleibt leer.
 - **GitHub Actions `import-eventfrog.yml`** (täglich 02:35 UTC): Eventfrog
   Public API (`src/lib/eventfrog/`), Vollabruf je Land (AT ~9 von 2.000
   Anfragen/Tag, 30/min je Konto). Secret `EVENTFROG_API_KEY` (Key-Typ
@@ -136,10 +147,18 @@ node / next.js
   `poi_activities.affiliate_product`. Secrets: `VIATOR_API_KEY` (+ optional
   `VIATOR_PARTNER_ID`/`VIATOR_DEEPLINK_*`). Ohne Key endet der Job mit
   Hinweis und Exit 0.
-- **Vercel-Crons** (vercel.json): send-reminders, seo-daily-snapshot
-  (GSC/CrUX-Snapshot — Collector hart deadline-begrenzt, `count: 'planned'`
-  statt exact!), warm-cache, sync-feratel (stündlich), lifecycle-emails,
-  outreach-* (Kaltakquise-Funnel), expire-boosts.
+- **systemd-Timer `lt-cron@<name>.timer` auf Hetzner** (`vercel.json` hat
+  seit fn-20 keine Crons mehr; die Routen liegen unter `src/app/api/cron/`):
+  send-reminders, warm-cache, sync-feratel (stündlich), lifecycle-emails,
+  newsletter-weekly, outreach-* (Kaltakquise-Funnel), seo-* (seo-daily-snapshot:
+  GSC/CrUX-Snapshot, Collector hart deadline-begrenzt, `count: 'planned'`
+  statt exact!), expire-boosts, workflow-reports. Dazu seit fn-30
+  `revalidate-landing`: `GET /api/cron/revalidate-landing` (Bearer
+  `CRON_SECRET` Pflicht, ohne Secret 401) baut `/` und `/en` über
+  `revalidateLanding()` (`src/lib/landing/revalidate-landing.ts`) neu, damit
+  die Tagesausgabe nach Mitternacht den neuen Wiener Tag zeigt; geplant
+  `OnCalendar=*-*-* 00:05:00 Europe/Vienna` (die übrigen Timer laufen in
+  UTC). Der Timer ist auf Hetzner noch einzurichten (MASTERPLAN §10.2 Punkt 5).
 - **Cloudflare (seit 2026-10-21) vor lasstreffen.at + www** (Free: Bot Fight
   Mode, WAF-Regeln, Cache nur statische Pfade); `api.lasstreffen.at` bleibt
   DNS-only. Caddy liest die Client-IP aus `CF-Connecting-IP` nur von
@@ -216,16 +235,41 @@ node / next.js
   (GeoNames-Ort in der VG250-Gemeindefläche). Gemeinde-Adapter für DE stehen
   in `src/lib/scrapers/de/` (nicht im Nachtlauf vor bestandenem Prüfstand,
   `npm run pruefstand:de`, Befunde `docs/research/de-gemeinden/adapter-*.md`).
-- `src/app/page.tsx` — Landing: statische ISR-Shell (KEIN cookies()/auth im
-  RSC-Pfad — Personalisierung client-seitig via `/api/me/landing` +
-  `PersonalizedMatches`); Datenqueries über cookie-freien Anon-Client
+- `src/app/[locale]/page.tsx` — Landing als Tagesausgabe (fn-30, Mockup D in
+  `docs/design/landing-redesign/`): statische ISR-Shell (`revalidate = 3600`,
+  KEIN cookies()/auth im RSC-Pfad, Datenqueries über den cookie-freien
+  Anon-Client in `src/lib/v4/get-landing-data.ts`). Kopf `Masthead` mit
+  `DateLine` (Client-Insel: Wetter heute in Wien aus `loadTodayWeather()` in
+  `src/lib/landing/weekend-weather.ts`, Wiener Tag über
+  `src/lib/landing/vienna-day.ts`); Bühne `TipOfDay` (Tipp des Tages:
+  `landing_features.kind = 'sponsored'` für den Wiener Tag mit Pflicht-Label
+  „Anzeige“ plus `sponsor_name`, sonst Score-Fallback ohne Label; Buchungslink
+  auf `/fuer-firmen`), `SeasonCard` (Pins `kind = 'editorial'`), `MapTile`
+  (Mapbox-Static-Bild mit Pins der heutigen Events,
+  `src/lib/v4/map-static-url.ts`, Attributionszeile), `ArtistsLive` (drei
+  Eventim-Künstler aus `event_artists`, stündliche Rotation; einziger Leser
+  von `/api/me/landing`, nur mit sb-Cookie; Folgen über `/api/artists/follow`);
+  darunter in fester Reihenfolge `ProgramList` (Heute Abend), `WeekendShelf`,
+  `RegionShelf`, `FestivalsBlog`, `ActivitiesShelf`, `NewsletterRow`,
+  `OrganizerRow`, Footer mit `DevNotice` (alle in `src/components/Landing/v4/`,
+  Regale über `shelf-ui.tsx` von /entdecken). Auswahl pur und getestet in
+  `src/lib/v4/landing-picks.ts` (Reihenfolge Tipp → Saison → Programm →
+  Wochenende, kein Event doppelt, Wiener Tage). Mitternacht: `DateLine`
+  rechnet den Tag client-seitig nach, der Cron `revalidate-landing` baut die
+  Seite um 00:05 Wien neu (siehe Betrieb). `data-track`: `landing_tip_click`
+  (mit `data-track-kind` → `data.kind`), `landing_tip_book`,
+  `landing_map_open`, `landing_artist_follow`.
 - `src/app/api/events/route.ts` — Events-API (Cursor-Pagination, bbox, Filter)
 - `src/app/api/events/map-points/route.ts` — columnar Karten-Snapshot aus MV (fn-16)
 - `src/app/api/search/semantic/route.ts` — Smart-Suche (Gemini-Intent →
   Taxonomie-Whitelist → parallele indexierte Queries; Sortier-Kommentar
   beachten — NICHT ohne EXPLAIN "optimieren")
 - `src/app/api/search/concierge/route.ts` — Concierge-Tipp (Gemini + Grounding, SSE)
-- `src/app/api/me/landing/route.ts` — Client-Personalisierung der Landing
+- `src/app/api/me/landing/route.ts` — Client-Personalisierung der Landing:
+  `followedLive` (gefolgte Künstler mit Eventim-Termin in 7 Tagen aus
+  `event_artists`, Helfer `src/lib/v4/followed-live.ts`, Abgleich in JS) und
+  `followedNames` (normalisiert über `src/lib/artists/normalize-name.ts`);
+  `matches` und die ID-Sets liefert die Route weiter, seit fn-30 ohne Leser
 - `src/app/entdecken/page.tsx` — Liste + Smart-Suche (Tabs)
 - **Freizeitaktivitäten (fn-18, zweite Inhaltssäule neben Events):**
   `src/app/[locale]/aktivitaeten/page.tsx` (Übersicht),
@@ -254,7 +298,10 @@ node / next.js
 - `src/app/[bundesland]/…`, `src/app/gemeinde/[slug]`, `src/app/thema/[slug]`,
   `src/app/studenten/…` — SEO-Hub-Seiten (~2 000 Gemeinden)
 - `src/app/fuer-firmen/page.tsx` — Veranstalter-Pakete (Boost 29 €, Abo 49 €/M,
-  Live-Anbindung); Leads → `/api/business/lead`; Admin-Boost: `/api/admin/boost`
+  Live-Anbindung); Leads → `/api/business/lead`; Admin-Boost: `/api/admin/boost`;
+  Tipp des Tages (ein Platz je Wiener Kalendertag) über
+  `/api/admin/landing-feature` mit `kind='sponsored'` + `sponsor_name`
+  (Pflicht), Überschneidung → 409, UI `/admin/boost`, danach `revalidateLanding()`
 - `src/app/blog/…` + `src/content/blog/posts/` — 64 Posts;
   `src/components/Blog/BlogTicketBox.tsx` = Affiliate-Ticket-Box (Eventim)
 - `src/components/Events/v4/V4TicketBox.tsx` — Ticket-CTA Event-Detail
@@ -381,9 +428,6 @@ npm run import:festivals     # data/festivals-upcoming.json → festivals + fest
 - Supabase Micro: `count(*) exact`/breite Scans auf `events` (~280k rows)
   laufen in Statement-Timeouts — `count: 'planned'`, MVs oder indexierte
   Pfade nutzen (MASTERPLAN §10.1/§10.4).
-- Personalisierte Karten-Badges (inplan/match/lineup) auf der Landing sind
-  seit dem Statik-Umbau nicht mehr im Server-HTML (ID-Sets liegen in
-  /api/me/landing für spätere Client-Hydration bereit).
 - Eventim-Feed-Passwort stand bis 2026-07-08 in der öffentlichen Repo-History
   — Rotation bei Eventim angeraten (MASTERPLAN P0-Merker).
 - Dev-Umgebung Windows/Node 24: Browser-Streaming von RSC-Seiten kann lokal
@@ -424,6 +468,11 @@ npm run import:festivals     # data/festivals-upcoming.json → festivals + fest
   liefert sie still nichts. Views laufen mit Owner-Rechten an der RLS vorbei:
   nie Schreibrechte für anon/authenticated vergeben.
   Migrationen: `20261008120000_api_rollen_rechte_zurueckschneiden.sql`, `20261008120100_api_rollen_neue_objekte.sql`.
+  `event_artists` (fn-30, `20261029200000_event_artists.sql`): RLS an,
+  Select-Policy `event_artists_public_read` für anon/authenticated, Schreiben
+  nur service_role (Import); nach dem Ausführen `NOTIFY pgrst, 'reload
+  schema'`, sonst kennt PostgREST weder die Tabelle noch den FK für
+  `events!inner`.
 - Viator-Monetarisierung (fn-18.5) ist gebaut, aber erst scharf, wenn das
   Partner-Konto steht: `VIATOR_API_KEY` muss in BEIDE Stores (GitHub-Actions
   UND Vercel-Env). Ohne Key liefert `/api/activities/[id]/booking` nichts und

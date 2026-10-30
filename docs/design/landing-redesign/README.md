@@ -10,10 +10,14 @@ Sprache sprechen.
 Umgesetzt wird **D Tagesausgabe** (`d-tagesausgabe.html`). A, B und C bleiben als verworfene
 Varianten liegen (zu nah am Regal-Template, Karte und Künstler folgen fehlten).
 
+**Implementiert: Branch `claude/landing-page-redesign-e6dafa`, 2026-10-30, PR folgt**
+(Epic fn-30, `src/app/[locale]/page.tsx`, Komponenten in `src/components/Landing/v4/`).
+
 - Kopf: Datumszeile mit Wetter und Event-Zahl, Slogan „Bleib ned daham.“, Suche.
 - Bühne aus vier Karten: **Tipp des Tages** (genau ein Veranstalter pro Tag aus
-  `landing_features`, Kennzeichnung „Gesponsert“; ohne aktiven Boost eine redaktionelle Wahl
-  nach Score ohne Label), **Saison** wie bisher, **Karte** mit den Pins der heutigen Events,
+  `landing_features`, Kennzeichnung in der Umsetzung „Anzeige“ plus Sponsorname nach
+  § 26 MedienG / § 6 ECG, nicht „Gesponsert“ wie hier zuerst geplant; ohne aktiven Boost
+  eine redaktionelle Wahl nach Score ohne Label), **Saison** wie bisher, **Karte** mit den Pins der heutigen Events,
   **Diese Woche live** mit drei Künstlern.
 - Diese Woche live muss ohne Login funktionieren: Künstler aus der Eventim-Quelle mit
   Terminen in Österreich in den nächsten sieben Tagen, stündlich rotiert. Eingeloggt stehen

@@ -846,14 +846,16 @@ kleinen APIs treffen lassen.
    `page.tsx` ruft kein `getLandingContext()` mehr; `getLandingData()` nutzt
    einen cookie-freien Anon-Client → `/` ist wieder echte ISR-Route
    (verifiziert: `.next/prerender-manifest.json` enthält `/` mit
-   `initialRevalidateSeconds: 3600`). Neue Route `GET /api/me/landing`
-   liefert Matches + Badge-ID-Sets; `<PersonalizedMatches/>` (Client)
-   rendert den Anon-Teaser im statischen HTML und tauscht nur bei
-   sichtbarem `sb-*`-Cookie auf die Matches-Sektion (anonyme Besucher
-   feuern keinen Request). Bewusster Trade-off: personalisierte
-   Karten-Badges (inplan/match/lineup) erscheinen auf der Landing vorerst
-   nicht mehr server-seitig; die ID-Sets liegen in der API für spätere
-   Client-Hydration.
+   `initialRevalidateSeconds: 3600`). Route `GET /api/me/landing`: seit
+   fn-30 (2026-10-29) ist die Kachel „Diese Woche live“ (`ArtistsLive`,
+   Client) ihr einziger Leser und ruft sie nur bei sichtbarem
+   `sb-*`-Cookie (anonyme Besucher feuern keinen Request). Die Route
+   liefert `followedLive` (gefolgte Künstler mit Eventim-Termin in den
+   nächsten 7 Tagen aus `event_artists`, Abgleich in JS über
+   `normalizeArtistName`) und `followedNames`; die Kachel zeigt gefolgte
+   Künstler zuerst und füllt aus der stündlichen Rotation auf drei auf.
+   `matches` und die ID-Sets (`savedEventIds`, `artistMatchEventIds`,
+   `lineupMatchEventIds`) liefert sie weiter, ohne Leser.
 2. ✅ **Doppeltes `auth.getUser()`** — durch (1) miterledigt: die Landing
    ruft gar kein getUser mehr; nur die Middleware macht den einen Refresh.
 3. ~~`.limit(8)`~~ — obsolet: die unbegrenzte notifications-Query läuft
