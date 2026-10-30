@@ -276,13 +276,14 @@ export abstract class BaseScraper {
    */
   protected async fetchHtml(
     url: string,
-    opts: { timeoutMs?: number; retries?: number; headers?: Record<string, string> } = {},
+    opts: { timeoutMs?: number; retries?: number; headers?: Record<string, string>; charset?: boolean } = {},
   ): Promise<FetchHtmlResult> {
     const attempts = Math.max(1, opts.retries ?? 1);
     let result: FetchHtmlResult = { html: null };
     for (let attempt = 1; attempt <= attempts; attempt++) {
       result = await fetchHtml(url, {
         timeoutMs: opts.timeoutMs ?? this.fetchTimeoutMs,
+        charset: opts.charset,
         headers: {
           'User-Agent': this.userAgent,
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
