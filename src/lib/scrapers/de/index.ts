@@ -13,8 +13,9 @@ import { DpCalendarDeScraper } from './DpCalendarDeScraper';
 import { ICagendaDeScraper, JEventsDeScraper } from './JoomlaDeScraper';
 import { HwDeScraper } from './HwDeScraper';
 import { KommOneDeScraper } from './KommOneDeScraper';
+import { CommuniceDeScraper } from './CommuniceDeScraper';
 
-export const DE_SCRAPERS: BaseScraper[] = [new IonasDeScraper(), new NolisDeScraper(), new TribeDeScraper(), new EventsManagerDeScraper(), new MecDeScraper(), new DpCalendarDeScraper(), new JEventsDeScraper(), new ICagendaDeScraper(), new HwDeScraper(), new KommOneDeScraper()];
+export const DE_SCRAPERS: BaseScraper[] = [new IonasDeScraper(), new NolisDeScraper(), new TribeDeScraper(), new EventsManagerDeScraper(), new MecDeScraper(), new DpCalendarDeScraper(), new JEventsDeScraper(), new ICagendaDeScraper(), new HwDeScraper(), new KommOneDeScraper(), new CommuniceDeScraper()];
 
 export function getDeScraperByName(name: string): BaseScraper | undefined {
   return DE_SCRAPERS.find(s => s.name === name);

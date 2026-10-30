@@ -60,7 +60,9 @@ const WASTE_RE = new RegExp(
     '(?:leicht|metall|kunststoff)[- ]?verpackung', 'verpackungskunststoff',
     'papier[- ]?(?:abhol|abfuhr|sammlung|entsorgung)',
     'kompost[- ]?(?:abfuhr|sammlung|abhol|tonne)',
-    'gr[üu]nschnitt', 'gr[üu]ngut', 'h[äa]cksel(?:dienst|aktion|platz)',
+    'gr[üu]nschnitt', 'gr[üu]ngut',
+    // Laubannahme am Bauhof (Wacken, fn-29.8).
+    'laub[- ]?(?:annahme|abgabe|abfuhr|entsorgung)','h[äa]cksel(?:dienst|aktion|platz)',
     '(?:christ|weihnachts)b[äa]um\\w*[\\s-]*(?:entsorgung|abhol|abfuhr|sammlung)',
     '(?:abholung|abfuhr|sammlung|entsorgung)\\s+(?:der\\s+)?(?:christ|weihnachts)b[äa]um',
     '(?:agrar|silo|landwirtschafts)[- ]?(?:folie|ballen|planen)',
