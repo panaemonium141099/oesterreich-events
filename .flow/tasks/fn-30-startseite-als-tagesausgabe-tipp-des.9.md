@@ -15,6 +15,18 @@ Abschluss: Dokumentation, Prod-Prüfungen und Verifikation der gesamten Tagesaus
   `/api/admin/landing-feature`, `kind='sponsored'`), „Bekannte Issues“ Karten-Badges-Absatz
   streichen, API-Rechte-Absatz um `event_artists`-Policy ergänzen.
   <!-- Updated by plan-sync: fn-30.2 Schreibmodul und Fehlerverhalten des Künstler-Schritts -->
+  Stand nach Task 4: Client-Personalisierung der Landing läuft über `ArtistsLive`
+  (`src/components/Landing/v4/ArtistsLive.tsx`, holt `/api/me/landing` nur mit sb-Cookie,
+  Folgen/Entfolgen über `/api/artists/follow`) statt `PersonalizedMatches`. `followedLive`
+  (Form `LandingArtistLive`) baut der reine Helfer `src/lib/v4/followed-live.ts`
+  (ilike-Vorauswahl auf `event_artists.artist_name`, Abgleich in JS); `followedNames` sind
+  normalisiert. `normalizeArtistName`/`stripDiacritics` liegen jetzt client-sicher in
+  `src/lib/artists/normalize-name.ts` (Re-Export aus `artist-matching.ts`). Die Kachel
+  verspricht keine Mails, weil Künstler-Alert-Mails standardmäßig aus sind (`RESEND_API_KEY`
+  + `channel_email`); MASTERPLAN/CLAUDE.md nicht anders formulieren. `savedEventIds`,
+  `artistMatchEventIds`, `lineupMatchEventIds` und `matches` liefert die Route weiter, nach
+  Task 6 ohne Leser.
+  <!-- Updated by plan-sync: fn-30.4 ArtistsLive, followed-live.ts, normalize-name.ts -->
 - MASTERPLAN §10.2 (Badges-Satz streichen, `followedLive`), §7.2 (Tipp des Tages als
   Boost-Platz, Kennzeichnung „Anzeige“), Ops-Notiz Cron 00:05.
   Stand nach Task 7: §7.2 (Absatz „Tipp des Tages“) und §10.2 Punkt 5 (Mitternacht und

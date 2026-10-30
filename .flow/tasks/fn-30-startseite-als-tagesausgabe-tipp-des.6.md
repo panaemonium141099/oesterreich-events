@@ -59,6 +59,14 @@ Untere Hälfte der Tagesausgabe, Entfernen der alten Sektionen und `von`/`bis` a
   `LandingArtist` jetzt selbst (in `get-landing-data.ts` entfernt) und geht mit der Datei.
   `FestivalsSection` läuft noch mit `data.festivals`.
   <!-- Updated by plan-sync: fn-30.3 entfernte page.tsx-Sektionen und LandingArtist-Typ -->
+  Stand nach Task 4: Ersatz für `PersonalizedMatches`/`AnonFollowTeaser` ist die Client-Insel
+  `ArtistsLive` (`src/components/Landing/v4/ArtistsLive.tsx`, Export in `index.ts`, Namespace
+  `Landing.ArtistsLive` in de/en); Export, Datei und Namespace bleiben (nicht mit
+  `ArtistTeaser` verwechseln). Nach dem Entfernen ist `ArtistsLive` der einzige Leser von
+  `/api/me/landing` (nutzt nur `signedIn`, `followedLive`, `followedNames`); die Route selbst
+  bleibt unverändert. Der Kopfkommentar in `src/app/[locale]/page.tsx` (Zeile 12, beschreibt
+  noch den `PersonalizedMatches`-Tausch) ist mit nachzuziehen.
+  <!-- Updated by plan-sync: fn-30.4 ArtistsLive ersetzt PersonalizedMatches, bleibt erhalten -->
 
 
 **Files:** `src/app/[locale]/page.tsx`, `src/components/Landing/v4/ProgramList.tsx`,
