@@ -27,7 +27,7 @@ import {
   type LandingTip,
 } from './landing-picks';
 import { collectMapPins, type MapPin } from './map-static-url';
-import { DORFFEST_TAGS, DORFFEST_TITLE_FILTER, DORFFESTE_DAYS } from '@/lib/landing/dorffeste';
+import { DORFFEST_POOL_EXCLUDE, DORFFEST_POOL_FILTER, DORFFESTE_DAYS } from '@/lib/landing/dorffeste';
 
 // Reine Auswahl-Logik lebt in landing-picks.ts; die bisherigen Importpfade
 // bleiben für Tests und Komponenten gültig.
@@ -219,7 +219,7 @@ const SEASON_POOL = 40;
 const PROGRAM_POOL = 60;
 const PINS_POOL = 60;
 const WEEKEND_POOL = 40;
-const DORFFESTE_POOL = 40;
+const DORFFESTE_POOL = 60;
 const ARTISTS_POOL = 120;
 const FESTIVALS_POOL = 48;
 const ACTIVITIES_POOL = 40;
@@ -272,13 +272,17 @@ async function getLandingDataInner(now: Date): Promise<{ data: LandingData; fail
 
   const tipBase = () => publishedAt().gte('start_date', nowIso).lt('start_date', next7Start.toISOString());
   const weekendBase = () => publishedAt().gte('start_date', weekendStart.toISOString()).lte('start_date', weekendEnd.toISOString());
-  // Dorffeste: Fest-Tags (GIN-Index idx_events_tags_published_gin) UND ein
-  // Fest-Wort im Titel; die Tags allein streuen (dorffeste.ts).
-  const dorffesteBase = () => publishedAt()
-    .gte('start_date', nowIso)
-    .lte('start_date', dorffesteEnd.toISOString())
-    .overlaps('tags', [...DORFFEST_TAGS])
-    .or(DORFFEST_TITLE_FILTER);
+  // Dorffeste: Fest-Tag ODER Fest-Wort im Titel (der Classifier vergibt
+  // kaum Fest-Tags: 3 von 116 Fest-Titeln, 2026-10-30), ohne Festivals;
+  // die Auswahl prüft den Titel (dorffeste.ts). Datumsfenster über
+  // idx_events_start_date, ~200 Zeilen je 30 Tage.
+  const dorffesteBase = () => DORFFEST_POOL_EXCLUDE.reduce(
+    (q, pattern) => q.not('title', 'ilike', pattern),
+    publishedAt()
+      .gte('start_date', nowIso)
+      .lte('start_date', dorffesteEnd.toISOString())
+      .or(DORFFEST_POOL_FILTER),
+  );
 
   const season = currentSeason(now);
   const failed: string[] = [];
