@@ -88,13 +88,11 @@ Untere Hälfte der Tagesausgabe, Entfernen der alten Sektionen und `von`/`bis` a
       cta_artist_search src` leer; de.json und en.json haben dieselben Landing-Schlüssel.
 - [ ] `npm test` grün; Mobile 390 px ohne horizontales Scrollen (Screenshot im PR).
 ## Done summary
-TBD
-
+Unterbau der Tagesausgabe gebaut: Programmliste „Heute Abend" (RSC-Zeilen + Client-Insel, die abgelaufene Zeilen und den leeren Abschnitt ausblendet), Wochenend- und Region-Regal über shelf-ui, Festivals + Blog nebeneinander, Freizeit-Regal mit Bildnachweis und Regen-Titel, Newsletter-Zeile, Zeile „Für Veranstalter" (landing_organizer_submit/_boost) und Footer-Hinweiszeile; /entdecken liest von/bis als dateFrom/dateTo. Alte Sektionen (ArtistTeaserV4 … V4CardHero/V/H, Onboarding) samt Tests, Exporten und i18n-Namespaces entfernt, de/en mit denselben Landing-Schlüsseln. Offen für den Orchestrator: Sichtprüfung Desktop/390 px (kein Dev-Server im Worktree), `next build` für /, /en.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 3f5591e805d0c72b8f07d6faffbbbe8820137725
+- Tests: npx tsc --noEmit (keine Fehler außerhalb von src/__tests__), npx vitest run src/__tests__/components/program-list.test.tsx src/__tests__/components/landing-below.test.tsx src/__tests__/lib/landing src/__tests__/app/entdecken-page.test.tsx src/__tests__/components/Footer.test.tsx src/__tests__/components/landing-stage.test.tsx src/__tests__/components/date-line.test.tsx src/__tests__/components/discover/v4/shelf-ui.test.tsx src/__tests__/lib/v4 src/__tests__/lib/site-country-guard.test.ts (174 Tests grün), npx vitest run (4047 grün; 17 Lastausfälle in 11 Dateien in Isolation grün, offen nur die bekannten Windows-Fälle patch-next-static-search-nav / search-event-ids-migration)
 - PRs:
-
 ## Ergänzung (User, 2026-10-30): Zeile „Für Veranstalter“
 Vor dem Footer, nach der Newsletter-Zeile, eine weitere `rowline` im selben Stil: links
 „Du veranstaltest selbst?“ mit einem Satz (Events kostenlos eintragen, Tipp des Tages für
