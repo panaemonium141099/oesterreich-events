@@ -220,6 +220,8 @@ import { post as konzertZumJahresausklangPhilharmonicEnsemble2026 } from './post
 import { post as konzerteInDerMinoritenkircheItalienischeBarockGala2026 } from './posts/konzerte-in-der-minoritenkirche-italienische-barock-gala-2026';
 import { post as osterfestspieleSalzburg2027 } from './posts/osterfestspiele-salzburg-2027';
 import { post as internationalGuitarFestivalRust2027 } from './posts/international-guitar-festival-rust-2027';
+import { post as pumucklDasWeihnachtsfest2026 } from './posts/pumuckl-das-weihnachtsfest-2026';
+import { post as bachBeiNachtKlavierkonzertStefanDonner2026 } from './posts/bach-bei-nacht-klavierkonzert-stefan-donner-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -450,6 +452,8 @@ export const ALL_POSTS: FestivalPost[] = [
   konzerteInDerMinoritenkircheItalienischeBarockGala2026,
   osterfestspieleSalzburg2027,
   internationalGuitarFestivalRust2027,
+  pumucklDasWeihnachtsfest2026,
+  bachBeiNachtKlavierkonzertStefanDonner2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
