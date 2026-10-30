@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { fetchHtml, readHtml, MAX_HTML_BYTES } from '@/lib/scrapers/fetch-html';
+import { decodeHtml, fetchHtml, readHtml, MAX_HTML_BYTES } from '@/lib/scrapers/fetch-html';
 import { BaseScraper } from '@/lib/scrapers/BaseScraper';
 import { Gem2GoScraper } from '@/lib/scrapers/Gem2GoScraper';
 import { discoverEventListUrl } from '@/lib/scrapers/gemeinde-event-discovery';
@@ -252,5 +252,22 @@ describe('Gemeinde-Homepage-Suche: Kandidaten nur als HTML', () => {
       ),
     });
     expect(await discoverEventListUrl(home)).toEqual({ url: `${home}/veranstaltungen-liste`, eventCount: 0 });
+  });
+});
+
+describe('Zeichensatz (Schalter charset, fn-29.13)', () => {
+  const latin = Buffer.from('<p>Gemünden ¤</p>', 'latin1');
+
+  it('ISO-8859-15 nach Content-Type bzw. <meta charset>, sonst UTF-8', () => {
+    expect(decodeHtml(latin, 'text/html; charset=ISO-8859-15')).toBe('<p>Gemünden €</p>');
+    expect(decodeHtml(Buffer.concat([Buffer.from('<meta charset="iso-8859-15">'), latin]), 'text/html')).toContain('Gemünden €');
+    expect(decodeHtml(Buffer.from('<p>Gemünden</p>'), null)).toBe('<p>Gemünden</p>');
+    expect(decodeHtml(Buffer.from('<p>Gemünden</p>'), 'text/html; charset=x-unbekannt')).toBe('<p>Gemünden</p>');
+  });
+
+  it('nur auf Wunsch: ohne Schalter bleibt es UTF-8 wie bisher', async () => {
+    const res = () => new Response(latin, { headers: { 'content-type': 'text/html; charset=ISO-8859-15' } });
+    expect((await readHtml(res())).html).toContain('Gem�nden');
+    expect((await readHtml(res(), { charset: true })).html).toBe('<p>Gemünden €</p>');
   });
 });
