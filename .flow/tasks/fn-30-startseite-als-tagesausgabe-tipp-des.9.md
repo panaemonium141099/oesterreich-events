@@ -27,6 +27,16 @@ Abschluss: Dokumentation, Prod-Prüfungen und Verifikation der gesamten Tagesaus
   `artistMatchEventIds`, `lineupMatchEventIds` und `matches` liefert die Route weiter, nach
   Task 6 ohne Leser.
   <!-- Updated by plan-sync: fn-30.4 ArtistsLive, followed-live.ts, normalize-name.ts -->
+  Stand nach Task 5: Kopf und Bühne bestehen aus `Masthead` (RSC) mit `DateLine`
+  (Client-Insel), `TipOfDay`, `MapTile`, `SeasonCard`, `ArtistsLive` in
+  `src/components/Landing/v4/`; den Wiener Tag teilen die Inseln über
+  `src/lib/landing/vienna-day.ts` (`announceViennaDay`/`useViennaDay`), das Wetter heute in
+  Wien kommt aus `loadTodayWeather()` in `src/lib/landing/weekend-weather.ts`. Entfernt sind
+  `HeroV4` (Datei gelöscht, i18n-Namespace `Landing.Hero` weg; neu `Landing.Masthead`,
+  `Landing.Tip`, `Landing.Map`), der Dev-Banner und `Onboarding` aus `page.tsx`; CLAUDE.md und
+  MASTERPLAN dürfen sie nicht mehr nennen. Tipp-Karte ohne Buchung: Link „Tipp des Tages
+  buchen“ auf `/fuer-firmen` (für die `fuer-firmen`-Zeile).
+  <!-- Updated by plan-sync: fn-30.5 Komponenten und entfernte Teile von Kopf und Bühne -->
 - MASTERPLAN §10.2 (Badges-Satz streichen, `followedLive`), §7.2 (Tipp des Tages als
   Boost-Platz, Kennzeichnung „Anzeige“), Ops-Notiz Cron 00:05.
   Stand nach Task 7: §7.2 (Absatz „Tipp des Tages“) und §10.2 Punkt 5 (Mitternacht und
@@ -69,8 +79,17 @@ Abschluss: Dokumentation, Prod-Prüfungen und Verifikation der gesamten Tagesaus
   nicht abgeschnitten, Handy-Verlauf bei `data-more`, kein horizontales Scrollen; Screenshots
   in den PR.
   <!-- Updated by plan-sync: fn-30.8 Sichtprüfung der Spur offen, hier nachzuholen -->
+  Offen aus Task 5 (kein Dev-Server im Worktree): `next build` bestätigt `/` und `/en` als
+  statisch (ISR), und die Sichtprüfung von Kopf und Bühne auf `/` bei Desktop 1440 (Raster
+  `1.45fr 1fr 1fr`, Zeilen 256 px) und Handy 390 (eine Spalte, kein horizontales Scrollen):
+  Wetter in der Datumszeile ohne Layoutsprung, Tipp-Bild als LCP mit `preload`,
+  Saison-Karte ohne überstehenden Text, `MapTile` mit Mapbox-Logo und Attributionszeile.
+  <!-- Updated by plan-sync: fn-30.5 Build-Statik und Sichtprüfung der Bühne offen -->
 - Analytics: `landing_tip_click`, `landing_map_open`, `landing_artist_follow` kommen in
-  `analytics_events` an (Dev-Check gegen die Route).
+  `analytics_events` an (Dev-Check gegen die Route). `landing_tip_click` trägt zusätzlich
+  `kind` (`sponsored`/`auto`): `ClickTracker` reicht `data-track-kind` als `data.kind` weiter.
+  Mit Task 5 kam der Marker `landing_tip_book` (Veranstalter-Link der Tipp-Karte) dazu.
+  <!-- Updated by plan-sync: fn-30.5 ClickTracker kind, Marker landing_tip_book -->
 - fn-19: Abhängigkeit auf fn-30 setzen (`flowctl epic add-dep`).
 
 **Files:** `CLAUDE.md`, `docs/MASTERPLAN.md`, `docs/design/landing-redesign/README.md`.
