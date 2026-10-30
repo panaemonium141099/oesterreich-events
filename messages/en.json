@@ -99,6 +99,18 @@
         "more": "More summer festivals"
       }
     },
+    "ArtistsLive": {
+      "title": "Live this week",
+      "all": "All artists",
+      "follow": "Follow",
+      "following": "Following",
+      "followAria": "Follow {name}",
+      "unfollowAria": "Unfollow {name}",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "hint": "We'll let you know as soon as a new date shows up.",
+      "error": "That didn't work, please try again."
+    },
     "ArtistTeaser": {
       "badge": "Favourite artists · signed-in only",
       "title": "Never miss a show by your favourite artists.",

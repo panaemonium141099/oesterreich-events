@@ -13,3 +13,4 @@ export { FestivalsSection } from './FestivalsSection';
 export { MapPreview } from './MapPreview';
 export { HowItWorks } from './HowItWorks';
 export { WeatherSection } from './WeatherSection';
+export { ArtistsLive } from './ArtistsLive';

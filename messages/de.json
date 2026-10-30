@@ -99,6 +99,18 @@
         "more": "Mehr Sommerfeste"
       }
     },
+    "ArtistsLive": {
+      "title": "Diese Woche live",
+      "all": "Alle Künstler",
+      "follow": "Folgen",
+      "following": "Folgst du",
+      "followAria": "{name} folgen",
+      "unfollowAria": "{name} entfolgen",
+      "today": "Heute",
+      "tomorrow": "Morgen",
+      "hint": "Wir sagen dir Bescheid, sobald ein neuer Termin auftaucht.",
+      "error": "Das hat nicht geklappt, bitte noch einmal versuchen."
+    },
     "ArtistTeaser": {
       "badge": "Lieblingskünstler · nur eingeloggt",
       "title": "Verpasse keinen Auftritt deiner Lieblingskünstler.",
