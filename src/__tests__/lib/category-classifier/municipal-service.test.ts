@@ -29,6 +29,8 @@ describe('municipalServiceKind', () => {
       'Erdaushubdeponie geöffnet', 'Wertstoffhof geöffnet', 'Recyclinghof ist am 25.12.2026 und 26.12.2026 geschlossen',
       '02.12.2026 (Mittwoch) Gelber Sack - Abholungen 2026', '23 Dez. Restmüllabfuhr 23.12.2026 Mehr Infos',
       'Autowrackentsorgung', 'Grün- und Strauchschnitt', 'Abgabemöglichkeit Grünmüll', 'Landwirtschaftsfoliensammlung',
+      // DE (fn-29.8): communice Wacken 07.11.2026
+      'Laubannahme',
     ]) {
       expect(municipalServiceKind(t), t).toBe('waste');
     }
