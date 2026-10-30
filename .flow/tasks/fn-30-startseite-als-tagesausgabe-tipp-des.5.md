@@ -63,13 +63,11 @@ Künstler-Kachel; `page.tsx` setzt sie zusammen. Größe M. Vorlage Mockup D
       Mockup (Screenshots im PR).
 - [ ] DE/EN-Texte vorhanden; `npm test` grün.
 ## Done summary
-TBD
-
+Kopf und Bühne der Tagesausgabe: Masthead mit DateLine (Wiener Tag, Wetter heute in Wien, gerundete Event-Zahl, Mitternachts-Korrektur über vienna-day.ts), TipOfDay (LCP-Bild mit preload, „Anzeige" + Sponsor bei sponsored, sonst Link „Tipp des Tages buchen" auf /fuer-firmen), MapTile (Mapbox-Static mit srcset, Attributionszeile, Fallback ohne Token), SeasonCard mit sechs Picks und Ellipsis, ArtistsLive in der Bühne; page.tsx ohne HeroV4, Dev-Banner und Onboarding. Offen für den Orchestrator: visuelle Prüfung Desktop 1440 px / Handy 390 px und `next build` (kein Dev-Server verfügbar).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: b3ed6b25213db7cbe18515f1e4f952aeba7266bf
+- Tests: npx vitest run src/__tests__/components/date-line.test.tsx src/__tests__/components/landing-stage.test.tsx src/__tests__/components/artists-live.test.tsx src/__tests__/lib/v4, npx vitest run (313/315 Dateien gruen; nur die bekannten Windows-Failures search-event-ids-migration.test.ts und patch-next-static-search-nav.test.ts), npx tsc --noEmit -p tsconfig.json (keine Fehler in geaenderten Dateien)
 - PRs:
-
 ## Ergänzung (User, 2026-10-30): Veranstalter-Hinweis im Tipp
 Wenn kein Veranstalter gebucht hat (`tip.kind !== 'sponsored'`), zeigt die Tipp-Karte unten
 rechts eine kleine Zeile „Dein Event hier? Tipp des Tages buchen“ als Link auf `/fuer-firmen`
