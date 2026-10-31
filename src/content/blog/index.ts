@@ -223,6 +223,8 @@ import { post as internationalGuitarFestivalRust2027 } from './posts/internation
 import { post as pumucklDasWeihnachtsfest2026 } from './posts/pumuckl-das-weihnachtsfest-2026';
 import { post as bachBeiNachtKlavierkonzertStefanDonner2026 } from './posts/bach-bei-nacht-klavierkonzert-stefan-donner-2026';
 import { post as fullMetalMayrhofen2027 } from './posts/full-metal-mayrhofen-2027';
+import { post as theaterverandTirolSKasermandlOntour2026 } from './posts/theaterverand-tirol-s-kasermandl-ontour-2026';
+import { post as dreiHaselnuesseFuerAschenbroedelNikolausTour2027 } from './posts/drei-haselnuesse-fuer-aschenbroedel-nikolaus-tour-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -456,6 +458,8 @@ export const ALL_POSTS: FestivalPost[] = [
   pumucklDasWeihnachtsfest2026,
   bachBeiNachtKlavierkonzertStefanDonner2026,
   fullMetalMayrhofen2027,
+  theaterverandTirolSKasermandlOntour2026,
+  dreiHaselnuesseFuerAschenbroedelNikolausTour2027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
