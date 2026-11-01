@@ -225,6 +225,8 @@ import { post as bachBeiNachtKlavierkonzertStefanDonner2026 } from './posts/bach
 import { post as fullMetalMayrhofen2027 } from './posts/full-metal-mayrhofen-2027';
 import { post as theaterverandTirolSKasermandlOntour2026 } from './posts/theaterverand-tirol-s-kasermandl-ontour-2026';
 import { post as dreiHaselnuesseFuerAschenbroedelNikolausTour2027 } from './posts/drei-haselnuesse-fuer-aschenbroedel-nikolaus-tour-2027';
+import { post as kingNoOneTheBurdenOfEmpathyTour20262026 } from './posts/king-no-one-the-burden-of-empathy-tour-2026-2026';
+import { post as riesenOrgelKonzert2026 } from './posts/riesen-orgel-konzert-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -460,6 +462,8 @@ export const ALL_POSTS: FestivalPost[] = [
   fullMetalMayrhofen2027,
   theaterverandTirolSKasermandlOntour2026,
   dreiHaselnuesseFuerAschenbroedelNikolausTour2027,
+  kingNoOneTheBurdenOfEmpathyTour20262026,
+  riesenOrgelKonzert2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
