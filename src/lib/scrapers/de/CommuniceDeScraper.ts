@@ -12,7 +12,7 @@
  * Etikett Bargenstedt, Ort Heide), gilt der Ort (`otherGemeindeNamed`).
  * Ohne Etikett gilt `terminContext` wie bei den übrigen DE-Adaptern.
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext, type GemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -139,6 +139,7 @@ export function acrossCalendars(cals: CalendarTermine[]): { termin: CommuniceEve
 
 export class CommuniceDeScraper extends DeFeedScraper {
   readonly name = 'de-communice';
+  readonly integrations = ['communice'];
 
   private async listPage(url: string): Promise<CommuniceListPage | null> {
     const html = await this.fetchHtmlPage(url);

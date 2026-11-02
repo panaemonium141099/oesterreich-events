@@ -41,7 +41,7 @@ async function main() {
     (from, to) =>
       supabase
         .from('events')
-        .select('id, source_name, source_url, title, start_date, created_at, last_seen_at, publish_status, duplicate_of')
+        .select('id, source_name, source_url, title, start_date, created_at, last_seen_at, publish_status, duplicate_of, country')
         .gte('start_date', since)
         .order('id')
         .range(from, to),
@@ -68,7 +68,16 @@ async function main() {
   const lastSeen = new Map(rows.map((r) => [r.id, r.last_seen_at ?? '']));
   const candidates = [...plan.probe].sort((a, b) => (lastSeen.get(a.id)! < lastSeen.get(b.id)! ? -1 : 1));
   const checked = candidates.slice(0, PROBE_BUDGET);
-  const gone = await probeGone(checked.map((c) => c.url), { budget: PROBE_BUDGET });
+  // Österreich wie bisher; andere Länder (DE-Gemeinde-Adapter, fn-29.18) nur
+  // mit robots.txt, Crawl-delay und höchstens 30 Abrufen je Website.
+  const countryOf = new Map(rows.map((r) => [r.id, r.country ?? 'AT']));
+  const atUrls = checked.filter((c) => countryOf.get(c.id) === 'AT').map((c) => c.url);
+  const otherUrls = checked.filter((c) => countryOf.get(c.id) !== 'AT').map((c) => c.url);
+  const [goneAt, goneOther] = await Promise.all([
+    probeGone(atUrls, { budget: PROBE_BUDGET }),
+    probeGone(otherUrls, { budget: PROBE_BUDGET, respectRobots: true, maxPerHost: 30, hostDelayMs: 1000 }),
+  ]);
+  const gone = new Set([...goneAt, ...goneOther]);
   const confirmed = checked.filter((c) => gone.has(c.url));
   const withdraw = [...plan.withdraw, ...confirmed];
 

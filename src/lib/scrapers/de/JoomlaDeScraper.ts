@@ -3,7 +3,7 @@
  * dann je Termin die Detailseite (`joomla.ts`). Quelle ist die Detailseite
  * des Termins. Kontext wie bei den übrigen DE-Adaptern (`kontext.ts`).
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -71,6 +71,7 @@ abstract class JoomlaDeScraper extends DeFeedScraper {
 
 export class JEventsDeScraper extends JoomlaDeScraper {
   readonly name = 'de-jevents';
+  readonly integrations = ['jevents'];
   protected idPrefix = 'jev';
   protected groups() { return feedGroups('jevents'); }
   protected rssUrl(g: FeedGroup) { return g.feedUrl; }
@@ -94,6 +95,7 @@ function icagendaGroups(): FeedGroup[] {
 
 export class ICagendaDeScraper extends JoomlaDeScraper {
   readonly name = 'de-icagenda';
+  readonly integrations = ['icagenda'];
   protected idPrefix = 'icag';
   protected groups() { return icagendaGroups(); }
   protected rssUrl(g: FeedGroup) {

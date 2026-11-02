@@ -9,7 +9,7 @@
  * Registry, ohne Termine dort `/events/`. Es kommen die Termine, die die
  * Seite anzeigt (meist die nächsten Wochen); spätere in den folgenden Nächten.
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -65,6 +65,7 @@ const termin = (e: LdEvent) => ({ uid: e.url ?? e.name, title: e.name, start: e.
 
 export class MecDeScraper extends DeFeedScraper {
   readonly name = 'de-mec';
+  readonly integrations = ['mec'];
 
   async scrape(): Promise<ScrapedEvent[]> {
     const groups = this.pickGroups(mecGroups());
