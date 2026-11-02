@@ -6,7 +6,7 @@
  * genau eine Gemeinde führt; im Kalender einer Verwaltungsgemeinschaft nur
  * die Gemeinde, die der Termin selbst nennt.
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -70,6 +70,7 @@ export function parentPath(url: string): string | null {
 
 export class HwDeScraper extends DeFeedScraper {
   readonly name = 'de-hwveranstaltung';
+  readonly integrations = ['hwext'];
 
   /** Kalenderseite lesen, wenn robots.txt sie erlaubt (Pause wie fetchFeed). */
   private async listPage(url: string): Promise<HwListPage | null> {

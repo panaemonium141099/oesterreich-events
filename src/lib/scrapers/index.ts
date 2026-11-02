@@ -90,6 +90,7 @@ import {
   MedUniInnsbruckScraper, AngewandteWienScraper, MDWWienScraper, KUGGrazScraper,
 } from './uni';
 import { closeSharedBrowser } from './puppeteerBrowser';
+import { DE_TIMEOUT_MIN, deNachtlaufScrapers, isDeNachtlaufAdapter } from './de/nachtlauf';
 import { syncEventsToSupabase } from '../db/supabase-sync';
 import { applySourceCoordsPolicy, demotePlaceholderCoords, dropSharedAddresses } from './source-coords-policy';
 import { createClient } from '@supabase/supabase-js';
@@ -341,6 +342,8 @@ const SCRAPER_TIMEOUT_OVERRIDES_MIN: Record<string, number> = {
 };
 
 export function timeoutMsFor(name: string): number {
+  // DE-Adapter (fn-29.18): Zeitbudget im Adapter, harte Grenze darüber (nachtlauf.ts).
+  if (isDeNachtlaufAdapter(name)) return DE_TIMEOUT_MIN * 60_000;
   return (SCRAPER_TIMEOUT_OVERRIDES_MIN[name] ?? DEFAULT_TIMEOUT_MIN) * 60_000;
 }
 
@@ -664,8 +667,9 @@ export async function runScraper(scraper: BaseScraper): Promise<ScraperRunResult
   }
 }
 
+/** AT-Scraper oder DE-Adapter des Nachtlaufs (Einzellauf, `scrape.ts --source`). */
 export function getScraperByName(name: string): BaseScraper | undefined {
-  return scrapers.find(s => s.name === name);
+  return scrapers.find(s => s.name === name) ?? deNachtlaufScrapers().find(s => s.name === name);
 }
 
 export function getAvailableScrapers(): string[] {

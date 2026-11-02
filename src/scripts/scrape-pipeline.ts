@@ -285,6 +285,12 @@ async function main() {
       execStep('Location metrics', `npx tsx ${envFlag}src/scripts/location-metrics.ts`);
     }, steps);
 
+    // fn-29.18: Gemeinden mit mindestens einem kommenden Termin je Land,
+    // Bundesland und DE-Integration (reports/abdeckung.json + Zusammenfassung).
+    steps.coverage = await runStep('coverage', async () => {
+      execStep('Coverage per country and integration', `npx tsx ${envFlag}src/scripts/coverage-report.ts`);
+    }, steps);
+
     steps.report = await runStep('report', async () => {
       execStep('Generate scrape report', `npx tsx ${envFlag}src/scripts/generate-scrape-report.ts`);
     }, steps);

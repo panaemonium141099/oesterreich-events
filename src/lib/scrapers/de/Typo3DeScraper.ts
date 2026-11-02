@@ -8,8 +8,8 @@
  * Listen sind Nachrichten (das Datum ist das der Meldung) und werden nicht
  * als Termine gelesen.
  *
- * Kontext wie bei den übrigen DE-Adaptern (`kontext.ts`). Nicht im
- * Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29, fn-29.18).
+ * Kontext wie bei den übrigen DE-Adaptern (`kontext.ts`). Im Nachtlauf
+ * seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -87,6 +87,7 @@ export type CalendarStatus = 'contao' | 'typo3' | 'jsonld' | 'kein_kalender' | '
 
 export class Typo3DeScraper extends DeFeedScraper {
   readonly name = 'de-typo3';
+  readonly integrations = TYPO3_INTEGRATIONS;
   /** Ergebnis je Kalenderseite (für den Prüfstand-Bericht). */
   readonly status = new Map<string, { status: CalendarStatus; termine: number }>();
 

@@ -25,6 +25,7 @@ const kommuneOf = (g: FeedGroup) => new URL(g.feedUrl).searchParams.get('selecte
 
 export class NolisDeScraper extends DeFeedScraper {
   readonly name = 'de-nolis';
+  readonly integrations = ['nolis'];
 
   async scrape(): Promise<ScrapedEvent[]> {
     const groups = feedGroups('nolis').slice(0, this.limit ?? Infinity);

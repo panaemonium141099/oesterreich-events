@@ -81,7 +81,8 @@ node / next.js
   Dazu Venues-Job + EIN Post-Processing-Job (`scrape-pipeline.ts
   --skip-scrapers --skip-venues`: normalize → categorize → geocode →
   master_coords → score → withdrawal → admission_recheck → dedup →
-  dedup_audit → security_audit → artist_matching → indexing → report) mit
+  dedup_audit → security_audit → artist_matching → indexing → coverage →
+  report) mit
   `if: always()`, nie zwei
   gleichzeitig (`concurrency`). Ein roter Schritt nennt seinen Grund in der
   Alarm-Mail (`reportStepReason`, `src/lib/pipeline/step-reason.ts`).
@@ -106,6 +107,36 @@ node / next.js
   der Grund, gilt wieder der Score. Ventil 500 Haltungen / 300 Freigaben,
   Freigabe per workflow_dispatch. `security_audit` wird rot, sobald eine
   schreibende SECURITY-DEFINER-Funktion für anon ausführbar ist.
+- **DE-Nachtlauf (fn-29.18, 2026-11):** Job `scrape-de` in
+  `scrape-events.yml`, 3 Shards (`scrape.ts --de-shard i/3`), parallel zu
+  den AT-Shards, das Post-Processing wartet auf beide. Welche Adapter
+  laufen, steht an EINER Stelle: `DE_NACHTLAUF` in
+  `src/lib/scrapers/de/nachtlauf.ts` (Adapter → Prüfstand-Bericht; neuer
+  Adapter = eine Zeile, Wächter `de-nachtlauf.test.ts` prüft Bericht und
+  Workflow). Nicht dabei: nolis (Lizenz), verwaltungsportal (Prüfstand
+  offen). Shards: Adapter mit gemeinsamer Website (laut Registry,
+  `adapterHosts`) im selben Shard, sonst LPT nach `DE_SCRAPER_WEIGHTS`.
+  Jeder Abruf eines DE-Adapters geht durch die Sperre je Website
+  (`host-gate.ts`): ein Abruf zur Zeit, Pause = Crawl-delay, auch über
+  Adapter hinweg; robots.txt je Prozess einmal. Zeitbudget je Adapter
+  180 min (`SCRAPER_SOFT_BUDGET_MIN` im Job, danach keine Abrufe mehr,
+  Teilergebnis), harte Grenze 210 min. iKISS (gut 2 h) setzt per Cursor je
+  Website fort (`resumeGroups`/`groupDone` in `feed-scraper.ts`; nie
+  mitten in einer Website, Amts- und Gemeindekalender teilen Termine).
+  `workflow_dispatch` mit `scraper=de` startet nur die DE-Shards und das
+  Post-Processing. Ventile rechnen je Land: der Dedup schreibt je Land eine
+  Zeile in `dedup_runs` (`country`, Migration `20261102120000`), Anker und
+  Grenzen gelten je Land, ein Stopp für DE hält AT nicht auf (und
+  umgekehrt); Freigabe nur für ein Land per Input `dedup_limits_country`
+  (`--limits-country`). `admission_recheck` schreibt die Länder unter der
+  Grenze. `dedup_audit` je Land: AT Grenze 100, jedes andere Land je
+  sichtbarem Event nicht mehr als AT (`auditByCountry`). Rückzug prüft
+  Detailseiten außerhalb AT mit robots.txt, Crawl-delay und höchstens 30
+  Abrufen je Website. Schritt `coverage` (`coverage-report.ts`, Regeln
+  `src/lib/pipeline/coverage.ts`): Gemeinden mit mindestens einem
+  kommenden Termin je Land, Bundesland und DE-Integration (nur Termine
+  des Adapters) in `reports/abdeckung.json` und der Run-Zusammenfassung.
+  Die Website zeigt DE weiter nicht (`SITE_COUNTRY`).
 - **Festivals (2026-10):** Die Festivalseite zeigt nur `ends_at >= heute`;
   die kommenden Ausgaben (Termin, Ticketlink, Preis, Beschreibung, Bild,
   Lineup) kommen aus der kuratierten `data/festivals-upcoming.json`

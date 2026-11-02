@@ -10,7 +10,7 @@
  * auf den ihre Termin-Links zeigen (`…/Veranstaltungskalender/Veranstaltung?…&id=N`
  * → `…/Veranstaltungskalender`).
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -52,6 +52,7 @@ export function calendarFromLinks(links: string[], pageUrl: string): string | nu
 
 export class CeasyDeScraper extends DeFeedScraper {
   readonly name = 'de-ceasy';
+  readonly integrations = ['ceasy'];
 
   private async listPage(url: string): Promise<CeasyListPage | null> {
     const html = await this.fetchHtmlPage(url);

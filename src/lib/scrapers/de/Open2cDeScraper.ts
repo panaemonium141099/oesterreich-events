@@ -9,7 +9,7 @@
  * Scheyern"); die PLZ mit Ort geht wie bei cEasy an den Resolver. Sonst
  * gilt der Kontext wie bei den übrigen DE-Adaptern (`kontext.ts`).
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -54,6 +54,7 @@ export function open2cPlace(raw: string | undefined): { locationName?: string; p
 
 export class Open2cDeScraper extends DeFeedScraper {
   readonly name = 'de-open2c';
+  readonly integrations = ['open2c'];
 
   private async listPage(url: string): Promise<Open2cListPage | null> {
     const html = await this.fetchHtmlPage(url);

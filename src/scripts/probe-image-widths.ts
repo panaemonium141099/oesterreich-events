@@ -16,11 +16,17 @@
  * Backlog-Definition (siehe Partial-Index events_image_probe_backlog_idx):
  * future events mit image_url, deren image_probed_url fehlt oder von der
  * aktuellen image_url abweicht (Scraper hat das Bild getauscht).
+ *
+ * Nur Events des Website-Landes (`SITE_COUNTRY`): der DE-Nachtlauf
+ * (fn-29.18) bringt zehntausende Bilder auf einmal, die würden das
+ * Nachtbudget für österreichische Bilder tagelang belegen, und deutsche
+ * Gemeinde-Server bekämen Abrufe ohne ihren Crawl-delay.
  */
 
 import { randomUUID } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { POSTGREST_MAX_ROWS } from '../lib/db/fetch-all';
+import { SITE_COUNTRY } from '../lib/site-country';
 
 const CONCURRENCY = 12;
 const FETCH_TIMEOUT_MS = 10_000;
@@ -165,6 +171,7 @@ async function main() {
       .select('id')
       .eq('image_width', IMAGE_UNKNOWN)
       .not('image_url', 'is', null)
+      .eq('country', SITE_COUNTRY)
       .gte('start_date', new Date().toISOString())
       .limit(requeue);
     if (sErr) throw new Error(`Requeue-Query: ${sErr.message}`);
@@ -194,6 +201,7 @@ async function main() {
           .select('id')
           .gt('image_width', 0)
           .not('image_url', 'is', null)
+          .eq('country', SITE_COUNTRY)
           .gte('start_date', nowIso);
         if (cursor) q = q.gt('id', cursor);
         if (before) q = q.lt('id', before);
@@ -240,6 +248,7 @@ async function main() {
       .select('id, image_url')
       .not('image_url', 'is', null)
       .is('image_probed_url', null)
+      .eq('country', SITE_COUNTRY)
       .gte('start_date', new Date().toISOString())
       .limit(pageSize);
     if (error) throw new Error(`Backlog-Query: ${error.message}`);

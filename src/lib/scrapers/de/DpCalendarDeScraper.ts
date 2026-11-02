@@ -3,7 +3,7 @@
  * DPCalendar-Kalender der DE-Gemeinde-Registry, löst Wiederholungen ein Jahr
  * ab heute auf. Kontext wie bei den übrigen DE-Adaptern (`kontext.ts`).
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -30,6 +30,7 @@ export function dpDetailUrl(url: string | undefined, g: FeedGroup): string {
 
 export class DpCalendarDeScraper extends DeFeedScraper {
   readonly name = 'de-dpcalendar';
+  readonly integrations = ['dpcalendar'];
 
   async scrape(): Promise<ScrapedEvent[]> {
     const groups = feedGroups('dpcalendar').slice(0, this.limit ?? Infinity);

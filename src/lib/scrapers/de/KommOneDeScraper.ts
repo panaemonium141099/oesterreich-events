@@ -10,7 +10,7 @@
  * mindestens `GLOBAL_GAP_MS` dazwischen, und wechselt dabei die Website,
  * damit jede ihre 30 s Pause bekommt, ohne dass der Lauf Stunden dauert.
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -51,6 +51,7 @@ export function kommOneGroups(entries: RegistryEntryDe[] = loadRegistryDe()): Fe
 
 export class KommOneDeScraper extends DeFeedScraper {
   readonly name = 'de-kommone';
+  readonly integrations = ['komm1'];
   private nextAt = new Map<string, number>();
   private lastEnd = 0;
   private lock: Promise<void> = Promise.resolve();
