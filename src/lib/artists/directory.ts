@@ -20,6 +20,7 @@
  */
 
 import { normalizeArtistName } from './normalize-name';
+import { slugifyPlace } from '@/lib/utils/slugify';
 import { addViennaDays, toViennaDate } from '@/lib/utils/event-time';
 
 /** Spielarten für Regale und Filter. */
@@ -46,6 +47,8 @@ export interface DirectoryEvent {
 export interface DirectoryArtist {
   id: string;
   name: string;
+  /** URL-Teil der Künstlerseite (/kuenstler/<slug>), aus dem Namen (artistSlug). */
+  slug: string;
   image: string | null;
   /** Affiliate-Link der Künstlerseite bei oeticket (enthält affiliate=J70). */
   evoLink: string | null;
@@ -244,6 +247,7 @@ export function buildDirectory(rows: DirectoryRow[], primaries: Map<string, Dire
     out.push({
       id,
       name: entry.name,
+      slug: artistSlug(entry.name),
       image: entry.image,
       evoLink: entry.evoLink,
       kind,
@@ -334,4 +338,22 @@ export function programTitle(artist: DirectoryArtist, event: DirectoryEvent): st
   // „Ernst Molden & Der Nino aus Wien - …“: der Rest beginnt mit einem Partner, der Titel bleibt ganz.
   if (/^(&|\+|und|and|feat\.?|featuring|mit|with|vs\.?)(\s|$)/i.test(rest)) return title;
   return rest || null;
+}
+
+/** Slug der Künstlerseite: „Pizzera & Jaus“ wird „pizzera-jaus“, „5/8erl in Ehr’n“ wird „5-8erl-in-ehr-n“. */
+export function artistSlug(name: string): string {
+  return slugifyPlace(name) || 'kuenstler';
+}
+
+/** Der Künstler zu einem Slug; führt mehrere Feed-IDs gleichen Namens zu einem zusammen (Termine vereint, nach Datum). */
+export function artistBySlug(artists: DirectoryArtist[], slug: string): DirectoryArtist | null {
+  const hits = artists.filter(a => a.slug === slug);
+  if (hits.length === 0) return null;
+  if (hits.length === 1) return hits[0];
+  const seen = new Set<string>();
+  const events: DirectoryEvent[] = [];
+  for (const a of hits) for (const e of a.events) if (!seen.has(e.id)) { seen.add(e.id); events.push(e); }
+  events.sort((a, b) => a.start_date.localeCompare(b.start_date));
+  const first = hits.find(a => a.image) ?? hits[0];
+  return { ...first, evoLink: hits.find(a => a.evoLink)?.evoLink ?? null, events: events.slice(0, MAX_EVENTS_PER_ARTIST) };
 }

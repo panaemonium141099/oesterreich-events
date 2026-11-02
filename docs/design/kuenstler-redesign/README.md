@@ -13,7 +13,8 @@ Umsetzung: `src/app/[locale]/artists/page.tsx` (ISR), `src/lib/artists/directory
 artist-ui). Regal „Große Hallen“ aus dem Mockup wurde „Auf Tour“ (mindestens drei
 Termine an zwei Orten), weil es keine Saalgrößen gibt; „Wer X mag, geht auch zu“ wurde
 „Auch bald live“ (gleiche Spielart aus dem Verzeichnis statt Last.fm). A und C bleiben als
-verworfene Varianten liegen; das Blatt als eigene URL je Künstler ist offen.
+verworfene Varianten liegen. Das Blatt gibt es seit demselben Tag auch als Seite
+`/kuenstler/[slug]` (Entscheidung des Users nach dem Merge von PR #424).
 
 `index.html` öffnen (lokal über einen statischen Server, z. B.
 `python -m http.server 5179 --directory docs/design/kuenstler-redesign`) und oben zwischen

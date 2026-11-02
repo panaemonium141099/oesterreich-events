@@ -30,6 +30,7 @@ import {
   isValidBundesland,
 } from '@/lib/landing-slugs';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { getArtistsDirectoryCached } from '@/lib/artists/get-artists-directory';
 import {
   SITEMAP_BASE_URL as BASE_URL,
   renderUrlset,
@@ -86,6 +87,22 @@ export async function GET(): Promise<NextResponse> {
     { loc: `${BASE_URL}/datenschutz`, lastmod: toISO(now), changefreq: 'yearly', priority: 0.3 },
     { loc: `${BASE_URL}/agb`, lastmod: toISO(now), changefreq: 'yearly', priority: 0.3 },
   );
+
+  // ─── 1b. Künstlerseiten (2026-11): Verzeichnis aus dem Stunden-Cache, DE-only ──
+  // Fällt die Abfrage aus, bleibt die Sitemap ohne Künstler statt mit 500.
+  try {
+    const directory = await getArtistsDirectoryCached();
+    for (const artist of directory.artists) {
+      entries.push({
+        loc: `${BASE_URL}/kuenstler/${artist.slug}`,
+        lastmod: toISO(now),
+        changefreq: 'daily',
+        priority: 0.5,
+      });
+    }
+  } catch (err) {
+    console.error('[sitemap-core] Künstlerseiten ausgelassen:', err);
+  }
 
   // ─── 2. Blog posts ──────────────────────────────────────────────────────
   for (const post of ALL_POSTS) {

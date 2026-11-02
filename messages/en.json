@@ -224,7 +224,15 @@
     "toastUnfollowed": "{name} removed.",
     "toastError": "That didn't work, please try again.",
     "today": "Today",
-    "tomorrow": "Tomorrow"
+    "tomorrow": "Tomorrow",
+    "pageMetaTitle": "{name}: dates in Austria",
+    "pageMetaDescription": "{name} live in Austria: {count} dates, first on {first}. Every date with tickets, follow the artist and never miss a show.",
+    "pageMetaDescriptionOne": "{name} live in Austria on {first}. Date with tickets, follow the artist and never miss a show.",
+    "pageBack": "All artists",
+    "pageDates": "Dates in Austria",
+    "pageUpdated": "As of {date}, dates over the next three months.",
+    "pageOpen": "Artist page",
+    "notFound": "Artist not found"
   },
   "Footer": {
     "rights": "All rights reserved.",
