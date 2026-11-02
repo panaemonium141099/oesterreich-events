@@ -227,6 +227,8 @@ import { post as theaterverandTirolSKasermandlOntour2026 } from './posts/theater
 import { post as dreiHaselnuesseFuerAschenbroedelNikolausTour2027 } from './posts/drei-haselnuesse-fuer-aschenbroedel-nikolaus-tour-2027';
 import { post as kingNoOneTheBurdenOfEmpathyTour20262026 } from './posts/king-no-one-the-burden-of-empathy-tour-2026-2026';
 import { post as riesenOrgelKonzert2026 } from './posts/riesen-orgel-konzert-2026';
+import { post as festkonzertMit66Jahren2026 } from './posts/festkonzert-mit-66-jahren-2026';
+import { post as weihnachtskonzertFingerlosTschejefemFreunde2026 } from './posts/weihnachtskonzert-fingerlos-tschejefem-freunde-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -464,6 +466,8 @@ export const ALL_POSTS: FestivalPost[] = [
   dreiHaselnuesseFuerAschenbroedelNikolausTour2027,
   kingNoOneTheBurdenOfEmpathyTour20262026,
   riesenOrgelKonzert2026,
+  festkonzertMit66Jahren2026,
+  weihnachtskonzertFingerlosTschejefemFreunde2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
