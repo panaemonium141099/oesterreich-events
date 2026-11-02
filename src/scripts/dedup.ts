@@ -399,6 +399,9 @@ interface ReportEntry {
   primaryTitle?: string;
   primarySource?: string | null;
   reason?: string;
+  /** Ventil-Klasse eines neuen Duplikats (valveClass), zur Prüfung des Probelaufs. */
+  valveClass?: ValveClass | null;
+  createdAt?: string | null;
 }
 
 /** Höchstens so weit zurück gilt der Zulauf als Zulauf: bleibt der Anker
@@ -622,6 +625,8 @@ async function main(): Promise<void> {
   for (const [id, c] of garbageById) garbageByCountry.set(c, [...(garbageByCountry.get(c) ?? []), id]);
   const countries = [...new Set([...RUN_COUNTRIES, ...plansByCountry.keys(), ...garbageByCountry.keys()])];
   const results: CountryResult[] = [];
+  /** Ventil-Klasse je neuem Duplikat für den Bericht. */
+  const classById = new Map<string, ValveClass | null>();
   for (const country of countries) {
     const cPlan = plansByCountry.get(country) ?? { markDuplicate: [], release: [], primaries: [] };
     const garbageIds = garbageByCountry.get(country) ?? [];
@@ -630,6 +635,7 @@ async function main(): Promise<void> {
     const byClass = new Map<ValveClass, number>();
     for (const m of cPlan.markDuplicate) {
       const c = classify(m);
+      classById.set(`${m.id}>${m.primaryId}`, c);
       if (c) byClass.set(c, (byClass.get(c) ?? 0) + 1);
     }
     const cNew = cPlan.markDuplicate.filter(m => m.isNew).length;
@@ -649,6 +655,11 @@ async function main(): Promise<void> {
       },
       violations: checkSafetyValve(cPlan, limits, garbageIds.length, classify),
     });
+  }
+  for (const r of report) {
+    if (r.action === 'release') continue;
+    r.valveClass = classById.get(`${r.id}>${r.primaryId}`) ?? null;
+    r.createdAt = allRows.get(r.id)?.created_at ?? null;
   }
   const sum = (k: keyof RunStats) => results.reduce((n, r) => n + r.stats[k], 0);
   const stock = sum('stock');

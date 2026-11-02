@@ -585,8 +585,11 @@ function venueRelation(rawA: VenueFeatures, rawB: VenueFeatures): VenueRelation 
   // Eine Adresse als Ortsname sagt nichts über den Venue-Namen der anderen Zeile.
   if (va.isAddress !== vb.isAddress) return 'unknown';
   // Nur Gattungswörter („Pfarrkirche"), außer beide nennen denselben Ort
-  // („Hauptplatz Haugsdorf").
-  const same: VenueRelation = va.core.size === 0 && vb.core.size === 0 && !sameTown ? 'generic' : 'same';
+  // („Hauptplatz Haugsdorf"). Auch wenn nur EINE Seite bloß ein Gattungswort
+  // ist: „Pfarrkirche" (Würflach, Ortsname entfernt) steckt in „Römisch-
+  // katholische Stadtpfarrkirche" (Neunkirchen), ist aber kein Beleg für
+  // dieselbe Kirche (Probelauf 2026-11-02).
+  const same: VenueRelation = (va.core.size === 0 || vb.core.size === 0) && !sameTown ? 'generic' : 'same';
   if (va.compact === vb.compact) return same;
   const [s, l] = va.tokens.length <= vb.tokens.length ? [va, vb] : [vb, va];
   if (containsSequence(l.tokens, s.tokens)) return same;

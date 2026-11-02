@@ -133,6 +133,15 @@ describe('Golden-Set: verschiedene Events bleiben getrennt', () => {
     // … aber zur Prüfung vorgemerkt.
     expect(result.pairs.some(p => p.breakdown.decision === 'uncertain')).toBe(true);
   });
+
+  it('Allerseelen: „Pfarrkirche Würflach" ist nicht die Stadtpfarrkirche Neunkirchen (Probelauf 2026-11-02)', () => {
+    // Ohne den eigenen Ortsnamen bleibt „Pfarrkirche", das als Teilwort in
+    // „Römisch-katholische Stadtpfarrkirche" steckt: kein Beleg für denselben Ort.
+    const { owner } = clusterOf(rows('7133da31', '28a554c8', '8e2b6360', 'ae28c069'));
+    together(owner, '7133da31', 'ae28c069');
+    together(owner, '28a554c8', '8e2b6360');
+    apart(owner, '7133da31', '28a554c8');
+  });
 });
 
 describe('Golden-Set: Tagesgruppen nach Wiener Kalendertag', () => {
