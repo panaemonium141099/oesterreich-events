@@ -14,9 +14,8 @@ Rahmenbedingungen: Der Qualitätsvertrag DE im Epic-Spec (`flowctl cat fn-29-de-
 - [ ] Erst nach bestandenem Prüfstand in den Nachtlauf
 
 ## Done summary
-TBD
-
+Amts- und VG-Kalender laufen über die bestehenden Adapter (viaVerband), keine zweite Logik. Neu: pickFeedGroups (gleicher Kalender einmal, Gemeinde vor Amt, keine Dubletten bei gleicher source_id), MEC- und communice-Ausweichwege, Registry-Builder fragt Amts-Startseiten (seriell), tribe-Standardseite, Etiketten-Regel „Samtgemeinde X“ ist kein Ort. Prüfstand-Sicht de-amt-vg (nicht Nachtlauf), Abdeckungs-Skript, Golden-Tests RP/NI/BB, Bericht docs/research/de-gemeinden/adapter-amt-vg.md. Prüfstand bestanden, Stichprobe 30/30, Dorffest Hinzweiler gegen Quelle geprüft. Abdeckung: 80 von 733 Gemeinden mit sichtbarem Termin.
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: 5af61554
+- Tests: src/__tests__/lib/scrapers/amt-vg-de.test.ts, src/__tests__/lib/registry-de/registry-de.test.ts
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/428
