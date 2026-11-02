@@ -126,7 +126,7 @@ export class AllgemeinDeScraper extends DeFeedScraper {
   }
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = allgemeinGroups().slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(allgemeinGroups());
     const byHost = new Map<string, FeedGroup[]>();
     for (const g of groups) {
       const h = new URL(g.feedUrl).host;

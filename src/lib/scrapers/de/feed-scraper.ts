@@ -12,6 +12,7 @@
 import { BaseScraper } from '../BaseScraper';
 import type { FetchHtmlResult } from '../fetch-html';
 import { robotsAllows, robotsCrawlDelay } from '@/lib/registry-de/robots';
+import { pickFeedGroups, type FeedGroup } from '@/lib/registry-de/load';
 import { sharedRobotsTxt, throughHostGate } from './host-gate';
 
 const UA_TOKEN = 'lasstreffen';
@@ -31,9 +32,18 @@ export abstract class DeFeedScraper extends BaseScraper {
   private cursorDone = new Set<string>();
   private cursorPrefix = 0;
 
-  /** Nur für den Prüfstand und Tests: Feeds einschränken. */
-  constructor(protected readonly limit?: number) {
+  /**
+   * Nur für den Prüfstand und Tests: Feeds einschränken (`limit`) bzw. nur
+   * die Kalender lesen, die Gemeinden über ihr Amt oder ihre VG nutzen
+   * (`onlyVerband`, Prüfstand `de-amt-vg`, fn-29.17).
+   */
+  constructor(protected readonly limit?: number, protected readonly onlyVerband = false) {
     super();
+  }
+
+  /** Kalender in Lesereihenfolge (`pickFeedGroups`: gleiche Kalender zusammen, Gemeinde vor Amt). */
+  protected pickGroups(groups: FeedGroup[], key?: (feedUrl: string) => string): FeedGroup[] {
+    return pickFeedGroups(groups, { limit: this.limit, onlyVerband: this.onlyVerband, key });
   }
 
   protected robotsTxt(origin: string): Promise<string | null> {
@@ -78,7 +88,7 @@ export abstract class DeFeedScraper extends BaseScraper {
   }
 
   /** robots.txt prüfen und die Pause einhalten; false, wenn gesperrt. */
-  private async gate(url: string): Promise<boolean> {
+  protected async gate(url: string): Promise<boolean> {
     const robots = await this.robotsTxt(new URL(url).origin);
     if (!robotsAllows(robots, url, UA_TOKEN)) {
       this.log(`robots.txt sperrt ${url}`);

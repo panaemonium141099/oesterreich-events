@@ -23,7 +23,7 @@ export class TribeDeScraper extends DeFeedScraper {
   readonly integrations = ['tribe'];
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = feedGroups('tribe').slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(feedGroups('tribe'));
     const today = new Date();
     const from = today.toISOString().slice(0, 10);
     const to = new Date(today.getTime() + 365 * 86_400_000).toISOString().slice(0, 10);

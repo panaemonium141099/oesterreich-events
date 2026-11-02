@@ -87,7 +87,7 @@ export class CeasyDeScraper extends DeFeedScraper {
   }
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = ceasyGroups().slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(ceasyGroups());
     const done = new Set<string>();
     const all: ScrapedEvent[] = [];
     for (const g of groups) {

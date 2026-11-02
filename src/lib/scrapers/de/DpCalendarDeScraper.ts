@@ -33,7 +33,7 @@ export class DpCalendarDeScraper extends DeFeedScraper {
   readonly integrations = ['dpcalendar'];
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = feedGroups('dpcalendar').slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(feedGroups('dpcalendar'));
     const from = new Date();
     const to = new Date(from.getTime() + 365 * 86_400_000);
     const all: ScrapedEvent[] = [];

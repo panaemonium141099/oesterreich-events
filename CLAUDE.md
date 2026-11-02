@@ -113,8 +113,8 @@ node / next.js
   laufen, steht an EINER Stelle: `DE_NACHTLAUF` in
   `src/lib/scrapers/de/nachtlauf.ts` (Adapter → Prüfstand-Bericht; neuer
   Adapter = eine Zeile, Wächter `de-nachtlauf.test.ts` prüft Bericht und
-  Workflow). Nicht dabei: nolis (Lizenz), verwaltungsportal (Prüfstand
-  offen). Shards: Adapter mit gemeinsamer Website (laut Registry,
+  Workflow). Nicht dabei: nolis (Lizenz) und de-amt-vg
+  (nur Prüfstand). Shards: Adapter mit gemeinsamer Website (laut Registry,
   `adapterHosts`) im selben Shard, sonst LPT nach `DE_SCRAPER_WEIGHTS`.
   Jeder Abruf eines DE-Adapters geht durch die Sperre je Website
   (`host-gate.ts`): ein Abruf zur Zeit, Pause = Crawl-delay, auch über
@@ -123,6 +123,8 @@ node / next.js
   Teilergebnis), harte Grenze 210 min. iKISS (gut 2 h) setzt per Cursor je
   Website fort (`resumeGroups`/`groupDone` in `feed-scraper.ts`; nie
   mitten in einer Website, Amts- und Gemeindekalender teilen Termine).
+  verwaltungsportal (752 Websites auf einem Server, 4 s Pause) liest
+  rund 120 je Nacht und setzt nach der letzten fertigen Website fort.
   `workflow_dispatch` mit `scraper=de` startet nur die DE-Shards und das
   Post-Processing. Ventile rechnen je Land: der Dedup schreibt je Land eine
   Zeile in `dedup_runs` (`country`, Migration `20261102120000`), Anker und
@@ -253,7 +255,11 @@ node / next.js
   (Cache in `.pruefstand/`, derselbe Schreibweg wie der Sync ohne Schreiben,
   Bericht mit Schwellen und 30er-Stichprobe in den PR). Schwellen in
   `src/lib/pruefstand/schwellen.ts`, AT-Referenz `data/pruefstand/at-referenz.json`
-  (`npm run pruefstand:at-referenz`, nur lesend gegen Prod).
+  (`npm run pruefstand:at-referenz`, nur lesend gegen Prod). Amts-/VG-Kalender
+  (fn-29.17) lesen die Adapter selbst mit (`viaVerband`, `pickFeedGroups`: gleicher
+  Kalender einmal, Gemeinde vor Amt); `de-amt-vg` ist nur Prüfstand-Sicht, nie Nachtlauf.
+  Abdeckung: `npx tsx src/scripts/amt-vg-abdeckung.ts`, Bericht
+  `docs/research/de-gemeinden/adapter-amt-vg.md`.
 - **Nur Österreich (2026-10-08):** lasstreffen.at spielt ausschließlich
   Events mit `country = SITE_COUNTRY` (`src/lib/site-country.ts`, 'AT') aus.
   DE/CH-Events (Eventim) bleiben in der DB und im Import für spätere
@@ -303,7 +309,12 @@ node / next.js
   Verzeichnis, dann Spotify; „Deine Künstler“ nur mit sb-Cookie über
   `/api/artists/following`; Folgen optimistisch über `/api/artists/follow`;
   Künstlerblatt als Sheet mit Terminen, Event-Links und Ticketlinks
-  (`ticket_url` bzw. `evo_link`, `data-track="ticket_click"`).
+  (`ticket_url` bzw. `evo_link`, `data-track="ticket_click"`). Dasselbe
+  Blatt als Seite: `src/app/[locale]/kuenstler/[slug]/page.tsx` (ISR,
+  Slug aus dem Namen über `artistSlug`, mehrere Feed-IDs eines Namens
+  vereint `artistBySlug`, JSON-LD Person/MusicGroup mit Terminen, in der
+  Core-Sitemap). Alle Leser teilen `getArtistsDirectoryCached`
+  (unstable_cache, 1 h, rund 1,2 MB).
 - `src/app/api/events/route.ts` — Events-API (Cursor-Pagination, bbox, Filter)
 - `src/app/api/events/map-points/route.ts` — columnar Karten-Snapshot aus MV (fn-16)
 - `src/app/api/search/semantic/route.ts` — Smart-Suche (Gemini-Intent →

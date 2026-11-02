@@ -1,0 +1,144 @@
+BEGIN:VCALENDAR
+PRODID:-//NOLIS GmbH//NOLIS-Manager Kalender V3.5//DE
+VERSION:2.0
+METHOD:PUBLISH
+LAST-MODIFIED:20261102T182248Z
+NAME:Kalender
+X-WR-CALNAME:Kalender
+X-WR-TIMEZONE:UTC
+TZID:UTC
+X-VCALENDAR-VERSION:3.5
+BEGIN:VEVENT
+DTSTART:20261103T150000Z
+SUMMARY:Bürgermeistersprechstunde
+PRIORITY:0
+DTEND:20261103T160000Z
+X-SERIENCONTAINER:900005155
+LOCATION:Rathaus Sottrum, Raiffeisenstraße 1, 27367 Sottrum
+X-LOCATION-ID:900000001
+X-LOCATION-OWNER:23830
+UID:e793839578d664cf022c1f1cc55e2ba9
+X-ID:23830_900005174
+DTSTAMP:20250312T123254Z
+CATEGORIES:Politik / Kommunalpolitik
+X-CATEGORIES:607
+DESCRIPTION:Am 1. Dienstag eines jeden Monats findet die Bürgermeistersprechstunde der Gemeinde Sottrum statt. \n\nSie erreichen Bürgermeister Achim Figgen im Sitzungssaal des Rathauses in Sottrum. 
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:9.228388115;53.116831111
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04264 8320-0
+CREATED:20250205T095212Z
+LAST-MODIFIED:20250312T123254Z
+X-KOMMUNE:Samtgemeinde Sottrum
+X-KOMMUNE-ID:23830
+X-RESSORT:Schulausfall
+X-RESSORT-ID:900000001
+X-SCHLAGWORTE:Bürgermeister, Bürgermeistersprechstunde, Sprechstunde, Achim Figgen
+X-ORGANIZER:Gemeinde Sottrum - Gemeindebüro\nAm Eichkamp 12\n27367 Sottrum
+X-ORGANIZER-ID:900000008
+X-ORGANIZER-OWNER:23830
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261106T230000Z
+SUMMARY:Bundesweiter Kinderturntag in Sottrum
+PRIORITY:0
+LOCATION:Turnhalle an der Oberschule Sottrum - Großturnhalle, Am Bullenworth 5, 27367 Sottrum
+X-LOCATION-ID:900000197
+X-LOCATION-OWNER:23830
+UID:9f1fea41c70ff2be4d42313beb52623a
+X-ID:23830_900005596
+DTSTAMP:20251024T063650Z
+CATEGORIES:Veranstaltungen aus Vereinen und Gruppen
+X-CATEGORIES:601
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.tv-sottrum.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04264 370470\nHomepage: http://www.tv-sottrum.de\nE-Mail: info@tv-sottrum.de
+CREATED:20251023T150117Z
+LAST-MODIFIED:20251024T063650Z
+X-KOMMUNE:Samtgemeinde Sottrum
+X-KOMMUNE-ID:23830
+X-ORT:Sottrum
+X-ORT-ID:23837
+X-RESSORT:Schulausfall
+X-RESSORT-ID:900000001
+X-KURZBESCHREIBUNG:Bundesweiter Kinderturntag für Kinder ab 4 Jahren.\nAnmeldung über den Turnkreis Rotenburg.
+X-KURZ-DETAIL:0
+X-ORGANIZER:TV Sottrum und der Turnkreis Rotenburg
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261210T143000Z
+SUMMARY:Kindergottesdienst in Horstedt
+PRIORITY:0
+DTEND:20261210T160000Z
+LOCATION:Johannes-der-Täufer Kirche Horstedt, Kirchstraße 6, 27367 Horstedt
+X-LOCATION-ID:900000168
+X-LOCATION-OWNER:23830
+UID:2d23db13d2bd8091d9e2cfbe602248db
+X-ID:23830_900005544
+DTSTAMP:20251014T085203Z
+CATEGORIES:Gottesdienst,Kirchliche Veranstaltungen,Kinderveranstaltungen
+X-CATEGORIES:10015,606,901
+DESCRIPTION:Kindergottesdienst in Horstedt\nmit Pastorin Haike Gleede und Team\nmit anschließender Aufführung im HoB
+CLASS:PUBLIC
+URL;VALUE=URI:https://www.kirchengemeinde-horstedt.de/
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04288 320\nHomepage: https://www.kirchengemeinde-horstedt.de/\nE-Mail: KG.Horstedt@evlka.de
+CREATED:20251010T134800Z
+LAST-MODIFIED:20251014T085203Z
+X-KOMMUNE:Samtgemeinde Sottrum
+X-KOMMUNE-ID:23830
+X-ORT:Horstedt
+X-ORT-ID:23835
+X-RESSORT:Schulausfall
+X-RESSORT-ID:900000001
+X-KURZBESCHREIBUNG:Kindergottesdienst in Horstedt\nmit Pastorin Haike Gleede und Team\nmit anschließender Aufführung im HoB
+X-KURZ-DETAIL:0
+X-ORGANIZER:Ev.-Luth. Johannes-der-Täufer-Kirchengemeinde Horstedt\n 
+X-ORGANIZER-ID:900000142
+X-ORGANIZER-OWNER:23830
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20270415T133000Z
+SUMMARY:Kindergottesdienst in Horstedt
+PRIORITY:0
+DTEND:20270415T150000Z
+LOCATION:Johannes-der-Täufer Kirche Horstedt, Kirchstraße 6, 27367 Horstedt
+X-LOCATION-ID:900000168
+X-LOCATION-OWNER:23830
+UID:b4542b8de79ac43666e645f19ca39218
+X-ID:23830_900006761
+DTSTAMP:20261029T071826Z
+CATEGORIES:Gottesdienst,Kirchliche Veranstaltungen,Kinderveranstaltungen
+X-CATEGORIES:10015,606,901
+DESCRIPTION:Kindergottesdienst in Horstedt\nmit Pastorin Haike Gleede & Team
+CLASS:PUBLIC
+URL;VALUE=URI:https://www.kirchengemeinde-horstedt.de/
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04288 320\nHomepage: https://www.kirchengemeinde-horstedt.de/\nE-Mail: KG.Horstedt@evlka.de
+CREATED:20261028T145022Z
+LAST-MODIFIED:20261029T071826Z
+X-KOMMUNE:Samtgemeinde Sottrum
+X-KOMMUNE-ID:23830
+X-ORT:Horstedt
+X-ORT-ID:23835
+X-RESSORT:Schulausfall
+X-RESSORT-ID:900000001
+X-KURZBESCHREIBUNG:Kindergottesdienst in Horstedt\nmit Pastorin Haike Gleede & Team
+X-KURZ-DETAIL:0
+X-ORGANIZER:Ev.-Luth. Johannes-der-Täufer-Kirchengemeinde Horstedt\n 
+X-ORGANIZER-ID:900000142
+X-ORGANIZER-OWNER:23830
+X-NOLISEXPORT:1
+END:VEVENT
+END:VCALENDAR

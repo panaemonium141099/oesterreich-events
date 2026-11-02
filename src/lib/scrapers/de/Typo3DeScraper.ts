@@ -165,7 +165,7 @@ export class Typo3DeScraper extends DeFeedScraper {
   }
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = typo3Groups().slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(typo3Groups());
     const all: ScrapedEvent[] = [];
     const ids = new Set<string>();
     for (const g of groups) {

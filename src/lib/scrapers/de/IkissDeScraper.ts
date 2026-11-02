@@ -153,7 +153,7 @@ export class IkissDeScraper extends DeFeedScraper {
   }
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = ikissGroups().slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(ikissGroups());
     // Nachtlauf (fn-29.18): alle Detailseiten dauern gut zwei Stunden. Der
     // Lauf setzt je Website fort, nie mitten in einer: Amts- und
     // Gemeindekalender derselben Website teilen Termine (`taken`), die

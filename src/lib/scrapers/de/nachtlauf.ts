@@ -3,8 +3,8 @@
  *
  * Ein Adapter kommt in den Nachtlauf, wenn sein Prüfstand bestanden ist und
  * der Bericht (`docs/research/de-gemeinden/adapter-*.md`) auf master liegt:
- * eine Zeile in `DE_NACHTLAUF`. Nicht dabei: nolis (Lizenzquelle, fn-29.19),
- * verwaltungsportal (Prüfstand offen, fn-29.11).
+ * eine Zeile in `DE_NACHTLAUF`. Nicht dabei: nolis (Lizenzquelle, fn-29.19)
+ * und `de-amt-vg` (nur Prüfstand, die Adapter lesen ihre Amtskalender mit).
  *
  * Shards: Adapter, die eine Website gemeinsam lesen, laufen im selben Shard,
  * dort hält die Sperre je Website (`host-gate.ts`) sie auseinander. Über
@@ -36,6 +36,8 @@ export const DE_NACHTLAUF: Readonly<Record<string, string>> = {
   'de-weblication': 'adapter-weblication.md',
   'de-digipublica': 'adapter-digipublica.md',
   'de-open2c': 'adapter-open2c.md',
+  'de-activecity': 'adapter-activecity.md',
+  'de-verwaltungsportal': 'adapter-verwaltungsportal.md',
 };
 
 export const DE_SHARD_COUNT = 3;
@@ -54,10 +56,12 @@ export const DE_TIMEOUT_MIN = 210;
  * Laufzeit-Gewichte in Minuten. Erste Werte aus den Prüfstand-Läufen
  * (iKISS 8.465 Abrufe gut zwei Stunden, allgemein 22 min mit vier Websites
  * gleichzeitig, Komm.ONE knapp 30 min bei Crawl-delay 30, communice 1.245
- * Abrufe), sonst aus der Zahl der Kalender geschätzt. Nach den ersten
+ * Abrufe, verwaltungsportal nutzt das ganze Budget: bei 180 min rund
+ * 120 von 752 Websites je Nacht), sonst aus der Zahl der Kalender geschätzt. Nach den ersten
  * Läufen aus source_runs nachziehen (Abfrage bei SCRAPER_WEIGHTS).
  */
 const DE_SCRAPER_WEIGHTS: Readonly<Record<string, number>> = {
+  'de-verwaltungsportal': 180,
   'de-ikiss': 130,
   'de-communice': 40,
   'de-kommone': 30,
@@ -75,6 +79,7 @@ const DE_SCRAPER_WEIGHTS: Readonly<Record<string, number>> = {
   'de-eventsmanager': 5,
   'de-digipublica': 5,
   'de-open2c': 5,
+  'de-activecity': 5,
 };
 const DEFAULT_WEIGHT = 10;
 

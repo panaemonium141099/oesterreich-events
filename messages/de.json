@@ -224,7 +224,15 @@
     "toastUnfollowed": "{name} entfernt.",
     "toastError": "Das hat nicht geklappt, bitte noch einmal versuchen.",
     "today": "Heute",
-    "tomorrow": "Morgen"
+    "tomorrow": "Morgen",
+    "pageMetaTitle": "{name}: Termine in Österreich",
+    "pageMetaDescription": "{name} live in Österreich: {count} Termine, zuerst am {first}. Alle Termine mit Tickets, Künstler folgen und keinen Termin verpassen.",
+    "pageMetaDescriptionOne": "{name} live in Österreich am {first}. Termin mit Tickets, Künstler folgen und keinen Termin verpassen.",
+    "pageBack": "Alle Künstler",
+    "pageDates": "Termine in Österreich",
+    "pageUpdated": "Stand {date}, Termine der nächsten drei Monate.",
+    "pageOpen": "Künstlerseite",
+    "notFound": "Künstler nicht gefunden"
   },
   "Footer": {
     "rights": "Alle Rechte vorbehalten.",

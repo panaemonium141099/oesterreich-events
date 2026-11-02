@@ -146,7 +146,7 @@ export class KommOneDeScraper extends DeFeedScraper {
   }
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = kommOneGroups().slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(kommOneGroups());
     const results: ScrapedEvent[][] = new Array(groups.length);
     let next = 0;
     const worker = async () => {

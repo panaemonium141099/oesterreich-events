@@ -22,9 +22,15 @@ import { Typo3DeScraper } from './Typo3DeScraper';
 import { AllgemeinDeScraper } from './AllgemeinDeScraper';
 import { DigipublicaDeScraper } from './DigipublicaDeScraper';
 import { Open2cDeScraper } from './Open2cDeScraper';
+import { ActiveCityDeScraper } from './ActiveCityDeScraper';
+import { VerwaltungsportalDeScraper } from './VerwaltungsportalDeScraper';
+import { AmtVgDeScraper } from './AmtVgDeScraper';
 
-export const DE_SCRAPERS: BaseScraper[] = [new IonasDeScraper(), new NolisDeScraper(), new TribeDeScraper(), new EventsManagerDeScraper(), new MecDeScraper(), new DpCalendarDeScraper(), new JEventsDeScraper(), new ICagendaDeScraper(), new HwDeScraper(), new IkissDeScraper(), new KommOneDeScraper(), new CommuniceDeScraper(), new CeasyDeScraper(), new WeblicationDeScraper(), new Typo3DeScraper(), new AllgemeinDeScraper(), new DigipublicaDeScraper(), new Open2cDeScraper()];
+export const DE_SCRAPERS: BaseScraper[] = [new IonasDeScraper(), new NolisDeScraper(), new TribeDeScraper(), new EventsManagerDeScraper(), new MecDeScraper(), new DpCalendarDeScraper(), new JEventsDeScraper(), new ICagendaDeScraper(), new HwDeScraper(), new IkissDeScraper(), new KommOneDeScraper(), new CommuniceDeScraper(), new CeasyDeScraper(), new WeblicationDeScraper(), new Typo3DeScraper(), new AllgemeinDeScraper(), new DigipublicaDeScraper(), new Open2cDeScraper(), new ActiveCityDeScraper(), new VerwaltungsportalDeScraper()];
+
+/** Nur Prüfstand: Sichten auf die Adapter oben, nie im Nachtlauf (fn-29.17). */
+export const DE_PRUEFSTAND_SCRAPERS: BaseScraper[] = [new AmtVgDeScraper()];
 
 export function getDeScraperByName(name: string): BaseScraper | undefined {
-  return DE_SCRAPERS.find(s => s.name === name);
+  return [...DE_SCRAPERS, ...DE_PRUEFSTAND_SCRAPERS].find(s => s.name === name);
 }
