@@ -11,7 +11,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { contaoWhen, fieldDate, parseContaoPage, parsePlace, splitOrtSuffix, whenFromTimes } from '@/lib/scrapers/de/contao';
 import { calendarizeWhen, detailId, parseTypo3Detail, parseTypo3Page } from '@/lib/scrapers/de/typo3';
 import { Typo3DeScraper, mergeSameTermin, typo3Groups } from '@/lib/scrapers/de/Typo3DeScraper';
@@ -41,6 +41,12 @@ type K = keyof typeof KAL;
 
 const entry = (k: K): RegistryEntryDe => ({ ...KAL[k], host: new URL(KAL[k].url).host.replace(/^www\./, ''), stufe: 'B', checked_at: '2026-10-28' });
 const group = (k: K): FeedGroup => ({ feedUrl: KAL[k].url, pageUrl: KAL[k].url, own: [entry(k)], viaVerband: [] });
+// Die Fixtures stammen vom 30.10.2026 und listen Termine an diesem Tag.
+// Der Freigabevertrag misst gegen die Uhr (start_in_past); sie steht
+// deshalb auf dem Abrufdatum, sonst kippen die Zeilen mit jedem Tag.
+beforeAll(() => vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-30T12:00:00Z') }));
+afterAll(() => vi.useRealTimers());
+
 const contao = (k: K) => parseContaoPage(fx(k), KAL[k].url);
 const typo3 = (k: K) => parseTypo3Page(fx(k), KAL[k].url);
 const termin = (list: CmsTermin[], title: string) => list.find(t => t.title === title)!;
