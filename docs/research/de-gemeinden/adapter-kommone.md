@@ -60,8 +60,8 @@ neu, keine weg.
 Gemeinde-Dienste aus echten Proben in Quarantäne: Altpapier- und Schrottsammlungen der
 Feuerwehren, Weihnachtsbaumsammlung, „PV-Sprechstunde“. Sitzungen bleiben sichtbar wie in
 Österreich und bei hwveranstaltung (71 öffentliche Zeilen mit Sitzung, Gemeinderat oder
-Ausschuss im Titel); die Entscheidung dazu liegt beim User und käme als Änderung in
-`municipal-service.ts` für AT und DE.
+Ausschuss im Titel). Der User hat das am 2026-11-02 so entschieden („Nein, sichtbar
+lassen“): Sitzungen bleiben in AT und DE sichtbar, nur die Smart-Suche filtert sie.
 
 Stichprobe (30 öffentliche Zeilen aus dem Bericht) gegen die Detailseite der Quelle, je
 Seite einzeln abgerufen: 30 von 30 Titel, Datum, Uhrzeit und Ort korrekt. Ganztägig ohne

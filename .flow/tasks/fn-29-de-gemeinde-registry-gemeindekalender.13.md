@@ -1,7 +1,7 @@
 # fn-29-de-gemeinde-registry-gemeindekalender.13 Adapter Advantic iKISS (364 Gemeinden)
 
 ## Description
-HTML `ModID=11` (`result-list veranstaltungen`, `<time datetime>`), `/output/` per robots.txt gesperrt; Kalender oft nur Sitzungen (Gemeinde-Dienste-Quarantäne).
+HTML `ModID=11` (`result-list veranstaltungen`, `<time datetime>`), `/output/` per robots.txt gesperrt; viele Kalender führen Sitzungen; die bleiben sichtbar (Entscheidung des Users 2026-11-02), Sprechstunden und andere Gemeinde-Dienste gehen in die Quarantäne `municipal_service`.
 
 Rahmenbedingungen: Der Qualitätsvertrag DE im Epic-Spec (`flowctl cat fn-29-de-gemeinde-registry-gemeindekalender`) gilt verbindlich. Belege und Zugriffswege: `docs/research/de-gemeinden/01-vollerhebung.md` und `00-bundesweit.md`.
 ## Acceptance

@@ -37,11 +37,13 @@ unbekannt; was nicht sicher ist, wird nicht veröffentlicht.
    (z. B. ionas `events.json`) werden als Ortszeit gelesen, Quellen mit `Z` nur dann als
    UTC, wenn die Probe das belegt (NUSSBAUM-`Z` ist Ortszeit). Keine erfundene Uhrzeit:
    ganztägig bleibt ganztägig. Datum nie als Uhrzeit lesen (PR #302).
-5. **Gemeinde-Dienste nicht anzeigen:** Sitzungen, Sprechstunden, Müllabfuhr,
+5. **Gemeinde-Dienste nicht anzeigen:** Sprechstunden, Müllabfuhr und
    Bekanntmachungen gehen in Quarantäne `municipal_service`
    (`src/lib/category-classifier/municipal-service.ts`), Vokabular um deutsche
-   Begriffe ergänzt (z. B. Ortsgemeinderat, Gelber Sack, Bürgersprechstunde), belegt
-   aus echten Proben der Adapter.
+   Begriffe ergänzt (z. B. Gelber Sack, Bürgersprechstunde), belegt aus echten Proben
+   der Adapter. Gemeinderats- und Ausschusssitzungen bleiben sichtbar wie in
+   Österreich, nur die Smart-Suche filtert sie (Entscheidung des Users 2026-11-02,
+   „Nein, sichtbar lassen“); keine Sonderregel im Adapter.
 6. **Inhalt nur aus der Quelle:** keine KI-Beschreibungen (MASTERPLAN §6), Kategorie
    nur über den deterministischen Classifier. Bilder (Entscheidung des Users
    2026-10-29, ersetzt „nur mit belegtem Nutzungsrecht"): das Bild der Quelle wird
