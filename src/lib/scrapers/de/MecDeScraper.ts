@@ -13,6 +13,7 @@
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
+import type { RegistryEntryDe } from '@/lib/registry-de/build';
 import { loadRegistryDe, type FeedGroup } from '@/lib/registry-de/load';
 import type { ScrapedEvent } from '@/types/events';
 import { DeFeedScraper } from './feed-scraper';
@@ -23,14 +24,18 @@ import { collapseSourceDuplicates, terminContext } from './kontext';
 /** Kalenderseiten aller MEC-Gemeinden, je Seite die Gemeinden, die sie führen. */
 export function mecGroups(): FeedGroup[] {
   const groups = new Map<string, FeedGroup>();
-  for (const e of loadRegistryDe()) {
-    if (e.integration !== 'mec') continue;
+  const add = (url: string | null, host: string | null, e: RegistryEntryDe, via: boolean) => {
     // Ohne Kalenderseite (die Registry verwirft Plugin-Dateien als URL) das MEC-Archiv.
-    const url = e.url ?? (e.host ? `https://${e.host}/events/` : null);
-    if (!url) continue;
-    const g = groups.get(url) ?? { feedUrl: url, pageUrl: url, own: [], viaVerband: [] };
-    g.own.push(e);
-    groups.set(url, g);
+    const page = url ?? (host ? `https://${host}/events/` : null);
+    if (!page) return;
+    const g = groups.get(page) ?? { feedUrl: page, pageUrl: page, own: [], viaVerband: [] };
+    (via ? g.viaVerband : g.own).push(e);
+    groups.set(page, g);
+  };
+  for (const e of loadRegistryDe()) {
+    if (e.integration === 'mec') add(e.url, e.host, e, false);
+    // Kalender des Amts bzw. der VG (fn-29.17).
+    if (e.fallback?.kind === 'verband' && e.fallback.integration === 'mec') add(e.fallback.url, e.fallback.host, e, true);
   }
   return [...groups.values()].sort((a, b) => a.feedUrl.localeCompare(b.feedUrl));
 }
@@ -62,7 +67,7 @@ export class MecDeScraper extends DeFeedScraper {
   readonly name = 'de-mec';
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = mecGroups().slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(mecGroups());
     const all: ScrapedEvent[] = [];
     const seen = new Set<string>();
     for (const g of groups) {

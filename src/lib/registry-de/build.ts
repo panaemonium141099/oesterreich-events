@@ -88,6 +88,11 @@ export function eventPageUrl(raw: string | null): string | null {
   }
 }
 
+/** Startseite eines Amts bzw. einer VG, für die die Erhebung keine Kalenderseite kennt. */
+export function verbandHomeUrl(host: string): string {
+  return `https://${host.trim()}/`;
+}
+
 export function buildRegistry(input: BuildInput): BuildResult {
   const problems: string[] = [];
   const seen = new Set<string>();
@@ -111,7 +116,9 @@ export function buildRegistry(input: BuildInput): BuildResult {
       else {
         const vbUrl = eventPageUrl(nn(r.vb_event_url));
         e.fallback = { kind: 'verband', host: r.vb_host, integration: r.vb_integration, url: vbUrl };
-        if (stufeOf(r.vb_integration) === 'A' && vbUrl && input.feeds.has(vbUrl)) e.fallback.feed_url = input.feeds.get(vbUrl)!;
+        // Ohne Kalenderseite hat der Feed-Lauf die Startseite des Amts gefragt.
+        const page = vbUrl ?? verbandHomeUrl(r.vb_host);
+        if (stufeOf(r.vb_integration) === 'A' && input.feeds.has(page)) e.fallback.feed_url = input.feeds.get(page)!;
       }
     } else if (stufe === 'M') {
       if (!nn(r.meinort_ort)) problems.push(`${r.ags}: Stufe M ohne meinOrt-Ort`);

@@ -150,7 +150,7 @@ export class IkissDeScraper extends DeFeedScraper {
   }
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = ikissGroups().slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(ikissGroups());
     const all: ScrapedEvent[] = [];
     const taken = new Set<string>();
     for (const g of groups) {

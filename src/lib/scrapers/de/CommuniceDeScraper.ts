@@ -18,6 +18,7 @@ import { applyGemeindeContext, type GemeindeContext } from '../gemeinde-context'
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
 import type { GemeindeDe } from '@/lib/gemeinden/de';
 import { normalizeGemeindeName } from '@/lib/location/gemeinde-name';
+import { calendarPageCandidates } from '@/lib/registry-de/feed-url';
 import { loadRegistryDe, type FeedGroup } from '@/lib/registry-de/load';
 import type { RegistryEntryDe } from '@/lib/registry-de/build';
 import type { ScrapedEvent } from '@/types/events';
@@ -50,7 +51,11 @@ export function communiceGroups(entries: RegistryEntryDe[] = loadRegistryDe()): 
   };
   for (const e of entries) {
     if (e.integration === 'communice' && e.url) group(e.url).own.push(e);
-    if (e.fallback?.kind === 'verband' && e.fallback.integration === 'communice' && e.fallback.url) group(e.fallback.url).viaVerband.push(e);
+    // Amt ohne Kalenderseite in der Erhebung: Standardseite des Herstellers
+    // (`calendarPageCandidates`, belegt in 03-schleswig-holstein), fn-29.17.
+    const f = e.fallback?.kind === 'verband' && e.fallback.integration === 'communice' ? e.fallback : null;
+    const page = f ? (f.url ?? calendarPageCandidates('communice', `https://www.${f.host.replace(/^www\./, '')}`)[0]) : null;
+    if (f && page) group(page).viaVerband.push(e);
   }
   return [...groups.values()].sort((a, b) => a.feedUrl.localeCompare(b.feedUrl));
 }
@@ -201,7 +206,7 @@ export class CommuniceDeScraper extends DeFeedScraper {
   }
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = communiceGroups().slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(communiceGroups());
     const today = new Date().toISOString().slice(0, 10);
     // Mehrere Registry-Seiten können auf denselben Kalender führen
     // (Startseite → /veranstaltungen): je Kalender ein Lauf, Gemeinden vereint.

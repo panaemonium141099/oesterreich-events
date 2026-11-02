@@ -78,7 +78,7 @@ export class Open2cDeScraper extends DeFeedScraper {
   }
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = open2cGroups().slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(open2cGroups());
     const all: ScrapedEvent[] = [];
     let calendars = 0;
     for (const g of groups) {

@@ -20,7 +20,7 @@ abstract class JoomlaDeScraper extends DeFeedScraper {
   protected abstract idPrefix: string;
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = this.groups().slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(this.groups());
     const today = new Date().toISOString().slice(0, 10);
     const all: ScrapedEvent[] = [];
     const seen = new Set<string>();

@@ -84,7 +84,7 @@ export class WeblicationDeScraper extends DeFeedScraper {
   }
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = weblicationGroups().slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(weblicationGroups());
     const done = new Set<string>();
     const all: ScrapedEvent[] = [];
     for (const g of groups) {

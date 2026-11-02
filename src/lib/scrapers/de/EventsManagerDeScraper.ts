@@ -18,7 +18,7 @@ export class EventsManagerDeScraper extends DeFeedScraper {
   readonly name = 'de-eventsmanager';
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = feedGroups('eventsmanager').slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(feedGroups('eventsmanager'));
     const all: ScrapedEvent[] = [];
     for (const g of groups) {
       const ics = await this.fetchFeed(g.feedUrl);
