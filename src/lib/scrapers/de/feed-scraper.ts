@@ -32,7 +32,7 @@ export abstract class DeFeedScraper extends BaseScraper {
   }
 
   /** robots.txt prüfen und die Pause einhalten; false, wenn gesperrt. */
-  private async gate(url: string): Promise<boolean> {
+  protected async gate(url: string): Promise<boolean> {
     const robots = await this.robotsTxt(new URL(url).origin);
     if (!robotsAllows(robots, url, UA_TOKEN)) {
       this.log(`robots.txt sperrt ${url}`);
