@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Künstler C: Kartei</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* Kartei: links das Verzeichnis, rechts das Künstlerblatt. Der Künstler ist die Einheit,
+   nicht der Termin. Auf dem Handy ist das Blatt eine eigene Seite (Verzeichnis > Blatt). */
+.two{display:grid;grid-template-columns:400px 1fr;gap:0 48px;margin-top:8px;align-items:start}
+.list{border-top:1px solid var(--h2)}
+.list .grp{display:flex;align-items:baseline;gap:10px;padding:18px 0 6px}
+.list .grp h2{margin:0;font-size:15px;font-weight:800;letter-spacing:-.02em}
+.list .grp span{font-size:12.5px;color:var(--ink50)}
+.list .grp a{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--ink70)}
+.list .a{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;padding:8px 10px;margin:0 -10px;border-radius:10px;cursor:pointer}
+.list .a:hover{background:var(--h1)}
+.list .a.sel{background:var(--elev);border:1px solid var(--h3)}
+.list .a .av{width:40px;height:40px}
+.list .a .min{min-width:0}
+.list .a b{display:block;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list .a small{display:block;font-size:12px;color:var(--ink50);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list .a small.soon{color:var(--amber);font-weight:700}
+.list .a .k{font-size:11.5px;color:var(--ink50);white-space:nowrap}
+.list .a.fav b{color:var(--amber)}
+.list .abc{display:flex;flex-wrap:wrap;gap:2px;padding:14px 0 4px}
+.list .abc span{width:26px;height:26px;display:grid;place-items:center;border-radius:6px;font-size:12px;font-weight:700;color:var(--ink70)}
+.list .abc span.off{color:var(--ink30)}
+.list .abc span.on{background:#fff;color:#0a0a0c}
+
+/* Blatt rechts: wie das Sheet, aber liegend auf der Fläche */
+.card{position:sticky;top:84px}
+.card .top{display:grid;grid-template-columns:140px 1fr;gap:24px;align-items:end;padding-bottom:18px;border-bottom:1px solid var(--h2)}
+.card .top img,.card .top .fb{width:140px;height:140px;border-radius:16px;object-fit:cover}
+.card .top .fb{display:grid;place-items:center;font-size:48px;font-weight:800;color:var(--ink30);background:var(--elev)}
+.card h2{margin:0;font-size:34px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.card .top p{margin:8px 0 14px;font-size:14px;color:var(--ink50)}
+.card .top .act{display:flex;gap:10px;align-items:center}
+.card .top .act span{font-size:12.5px;color:var(--ink50)}
+.card .sh-dates{margin-top:4px;border-top:0}
+.card .sh-dates li{grid-template-columns:60px 1fr auto}
+.card .sh-sim{margin-top:28px}
+.card .sim-row{grid-template-columns:repeat(6,1fr)}
+.card .sh-src{margin-top:22px}
+.back{display:none}
+@media(max-width:900px){
+  .two{grid-template-columns:1fr}
+  .list .grp span{display:none}.list .grp h2{white-space:nowrap}
+  .card{display:none;position:fixed;inset:0;z-index:30;background:var(--surface);overflow-y:auto;padding:14px 16px 90px}
+  body.show-card .card{display:block}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;color:var(--ink70);margin-bottom:14px}
+  .card .top{grid-template-columns:96px 1fr;gap:16px}
+  .card .top img,.card .top .fb{width:96px;height:96px}
+  .card h2{font-size:26px}
+  .card .sim-row{grid-template-columns:repeat(3,1fr)}
+}
+</style></head><body>
+<script src="data.js"></script><script src="shared.js"></script>
+<script>document.write('<style>'+CHROME_CSS+'</style>');document.write(NAV)</script>
+
+<main class="wrap">
+  <header class="head">
+    <div><h1>Künstler</h1><p id="sub"></p></div>
+    <div class="searchbar">⌕ Name oder Spotify-Link</div>
+  </header>
+
+  <div class="two">
+    <div class="list" id="list"></div>
+    <div class="card" id="card"></div>
+  </div>
+</main>
+<div id="toast" role="status"></div>
+
+<script>
+const all = ARTISTS.filter(a => nextEvent(a));
+document.getElementById('sub').textContent = `${all.length} Künstler mit Terminen in Österreich, Stand heute`;
+
+let selected = SIGNED_IN ? 'alex-kristan' : 'bob-dylan';
+const rowHtml = a => { const e = nextEvent(a); return `<div class="a ${isFollowed(a.id) ? 'fav' : ''} ${a.id === selected ? 'sel' : ''}" data-sel="${a.id}">${avatar(a, 40)}<span class="min"><b>${a.name}</b><small class="${e && e.iso <= '2026-11-08' ? 'soon' : ''}">${e ? `${e.day}, ${e.city}${upcoming(a).length > 1 ? `, +${upcoming(a).length - 1}` : ''}` : 'noch kein Termin in Österreich'}</small></span><span class="k">${a.kind}</span></div>`; };
+
+function renderList() {
+  let html = '';
+  if (SIGNED_IN) {
+    const mine = FOLLOWED.map(artist).filter(Boolean).sort((x, y) => (nextEvent(x)?.iso || '9') < (nextEvent(y)?.iso || '9') ? -1 : 1);
+    html += `<div class="grp"><h2>Deine Künstler</h2><span>${mine.filter(nextEvent).length} von ${mine.length} mit Termin</span><a href="#">Benachrichtigungen</a></div>${mine.map(rowHtml).join('')}`;
+  }
+  const week = all.filter(a => weekOf(nextEvent(a).iso) === 'w1').sort((x, y) => nextEvent(x).iso < nextEvent(y).iso ? -1 : 1);
+  html += `<div class="grp"><h2>Diese Woche live</h2><span>2. bis 8. November</span></div>${week.slice(0, 8).map(rowHtml).join('')}`;
+  const sorted = [...all].sort((x, y) => x.name.localeCompare(y.name, 'de'));
+  const has = new Set(sorted.map(a => a.name[0].toUpperCase()));
+  html += `<div class="grp"><h2>Alle mit Termin</h2><span>von A bis Z</span></div><div class="abc"><span class="on">Alle</span>${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l => `<span class="${has.has(l) ? '' : 'off'}">${l}</span>`).join('')}</div>${sorted.map(rowHtml).join('')}`;
+  document.getElementById('list').innerHTML = html;
+}
+function renderCard() {
+  const a = artist(selected), evs = upcoming(a);
+  document.getElementById('card').innerHTML = `<a href="#" class="back" data-back>‹ Künstler</a>
+  <div class="top">${a.img ? `<img src="${a.img}" alt="" referrerpolicy="no-referrer">` : `<span class="fb">${initials(a.name)}</span>`}<div><h2>${a.name}</h2><p>${a.kind}${evs.length ? `, ${evs.length} Termin${evs.length === 1 ? '' : 'e'} in Österreich` : ', derzeit kein Termin in Österreich'}</p><div class="act">${followBtn(a.id, 'big')}<span>Neue Termine per Mail</span></div></div></div>
+  ${evs.length ? `<ul class="sh-dates">${evs.map(e => `<li><span class="d"><b>${e.wd} ${e.d}.</b><small>${e.m}</small></span><span class="min"><b>${progTitle(a, e)}</b><small>${progSub(a, e)}</small></span><a class="tix" href="#">Tickets</a></li>`).join('')}</ul>` : `<p class="sh-empty">Sobald ${a.name} einen Termin in Österreich hat, steht er hier. Mit Folgen bekommst du ihn per Mail.</p>`}
+  <div class="sh-sim"><h3>Wer ${a.name} mag, geht auch zu</h3><div class="sim-row">${similarTo(a).concat(ARTISTS.filter(x => !similarTo(a).includes(x) && x.id !== a.id).slice(0, 2)).map(s => `<a href="#" class="sim" data-sel="${s.id}">${avatar(s, 56)}<b>${s.name}</b><small>${nextEvent(s) ? nextEvent(s).day : ''}</small></a>`).join('')}</div></div>
+  <p class="sh-src">Termine und Tickets von oeticket. Fehlt wer? Name oben eingeben, wir suchen auch bei Spotify.</p>`;
+}
+renderList(); renderCard();
+document.addEventListener('click', ev => {
+  const s = ev.target.closest('[data-sel]');
+  if (s) { ev.preventDefault(); selected = s.dataset.sel; renderList(); renderCard(); document.body.classList.add('show-card'); document.getElementById('card').scrollTop = 0; return; }
+  if (ev.target.closest('[data-back]')) { ev.preventDefault(); document.body.classList.remove('show-card'); }
+});
+document.write(TABBAR);
+</script>
+</body></html>

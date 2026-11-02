@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Künstler-Tab Redesign</title>
+<meta name="description" content="Drei Varianten für den Künstler-Tab von lasstreffen.at, Desktop und Handy, als Gast und eingeloggt, mit echten Künstlern vom 2.11.2026.">
+<style>
+:root{--bg:#0a0a0c;--ink:#fff;--muted:rgba(255,255,255,.55);--line:rgba(255,255,255,.1);color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Geist,Inter,system-ui,sans-serif}
+.bar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.bar b{font-size:14px;margin-right:10px}
+.bar button{font:inherit;font-size:13px;font-weight:600;color:var(--muted);background:none;border:1px solid var(--line);padding:7px 14px;border-radius:999px;cursor:pointer}
+.bar button.on{background:#fff;color:#0a0a0c;border-color:#fff}
+.bar .grp{display:flex;gap:6px;margin-left:18px}
+.bar .grp:last-of-type{margin-left:auto}
+.bar p{width:100%;margin:6px 0 0;font-size:13px;color:var(--muted);line-height:1.5}
+.stage{height:calc(100% - 92px);display:flex;justify-content:center;background:#000}
+iframe{border:0;width:100%;height:100%;background:#0a0a0c}
+iframe.m{width:390px;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+</style></head><body>
+<div class="bar"><b>Künstler-Tab: Varianten</b>
+<button class="on" data-v="a-spielplan">A · Spielplan</button><button data-v="b-plakatwand">B · Plakatwand</button><button data-v="c-kartei">C · Kartei</button>
+<div class="grp"><button class="on" data-s="">Gast</button><button data-s="in">Eingeloggt</button></div>
+<div class="grp"><button class="on" data-w="d">Desktop</button><button data-w="m">Handy</button></div>
+<p id="note"></p></div>
+<div class="stage"><iframe id="f" src="a-spielplan.html" title="Variante"></iframe></div>
+<script>
+const notes={
+'a-spielplan':'Der Tab ist ein Tourkalender für Österreich: Tage als linke Spalte, daneben wer an dem Tag spielt, Folgen in jeder Zeile. Diese und nächste Woche komplett, danach der nächste Termin je Künstler. Eingeloggt stehen die eigenen Künstler als Reihe oben und in den Tagen zuerst (amber). Klick auf eine Zeile öffnet das Künstlerblatt mit allen Terminen und Ticketlinks.',
+'b-plakatwand':'Gesichter zuerst: Regale wie auf /entdecken, aber mit Porträts, der Name steht auf dem Bild, die Terminzahl als Badge. Regale: Diese Woche live, Große Hallen, Kabarett, Konzerte. Darunter alle Künstler mit Termin von A bis Z. Eingeloggt die eigene Reihe oben. Jede Kachel öffnet das Künstlerblatt.',
+'c-kartei':'Der Künstler ist die Einheit: links das Verzeichnis (eigene Künstler, diese Woche, A bis Z), rechts das Blatt des gewählten Künstlers mit allen Terminen, Tickets und ähnlichen Künstlern. Am Handy ist das Blatt eine eigene Seite. Das Blatt ist dieselbe Ansicht wie das Sheet in A und B, nur dauerhaft sichtbar; es könnte eine eigene URL je Künstler bekommen.'};
+const f=document.getElementById('f'),note=document.getElementById('note');let v='a-spielplan',w='d',s='';
+function go(){f.src=v+'.html'+(s?'?in':'');f.className=w==='m'?'m':'';note.textContent=notes[v];document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('[data-w]').forEach(b=>b.classList.toggle('on',b.dataset.w===w));document.querySelectorAll('[data-s]').forEach(b=>b.classList.toggle('on',b.dataset.s===s));}
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{v=b.dataset.v;go()});document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{w=b.dataset.w;go()});document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{s=b.dataset.s;go()});go();
+</script></body></html>

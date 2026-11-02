@@ -259,6 +259,20 @@ node / next.js
   Seite um 00:05 Wien neu (siehe Betrieb). `data-track`: `landing_tip_click`
   (mit `data-track-kind` → `data.kind`), `landing_tip_book`,
   `landing_map_open`, `landing_artist_follow`.
+- `src/app/[locale]/artists/page.tsx` — Künstler-Tab als Plakatwand (2026-11,
+  Mockup B in `docs/design/kuenstler-redesign/`): offen für alle, ISR-Shell
+  wie die Startseite. Verzeichnis aus `event_artists` (Eventim, Termine in
+  Österreich der nächsten 90 Tage, seitenweise über den Anon-Client,
+  `src/lib/artists/get-artists-directory.ts`); Auswahl pur in
+  `src/lib/artists/directory.ts`: Häuser, Reihen und Festivals bleiben
+  draußen (Name = Veranstaltungsort, Hauswort bei höchstens drei Orten,
+  zehn Termine am selben Ort, keine Auftritts-Tags), Spielart aus den
+  Event-Tags, Regale Diese Woche live, Auf Tour, je Spielart, dazu A bis Z.
+  Client-Insel `ArtistsWall` (`src/components/Artists/v4/`): Suche zuerst im
+  Verzeichnis, dann Spotify; „Deine Künstler“ nur mit sb-Cookie über
+  `/api/artists/following`; Folgen optimistisch über `/api/artists/follow`;
+  Künstlerblatt als Sheet mit Terminen, Event-Links und Ticketlinks
+  (`ticket_url` bzw. `evo_link`, `data-track="ticket_click"`).
 - `src/app/api/events/route.ts` — Events-API (Cursor-Pagination, bbox, Filter)
 - `src/app/api/events/map-points/route.ts` — columnar Karten-Snapshot aus MV (fn-16)
 - `src/app/api/search/semantic/route.ts` — Smart-Suche (Gemini-Intent →
