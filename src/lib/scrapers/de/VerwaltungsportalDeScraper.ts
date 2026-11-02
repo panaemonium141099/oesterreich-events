@@ -15,7 +15,7 @@
  * fertig wird, setzt die nächste nach der zuletzt gelesenen Website fort
  * (`resumeAfterCursor`).
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -80,6 +80,7 @@ export function spreadSample<T>(list: T[], n: number | undefined): T[] {
 
 export class VerwaltungsportalDeScraper extends DeFeedScraper {
   readonly name = 'de-verwaltungsportal';
+  readonly integrations = ['verwaltungsportal'];
   override readonly resumesSourceList = true;
   /** Pause je Abruf (Prüfstand 2026-11-02: 1.265 Abrufe mit 4 s ohne Sperre); `DE_VP_DELAY_MS` ändert sie. */
   protected delayMs = Number(process.env.DE_VP_DELAY_MS) || 4000;
@@ -104,7 +105,8 @@ export class VerwaltungsportalDeScraper extends DeFeedScraper {
       }
       all.push(...await this.scrapeGroup(g));
       done++;
-      if (!n && !this.onlyVerband) this.markReached(g.host);
+      // Endet das Budget mitten in der Website, liest der nächste Lauf sie neu.
+      if (!n && !this.onlyVerband && !this.budgetSpent()) this.markReached(g.host);
     }
     this.log(`${done} Websites, ${all.length} Termine, ${this.fetches} Abrufe`);
     return all;

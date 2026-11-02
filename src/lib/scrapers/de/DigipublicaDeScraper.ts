@@ -15,7 +15,7 @@
  * Termin bleibt einmal, und keine der Websites ist dann sein Ort (wie
  * `acrossCalendars` bei communice).
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -84,6 +84,7 @@ export function acrossCalendars(cals: CalendarTermine[]): { termin: DigipublicaT
 
 export class DigipublicaDeScraper extends DeFeedScraper {
   readonly name = 'de-digipublica';
+  readonly integrations = ['digipublica'];
 
   async scrape(): Promise<ScrapedEvent[]> {
     const groups = this.pickGroups(digipublicaGroups());

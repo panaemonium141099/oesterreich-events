@@ -468,3 +468,24 @@ export function checkSafetyValve(
   }
   return violations;
 }
+
+/**
+ * Plan je Land der geänderten Zeile (fn-29.18): Das Ventil prüft und der
+ * Lauf schreibt jedes Land für sich. Der erste Nachtlauf der deutschen
+ * Gemeinde-Adapter bringt zehntausende neue Zeilen auf einmal; stoppt das
+ * Ventil dafür, schreibt Österreich trotzdem. Duplikate und Freigaben
+ * zählen zum Land ihrer eigenen Zeile, Primary-Updates ebenso.
+ */
+export function splitPlanByCountry(plan: DedupPlan, countryOf: (id: string) => string): Map<string, DedupPlan> {
+  const out = new Map<string, DedupPlan>();
+  const of = (id: string) => {
+    const c = countryOf(id);
+    let p = out.get(c);
+    if (!p) { p = { markDuplicate: [], release: [], primaries: [] }; out.set(c, p); }
+    return p;
+  };
+  for (const m of plan.markDuplicate) of(m.id).markDuplicate.push(m);
+  for (const r of plan.release) of(r.id).release.push(r);
+  for (const p of plan.primaries) of(p.id).primaries.push(p);
+  return out;
+}

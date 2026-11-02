@@ -3,7 +3,7 @@
  * Events-Manager-Kalender der DE-Gemeinde-Registry. Kontext wie bei den
  * übrigen DE-Adaptern (`kontext.ts`).
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -16,6 +16,7 @@ import { collapseSourceDuplicates, terminContext } from './kontext';
 
 export class EventsManagerDeScraper extends DeFeedScraper {
   readonly name = 'de-eventsmanager';
+  readonly integrations = ['eventsmanager'];
 
   async scrape(): Promise<ScrapedEvent[]> {
     const groups = this.pickGroups(feedGroups('eventsmanager'));

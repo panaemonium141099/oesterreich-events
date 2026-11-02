@@ -10,7 +10,7 @@
  * oder eine Unterseite; dann gilt die Seite über `/termine/` bzw. der
  * Kalender, auf den ihre Termin-Links zeigen.
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -44,6 +44,7 @@ export function weblicationGroups(entries: RegistryEntryDe[] = loadRegistryDe())
 
 export class WeblicationDeScraper extends DeFeedScraper {
   readonly name = 'de-weblication';
+  readonly integrations = ['weblication'];
 
   private async listPage(url: string): Promise<WeblicationListPage | null> {
     const html = await this.fetchHtmlPage(url);

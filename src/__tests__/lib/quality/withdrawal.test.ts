@@ -293,4 +293,26 @@ describe('probeGone — Beleg an der Quelle', () => {
     const gone = await probeGone(urls, { hostDelayMs: 0, fetchImpl: async () => res(seq[i++]) });
     expect([...gone]).toEqual(['https://a.at/5']);
   });
+
+  // fn-29.18: deutsche Gemeinde-Websites nur mit robots.txt und Crawl-delay
+  // (Qualitätsvertrag DE Punkt 9; Komm.ONE setzt 30 s).
+  it('respectRobots: gesperrte Seiten nicht abrufen, Crawl-delay als Pause, Obergrenze je Website', async () => {
+    const calls: { url: string; at: number }[] = [];
+    const t0 = Date.now();
+    const gone = await probeGone(['https://g.de/a/1', 'https://g.de/intern/2', 'https://g.de/a/3', 'https://g.de/a/4'], {
+      respectRobots: true,
+      maxPerHost: 3,
+      hostDelayMs: 0,
+      fetchImpl: async (u) => {
+        calls.push({ url: String(u), at: Date.now() - t0 });
+        if (String(u).endsWith('/robots.txt')) {
+          return new Response('User-agent: *\nDisallow: /intern/\nCrawl-delay: 0.05', { status: 200 });
+        }
+        return res(404);
+      },
+    });
+    expect(calls.map((c) => c.url)).toEqual(['https://g.de/robots.txt', 'https://g.de/a/1', 'https://g.de/a/3']);
+    expect(calls[2].at - calls[1].at).toBeGreaterThanOrEqual(45);
+    expect([...gone].sort()).toEqual(['https://g.de/a/1', 'https://g.de/a/3']);
+  });
 });

@@ -6,7 +6,7 @@
  * die Gemeinde eines Kalenders, den genau eine Gemeinde führt; im
  * Amtskalender nur die Gemeinde, die der Termin selbst nennt.
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Nachtlauf mit Fortsetzungs-Cursor je Website (fn-29.18, `nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -15,6 +15,7 @@ import type { RegistryEntryDe } from '@/lib/registry-de/build';
 import { robotsAllows, robotsCrawlDelay } from '@/lib/registry-de/robots';
 import type { ScrapedEvent } from '@/types/events';
 import { DeFeedScraper } from './feed-scraper';
+import { hostKey } from './host-gate';
 import { imageCredit, imageUrl, withoutPlaceholderImages } from './bild';
 import { collapseSourceDuplicates, terminContext } from './kontext';
 import { imageAllowed } from './HwDeScraper';
@@ -64,6 +65,8 @@ export function onSite(link: string, rssUrl: string): string {
 
 export class IkissDeScraper extends DeFeedScraper {
   readonly name = 'de-ikiss';
+  readonly integrations = ['ikiss'];
+  readonly resumesSourceList = true;
   private pages = new Map<string, string | null>();
   private termine = new Map<string, IkissTermin | null>();
 
@@ -151,24 +154,39 @@ export class IkissDeScraper extends DeFeedScraper {
 
   async scrape(): Promise<ScrapedEvent[]> {
     const groups = this.pickGroups(ikissGroups());
+    // Nachtlauf (fn-29.18): alle Detailseiten dauern gut zwei Stunden. Der
+    // Lauf setzt je Website fort, nie mitten in einer: Amts- und
+    // Gemeindekalender derselben Website teilen Termine (`taken`), die
+    // Gemeinde-Seite gilt nur, wenn beide im selben Lauf gelesen werden.
+    const byHost = new Map<string, FeedGroup[]>();
+    for (const g of groups) {
+      const h = hostKey(g.pageUrl);
+      byHost.set(h, [...(byHost.get(h) ?? []), g]);
+    }
     const all: ScrapedEvent[] = [];
     const taken = new Set<string>();
-    for (const g of groups) {
-      const termine: IkissTermin[] = [];
-      for (const d of await this.calendar(g.pageUrl)) {
-        const key = `${new URL(d.url).host}|${d.fid}`;
-        if (taken.has(key)) continue;
-        const t = await this.termin(d);
-        if (!t) continue;
-        taken.add(key);
-        termine.push(t);
+    let read = 0;
+    for (const [host, hostGroups] of this.resumeGroups([...byHost], ([h]) => h)) {
+      if (this.budgetSpent()) break;
+      for (const g of hostGroups) {
+        read++;
+        const termine: IkissTermin[] = [];
+        for (const d of await this.calendar(g.pageUrl)) {
+          const key = `${new URL(d.url).host}|${d.fid}`;
+          if (taken.has(key)) continue;
+          const t = await this.termin(d);
+          if (!t) continue;
+          taken.add(key);
+          termine.push(t);
+        }
+        const robots = termine.length ? await this.robotsTxt(new URL(g.pageUrl).origin) : null;
+        const allowed = termine.map(t => (t.image && !imageAllowed(robots, t.image) ? { ...t, image: undefined } : t));
+        const unique = collapseSourceDuplicates(allowed.map(t => ({ ...t, uid: t.fid })));
+        all.push(...withoutPlaceholderImages(unique).map(t => this.toScraped(t, g)));
       }
-      const robots = termine.length ? await this.robotsTxt(new URL(g.pageUrl).origin) : null;
-      const allowed = termine.map(t => (t.image && !imageAllowed(robots, t.image) ? { ...t, image: undefined } : t));
-      const unique = collapseSourceDuplicates(allowed.map(t => ({ ...t, uid: t.fid })));
-      all.push(...withoutPlaceholderImages(unique).map(t => this.toScraped(t, g)));
+      if (!this.budgetSpent()) this.groupDone(host);
     }
-    this.log(`${groups.length} Kalender, ${all.length} Termine`);
+    this.log(`${read} von ${groups.length} Kalendern auf ${byHost.size} Websites, ${all.length} Termine`);
     return all;
   }
 

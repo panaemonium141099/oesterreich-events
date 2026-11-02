@@ -10,7 +10,7 @@
  * Websites laufen nebeneinander, Seiten einer Website nacheinander mit
  * ihrem Crawl-delay (robots.txt, `feed-scraper.ts`).
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29, fn-29.18).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { detectNextPage } from '../pagination';
@@ -117,6 +117,7 @@ const berlinToday = () => new Date().toLocaleString('sv-SE', { timeZone: 'Europe
 
 export class AllgemeinDeScraper extends DeFeedScraper {
   readonly name = 'de-allgemein';
+  readonly integrations = [...ALLGEMEIN_INTEGRATIONS];
   protected fetchTimeoutMs = 20_000;
 
   /** Gemeindeseiten in ISO-8859-1 richtig lesen (fetch-html.ts). */

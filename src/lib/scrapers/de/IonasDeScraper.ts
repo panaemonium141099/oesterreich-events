@@ -5,7 +5,7 @@
  * Gebietsangabe); ein Amtskalender nur den Kontext des Landes, der Ort kommt
  * dann allein aus dem Termin (Etiketten-Regel des Qualitätsvertrags).
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -18,6 +18,7 @@ import { collapseSourceDuplicates, terminContext } from './kontext';
 
 export class IonasDeScraper extends DeFeedScraper {
   readonly name = 'de-ionas';
+  readonly integrations = ['ionas'];
 
   async scrape(): Promise<ScrapedEvent[]> {
     // Dieselbe events.json mit und ohne Ansichts-Parameter ist ein Kalender (Lambsheim-Heßheim).

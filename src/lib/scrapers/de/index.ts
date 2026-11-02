@@ -1,7 +1,8 @@
 /**
  * DE-Gemeinde-Adapter (Epic fn-29). Bewusst NICHT in `scrapers` (index.ts):
- * ein Adapter kommt erst in den Nachtlauf, wenn sein Prüfstand bestanden ist
- * (fn-29.18). Bis dahin nutzt ihn nur `npm run pruefstand:de`.
+ * ein Adapter kommt erst in den Nachtlauf, wenn sein Prüfstand bestanden ist,
+ * und zwar über den Schalter `DE_NACHTLAUF` (`nachtlauf.ts`, fn-29.18) in
+ * eigenen DE-Shards. Bis dahin nutzt ihn nur `npm run pruefstand:de`.
  */
 import type { BaseScraper } from '../BaseScraper';
 import { IonasDeScraper } from './IonasDeScraper';

@@ -9,17 +9,22 @@
 //   npm run dedup                                   # schreiben (mit Sicherheitsventil)
 //   npm run dedup -- --max-new-duplicates 20000 --max-releases 2000
 //                                                   # Freigabe nach geprüftem Probelauf
+//   npm run dedup -- --limits-country DE --max-inflow-duplicates 30000
+//                                                   # Freigabe nur für ein Land
 //
 // Sicherheitsventil: mehr neue Duplikate oder Freigaben als die Grenzen →
 // nichts schreiben, Exit 1 (Pipeline-Schritt rot → Alarm). Massenänderungen
 // sind fast immer ein Fehler; ein Mensch prüft den Probelauf und gibt frei.
+// Das Ventil rechnet je Land (fn-29.18): stoppt es für Deutschland, schreibt
+// der Lauf Österreich trotzdem, und umgekehrt. Anker und Laufzeile
+// (`dedup_runs.country`) gelten je Land.
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 import { canonicalizeIds } from '@/lib/pipeline/dedup-scorer';
 import { dedupDay, pairKey } from '@/lib/pipeline/dedup-engine';
-import { planDedup, releaseStatus, checkSafetyValve, valveClass, dropDependentsOfFailedReleases, resolvePlanConflicts, type DedupPlan, type ValveClass } from '@/lib/pipeline/dedup-plan';
+import { planDedup, releaseStatus, checkSafetyValve, valveClass, dropDependentsOfFailedReleases, resolvePlanConflicts, splitPlanByCountry, type DedupPlan, type SafetyLimits, type ValveClass } from '@/lib/pipeline/dedup-plan';
 import { isPlausibleEventDay, planningStartDay, viennaDayBoundsUtc, viennaDayOf } from '@/lib/pipeline/dedup-evidence';
 import { isGarbageRow, namedPageKeys, surplusBrokenTitleIds, type GarbageRowInput } from '@/lib/pipeline/garbage-filter';
 import { staleVersionIds } from '@/lib/pipeline/dedup-cluster';
@@ -72,16 +77,30 @@ function strArg(name: string): string | null {
   return i >= 0 && args[i + 1] ? args[i + 1] : null;
 }
 // Normale Nacht: ein paar hundert neue Dubletten, kaum Freigaben.
-const LIMITS = {
+const DEFAULT_LIMITS: Required<SafetyLimits> = {
   // Neue Duplikate am Bestand (valveClass 'stock'): eine normale Nacht
   // bringt 170 bis 330 (Prod 2026-10-10/11), der erste Lauf nach einem
   // Stopp das Doppelte. Zulauf hat einen eigenen, höheren Stolperdraht.
-  maxNewDuplicates: numArg('--max-new-duplicates', 800, 'DEDUP_MAX_NEW_DUPLICATES'),
-  maxInflowDuplicates: numArg('--max-inflow-duplicates', 4000, 'DEDUP_MAX_INFLOW_DUPLICATES'),
-  maxReleases: numArg('--max-releases', 300, 'DEDUP_MAX_RELEASES'),
+  maxNewDuplicates: 800,
+  maxInflowDuplicates: 4000,
+  maxReleases: 300,
   // Seit Müll-Titel schon im Sync verworfen werden, kommt kaum neuer dazu.
-  maxGarbage: numArg('--max-garbage', 1000, 'DEDUP_MAX_GARBAGE'),
+  maxGarbage: 1000,
 };
+/** Grenzen einer Freigabe (Argument oder workflow_dispatch). */
+const RELEASED_LIMITS: Required<SafetyLimits> = {
+  maxNewDuplicates: numArg('--max-new-duplicates', DEFAULT_LIMITS.maxNewDuplicates, 'DEDUP_MAX_NEW_DUPLICATES'),
+  maxInflowDuplicates: numArg('--max-inflow-duplicates', DEFAULT_LIMITS.maxInflowDuplicates, 'DEDUP_MAX_INFLOW_DUPLICATES'),
+  maxReleases: numArg('--max-releases', DEFAULT_LIMITS.maxReleases, 'DEDUP_MAX_RELEASES'),
+  maxGarbage: numArg('--max-garbage', DEFAULT_LIMITS.maxGarbage, 'DEDUP_MAX_GARBAGE'),
+};
+/** Die Freigabe gilt nur diesem Land (leer: allen Ländern). */
+const LIMITS_COUNTRY = strArg('--limits-country') ?? (process.env.DEDUP_LIMITS_COUNTRY?.trim() || null);
+const limitsFor = (country: string) => (!LIMITS_COUNTRY || LIMITS_COUNTRY === country ? RELEASED_LIMITS : DEFAULT_LIMITS);
+/** Länder mit Laufzeile ab Laufbeginn; ein weiteres bekommt sie am Ende. */
+const RUN_COUNTRIES = ['AT', 'DE', 'CH'];
+/** Zeilen ohne Land (Prod 2026-11-02: keine). */
+const FALLBACK_COUNTRY = 'AT';
 const REPORT_PATH = strArg('--report') ?? process.env.DEDUP_REPORT_PATH ?? null;
 // Vergangene Tage sieht niemand mehr: geplant (und gezählt) wird ab dem Vortag.
 const START_DAY = planningStartDay();
@@ -91,7 +110,7 @@ if (args.includes('--reset')) {
   console.log('Hinweis: --reset ist überflüssig — jeder Lauf rechnet alle Cluster neu.');
 }
 
-const EVENT_SELECT = 'id,title,description,start_date,end_date,is_all_day,location_name,address,district,postal_code,bundesland,latitude,longitude,location_precision,source_url,ticket_url,image_url,category,tags,source_id,source_name,venue_id,quality_score,publish_status,content_fingerprint,duplicate_of,dedup_score,dedup_cluster_id,organizer,price_text,created_at,last_seen_at,location_status,source_type,withdrawn_at,admission_decision:location_resolution->admission->>decision';
+const EVENT_SELECT = 'id,title,description,start_date,end_date,is_all_day,location_name,address,district,postal_code,bundesland,latitude,longitude,location_precision,source_url,ticket_url,image_url,category,tags,source_id,source_name,venue_id,quality_score,publish_status,content_fingerprint,duplicate_of,dedup_score,dedup_cluster_id,organizer,price_text,created_at,last_seen_at,location_status,source_type,withdrawn_at,country,admission_decision:location_resolution->admission->>decision';
 
 // ---------------------------------------------------------------------------
 // Phase 1: Garbage cleanup
@@ -107,16 +126,16 @@ let STALE_IDS = new Set<string>();
 const SURPLUS_IDS = new Set<string>();
 const isGarbage = (e: GarbageRowInput & { id?: string }) => isGarbageRow(e, NAMED_PAGES) || (!!e.id && SURPLUS_IDS.has(e.id));
 
-/** Sichtbare Müll-Zeilen finden. Geschrieben wird erst nach dem
+/** Sichtbare Müll-Zeilen finden (Id → Land). Geschrieben wird erst nach dem
  *  Sicherheitsventil (suppressGarbage). */
-async function scanGarbage(): Promise<string[]> {
+async function scanGarbage(): Promise<Map<string, string>> {
   console.log('\n--- Phase 1: Garbage-Scan ---');
-  type Row = GarbageRowInput & { id: string; publish_status: string | null; source_id: string | null; last_seen_at: string | null };
+  type Row = GarbageRowInput & { id: string; publish_status: string | null; source_id: string | null; last_seen_at: string | null; country: string | null };
   const rows: Row[] = [];
   await forEachPage<Row>(
     (from, to) => supabase
       .from('events')
-      .select('id,title,source_name,source_id,source_url,ticket_url,start_date,last_seen_at,publish_status')
+      .select('id,title,source_name,source_id,source_url,ticket_url,start_date,last_seen_at,publish_status,country')
       .gte('start_date', viennaDayBoundsUtc(START_DAY)[0])
       .neq('publish_status', 'suppressed')
       .order('id')
@@ -126,11 +145,13 @@ async function scanGarbage(): Promise<string[]> {
   );
   for (const r of rows) for (const key of namedPageKeys(r)) NAMED_PAGES.add(key);
   for (const id of surplusBrokenTitleIds(rows.filter(r => r.publish_status !== 'duplicate'), NAMED_PAGES)) SURPLUS_IDS.add(id);
-  const garbageIds = rows.filter(r => r.publish_status !== 'duplicate' && isGarbage(r)).map(r => r.id);
+  const garbage = new Map(rows
+    .filter(r => r.publish_status !== 'duplicate' && isGarbage(r))
+    .map(r => [r.id, r.country ?? FALLBACK_COUNTRY] as const));
   STALE_IDS = staleVersionIds(rows as unknown as EventRow[]);
   console.log(`  ${STALE_IDS.size} ältere Fassungen von Event-Seiten (gelten wie verwaist)`);
-  console.log(`  Found ${garbageIds.length} garbage events`);
-  return garbageIds;
+  console.log(`  Found ${garbage.size} garbage events`);
+  return garbage;
 }
 
 async function suppressGarbage(garbageIds: string[]): Promise<void> {
@@ -397,12 +418,14 @@ interface Anchor {
   problem: string | null;
 }
 
-/** Anker des Ventils: Beginn des letzten Laufs, der seinen Plan geschrieben hat. */
-async function loadAnchor(runStartedAt: Date): Promise<Anchor> {
+/** Anker des Ventils: Beginn des letzten Laufs, der den Plan dieses Landes
+ *  geschrieben hat. Läufe ohne Land (vor fn-29.18) galten allen Ländern. */
+async function loadAnchor(runStartedAt: Date, country: string): Promise<Anchor> {
   const { data, error } = await supabase
     .from('dedup_runs')
     .select('started_at')
     .eq('outcome', 'written')
+    .or(`country.is.null,country.eq.${country}`)
     .order('started_at', { ascending: false })
     .limit(1);
   if (error) return { at: null, problem: `Anker fehlt (dedup_runs: ${error.message}), jede neue Zeile zählt` };
@@ -427,30 +450,42 @@ interface RunStats {
   writeErrors: number;
 }
 
-/** Laufzeile mit Beginn nach Datenbank-Uhr (created_at kommt auch von dort).
- *  Ein abgebrochener Lauf bleibt 'running' und verschiebt den Anker nicht. */
-async function startRun(): Promise<{ id: string; startedAt: Date } | null> {
+interface Runs {
+  /** Laufzeile je Land. */
+  ids: Map<string, string>;
+  /** Beginn nach Datenbank-Uhr, für alle Länder derselbe. */
+  startedAt: Date;
+}
+
+const githubRunId = () => (process.env.GITHUB_RUN_ID ? Number(process.env.GITHUB_RUN_ID) : null);
+
+/** Laufzeilen je Land mit Beginn nach Datenbank-Uhr (created_at kommt auch
+ *  von dort). Ein abgebrochener Lauf bleibt 'running' und verschiebt den
+ *  Anker nicht. */
+async function startRuns(): Promise<Runs | null> {
   const { data, error } = await supabase
     .from('dedup_runs')
-    .insert({ outcome: 'running', github_run_id: process.env.GITHUB_RUN_ID ? Number(process.env.GITHUB_RUN_ID) : null })
-    .select('id,started_at')
-    .single();
-  if (error || !data) {
+    .insert(RUN_COUNTRIES.map(country => ({ outcome: 'running', country, github_run_id: githubRunId() })))
+    .select('id,started_at,country');
+  if (error || !data?.length) {
     console.warn(`  dedup_runs: Lauf nicht angelegt (${error?.message ?? 'keine Zeile'})`);
     return null;
   }
-  return { id: data.id as string, startedAt: new Date(data.started_at as string) };
+  const rows = data as Array<{ id: string; started_at: string; country: string }>;
+  return { ids: new Map(rows.map(r => [r.country, r.id])), startedAt: new Date(rows[0].started_at) };
 }
 
-/** Ausgang festhalten; ohne Eintrag zählt die nächste Nacht den Zulauf seit
- *  dem älteren Anker mit. Schreibfehler hier sind laut. */
+/** Ausgang je Land festhalten; ohne Eintrag zählt die nächste Nacht den
+ *  Zulauf seit dem älteren Anker mit. Schreibfehler hier sind laut. */
 async function finishRun(
-  run: { id: string; startedAt: Date } | null,
+  runs: Runs | null,
+  country: string,
   fallbackStart: Date,
   outcome: 'written' | 'valve_stopped' | 'write_failed',
   r: RunStats,
   errors: string[],
 ): Promise<void> {
+  const id = runs?.ids.get(country);
   const row = {
     outcome,
     finished_at: new Date().toISOString(),
@@ -464,27 +499,46 @@ async function finishRun(
     garbage: r.garbage,
     write_errors: r.writeErrors,
   };
-  const { error } = run
-    ? await supabase.from('dedup_runs').update(row).eq('id', run.id)
-    : await supabase.from('dedup_runs').insert({ ...row, started_at: fallbackStart.toISOString(),
-        github_run_id: process.env.GITHUB_RUN_ID ? Number(process.env.GITHUB_RUN_ID) : null });
-  if (error) errors.push(`dedup_runs schreiben: ${error.message}`);
+  const { error } = id
+    ? await supabase.from('dedup_runs').update(row).eq('id', id)
+    : await supabase.from('dedup_runs').insert({ ...row, country, started_at: (runs?.startedAt ?? fallbackStart).toISOString(),
+        github_run_id: githubRunId() });
+  if (error) errors.push(`dedup_runs schreiben (${country}): ${error.message}`);
+}
+
+/** Plan, Ventil und Zahlen eines Landes. */
+interface CountryResult {
+  country: string;
+  plan: DedupPlan;
+  garbageIds: string[];
+  anchor: Anchor;
+  limits: Required<SafetyLimits>;
+  stats: RunStats;
+  violations: string[];
+}
+
+function mergePlans(plans: DedupPlan[]): DedupPlan {
+  return {
+    markDuplicate: plans.flatMap(p => p.markDuplicate),
+    release: plans.flatMap(p => p.release),
+    primaries: plans.flatMap(p => p.primaries),
+  };
 }
 
 async function main(): Promise<void> {
   const started = Date.now();
   console.log(`=== Batch Dedup ${DRY_RUN ? '(DRY RUN)' : '(LIVE)'} ===`);
-  console.log(`  Grenzen: ${LIMITS.maxNewDuplicates} neue Duplikate am Bestand, ${LIMITS.maxInflowDuplicates} im Zulauf, ${LIMITS.maxReleases} Freigaben, ${LIMITS.maxGarbage} Müll`);
+  const fmtLimits = (l: Required<SafetyLimits>) => `${l.maxNewDuplicates} neue Duplikate am Bestand, ${l.maxInflowDuplicates} im Zulauf, ${l.maxReleases} Freigaben, ${l.maxGarbage} Müll`;
+  console.log(`  Grenzen je Land: ${fmtLimits(DEFAULT_LIMITS)}`);
+  if (LIMITS_COUNTRY || JSON.stringify(RELEASED_LIMITS) !== JSON.stringify(DEFAULT_LIMITS)) {
+    console.log(`  Freigabe ${LIMITS_COUNTRY ? `für ${LIMITS_COUNTRY}` : 'für alle Länder'}: ${fmtLimits(RELEASED_LIMITS)}`);
+  }
 
   // Probeläufe schreiben nichts, auch keine Laufzeile.
-  const run = DRY_RUN ? null : await startRun();
-  const runStartedAt = run?.startedAt ?? new Date(started);
-  const anchor = await loadAnchor(runStartedAt);
-  const settledBefore = anchor.at;
-  console.log(`  Anker (danach angelegte Zeilen sind Zulauf): ${settledBefore?.toISOString() ?? 'keiner'}`);
-  if (anchor.problem) console.log(`  !!! ${anchor.problem}`);
-  const garbageIds = await scanGarbage();
-  const garbage = garbageIds.length;
+  const runs = DRY_RUN ? null : await startRuns();
+  const runStartedAt = runs?.startedAt ?? new Date(started);
+  const garbageById = await scanGarbage();
+  const garbage = garbageById.size;
   const manual = await loadManualDecisions();
   console.log(`  Manuelle Entscheidungen: ${manual.merges.size} merge, ${manual.splits.size} split`);
 
@@ -563,22 +617,54 @@ async function main(): Promise<void> {
     }
   }
   const newDuplicates = plan.markDuplicate.filter(m => m.isNew).length;
-  const classify = (m: DedupPlan['markDuplicate'][number]) => valveClass(m, allRows, settledBefore);
-  const byClass = new Map<ValveClass, number>();
-  for (const m of plan.markDuplicate) {
-    const c = classify(m);
-    if (c) byClass.set(c, (byClass.get(c) ?? 0) + 1);
+
+  // Ventil je Land: eigener Anker, eigene Grenzen, eigene Laufzeile.
+  const countryOf = (id: string) => allRows.get(id)?.country ?? garbageById.get(id) ?? FALLBACK_COUNTRY;
+  const plansByCountry = splitPlanByCountry(plan, countryOf);
+  const garbageByCountry = new Map<string, string[]>();
+  for (const [id, c] of garbageById) garbageByCountry.set(c, [...(garbageByCountry.get(c) ?? []), id]);
+  const countries = [...new Set([...RUN_COUNTRIES, ...plansByCountry.keys(), ...garbageByCountry.keys()])];
+  const results: CountryResult[] = [];
+  /** Ventil-Klasse je neuem Duplikat für den Bericht. */
+  const classById = new Map<string, ValveClass | null>();
+  for (const country of countries) {
+    const cPlan = plansByCountry.get(country) ?? { markDuplicate: [], release: [], primaries: [] };
+    const garbageIds = garbageByCountry.get(country) ?? [];
+    const anchor = await loadAnchor(runStartedAt, country);
+    const classify = (m: DedupPlan['markDuplicate'][number]) => valveClass(m, allRows, anchor.at);
+    const byClass = new Map<ValveClass, number>();
+    for (const m of cPlan.markDuplicate) {
+      const c = classify(m);
+      classById.set(`${m.id}>${m.primaryId}`, c);
+      if (c) byClass.set(c, (byClass.get(c) ?? 0) + 1);
+    }
+    const cNew = cPlan.markDuplicate.filter(m => m.isNew).length;
+    const limits = limitsFor(country);
+    results.push({
+      country, plan: cPlan, garbageIds, anchor, limits,
+      stats: {
+        newDuplicates: cNew,
+        stock: byClass.get('stock') ?? 0,
+        inflow: byClass.get('inflow') ?? 0,
+        series: byClass.get('series') ?? 0,
+        repoints: cPlan.markDuplicate.length - cNew,
+        releases: cPlan.release.length,
+        visibleReleases: cPlan.release.filter(r => r.visible !== false).length,
+        garbage: garbageIds.length,
+        writeErrors: 0,
+      },
+      violations: checkSafetyValve(cPlan, limits, garbageIds.length, classify),
+    });
   }
-  const classById = new Map(plan.markDuplicate.map(m => [`${m.id}>${m.primaryId}`, classify(m)] as const));
   for (const r of report) {
     if (r.action === 'release') continue;
     r.valveClass = classById.get(`${r.id}>${r.primaryId}`) ?? null;
     r.createdAt = allRows.get(r.id)?.created_at ?? null;
   }
-  const stock = byClass.get('stock') ?? 0;
-  const inflow = byClass.get('inflow') ?? 0;
-  const series = byClass.get('series') ?? 0;
-  const visibleReleases = plan.release.filter(r => r.visible !== false).length;
+  const sum = (k: keyof RunStats) => results.reduce((n, r) => n + r.stats[k], 0);
+  const stock = sum('stock');
+  const inflow = sum('inflow');
+  const series = sum('series');
   console.log('\n=== Plan ===');
   console.log(`  Events geprüft:        ${scanned}`);
   console.log(`  Kandidaten-Paare:      ${candidates}`);
@@ -592,6 +678,12 @@ async function main(): Promise<void> {
   console.log(`  Widerspruch im Cluster:${blocked} Verbindungen`);
   console.log('  Entscheidungen nach Grund:');
   for (const [r, n] of [...reasons.entries()].sort((a, b) => b[1] - a[1])) console.log(`    ${String(n).padStart(7)}  ${r}`);
+  console.log('  Je Land:');
+  for (const r of results) {
+    const s = r.stats;
+    console.log(`    ${r.country}: neu ${s.newDuplicates} (Bestand ${s.stock}, Zulauf ${s.inflow}, Serie ${s.series}), umgehängt ${s.repoints}, Freigaben ${s.releases} (sichtbar ${s.visibleReleases}), Müll ${s.garbage}; Anker ${r.anchor.at?.toISOString() ?? 'keiner'}`);
+    if (r.anchor.problem) console.log(`      !!! ${r.anchor.problem}`);
+  }
 
   for (const action of ['duplicate', 'release'] as const) {
     const sample = report.filter(r => r.action === action).sort(() => Math.random() - 0.5).slice(0, 15);
@@ -603,55 +695,60 @@ async function main(): Promise<void> {
   }
   if (REPORT_PATH) {
     mkdirSync(dirname(REPORT_PATH), { recursive: true });
-    writeFileSync(REPORT_PATH, JSON.stringify({ limits: LIMITS, report, reasons: Object.fromEntries(reasons) }, null, 1));
+    const countryById = new Map([...allRows].map(([id, e]) => [id, e.country ?? FALLBACK_COUNTRY]));
+    writeFileSync(REPORT_PATH, JSON.stringify({
+      limits: Object.fromEntries(results.map(r => [r.country, r.limits])),
+      perCountry: Object.fromEntries(results.map(r => [r.country, { ...r.stats, violations: r.violations, anchor: r.anchor }])),
+      report: report.map(e => ({ ...e, country: countryById.get(e.id) ?? FALLBACK_COUNTRY })),
+      reasons: Object.fromEntries(reasons),
+    }, null, 1));
     console.log(`\n  Bericht: ${REPORT_PATH}`);
   }
 
-  const stats = (writeErrors: number): RunStats => ({
-    newDuplicates, stock, inflow, series, repoints: plan.markDuplicate.length - newDuplicates,
-    releases: plan.release.length, visibleReleases, garbage, writeErrors,
-  });
-  const violations = checkSafetyValve(plan, LIMITS, garbage, classify);
-  if (violations.length > 0) {
-    const why = [...violations, ...(anchor.problem ? [anchor.problem] : [])].join('; ');
-    console.log(`\n!!! Sicherheitsventil: ${why}`);
-    if (!DRY_RUN) {
-      console.log('    Nichts geschrieben. Probelauf prüfen (--dry-run --report …) und mit höheren Grenzen freigeben.');
-      const recErrors: string[] = [];
-      await finishRun(run, runStartedAt, 'valve_stopped', stats(0), recErrors);
-      for (const e of recErrors) console.log(`    ${e}`);
-      reportStepReason(`Sicherheitsventil, nichts geschrieben: ${why}`);
-      process.exit(1);
-    }
-  }
+  const stopped = results.filter(r => r.violations.length > 0);
+  const passed = results.filter(r => r.violations.length === 0);
+  const stopReasons = stopped.map(r => `${r.country}: ${[...r.violations, ...(r.anchor.problem ? [r.anchor.problem] : [])].join('; ')}`);
+  for (const why of stopReasons) console.log(`\n!!! Sicherheitsventil ${why}`);
 
   const errors: string[] = [];
   if (!DRY_RUN) {
-    console.log('\n--- Phase 3: Schreiben ---');
-    await suppressGarbage(garbageIds);
-    await applyPlan(plan, errors);
-    const planErrors = errors.length;
-    await writeLog(logPairs, errors);
-
-    const { data: rewire, error: rewireErr } = await supabase.rpc('rewire_saved_events_to_primaries');
-    if (rewireErr) errors.push(`Rewire saved_events: ${rewireErr.message}`);
-    else if (Array.isArray(rewire) && rewire.length > 0) {
-      const row = rewire[0] as { rewired_saved_events: number; rewired_artist_notifications: number };
-      console.log(`  Rewired ${row.rewired_saved_events} saved_events + ${row.rewired_artist_notifications} notifications to primaries.`);
+    if (stopped.length > 0) {
+      console.log(`    Nicht geschrieben: ${stopped.map(r => r.country).join(', ')}. Probelauf prüfen (--dry-run --report …) und mit höheren Grenzen freigeben (--limits-country).`);
+      for (const r of stopped) await finishRun(runs, r.country, runStartedAt, 'valve_stopped', r.stats, errors);
     }
-    // Mit einzelnen Schreibfehlern ist der Plan geschrieben (der nächste Lauf
-    // rechnet ohnehin alles neu). Scheitert ein größerer Teil, bleibt der
-    // Anker stehen: der nicht verarbeitete Zulauf zählt sonst nie.
-    const outcome = planErrors > MAX_WRITE_ERRORS_FOR_WRITTEN ? 'write_failed' : 'written';
-    await finishRun(run, runStartedAt, outcome, stats(errors.length), errors);
+    if (passed.length > 0) {
+      console.log(`\n--- Phase 3: Schreiben (${passed.map(r => r.country).join(', ')}) ---`);
+      const before = errors.length;
+      await suppressGarbage(passed.flatMap(r => r.garbageIds));
+      await applyPlan(mergePlans(passed.map(r => r.plan)), errors);
+      const planErrors = errors.length - before;
+      await writeLog(logPairs, errors);
+
+      const { data: rewire, error: rewireErr } = await supabase.rpc('rewire_saved_events_to_primaries');
+      if (rewireErr) errors.push(`Rewire saved_events: ${rewireErr.message}`);
+      else if (Array.isArray(rewire) && rewire.length > 0) {
+        const row = rewire[0] as { rewired_saved_events: number; rewired_artist_notifications: number };
+        console.log(`  Rewired ${row.rewired_saved_events} saved_events + ${row.rewired_artist_notifications} notifications to primaries.`);
+      }
+      // Mit einzelnen Schreibfehlern ist der Plan geschrieben (der nächste Lauf
+      // rechnet ohnehin alles neu). Scheitert ein größerer Teil, bleibt der
+      // Anker stehen: der nicht verarbeitete Zulauf zählt sonst nie.
+      const outcome = planErrors > MAX_WRITE_ERRORS_FOR_WRITTEN ? 'write_failed' : 'written';
+      for (const r of passed) await finishRun(runs, r.country, runStartedAt, outcome, { ...r.stats, writeErrors: planErrors }, errors);
+    }
   }
 
   console.log('\n=== Dedup Summary ===');
   console.log(`  Mode: ${DRY_RUN ? 'DRY RUN' : 'LIVE'} | Dauer ${((Date.now() - started) / 1000).toFixed(1)} s | Garbage ${garbage}`);
+  const failures: string[] = [];
+  if (!DRY_RUN && stopped.length > 0) failures.push(`Sicherheitsventil, nicht geschrieben: ${stopReasons.join(' | ')}`);
   if (errors.length > 0) {
     console.log(`  Fehler: ${errors.length}`);
     for (const err of errors.slice(0, 20)) console.log(`    - ${err}`);
-    reportStepReason(`${errors.length} Schreibfehler, z. B. ${errors[0]}`);
+    failures.push(`${errors.length} Schreibfehler, z. B. ${errors[0]}`);
+  }
+  if (failures.length > 0) {
+    reportStepReason(failures.join('; '));
     process.exit(1);
   }
 }

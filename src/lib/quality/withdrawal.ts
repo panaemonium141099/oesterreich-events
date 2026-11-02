@@ -55,6 +55,7 @@
  * Rein und ohne I/O. Ausführung: `src/scripts/withdraw-stale-events.ts`.
  */
 import { toViennaDate } from '@/lib/utils/event-time';
+import { robotsAllows, robotsCrawlDelay } from '@/lib/registry-de/robots';
 
 export interface SightingRow {
   id: string;
@@ -67,6 +68,8 @@ export interface SightingRow {
   last_seen_at: string | null;
   publish_status: string | null;
   duplicate_of: string | null;
+  /** Land; deutsche Detailseiten prüft der Rückzug mit robots.txt und Crawl-delay. */
+  country?: string | null;
 }
 
 export type WithdrawalReason = 'missing_from_source' | 'source_dead' | 'superseded';
@@ -263,7 +266,16 @@ export interface ProbeOptions {
   /** Pause zwischen zwei Abrufen derselben Website (Gemeinde-Server sind klein). */
   hostDelayMs?: number;
   maxHostFailures?: number;
+  /**
+   * robots.txt je Website lesen: gesperrte Seiten nicht abrufen, Crawl-delay
+   * als Pause (Qualitätsvertrag DE Punkt 9; Komm.ONE setzt 30 s).
+   */
+  respectRobots?: boolean;
+  /** Höchstens so viele Abrufe je Website und Lauf, der Rest in der nächsten Nacht. */
+  maxPerHost?: number;
 }
+
+const ROBOTS_TOKEN = 'lasstreffen';
 
 /**
  * Ruft Detailseiten ab und liefert die, die belegt weg sind: Endstatus
@@ -275,12 +287,15 @@ export interface ProbeOptions {
  * sperrt Bots, 354 Abrufe liefen dort sonst je 15 s in die Zeitüberschreitung.
  */
 export async function probeGone(urls: string[], options: ProbeOptions = {}): Promise<Set<string>> {
-  const { fetchImpl = fetch, budget = Infinity, hostConcurrency = 8, timeoutMs = 15_000, hostDelayMs = 500, maxHostFailures = 3 } = options;
+  const { fetchImpl = fetch, budget = Infinity, hostConcurrency = 8, timeoutMs = 15_000, hostDelayMs = 500, maxHostFailures = 3,
+    respectRobots = false, maxPerHost = Infinity } = options;
+  const headers = { 'User-Agent': 'LassTreffenBot/1.0 (+https://lasstreffen.at/quellen)' };
   const byHost = new Map<string, string[]>();
   for (const url of urls.slice(0, budget)) {
     let host: string;
     try { host = new URL(url).host; } catch { continue; }
-    byHost.set(host, [...(byHost.get(host) ?? []), url]);
+    const list = byHost.get(host) ?? [];
+    if (list.length < maxPerHost) byHost.set(host, [...list, url]);
   }
 
   const gone = new Set<string>();
@@ -288,14 +303,29 @@ export async function probeGone(urls: string[], options: ProbeOptions = {}): Pro
   const worker = async () => {
     for (let q = queues.shift(); q; q = queues.shift()) {
       let failures = 0;
-      for (const [i, url] of q.entries()) {
+      let delayMs = hostDelayMs;
+      let robots: string | null = null;
+      if (respectRobots) {
+        try {
+          const res = await fetchImpl(`${new URL(q[0]).origin}/robots.txt`, { signal: AbortSignal.timeout(timeoutMs), headers });
+          robots = res.ok ? await res.text() : null;
+          if (!res.ok) await res.body?.cancel().catch(() => {});
+        } catch {
+          robots = null;
+        }
+        delayMs = Math.max(hostDelayMs, (robotsCrawlDelay(robots, ROBOTS_TOKEN) ?? 0) * 1000);
+      }
+      let fetched = respectRobots ? 1 : 0;
+      for (const url of q) {
         if (failures >= maxHostFailures) break;
-        if (i > 0 && hostDelayMs > 0) await new Promise((r) => setTimeout(r, hostDelayMs));
+        if (respectRobots && !robotsAllows(robots, url, ROBOTS_TOKEN)) continue;
+        if (fetched > 0 && delayMs > 0) await new Promise((r) => setTimeout(r, delayMs));
+        fetched++;
         try {
           const res = await fetchImpl(url, {
             redirect: 'follow',
             signal: AbortSignal.timeout(timeoutMs),
-            headers: { 'User-Agent': 'LassTreffenBot/1.0 (+https://lasstreffen.at/quellen)' },
+            headers,
           });
           if (res.status === 404 || res.status === 410) gone.add(url);
           failures = res.status < 400 || res.status === 404 || res.status === 410 ? 0 : failures + 1;

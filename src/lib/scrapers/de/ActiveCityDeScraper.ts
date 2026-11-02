@@ -11,7 +11,7 @@
  * Ort: Die Liste nennt Name, Straße und „PLZ Ort“; PLZ und Ort gehen wie bei
  * cEasy an den Resolver. Sonst Kontext wie bei den übrigen DE-Adaptern.
  *
- * Nicht im Nachtlauf, bevor der Prüfstand bestanden ist (Epic fn-29).
+ * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
@@ -59,6 +59,7 @@ export function activeCityCalendarLinks(html: string, base: string): string[] {
 
 export class ActiveCityDeScraper extends DeFeedScraper {
   readonly name = 'de-activecity';
+  readonly integrations = ['activecity'];
 
   private async page(url: string): Promise<{ html: string; page: ActiveCityListPage } | null> {
     const html = await this.fetchHtmlPage(url);
