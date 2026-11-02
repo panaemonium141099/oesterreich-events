@@ -21,8 +21,9 @@ import { Typo3DeScraper } from './Typo3DeScraper';
 import { AllgemeinDeScraper } from './AllgemeinDeScraper';
 import { DigipublicaDeScraper } from './DigipublicaDeScraper';
 import { Open2cDeScraper } from './Open2cDeScraper';
+import { ActiveCityDeScraper } from './ActiveCityDeScraper';
 
-export const DE_SCRAPERS: BaseScraper[] = [new IonasDeScraper(), new NolisDeScraper(), new TribeDeScraper(), new EventsManagerDeScraper(), new MecDeScraper(), new DpCalendarDeScraper(), new JEventsDeScraper(), new ICagendaDeScraper(), new HwDeScraper(), new IkissDeScraper(), new KommOneDeScraper(), new CommuniceDeScraper(), new CeasyDeScraper(), new WeblicationDeScraper(), new Typo3DeScraper(), new AllgemeinDeScraper(), new DigipublicaDeScraper(), new Open2cDeScraper()];
+export const DE_SCRAPERS: BaseScraper[] = [new IonasDeScraper(), new NolisDeScraper(), new TribeDeScraper(), new EventsManagerDeScraper(), new MecDeScraper(), new DpCalendarDeScraper(), new JEventsDeScraper(), new ICagendaDeScraper(), new HwDeScraper(), new IkissDeScraper(), new KommOneDeScraper(), new CommuniceDeScraper(), new CeasyDeScraper(), new WeblicationDeScraper(), new Typo3DeScraper(), new AllgemeinDeScraper(), new DigipublicaDeScraper(), new Open2cDeScraper(), new ActiveCityDeScraper()];
 
 export function getDeScraperByName(name: string): BaseScraper | undefined {
   return DE_SCRAPERS.find(s => s.name === name);
