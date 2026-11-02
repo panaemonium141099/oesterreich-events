@@ -33,6 +33,8 @@ describe('municipalServiceKind', () => {
       'Laubannahme',
       // DE-Prüfstand fn-29.16 (Bergfeld 2026-10-29)
       'Laubannahme der Gemeinde auf der Masche', 'Annahme Gartenabfälle',
+      // DE (fn-29.15): DigiPublica Feldkirchen 30.10.2026
+      'Gartenabfall-Abfuhr',
     ]) {
       expect(municipalServiceKind(t), t).toBe('waste');
     }
