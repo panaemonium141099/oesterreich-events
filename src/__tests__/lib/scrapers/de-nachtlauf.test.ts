@@ -172,7 +172,10 @@ describe('Fortsetzungs-Cursor und Zeitbudget', () => {
     // Budget beginnt beim ersten Abruf; ein Adapter mit abgelaufenem Budget:
     const late = new TestAdapter();
     late.budgetMin = -1;
+    const sleep = vi.spyOn(late as unknown as { sleep: (ms: number) => Promise<void> }, 'sleep');
     expect(await late.feed('https://d.de/feed2.ics')).toBeNull();
+    // Keine Pause mehr nach dem Budget (vorher 4 s je übrige URL, 14 min am 02.11.).
+    expect(sleep).not.toHaveBeenCalled();
     expect(fetchMock.mock.calls.map(c => String(c[0]))).toEqual(['https://d.de/robots.txt', 'https://d.de/feed.ics']);
   });
 

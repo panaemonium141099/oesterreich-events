@@ -120,11 +120,11 @@ node / next.js
   (`host-gate.ts`): ein Abruf zur Zeit, Pause = Crawl-delay, auch über
   Adapter hinweg; robots.txt je Prozess einmal. Zeitbudget je Adapter
   180 min (`SCRAPER_SOFT_BUDGET_MIN` im Job, danach keine Abrufe mehr,
-  Teilergebnis), harte Grenze 210 min. iKISS (gut 2 h) setzt per Cursor je
-  Website fort (`resumeGroups`/`groupDone` in `feed-scraper.ts`; nie
+  Teilergebnis), harte Grenze 210 min. iKISS (225 Kalender, braucht das
+  ganze Budget, 02.11.: 218) setzt per Cursor je Website fort (`resumeGroups`/`groupDone` in `feed-scraper.ts`; nie
   mitten in einer Website, Amts- und Gemeindekalender teilen Termine).
   verwaltungsportal (752 Websites auf einem Server, 4 s Pause) liest
-  rund 120 je Nacht und setzt nach der letzten fertigen Website fort.
+  rund 75 je Nacht (02.11.: 74) und setzt nach der letzten fertigen Website fort.
   `workflow_dispatch` mit `scraper=de` startet nur die DE-Shards und das
   Post-Processing. Ventile rechnen je Land: der Dedup schreibt je Land eine
   Zeile in `dedup_runs` (`country`, Migration `20261102120000`), Anker und
