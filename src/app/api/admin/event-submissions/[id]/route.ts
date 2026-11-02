@@ -24,14 +24,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { requireAdminWithCaller } from '@/lib/supabase/require-admin';
 import { buildEventRow, type ApprovableSubmission } from '@/lib/inserate/approve';
-import {
-  clean,
-  cleanMultiline,
-  cleanUrl,
-  MAX_DESCRIPTION_LENGTH,
-} from '@/lib/inserate/submission';
-import { geocodeLocation } from '@/lib/geocoding';
-import { buildGeocodeCandidates, precisionOfCandidate } from '@/lib/inserate/geocode-query';
+import { clean } from '@/lib/inserate/submission';
+import { extractEdits, resolveSubmissionCoordinates } from '@/lib/inserate/review-input';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { sendGenericEmail } from '@/lib/email';
 import { escapeHtml } from '@/lib/utils/escape-html';
@@ -40,57 +34,11 @@ export const dynamic = 'force-dynamic';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://lasstreffen.at';
 
-/** Felder, die der Admin vor der Freigabe korrigieren darf. Bewusst ohne
- *  Datum: eine Terminänderung ist keine Korrektur, sondern ein anderes
- *  Event — das gehört zurück an den Inserenten. */
-const EDITABLE_TEXT: Array<[key: string, column: string, max: number]> = [
-  ['title', 'title', 200],
-  ['category', 'category', 60],
-  ['locationName', 'location_name', 200],
-  ['address', 'address', 300],
-  ['postalCode', 'postal_code', 10],
-  ['city', 'city', 200],
-  ['bundesland', 'bundesland', 40],
-  ['priceText', 'price_text', 200],
-  ['organizer', 'organizer', 200],
-];
-
-const EDITABLE_URL: Array<[key: string, column: string]> = [
-  ['ticketUrl', 'ticket_url'],
-  ['imageUrl', 'image_url'],
-  ['eventUrl', 'event_url'],
-];
-
 function getServiceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
-}
-
-/** Zieht die erlaubten Korrekturen aus dem Body. Unbekannte Schlüssel
- *  werden ignoriert — der Body darf nicht bestimmen, welche Spalten
- *  geschrieben werden. */
-function extractEdits(raw: unknown): Record<string, string | null> {
-  if (!raw || typeof raw !== 'object') return {};
-  const input = raw as Record<string, unknown>;
-  const edits: Record<string, string | null> = {};
-
-  // Die Beschreibung ist der einzige mehrzeilige Text: ihre Absaetze sind
-  // Inhalt (Line-up, Uhrzeiten, Preise) und muessen die Korrektur im Admin
-  // ueberleben. `clean` wuerde sie zwar nicht zerstoeren, aber auch nicht
-  // normalisieren — cleanMultiline macht beides an einer Stelle.
-  if ('description' in input) {
-    edits.description = cleanMultiline(input.description, MAX_DESCRIPTION_LENGTH);
-  }
-
-  for (const [key, column, max] of EDITABLE_TEXT) {
-    if (key in input) edits[column] = clean(input[key], max);
-  }
-  for (const [key, column] of EDITABLE_URL) {
-    if (key in input) edits[column] = cleanUrl(input[key]);
-  }
-  return edits;
 }
 
 export async function PATCH(
@@ -189,36 +137,11 @@ export async function PATCH(
     );
   }
 
-  // Koordinaten aufloesen. Das ist KEINE Kuer: /api/events filtert
-  // `.not('latitude','is',null)` und die MV event_map_points verlangt
-  // lat/lng. Ein freigegebenes Inserat ohne Koordinaten ist deshalb nicht
-  // bloss ohne Kartenpin, sondern in Liste, Karte UND Suche unsichtbar.
-  // Genau so verschwand am 2026-09-07 ein bereits veroeffentlichtes Event.
-  //
-  // Die Kandidaten kommen aus buildGeocodeCandidates und gehen von genau
-  // nach grob (Adresse mit Ort -> PLZ+Ort -> Venue+Ort -> Ort). Frueher
-  // stand hier eine naiv zusammengeklebte Zeichenkette
-  // ("Strasse, PLZ, Venue"), auf die Nominatim nichts lieferte.
-  const candidates = buildGeocodeCandidates(merged);
-
-  let latitude: number | null = null;
-  let longitude: number | null = null;
-  let geocodedFrom: string | null = null;
-  let coordsPrecision: 'address' | 'venue' | 'municipality' | null = null;
-  for (const candidate of candidates) {
-    try {
-      const geo = await geocodeLocation(candidate);
-      if (geo) {
-        latitude = geo.latitude;
-        longitude = geo.longitude;
-        geocodedFrom = candidate;
-        coordsPrecision = precisionOfCandidate(candidate, merged);
-        break;
-      }
-    } catch (err) {
-      console.error('[admin/event-submissions] geocoding failed:', candidate, err);
-    }
-  }
+  // Koordinaten aufloesen — dieselbe Logik wie die Vorschau-Route
+  // (src/lib/inserate/review-input.ts): ohne sie ist das Event in Liste,
+  // Karte und Suche unsichtbar.
+  const { latitude, longitude, geocodedFrom, coordsPrecision, tried } =
+    await resolveSubmissionCoordinates(merged);
 
   // Ohne Koordinaten wird NICHT veroeffentlicht, ausser der Admin besteht
   // ausdruecklich darauf (`force`). Sonst entstuende ein Event, das auf
@@ -232,7 +155,7 @@ export async function PATCH(
         error:
           'Die Adresse liess sich nicht auf Koordinaten aufloesen. Ohne sie erscheint das Event weder in der Liste noch auf der Karte noch in der Suche. Bitte Adresse, PLZ und Ort pruefen und erneut freigeben.',
         needsCoordinates: true,
-        tried: candidates,
+        tried,
       },
       { status: 422 }
     );

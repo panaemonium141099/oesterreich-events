@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { FileText, Check, X, ExternalLink, Loader2, Inbox } from 'lucide-react';
+import { FileText, Check, X, ExternalLink, Loader2, Inbox, Eye } from 'lucide-react';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import type { Event } from '@/types/events';
+import { InseratVorschau } from '@/components/Admin/InseratVorschau';
 
 /**
  * /admin/inserate — Freigabe der öffentlich eingereichten Event-Inserate.
@@ -15,6 +17,10 @@ import { EVENT_TZ } from '@/lib/utils/event-time';
  *
  * Das Datum ist bewusst NICHT editierbar — eine Terminänderung ist keine
  * Korrektur, sondern ein anderes Event, und gehört zurück an den Inserenten.
+ *
+ * „Vorschau" zeigt das Event vor der Freigabe so, wie es die Detailseite
+ * rendern würde (mit allen Korrekturen, Preisaufschlüsselung, Kartenpin-
+ * Befund) — aus der Vorschau heraus kann direkt freigegeben werden.
  */
 
 type Status = 'pending' | 'approved' | 'rejected';
@@ -109,6 +115,13 @@ export default function AdminInseratePage() {
   /** Gesetzt, wenn die Freigabe an fehlenden Koordinaten gescheitert ist.
    *  Erst dann bietet die Maske das Veroeffentlichen ohne Kartenpin an. */
   const [needsCoordinates, setNeedsCoordinates] = useState(false);
+  /** Geladene Vorschau (Event wie nach der Freigabe) samt Kartenpin-Befund. */
+  const [preview, setPreview] = useState<{
+    submission: Submission;
+    event: Event;
+    geocodedFrom: string | null;
+  } | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -144,11 +157,34 @@ export default function AdminInseratePage() {
     setActionError('');
     setNeedsCoordinates(false);
     setNote('');
+    setPreview(null);
     const initial: Record<string, string> = {};
     for (const field of EDIT_FIELDS) {
       initial[field.key] = (submission[field.column] as string | null) ?? '';
     }
     setEdits(initial);
+  };
+
+  const openPreview = async (submission: Submission) => {
+    setPreviewLoading(true);
+    setActionError('');
+    try {
+      const res = await fetch(`/api/admin/event-submissions/${submission.id}/preview`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ edits }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setActionError(data.error || 'Vorschau fehlgeschlagen');
+        return;
+      }
+      setPreview({ submission, event: data.event, geocodedFrom: data.geocodedFrom ?? null });
+    } catch {
+      setActionError('Netzwerkfehler.');
+    } finally {
+      setPreviewLoading(false);
+    }
   };
 
   const review = async (
@@ -180,6 +216,7 @@ export default function AdminInseratePage() {
       }
       setOpenId(null);
       setNeedsCoordinates(false);
+      setPreview(null);
       await load();
     } catch {
       setActionError('Netzwerkfehler.');
@@ -380,6 +417,18 @@ export default function AdminInseratePage() {
 
                         <div className="flex flex-wrap gap-2">
                           <button
+                            onClick={() => openPreview(s)}
+                            disabled={isBusy || previewLoading}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-400/10 border border-amber-400/30 text-amber-300 text-sm hover:bg-amber-400/15 disabled:opacity-40 transition-colors"
+                          >
+                            {previewLoading ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
+                            Vorschau
+                          </button>
+                          <button
                             onClick={() => review(s, 'approve')}
                             disabled={isBusy}
                             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-400/10 border border-green-400/30 text-green-300 text-sm hover:bg-green-400/15 disabled:opacity-40 transition-colors"
@@ -429,6 +478,22 @@ export default function AdminInseratePage() {
             );
           })}
         </div>
+      )}
+
+      {preview && (
+        <InseratVorschau
+          event={preview.event}
+          geocodedFrom={preview.geocodedFrom}
+          busy={busyId === preview.submission.id}
+          onApprove={() => {
+            // Die Freigabe läuft über denselben Weg wie der Knopf in der
+            // Maske; ein Fehler (z. B. fehlende Koordinaten) erscheint dort.
+            const target = preview.submission;
+            setPreview(null);
+            void review(target, 'approve');
+          }}
+          onClose={() => setPreview(null)}
+        />
       )}
     </div>
   );
