@@ -45,7 +45,8 @@ const CLOSED_RE = /\bgeschlossen\b/i;
 /** Abfuhr, Sammelstellen und Sammelaktionen der Abfallwirtschaft. */
 const WASTE_RE = new RegExp(
   [
-    '(?:sperr|rest|bio|haus|sonder|gr[üu]n|gift)m[üu]ll',
+    // Problemmüll (Open2C Jesenwang „Problemmüllsamlung“, fn-29.15).
+    '(?:sperr|rest|bio|haus|sonder|gr[üu]n|gift|problem)m[üu]ll',
     'm[üu]ll[- ]?(?:abfuhr|abhol|entsorgung|termin|kalender|hof|s[äa]ck|tonne|insel)',
     'abfuhrtermin', 'abfallsammel', 'abfallwirtschaft', 'abfallkalender', 'bioabfall',
     'altpapier', 'altstoff', 'altglas', 'altkleider', 'altmetall', 'elektroalt', 'elektroschrott',
