@@ -25,6 +25,7 @@ import { MecDeScraper } from './MecDeScraper';
 import { NolisDeScraper } from './NolisDeScraper';
 import { Open2cDeScraper } from './Open2cDeScraper';
 import { TribeDeScraper } from './TribeDeScraper';
+import { VerwaltungsportalDeScraper } from './VerwaltungsportalDeScraper';
 import { Typo3DeScraper } from './Typo3DeScraper';
 import { WeblicationDeScraper } from './WeblicationDeScraper';
 
@@ -36,7 +37,7 @@ export function amtVgAdapters(): DeFeedScraper[] {
     new MecDeScraper(undefined, v), new HwDeScraper(undefined, v), new IkissDeScraper(undefined, v),
     new KommOneDeScraper(undefined, v), new CommuniceDeScraper(undefined, v), new WeblicationDeScraper(undefined, v),
     new Typo3DeScraper(undefined, v), new AllgemeinDeScraper(undefined, v), new DigipublicaDeScraper(undefined, v),
-    new Open2cDeScraper(undefined, v), new ActiveCityDeScraper(undefined, v),
+    new Open2cDeScraper(undefined, v), new ActiveCityDeScraper(undefined, v), new VerwaltungsportalDeScraper(undefined, v),
   ];
 }
 

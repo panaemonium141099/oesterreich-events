@@ -106,8 +106,11 @@ verlangt; ein Gemeinde-Mittelpunkt des Amts ist kein Ort des Termins.
   `/kalender/`, `/veranstaltungen/`, `/termine/`). Belege: VG Wittlich-Land zeigt „Es
   wurden keine Termine gefunden“, Bitburger Land verlinkt auf eifel-direkt.de,
   Simmern-Rheinböllen lädt die Liste per Skript nach. Eigener Adapter nötig.
-* **verwaltungsportal (74):** Adapter PR #401 als Entwurf, IP-Sperre nach parallelen
-  Abrufen (fn-29.11).
+* **verwaltungsportal (74):** Der Adapter (fn-29.11, PR #401) kam nach diesem
+  Prüfstand auf master; er führt die Ausweichwege schon selbst (103 Amts- und
+  VG-Kalender, eigener Prüfstand mit 4 s Pause) und hängt jetzt auch in `de-amt-vg`.
+  In den Zahlen oben ist er nicht enthalten; ein Lauf von `de-amt-vg` mit ihm braucht
+  wegen der Pause mehrere Stunden.
 * **Tourismus-Systeme (54):** deskline, destination.one, termine-regional, stadtlandnews,
   outdooractive; kein Gemeinde-Adapter (Epic-Grenze: nur eingebettete Gemeinde-Widgets).
 * **active-City (5):** Der Adapter (fn-29.15, nach diesem Prüfstand gemergt) ist in
