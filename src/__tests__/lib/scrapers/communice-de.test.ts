@@ -9,7 +9,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   communiceCalendarUrl, communiceIcalHref, communicePageUrl, communiceSlug, communiceStartWithoutYear,
   communiceStartYear, communiceWhen, parseCommuniceList,
@@ -41,6 +41,12 @@ const GROUPS: Record<Kal, FeedGroup> = {
   babenhausen: { feedUrl: KAL.babenhausen, pageUrl: KAL.babenhausen, own: [reg('09778115', 'Babenhausen, M', 'bayern', KAL.babenhausen), reg('09778152', 'Kirchhaslach', 'bayern', KAL.babenhausen)], viaVerband: [] },
   teisendorf: { feedUrl: KAL.teisendorf, pageUrl: KAL.teisendorf, own: [reg('09172134', 'Teisendorf, M', 'bayern', KAL.teisendorf)], viaVerband: [] },
 };
+
+// Die Fixtures stammen vom 30.10.2026 und listen Termine an diesem Tag.
+// Der Freigabevertrag misst gegen die Uhr (start_in_past); sie steht
+// deshalb auf dem Abrufdatum, sonst kippen die Zeilen mit jedem Tag.
+beforeAll(() => vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-30T12:00:00Z') }));
+afterAll(() => vi.useRealTimers());
 
 const page = (k: Kal) => parseCommuniceList(fx(k), KAL[k]);
 const termin = (k: Kal, title: string) => page(k).termine.find(t => t.title === title)!;
