@@ -378,6 +378,9 @@ interface ReportEntry {
   primaryTitle?: string;
   primarySource?: string | null;
   reason?: string;
+  /** Ventil-Klasse eines neuen Duplikats (valveClass), zur Prüfung des Probelaufs. */
+  valveClass?: ValveClass | null;
+  createdAt?: string | null;
 }
 
 /** Höchstens so weit zurück gilt der Zulauf als Zulauf: bleibt der Anker
@@ -565,6 +568,12 @@ async function main(): Promise<void> {
   for (const m of plan.markDuplicate) {
     const c = classify(m);
     if (c) byClass.set(c, (byClass.get(c) ?? 0) + 1);
+  }
+  const classById = new Map(plan.markDuplicate.map(m => [`${m.id}>${m.primaryId}`, classify(m)] as const));
+  for (const r of report) {
+    if (r.action === 'release') continue;
+    r.valveClass = classById.get(`${r.id}>${r.primaryId}`) ?? null;
+    r.createdAt = allRows.get(r.id)?.created_at ?? null;
   }
   const stock = byClass.get('stock') ?? 0;
   const inflow = byClass.get('inflow') ?? 0;
