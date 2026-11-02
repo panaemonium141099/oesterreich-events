@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { FileText, Check, X, ExternalLink, Loader2, Inbox, Eye } from 'lucide-react';
+import { FileText, Check, X, ExternalLink, Loader2, Inbox, Eye, Save } from 'lucide-react';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import type { Event } from '@/types/events';
 import { InseratVorschau } from '@/components/Admin/InseratVorschau';
@@ -21,6 +21,13 @@ import { InseratVorschau } from '@/components/Admin/InseratVorschau';
  * „Vorschau" zeigt das Event vor der Freigabe so, wie es die Detailseite
  * rendern würde (mit allen Korrekturen, Preisaufschlüsselung, Kartenpin-
  * Befund) — aus der Vorschau heraus kann direkt freigegeben werden.
+ * Die Vorschau legt einen History-Eintrag an: der Zurück-Pfeil der
+ * Detailseite (router.back()), die Browser-Zurück-Taste und der eigene
+ * Knopf landen alle wieder in der Maske mit offenen Details und
+ * unveränderten Korrekturen, statt die Admin-Seite zu verlassen.
+ *
+ * „Speichern" schreibt die Korrekturen in die Einreichung, ohne zu
+ * entscheiden: das Inserat bleibt offen, nichts geht online.
  */
 
 type Status = 'pending' | 'approved' | 'rejected';
@@ -122,6 +129,24 @@ export default function AdminInseratePage() {
     geocodedFrom: string | null;
   } | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  /** ID des Inserats, dessen Korrekturen zuletzt gespeichert wurden. */
+  const [savedId, setSavedId] = useState<string | null>(null);
+
+  // Die Vorschau liegt als eigener History-Eintrag über der Maske:
+  // „zurück" (Pfeil, Browser, Esc, Knopf) schließt nur die Vorschau.
+  useEffect(() => {
+    const onPop = () => setPreview(null);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  const closePreview = () => {
+    if (window.history.state?.inseratVorschau) {
+      window.history.back();
+    } else {
+      setPreview(null);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -158,6 +183,7 @@ export default function AdminInseratePage() {
     setNeedsCoordinates(false);
     setNote('');
     setPreview(null);
+    setSavedId(null);
     const initial: Record<string, string> = {};
     for (const field of EDIT_FIELDS) {
       initial[field.key] = (submission[field.column] as string | null) ?? '';
@@ -179,11 +205,38 @@ export default function AdminInseratePage() {
         setActionError(data.error || 'Vorschau fehlgeschlagen');
         return;
       }
+      window.history.pushState({ ...window.history.state, inseratVorschau: true }, '');
       setPreview({ submission, event: data.event, geocodedFrom: data.geocodedFrom ?? null });
     } catch {
       setActionError('Netzwerkfehler.');
     } finally {
       setPreviewLoading(false);
+    }
+  };
+
+  const save = async (submission: Submission) => {
+    setBusyId(submission.id);
+    setActionError('');
+    setSavedId(null);
+    try {
+      const res = await fetch(`/api/admin/event-submissions/${submission.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'save', edits }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setActionError(data.error || 'Speichern fehlgeschlagen');
+        return;
+      }
+      setSavedId(submission.id);
+      // Liste nachladen, Details bleiben offen; die Maske zeigt weiter
+      // die Korrekturen, die jetzt auch in der Einreichung stehen.
+      await load();
+    } catch {
+      setActionError('Netzwerkfehler.');
+    } finally {
+      setBusyId(null);
     }
   };
 
@@ -429,6 +482,18 @@ export default function AdminInseratePage() {
                             Vorschau
                           </button>
                           <button
+                            onClick={() => save(s)}
+                            disabled={isBusy || previewLoading}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/15 text-white/80 text-sm hover:bg-white/10 disabled:opacity-40 transition-colors"
+                          >
+                            {isBusy ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Save className="w-4 h-4" />
+                            )}
+                            Speichern
+                          </button>
+                          <button
                             onClick={() => review(s, 'approve')}
                             disabled={isBusy}
                             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-400/10 border border-green-400/30 text-green-300 text-sm hover:bg-green-400/15 disabled:opacity-40 transition-colors"
@@ -448,6 +513,12 @@ export default function AdminInseratePage() {
                             <X className="w-4 h-4" />
                             Ablehnen
                           </button>
+                          {savedId === s.id && !isBusy && (
+                            <span className="inline-flex items-center gap-1.5 self-center text-xs text-green-300/80">
+                              <Check className="w-3.5 h-3.5" />
+                              Gespeichert, Inserat bleibt offen
+                            </span>
+                          )}
                         </div>
                       </>
                     ) : (
@@ -489,10 +560,10 @@ export default function AdminInseratePage() {
             // Die Freigabe läuft über denselben Weg wie der Knopf in der
             // Maske; ein Fehler (z. B. fehlende Koordinaten) erscheint dort.
             const target = preview.submission;
-            setPreview(null);
+            closePreview();
             void review(target, 'approve');
           }}
-          onClose={() => setPreview(null)}
+          onClose={closePreview}
         />
       )}
     </div>

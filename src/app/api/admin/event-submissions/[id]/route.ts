@@ -1,11 +1,16 @@
 /**
  * PATCH /api/admin/event-submissions/[id]
  *
- * Freigabe oder Ablehnung eines Event-Inserats.
+ * Freigabe, Ablehnung oder Zwischenspeichern eines Event-Inserats.
  *
  * Body:
  *   { action: 'approve', edits?: {...}, note?: string }
  *   { action: 'reject',  note?: string }
+ *   { action: 'save',    edits?: {...} }
+ *
+ * `save` schreibt die Korrekturen in die Einreichung, ohne zu entscheiden:
+ * das Inserat bleibt offen, nichts wird veröffentlicht, keine Mail.
+ * So überlebt eine halb fertige Korrektur den Seitenwechsel.
  *
  * `edits` erlaubt es, Tippfehler und schiefe Ortsangaben VOR der
  * Veröffentlichung zu korrigieren — sonst wäre die Freigabe ein
@@ -59,9 +64,9 @@ export async function PATCH(
   }
 
   const action = body.action;
-  if (action !== 'approve' && action !== 'reject') {
+  if (action !== 'approve' && action !== 'reject' && action !== 'save') {
     return NextResponse.json(
-      { error: "action muss 'approve' oder 'reject' sein" },
+      { error: "action muss 'approve', 'reject' oder 'save' sein" },
       { status: 400 }
     );
   }
@@ -90,6 +95,28 @@ export async function PATCH(
   }
 
   const reviewedAt = new Date().toISOString();
+
+  // ── Zwischenspeichern ─────────────────────────────────────────────
+  if (action === 'save') {
+    const edits = extractEdits(body.edits);
+    if (Object.keys(edits).length === 0) {
+      return NextResponse.json({ error: 'Nichts zu speichern.' }, { status: 400 });
+    }
+    if ('title' in edits && (!edits.title || edits.title.trim().length < 3)) {
+      return NextResponse.json({ error: 'Der Titel darf nicht leer sein.' }, { status: 400 });
+    }
+
+    const { error } = await supabase
+      .from('event_submissions')
+      .update(edits)
+      .eq('id', id);
+
+    if (error) {
+      console.error('[admin/event-submissions] save failed:', error);
+      return NextResponse.json({ error: 'Speichern fehlgeschlagen' }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true, status: 'pending' });
+  }
 
   // ── Ablehnen ──────────────────────────────────────────────────────
   if (action === 'reject') {
