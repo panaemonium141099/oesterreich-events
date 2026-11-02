@@ -276,7 +276,12 @@ node / next.js
   Verzeichnis, dann Spotify; „Deine Künstler“ nur mit sb-Cookie über
   `/api/artists/following`; Folgen optimistisch über `/api/artists/follow`;
   Künstlerblatt als Sheet mit Terminen, Event-Links und Ticketlinks
-  (`ticket_url` bzw. `evo_link`, `data-track="ticket_click"`).
+  (`ticket_url` bzw. `evo_link`, `data-track="ticket_click"`). Dasselbe
+  Blatt als Seite: `src/app/[locale]/kuenstler/[slug]/page.tsx` (ISR,
+  Slug aus dem Namen über `artistSlug`, mehrere Feed-IDs eines Namens
+  vereint `artistBySlug`, JSON-LD Person/MusicGroup mit Terminen, in der
+  Core-Sitemap). Alle Leser teilen `getArtistsDirectoryCached`
+  (unstable_cache, 1 h, rund 1,2 MB).
 - `src/app/api/events/route.ts` — Events-API (Cursor-Pagination, bbox, Filter)
 - `src/app/api/events/map-points/route.ts` — columnar Karten-Snapshot aus MV (fn-16)
 - `src/app/api/search/semantic/route.ts` — Smart-Suche (Gemini-Intent →

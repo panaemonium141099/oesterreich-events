@@ -20,14 +20,14 @@
  * man auch Künstlern ohne Termin folgen kann.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Shelf } from '@/components/Discover/v4/shelf-ui';
-import { hasSupabaseAuthCookie } from '@/lib/ads/ads-allowed';
 import { normalizeArtistName } from '@/lib/artists/normalize-name';
 import {
   alphabetical,
+  artistSlug,
   letterOf,
   planArtistShelves,
   relatedArtists,
@@ -37,12 +37,7 @@ import {
 } from '@/lib/artists/directory';
 import { ArtistSheet } from './ArtistSheet';
 import { ArtistAvatar, ArtistCard, ArtistRow, FollowButton, LOGIN_HREF, dayLabel } from './artist-ui';
-
-interface FollowedArtist {
-  id: string;
-  artist_name: string;
-  spotify_image_url: string | null;
-}
+import { TOAST_CLASS, useFollowed, type FollowedArtist } from './use-followed';
 
 interface SpotifyArtist {
   id: string;
@@ -66,21 +61,18 @@ const SPOTIFY_LINK = /open\.spotify\.com\/|^spotify:/i;
 
 /** Ein gefolgter Künstler ohne Termin im Verzeichnis, damit Reihe und Blatt ihn zeigen können. */
 function followedOnly(f: FollowedArtist): DirectoryArtist {
-  return { id: `followed:${f.id}`, name: f.artist_name, image: f.spotify_image_url, evoLink: null, kind: 'sonstiges', genre: null, events: [] };
+  return { id: `followed:${f.id}`, name: f.artist_name, slug: artistSlug(f.artist_name), image: f.spotify_image_url, evoLink: null, kind: 'sonstiges', genre: null, events: [] };
 }
 
 export function ArtistsWall({ artists, today }: { artists: DirectoryArtist[]; today: string }) {
   const t = useTranslations('Artists');
   const locale = useLocale();
 
-  const [signedIn, setSignedIn] = useState(false);
-  const [followed, setFollowed] = useState<Map<string, FollowedArtist>>(() => new Map());
+  const { signedIn, followed, isFollowed, toggle, toast } = useFollowed();
   const [open, setOpen] = useState<DirectoryArtist | null>(null);
   const [letter, setLetter] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [spotify, setSpotify] = useState<{ state: 'idle' | 'searching' | 'done' | 'error'; results: SpotifyArtist[] }>({ state: 'idle', results: [] });
-  const [toast, setToast] = useState<string | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const byName = useMemo(() => new Map(artists.map(a => [normalizeArtistName(a.name), a])), [artists]);
   const shelves = useMemo(() => planArtistShelves(artists, today), [artists, today]);
@@ -88,68 +80,6 @@ export function ArtistsWall({ artists, today }: { artists: DirectoryArtist[]; to
   const letters = useMemo(() => new Set(sorted.map(a => letterOf(a.name))), [sorted]);
   const directory = letter ? sorted.filter(a => letterOf(a.name) === letter) : sorted;
   const localHits = useMemo(() => searchDirectory(artists, query), [artists, query]);
-  const isFollowed = useCallback((name: string) => followed.has(normalizeArtistName(name)), [followed]);
-
-  useEffect(() => {
-    if (!hasSupabaseAuthCookie()) return;
-    const controller = new AbortController();
-    fetch('/api/artists/following?limit=200', { signal: controller.signal, credentials: 'same-origin' })
-      .then(r => (r.ok ? (r.json() as Promise<{ artists?: FollowedArtist[] }>) : null))
-      .then(data => {
-        if (!data) return;
-        setFollowed(new Map((data.artists ?? []).map(f => [normalizeArtistName(f.artist_name), f])));
-        setSignedIn(true);
-      })
-      .catch(() => {
-        // Personalisierung ist Kür: ohne Antwort bleibt die Wand anonym.
-      });
-    return () => controller.abort();
-  }, []);
-
-  const notify = useCallback((text: string) => {
-    setToast(text);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 4000);
-  }, []);
-
-  const toggle = useCallback(async (name: string, image: string | null, spotifyId?: string) => {
-    const key = normalizeArtistName(name);
-    const was = followed.get(key);
-    // Optimistisch: der Knopf wechselt sofort, bei Nicht-2xx rollt er zurück.
-    setFollowed(prev => {
-      const next = new Map(prev);
-      if (was) next.delete(key);
-      else next.set(key, { id: `tmp:${key}`, artist_name: name, spotify_image_url: image });
-      return next;
-    });
-    notify(was ? t('toastUnfollowed', { name }) : t('toastFollowed', { name }));
-    try {
-      const res = await fetch('/api/artists/follow', {
-        method: was ? 'DELETE' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify(
-          was
-            ? { artist_name: name }
-            : { artist_name: name, spotify_image_url: image ?? undefined, spotify_artist_id: spotifyId, source: spotifyId ? 'spotify' : 'manual' },
-        ),
-      });
-      // 404 beim Entfolgen heißt: war schon nicht mehr gefolgt, Zustand stimmt.
-      if (!res.ok && !(was && res.status === 404)) throw new Error(String(res.status));
-      if (!was) {
-        const data = (await res.json().catch(() => null)) as { followed_artist?: { id?: string } } | null;
-        const id = data?.followed_artist?.id;
-        if (id) setFollowed(prev => { const next = new Map(prev); const f = next.get(key); if (f) next.set(key, { ...f, id }); return next; });
-      }
-    } catch {
-      setFollowed(prev => {
-        const next = new Map(prev);
-        if (was) next.set(key, was); else next.delete(key);
-        return next;
-      });
-      notify(t('toastError'));
-    }
-  }, [followed, notify, t]);
 
   const toggleArtist = useCallback((a: DirectoryArtist) => { void toggle(a.name, a.image); }, [toggle]);
   const openArtist = useCallback((a: DirectoryArtist) => setOpen(a), []);
@@ -351,11 +281,7 @@ export function ArtistsWall({ artists, today }: { artists: DirectoryArtist[]; to
         />
       )}
 
-      <div
-        role="status"
-        aria-live="polite"
-        className={`pointer-events-none fixed left-1/2 z-[70] max-w-[min(92vw,480px)] -translate-x-1/2 rounded-xl bg-white px-4.5 py-3 text-center text-[13.5px] font-semibold text-[#0a0a0c] shadow-lg transition-all duration-200 ${toast ? 'opacity-100' : 'translate-y-3 opacity-0'} bottom-[90px] md:bottom-8`}
-      >
+      <div role="status" aria-live="polite" className={`${TOAST_CLASS} ${toast ? 'opacity-100' : 'translate-y-3 opacity-0'}`}>
         {toast}
       </div>
     </div>

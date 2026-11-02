@@ -6,6 +6,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   alphabetical,
+  artistBySlug,
+  artistSlug,
   buildDirectory,
   isHouseOrSeries,
   kindOf,
@@ -152,6 +154,7 @@ describe('kindOf', () => {
 const artist = (id: string, name: string, dates: string[], extra: Partial<DirectoryArtist> = {}): DirectoryArtist => ({
   id,
   name,
+  slug: artistSlug(name),
   image: null,
   evoLink: null,
   kind: 'konzert',
@@ -235,5 +238,33 @@ describe('Verzeichnis und Suche', () => {
     expect(programTitle(a, { ...e, title: 'Alex Kristan' })).toBeNull();
     expect(programTitle(a, { ...e, title: 'Kabarettgipfel mit Alex Kristan' })).toBe('Kabarettgipfel mit Alex Kristan');
     expect(programTitle(a, { ...e, title: 'Alex Kristan & Gery Seidl - Doppelpass' })).toBe('Alex Kristan & Gery Seidl - Doppelpass');
+  });
+});
+
+describe('Künstlerseiten', () => {
+  it('artistSlug: Umlaute, Sonderzeichen und Leerzeichen werden URL-tauglich', () => {
+    expect(artistSlug('Pizzera & Jaus')).toBe('pizzera-jaus');
+    expect(artistSlug('5/8erl in Ehr’n')).toBe('5-8erl-in-ehr-n');
+    expect(artistSlug('Hubert von Goisern')).toBe('hubert-von-goisern');
+    expect(artistSlug('Mnozil Brass')).toBe('mnozil-brass');
+    expect(artistSlug('Gery Seidl')).toBe('gery-seidl');
+    expect(artistSlug('Conchita WURST / Tom Neuwirth')).toBe('conchita-wurst-tom-neuwirth');
+    expect(artistSlug('Bühne Baden')).toBe('buehne-baden');
+  });
+
+  it('buildDirectory vergibt den Slug, artistBySlug findet ihn und vereint mehrere Feed-IDs', () => {
+    const rows = [
+      row('a1', 'Alex Kristan', ev('e1', '2026-11-03T18:30:00Z', { tags: ['kabarett'] }), null),
+      row('a2', 'Alex Kristan', ev('e2', '2026-11-05T18:30:00Z', { tags: ['kabarett'] }), 'https://img/alex.jpg'),
+      row('a2', 'Alex Kristan', ev('e1', '2026-11-03T18:30:00Z', { tags: ['kabarett'] }), 'https://img/alex.jpg'),
+      row('b', 'Gery Seidl', ev('e3', '2026-11-04T18:30:00Z', { tags: ['kabarett'] })),
+    ];
+    const out = buildDirectory(rows, new Map());
+    expect(out.map(a => a.slug)).toEqual(['alex-kristan', 'alex-kristan', 'gery-seidl']);
+    const merged = artistBySlug(out, 'alex-kristan');
+    expect(merged?.events.map(e => e.id)).toEqual(['e1', 'e2']);
+    expect(merged?.image).toBe('https://img/alex.jpg');
+    expect(artistBySlug(out, 'gery-seidl')?.id).toBe('b');
+    expect(artistBySlug(out, 'niemand')).toBeNull();
   });
 });

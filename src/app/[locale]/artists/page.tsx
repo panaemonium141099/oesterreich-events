@@ -14,7 +14,7 @@ import type { Metadata } from 'next';
 import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ArtistsWall } from '@/components/Artists/v4';
-import { getArtistsDirectory } from '@/lib/artists/get-artists-directory';
+import { getArtistsDirectoryCached } from '@/lib/artists/get-artists-directory';
 import { bilingualAlternates } from '@/lib/seo/canonical';
 import { routing } from '@/i18n/routing';
 
@@ -36,7 +36,7 @@ export default async function ArtistsPage({ params }: { params: Promise<{ locale
   const locale = hasLocale(routing.locales, rawLocale) ? rawLocale : routing.defaultLocale;
   setRequestLocale(locale);
 
-  const directory = await getArtistsDirectory();
+  const directory = await getArtistsDirectoryCached();
 
   return (
     <main className="min-h-screen bg-[var(--v4-surface)] text-[var(--v4-ink)]">

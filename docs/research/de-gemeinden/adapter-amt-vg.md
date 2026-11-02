@@ -110,6 +110,9 @@ verlangt; ein Gemeinde-Mittelpunkt des Amts ist kein Ort des Termins.
   Abrufen (fn-29.11).
 * **Tourismus-Systeme (54):** deskline, destination.one, termine-regional, stadtlandnews,
   outdooractive; kein Gemeinde-Adapter (Epic-Grenze: nur eingebettete Gemeinde-Widgets).
+* **active-City (5):** Der Adapter (fn-29.15, nach diesem Prüfstand gemergt) ist in
+  `de-amt-vg` eingehängt und liest Ausweichwege; den fünf Gemeinden fehlt in der Registry
+  die Kalenderseite des Amts, und active-City hat keinen Feed für den Builder.
 * **„Gemeinde OT Ortsteil“ im Ortsfeld** (tribe, Amt Odervorland: „Jacobsdorf OT
   Pillgram“) liest der Resolver nicht; die Termine stehen in Quarantäne. Das betrifft den
   gemeinsamen Resolver und gehört in eine eigene Aufgabe.
