@@ -15,6 +15,7 @@
  * behält (gleiche Regel wie get-landing-data.ts).
  */
 
+import { unstable_cache } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 import { SITE_COUNTRY } from '@/lib/site-country';
 import { forEachPage } from '@/lib/db/fetch-all';
@@ -101,3 +102,16 @@ async function loadDirectory(now: Date): Promise<ArtistsDirectory> {
   const cityOf = (plz: string) => plzReference(plz)?.orte[0] ?? null;
   return { artists: buildDirectory(rows, primaries, { cityOf }), today, windowDays: DIRECTORY_WINDOW_DAYS };
 }
+
+/**
+ * Dasselbe Verzeichnis für alle Leser (/artists, /kuenstler/[slug],
+ * Sitemap): eine Abfrage je Stunde statt je Seite. Der Supabase-Client
+ * schickt intern `Cache-Control: no-cache`, der Next-Cache hält das
+ * Ergebnis trotzdem (gleiches Muster wie activity-detail-loaders.ts).
+ * Rund 1,2 MB als JSON (Prod 2026-11-02: 694 Künstler, 2.217 Termine).
+ */
+export const getArtistsDirectoryCached = unstable_cache(
+  () => getArtistsDirectory(),
+  ['artists-directory'],
+  { revalidate: 3600, tags: ['artists'] },
+);
