@@ -1,0 +1,965 @@
+
+<!DOCTYPE HTML>
+<html lang="de" class="frontend">
+<head>
+ <link rel="manifest" href="/layout/_basis/pwa_manifest.webmanifest?__ts=1778160526" crossorigin="use-credentials" />
+<meta charset="UTF-8">
+<title>Veranstaltungskalender / Gemeinde Pfatter</title>
+<meta name="author" content="Gemeinde Pfatter">
+<meta name="publisher" content="Gemeinde Pfatter">
+<meta name="designer" content="Advantic GmbH">
+<meta name="copyright" content="Gemeinde Pfatter">
+<meta name="robots" content="index,follow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no">
+<meta property="og:locale" content="de_DE">
+<meta property="og:site_name" content="Gemeinde Pfatter">
+<meta name="twitter:card" content="summary_large_image">
+ <meta property="og:type" content="website">
+ <meta property="og:title" content="Veranstaltungskalender">
+ <meta name="twitter:title" content="Veranstaltungskalender">
+ <meta property="og:url" content="https://www.pfatter.de/Freizeit-und-Kultur/Veranstaltungskalender">
+ <meta name="twitter:url" content="https://www.pfatter.de/Freizeit-und-Kultur/Veranstaltungskalender">
+ <meta property="og:image" content="https://www.pfatter.de/layout/_basis/assets/img/placeholder-1200x630.png">
+ <meta property="og:image:alt" content="Gemeinde Pfatter">
+ <meta name="twitter:image" content="https://www.pfatter.de/layout/_basis/assets/img/placeholder-1200x630.png">
+ <meta name="twitter:image:alt" content="Gemeinde Pfatter">
+ <link href="/output/js/noUiSlider/nouislider.css?v=1581" rel="stylesheet">
+ <link rel="stylesheet" href="/layout/_basis/assets/js/slicknav/slicknav.min.css?__ts=1756473532">
+ <link rel="stylesheet" href="/layout/_basis/layout.css?__ts=1793234027">
+ <link rel="stylesheet" href="/layout/_basis/modern-nav.css?__ts=1759396354">
+ <link rel="stylesheet preload" href="/layout/_basis/assets/fonts/open-sans.css" as="style">
+ <link rel="stylesheet" media="screen and (prefers-color-scheme: dark)" href="/layout/_basis/darkmode.css?__ts=1773831919">
+ <link rel="icon" type="image/png" href="/layout/_basis/assets/favicon/favicon-96x96.png?__ts=1759738264" sizes="96x96" />
+ <link rel="icon" type="image/svg+xml" href="/layout/_basis/assets/favicon/favicon.svg?__ts=1759738264" />
+ <link rel="shortcut icon" href="/layout/_basis/assets/favicon/favicon.ico?__ts=1759738264" />
+ <link rel="apple-touch-icon" sizes="180x180" href="/layout/_basis/assets/favicon/apple-touch-icon.png?__ts=1759738279" />
+ <meta name="apple-mobile-web-app-title" content="Gemeinde Pfatter" />
+ <link rel="stylesheet" href="/output/gmc/leaflet/leaflet.css">
+ <link href="/layout/_basis/ikiss.autocomplete_solr_respond.css?__ts=1756885831" rel="styleSheet">
+ <link rel="stylesheet" href="/output/js/photoswipe/photoswipe.css">
+ <link rel="stylesheet" href="/output/js/photoswipe/ikiss-skin.css">
+<link rel="stylesheet" href="/layout/_basis/pwa.css?__ts=1778149792">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" sizes="128x128" href="/layout/_basis/assets/pwa/icons/manifest-icon-maskable_128x128.png?__ts=1777986569">
+<link rel="apple-touch-icon" sizes="16x16" href="/layout/_basis/assets/pwa/icons/manifest-icon-maskable_16x16.png?__ts=1777986569">
+<link rel="apple-touch-icon" sizes="192x192" href="/layout/_basis/assets/pwa/icons/manifest-icon-maskable_192x192.png?__ts=1777986569">
+<link rel="apple-touch-icon" sizes="32x32" href="/layout/_basis/assets/pwa/icons/manifest-icon-maskable_32x32.png?__ts=1777986569">
+<link rel="apple-touch-icon" sizes="48x48" href="/layout/_basis/assets/pwa/icons/manifest-icon-maskable_48x48.png?__ts=1777986569">
+<link rel="apple-touch-icon" sizes="72x72" href="/layout/_basis/assets/pwa/icons/manifest-icon-maskable_72x72.png?__ts=1777986569">
+<link rel="apple-touch-icon" sizes="96x96" href="/layout/_basis/assets/pwa/icons/manifest-icon-maskable_96x96.png?__ts=1777986569">
+ </head>
+<body id="start" class="folgeseite pagewidth-wide jumbotronwidth-full sticky-header">
+ <div id="cookie-note" class="cookie-note bottom-left" role="dialog" aria-modal="false" aria-label="Cookie-Hinweis" aria-describedby="cookie-note-text" data-ikiss-mfid="41.4257.1.1">
+ <div class="pull-left" id="cookie-note-text">
+ <p>Diese Website verwendet Cookies, die f&uuml;r den technischen Betrieb der Website notwendig sind und stets gesetzt werden.</p>
+<p>Weitere Cookies werden nur mit Ihrer Zustimmung gesetzt, um statistische Daten zur Nutzung der Website in anonymisierter Form zu sammeln.</p>
+<p><strong><a href="Datenschutz#Cookies">Mehr dazu in unserer Datenschutzerkl&auml;rung.</a></strong></p>
+ </div>
+ <div class="btn-row pull-right">
+ <button id="cookie-note-hide" class="btn"><span class="fa-regular fa-xmark" aria-hidden="true"></span>Ablehnen</button><br class="hide"><button id="cookie-note-accept" class="btn"><span class="fa-regular fa-check" aria-hidden="true"></span>Zustimmen</button>
+ </div>
+ </div>
+ <nav aria-label="Sprungziele">
+ <ul class="sr-links">
+ <li><a id="sr-link-content" href="#content">zum Inhalt</a></li>
+ <li><a id="sr-link-search" href="#text" class="open-fullscreen-search">zur Volltextsuche</a></li>
+ <li class="hide-md"><a id="sr-link-nav" href="#nav">zur Hauptnavigation</a></li>
+ <li class="hide-lg"><a id="sr-link-nav-mob" href="#nav-mob">zur Navigation</a></li>
+ <li><a id="sr-link-quicknav" href="#quicknav">zur Servicenavigation</a></li>
+ </ul>
+ </nav>
+ <div class="modern-nav flex primary-bg-color with-content">
+ <button class="modern-nav-btn close primary-bg-color" aria-label="Men&uuml; schlie&szlig;en">
+ <span class="fa-regular fa-xmark fa-fw" aria-hidden="true"></span><span class="btn-desc">schlie&szlig;en</span>
+ </button>
+ <nav id="nav-mob" aria-label="Navigation"></nav>
+ <nav id="nav" class="hide" aria-label="Hauptnavigation">
+ </nav>
+ <div class="nav-bottom" role="region" aria-label="Zusatzinformationen">
+<h3>Wir sind gern f&uuml;r Sie da</h3>
+<p><em>- pers&ouml;nlich oder digital -</em></p>
+<div class="result-list adressen" id="liste_4">
+<div class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="9.4257.1.1">
+ <div class="flex-row">
+ <div class="flex-col-1">
+ <div class="result-list_text">
+ <h4 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/index.php?object=tx,4257.1.1&amp;ModID=9&amp;FID=4257.1.1&amp;NavID=4257.622"><span translate="no">Gemeinde Pfatter</span><span class="sr-only">: Detailseite</span></a>
+ </h4>
+ <div class="result-list_text-columns js-remove-empty"> 
+ <div class="flex-row js-remove-empty">
+ <div class="flex-col-1 js-remove-empty">
+ <div class="result-list_text js-remove-empty">
+ <p>
+ Haidauer Str.&nbsp;40<br> 93102&nbsp;Pfatter<br> </p>
+ </div>
+ </div>
+ <div class="flex-col-1 js-remove-empty">
+ <div class="result-list_text js-remove-empty">
+ <ul class="contact-list">
+ <li class="contact-list_item has-icon"><a class="contact-list_link has-icon" href="tel:0948194040" title="Nummer anrufen"><span class="contact-list_icon fa-solid fa-phone rs_skip" aria-hidden="true" title="Telefon"><span class="hide">&zwnj;</span></span><span class="sr-only">Telefon: </span><span class="contact-list_text">09481/9404-0</span></a></li>
+ <li class="contact-list_item has-icon no-js-link"><span class="contact-list_icon fa-solid fa-fax rs_skip" aria-hidden="true" title="Fax"><span class="hide">&zwnj;</span></span><span class="sr-only">Fax: </span><span class="contact-list_text">09481/9404-25</span></li>
+ <li class="contact-list_item has-icon"><a class="contact-list_link has-icon" href="mailto:gemeinde@pfatter.de" title="E-Mail schreiben"><span class="contact-list_icon fa-solid fa-envelope rs_skip" aria-hidden="true" title="E-Mail"><span class="hide">&zwnj;</span></span><span class="sr-only">E-Mail: </span><span class="contact-list_text">gemeinde@pfatter.de</span></a></li>
+ </ul>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+</div> </div>
+<p class="btn-outline"><a target="_self" href="/index.php?La=1&amp;object=tx,4257.3066.1&amp;kuo=2&amp;sub=0" class="csslink_intern">Allgemeine &Ouml;ffnungszeiten</a></p>
+ </div>
+ </div>
+ <header class="site-header sticky transition">
+ <div class="top-bar transition modern-search">
+ <div class="flex-row wrapper">
+ <div class="logo flex-col-2 flex-col-md-2 flex-col-sm-1" data-ikiss-mfid="41.4257.1.1">
+ <a href="/" title="Zur Startseite" class="flex headerheight transition">
+ <img src="/media/custom/4257_751_1_k.SVG?1759735637" alt="Gemeinde Pfatter: Zur Startseite" class="transition">
+ <span class="transition">
+ <strong>Gemeinde Pfatter</strong><br><small>Landkreis Regensburg</small> </span>
+ </a>
+ </div>
+ <div class="header-right flex flex-col-2 flex-col-md-2 flex-col-sm-2 text-right">
+ <div class="flex-inner" tabindex="-1">
+ <a href="/Leichte-Sprache" class="btn-leichte-sprache"><span class="fa-light fa-fw fa-book-open-reader" aria-hidden="true"></span><span class="btn-desc">Leichte Sprache</span></a>
+<div id="cnw_position"></div>
+ <button class="suche-btn-fs" aria-label="Suche">
+ <span class="fa-regular fa-magnifying-glass fa-fw" aria-hidden="true"></span><span class="btn-desc">Suche</span>
+</button>
+ <button class="modern-nav-btn fs-btn no-keep-focus" aria-label="Men&uuml;">
+ <span class="fa-light fa-bars fa-fw" aria-hidden="true"></span><span class="btn-desc">Men&uuml;</span>
+ </button>
+ </div>
+ </div>
+ <div class="sm-btn flex-col-4 flex-col-sm-2 text-right">
+ <button class="suche-btn-fs" aria-label="Suche">
+ <span class="fa-regular fa-magnifying-glass fa-fw" aria-hidden="true"></span><span class="btn-desc">Suche</span>
+</button>
+ <button class="modern-nav-btn snav_btn" aria-label="Men&uuml;">
+ <span class="fa-light fa-bars fa-fw" aria-hidden="true"></span><span class="btn-desc">Men&uuml;</span>
+ </button>
+ </div>
+ <div class="suche-fullscreen blur" role="dialog" aria-modal="true" aria-labelledby="suche-title">
+ <div class="modal-window-overlay">
+ <div class="suche clearfix" role="search">
+ <h2>Suchen - Finden - Informieren</h2>
+ <form name="suchform" action="/" method="get" aria-label="Volltextsuche">
+ <input name="NavID" value="4257.11" type="hidden"> 
+ <label for="qs_top" id="suche-title" class="sr-only">Bitte geben Sie hier Ihren Suchbegriff ein</label>
+ <input name="qs" id="qs_top" placeholder="Bitte geben Sie hier Ihren Suchbegriff ein" type="text" autocomplete="off">
+ <button type="submit" class="submit" title="Suchen"><span class="fa-regular fa-magnifying-glass fa-fw" aria-hidden="true"></span><span class="sr-only">Suchen</span></button>
+ </form>
+ <div class="suche_text">
+<h3>H&auml;ufig gesucht</h3>
+<ul class="link-list btn-list hide-icons">
+ <li class="link-list_item" data-ikiss-mfid="5.4257.14.1">
+ <a class="link-list_link btn" href="/B%C3%BCrgerservice/B%C3%BCrgerserviceportal/">
+ <span class="link-list_link-icon fa-light fa-arrow-down-a-z" aria-hidden="true"><span class="hide">&zwnj;</span></span><span class="link-list_link-title">Bürgerserviceportal</span></a>
+ </li>
+ <li class="link-list_item" data-ikiss-mfid="5.4257.622.1">
+ <a class="link-list_link btn" href="/Freizeit-und-Kultur/Veranstaltungskalender/">
+ <span class="link-list_link-icon fa-light fa-long-arrow-right" aria-hidden="true"><span class="hide">&zwnj;</span></span><span class="link-list_link-title">Veranstaltungskalender</span></a>
+ </li>
+ </ul>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </header>
+ <nav class="breadcrumb" aria-label="Navigationspfad">
+ <div class="wrapper">
+ <ol>
+ <li class="npt_off npt_first"><a href="/Startseite/" class="nlk_off npt_first">Startseite</a></li>
+ <li class="npt_on childs"><a href="/Freizeit-und-Kultur/" class="nlk_on childs"><span class="fa-regular fa-angle-right" aria-hidden="true"></span>Freizeit und Kultur</a></li>
+ <li class="npt_on npt_last"><a href="/Freizeit-und-Kultur/Veranstaltungskalender/" aria-current="page" class="nlk_on npt_last"><span class="fa-regular fa-angle-right" aria-hidden="true"></span>Veranstaltungskalender</a></li>
+ </ol>
+ </div>
+ </nav>
+ <main class="site-main wrapper">
+<div class="row">
+ <div id="content" class="main-content column-1"> 
+ <form id="SFm" name="SFm" rel="nofollow" action="/Freizeit-und-Kultur/Veranstaltungskalender/index.php" method="get" target="_self" style="display:inline">
+<input type="hidden" name="ModID" value="11">
+<input type="hidden" name="object" value="tx,4257.394.1">
+<input type="hidden" name="La" value="1">
+<input type="hidden" name="NavID" value="4257.622">
+ <h1 class="page-title">Veranstaltungskalender</h1>
+ <div class="flex-row inputs">
+ <div class="flex-col-2">
+ <label for="suchbegriff">Suchbegriff:</label>
+ <input type="text" name="text" value="" id="suchbegriff"> <p id="qs_desc"><small>Suche nach Wortbestandteilen mit *</small></p>
+ </div>
+ <div class="flex-col-2">
+ <label for="kategorie">Kategorie:</label>
+ <select name="kat[]" id="kategorie">
+<option value="1,">-keine Auswahl-</option>
+<option value="4257.10">Top-Veranstaltung</option>
+<option value="4257.1118">Gemeinschaftshaus Geisling</option>
+<option value="4257.1116">Voglmeier-Saal</option>
+<option value="4257.953">Ausstellung</option>
+<option value="4257.954">Weihnachten</option>
+<option value="4257.955">Brauchtum</option>
+<option value="4257.956">Vereine</option>
+<option value="4257.957">Sonstiges</option>
+<option value="4257.958">für Kinder</option>
+<option value="4257.959">Kultur</option>
+<option value="4257.960">Markt</option>
+<option value="4257.961">Musik/Konzert</option>
+<option value="4257.962">Kulinarisches</option>
+<option value="4257.963">Regionale Spezialitäten</option>
+<option value="4257.964">Volks- und Straßenfeste</option>
+<option value="4257.965">Ball/Tanz</option>
+<option value="4257.966">Theater/Kabarett</option>
+<option value="4257.967">Musiktheater</option>
+<option value="4257.968">Literatur/Vortrag/Film</option>
+<option value="4257.969">Fest</option>
+<option value="4257.970">Führung/Besichtigung</option>
+<option value="4257.971">Geselligkeit/Spiel</option>
+<option value="4257.972">Kurs/Seminar/Hobby</option>
+<option value="4257.973">Sport/Freizeit</option>
+<option value="4257.974">Kunst</option>
+<option value="4257.975">Versammlung/Sitzung</option>
+<option value="4257.976">Turnier/Wettbewerb</option>
+<option value="4257.977">Ausflug/Fahrt</option>
+<option value="4257.978">Messe</option>
+<option value="4257.979">Religiöse Veranstaltung</option>
+<option value="4257.980">Gesundheit/Wellness</option>
+<option value="4257.981">Wanderung</option>
+<option value="4257.982">Radtour</option>
+<option value="4257.983">Fasching</option>
+</select>
+ </div>
+ <select name="kat[]" id="kategorie_datenpool" style="display:none">
+<option value="">-keine Auswahl-</option>
+<option value="3.1">Beispieldatensätze</option>
+<option value="4257.1120">Button Suchvorschlag</option>
+</select>
+ <div class="flex-col-3 flex-col-md-2">
+ <label for="period">Zeitraum:</label>
+ <select name="period" id="period">
+ <option value="">-keine Auswahl-</option>
+ <option value="td">heute</option>
+ <option value="tm">morgen</option>
+ <option value="twk">diese Woche</option>
+ <option value="twe">dieses Wochenende</option>
+ <option value="nwk">n&auml;chste Woche</option>
+ <option value="nwe">n&auml;chstes Wochenende</option>
+ <option value="4w">4 Wochen ab heute</option>
+ <option value="12m">Ein Jahr ab heute</option>
+ <option value="15m">15 Monate ab heute</option>
+ </select>
+ </div>
+ <fieldset class="flex-col-3 flex-col-md-2">
+ <legend class="sr-only">Zeitraum</legend>
+ <div class="flex-row">
+ <div class="flex-col-2 flex-col-sm-2">
+ <label for="dat_tv">Zeitraum von:</label>
+ <input type="date" id="dat_tv" name="dat_tv" aria-label="Beginndatum des Zeitraums">
+ </div>
+ <div class="flex-col-2 flex-col-sm-2">
+ <label for="dat_tb">Zeitraum bis:</label>
+ <input type="date" id="dat_tb" name="dat_tb" aria-label="Enddatum des Zeitraums">
+ </div>
+ </div>
+ </fieldset>
+ <div class="flex-col-3">
+ <div class="accordion">
+ <label class="noshow">Veranstaltungsfilter</label>
+ <p class="accordion-title">weitere Filter</p>
+ <div class="accordion-container">
+ <label for="veranst_ort">Veranstaltungsort:</label>
+ <select name="ext[4257_7][]" id="veranst_ort">
+<option value="">-keine Auswahl-</option>
+<option value="Pfatter">Pfatter</option>
+</select>
+<input type="hidden" name="ext_o[4257_7]" value="1">
+ </div> 
+ </div> 
+ </div>
+ </div>
+ <div class="flex-row sm-events"> 
+ <div class="flex-col-3">
+ <div class="btn-row">
+ <button class="btn" title="Suchmaske absenden"><span class="far fa-search" aria-hidden="true"></span>suchen</button><br class="hide">
+ </div>
+ </div>
+ <div class="flex-col-3">
+ <div class="btn-row">
+ <a href="https://pages.et4.de/de/landkreis-regensburg/default/announce/Event/edit" target="_blank" class="btn"><span aria-hidden="true" class="fal fa-pencil"></span>Veranstaltung einreichen</a>
+ </div>
+ </div>
+ </div>
+ <input type="hidden" name="k_sub" value="1">
+<input type="hidden" name="kuo" value="1">
+<input type="hidden" name="sfreg" value="1">
+<input type="hidden" name="sfort" value="1">
+ </form><h2 id="searchresult">Es wurden 87 Veranstaltungen gefunden</h2> 
+ <ul class="result-list veranstaltungen" id="liste_2">
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5597.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/De-Zamgw%C3%BCrfelten-Theater.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5597.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Theater/Kabarett / Pfatter </span>
+ De Zamgwürfelten - Theater </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-10-30 19:30:00">30.10.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:30 bis 23:59&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5598.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/De-Zamgw%C3%BCrfelten-Theater.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5598.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Theater/Kabarett / Pfatter </span>
+ De Zamgwürfelten - Theater </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-10-31 19:30:00">31.10.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:30 bis 23:59&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5599.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/De-Zamgw%C3%BCrfelten-Theater.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5599.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Theater/Kabarett / Pfatter </span>
+ De Zamgwürfelten - Theater </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-01 19:30:00">01.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:30 bis 23:59&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5639.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/OGV-Geisling-Stammtisch.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5639.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Sonstiges<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Geselligkeit/Spiel / Pfatter </span>
+ OGV Geisling - Stammtisch </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-04 15:00:00">04.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>15:00 bis 23:59&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5784.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/TV-Geisling-Wattturnier.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5784.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Turnier/Wettbewerb / Pfatter </span>
+ TV Geisling - Wattturnier </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-06 00:00:00">06.11.2026</time> <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5600.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/De-Zamgw%C3%BCrfelten-Theater.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5600.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Theater/Kabarett / Pfatter </span>
+ De Zamgwürfelten - Theater </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-06 19:30:00">06.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:30 bis 23:59&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5771.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/N%C3%A4hen-f%C3%BCr-Sternenkinder.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5771.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Sonstiges<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Voglmeier-Saal / Pfatter </span>
+ Nähen für Sternenkinder </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-07 00:00:00">07.11.2026</time> <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5789.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/FF-Pfatter-Abzeichenverleihung.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5789.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Sonstiges / Pfatter </span>
+ FF Pfatter - Abzeichenverleihung </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-07 19:00:00">07.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:00 bis 23:59&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5601.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/De-Zamgw%C3%BCrfelten-Theater.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5601.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Theater/Kabarett / Pfatter </span>
+ De Zamgwürfelten - Theater </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-07 19:30:00">07.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:30 bis 23:59&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5802.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/SG-Hubertus-Hubertusmesse-.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5802.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine / Pfatter </span>
+ SG Hubertus - Hubertusmesse </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-08 10:00:00">08.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>10:00 bis 23:59&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5615.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/SG-Hubertus-Hubertusfeier-135-Jahre-SG-Pfatter.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5615.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Fest<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Geselligkeit/Spiel / Pfatter </span>
+ SG Hubertus - Hubertusfeier 135 Jahre SG Pfatter </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-08 11:00:00">08.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>11:00&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5602.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/De-Zamgw%C3%BCrfelten-Theater.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5602.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Theater/Kabarett / Pfatter </span>
+ De Zamgwürfelten - Theater </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-08 19:30:00">08.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:30 bis 23:59&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5818.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/Freie-W%C3%A4hlergemeinschaft-Jahreshauptversammlung.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5818.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Versammlung/Sitzung / Pfatter </span>
+ Freie Wählergemeinschaft - Jahreshauptversammlung </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-12 19:00:00">12.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:00&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5901.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/Pfarrei-Geisling-St-Martin.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5901.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Brauchtum<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>für Kinder / Pfatter </span>
+ Pfarrei Geisling - St. Martin </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-13 17:00:00">13.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>17:00&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5603.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/De-Zamgw%C3%BCrfelten-Theater.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5603.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Theater/Kabarett / Pfatter </span>
+ De Zamgwürfelten - Theater </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-13 19:30:00">13.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:30 bis 23:59&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5594.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/Pfarrei-Pfatter-St-Martin.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5594.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Brauchtum<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>für Kinder / Pfatter </span>
+ Pfarrei Pfatter - St. Martin </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-14 17:00:00">14.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>17:00&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5604.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/De-Zamgw%C3%BCrfelten-Theater.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5604.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Theater/Kabarett / Pfatter </span>
+ De Zamgwürfelten - Theater </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-14 19:30:00">14.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:30 bis 23:59&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5605.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/De-Zamgw%C3%BCrfelten-Theater.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5605.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Theater/Kabarett / Pfatter </span>
+ De Zamgwürfelten - Theater </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-15 19:30:00">15.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:30 bis 23:59&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5861.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/Pfarrei-Pfatter-Gruppenstunde-der-Kommunionkinder.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5861.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Religiöse Veranstaltung<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Voglmeier-Saal / Pfatter </span>
+ Pfarrei Pfatter- Gruppenstunde der Kommunionkinder </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-17 16:00:00">17.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>16:00&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5795.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/OGV-Pfatter-Herbstversammlung.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5795.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Versammlung/Sitzung / Pfatter </span>
+ OGV Pfatter - Herbstversammlung </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-19 19:00:00">19.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:00 bis 23:59&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5899.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/SV-Pfatter-Gedenkgottesdienst-f%C3%BCr-verstorbene-Mitglieder.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5899.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine / Pfatter </span>
+ SV Pfatter - Gedenkgottesdienst für verstorbene Mitglieder </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-20 18:00:00">20.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>18:00 bis 19:00&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5769.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/MSC-Pfatter-Ehrenabend.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5769.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Sport/Freizeit / Pfatter </span>
+ MSC Pfatter Ehrenabend </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-20 19:00:00">20.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:00 bis 22:00&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5772.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/OGV-Geisling-Weihnachtsbasteln.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5772.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Weihnachten<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>für Kinder<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Gemeinschaftshaus Geisling / Pfatter </span>
+ OGV Geisling - Weihnachtsbasteln </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-21 14:00:00">21.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>14:00 bis 23:59&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5857.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/FF-Griesau-Christbaumversteigerung.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5857.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Weihnachten<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Vereine / Pfatter </span>
+ FF Griesau - Christbaumversteigerung </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-21 19:00:00">21.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:00&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ <li class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="11.4257.5829.1">
+ <div class="flex-row">
+ <div class="flex-col-2x3 flex-col-sm-1 order-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/FF-Geisling-Aktivenessen-und-Jubilarfeier.php?object=tx,4257.394.1&amp;ModID=11&amp;FID=4257.5829.1&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;k_sub=1">
+ <span class="result-list_object-topic">
+ Vereine<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Fest<span class="fa-solid fa-circle-small" aria-hidden="true">&zwnj;</span>Gemeinschaftshaus Geisling / Pfatter </span>
+ FF Geisling - Aktivenessen und Jubilarfeier </a>
+ </h3>
+ <p class="result-list_object-properties">
+ <span class="result-list_object-property date"><span aria-hidden="true" class="fa-regular fa-calendar" title="Datum">&zwnj;</span><span class="sr-only">Datum: </span><time datetime="2026-11-21 19:00:00">21.11.2026</time> <span class="sr-only"><br></span></span><span class="result-list_object-property time"><span aria-hidden="true" class="fa-regular fa-clock" title="Uhrzeit">&zwnj;</span><span class="sr-only">Uhrzeit: </span>19:00 bis 23:00&nbsp;Uhr <span class="sr-only"><br></span></span> </p>
+ </div>
+ </div>
+ <div class="flex-col-3 flex-col-sm-1 order-0">
+ <div class="result-list_icon-wrapper ratio-3x2">
+ <span class="result-list_icon fa-light fa-calendar js-icon-resize" aria-hidden="true">&zwnj;</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </li>
+ </ul>
+ <nav aria-label="Seitennavigation" class="ikiss_pagenav"><ul><li><span class="pn_active" aria-current="page">1</span></li><li><a href="/Freizeit-und-Kultur/Veranstaltungskalender/index.php?ofs_2=25&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;kuo=1&amp;k_sub=1&amp;ModID=11&amp;object=tx%7C4257.394.1#liste_2" class="pn_step" aria-label="zu Seite 2" title="zu Seite 2">2</a></li><li><a href="/Freizeit-und-Kultur/Veranstaltungskalender/index.php?ofs_2=50&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;kuo=1&amp;k_sub=1&amp;ModID=11&amp;object=tx%7C4257.394.1#liste_2" class="pn_step" aria-label="zu Seite 3" title="zu Seite 3">3</a></li><li><a href="/Freizeit-und-Kultur/Veranstaltungskalender/index.php?ofs_2=75&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;kuo=1&amp;k_sub=1&amp;ModID=11&amp;object=tx%7C4257.394.1#liste_2" class="pn_step" aria-label="zu Seite 4" title="zu Seite 4">4</a></li><li><a href="/Freizeit-und-Kultur/Veranstaltungskalender/index.php?ofs_2=25&amp;NavID=4257.622&amp;sfreg=1&amp;sfort=1&amp;kuo=1&amp;k_sub=1&amp;ModID=11&amp;object=tx%7C4257.394.1#liste_2" class="pn_page_r" aria-label="eine Seite vor" title="eine Seite vor">&gt;</a></li></ul></nav> 
+ </div>
+ </div>
+<div class="bottom-controls sticky clearfix">
+ <div class="btn-row">
+ <a href="#start" class="btn seitenanfang" title="zum Seitenanfang" rel="nofollow"><span class="far fa-arrow-up" aria-hidden="true"></span></a>
+ </div>
+</div> 
+ </main>
+ <footer class="site-footer secondary-bg-color">
+ <div class="wrapper" data-nosnippet>
+ <h2 class="sr-only">Allgemeine Informationen</h2> <div class="text-grid ikiss-grid ikiss-grid-cols-3 ikiss-grid-cols-md-3 ikiss-grid-cols-sm-1">
+ <div class="text-grid_text-wrapper" data-ikiss-mfid="7.4257.2682.1">
+ <h3>Kontakt</h3>
+<div class="result-list adressen" id="liste_8">
+<div class="result-list_item">
+ <div class="result-list_object js-link" data-ikiss-mfid="9.4257.1.1">
+ <div class="flex-row">
+ <div class="flex-col-1">
+ <div class="result-list_text">
+ <h3 class="result-list_object-title">
+ <a class="result-list_object-link js-link-source" href="/Freizeit-und-Kultur/Veranstaltungskalender/index.php?object=tx,4257.1.1&amp;ModID=9&amp;FID=4257.1.1&amp;NavID=4257.622"><span translate="no">Gemeinde Pfatter</span><span class="sr-only">: Detailseite</span></a>
+ </h3>
+ <div class="result-list_text-columns js-remove-empty"> 
+ <div class="flex-row js-remove-empty">
+ <div class="flex-col-1 js-remove-empty">
+ <div class="result-list_text js-remove-empty">
+ <p>
+ Haidauer Str.&nbsp;40<br> 93102&nbsp;Pfatter<br> </p>
+ </div>
+ </div>
+ <div class="flex-col-1 js-remove-empty">
+ <div class="result-list_text js-remove-empty">
+ <ul class="contact-list">
+ <li class="contact-list_item has-icon"><a class="contact-list_link has-icon" href="tel:0948194040" title="Nummer anrufen"><span class="contact-list_icon fa-solid fa-phone rs_skip" aria-hidden="true" title="Telefon"><span class="hide">&zwnj;</span></span><span class="sr-only">Telefon: </span><span class="contact-list_text">09481/9404-0</span></a></li>
+ <li class="contact-list_item has-icon no-js-link"><span class="contact-list_icon fa-solid fa-fax rs_skip" aria-hidden="true" title="Fax"><span class="hide">&zwnj;</span></span><span class="sr-only">Fax: </span><span class="contact-list_text">09481/9404-25</span></li>
+ <li class="contact-list_item has-icon"><a class="contact-list_link has-icon" href="mailto:gemeinde@pfatter.de" title="E-Mail schreiben"><span class="contact-list_icon fa-solid fa-envelope rs_skip" aria-hidden="true" title="E-Mail"><span class="hide">&zwnj;</span></span><span class="sr-only">E-Mail: </span><span class="contact-list_text">gemeinde@pfatter.de</span></a></li>
+ </ul>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+</div> </div>
+ </div>
+ <div class="text-grid_text-wrapper" data-ikiss-mfid="7.4257.2683.1">
+ <h3>&Ouml;ffnungszeiten &amp; Terminvereinbarung B&uuml;rgerb&uuml;ro</h3>
+<p>Montag, Dienstag, Donnerstag, Freitag:<br>08.00 Uhr - 12.00 Uhr<br></p>
+<p>Dienstag:<br>13.00 Uhr - 16.30 Uhr<br></p>
+<p>Donnerstag:<br>13.00 Uhr - 18.00 Uhr<br></p>
+<p>Mittwoch: geschlossen</p>
+ </div>
+ <div class="text-grid_text-wrapper" data-ikiss-mfid="7.4257.2684.1">
+ <h3>Rechtliche Angaben</h3>
+<nav id="quicknav" aria-label="Servicenavigation">
+ <ul class="link-list hide-icons">
+ <li class="link-list_item" data-ikiss-mfid="5.4257.10.1">
+ <a class="link-list_link" href="/Service/Impressum/">
+ <span aria-hidden="true" class="link-list_link-icon fa-light fa-section"><span class="hide">&zwnj;</span></span><span class="link-list_link-title">Impressum</span></a>
+ </li>
+ <li class="link-list_item" data-ikiss-mfid="5.4257.9.1">
+ <a class="link-list_link" href="/Service/Datenschutz/">
+ <span aria-hidden="true" class="link-list_link-icon fa-light fa-shield-check"><span class="hide">&zwnj;</span></span><span class="link-list_link-title">Datenschutz</span></a>
+ </li>
+ <li class="link-list_item" data-ikiss-mfid="5.4257.532.1">
+ <a class="link-list_link" href="/Service/Barrierefrei/Erkl%C3%A4rung-zur-Barrierefreiheit/">
+ <span aria-hidden="true" class="link-list_link-icon fa-light fa-long-arrow-right"><span class="hide">&zwnj;</span></span><span class="link-list_link-title">Erklärung zur Barrierefreiheit</span></a>
+ </li>
+ <li class="link-list_item" data-ikiss-mfid="5.4257.19.1">
+ <a class="link-list_link" href="/Service/Fehler-melden/">
+ <span aria-hidden="true" class="link-list_link-icon fa-light fa-bolt-lightning"><span class="hide">&zwnj;</span></span><span class="link-list_link-title">Fehler melden</span></a>
+ </li>
+ </ul>
+ </nav>
+ </div>
+ </div> 
+ </div>
+ </footer>
+</body>
+</html>
