@@ -70,6 +70,9 @@ export async function GET(): Promise<NextResponse> {
     { loc: `${BASE_URL}/en`, lastmod: toISO(now), changefreq: 'daily', priority: 0.9, alternates: i18nAlternates('') },
     { loc: `${BASE_URL}/map`, lastmod: toISO(now), changefreq: 'daily', priority: 0.8, alternates: i18nAlternates('/map') },
     { loc: `${BASE_URL}/en/map`, lastmod: toISO(now), changefreq: 'daily', priority: 0.7, alternates: i18nAlternates('/map') },
+    // Künstler-Plakatwand (2026-11): ISR, zweisprachig, Verzeichnis ändert sich täglich.
+    { loc: `${BASE_URL}/artists`, lastmod: toISO(now), changefreq: 'daily', priority: 0.7, alternates: i18nAlternates('/artists') },
+    { loc: `${BASE_URL}/en/artists`, lastmod: toISO(now), changefreq: 'daily', priority: 0.6, alternates: i18nAlternates('/artists') },
     { loc: `${BASE_URL}/blog`, lastmod: toISO(now), changefreq: 'weekly', priority: 0.8 },
     // fn-18 Task 8: Uebersichtsseite des Freizeit-Bestands. DE-only ohne
     // Alternates — /en/aktivitaeten zeigt DE-Content und kanonisiert auf

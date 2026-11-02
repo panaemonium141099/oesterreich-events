@@ -8,9 +8,10 @@ import type { MetadataRoute } from 'next';
  *  1. **Indexing policy** — what parts of the site are public vs auth-gated.
  *     Disallowed paths fall into three buckets:
  *     - `/api/`, `/admin/`, `/auth/` — never meant to be indexed.
+ *     - `/artists` ist seit 2026-11 öffentlich (Plakatwand, ISR), nicht mehr hier.
  *     - Authenticated user UI (`/feed`, `/messages`, `/saved`, `/groups`,
  *       `/notifications`, `/memories`, `/friends`, `/profile`, `/settings`,
- *       `/artists`, `/spotify-matches`, `/events/create`, `/calendar`) —
+ *       `/spotify-matches`, `/events/create`, `/calendar`) —
  *       these are all auth-gated and either redirect (server-side, since
  *       the auth-gate refactor) or render empty to bots. Bing's Site-Scan
  *       was flagging them as "H1 missing / thin content" because it
@@ -46,7 +47,6 @@ export default function robots(): MetadataRoute.Robots {
     '/memories/',
     '/friends/',
     '/calendar/',
-    '/artists/',
     '/spotify-matches/',
     '/events/create',
   ];
