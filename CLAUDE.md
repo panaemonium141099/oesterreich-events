@@ -222,7 +222,11 @@ node / next.js
   (Cache in `.pruefstand/`, derselbe Schreibweg wie der Sync ohne Schreiben,
   Bericht mit Schwellen und 30er-Stichprobe in den PR). Schwellen in
   `src/lib/pruefstand/schwellen.ts`, AT-Referenz `data/pruefstand/at-referenz.json`
-  (`npm run pruefstand:at-referenz`, nur lesend gegen Prod).
+  (`npm run pruefstand:at-referenz`, nur lesend gegen Prod). Amts-/VG-Kalender
+  (fn-29.17) lesen die Adapter selbst mit (`viaVerband`, `pickFeedGroups`: gleicher
+  Kalender einmal, Gemeinde vor Amt); `de-amt-vg` ist nur Prüfstand-Sicht, nie Nachtlauf.
+  Abdeckung: `npx tsx src/scripts/amt-vg-abdeckung.ts`, Bericht
+  `docs/research/de-gemeinden/adapter-amt-vg.md`.
 - **Nur Österreich (2026-10-08):** lasstreffen.at spielt ausschließlich
   Events mit `country = SITE_COUNTRY` (`src/lib/site-country.ts`, 'AT') aus.
   DE/CH-Events (Eventim) bleiben in der DB und im Import für spätere

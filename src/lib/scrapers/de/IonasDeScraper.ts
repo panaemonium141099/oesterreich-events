@@ -20,7 +20,8 @@ export class IonasDeScraper extends DeFeedScraper {
   readonly name = 'de-ionas';
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = feedGroups('ionas').slice(0, this.limit ?? Infinity);
+    // Dieselbe events.json mit und ohne Ansichts-Parameter ist ein Kalender (Lambsheim-Heßheim).
+    const groups = this.pickGroups(feedGroups('ionas'), u => ionasIcsUrl(u, '', ''));
     const today = new Date();
     const from = today.toISOString().slice(0, 10);
     const to = new Date(today.getTime() + 365 * 86_400_000).toISOString().slice(0, 10);

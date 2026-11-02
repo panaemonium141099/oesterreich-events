@@ -119,6 +119,9 @@ export function calendarPageCandidates(integration: string, origin: string): str
     case 'ionas': return ['/kalender/', '/veranstaltungen/', '/termine/'].map(p => origin + p); // amt-sn.de /kalender/
     case 'nolis': return [`${origin}/regional/veranstaltungen/sucheplus.html`]; // 00-bundesweit C2
     case 'communice': return [`${origin}/veranstaltungen`]; // 03-schleswig-holstein
+    // Archivseite des Plugins (Standard-Slug „events"); die Erhebung verlinkte
+    // teils den iCal-Export `/events/?ical=1` (VG Leinetal), fn-29.17.
+    case 'tribe': return [`${origin}/events/`];
     default: return [];
   }
 }

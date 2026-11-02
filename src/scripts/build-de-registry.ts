@@ -5,7 +5,7 @@
  * CSV docs/research/de-gemeinden/data/vollerhebung-*.csv → dieser Builder.
  *
  * Mit `--feeds` lädt er je Kalenderseite der Stufe A (eigene und Amts/VG-
- * Seiten) einmal die Seite, prüft vorher robots.txt und liest den Feed, den
+ * Seiten, bei Amt/VG ohne Kalenderseite deren Startseite) einmal die Seite, prüft vorher robots.txt und liest den Feed, den
  * die Seite selbst nennt (`feedUrlFromPage`). Ergebnisse landen in
  * `.registry-cache/feeds.json`; ohne `--feeds` nutzt der Builder diesen Stand.
  * Am Ende gibt er den Unterschied zur bisherigen Registry aus.
@@ -15,7 +15,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadGemeindenDe } from '../lib/gemeinden/de';
-import { buildRegistry, diffRegistry, type ErhebungRow, type RegistryEntryDe } from '../lib/registry-de/build';
+import { buildRegistry, diffRegistry, verbandHomeUrl, type ErhebungRow, type RegistryEntryDe } from '../lib/registry-de/build';
 import { calendarPageCandidates, feedFormat, feedUrlFromPage, looksLikeFeed } from '../lib/registry-de/feed-url';
 import { FEED_FROM_PAGE } from '../lib/registry-de/integrations';
 import { robotsAllows } from '../lib/registry-de/robots';
@@ -77,6 +77,8 @@ async function collectFeeds(rows: ErhebungRow[], known: Record<string, string | 
   for (const r of rows) {
     if (FEED_FROM_PAGE.has(r.integration) && r.event_url) pages.set(r.event_url, r.integration);
     if (FEED_FROM_PAGE.has(r.vb_integration) && r.vb_event_url) pages.set(r.vb_event_url, r.vb_integration);
+    // Amt/VG ohne Kalender-URL: Startseite, danach die belegten Standardseiten (fn-29.17).
+    else if (FEED_FROM_PAGE.has(r.vb_integration) && r.vb_host?.trim()) pages.set(verbandHomeUrl(r.vb_host), r.vb_integration);
   }
   const todo = [...pages].filter(([u]) => !(u in known));
   console.log(`Feed-Lauf: ${pages.size} Kalenderseiten, ${todo.length} offen`);
@@ -122,7 +124,8 @@ async function collectFeeds(rows: ErhebungRow[], known: Record<string, string | 
       }
     }
   };
-  await Promise.all(Array.from({ length: 24 }, worker));
+  // --workers 1: seriell (fn-29.11: verwaltungsportal sperrte nach parallelen Abrufen).
+  await Promise.all(Array.from({ length: Number(arg('workers') ?? 24) }, worker));
   writeFileSync(FEEDS_FILE, JSON.stringify(known));
   console.log('');
   return known;

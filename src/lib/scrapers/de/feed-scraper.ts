@@ -5,6 +5,7 @@
  */
 import { BaseScraper } from '../BaseScraper';
 import { robotsAllows, robotsCrawlDelay } from '@/lib/registry-de/robots';
+import { pickFeedGroups, type FeedGroup } from '@/lib/registry-de/load';
 
 const UA_TOKEN = 'lasstreffen';
 
@@ -13,9 +14,18 @@ export abstract class DeFeedScraper extends BaseScraper {
   protected delayMs = 1000;
   private robots = new Map<string, string | null>();
 
-  /** Nur für den Prüfstand und Tests: Feeds einschränken. */
-  constructor(protected readonly limit?: number) {
+  /**
+   * Nur für den Prüfstand und Tests: Feeds einschränken (`limit`) bzw. nur
+   * die Kalender lesen, die Gemeinden über ihr Amt oder ihre VG nutzen
+   * (`onlyVerband`, Prüfstand `de-amt-vg`, fn-29.17).
+   */
+  constructor(protected readonly limit?: number, protected readonly onlyVerband = false) {
     super();
+  }
+
+  /** Kalender in Lesereihenfolge (`pickFeedGroups`: gleiche Kalender zusammen, Gemeinde vor Amt). */
+  protected pickGroups(groups: FeedGroup[], key?: (feedUrl: string) => string): FeedGroup[] {
+    return pickFeedGroups(groups, { limit: this.limit, onlyVerband: this.onlyVerband, key });
   }
 
   protected async robotsTxt(origin: string): Promise<string | null> {

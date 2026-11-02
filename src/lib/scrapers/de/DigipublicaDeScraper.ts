@@ -86,7 +86,7 @@ export class DigipublicaDeScraper extends DeFeedScraper {
   readonly name = 'de-digipublica';
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = digipublicaGroups().slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(digipublicaGroups());
     const cals: CalendarTermine[] = [];
     let cancelled = 0;
     for (const g of groups) {

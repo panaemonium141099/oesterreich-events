@@ -42,12 +42,28 @@ export function namedMember(ev: { title: string; locationName?: string }, candid
 }
 
 /**
+ * Die Verwaltung als Ortsangabe („Samtgemeinde Hanstedt“, „Amt Amt Rehna“,
+ * „Rathaus der Samtgemeinde Wesendorf“) ist ein Etikett des Kalenders, kein
+ * Veranstaltungsort: Der Ausschuss der Gemeinde Egestorf tagte laut
+ * Kalender der Samtgemeinde Hanstedt in „Samtgemeinde Hanstedt“ (fn-29.17).
+ * Der Sitz trägt nicht immer den Namen (Samtgemeinde Boldecker Land sitzt in
+ * Weyhausen). „Lembruch, Samtgemeinde Lemförde“ nennt weiter Lembruch. „SG“
+ * fehlt mit Absicht: meist die Sportgemeinschaft („Sportheim SG Rethem“).
+ */
+const VERBAND_LABEL = /(?<![\p{L}-])(?:Samtgemeinde|Verbandsgemeinde|Verwaltungsgemeinschaft|Gemeindeverwaltungsverband|Verwaltungsverband|Amt|VGem|VG)\s+[^,;/()]+/gu;
+
+function withoutVerband(locationName: string): string {
+  return locationName.replace(VERBAND_LABEL, ' ');
+}
+
+/**
  * Alle Gemeinden, die der Termin nennt. `full`: nur mit Zusatz
  * („Allendorf (Lumda)" auch als „Allendorf / Lumda" oder „Allendorf an der
  * Lumda"); `any`: auch der Name ohne Zusatz.
  */
 function namedGemeinden(ev: { title: string; locationName?: string }, candidates: GemeindeDe[], mode: 'full' | 'any'): GemeindeDe[] {
   const hits = new Map<string, GemeindeDe>();
+  const loc = withoutVerband(ev.locationName ?? '');
   for (const g of candidates) {
     const m = /^(.*?)\s*\(([^)]*)\)\s*$/.exec(g.name);
     const names = m
@@ -56,7 +72,7 @@ function namedGemeinden(ev: { title: string; locationName?: string }, candidates
     for (const n of names) {
       const word = String.raw`${n}(?!\p{L}|-\p{L})`;
       if (
-        new RegExp(String.raw`(?<![\p{L}-])${word}`, 'u').test(ev.locationName ?? '') ||
+        new RegExp(String.raw`(?<![\p{L}-])${word}`, 'u').test(loc) ||
         new RegExp(String.raw`(?:^|\s)(?:in|im|zu|bei|aus|nach)\s+${word}`, 'iu').test(ev.title)
       ) hits.set(g.ags, g);
     }

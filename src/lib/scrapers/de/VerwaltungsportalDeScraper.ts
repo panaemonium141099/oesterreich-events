@@ -90,7 +90,10 @@ export class VerwaltungsportalDeScraper extends DeFeedScraper {
    */
   async scrape(): Promise<ScrapedEvent[]> {
     const n = this.limit ?? (Number(process.env.DE_VP_WEBSITES) || undefined);
-    const groups = n ? spreadSample(vpGroups(), n) : this.resumeAfterCursor(vpGroups(), g => g.host);
+    // Eine Website je Kalender, Reihenfolge nach Host (Cursor): `pickGroups` nicht nötig.
+    // Prüfstand `de-amt-vg` (fn-29.17): nur Websites, die Gemeinden über ihr Amt lesen, ohne Cursor.
+    const sites = this.onlyVerband ? vpGroups().filter(g => g.viaVerband.length > 0) : vpGroups();
+    const groups = n ? spreadSample(sites, n) : this.onlyVerband ? sites : this.resumeAfterCursor(sites, g => g.host);
     const deadline = this.softDeadline();
     const all: ScrapedEvent[] = [];
     let done = 0;
@@ -101,7 +104,7 @@ export class VerwaltungsportalDeScraper extends DeFeedScraper {
       }
       all.push(...await this.scrapeGroup(g));
       done++;
-      if (!n) this.markReached(g.host);
+      if (!n && !this.onlyVerband) this.markReached(g.host);
     }
     this.log(`${done} Websites, ${all.length} Termine, ${this.fetches} Abrufe`);
     return all;

@@ -121,7 +121,7 @@ export class HwDeScraper extends DeFeedScraper {
   }
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = hwGroups().slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(hwGroups());
     const all: ScrapedEvent[] = [];
     for (const g of groups) {
       const termine = await this.calendar(g.pageUrl);

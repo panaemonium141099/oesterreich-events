@@ -1,0 +1,1610 @@
+BEGIN:VCALENDAR
+PRODID:-//IONAS//TVM//DE
+VERSION:2.0
+CALSCALE:GREGORIAN
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+LAST-MODIFIED:20201010T011803Z
+TZURL:http://tzurl.org/zoneinfo/Europe/Berlin
+X-LIC-LOCATION:Europe/Berlin
+X-PROLEPTIC-TZNAME:LMT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+005328
+TZOFFSETTO:+0100
+DTSTART:18930401T000000
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19160430T230000
+RDATE:19400401T020000
+RDATE:19430329T020000
+RDATE:19460414T020000
+RDATE:19470406T030000
+RDATE:19480418T020000
+RDATE:19490410T020000
+RDATE:19800406T020000
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19161001T010000
+RDATE:19421102T030000
+RDATE:19431004T030000
+RDATE:19441002T030000
+RDATE:19451118T030000
+RDATE:19461007T030000
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19170416T020000
+RRULE:FREQ=YEARLY;UNTIL=19180415T010000Z;BYMONTH=4;BYDAY=3MO
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19170917T030000
+RRULE:FREQ=YEARLY;UNTIL=19180916T010000Z;BYMONTH=9;BYDAY=3MO
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19440403T020000
+RRULE:FREQ=YEARLY;UNTIL=19450402T010000Z;BYMONTH=4;BYDAY=1MO
+END:DAYLIGHT
+BEGIN:DAYLIGHT
+TZNAME:CEMT
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0300
+DTSTART:19450524T020000
+RDATE:19470511T030000
+END:DAYLIGHT
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0300
+TZOFFSETTO:+0200
+DTSTART:19450924T030000
+RDATE:19470629T030000
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0100
+DTSTART:19460101T000000
+RDATE:19800101T000000
+END:STANDARD
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19471005T030000
+RRULE:FREQ=YEARLY;UNTIL=19491002T010000Z;BYMONTH=10;BYDAY=1SU
+END:STANDARD
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19800928T030000
+RRULE:FREQ=YEARLY;UNTIL=19950924T010000Z;BYMONTH=9;BYDAY=-1SU
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19810329T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19961027T030000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;VALUE=DATE:20261030
+DTEND;VALUE=DATE:20261103
+SUMMARY:Kerwe Hoppstädten
+CREATED:20251023T100154Z
+LAST-MODIFIED:20261001T065222Z
+DESCRIPTION:
+LOCATION:Hoppstädten
+X-LOCATION-NAME:Hoppstädten
+X-IONAS-CATEGORY:Kerwe
+CATEGORIES:Kerwe
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-10-30-kerwe-
+ hoppstaedten/img-20260923-wa0006.jpg?cid=1i8d.9itv
+UID:8952d0ae-a1fe-4b0e-9765-037ba84052c9:2026-10-30
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261102T140000
+DTEND;TZID=Europe/Berlin:20261102T160000
+SUMMARY:Strickcafé Verkauf am 2. November 
+CREATED:20261028T132756Z
+LAST-MODIFIED:20261028T134535Z
+DESCRIPTION:Diee fleißigen Hände der Damen unserer Kirchengemeinde Wolfst
+ ein haben wieder ganze Arbeit geleistet! Mit viel Liebe und Geschick sin
+ d wunderschöne hangestrickte Socken und Mützen entschtanden\, die nun au
+ f neue Besitzerinnen und Besitzer warten. Beim Verkauf wird nicht nur fü
+ r warme Füße und Köpfe gesorgt\, sondern auch Gutes getan: DEr Erlös kom
+ mt in diesem JAhr dem Hospizdienst Lauterecken zugute.\n\n Verkauf am 2.
+  November und 7. Dezember 14-16 Uhr Pfarrsaal Wolfstein
+ATTACH;FMTTYPE=image/png:https://www.vg-lw.de/kalender/2026-11-02-strickc
+ afe-verkauf-am-2.-november/verkauf-strickcafe-wolfstein.png?cid=1ikg.9ld
+ j
+UID:3c024875-b1de-4365-b750-a4017127a019:2026-11-02
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261103T180000
+DTEND;TZID=Europe/Berlin:20261103T190000
+SUMMARY:Informationsabend für Zeitschenker
+CREATED:20261028T115939Z
+LAST-MODIFIED:20261028T120241Z
+DESCRIPTION:Am 3. November von 18.00 Uhr bis 19.00Uhr bieten wir allen di
+ e sich fragen ob eine Ehrenamtliche Tätigkeit in unserem Ambulanten Hosp
+ izdienst etwas für sie ist einen Informationsabend an.\n\nFrau Bauhaus u
+ nd Frau Fischer erzählen von Ihrer Arbeit und wie die Ehrenamtlichen auf
+  Lebensbegleitungen vorbereitet werden. Die Unterstützung durch Ehrenamt
+ liche ist für uns das Wichtigste Standbein unserer Arbeit. Anfang 2027 s
+ tartet ein neuer Kurs für Ehrenamtliche. Bei weiteren Fragen oder zur An
+ meldung bitte per E- Mail unter hospiz@sozialstation-lauterecken.de oder
+  telefonisch unter 06382/993022.\n\nOrt der Veranstaltung sind die Räuml
+ ichkeiten des Ambulanten Hospiz und Palliativ Beratungsdienstes Hauptstr
+ aße 15 in Lauterecken.
+X-IONAS-CATEGORY:Lauterecken-
+CATEGORIES:Lauterecken-
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-1990453-19
+ 20.jpg?cid=8fw.6ild
+UID:5d2ca12d-5504-47a4-a296-68f63f3fe639:2026-11-03
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261103T183000
+DTEND;TZID=Europe/Berlin:20261103T193000
+SUMMARY:KOMMUNALPOLITIK CRINGE ODER PEAK?
+CREATED:20261029T152821Z
+LAST-MODIFIED:20261029T153113Z
+DESCRIPTION:
+LOCATION:Glanbrücken
+X-LOCATION-NAME:Glanbrücken
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-03-kommun
+ alpolitik-cringe-oder-peak/plakat-kommunalpolitik.jpg?cid=1ils.9lqj
+UID:e03a5471-ad65-4cb4-8c9e-75b344057fdb:2026-11-03
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261104T161500
+DTEND;TZID=Europe/Berlin:20261104T174500
+SUMMARY:Sport AG - Ball for All
+CREATED:20260825T071502Z
+LAST-MODIFIED:20260903T082654Z
+DESCRIPTION:Treffpunkt: Sporthalle Grundschule LautereckenAlter: ab 10 Ja
+ hreKeine Anmeldung erforderlich\, kommt einfach vorbei!
+LOCATION:Sporthalle der Grundschule Lauterecken
+X-LOCATION-NAME:Sporthalle der Grundschule Lauterecken
+CATEGORIES:JUZ
+ATTACH:https://www.vg-lw.de/kalender/2026-09-02-sport-ag-ball-for-all/pla
+ kat-sport-ag-2026.jpeg?cid=1hra.9edd
+UID:fa9001ff-2015-4e23-ae9c-4bb023049c7b:2026-11-04
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261105T143000
+DTEND;TZID=Europe/Berlin:20261105T160000
+SUMMARY:Zwergentreff in der Kindertagesstätte St. Julian
+CREATED:20260806T062533Z
+LAST-MODIFIED:20260806T062832Z
+DESCRIPTION:
+LOCATION:St. Julian
+X-LOCATION-NAME:St. Julian
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-08-13-zwerge
+ ntreff-in-der-kindertagesstaette-st.-julian/zwergentreff-st.julian-2026.
+ jpg?cid=1hka.9bzd
+UID:12da0d9b-87af-44ac-a985-a3ff58ad4f9e:2026-11-12
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261105T173000
+DTEND;TZID=Europe/Berlin:20261105T183000
+SUMMARY:Laternenumzug der Kita Piepmatz in Grumbach
+CREATED:20261020T070154Z
+LAST-MODIFIED:20261020T070641Z
+DESCRIPTION:Laternenumzug am 05.11.2026\n\n \n\nTreff: 17:30Uhr im Außeng
+ elände der Kita Piepmatz in Grumbach.\n\n \n\nVortrag der Vorschulkinder
+  mit kurzer Andacht von Pfarrerin Denise RothDer Laternenumzug startet a
+ n der Kita mit Feuerwehr und Posaunenchor  und zieht sich über:Vogelshee
+ rd\, Am Wäldchen\, Rheingrafenweg\, Wirtschaftsweg\, Am Wäldchen\, Vogel
+ sheerd\, Fichtenweg\, an der Turnhalle vorbei wieder zur Kita.\n\nWeckmä
+ nner\, Würstchen\, Glühwein und Kinderpunsch warten bei Ankunft im Außen
+ gelände der Kita (Bitte pro Person eine Tasse mitbringen). \n\nGroß und 
+ Klein aus der Umgebung sind herzlich eingeladen. \n\nWir bitten um Vorbe
+ stellung für Weckmänner\, Würstchen und Veggies bis zum 26.10.2026 unter
+  Tel.: 06382/403471 oder per Email: kita.piepmatz@vg-lw.de\n\n \n\nAuf d
+ iesen leuchtenden Abend freuen sich Kinder\, Förderverein\, Elternaussch
+ uss\, Träger  und das Team der Kita Piepmatz.
+X-IONAS-CATEGORY:Martinsumzug
+CATEGORIES:Martinsumzug
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-05-latern
+ enumzug-der-kita-piepmatz-in-grumbach/laternenumzug-grumbach.jpg?cid=1id
+ a.9khg
+UID:85b463a0-8475-4a48-8641-07735cc0ffea:2026-11-05
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261106T170000
+DTEND;TZID=Europe/Berlin:20261106T180000
+SUMMARY:St. Martinsumzug Hefersweiler
+CREATED:20261021T123520Z
+LAST-MODIFIED:20261028T075801Z
+DESCRIPTION:Herzliche Einladung\n\nzu unserem\n\nSt. Martinsumzug\n\nbei 
+ der Kita Nesthocker\n\nHefersweiler \n\n06. November 2026 \n\nTreffpunkt
+  17:00 Uhr an der Kita\n\nStart des Umzugs um 17:30 Uhr \n\nIm Anschluss
+  an den Umzug gibt es an der Kita Würstchen\, Laugenbrezeln\, Kuchen am 
+ Stiel und verschieden Getränke. \n\nWir freuen uns auf einen schönen\, s
+ timmungsvollen Martinsabend mit Ihnen und Ihren Kindern. 
+X-IONAS-CATEGORY:Martinsumzug
+CATEGORIES:Martinsumzug
+ATTACH;FMTTYPE=image/png:https://www.vg-lw.de/kalender/2026-11-06-st.-mar
+ tinsumzug-hefersweiler/st.-martin-hefersweiler.png?cid=1ih4.9ksv
+UID:d3949df3-25d6-423e-a663-dfa8d10abe30:2026-11-06
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261106T180000
+DTEND;TZID=Europe/Berlin:20261106T190000
+SUMMARY:Martinsumzug U.L.M.
+CREATED:20261020T065406Z
+LAST-MODIFIED:20261029T153829Z
+DESCRIPTION:!!!! Änderung der Strecke !!!!\n\nAm 06.11.2026 findet unser 
+ Martinsumzug in Langweiler auf neuer Strecke statt. Los geht es um 18 Uh
+ r in der Straße Im Teich 10\, wir gehen dann durch den Wald am Ofen und 
+ enden wieder Im Teich 10. Zum gemütlichen Beisammensein\, mit Punch\, Gl
+ ühwein und Würstchen treffen wir uns nach dem Umzug am neuen FW Haus U.L
+ .M.
+X-IONAS-CATEGORY:Martinsumzug
+CATEGORIES:Martinsumzug
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-06-martin
+ sumzug-u.l.m./martinsumzug.pdf.jpg?cid=1id7.9kh4
+UID:b9d3cf1b-fa79-45cf-bd03-30538348ee69:2026-11-06
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261106T180000
+DTEND;TZID=Europe/Berlin:20261106T190000
+SUMMARY:St.Martinsumzug in Hoppstädten
+CREATED:20261028T085144Z
+LAST-MODIFIED:20261028T092244Z
+DESCRIPTION:Freitag 06.11.2026\n\nab 18 Uhr\n\nBeginn am Rathaus\n\nAlle 
+ Kinder\, Familien und Freunde sind herzlich eingeladen!
+X-IONAS-CATEGORY:Martinsumzug
+CATEGORIES:Martinsumzug
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-06-st.mar
+ tinsumzug-in-hoppstaedten/img-20261022-wa0004.jpg?cid=1ii4.9l3p
+UID:313f413e-dd1b-425e-a92e-3c76beb5b555:2026-11-06
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261106T200000
+DTEND;TZID=Europe/Berlin:20261106T210000
+SUMMARY:Preisschafskopf
+CREATED:20261028T120320Z
+LAST-MODIFIED:20261028T120509Z
+DESCRIPTION:am Freitag\, den\n06.11.26\n20.00 Uhr\n Schützenhaus\nCronenb
+ erg
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-06-preiss
+ chafskopf/plakat-a3-preisschafskopf2-2026.jpg?cid=1ijm.9lbp
+UID:fca8e8c6-6496-4532-92c8-71d8a70b8067:2026-11-06
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261107T110000
+DTEND;TZID=Europe/Berlin:20261107T140000
+SUMMARY:Kinder-Second-Hand-Basar
+CREATED:20261020T074422Z
+LAST-MODIFIED:20261020T074846Z
+DESCRIPTION:Samstag\, den 07.11.2026\n11.00 – 14.00 Uhr\nTischreservierun
+ gen unter: 017624274440\nGemeinschaftshalle Kreimbach-Kaulbach\nFörderve
+ rein Sportverein Kaulbach-Kreimbach 03 e.V.
+X-IONAS-CATEGORY:Sportverein
+CATEGORIES:Sportverein
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-07-kinder
+ -second-hand-basar/kb071126.jpg?cid=1idj.9kig
+UID:d165cc6b-aa0b-40e6-8095-def6eb59a11c:2026-11-07
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261107T173000
+DTEND;TZID=Europe/Berlin:20261107T183000
+SUMMARY:St. Martin in Lohnweiler
+CREATED:20261023T054339Z
+LAST-MODIFIED:20261028T081807Z
+DESCRIPTION:Am 07.11.2026 ab 17:30 Uhr\n\nAm Feuerwehrgerätehaus in Lohnw
+ eiler\n\nDer Umzug startet traditionell für alle am Ende der Hauptstraße
+  gegen 18 Uhr.\n\nDas Martinsfeuer wird auf dem Sportplatz entfacht.\n\n
+ Wetterunabhängig befinden sich Sitz- und Stehplätze im Feuerwehrgeräteha
+ us\, in dem auch für Essen und Getränke reichlich gesorgt sein wird.\n\n
+ Unter anderem gibt es Currywurst mit Pommes.\n\nFür die Kinder werden wi
+ eder Weckmänner verteilt.\n\nEs lädt ein: Eure Feuerwehr Lohnweiler\n\n\
+ n\n\n 
+X-IONAS-CATEGORY:Martinsumzug
+CATEGORIES:Martinsumzug
+ATTACH;FMTTYPE=image/png:https://www.vg-lw.de/kalender/2026-11-07-st.-mar
+ tin-in-lohnweiler/martinsumzug-lohnweiler.png?cid=1ihs.9l2v
+UID:f35a8875-0d61-4f84-b1ea-577767e621ad:2026-11-07
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261107T180000
+DTEND;TZID=Europe/Berlin:20261107T190000
+SUMMARY:Adenbacher St. Martinsumzug 
+CREATED:20261028T121742Z
+LAST-MODIFIED:20261029T153543Z
+DESCRIPTION:Am Samstag\, den 07.11.2026 findet der St.Martinsumzug statt.
+ \n\nDer Umzug startet in der Dorfstraße und führt ans Bürgerhaus. Beglei
+ tet wird er vom Musikverein Odenbach. Dort gibt es das traditionelle San
+ kt Martinsfeuer mit Weckmänner\, Würstchen\, Glühwein und Kinderpunsch
+X-IONAS-CATEGORY:Martinsumzug
+CATEGORIES:Martinsumzug
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/lantern-hike-382913
+ 3-1920.jpg?cid=9fo.13ft
+UID:1b4fef94-fdfc-4f88-b643-4ebc2394ba68:2026-11-07
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261107T180000
+DTEND;TZID=Europe/Berlin:20261107T190000
+SUMMARY:VIVA MÉXICO!
+CREATED:20261028T095337Z
+LAST-MODIFIED:20261028T100115Z
+DESCRIPTION:Am Samstag 07.11.2026 ab 18.00 Uhr verwandelt sich das Tennis
+ heim des \nTC Offenbach-Hundheim in eine mexikanische Fiesta!\nWir laden
+  alle Mitglieder mit Begleitung herzlich zu einem Abend mit viel Spaß\, 
+ leckerem\nEssen und guter Musik ein.\nDas erwartet Euch:\nKulinarische H
+ ighlights: Würziges Chili (inkl. vegetarischer Variante)\n Tacos mit Dip
+ s\n Pauschalpreis\nErfrischende Drinks: Margaritas\, Tequila und typisch
+  mexikanisches Bier\nFiesta-Stimmung: Musik aus Mexiko und Lateinamerika
+ \n stimmungsvolle Dekoration\nZur besseren Planung bitten wir um Anmeldu
+ ng bis zum\nDienstag\, 03.11.2026 per persönliche Nachricht\nper WhatsAp
+ p oder E-Mail bei Hiltrud Molter\, 0160 98181117 oder h_molter@t-online.
+ de\noder Tanja Schumacher\, 0151 11619887\nPackt gute Laune ein\, kommt 
+ vorbei und feiert mit uns – gerne auch im passenden Outfit!\nNos vemos! 
+ - Wir freuen uns auf euch!
+X-IONAS-CATEGORY:Tennisverein
+CATEGORIES:Tennisverein
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-07-viva-m
+ exico/viva-mexico.jpg?cid=1iig.9l5j
+UID:f554aa3e-6593-4dc3-9aa1-665653d48735:2026-11-07
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;VALUE=DATE:20261108
+DTEND;VALUE=DATE:20261109
+SUMMARY:Ernst-Reichel-Hütte geöffnet
+CREATED:20261021T055043Z
+LAST-MODIFIED:20261021T055442Z
+DESCRIPTION:Ortsgruppe Offenbach-Hundheim\n\nDie Ernst-Reichel-Hütte ist 
+ am\n\n 08.11.2026 \n\ngeöffnet! \n\nEs gibt Wildbratwürste vom heimische
+ n Wild mit Kartoffelpüree und Rotkohl\n\n \n\nBitte um Anmeldung bis 05.
+ 11.2026 bei\n\nFam. Petrowsky unter 06382-6754 und bei\n\nSteffi Fauß un
+ ter 0151-59 11 52 83\n\nauch gerne per Whatsapp!
+X-IONAS-CATEGORY:Ernst-Reichel-Hütte
+CATEGORIES:Ernst-Reichel-Hütte
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-08-ernst-
+ reichel-huette-geoeffnet/wildbratwuerste-08.11.2026.pdf.jpg?cid=1ids.9kj
+ g
+UID:4e9d60ac-4efd-4256-b755-2be69537d754:2026-11-08
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261108T100000
+DTEND;TZID=Europe/Berlin:20261108T110000
+SUMMARY:EINLADUNG ZUR ERÖFFNUNGSFEIER DES RUNDWANDERWEGES „PANORAMASCHLEI
+ FE MITTLERES GLANTAL“ 
+CREATED:20261028T103352Z
+LAST-MODIFIED:20261028T104425Z
+DESCRIPTION:Liebe Förderer\, Unterstützer und Freunde der Panoramaschleif
+ e Mittleres Glantal\,\n\nam 08.11.2026\, 10:00 Uhr\,  ist es endlich sow
+ eit. IM Bürgerhaus in Wiesweiler\, Hauptstraße 26\, wollen wir In einer 
+ kleinen Feierstunde \n\n den Rundwanderweg „Panoramaschleife Mittleres G
+ lantal“\n\noffiziell eröffnen. \n\nHierzu laden wir Hiermit ganz herzlic
+ h ein.\n\nFolgendes Programm ist vorgesehen:\n\nBegrüßung durch den Orts
+ bürgermeister\n\nKurzvorstellung des Rundwanderweges\n\nGrußworte\n\nSek
+ tempfang \n\nGelegenheit den Rundwanderweg im Rahmen einer \n\nGemeinsam
+ en Wanderung Kennenzulernen\n\nTreffpunkt Hierzu: 13:15 Uhr Bürgerhaus\n
+ \nAbschluss der Wanderung im Dorfcafe im Bürgerhaus\n\nSchöne Grüße und 
+ Hoffentlich bis zum 08.11.2026\n\nArbeitsgruppe Panoramaschleife       
+LOCATION:Wiesweiler
+X-LOCATION-NAME:Wiesweiler
+X-IONAS-CATEGORY:Wandern
+CATEGORIES:Wandern
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-08-einlad
+ ung-zur-eroeffnungsfeier-des-rundwanderweges-panoramaschleife-mittleres-
+ glantal/einladung-eroeffnung.pdf.jpg?cid=1iiv.9l8s
+UID:0aa92904-9450-4dfa-ab2d-fcf46126930f:2026-11-08
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261108T110000
+DTEND;TZID=Europe/Berlin:20261108T120000
+SUMMARY:Traditionelles Wellfleischessen des Karnevalverein Wilder Haufen 
+ Hinzweiler e.V.
+CREATED:20261020T072118Z
+LAST-MODIFIED:20261020T072356Z
+DESCRIPTION:Am Sonntag\, 08.11.2026 findet das traditionelle Wellfleische
+ ssen in der Königslandhalle Hinzweiler statt. \n\nEinlass ist ab 11:00 U
+ hr! Die Küche bietet Wellfleisch vom Buffet und grobe Bratwürste mit Sau
+ erkraut und Brot.\n\nAm Nachmittag gibt es Kaffee und Kuchen.
+X-IONAS-CATEGORY:Hinzweiler
+CATEGORIES:Hinzweiler
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-1990453-19
+ 20.jpg?cid=8fw.6ild
+UID:f06eb54e-1298-4ddd-8c7a-e45141171e5a:2026-11-08
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261109T173000
+DTEND;TZID=Europe/Berlin:20261109T183000
+SUMMARY:Synagoge Odenbach
+CREATED:20261029T143714Z
+LAST-MODIFIED:20261029T152403Z
+DESCRIPTION:
+LOCATION:Odenbach
+X-LOCATION-NAME:Odenbach
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-09-synago
+ ge-odenbach/img-20261029-wa0011.jpg?cid=1ilm.9lpj
+UID:94783306-31dd-4007-b524-e60c27184a0c:2026-11-09
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261109T190000
+DTEND;TZID=Europe/Berlin:20261109T200000
+SUMMARY:Theaterstück Lauterecken 
+CREATED:20261020T105623Z
+LAST-MODIFIED:20261020T110251Z
+DESCRIPTION:„ÜBERdasLEBEN oder meine Geburtstage mit dem Führer“ \n- Ein 
+ Theaterstück von Beate Albrecht (Theaterspiel Witten) im Rahmen der Part
+ nerschaft \nfür Demokratie im Landkreis Kusel\, gefördert durch das Bund
+ esprogramm „Demokratie \nleben!“ des Bundesministeriums für Bildung\, Fa
+ milie\, Senioren\, Frauen und Jugend \n(BMBFSFJ) - \nEin Stück über Allt
+ agswiderstand\, Gräuel der NS-Zeit und den Wunsch „zu Latschen statt zu 
+ \nMarschieren“. Auf Grundlage von Zeitzeugenberichten erzählt „ÜBERdasLE
+ BEN oder meine \nGeburtstage mit dem Führer“ vom Unrechtssystem des NS-S
+ taates. Gegen Gleichschaltung\, \nUnfreiheit und Ungerechtigkeit gab es 
+ Widerstand in unterschiedlichsten Formen. Ein \nThema damals so aktuell 
+ wie heute - ein Thema\, das gerade Jugendliche bewegt\, die \nOrientieru
+ ng im Mainstream suchen. \nInhalt: Bei Hitlers Machtübernahme 1933 ist A
+ nni 9 Jahre. Sie\, ihre Freunde und ihre Eltern \ngeraten mehr und mehr 
+ in den Strudel der historischen Ereignisse. Einige von ihnen werden \nAn
+ hänger der NS-Diktatur und marschieren mit\, andere versuchen\, sich der
+  alles \nbeherrschenden Ideologie zu verweigern oder dem Terror zu entfl
+ iehen. Anni schließt sich \neiner Gruppe von Jugendlichen an\, die auf d
+ en Drill der Hitlerjugend keine Lust hat. Anfangs \nnoch in Auflehnung g
+ egen die Gleichmacherei\, tritt die Gruppe mehr und mehr in den \naktive
+ n Widerstand. Als Anni jedoch gefangen genommen wird\, entwickelt sich i
+ hr Kampf \num ein gerechtes Leben zu einem Kampf ums Überleben. \nMit Li
+ ve-Musik\, Schauspiel und Tanz taucht das Stück ein in diese bewegende Z
+ eit\, erzählt \nvon Schicksalen\, Freundschaft und Feindschaft und verde
+ utlicht\, dass es nötig ist\, jeden Tag \nfür Demokratie und Menschlichk
+ eit einzutreten – auch heute noch. \nTermin: 09. November 2026 \nUhrzeit
+ : 19.00 Uhr \nOrt: Ev. Gemeinderäume Lauterecken (Hauptstr. 15) \nDer Ei
+ ntritt ist frei! \nVeranstalter: Initiative“ Tol(l)eranz – find ich gut!
+ “ und Prot. Kirchengemeinde Lauterecken \nAnsprechpartner und nähere Inf
+ ormationen bei Annette Junkes\, Jugendzentrum \nLauterecken\, Karl-Kelle
+ r-Str. 6a\, 67742 Lauterecken\, 06382 / 6561 
+X-IONAS-CATEGORY:Lauterecken-
+CATEGORIES:Lauterecken-
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-09-theate
+ rstueck-lauterecken/teatherstueck-lauterecken.pdf.jpg?cid=1idp.9kiy
+UID:b971a8ac-b982-4424-9553-fbbc60542bb5:2026-11-09
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261111T111100
+DTEND;TZID=Europe/Berlin:20261111T111100
+SUMMARY:Sessioneröffnung Karnevalverein \"Fröhlich\"
+CREATED:20261015T130030Z
+LAST-MODIFIED:20261015T132300Z
+DESCRIPTION:Der Karnevalsverein \"Frölich\" freut sich auf euer kommen un
+ d einen närrischen Start in dei Session 2027!
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-11-sessio
+ neroeffnung-karnevalverein-froehlich/sessioneroeffnung-karnevalverein.pd
+ f.jpg?cid=1icj.9k7p
+UID:9ee42c75-782d-45a6-b765-32592f3e1e78:2026-11-11
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261111T161500
+DTEND;TZID=Europe/Berlin:20261111T174500
+SUMMARY:Sport AG - Ball for All
+CREATED:20260825T071502Z
+LAST-MODIFIED:20260903T082654Z
+DESCRIPTION:Treffpunkt: Sporthalle Grundschule LautereckenAlter: ab 10 Ja
+ hreKeine Anmeldung erforderlich\, kommt einfach vorbei!
+LOCATION:Sporthalle der Grundschule Lauterecken
+X-LOCATION-NAME:Sporthalle der Grundschule Lauterecken
+CATEGORIES:JUZ
+ATTACH:https://www.vg-lw.de/kalender/2026-09-02-sport-ag-ball-for-all/pla
+ kat-sport-ag-2026.jpeg?cid=1hra.9edd
+UID:fa9001ff-2015-4e23-ae9c-4bb023049c7b:2026-11-11
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261111T170000
+DTEND;TZID=Europe/Berlin:20261111T180000
+SUMMARY:Einladung zur Martinsfeier in Rothselberg
+CREATED:20261029T073955Z
+LAST-MODIFIED:20261029T074210Z
+DESCRIPTION:Mittwoch 11. November 2026\n\n \n\nWir starten um 17:00 Uhr m
+ it einem Gottesdienst in der Kirche. Danach ziehen wir mit unseren Later
+ nen durch den Ort zum Feuerwehrhaus.\n\n \n\nDort lädt die Feuerwehr zum
+  gemütlichen Beisammensein mit Punsch\, Glühwein\, Brezeln und Würstchen
+  am Martinsfeuer ein.\n\n \n\nBitte bringen Sie Ihre Tassen von Zuhause 
+ mit!\n\n \n\nAuf euer Kommen freuen sich:\n\nDie Ortsgemeinde Eßweiler u
+ nd Rothselberg sowie die Kirchengemeinde Rothselberg
+X-IONAS-CATEGORY:Martinsumzug
+CATEGORIES:Martinsumzug
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-1990453-19
+ 20.jpg?cid=8fw.6ild
+UID:e13dbef2-28a4-4028-a8ff-c3476ee629bf:2026-11-11
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261111T170000
+DTEND;TZID=Europe/Berlin:20261111T180000
+SUMMARY:Laternenumzug Kita Lauterfrösche 
+CREATED:20261028T124926Z
+LAST-MODIFIED:20261028T132146Z
+DESCRIPTION:Die Kita LAuterfrösche lädt ein am 11. November 2026 um 17:00
+  Uhr Bürgerhaus Rutsweiler\n\nFür Essen und Trinken ist gesorgt.\n\nBitt
+ e bringt eure eigenen Tassen mit! \n\nWir freuen uns auf euch!\n\nDie Ki
+ ta LAuterfrösche\, die Freiwillige Feuerwehr und die Ortgemeinden Rutswe
+ iler und Kraimbach -Kaulbach 
+X-IONAS-CATEGORY:Martinsumzug
+CATEGORIES:Martinsumzug
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-11-latern
+ enumzug-kita-lauterfroesche/laternenumzug-2026-rutsweiler.jpg?cid=1ikd.9
+ lda
+UID:5f3af10d-005f-4370-8185-1e38fb869b14:2026-11-11
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261111T180000
+DTEND;TZID=Europe/Berlin:20261111T190000
+SUMMARY:St. Martin in St. Julian
+CREATED:20261028T092313Z
+LAST-MODIFIED:20261028T094745Z
+DESCRIPTION:Start: 18:00 Uhr an der Kirche in Gumbsweiler (17:00 Uhr Gott
+ esdienst)\n\nMit St. Martin auf seinem Pferd und Musikalischer Begleitun
+ g durch eine Musikkapelle \n\nGemütliches Beisammensein bei Musik\, Getr
+ änke\, Würstchen und den Abbrennen des Martinsfeuer\n\nDer Umzug wird be
+ gleitet durch die Freiwillige Feuerwehr St. Julian\, Glanbrücken und die
+  gemeinsame Jugendfeuerwehr
+LOCATION:St. Julian
+X-LOCATION-NAME:St. Julian
+X-IONAS-CATEGORY:Martinsumzug
+CATEGORIES:Martinsumzug
+ATTACH:https://www.vg-lw.de/kalender/2026-11-11-st.-martin-in-st.-julian/
+ flyersanktmartin26.jpeg?cid=1ii7.9l41
+UID:f63db91e-1c02-49e2-a63f-9291b9b6807b:2026-11-11
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261112T150000
+DTEND;TZID=Europe/Berlin:20261112T173000
+SUMMARY:GLANBRÜCKER Senioren-Nachmittage
+CREATED:20250321T103516Z
+LAST-MODIFIED:20260127T104219Z
+DESCRIPTION:Für Sie da zu sein und mit Ihnen im Dialog zu stehen ist für 
+ uns selbstverständlich und wichtig\, denn unter Menschen zu kommen und a
+ m gesellschaftlichen Leben teilzunehmen\, war schon immer ein gutes Mitt
+ el\, auch im Alter jung zu bleiben.\n\n \n\nDie Glanbrücker Seniorennach
+ mittage richten sich an Bürgerinnen und Bürger\, die bereits das 70. Leb
+ ensjahr vollendet haben.\n\n \n\nJeden zweiten Donnerstag im Monat könne
+ n Sie von 15:00 Uhr bis ca. 17:30 Uhr bei leckeren selbstgemachten Kuche
+ n und Kaffee einige Stunden in geselliger Runde verbringen und unser Mot
+ to „Miteinander – Füreinander“ im neuen Bürgerhaus erleben.\n\n \n\nFür 
+ eine gute Vorbereitung ist eine Voranmeldung immer gut\, dazu bitte eine
+  kurze Info an:\n\n \n\nAngela Dick   e-mail: angelabasile1993@libero.it
+ \n\nAnja Dick        e-mail: anjadick@t-online.de\n\n \n\noder direkt an
+  Ortsbürgermeister Uli Röder 0176-70618306.\n\n \n\nFalls Sie nicht die 
+ Möglichkeit haben selbst zum Bürgerhaus zu kommen\, können wir Sie abhol
+ en und wieder nach Hause bringen.
+LOCATION:Glanbrücken
+X-LOCATION-NAME:Glanbrücken
+X-IONAS-CATEGORY:Bürgerhaus
+CATEGORIES:Bürgerhaus,Senioren
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-02-12-glanbr
+ uecker-senioren-nachmittage/dokument0.jpg?cid=1fcd.8o91
+UID:95fc64d2-13f2-497e-a427-781366446edf:2026-11-12
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261112T190000
+DTEND;TZID=Europe/Berlin:20261112T235900
+SUMMARY:Lesung mit Christian Baron aus seinem Buch \"1. FC Kaiserslautern
+  Eine Liebeserklärung\"
+CREATED:20260928T195822Z
+LAST-MODIFIED:20261001T140222Z
+DESCRIPTION:Kein anderer Verein verkörpert die Extreme des deutschen Fußb
+ alls so sehr wie der 1. FC Kaiserslautern.\nZwischen Meisterschaftsrausc
+ h und Abstiegsdrama\, zwischen Euphorie und tiefer Enttäuschung – das Le
+ ben rund um den Betzenberg ist eine emotionale Achterbahnfahrt. Doch was
+  macht diesen Klub so besonders? Es ist die unerschütterliche Treue sein
+ er Fans\, die in guten wie in schlechten Zeiten hinter ihrem Verein steh
+ en. In einer Region\, in der Fußball mehr als ein Spiel ist\, wird jede 
+ Niederlage zur persönlichen Kränkung\, jeder Sieg zum kollektiven Fest. 
+ Am eigenen Fandasein zeigt Christian Baron\, wofür der FCK steht: der Un
+ derdog aus der strukturschwachen Provinz\, der mit Herz\, Haltung und we
+ nig Mitteln den Großen die\nStirn bietet.\nChristian Baron\, kam 1985 in
+  Kaiserslautern zur Welt. Nach seinem Studium arbeitete er mehrere Jahre
+  als Zeitungsredakteur. 2020 erschien sein mehrfach ausgezeichnetes Debü
+ t «Ein Mann seiner Klasse»\, das verfilmt\, mit dem Deutschen Fernsehpre
+ is gewürdigt und für die Theaterbühne adaptiert wurde. Außerdem\nveröffe
+ ntlichte er die von Presse und Publikum gefeierten Romane «Schön ist die
+  Nacht» und «Drei Schwestern». Nach zwölf Jahren in Berlin zog er im Som
+ mer 2026 mit seiner Familie zurück nach Kaiserslautern.\nKartenvorverkau
+ f: 8 € Glantalapotheke Offenbach-Hundheim und Buchhandlung Wolf Kusel\nA
+ bendkasse: 10 €
+LOCATION:Evangelisches Gemeindehaus Offenbach am Glan
+X-LOCATION-NAME:Evangelisches Gemeindehaus Offenbach am Glan
+X-STREET-ADDRESS:Klosterstraße 15
+X-POSTAL-CODE:67749
+X-LOCALITY:Offenbach-Hundheim
+ORGANIZER;CN=Freundeskreis der Abteikirche Offenbach am Glan e.V.:mailto:
+ freundeskreisabteikirche@posteo.de
+X-ORGANIZER-NAME:Freundeskreis der Abteikirche Offenbach am Glan e.V.
+X-ORGANIZER-EMAIL:freundeskreisabteikirche@posteo.de
+CONTACT:Anette Rheinheimer\,06382-6080
+X-CONTACT-GIVEN-NAME:Anette
+X-CONTACT-FAMILY-NAME:Rheinheimer
+X-CONTACT-TELEPHONE:06382-6080
+X-CONTACT-ADDRESS-POSTALCODE:67749
+X-CONTACT-ADDRESS-LOCALITY:Offenbach-Hundheim
+X-IONAS-CATEGORY:Kultur
+CATEGORIES:Kultur,Offenbach-Hundheim
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-12-lesung
+ -mit-christian-baron-aus-seinem-buch-1.-fc-kaiserslautern-eine-liebeserk
+ laerung/img-1723.jpg?cid=1i94.9j2g
+UID:31cda923-7f1a-4329-bcac-72840fb12eb7:2026-11-12
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261113T170000
+DTEND;TZID=Europe/Berlin:20261113T180000
+SUMMARY:Einladung zum St. Martinsumzug
+CREATED:20261028T101538Z
+LAST-MODIFIED:20261028T101859Z
+DESCRIPTION:Am Freitag\, den 13. November 2026\,\nab 17:00 Uhr\n\nin der 
+ Kirche in Hinzweiler\n\nladen wir herzlich zu unserem\n\nSt. Martinsfest
+  ein!\n\nMit Pferd und Musik ziehen wir\ngemeinsam durch Hinzweiler\nund
+  feiern den Martinstag.\n\nFür das leibliche Wohl\nist bestens gesorgt:\
+ n\nWurstchen\nFrikadellen\nPommes\n\nJedes Kind bekommt\neine Martinsbre
+ zel\ngeschenkt!\n\nWir freuen uns auf einen schönen\,\ngemütlichen Marti
+ nsabend mit vielen\nkleinen und großen Gästen.\n\nEs freuen sich auf euc
+ h\ndie Kinder\, Erzieherinnen und\nder Kitaförderverein
+LOCATION:Hinzweiler
+X-LOCATION-NAME:Hinzweiler
+X-IONAS-CATEGORY:Martinsumzug
+CATEGORIES:Martinsumzug
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-13-einlad
+ ung-zum-st.-martinsumzug/st.-martin-plakat-2026.pdf-hinzweiler.jpg?cid=1
+ iis.9l6j
+UID:5e1bd241-5ad8-4446-bdbb-5ce2cc75d9d4:2026-11-13
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261113T180000
+DTEND;TZID=Europe/Berlin:20261113T190000
+SUMMARY:Martinsumzug Homberg und Herren-Sulzbach 
+CREATED:20261029T074532Z
+LAST-MODIFIED:20261029T074710Z
+DESCRIPTION:Wir wollen in diesem Jahr wieder gemeinsam mit den Kindern un
+ d Eltern und allen Bürgerinnen und Bürgern der beiden Ortsgemeinden unse
+ ren\n\nSt. Martinsumzug veranstalten.\n\nTreffpunkt am Ortseingang Hombe
+ rg\, Im Oberdorf.\n\nAm Freitag\, dem 13.11.2026\, 18.00 Uhr.\n\nHiermit
+  ergeht herzliche Einladung.\n\nWir freuen uns auf Ihr Euer Kommen.\n\n 
+ 
+X-IONAS-CATEGORY:Martinsumzug
+CATEGORIES:Martinsumzug
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-1990453-19
+ 20.jpg?cid=8fw.6ild
+UID:756ec7b2-a01f-4f7f-9b06-075a388769ec:2026-11-13
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261113T180000
+DTEND;TZID=Europe/Berlin:20261113T190000
+SUMMARY:St. Martin in Odenbach
+CREATED:20261029T074305Z
+LAST-MODIFIED:20261029T153401Z
+DESCRIPTION:Am 13.11.2026\n\n \n\nTreffpunkt\n\n 18 Uhr \n\nSpielplatz Od
+ enbach\n\n \n\nZiel \n\nehemaliger Schulhof Odenbach\n\n \n\nFür Das lei
+ bliche Wohl ist gesorgt\n\nGroße Tombola\n\nDer Musikverein Odenbach e.V
+ . spielt dazu\n\nST. Martin auf seinem Pferd\n\nAuf euer kommen freut si
+ ch der KV-Odenbach und der Förderverein der Kita Odenbach
+LOCATION:Odenbach
+X-LOCATION-NAME:Odenbach
+CATEGORIES:Martinsumzug
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/lantern-hike-382913
+ 3-1920.jpg?cid=9fo.13ft
+UID:bb001409-a9f9-42b4-9035-8c95251cb121:2026-11-13
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261117T140000
+DTEND;TZID=Europe/Berlin:20261117T150000
+SUMMARY:Geh-Spräche in Kreimbach-Kaulbach
+CREATED:20250408T094303Z
+LAST-MODIFIED:20260414T070501Z
+DESCRIPTION:Bewegungsangebot für Seniorinnen\nund Senioren der Verbandsge
+ meinde\nLauterecken-Wolfstein\nTreffpunkt für alle Interessierten:\nJede
+ n dritten Dienstag im Monat - diesen April am\n15.04.2025 von 14 bis 15 
+ Uhr in Kreimbach-Kaulbach am\nBahnhof.\nBei schlechtem Wetter findet die
+  Veranstaltung in der\nGemeindehalle Kreimbach-Kaulbach statt.\nDie Wegs
+ trecke ist für Rollator und Rollstuhl geeignet.\nKommen Sie einfach vorb
+ ei und gehen Sie mit!\nEine Anmeldung ist nicht erforderlich.\nInfos bei
+  der Gemeindeschwester Plus Elisabeth Schnei-\nder\, Telefon 06381 424-3
+ 55
+LOCATION:Kreimbach-Kaulbach
+X-LOCATION-NAME:Kreimbach-Kaulbach
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-3073971-34
+ 0.jpg?cid=1a.59ws
+UID:f438a730-041a-4b17-89f4-1f091904163f:2026-11-17
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261118T161500
+DTEND;TZID=Europe/Berlin:20261118T174500
+SUMMARY:Sport AG - Ball for All
+CREATED:20260825T071502Z
+LAST-MODIFIED:20260903T082654Z
+DESCRIPTION:Treffpunkt: Sporthalle Grundschule LautereckenAlter: ab 10 Ja
+ hreKeine Anmeldung erforderlich\, kommt einfach vorbei!
+LOCATION:Sporthalle der Grundschule Lauterecken
+X-LOCATION-NAME:Sporthalle der Grundschule Lauterecken
+CATEGORIES:JUZ
+ATTACH:https://www.vg-lw.de/kalender/2026-09-02-sport-ag-ball-for-all/pla
+ kat-sport-ag-2026.jpeg?cid=1hra.9edd
+UID:fa9001ff-2015-4e23-ae9c-4bb023049c7b:2026-11-18
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261120T190000
+DTEND;TZID=Europe/Berlin:20261120T200000
+SUMMARY:Men in Blue Benefizkonzert 
+CREATED:20261021T061151Z
+LAST-MODIFIED:20261021T105128Z
+DESCRIPTION:Benefizkonzert zu Gunsten der Stiftung Gemeinsam Zukunft scha
+ ffen Kulturstiftung Westpfälzer Musikantenland 
+X-IONAS-CATEGORY:Konzert
+CATEGORIES:Konzert
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-20-men-in
+ -blue-benefizkonzert/img-20260921-wa0001.pdf.jpg?cid=1igs.9krg
+UID:26905c5e-f1b3-4e0b-a11f-cadc06cdcc26:2026-11-20
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;VALUE=DATE:20261122
+DTEND;VALUE=DATE:20261123
+SUMMARY:Schlachtfest beim PWV Hinzweiler 
+CREATED:20261028T112813Z
+LAST-MODIFIED:20261028T113021Z
+DESCRIPTION:Am Sonntag\, 22.11.2026\, findet das Schlachtfest an der PWV 
+ Hütte Hinzweiler statt.\n\nDie Küche bietet Wellfleisch\, Schlachtplatte
+  mit Leberknödel und Sauerkraut\, grobe Bratwürste und Schweinemett.\n\n
+ Nachmittags gibt es Kaffee und Kuchen.\n\n \n\nEs freut sich der PWV Hin
+ zweiler 
+LOCATION:Hinzweiler
+X-LOCATION-NAME:Hinzweiler
+X-IONAS-CATEGORY:PWV Hütte
+CATEGORIES:PWV Hütte
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-3073971-34
+ 0.jpg?cid=1a.59ws
+UID:9eeb8a0b-ff3e-4774-b11f-2d5946138d74:2026-11-22
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261125T161500
+DTEND;TZID=Europe/Berlin:20261125T174500
+SUMMARY:Sport AG - Ball for All
+CREATED:20260825T071502Z
+LAST-MODIFIED:20260903T082654Z
+DESCRIPTION:Treffpunkt: Sporthalle Grundschule LautereckenAlter: ab 10 Ja
+ hreKeine Anmeldung erforderlich\, kommt einfach vorbei!
+LOCATION:Sporthalle der Grundschule Lauterecken
+X-LOCATION-NAME:Sporthalle der Grundschule Lauterecken
+CATEGORIES:JUZ
+ATTACH:https://www.vg-lw.de/kalender/2026-09-02-sport-ag-ball-for-all/pla
+ kat-sport-ag-2026.jpeg?cid=1hra.9edd
+UID:fa9001ff-2015-4e23-ae9c-4bb023049c7b:2026-11-25
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261128T120000
+DTEND;TZID=Europe/Berlin:20261129T130000
+SUMMARY:22. Mittelalterlicher Weihnachtsmarkt auf Burg Lichtenberg\, bei 
+ Kusel
+CREATED:20261028T112359Z
+LAST-MODIFIED:20261028T112635Z
+DESCRIPTION:am 28.11.2026 und 29.11.2026\n\n\nDer Markt öffnet am Samstag
+ \, 28.11. um 12 Uhr die Tore und wird um 14 Uhr durch die Böllerschützen
+  feierlich eröffnet. Am Sonntag\, 29.11. öffnet der Markt bereits um 11 
+ Uhr.\n\nDer Eintritt ist frei. \n\nAuf dem historischen Burggelände werd
+ en auf der gesamten Burganlage Musik- und Tanzgruppen das Publikum unter
+ halten.\n\nRitterlager\, je nach Wetterlage\, zeigen das Leben in der da
+ maligen Zeit.\n\nAm Samstagabend erwartet unser Publikum auf der Unterbu
+ rg eine Feuershow.\n\nFür die Kinder wird am Sonntagmittag auch der Niko
+ laus erwartet.\n\nArmbrust- und Bogenschießen ergänzen das Programm. \n\
+ nVerkaufsstände bieten Speisen und Getränke an. Geöffnet ist das Urweltm
+ useum Geoskop und das Pfälzer Musikantenland-Museum (Kostenpflichtig).\n
+ \nIn der Zehntscheune wird Kaffee und Kuchen angeboten. \n\n \n\nParkmög
+ lichkeiten:\n\naus Richtung Körborn kommend auf Parkwiesen (3€/PKW)\, mi
+ t Fußmarsch zur Burg.\n\nVon Kusel/Pfeffelbach kommend Weiterfahrt bis O
+ rtsausgang Thallichtenberg (Richtung Baumholder) auf Sportgelände der TS
+ G Burglichtenberg\, mit Shuttle-Bus zur Burg und zurück (3€/Person\, Kin
+ der bis 12 Jahre kostenlos).\n\nParkplätze werden zugewiesen!\n\nwww.mit
+ telaltermarkt-burglichtenberg.de
+X-IONAS-CATEGORY:Advent
+CATEGORIES:Advent
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-1990453-19
+ 20.jpg?cid=8fw.6ild
+UID:d1d15811-b3ec-4030-8d8d-f47d1e8dbb9c:2026-11-28
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261128T140000
+DTEND;TZID=Europe/Berlin:20261128T220000
+SUMMARY:Stamm-Café 2026 Waldhütte Offenbach-Hundheim
+CREATED:20260224T085205Z
+LAST-MODIFIED:20260224T085912Z
+DESCRIPTION:
+LOCATION:Offenbach-Hundheim
+X-LOCATION-NAME:Offenbach-Hundheim
+X-IONAS-CATEGORY:Ernst-Reichel-Hütte
+CATEGORIES:Ernst-Reichel-Hütte,Stamm-Café-1
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-03-28-stamm-
+ cafe-2026-waldhuette-offenbach-hundheim/facebook-1768312338600-741683951
+ 5039637954-1.jpg?cid=1f8b.8sc7
+UID:f1bbd88e-e4ad-4d9f-83fe-2bdd688b337c:2026-11-28
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261128T180000
+DTEND;TZID=Europe/Berlin:20261128T190000
+SUMMARY:Adventskonzert
+CREATED:20261028T100139Z
+LAST-MODIFIED:20261028T100615Z
+DESCRIPTION:28.11.2026\n18:00\nKirche Einöllen\nes lädt ein\nMGV/Gemischt
+ er Chor\nHohenöllen
+X-IONAS-CATEGORY:Chor
+CATEGORIES:Chor
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-28-advent
+ skonzert/plakat-weihnachtskonzert-2026.jpg?cid=1iip.9l6a
+UID:a8829bf2-9f36-47a3-a29e-1f47c55ce202:2026-11-28
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261129T180000
+DTEND;TZID=Europe/Berlin:20261129T190000
+SUMMARY:Christmas unplugged
+CREATED:20261020T062933Z
+LAST-MODIFIED:20261022T112858Z
+DESCRIPTION:Stimmungsvolles Konzerthighlight in der Vorweihnachtszeit: „C
+ hristmas unplugged“ im Bürgerhaus Grumbach\n\nDie Adventszeit wirft ihre
+  musikalischen Schatten voraus: Am Sonntag\, den 29. November 2026\, läd
+ t die Vereinsgemeinschaft Grumbach mit „Christmas unplugged“ zu einem be
+ sonderen musikalischen Abend in das Bürgerhaus Grumbach ein. Ab 18:00 Uh
+ r erwartet die Besucher ein stimmungsvolles Konzert\, das perfekt auf di
+ e besinnliche Zeit des Jahres einstimmt.\n\nIn gemütlicher Atmosphäre pr
+ äsentieren die Musikerinnen und Musiker bekannte Weihnachtsklassiker. Da
+ s harmonische Zusammenspiel aus feinen Klängen und einfühlsamem Gesang v
+ erspricht ein hautnahes und emotionales Konzerterlebnis abseits des vorw
+ eihnachtlichen Trubels.\n\nVorverkauf startet am 6. November\n\nWer sich
+  dieses Highlight nicht entgehen lassen möchte\, sollte sich bereits den
+  Freitag\, 6. November 2026\, im Kalender markieren. An diesem Tag finde
+ t von 15:00 bis 18:00 Uhr der Ticket-Vorverkauf beim Café Jedermann im B
+ ürgerhaus Grumbach statt.\n\nDie Karten sind für 19 Euro je Ticket erhäl
+ tlich. Aufgrund der zu erwartenden Nachfrage und des begrenzten Kontinge
+ nts wird empfohlen\, den Vorverkaufstermin frühzeitig zu nutzen.\n\nAuf 
+ einen Blick:\n\nEvent: „Christmas unplugged“ – Das akustische Weihnachts
+ konzertKonzerttermin: Sonntag\, 29.11.2026 | Beginn: 18:00 UhrOrt: Bürge
+ rhaus GrumbachVorverkauf: Freitag\, 06.11.2026 | 15:00 – 18:00 Uhr im Ca
+ fé Jedermann (Bürgerhaus Grumbach)Eintritt: 19 € pro Ticket \n\nWer am V
+ orverkauf nicht kommen kann\, kann sich gerne telefonisch unter der Nr. 
+ 06382-6356 melden.\n\n 
+X-IONAS-CATEGORY:Grumbach
+CATEGORIES:Grumbach,Bürgerhaus
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-29-christ
+ mas-unplugged/christmas-unplugged-final-2.jpg?cid=1ihj.9kuv
+UID:708d246d-f174-4c29-b9ae-50d5d6a43497:2026-11-29
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261129T180000
+DTEND;TZID=Europe/Berlin:20261129T190000
+SUMMARY:Christmas unplugged
+CREATED:20261029T152435Z
+LAST-MODIFIED:20261029T152741Z
+DESCRIPTION:
+LOCATION:Grumbach
+X-LOCATION-NAME:Grumbach
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-11-29-christ
+ mas-unplugged-1/christmas-unplugged-final.jpg?cid=1ilp.9lq1
+UID:5ce3688f-3d89-4d79-a37c-71398a237a43:2026-11-29
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261202T161500
+DTEND;TZID=Europe/Berlin:20261202T174500
+SUMMARY:Sport AG - Ball for All
+CREATED:20260825T071502Z
+LAST-MODIFIED:20260903T082654Z
+DESCRIPTION:Treffpunkt: Sporthalle Grundschule LautereckenAlter: ab 10 Ja
+ hreKeine Anmeldung erforderlich\, kommt einfach vorbei!
+LOCATION:Sporthalle der Grundschule Lauterecken
+X-LOCATION-NAME:Sporthalle der Grundschule Lauterecken
+CATEGORIES:JUZ
+ATTACH:https://www.vg-lw.de/kalender/2026-09-02-sport-ag-ball-for-all/pla
+ kat-sport-ag-2026.jpeg?cid=1hra.9edd
+UID:fa9001ff-2015-4e23-ae9c-4bb023049c7b:2026-12-02
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;VALUE=DATE:20261205
+DTEND;VALUE=DATE:20261206
+SUMMARY:Weihnachtsmarkt Lauterecken
+CREATED:20251006T120013Z
+LAST-MODIFIED:20251006T120248Z
+DESCRIPTION:.....weitere Infos folgen!
+LOCATION:Lauterecken
+X-LOCATION-NAME:Lauterecken
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/wappen/lauterecken.
+ jpg?cid=ar.432d
+UID:d6914f6e-4846-4e11-816a-b3cc9165f56b:2026-12-05
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261209T161500
+DTEND;TZID=Europe/Berlin:20261209T174500
+SUMMARY:Sport AG - Ball for All
+CREATED:20260825T071502Z
+LAST-MODIFIED:20260903T082654Z
+DESCRIPTION:Treffpunkt: Sporthalle Grundschule LautereckenAlter: ab 10 Ja
+ hreKeine Anmeldung erforderlich\, kommt einfach vorbei!
+LOCATION:Sporthalle der Grundschule Lauterecken
+X-LOCATION-NAME:Sporthalle der Grundschule Lauterecken
+CATEGORIES:JUZ
+ATTACH:https://www.vg-lw.de/kalender/2026-09-02-sport-ag-ball-for-all/pla
+ kat-sport-ag-2026.jpeg?cid=1hra.9edd
+UID:fa9001ff-2015-4e23-ae9c-4bb023049c7b:2026-12-09
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261210T143000
+DTEND;TZID=Europe/Berlin:20261210T160000
+SUMMARY:Zwergentreff in der Kindertagesstätte St. Julian
+CREATED:20260806T062533Z
+LAST-MODIFIED:20260806T062832Z
+DESCRIPTION:
+LOCATION:St. Julian
+X-LOCATION-NAME:St. Julian
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-08-13-zwerge
+ ntreff-in-der-kindertagesstaette-st.-julian/zwergentreff-st.julian-2026.
+ jpg?cid=1hka.9bzd
+UID:12da0d9b-87af-44ac-a985-a3ff58ad4f9e:2026-12-10
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261210T150000
+DTEND;TZID=Europe/Berlin:20261210T173000
+SUMMARY:GLANBRÜCKER Senioren-Nachmittage
+CREATED:20250321T103516Z
+LAST-MODIFIED:20260127T104219Z
+DESCRIPTION:Für Sie da zu sein und mit Ihnen im Dialog zu stehen ist für 
+ uns selbstverständlich und wichtig\, denn unter Menschen zu kommen und a
+ m gesellschaftlichen Leben teilzunehmen\, war schon immer ein gutes Mitt
+ el\, auch im Alter jung zu bleiben.\n\n \n\nDie Glanbrücker Seniorennach
+ mittage richten sich an Bürgerinnen und Bürger\, die bereits das 70. Leb
+ ensjahr vollendet haben.\n\n \n\nJeden zweiten Donnerstag im Monat könne
+ n Sie von 15:00 Uhr bis ca. 17:30 Uhr bei leckeren selbstgemachten Kuche
+ n und Kaffee einige Stunden in geselliger Runde verbringen und unser Mot
+ to „Miteinander – Füreinander“ im neuen Bürgerhaus erleben.\n\n \n\nFür 
+ eine gute Vorbereitung ist eine Voranmeldung immer gut\, dazu bitte eine
+  kurze Info an:\n\n \n\nAngela Dick   e-mail: angelabasile1993@libero.it
+ \n\nAnja Dick        e-mail: anjadick@t-online.de\n\n \n\noder direkt an
+  Ortsbürgermeister Uli Röder 0176-70618306.\n\n \n\nFalls Sie nicht die 
+ Möglichkeit haben selbst zum Bürgerhaus zu kommen\, können wir Sie abhol
+ en und wieder nach Hause bringen.
+LOCATION:Glanbrücken
+X-LOCATION-NAME:Glanbrücken
+X-IONAS-CATEGORY:Bürgerhaus
+CATEGORIES:Bürgerhaus,Senioren
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-02-12-glanbr
+ uecker-senioren-nachmittage/dokument0.jpg?cid=1fcd.8o91
+UID:95fc64d2-13f2-497e-a427-781366446edf:2026-12-10
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261215T140000
+DTEND;TZID=Europe/Berlin:20261215T150000
+SUMMARY:Geh-Spräche in Kreimbach-Kaulbach
+CREATED:20250408T094303Z
+LAST-MODIFIED:20260414T070501Z
+DESCRIPTION:Bewegungsangebot für Seniorinnen\nund Senioren der Verbandsge
+ meinde\nLauterecken-Wolfstein\nTreffpunkt für alle Interessierten:\nJede
+ n dritten Dienstag im Monat - diesen April am\n15.04.2025 von 14 bis 15 
+ Uhr in Kreimbach-Kaulbach am\nBahnhof.\nBei schlechtem Wetter findet die
+  Veranstaltung in der\nGemeindehalle Kreimbach-Kaulbach statt.\nDie Wegs
+ trecke ist für Rollator und Rollstuhl geeignet.\nKommen Sie einfach vorb
+ ei und gehen Sie mit!\nEine Anmeldung ist nicht erforderlich.\nInfos bei
+  der Gemeindeschwester Plus Elisabeth Schnei-\nder\, Telefon 06381 424-3
+ 55
+LOCATION:Kreimbach-Kaulbach
+X-LOCATION-NAME:Kreimbach-Kaulbach
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-3073971-34
+ 0.jpg?cid=1a.59ws
+UID:f438a730-041a-4b17-89f4-1f091904163f:2026-12-15
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20261216T161500
+DTEND;TZID=Europe/Berlin:20261216T174500
+SUMMARY:Sport AG - Ball for All
+CREATED:20260825T071502Z
+LAST-MODIFIED:20260903T082654Z
+DESCRIPTION:Treffpunkt: Sporthalle Grundschule LautereckenAlter: ab 10 Ja
+ hreKeine Anmeldung erforderlich\, kommt einfach vorbei!
+LOCATION:Sporthalle der Grundschule Lauterecken
+X-LOCATION-NAME:Sporthalle der Grundschule Lauterecken
+CATEGORIES:JUZ
+ATTACH:https://www.vg-lw.de/kalender/2026-09-02-sport-ag-ball-for-all/pla
+ kat-sport-ag-2026.jpeg?cid=1hra.9edd
+UID:fa9001ff-2015-4e23-ae9c-4bb023049c7b:2026-12-16
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270114T150000
+DTEND;TZID=Europe/Berlin:20270114T173000
+SUMMARY:GLANBRÜCKER Senioren-Nachmittage
+CREATED:20250321T103516Z
+LAST-MODIFIED:20260127T104219Z
+DESCRIPTION:Für Sie da zu sein und mit Ihnen im Dialog zu stehen ist für 
+ uns selbstverständlich und wichtig\, denn unter Menschen zu kommen und a
+ m gesellschaftlichen Leben teilzunehmen\, war schon immer ein gutes Mitt
+ el\, auch im Alter jung zu bleiben.\n\n \n\nDie Glanbrücker Seniorennach
+ mittage richten sich an Bürgerinnen und Bürger\, die bereits das 70. Leb
+ ensjahr vollendet haben.\n\n \n\nJeden zweiten Donnerstag im Monat könne
+ n Sie von 15:00 Uhr bis ca. 17:30 Uhr bei leckeren selbstgemachten Kuche
+ n und Kaffee einige Stunden in geselliger Runde verbringen und unser Mot
+ to „Miteinander – Füreinander“ im neuen Bürgerhaus erleben.\n\n \n\nFür 
+ eine gute Vorbereitung ist eine Voranmeldung immer gut\, dazu bitte eine
+  kurze Info an:\n\n \n\nAngela Dick   e-mail: angelabasile1993@libero.it
+ \n\nAnja Dick        e-mail: anjadick@t-online.de\n\n \n\noder direkt an
+  Ortsbürgermeister Uli Röder 0176-70618306.\n\n \n\nFalls Sie nicht die 
+ Möglichkeit haben selbst zum Bürgerhaus zu kommen\, können wir Sie abhol
+ en und wieder nach Hause bringen.
+LOCATION:Glanbrücken
+X-LOCATION-NAME:Glanbrücken
+X-IONAS-CATEGORY:Bürgerhaus
+CATEGORIES:Bürgerhaus,Senioren
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-02-12-glanbr
+ uecker-senioren-nachmittage/dokument0.jpg?cid=1fcd.8o91
+UID:95fc64d2-13f2-497e-a427-781366446edf:2027-01-14
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270119T140000
+DTEND;TZID=Europe/Berlin:20270119T150000
+SUMMARY:Geh-Spräche in Kreimbach-Kaulbach
+CREATED:20250408T094303Z
+LAST-MODIFIED:20260414T070501Z
+DESCRIPTION:Bewegungsangebot für Seniorinnen\nund Senioren der Verbandsge
+ meinde\nLauterecken-Wolfstein\nTreffpunkt für alle Interessierten:\nJede
+ n dritten Dienstag im Monat - diesen April am\n15.04.2025 von 14 bis 15 
+ Uhr in Kreimbach-Kaulbach am\nBahnhof.\nBei schlechtem Wetter findet die
+  Veranstaltung in der\nGemeindehalle Kreimbach-Kaulbach statt.\nDie Wegs
+ trecke ist für Rollator und Rollstuhl geeignet.\nKommen Sie einfach vorb
+ ei und gehen Sie mit!\nEine Anmeldung ist nicht erforderlich.\nInfos bei
+  der Gemeindeschwester Plus Elisabeth Schnei-\nder\, Telefon 06381 424-3
+ 55
+LOCATION:Kreimbach-Kaulbach
+X-LOCATION-NAME:Kreimbach-Kaulbach
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-3073971-34
+ 0.jpg?cid=1a.59ws
+UID:f438a730-041a-4b17-89f4-1f091904163f:2027-01-19
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270211T150000
+DTEND;TZID=Europe/Berlin:20270211T173000
+SUMMARY:GLANBRÜCKER Senioren-Nachmittage
+CREATED:20250321T103516Z
+LAST-MODIFIED:20260127T104219Z
+DESCRIPTION:Für Sie da zu sein und mit Ihnen im Dialog zu stehen ist für 
+ uns selbstverständlich und wichtig\, denn unter Menschen zu kommen und a
+ m gesellschaftlichen Leben teilzunehmen\, war schon immer ein gutes Mitt
+ el\, auch im Alter jung zu bleiben.\n\n \n\nDie Glanbrücker Seniorennach
+ mittage richten sich an Bürgerinnen und Bürger\, die bereits das 70. Leb
+ ensjahr vollendet haben.\n\n \n\nJeden zweiten Donnerstag im Monat könne
+ n Sie von 15:00 Uhr bis ca. 17:30 Uhr bei leckeren selbstgemachten Kuche
+ n und Kaffee einige Stunden in geselliger Runde verbringen und unser Mot
+ to „Miteinander – Füreinander“ im neuen Bürgerhaus erleben.\n\n \n\nFür 
+ eine gute Vorbereitung ist eine Voranmeldung immer gut\, dazu bitte eine
+  kurze Info an:\n\n \n\nAngela Dick   e-mail: angelabasile1993@libero.it
+ \n\nAnja Dick        e-mail: anjadick@t-online.de\n\n \n\noder direkt an
+  Ortsbürgermeister Uli Röder 0176-70618306.\n\n \n\nFalls Sie nicht die 
+ Möglichkeit haben selbst zum Bürgerhaus zu kommen\, können wir Sie abhol
+ en und wieder nach Hause bringen.
+LOCATION:Glanbrücken
+X-LOCATION-NAME:Glanbrücken
+X-IONAS-CATEGORY:Bürgerhaus
+CATEGORIES:Bürgerhaus,Senioren
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-02-12-glanbr
+ uecker-senioren-nachmittage/dokument0.jpg?cid=1fcd.8o91
+UID:95fc64d2-13f2-497e-a427-781366446edf:2027-02-11
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270216T140000
+DTEND;TZID=Europe/Berlin:20270216T150000
+SUMMARY:Geh-Spräche in Kreimbach-Kaulbach
+CREATED:20250408T094303Z
+LAST-MODIFIED:20260414T070501Z
+DESCRIPTION:Bewegungsangebot für Seniorinnen\nund Senioren der Verbandsge
+ meinde\nLauterecken-Wolfstein\nTreffpunkt für alle Interessierten:\nJede
+ n dritten Dienstag im Monat - diesen April am\n15.04.2025 von 14 bis 15 
+ Uhr in Kreimbach-Kaulbach am\nBahnhof.\nBei schlechtem Wetter findet die
+  Veranstaltung in der\nGemeindehalle Kreimbach-Kaulbach statt.\nDie Wegs
+ trecke ist für Rollator und Rollstuhl geeignet.\nKommen Sie einfach vorb
+ ei und gehen Sie mit!\nEine Anmeldung ist nicht erforderlich.\nInfos bei
+  der Gemeindeschwester Plus Elisabeth Schnei-\nder\, Telefon 06381 424-3
+ 55
+LOCATION:Kreimbach-Kaulbach
+X-LOCATION-NAME:Kreimbach-Kaulbach
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-3073971-34
+ 0.jpg?cid=1a.59ws
+UID:f438a730-041a-4b17-89f4-1f091904163f:2027-02-16
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270311T150000
+DTEND;TZID=Europe/Berlin:20270311T173000
+SUMMARY:GLANBRÜCKER Senioren-Nachmittage
+CREATED:20250321T103516Z
+LAST-MODIFIED:20260127T104219Z
+DESCRIPTION:Für Sie da zu sein und mit Ihnen im Dialog zu stehen ist für 
+ uns selbstverständlich und wichtig\, denn unter Menschen zu kommen und a
+ m gesellschaftlichen Leben teilzunehmen\, war schon immer ein gutes Mitt
+ el\, auch im Alter jung zu bleiben.\n\n \n\nDie Glanbrücker Seniorennach
+ mittage richten sich an Bürgerinnen und Bürger\, die bereits das 70. Leb
+ ensjahr vollendet haben.\n\n \n\nJeden zweiten Donnerstag im Monat könne
+ n Sie von 15:00 Uhr bis ca. 17:30 Uhr bei leckeren selbstgemachten Kuche
+ n und Kaffee einige Stunden in geselliger Runde verbringen und unser Mot
+ to „Miteinander – Füreinander“ im neuen Bürgerhaus erleben.\n\n \n\nFür 
+ eine gute Vorbereitung ist eine Voranmeldung immer gut\, dazu bitte eine
+  kurze Info an:\n\n \n\nAngela Dick   e-mail: angelabasile1993@libero.it
+ \n\nAnja Dick        e-mail: anjadick@t-online.de\n\n \n\noder direkt an
+  Ortsbürgermeister Uli Röder 0176-70618306.\n\n \n\nFalls Sie nicht die 
+ Möglichkeit haben selbst zum Bürgerhaus zu kommen\, können wir Sie abhol
+ en und wieder nach Hause bringen.
+LOCATION:Glanbrücken
+X-LOCATION-NAME:Glanbrücken
+X-IONAS-CATEGORY:Bürgerhaus
+CATEGORIES:Bürgerhaus,Senioren
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-02-12-glanbr
+ uecker-senioren-nachmittage/dokument0.jpg?cid=1fcd.8o91
+UID:95fc64d2-13f2-497e-a427-781366446edf:2027-03-11
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270316T140000
+DTEND;TZID=Europe/Berlin:20270316T150000
+SUMMARY:Geh-Spräche in Kreimbach-Kaulbach
+CREATED:20250408T094303Z
+LAST-MODIFIED:20260414T070501Z
+DESCRIPTION:Bewegungsangebot für Seniorinnen\nund Senioren der Verbandsge
+ meinde\nLauterecken-Wolfstein\nTreffpunkt für alle Interessierten:\nJede
+ n dritten Dienstag im Monat - diesen April am\n15.04.2025 von 14 bis 15 
+ Uhr in Kreimbach-Kaulbach am\nBahnhof.\nBei schlechtem Wetter findet die
+  Veranstaltung in der\nGemeindehalle Kreimbach-Kaulbach statt.\nDie Wegs
+ trecke ist für Rollator und Rollstuhl geeignet.\nKommen Sie einfach vorb
+ ei und gehen Sie mit!\nEine Anmeldung ist nicht erforderlich.\nInfos bei
+  der Gemeindeschwester Plus Elisabeth Schnei-\nder\, Telefon 06381 424-3
+ 55
+LOCATION:Kreimbach-Kaulbach
+X-LOCATION-NAME:Kreimbach-Kaulbach
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-3073971-34
+ 0.jpg?cid=1a.59ws
+UID:f438a730-041a-4b17-89f4-1f091904163f:2027-03-16
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270408T150000
+DTEND;TZID=Europe/Berlin:20270408T173000
+SUMMARY:GLANBRÜCKER Senioren-Nachmittage
+CREATED:20250321T103516Z
+LAST-MODIFIED:20260127T104219Z
+DESCRIPTION:Für Sie da zu sein und mit Ihnen im Dialog zu stehen ist für 
+ uns selbstverständlich und wichtig\, denn unter Menschen zu kommen und a
+ m gesellschaftlichen Leben teilzunehmen\, war schon immer ein gutes Mitt
+ el\, auch im Alter jung zu bleiben.\n\n \n\nDie Glanbrücker Seniorennach
+ mittage richten sich an Bürgerinnen und Bürger\, die bereits das 70. Leb
+ ensjahr vollendet haben.\n\n \n\nJeden zweiten Donnerstag im Monat könne
+ n Sie von 15:00 Uhr bis ca. 17:30 Uhr bei leckeren selbstgemachten Kuche
+ n und Kaffee einige Stunden in geselliger Runde verbringen und unser Mot
+ to „Miteinander – Füreinander“ im neuen Bürgerhaus erleben.\n\n \n\nFür 
+ eine gute Vorbereitung ist eine Voranmeldung immer gut\, dazu bitte eine
+  kurze Info an:\n\n \n\nAngela Dick   e-mail: angelabasile1993@libero.it
+ \n\nAnja Dick        e-mail: anjadick@t-online.de\n\n \n\noder direkt an
+  Ortsbürgermeister Uli Röder 0176-70618306.\n\n \n\nFalls Sie nicht die 
+ Möglichkeit haben selbst zum Bürgerhaus zu kommen\, können wir Sie abhol
+ en und wieder nach Hause bringen.
+LOCATION:Glanbrücken
+X-LOCATION-NAME:Glanbrücken
+X-IONAS-CATEGORY:Bürgerhaus
+CATEGORIES:Bürgerhaus,Senioren
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-02-12-glanbr
+ uecker-senioren-nachmittage/dokument0.jpg?cid=1fcd.8o91
+UID:95fc64d2-13f2-497e-a427-781366446edf:2027-04-08
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270420T140000
+DTEND;TZID=Europe/Berlin:20270420T150000
+SUMMARY:Geh-Spräche in Kreimbach-Kaulbach
+CREATED:20250408T094303Z
+LAST-MODIFIED:20260414T070501Z
+DESCRIPTION:Bewegungsangebot für Seniorinnen\nund Senioren der Verbandsge
+ meinde\nLauterecken-Wolfstein\nTreffpunkt für alle Interessierten:\nJede
+ n dritten Dienstag im Monat - diesen April am\n15.04.2025 von 14 bis 15 
+ Uhr in Kreimbach-Kaulbach am\nBahnhof.\nBei schlechtem Wetter findet die
+  Veranstaltung in der\nGemeindehalle Kreimbach-Kaulbach statt.\nDie Wegs
+ trecke ist für Rollator und Rollstuhl geeignet.\nKommen Sie einfach vorb
+ ei und gehen Sie mit!\nEine Anmeldung ist nicht erforderlich.\nInfos bei
+  der Gemeindeschwester Plus Elisabeth Schnei-\nder\, Telefon 06381 424-3
+ 55
+LOCATION:Kreimbach-Kaulbach
+X-LOCATION-NAME:Kreimbach-Kaulbach
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-3073971-34
+ 0.jpg?cid=1a.59ws
+UID:f438a730-041a-4b17-89f4-1f091904163f:2027-04-20
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270508T090800
+DTEND;TZID=Europe/Berlin:20270509T100800
+SUMMARY:5. DUBBEGLAS WANDERUNG
+CREATED:20260720T070846Z
+LAST-MODIFIED:20260721T073113Z
+DESCRIPTION:SAVE THE DATE
+LOCATION:Wolfstein
+X-LOCATION-NAME:Wolfstein
+CATEGORIES:Dubbeglaswanderung
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2027-05-08-5.-dub
+ beglas-wanderung/dubbeglas.jpg?cid=1hg7.9as4
+UID:6a365be7-3e5b-4094-8025-c183f67487ae:2027-05-08
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270513T150000
+DTEND;TZID=Europe/Berlin:20270513T173000
+SUMMARY:GLANBRÜCKER Senioren-Nachmittage
+CREATED:20250321T103516Z
+LAST-MODIFIED:20260127T104219Z
+DESCRIPTION:Für Sie da zu sein und mit Ihnen im Dialog zu stehen ist für 
+ uns selbstverständlich und wichtig\, denn unter Menschen zu kommen und a
+ m gesellschaftlichen Leben teilzunehmen\, war schon immer ein gutes Mitt
+ el\, auch im Alter jung zu bleiben.\n\n \n\nDie Glanbrücker Seniorennach
+ mittage richten sich an Bürgerinnen und Bürger\, die bereits das 70. Leb
+ ensjahr vollendet haben.\n\n \n\nJeden zweiten Donnerstag im Monat könne
+ n Sie von 15:00 Uhr bis ca. 17:30 Uhr bei leckeren selbstgemachten Kuche
+ n und Kaffee einige Stunden in geselliger Runde verbringen und unser Mot
+ to „Miteinander – Füreinander“ im neuen Bürgerhaus erleben.\n\n \n\nFür 
+ eine gute Vorbereitung ist eine Voranmeldung immer gut\, dazu bitte eine
+  kurze Info an:\n\n \n\nAngela Dick   e-mail: angelabasile1993@libero.it
+ \n\nAnja Dick        e-mail: anjadick@t-online.de\n\n \n\noder direkt an
+  Ortsbürgermeister Uli Röder 0176-70618306.\n\n \n\nFalls Sie nicht die 
+ Möglichkeit haben selbst zum Bürgerhaus zu kommen\, können wir Sie abhol
+ en und wieder nach Hause bringen.
+LOCATION:Glanbrücken
+X-LOCATION-NAME:Glanbrücken
+X-IONAS-CATEGORY:Bürgerhaus
+CATEGORIES:Bürgerhaus,Senioren
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-02-12-glanbr
+ uecker-senioren-nachmittage/dokument0.jpg?cid=1fcd.8o91
+UID:95fc64d2-13f2-497e-a427-781366446edf:2027-05-13
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270518T140000
+DTEND;TZID=Europe/Berlin:20270518T150000
+SUMMARY:Geh-Spräche in Kreimbach-Kaulbach
+CREATED:20250408T094303Z
+LAST-MODIFIED:20260414T070501Z
+DESCRIPTION:Bewegungsangebot für Seniorinnen\nund Senioren der Verbandsge
+ meinde\nLauterecken-Wolfstein\nTreffpunkt für alle Interessierten:\nJede
+ n dritten Dienstag im Monat - diesen April am\n15.04.2025 von 14 bis 15 
+ Uhr in Kreimbach-Kaulbach am\nBahnhof.\nBei schlechtem Wetter findet die
+  Veranstaltung in der\nGemeindehalle Kreimbach-Kaulbach statt.\nDie Wegs
+ trecke ist für Rollator und Rollstuhl geeignet.\nKommen Sie einfach vorb
+ ei und gehen Sie mit!\nEine Anmeldung ist nicht erforderlich.\nInfos bei
+  der Gemeindeschwester Plus Elisabeth Schnei-\nder\, Telefon 06381 424-3
+ 55
+LOCATION:Kreimbach-Kaulbach
+X-LOCATION-NAME:Kreimbach-Kaulbach
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-3073971-34
+ 0.jpg?cid=1a.59ws
+UID:f438a730-041a-4b17-89f4-1f091904163f:2027-05-18
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270610T150000
+DTEND;TZID=Europe/Berlin:20270610T173000
+SUMMARY:GLANBRÜCKER Senioren-Nachmittage
+CREATED:20250321T103516Z
+LAST-MODIFIED:20260127T104219Z
+DESCRIPTION:Für Sie da zu sein und mit Ihnen im Dialog zu stehen ist für 
+ uns selbstverständlich und wichtig\, denn unter Menschen zu kommen und a
+ m gesellschaftlichen Leben teilzunehmen\, war schon immer ein gutes Mitt
+ el\, auch im Alter jung zu bleiben.\n\n \n\nDie Glanbrücker Seniorennach
+ mittage richten sich an Bürgerinnen und Bürger\, die bereits das 70. Leb
+ ensjahr vollendet haben.\n\n \n\nJeden zweiten Donnerstag im Monat könne
+ n Sie von 15:00 Uhr bis ca. 17:30 Uhr bei leckeren selbstgemachten Kuche
+ n und Kaffee einige Stunden in geselliger Runde verbringen und unser Mot
+ to „Miteinander – Füreinander“ im neuen Bürgerhaus erleben.\n\n \n\nFür 
+ eine gute Vorbereitung ist eine Voranmeldung immer gut\, dazu bitte eine
+  kurze Info an:\n\n \n\nAngela Dick   e-mail: angelabasile1993@libero.it
+ \n\nAnja Dick        e-mail: anjadick@t-online.de\n\n \n\noder direkt an
+  Ortsbürgermeister Uli Röder 0176-70618306.\n\n \n\nFalls Sie nicht die 
+ Möglichkeit haben selbst zum Bürgerhaus zu kommen\, können wir Sie abhol
+ en und wieder nach Hause bringen.
+LOCATION:Glanbrücken
+X-LOCATION-NAME:Glanbrücken
+X-IONAS-CATEGORY:Bürgerhaus
+CATEGORIES:Bürgerhaus,Senioren
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-02-12-glanbr
+ uecker-senioren-nachmittage/dokument0.jpg?cid=1fcd.8o91
+UID:95fc64d2-13f2-497e-a427-781366446edf:2027-06-10
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270615T140000
+DTEND;TZID=Europe/Berlin:20270615T150000
+SUMMARY:Geh-Spräche in Kreimbach-Kaulbach
+CREATED:20250408T094303Z
+LAST-MODIFIED:20260414T070501Z
+DESCRIPTION:Bewegungsangebot für Seniorinnen\nund Senioren der Verbandsge
+ meinde\nLauterecken-Wolfstein\nTreffpunkt für alle Interessierten:\nJede
+ n dritten Dienstag im Monat - diesen April am\n15.04.2025 von 14 bis 15 
+ Uhr in Kreimbach-Kaulbach am\nBahnhof.\nBei schlechtem Wetter findet die
+  Veranstaltung in der\nGemeindehalle Kreimbach-Kaulbach statt.\nDie Wegs
+ trecke ist für Rollator und Rollstuhl geeignet.\nKommen Sie einfach vorb
+ ei und gehen Sie mit!\nEine Anmeldung ist nicht erforderlich.\nInfos bei
+  der Gemeindeschwester Plus Elisabeth Schnei-\nder\, Telefon 06381 424-3
+ 55
+LOCATION:Kreimbach-Kaulbach
+X-LOCATION-NAME:Kreimbach-Kaulbach
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-3073971-34
+ 0.jpg?cid=1a.59ws
+UID:f438a730-041a-4b17-89f4-1f091904163f:2027-06-15
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270708T150000
+DTEND;TZID=Europe/Berlin:20270708T173000
+SUMMARY:GLANBRÜCKER Senioren-Nachmittage
+CREATED:20250321T103516Z
+LAST-MODIFIED:20260127T104219Z
+DESCRIPTION:Für Sie da zu sein und mit Ihnen im Dialog zu stehen ist für 
+ uns selbstverständlich und wichtig\, denn unter Menschen zu kommen und a
+ m gesellschaftlichen Leben teilzunehmen\, war schon immer ein gutes Mitt
+ el\, auch im Alter jung zu bleiben.\n\n \n\nDie Glanbrücker Seniorennach
+ mittage richten sich an Bürgerinnen und Bürger\, die bereits das 70. Leb
+ ensjahr vollendet haben.\n\n \n\nJeden zweiten Donnerstag im Monat könne
+ n Sie von 15:00 Uhr bis ca. 17:30 Uhr bei leckeren selbstgemachten Kuche
+ n und Kaffee einige Stunden in geselliger Runde verbringen und unser Mot
+ to „Miteinander – Füreinander“ im neuen Bürgerhaus erleben.\n\n \n\nFür 
+ eine gute Vorbereitung ist eine Voranmeldung immer gut\, dazu bitte eine
+  kurze Info an:\n\n \n\nAngela Dick   e-mail: angelabasile1993@libero.it
+ \n\nAnja Dick        e-mail: anjadick@t-online.de\n\n \n\noder direkt an
+  Ortsbürgermeister Uli Röder 0176-70618306.\n\n \n\nFalls Sie nicht die 
+ Möglichkeit haben selbst zum Bürgerhaus zu kommen\, können wir Sie abhol
+ en und wieder nach Hause bringen.
+LOCATION:Glanbrücken
+X-LOCATION-NAME:Glanbrücken
+X-IONAS-CATEGORY:Bürgerhaus
+CATEGORIES:Bürgerhaus,Senioren
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-02-12-glanbr
+ uecker-senioren-nachmittage/dokument0.jpg?cid=1fcd.8o91
+UID:95fc64d2-13f2-497e-a427-781366446edf:2027-07-08
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270720T140000
+DTEND;TZID=Europe/Berlin:20270720T150000
+SUMMARY:Geh-Spräche in Kreimbach-Kaulbach
+CREATED:20250408T094303Z
+LAST-MODIFIED:20260414T070501Z
+DESCRIPTION:Bewegungsangebot für Seniorinnen\nund Senioren der Verbandsge
+ meinde\nLauterecken-Wolfstein\nTreffpunkt für alle Interessierten:\nJede
+ n dritten Dienstag im Monat - diesen April am\n15.04.2025 von 14 bis 15 
+ Uhr in Kreimbach-Kaulbach am\nBahnhof.\nBei schlechtem Wetter findet die
+  Veranstaltung in der\nGemeindehalle Kreimbach-Kaulbach statt.\nDie Wegs
+ trecke ist für Rollator und Rollstuhl geeignet.\nKommen Sie einfach vorb
+ ei und gehen Sie mit!\nEine Anmeldung ist nicht erforderlich.\nInfos bei
+  der Gemeindeschwester Plus Elisabeth Schnei-\nder\, Telefon 06381 424-3
+ 55
+LOCATION:Kreimbach-Kaulbach
+X-LOCATION-NAME:Kreimbach-Kaulbach
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-3073971-34
+ 0.jpg?cid=1a.59ws
+UID:f438a730-041a-4b17-89f4-1f091904163f:2027-07-20
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270812T150000
+DTEND;TZID=Europe/Berlin:20270812T173000
+SUMMARY:GLANBRÜCKER Senioren-Nachmittage
+CREATED:20250321T103516Z
+LAST-MODIFIED:20260127T104219Z
+DESCRIPTION:Für Sie da zu sein und mit Ihnen im Dialog zu stehen ist für 
+ uns selbstverständlich und wichtig\, denn unter Menschen zu kommen und a
+ m gesellschaftlichen Leben teilzunehmen\, war schon immer ein gutes Mitt
+ el\, auch im Alter jung zu bleiben.\n\n \n\nDie Glanbrücker Seniorennach
+ mittage richten sich an Bürgerinnen und Bürger\, die bereits das 70. Leb
+ ensjahr vollendet haben.\n\n \n\nJeden zweiten Donnerstag im Monat könne
+ n Sie von 15:00 Uhr bis ca. 17:30 Uhr bei leckeren selbstgemachten Kuche
+ n und Kaffee einige Stunden in geselliger Runde verbringen und unser Mot
+ to „Miteinander – Füreinander“ im neuen Bürgerhaus erleben.\n\n \n\nFür 
+ eine gute Vorbereitung ist eine Voranmeldung immer gut\, dazu bitte eine
+  kurze Info an:\n\n \n\nAngela Dick   e-mail: angelabasile1993@libero.it
+ \n\nAnja Dick        e-mail: anjadick@t-online.de\n\n \n\noder direkt an
+  Ortsbürgermeister Uli Röder 0176-70618306.\n\n \n\nFalls Sie nicht die 
+ Möglichkeit haben selbst zum Bürgerhaus zu kommen\, können wir Sie abhol
+ en und wieder nach Hause bringen.
+LOCATION:Glanbrücken
+X-LOCATION-NAME:Glanbrücken
+X-IONAS-CATEGORY:Bürgerhaus
+CATEGORIES:Bürgerhaus,Senioren
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-02-12-glanbr
+ uecker-senioren-nachmittage/dokument0.jpg?cid=1fcd.8o91
+UID:95fc64d2-13f2-497e-a427-781366446edf:2027-08-12
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270817T140000
+DTEND;TZID=Europe/Berlin:20270817T150000
+SUMMARY:Geh-Spräche in Kreimbach-Kaulbach
+CREATED:20250408T094303Z
+LAST-MODIFIED:20260414T070501Z
+DESCRIPTION:Bewegungsangebot für Seniorinnen\nund Senioren der Verbandsge
+ meinde\nLauterecken-Wolfstein\nTreffpunkt für alle Interessierten:\nJede
+ n dritten Dienstag im Monat - diesen April am\n15.04.2025 von 14 bis 15 
+ Uhr in Kreimbach-Kaulbach am\nBahnhof.\nBei schlechtem Wetter findet die
+  Veranstaltung in der\nGemeindehalle Kreimbach-Kaulbach statt.\nDie Wegs
+ trecke ist für Rollator und Rollstuhl geeignet.\nKommen Sie einfach vorb
+ ei und gehen Sie mit!\nEine Anmeldung ist nicht erforderlich.\nInfos bei
+  der Gemeindeschwester Plus Elisabeth Schnei-\nder\, Telefon 06381 424-3
+ 55
+LOCATION:Kreimbach-Kaulbach
+X-LOCATION-NAME:Kreimbach-Kaulbach
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-3073971-34
+ 0.jpg?cid=1a.59ws
+UID:f438a730-041a-4b17-89f4-1f091904163f:2027-08-17
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270909T150000
+DTEND;TZID=Europe/Berlin:20270909T173000
+SUMMARY:GLANBRÜCKER Senioren-Nachmittage
+CREATED:20250321T103516Z
+LAST-MODIFIED:20260127T104219Z
+DESCRIPTION:Für Sie da zu sein und mit Ihnen im Dialog zu stehen ist für 
+ uns selbstverständlich und wichtig\, denn unter Menschen zu kommen und a
+ m gesellschaftlichen Leben teilzunehmen\, war schon immer ein gutes Mitt
+ el\, auch im Alter jung zu bleiben.\n\n \n\nDie Glanbrücker Seniorennach
+ mittage richten sich an Bürgerinnen und Bürger\, die bereits das 70. Leb
+ ensjahr vollendet haben.\n\n \n\nJeden zweiten Donnerstag im Monat könne
+ n Sie von 15:00 Uhr bis ca. 17:30 Uhr bei leckeren selbstgemachten Kuche
+ n und Kaffee einige Stunden in geselliger Runde verbringen und unser Mot
+ to „Miteinander – Füreinander“ im neuen Bürgerhaus erleben.\n\n \n\nFür 
+ eine gute Vorbereitung ist eine Voranmeldung immer gut\, dazu bitte eine
+  kurze Info an:\n\n \n\nAngela Dick   e-mail: angelabasile1993@libero.it
+ \n\nAnja Dick        e-mail: anjadick@t-online.de\n\n \n\noder direkt an
+  Ortsbürgermeister Uli Röder 0176-70618306.\n\n \n\nFalls Sie nicht die 
+ Möglichkeit haben selbst zum Bürgerhaus zu kommen\, können wir Sie abhol
+ en und wieder nach Hause bringen.
+LOCATION:Glanbrücken
+X-LOCATION-NAME:Glanbrücken
+X-IONAS-CATEGORY:Bürgerhaus
+CATEGORIES:Bürgerhaus,Senioren
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-02-12-glanbr
+ uecker-senioren-nachmittage/dokument0.jpg?cid=1fcd.8o91
+UID:95fc64d2-13f2-497e-a427-781366446edf:2027-09-09
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20270921T140000
+DTEND;TZID=Europe/Berlin:20270921T150000
+SUMMARY:Geh-Spräche in Kreimbach-Kaulbach
+CREATED:20250408T094303Z
+LAST-MODIFIED:20260414T070501Z
+DESCRIPTION:Bewegungsangebot für Seniorinnen\nund Senioren der Verbandsge
+ meinde\nLauterecken-Wolfstein\nTreffpunkt für alle Interessierten:\nJede
+ n dritten Dienstag im Monat - diesen April am\n15.04.2025 von 14 bis 15 
+ Uhr in Kreimbach-Kaulbach am\nBahnhof.\nBei schlechtem Wetter findet die
+  Veranstaltung in der\nGemeindehalle Kreimbach-Kaulbach statt.\nDie Wegs
+ trecke ist für Rollator und Rollstuhl geeignet.\nKommen Sie einfach vorb
+ ei und gehen Sie mit!\nEine Anmeldung ist nicht erforderlich.\nInfos bei
+  der Gemeindeschwester Plus Elisabeth Schnei-\nder\, Telefon 06381 424-3
+ 55
+LOCATION:Kreimbach-Kaulbach
+X-LOCATION-NAME:Kreimbach-Kaulbach
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-3073971-34
+ 0.jpg?cid=1a.59ws
+UID:f438a730-041a-4b17-89f4-1f091904163f:2027-09-21
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20271014T150000
+DTEND;TZID=Europe/Berlin:20271014T173000
+SUMMARY:GLANBRÜCKER Senioren-Nachmittage
+CREATED:20250321T103516Z
+LAST-MODIFIED:20260127T104219Z
+DESCRIPTION:Für Sie da zu sein und mit Ihnen im Dialog zu stehen ist für 
+ uns selbstverständlich und wichtig\, denn unter Menschen zu kommen und a
+ m gesellschaftlichen Leben teilzunehmen\, war schon immer ein gutes Mitt
+ el\, auch im Alter jung zu bleiben.\n\n \n\nDie Glanbrücker Seniorennach
+ mittage richten sich an Bürgerinnen und Bürger\, die bereits das 70. Leb
+ ensjahr vollendet haben.\n\n \n\nJeden zweiten Donnerstag im Monat könne
+ n Sie von 15:00 Uhr bis ca. 17:30 Uhr bei leckeren selbstgemachten Kuche
+ n und Kaffee einige Stunden in geselliger Runde verbringen und unser Mot
+ to „Miteinander – Füreinander“ im neuen Bürgerhaus erleben.\n\n \n\nFür 
+ eine gute Vorbereitung ist eine Voranmeldung immer gut\, dazu bitte eine
+  kurze Info an:\n\n \n\nAngela Dick   e-mail: angelabasile1993@libero.it
+ \n\nAnja Dick        e-mail: anjadick@t-online.de\n\n \n\noder direkt an
+  Ortsbürgermeister Uli Röder 0176-70618306.\n\n \n\nFalls Sie nicht die 
+ Möglichkeit haben selbst zum Bürgerhaus zu kommen\, können wir Sie abhol
+ en und wieder nach Hause bringen.
+LOCATION:Glanbrücken
+X-LOCATION-NAME:Glanbrücken
+X-IONAS-CATEGORY:Bürgerhaus
+CATEGORIES:Bürgerhaus,Senioren
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/kalender/2026-02-12-glanbr
+ uecker-senioren-nachmittage/dokument0.jpg?cid=1fcd.8o91
+UID:95fc64d2-13f2-497e-a427-781366446edf:2027-10-14
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261102T172141Z
+DTSTART;TZID=Europe/Berlin:20271019T140000
+DTEND;TZID=Europe/Berlin:20271019T150000
+SUMMARY:Geh-Spräche in Kreimbach-Kaulbach
+CREATED:20250408T094303Z
+LAST-MODIFIED:20260414T070501Z
+DESCRIPTION:Bewegungsangebot für Seniorinnen\nund Senioren der Verbandsge
+ meinde\nLauterecken-Wolfstein\nTreffpunkt für alle Interessierten:\nJede
+ n dritten Dienstag im Monat - diesen April am\n15.04.2025 von 14 bis 15 
+ Uhr in Kreimbach-Kaulbach am\nBahnhof.\nBei schlechtem Wetter findet die
+  Veranstaltung in der\nGemeindehalle Kreimbach-Kaulbach statt.\nDie Wegs
+ trecke ist für Rollator und Rollstuhl geeignet.\nKommen Sie einfach vorb
+ ei und gehen Sie mit!\nEine Anmeldung ist nicht erforderlich.\nInfos bei
+  der Gemeindeschwester Plus Elisabeth Schnei-\nder\, Telefon 06381 424-3
+ 55
+LOCATION:Kreimbach-Kaulbach
+X-LOCATION-NAME:Kreimbach-Kaulbach
+ATTACH;FMTTYPE=image/jpeg:https://www.vg-lw.de/bilder/calendar-3073971-34
+ 0.jpg?cid=1a.59ws
+UID:f438a730-041a-4b17-89f4-1f091904163f:2027-10-19
+END:VEVENT
+END:VCALENDAR

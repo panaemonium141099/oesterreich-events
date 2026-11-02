@@ -48,3 +48,49 @@ export function feedGroups(integration: string, entries: RegistryEntryDe[] = loa
 export function singleGemeinde(g: FeedGroup): RegistryEntryDe | null {
   return g.own.length === 1 && g.viaVerband.length === 0 ? g.own[0] : null;
 }
+
+/**
+ * Dieselbe Kalenderadresse in zwei Schreibweisen (http/https, mit und ohne
+ * www, `&amp;`, Schrägstrich am Ende): Amt Nordsee-Treene steht für Mildstedt
+ * mit http, für elf Gemeinden mit https in der Registry (fn-29.17).
+ */
+export function calendarKey(url: string): string {
+  return url.trim().replace(/&amp;/g, '&').replace(/^https?:\/\/(www\.)?/i, '').replace(/\/+(?=$|[?#])/, '').toLowerCase();
+}
+
+export interface PickOptions {
+  /** Nur Kalender, die Gemeinden als Ausweichweg ihres Amts bzw. ihrer VG lesen (Prüfstand fn-29.17). */
+  onlyVerband?: boolean;
+  limit?: number;
+  /** Schlüssel, unter dem zwei Feed-Adressen derselbe Kalender sind (Standard `calendarKey`). */
+  key?: (feedUrl: string) => string;
+}
+
+/**
+ * Kalender eines Adapters in Lesereihenfolge (fn-29.17):
+ * - Gleicher Kalender unter zwei Adressen wird einer; liest ihn nur eine
+ *   Gemeinde als eigenen Kalender und andere über ihr Amt, ist es ein
+ *   Amtskalender (Lambsheim-Heßheim: Kleinniedesheim führt den Kalender der
+ *   VG, sonst bekämen alle Termine der VG Kleinniedesheim als Ort).
+ * - Kalender genau einer Gemeinde vor den Amtskalendern: liefert ein
+ *   Amtskalender einen Termin, den die Gemeinde selbst führt (gleiche
+ *   `source_id`), gilt die erste Zeile (Sync und Prüfstand behalten die erste),
+ *   also die der Gemeinde (Ahlden: Grethem führt einen Ausschnitt des
+ *   Samtgemeinde-Kalenders).
+ */
+export function pickFeedGroups(groups: FeedGroup[], opts: PickOptions = {}): FeedGroup[] {
+  const key = (u: string) => calendarKey(opts.key ? opts.key(u) : u);
+  const merged = new Map<string, FeedGroup>();
+  for (const g of groups) {
+    const k = key(g.feedUrl);
+    const cur = merged.get(k);
+    if (!cur) { merged.set(k, { ...g, own: [...g.own], viaVerband: [...g.viaVerband] }); continue; }
+    if (!/^https:/i.test(cur.feedUrl) && /^https:/i.test(g.feedUrl)) { cur.feedUrl = g.feedUrl; cur.pageUrl = g.pageUrl; }
+    for (const e of g.own) if (!cur.own.some(x => x.ags === e.ags)) cur.own.push(e);
+    for (const e of g.viaVerband) if (!cur.viaVerband.some(x => x.ags === e.ags)) cur.viaVerband.push(e);
+  }
+  let out = [...merged.values()].map(g => ({ ...g, viaVerband: g.viaVerband.filter(e => !g.own.some(x => x.ags === e.ags)) }));
+  if (opts.onlyVerband) out = out.filter(g => g.viaVerband.length > 0);
+  out.sort((a, b) => Number(!singleGemeinde(a)) - Number(!singleGemeinde(b)));
+  return out.slice(0, opts.limit ?? Infinity);
+}

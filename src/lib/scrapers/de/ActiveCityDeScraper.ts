@@ -100,7 +100,7 @@ export class ActiveCityDeScraper extends DeFeedScraper {
   }
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = activeCityGroups().slice(0, this.limit ?? Infinity);
+    const groups = this.pickGroups(activeCityGroups());
     const calendars = new Map<string, { group: FeedGroup; page: ActiveCityListPage }>();
     for (const g of groups) {
       const first = await this.firstPage(g.pageUrl);

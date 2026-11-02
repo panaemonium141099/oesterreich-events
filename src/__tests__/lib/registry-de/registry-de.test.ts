@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { loadGemeindenDe } from '@/lib/gemeinden/de';
-import { buildRegistry, diffRegistry, eventPageUrl, type ErhebungRow, type RegistryEntryDe } from '@/lib/registry-de/build';
+import { buildRegistry, diffRegistry, eventPageUrl, verbandHomeUrl, type ErhebungRow, type RegistryEntryDe } from '@/lib/registry-de/build';
 import { calendarPageCandidates, feedFormat, feedUrlFromPage, looksLikeFeed } from '@/lib/registry-de/feed-url';
 import { INTEGRATIONS, stufeOf } from '@/lib/registry-de/integrations';
 import { robotsAllows } from '@/lib/registry-de/robots';
@@ -58,7 +58,8 @@ describe('Feed-URL aus der Kalenderseite', () => {
 
   it('Standardseiten je Hersteller und Formatprüfung des Abrufs', () => {
     expect(calendarPageCandidates('nolis', 'https://www.barsbuettel.de')).toEqual(['https://www.barsbuettel.de/regional/veranstaltungen/sucheplus.html']);
-    expect(calendarPageCandidates('tribe', 'https://x.de')).toEqual([]);
+    expect(calendarPageCandidates('tribe', 'https://vg-leinetal.de')).toEqual(['https://vg-leinetal.de/events/']);
+    expect(calendarPageCandidates('mec', 'https://x.de')).toEqual([]);
     expect(looksLikeFeed('ics', 'BEGIN:VCALENDAR\r\nVERSION:2.0')).toBe(true);
     expect(looksLikeFeed('ics', '<!DOCTYPE html><html>')).toBe(false);
     expect(looksLikeFeed('xml', '<?xml version="1.0"?>\n<rss version="2.0">')).toBe(true);
@@ -111,6 +112,18 @@ describe('Registry-Aufbau', () => {
     expect(entries.find(e => e.ags === '07137088')?.feed_url).toBe('https://plaidt.de/wp-json/tribe/events/v1/events');
     expect(entries.find(e => e.ags === '07143205')?.fallback).toEqual({ kind: 'meinort', ort: '1936-Atzelgift' });
     expect(entries.find(e => e.ags === '09679152')?.feed_url).toBe('https://heimatinfo-api-platform.azurewebsites.net/communes/692a3da4-2425-476e-957b-cc2aa5e0269f/events');
+  });
+
+  it('Amt/VG ohne Kalenderseite: Feed von der Startseite des Amts (fn-29.17, Büsum-Wesselburen)', () => {
+    const feed = 'https://www.amt-buesum-wesselburen.de/veranstaltungen/veranstaltungen.ical?selected_kommune=38050';
+    const { entries, problems } = buildRegistry({
+      rows: [row({ stufe: 'V', integration: 'leer', event_url: '', vb_host: 'amt-buesum-wesselburen.de', vb_integration: 'nolis', vb_event_url: '' })],
+      landByAgs,
+      feeds: new Map([[verbandHomeUrl('amt-buesum-wesselburen.de'), feed]]),
+      checkedAt: '2026-11-02',
+    });
+    expect(problems).toEqual([]);
+    expect(entries[0].fallback).toEqual({ kind: 'verband', host: 'amt-buesum-wesselburen.de', integration: 'nolis', url: null, feed_url: feed });
   });
 
   it('meldet Gemeinde ohne Stammdaten, Doppelte und unbekannte Integration', () => {
