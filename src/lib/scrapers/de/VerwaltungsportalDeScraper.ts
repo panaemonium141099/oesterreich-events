@@ -7,7 +7,7 @@
  * Gemeinde, die der Termin selbst nennt.
  *
  * Alle Websites liegen auf einem Server (144.76.55.199): abgerufen wird
- * plattformweit nacheinander, mit 2 s Pause und robots.txt
+ * plattformweit nacheinander, mit 4 s Pause und robots.txt
  * (`DeFeedScraper.gate`). Mit acht Websites parallel (rund acht
  * Abrufe je Sekunde) nahm der Server am 2026-10-29 keine Verbindungen mehr
  * an. Eine Serie (eine ID, viele Termintage) kostet einen Abruf, wenn die
@@ -81,7 +81,8 @@ export function spreadSample<T>(list: T[], n: number | undefined): T[] {
 export class VerwaltungsportalDeScraper extends DeFeedScraper {
   readonly name = 'de-verwaltungsportal';
   override readonly resumesSourceList = true;
-  protected delayMs = 2000;
+  /** Pause je Abruf (Prüfstand 2026-11-02: 1.265 Abrufe mit 4 s ohne Sperre); `DE_VP_DELAY_MS` ändert sie. */
+  protected delayMs = Number(process.env.DE_VP_DELAY_MS) || 4000;
 
   /**
    * `limit` (Tests) bzw. `DE_VP_WEBSITES` (Prüfstand): so viele Websites,

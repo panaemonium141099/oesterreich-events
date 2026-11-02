@@ -6,7 +6,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   parseVpDateLine, parseVpDetail, parseVpListLinks, vpCalendarHost, vpListUrls, vpOccurrence, vpPrintUrl, vpSameClock, type VpEvent, type VpLink,
 } from '@/lib/scrapers/de/verwaltungsportal';
@@ -178,6 +178,10 @@ describe('verwaltungsportal: Websites der Registry', () => {
 });
 
 describe('verwaltungsportal: Termin → Zeile', () => {
+  // Freigabe hängt am heutigen Tag: Abruftag der Fixtures, sonst ist die Kirmes vorbei.
+  beforeAll(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-10-29T12:00:00Z')); });
+  afterAll(() => { vi.useRealTimers(); });
+
   const remptendorf: VpGroup = {
     host: 'remptendorf.de', knownUrl: null, feedUrl: 'https://www.remptendorf.de/veranstaltungen/index.php', pageUrl: 'https://www.remptendorf.de/veranstaltungen/index.php',
     own: [{ ags: '16075134', name: 'Remptendorf', land: 'thueringen', host: 'remptendorf.de', stufe: 'B', integration: 'verwaltungsportal', url: null, checked_at: '2026-10-28' }],
