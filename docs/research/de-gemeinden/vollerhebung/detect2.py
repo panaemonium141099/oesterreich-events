@@ -4,6 +4,7 @@ import sys, json, re, os, threading, urllib.parse, urllib.robotparser
 from concurrent.futures import ThreadPoolExecutor
 import requests
 sys.path.insert(0, os.path.dirname(__file__))
+import drossel  # noqa: E402  (je Server-IP nacheinander)
 from detect import MARKERS, UA  # noqa: E402  (laedt nur Konstanten)
 
 MARKERS = dict(MARKERS)
@@ -92,6 +93,6 @@ if __name__ == "__main__":
     items = [json.loads(l) for l in open(PREV, encoding="utf-8")]
     items = [r for r in items if r.get("status") == 200 and r["host"] not in done]
     print("todo", len(items), flush=True)
-    with ThreadPoolExecutor(40) as ex:
+    with ThreadPoolExecutor(drossel.THREADS) as ex:
         list(ex.map(work, items))
     print("fertig", flush=True)
