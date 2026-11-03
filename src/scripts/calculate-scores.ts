@@ -6,6 +6,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { forCountry, pipelineCountry } from '../lib/pipeline/pipeline-country';
 import {
   calculateScore,
   LOCAL_VENUE_TYPES,
@@ -67,15 +68,16 @@ async function main() {
   const venueMap = await fetchVenueMap();
   console.log(`Loaded ${venueMap.size} venues for scoring bonuses.`);
 
-  // Fetch all future events
+  // Fetch all future events (im getrennten Lauf nur die des eigenen Landes)
+  const country = pipelineCountry();
   let allEvents: ScoringEventRow[] = [];
   let from = 0;
 
   while (true) {
-    const { data, error } = await supabase
+    const { data, error } = await forCountry(supabase
       .from('events')
       .select('id, title, description, image_url, ticket_url, price_min, price_text, tags, organizer, source_url, view_count, save_count, share_count, start_date, venue_id, event_series_id')
-      .gte('start_date', today)
+      .gte('start_date', today), country)
       .range(from, from + BATCH_SIZE - 1);
 
     if (error) {

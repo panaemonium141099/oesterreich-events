@@ -9,6 +9,11 @@ name: Scrape Events Pipeline
 #      → geocoding → master_coords → scoring → withdrawal → dedup → artist_matching
 #      → indexing → report
 # Das 6h-Limit gilt PRO JOB — jeder Shard hat also reichlich Luft.
+#
+# Nur Österreich (und die übrigen Nicht-DE-Zeilen, z. B. Eventim CH): der
+# DE-Nachtlauf ist ein eigenes System (scrape-events-de.yml, 22:17 Wien) mit
+# eigenen Shards und eigener Nachbearbeitung. Die Nachbearbeitung hier läuft
+# mit --country AT und fasst keine DE-Zeile an.
 
 on:
   schedule:
@@ -17,7 +22,7 @@ on:
   workflow_dispatch:
     inputs:
       scraper:
-        description: 'Specific scraper to run (leave empty for all; "de" = nur die DE-Shards + Post-Processing)'
+        description: 'Specific scraper to run (leave empty for all)'
         required: false
         default: ''
       skip_scrapers:
@@ -50,9 +55,10 @@ on:
         required: false
         default: ''
       # Das Ventil rechnet je Land (fn-29.18). Die Grenzen oben gelten nur
-      # für dieses Land, die übrigen behalten die Standardgrenzen.
+      # für dieses Land, die übrigen behalten die Standardgrenzen. DE hat
+      # seinen eigenen Lauf (scrape-events-de.yml).
       dedup_limits_country:
-        description: 'Dedup: Grenzen oben nur für dieses Land (AT, DE, CH; leer = alle)'
+        description: 'Dedup: Grenzen oben nur für dieses Land (AT, CH; leer = alle)'
         required: false
         default: ''
       # Freigabe nach einem Ventil-Stopp der Nachprüfung des Freigabevertrags
@@ -74,15 +80,11 @@ on:
 # source_runs schreiben und danach lastbalanciert sharden.
 env:
   SHARD_COUNT: 10
-  # DE-Gemeinde-Adapter (fn-29.18): Zahl muss DE_SHARD_COUNT in
-  # src/lib/scrapers/de/nachtlauf.ts entsprechen (Matrix unten).
-  DE_SHARD_COUNT: 3
 
 jobs:
   scrape:
     # Bei workflow_dispatch mit skip_scrapers oder gezieltem Einzel-Scraper
     # laufen die Shards nicht — das erledigt der post-Job bzw. single-Job.
-    # scraper=de: nur die DE-Shards (Job scrape-de).
     if: ${{ github.event_name == 'schedule' || (github.event.inputs.skip_scrapers != 'true' && github.event.inputs.scraper == '') }}
     runs-on: ubuntu-latest
     timeout-minutes: 300
@@ -111,40 +113,9 @@ jobs:
       - name: Scrape shard ${{ matrix.shard }}/${{ env.SHARD_COUNT }}
         run: npx tsx src/scripts/scrape.ts --shard ${{ matrix.shard }}/${{ env.SHARD_COUNT }}
 
-  # DE-Gemeinde-Adapter (fn-29.18): Adapter mit gemeinsamer Website im
-  # selben Shard (src/lib/scrapers/de/nachtlauf.ts), Zeitbudget je Adapter
-  # 180 min, danach Teilergebnis; iKISS setzt im nächsten Lauf fort.
-  # Endet vor den langen AT-Shards (rund 4 h), das Post-Processing wartet
-  # also nicht. scraper=de startet nur diese Shards und das Post-Processing.
-  scrape-de:
-    if: ${{ github.event_name == 'schedule' || (github.event.inputs.skip_scrapers != 'true' && (github.event.inputs.scraper == '' || github.event.inputs.scraper == 'de')) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [0, 1, 2]
-
-    env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      SCRAPER_SOFT_BUDGET_MIN: 180
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-      - run: npm ci
-      - name: Scrape DE shard ${{ matrix.shard }}/${{ env.DE_SHARD_COUNT }}
-        run: npx tsx src/scripts/scrape.ts --de-shard ${{ matrix.shard }}/${{ env.DE_SHARD_COUNT }}
-
   single:
     # Manueller Lauf eines einzelnen Scrapers (workflow_dispatch mit input).
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.scraper != '' && github.event.inputs.scraper != 'de' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.scraper != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 150
 
@@ -195,8 +166,8 @@ jobs:
     # Geocoding/Scoring/Dedup braucht mehr als 180 min pro Lauf — die Jobs
     # vom 11.+12.07. wurden bei 180 min gekillt, bevor Indexing/Report
     # drankamen. Nach Abbau des Rückstaus normalisiert sich die Laufzeit.
-    needs: [scrape, scrape-de, venues]
-    if: ${{ always() && (github.event_name == 'schedule' || github.event.inputs.scraper == '' || github.event.inputs.scraper == 'de') }}
+    needs: [scrape, venues]
+    if: ${{ always() && (github.event_name == 'schedule' || github.event.inputs.scraper == '') }}
     runs-on: ubuntu-latest
     timeout-minutes: 300
     # Nie zwei Nachbearbeitungen gleichzeitig: Dedup und Rückzug planen aus
@@ -232,7 +203,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TRIGGER="github_dispatch"
           fi
-          ARGS="--trigger $TRIGGER --skip-scrapers --skip-venues"
+          ARGS="--trigger $TRIGGER --skip-scrapers --skip-venues --country AT"
           if [ "${{ github.event.inputs.skip_geocoding }}" = "true" ]; then
             ARGS="$ARGS --skip-geocoding"
           fi

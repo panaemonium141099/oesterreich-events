@@ -51,6 +51,15 @@ describe('auditByCountry', () => {
     expect(audit[0]).toMatchObject({ visible: 1000, residual: 0, limit: 100 });
     expect(audit[1]).toMatchObject({ visible: 3002, residual: 1, limit: 301 });
   });
+
+  it('getrennter DE-Lauf: die AT-Zahl kommt von außen, die Grenze bleibt dieselbe', () => {
+    const de = Array.from({ length: 3000 }, (_, i) => ev({ id: `de${i}`, source_name: 'y', title: `D${i}` }));
+    const dup = [ev({ id: 'd1', source_name: 'de-ionas' }), ev({ id: 'd2', source_name: 'de-tribe' })];
+    const events = [...de, ...dup];
+    const audit = auditByCountry(events, findResidualDuplicates(events), 100, 1000);
+    expect(audit.map(a => a.country)).toEqual(['DE']);
+    expect(audit[0]).toMatchObject({ visible: 3002, residual: 1, limit: 301 });
+  });
 });
 
 describe('buildCoverage', () => {

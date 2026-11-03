@@ -19,6 +19,7 @@ import { pairKey } from '@/lib/pipeline/dedup-engine';
 import { toViennaIso } from '@/lib/utils/event-time';
 import { reportStepReason } from '@/lib/pipeline/step-reason';
 import type { EventRow } from '@/lib/pipeline/types';
+import { forCountry, pipelineCountry } from '@/lib/pipeline/pipeline-country';
 
 try {
   const envContent = readFileSync(join(process.cwd(), '.env.local'), 'utf8');
@@ -55,12 +56,14 @@ async function main(): Promise<void> {
 
   // Ab Wiener Tagesbeginn heute: auch heutige Events zählen.
   const since = new Date(Date.now() - 24 * 3_600_000).toISOString();
+  // Im getrennten Lauf nur das eigene Land (pipeline-country.ts).
+  const country = pipelineCountry();
   const events = await fetchAllRows<EventRow>(
-    (from, to) => supabase
+    (from, to) => forCountry(supabase
       .from('events')
       .select(SELECT)
       .gte('start_date', since)
-      .in('publish_status', ['published', 'published_low_confidence'])
+      .in('publish_status', ['published', 'published_low_confidence']), country)
       .order('id')
       .range(from, to) as unknown as PromiseLike<{ data: EventRow[] | null; error: { message: string } | null }>,
     { label: 'dedup-audit: Events' },
@@ -85,7 +88,20 @@ async function main(): Promise<void> {
     bySource.set(k, (bySource.get(k) ?? 0) + 1);
   }
 
-  const byCountry = auditByCountry(events, residual, MAX_RESIDUAL);
+  // Die Grenze eines anderen Landes rechnet je sichtbarem AT-Event; ohne
+  // AT-Zeilen im Lauf zählt die Datenbank sie.
+  let atVisible: number | undefined;
+  if (country && country !== 'AT') {
+    const { count, error } = await supabase
+      .from('events')
+      .select('id', { count: 'exact', head: true })
+      .eq('country', 'AT')
+      .gte('start_date', since)
+      .in('publish_status', ['published', 'published_low_confidence']);
+    if (error || count == null) throw new Error(`dedup-audit: sichtbare AT-Events nicht zählbar: ${error?.message ?? 'ohne Zahl'}`);
+    atVisible = count;
+  }
+  const byCountry = auditByCountry(events, residual, MAX_RESIDUAL, atVisible);
   console.log(`=== Dedup-Audit ===`);
   console.log(`  Sichtbare Events ab heute: ${events.length}`);
   console.log(`  Offensichtliche Restdubletten: ${residual.length}`);

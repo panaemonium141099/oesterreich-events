@@ -6,7 +6,9 @@
  * Schreibt `reports/abdeckung.json` (Artefakt des Nachtlaufs) und die
  * Tabellen in die GitHub-Zusammenfassung des Laufs. Liest nur.
  *
- *   npx tsx src/scripts/coverage-report.ts
+ *   npx tsx src/scripts/coverage-report.ts [--country AT|DE]
+ *
+ * Im getrennten Lauf (pipeline-country.ts) nur das eigene Land.
  */
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -20,6 +22,7 @@ import { deNachtlaufScrapers } from '../lib/scrapers/de/nachtlauf';
 import { buildCoverage, coverageTable, type CoverageEvent, type CoverageGemeinde, type IntegrationAssignment } from '../lib/pipeline/coverage';
 import { viennaDayBoundsUtc } from '../lib/pipeline/dedup-evidence';
 import { viennaToday } from '../lib/utils/event-time';
+import { forCountry, pipelineCountry } from '../lib/pipeline/pipeline-country';
 
 try {
   for (const line of readFileSync(join(process.cwd(), '.env.local'), 'utf8').split('\n')) {
@@ -36,9 +39,10 @@ type Row = { country: string | null; source_name: string | null; gem: Gem };
 async function main(): Promise<void> {
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
 
+  const country = pipelineCountry();
   const gemeinden: CoverageGemeinde[] = [
-    ...loadGemeindenMaster().map(g => ({ id: g.gkz, country: 'AT', region: g.bundesland })),
-    ...loadGemeindenDe().map(g => ({ id: g.ags, country: 'DE', region: g.land })),
+    ...(country !== 'DE' ? loadGemeindenMaster().map(g => ({ id: g.gkz, country: 'AT', region: g.bundesland })) : []),
+    ...(country !== 'AT' ? loadGemeindenDe().map(g => ({ id: g.ags, country: 'DE', region: g.land })) : []),
   ];
   // Die Ortsentscheidung trägt Name, PLZ und Land der Stammdaten-Gemeinde.
   const deByNamePlz = new Map(loadGemeindenDe().map(g => [`${g.land}|${normalizeGemeindeName(g.name)}|${g.plz}`, g.ags]));
@@ -57,11 +61,11 @@ async function main(): Promise<void> {
   const events: CoverageEvent[] = [];
   let unmapped = 0;
   await forEachPage<Row>(
-    (from, to) => supabase
+    (from, to) => forCountry(supabase
       .from('events')
       .select('country,source_name,gem:location_resolution->gemeinde')
       .gte('start_date', fromIso)
-      .in('publish_status', ['published', 'published_low_confidence', 'duplicate'])
+      .in('publish_status', ['published', 'published_low_confidence', 'duplicate']), country)
       .order('id')
       .range(from, to) as unknown as PromiseLike<{ data: Row[] | null; error: { message: string } | null }>,
     (page) => {
@@ -75,7 +79,7 @@ async function main(): Promise<void> {
   );
 
   const registry = loadRegistryDe();
-  const integrations: IntegrationAssignment[] = deNachtlaufScrapers().flatMap(s => s.integrations.map(integration => ({
+  const integrations: IntegrationAssignment[] = country === 'AT' ? [] : deNachtlaufScrapers().flatMap(s => s.integrations.map(integration => ({
     integration,
     adapter: s.name,
     gemeindeIds: registry
@@ -92,7 +96,7 @@ async function main(): Promise<void> {
     coverageTable('Je Land', report.countries),
     '',
     ...Object.entries(report.regions).flatMap(([c, rows]) => [coverageTable(`${c} je Bundesland`, rows), '']),
-    coverageTable('DE je Integration (Termine des Adapters)', report.integrations),
+    ...(country === 'AT' ? [] : [coverageTable('DE je Integration (Termine des Adapters)', report.integrations)]),
   ].join('\n');
   console.log(md);
 
