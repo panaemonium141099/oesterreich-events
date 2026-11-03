@@ -17,6 +17,8 @@ const rows = [
   { source_name: 'events.at', run_at: '2026-09-07T06:40:00Z', status: 'timeout', events_found: 0, events_upserted: 0, duration_ms: 1500000, error_message: 'timed out nach 25 min' },
   // Aelterer Lauf derselben Quelle — der juengste muss gewinnen.
   { source_name: 'meinbezirk', run_at: '2026-09-07T04:00:00Z', status: 'success', events_found: 10, events_upserted: 10, duration_ms: 100, error_message: null },
+  // DE-Nachtlauf: eigener Lauf, gehört nicht in die AT-Bilanz.
+  { source_name: 'de-ionas', run_at: '2026-09-07T01:00:00Z', status: 'success', events_found: 13304, events_upserted: 13244, duration_ms: 600000, error_message: null },
 ];
 
 vi.mock('@supabase/supabase-js', () => ({
@@ -48,9 +50,9 @@ afterEach(() => vi.resetModules());
 describe('loadScraperResultsFromSourceRuns', () => {
   it('baut die Scraper-Bilanz aus source_runs', async () => {
     const { loadScraperResultsFromSourceRuns } = await import('@/lib/scrape-reporter');
-    const res = await loadScraperResultsFromSourceRuns();
+    const res = await loadScraperResultsFromSourceRuns(12, 'AT');
 
-    // Drei Quellen, nicht vier — meinbezirk kommt nur einmal vor.
+    // Drei Quellen, nicht vier — meinbezirk kommt nur einmal vor, de-ionas gehört zum DE-Lauf.
     expect(res).toHaveLength(3);
 
     const byName = Object.fromEntries(res.map(r => [r.scraper_name, r]));
@@ -68,5 +70,11 @@ describe('loadScraperResultsFromSourceRuns', () => {
     const found = res.reduce((n, r) => n + r.events_found, 0);
     expect(found).toBe(10263 + 3701 + 0);
     expect(res.filter(r => r.status !== 'success')).toHaveLength(2);
+  });
+
+  it('der DE-Lauf zählt nur die DE-Adapter, ohne Land alle', async () => {
+    const { loadScraperResultsFromSourceRuns } = await import('@/lib/scrape-reporter');
+    expect((await loadScraperResultsFromSourceRuns(12, 'DE')).map(r => r.scraper_name)).toEqual(['de-ionas']);
+    expect(await loadScraperResultsFromSourceRuns()).toHaveLength(4);
   });
 });

@@ -28,10 +28,16 @@ const CATALOG: Record<string, WorkflowInfo> = {
     schedule: 'täglich 07:23 Wien, sonntags zusätzlich ein Unterkunfts-Guide',
   },
   'scrape-pipeline': {
-    name: 'Scrape-Pipeline',
+    name: 'Scrape-Pipeline AT',
     purpose:
-      'Holt Events von ~144 Quellen, normalisiert und kategorisiert sie, geocodiert, bewertet und entfernt Duplikate.',
-    schedule: 'täglich 05:17 Wien',
+      'Holt Events von ~144 österreichischen Quellen, normalisiert und kategorisiert sie, geocodiert, bewertet und entfernt Duplikate.',
+    schedule: 'täglich 03:17 Wien',
+  },
+  'scrape-pipeline-de': {
+    name: 'Scrape-Pipeline DE',
+    purpose:
+      'Liest die Kalender der deutschen Gemeinden (DE-Nachtlauf), bewertet die DE-Termine und entfernt Duplikate; getrennt vom AT-Lauf.',
+    schedule: 'täglich 22:17 Wien',
   },
   'import-eventim': {
     name: 'Eventim-Import',

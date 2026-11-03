@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { fetchAllRows } from './db/fetch-all';
 import { startWorkflowRun, finishWorkflowRun } from './reporting/workflow-run';
+import { pipelineWorkflowName, sourceCountry, type PipelineCountry } from './pipeline/pipeline-country';
 import type {
   ScraperResult,
   PipelineResults,
@@ -92,9 +93,11 @@ export async function insertScraperStats(
  * Quelle der juengste Lauf innerhalb der letzten `hours` Stunden. Die
  * Shards laufen unmittelbar vor der Nachbearbeitung, 12 h decken auch
  * einen langen Lauf (die Gemeinde-Riesen brauchen bis zu 4 h) sicher ab.
+ * Mit Land nur dessen Quellen: AT und DE sind getrennte Läufe.
  */
 export async function loadScraperResultsFromSourceRuns(
   hours = 12,
+  country: PipelineCountry | null = null,
 ): Promise<ScraperResult[]> {
   const supabase = getSupabaseAdmin();
   const since = new Date(Date.now() - hours * 3600_000).toISOString();
@@ -123,6 +126,7 @@ export async function loadScraperResultsFromSourceRuns(
       duration_ms: number | null;
       error_message: string | null;
     };
+    if (country && sourceCountry(r.source_name) !== country) continue;
     latest.set(r.source_name, {
       scraper_name: r.source_name,
       // `timeout` ist in source_runs ein eigener Status, im Bericht aber
@@ -189,7 +193,7 @@ export async function sendAlertIfNeeded(results: PipelineResults): Promise<void>
     .map(([name, step]) => `Schritt "${name}": ${step.status}${step.error ? ` — ${step.error}` : ''}`);
 
   const runId = await startWorkflowRun(
-    'scrape-pipeline',
+    pipelineWorkflowName(results.country ?? null),
     results.trigger === 'manual' ? 'manual' : results.trigger === 'cron' ? 'cron' : 'github_dispatch',
   );
 
@@ -249,7 +253,7 @@ export function buildGitHubSummary(results: PipelineResults): string {
           60,
       )
     : '?';
-  let md = `## ${icon} Scrape Pipeline: ${status}\n\n`;
+  let md = `## ${icon} Scrape Pipeline${results.country ? ` ${results.country}` : ''}: ${status}\n\n`;
   md += `| Metric | Value |\n|--------|-------|\n`;
   md += `| Duration | ${duration} min |\n`;
   md += `| Events scraped | ${results.total_events_scraped} |\n`;

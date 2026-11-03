@@ -61,6 +61,7 @@ import {
   type ExistingCategoryRow,
   type CanonicalCategory,
 } from '../lib/category-classifier';
+import { forCountry, pipelineCountry } from '../lib/pipeline/pipeline-country';
 
 // ─── CLI args ────────────────────────────────────────────────────────────
 function parseArgs() {
@@ -232,6 +233,8 @@ async function fetchEvents(): Promise<EventRow[]> {
     }
     if (opts.source) query = query.eq('source_name', opts.source);
     if (opts.changedSince) query = query.gte('updated_at', opts.changedSince);
+    // Im getrennten Lauf nur das eigene Land (pipeline-country.ts).
+    query = forCountry(query, pipelineCountry());
 
     const { data, error } = await query;
     if (error) {

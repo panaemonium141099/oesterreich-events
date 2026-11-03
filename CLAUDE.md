@@ -79,7 +79,7 @@ node / next.js
   scrape.ts endet mit explizitem `process.exit(0)` — sonst halten
   verwaiste Sockets getimeouteter Scraper den Job stundenlang am Leben.
   Dazu Venues-Job + EIN Post-Processing-Job (`scrape-pipeline.ts
-  --skip-scrapers --skip-venues`: normalize → categorize → geocode →
+  --skip-scrapers --skip-venues --country AT`, keine DE-Zeilen: normalize → categorize → geocode →
   master_coords → score → withdrawal → admission_recheck → dedup →
   dedup_audit → security_audit → artist_matching → indexing → coverage →
   report) mit
@@ -107,9 +107,19 @@ node / next.js
   der Grund, gilt wieder der Score. Ventil 500 Haltungen / 300 Freigaben,
   Freigabe per workflow_dispatch. `security_audit` wird rot, sobald eine
   schreibende SECURITY-DEFINER-Funktion für anon ausführbar ist.
-- **DE-Nachtlauf (fn-29.18, 2026-11):** Job `scrape-de` in
-  `scrape-events.yml`, 3 Shards (`scrape.ts --de-shard i/3`), parallel zu
-  den AT-Shards, das Post-Processing wartet auf beide. Welche Adapter
+- **DE-Nachtlauf (fn-29.18, 2026-11):** eigenes System neben AT: Workflow
+  `scrape-events-de.yml` (täglich 22:17 Wien, concurrency `scrape-events-de`),
+  3 Shards (`scrape.ts --de-shard i/3`) und eigene Nachbearbeitung
+  (`scrape-pipeline.ts --country DE`). Gleicher Code, gleiche DB, aber jeder
+  Lauf fasst nur die Zeilen seines Landes an (`src/lib/pipeline/
+  pipeline-country.ts`: `PIPELINE_COUNTRY`, `forCountry`; AT-Lauf = alles
+  außer DE, also auch Eventim CH). Ein roter DE-Lauf hält AT nicht auf und
+  umgekehrt. Nur im AT-Lauf (`AT_ONLY_STEPS`): venues, festival_lineups,
+  image_probe, address_geocoding, security_audit, artist_matching, indexing,
+  location_metrics, report. Die DE-Nachbearbeitung wartet (höchstens 180 min),
+  solange eine AT-Nachbearbeitung läuft; AT wartet nie. Alarm-Mail
+  `scrape-pipeline-de`, Artefakt `scrape-reports-de`. Wächter
+  `pipeline-country.test.ts` (jeder Landesschritt filtert). Welche Adapter
   laufen, steht an EINER Stelle: `DE_NACHTLAUF` in
   `src/lib/scrapers/de/nachtlauf.ts` (Adapter → Prüfstand-Bericht; neuer
   Adapter = eine Zeile, Wächter `de-nachtlauf.test.ts` prüft Bericht und
@@ -125,14 +135,15 @@ node / next.js
   mitten in einer Website, Amts- und Gemeindekalender teilen Termine).
   verwaltungsportal (752 Websites auf einem Server, 4 s Pause) liest
   rund 75 je Nacht (02.11.: 74) und setzt nach der letzten fertigen Website fort.
-  `workflow_dispatch` mit `scraper=de` startet nur die DE-Shards und das
-  Post-Processing. Ventile rechnen je Land: der Dedup schreibt je Land eine
+  `workflow_dispatch` von `scrape-events-de.yml` (`skip_scrapers` für nur
+  die Nachbearbeitung, Dedup-Grenzen gelten dann für DE). Ventile rechnen je Land: der Dedup schreibt je Land eine
   Zeile in `dedup_runs` (`country`, Migration `20261102120000`), Anker und
   Grenzen gelten je Land, ein Stopp für DE hält AT nicht auf (und
   umgekehrt); Freigabe nur für ein Land per Input `dedup_limits_country`
   (`--limits-country`). `admission_recheck` schreibt die Länder unter der
   Grenze. `dedup_audit` je Land: AT Grenze 100, jedes andere Land je
-  sichtbarem Event nicht mehr als AT (`auditByCountry`). Rückzug prüft
+  sichtbarem Event nicht mehr als AT (`auditByCountry`, im DE-Lauf zählt die
+  DB die sichtbaren AT-Events). Rückzug prüft
   Detailseiten außerhalb AT mit robots.txt, Crawl-delay und höchstens 30
   Abrufen je Website. Schritt `coverage` (`coverage-report.ts`, Regeln
   `src/lib/pipeline/coverage.ts`): Gemeinden mit mindestens einem

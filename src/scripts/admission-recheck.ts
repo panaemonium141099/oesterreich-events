@@ -20,6 +20,7 @@ import { planAdmissionRecheck, protocolWith, type RecheckChange, type RecheckRow
 import { viennaDayBoundsUtc } from '../lib/pipeline/dedup-evidence';
 import { viennaToday } from '../lib/utils/event-time';
 import { reportStepReason } from '../lib/pipeline/step-reason';
+import { forCountry, pipelineCountry } from '../lib/pipeline/pipeline-country';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -59,13 +60,15 @@ async function main() {
   const now = new Date();
   const fromIso = viennaDayBoundsUtc(viennaToday(now))[0];
   const rows: ScanRow[] = [];
+  // Im getrennten Lauf nur das eigene Land (pipeline-country.ts).
+  const country = pipelineCountry();
   await forEachPage<ScanRow>(
     (from, to) =>
-      supabase
+      forCountry(supabase
         .from('events')
         .select('id,title,start_date,publish_status,quality_score,location_status,source_name,last_seen_at,country,reasons:location_resolution->reasons')
         .gte('start_date', fromIso)
-        .in('publish_status', ['published', 'published_low_confidence', 'needs_review'])
+        .in('publish_status', ['published', 'published_low_confidence', 'needs_review']), country)
         .order('id')
         .range(from, to) as unknown as PromiseLike<{ data: ScanRow[] | null; error: { message: string } | null }>,
     (page) => { rows.push(...page); },

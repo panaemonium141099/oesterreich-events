@@ -22,7 +22,8 @@ import {
 import { timeoutMsFor } from '@/lib/scrapers';
 import type { ScrapedEvent } from '@/types/events';
 
-const workflow = readFileSync(join(process.cwd(), '.github/workflows/scrape-events.yml'), 'utf8');
+const workflow = readFileSync(join(process.cwd(), '.github/workflows/scrape-events-de.yml'), 'utf8');
+const atWorkflow = readFileSync(join(process.cwd(), '.github/workflows/scrape-events.yml'), 'utf8');
 
 describe('Schalter DE_NACHTLAUF', () => {
   it('jeder Adapter steht in DE_SCRAPERS und hat seinen Prüfstand-Bericht auf master', () => {
@@ -43,12 +44,24 @@ describe('Schalter DE_NACHTLAUF', () => {
   it('harte Grenze über dem Zeitbudget, Job-Grenze darüber, Budget im Workflow gesetzt', () => {
     expect(timeoutMsFor('de-ikiss')).toBe(DE_TIMEOUT_MIN * 60_000);
     expect(DE_TIMEOUT_MIN).toBeGreaterThan(DE_SOFT_BUDGET_MIN);
-    const job = workflow.slice(workflow.indexOf('  scrape-de:'), workflow.indexOf('  single:'));
+    const job = workflow.slice(workflow.indexOf('  scrape-de:'), workflow.indexOf('  post:'));
     expect(job).toContain(`SCRAPER_SOFT_BUDGET_MIN: ${DE_SOFT_BUDGET_MIN}`);
     expect(Number(/timeout-minutes: (\d+)/.exec(job)![1])).toBeGreaterThan(DE_TIMEOUT_MIN);
     expect(job).toContain(`shard: [${Array.from({ length: DE_SHARD_COUNT }, (_, i) => i).join(', ')}]`);
     expect(workflow).toContain(`DE_SHARD_COUNT: ${DE_SHARD_COUNT}`);
-    expect(workflow).toMatch(/needs: \[scrape, scrape-de, venues\]/);
+    expect(workflow).toMatch(/needs: \[scrape-de\]/);
+  });
+
+  it('DE und AT sind getrennte Systeme: eigener Workflow, eigene Nachbearbeitung je Land', () => {
+    // DE: eigener Zeitplan, eigene concurrency-Gruppe, Nachbearbeitung nur DE.
+    expect(workflow).toMatch(/cron: '17 22 \* \* \*'/);
+    expect(workflow).toMatch(/group: scrape-events-de/);
+    expect(workflow).toContain('scrape-pipeline.ts --trigger "$TRIGGER" --skip-scrapers --country DE');
+    // AT: kein DE-Shard, keine Abhängigkeit von DE, Nachbearbeitung nur AT.
+    expect(atWorkflow).not.toMatch(/--de-shard|scrape-de/);
+    expect(atWorkflow).toMatch(/needs: \[scrape, venues\]/);
+    expect(atWorkflow).toContain('--skip-venues --country AT');
+    expect(atWorkflow).toMatch(/group: scrape-post-processing/);
   });
 });
 

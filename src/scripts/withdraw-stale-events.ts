@@ -16,6 +16,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { fetchAllRows, forEachPage } from '../lib/db/fetch-all';
 import { planWithdrawals, probeGone, WITHDRAWABLE_STATUSES, type SightingRow } from '../lib/quality/withdrawal';
+import { forCountry, pipelineCountry } from '../lib/pipeline/pipeline-country';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -37,12 +38,14 @@ async function main() {
   // heute laufendes Event noch als Sichtung zählt.
   const since = new Date(now.getTime() - 86_400_000).toISOString();
   const rows: SightingRow[] = [];
+  // Im getrennten Lauf nur das eigene Land (pipeline-country.ts).
+  const country = pipelineCountry();
   await forEachPage<SightingRow>(
     (from, to) =>
-      supabase
+      forCountry(supabase
         .from('events')
         .select('id, source_name, source_url, title, start_date, created_at, last_seen_at, publish_status, duplicate_of, country')
-        .gte('start_date', since)
+        .gte('start_date', since), country)
         .order('id')
         .range(from, to),
     (page) => { rows.push(...page); },

@@ -81,9 +81,10 @@ export interface CountryAudit {
  * `maxAt`. Jedes andere Land darf je sichtbarem Event nicht mehr haben, als
  * die österreichische Grenze erlaubt (Qualitätsvertrag DE: Dedup-Audit
  * nicht schlechter als AT), mindestens 10. Ein Paar zählt zum Land seiner
- * ersten Zeile.
+ * ersten Zeile. Ein Lauf ohne AT-Zeilen (getrennter DE-Lauf) gibt die Zahl
+ * der sichtbaren AT-Events als `atVisible` mit.
  */
-export function auditByCountry(events: EventRow[], residual: ResidualPair[], maxAt: number): CountryAudit[] {
+export function auditByCountry(events: EventRow[], residual: ResidualPair[], maxAt: number, atVisible?: number): CountryAudit[] {
   const visible = new Map<string, number>();
   for (const e of events) {
     if (!VISIBLE.has(e.publish_status ?? '')) continue;
@@ -95,13 +96,13 @@ export function auditByCountry(events: EventRow[], residual: ResidualPair[], max
     const c = a.country ?? 'AT';
     pairs.set(c, (pairs.get(c) ?? 0) + 1);
   }
-  const atVisible = visible.get('AT') ?? 0;
+  const atBase = atVisible ?? visible.get('AT') ?? 0;
   const countries = [...new Set([...visible.keys(), ...pairs.keys()])]
     .sort((x, y) => (x === 'AT' ? -1 : y === 'AT' ? 1 : x.localeCompare(y)));
   return countries.map(country => {
     const v = visible.get(country) ?? 0;
     const r = pairs.get(country) ?? 0;
-    const limit = country === 'AT' || atVisible === 0 ? maxAt : Math.max(10, Math.ceil((maxAt * v) / atVisible));
+    const limit = country === 'AT' || atBase === 0 ? maxAt : Math.max(10, Math.ceil((maxAt * v) / atBase));
     return { country, visible: v, residual: r, rate: v ? Math.round((r / v) * 100_000) / 10 : 0, limit };
   });
 }

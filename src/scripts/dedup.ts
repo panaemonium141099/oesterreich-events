@@ -11,13 +11,17 @@
 //                                                   # Freigabe nach geprüftem Probelauf
 //   npm run dedup -- --limits-country DE --max-inflow-duplicates 30000
 //                                                   # Freigabe nur für ein Land
+//   npm run dedup -- --country DE                   # nur DE-Zeilen (getrennter DE-Lauf;
+//                                                   # AT = alles außer DE)
 //
 // Sicherheitsventil: mehr neue Duplikate oder Freigaben als die Grenzen →
 // nichts schreiben, Exit 1 (Pipeline-Schritt rot → Alarm). Massenänderungen
 // sind fast immer ein Fehler; ein Mensch prüft den Probelauf und gibt frei.
 // Das Ventil rechnet je Land (fn-29.18): stoppt es für Deutschland, schreibt
 // der Lauf Österreich trotzdem, und umgekehrt. Anker und Laufzeile
-// (`dedup_runs.country`) gelten je Land.
+// (`dedup_runs.country`) gelten je Land. Seit AT und DE getrennt laufen
+// (`--country`, PIPELINE_COUNTRY) liest und schreibt jeder Lauf nur sein Land.
+// Cluster verbinden nie Zeilen zweier Länder.
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -31,6 +35,7 @@ import { staleVersionIds } from '@/lib/pipeline/dedup-cluster';
 import { fetchAllRows, forEachPage } from '@/lib/db/fetch-all';
 import { reportStepReason } from '@/lib/pipeline/step-reason';
 import type { DedupScoreBreakdown, EventRow } from '@/lib/pipeline/types';
+import { forCountry, inRunCountry, pipelineCountry } from '@/lib/pipeline/pipeline-country';
 
 /** Nur Ids + Bewertung: das Log braucht keine ganzen Zeilen im Speicher. */
 interface LogPair {
@@ -97,8 +102,10 @@ const RELEASED_LIMITS: Required<SafetyLimits> = {
 /** Die Freigabe gilt nur diesem Land (leer: allen Ländern). */
 const LIMITS_COUNTRY = strArg('--limits-country') ?? (process.env.DEDUP_LIMITS_COUNTRY?.trim() || null);
 const limitsFor = (country: string) => (!LIMITS_COUNTRY || LIMITS_COUNTRY === country ? RELEASED_LIMITS : DEFAULT_LIMITS);
+/** Land des Laufs (AT: alles außer DE); null = alle. */
+const COUNTRY = pipelineCountry(args);
 /** Länder mit Laufzeile ab Laufbeginn; ein weiteres bekommt sie am Ende. */
-const RUN_COUNTRIES = ['AT', 'DE', 'CH'];
+const RUN_COUNTRIES = ['AT', 'DE', 'CH'].filter(c => inRunCountry(c, COUNTRY));
 /** Zeilen ohne Land (Prod 2026-11-02: keine). */
 const FALLBACK_COUNTRY = 'AT';
 const REPORT_PATH = strArg('--report') ?? process.env.DEDUP_REPORT_PATH ?? null;
@@ -133,11 +140,11 @@ async function scanGarbage(): Promise<Map<string, string>> {
   type Row = GarbageRowInput & { id: string; publish_status: string | null; source_id: string | null; last_seen_at: string | null; country: string | null };
   const rows: Row[] = [];
   await forEachPage<Row>(
-    (from, to) => supabase
+    (from, to) => forCountry(supabase
       .from('events')
       .select('id,title,source_name,source_id,source_url,ticket_url,start_date,last_seen_at,publish_status,country')
       .gte('start_date', viennaDayBoundsUtc(START_DAY)[0])
-      .neq('publish_status', 'suppressed')
+      .neq('publish_status', 'suppressed'), COUNTRY)
       .order('id')
       .range(from, to),
     (page) => { rows.push(...page); },
@@ -194,11 +201,11 @@ async function getViennaDays(): Promise<{ days: string[]; sourceLastSeen: Map<st
   const implausible = new Map<string, number>();
   const sourceLastSeen = new Map<string, string>();
   await forEachPage<{ id: string; start_date: string | null; source_name: string | null; last_seen_at: string | null }>(
-    (from, to) => supabase
+    (from, to) => forCountry(supabase
       .from('events')
       .select('id,start_date,source_name,last_seen_at')
       .not('start_date', 'is', null)
-      .neq('publish_status', 'suppressed')
+      .neq('publish_status', 'suppressed'), COUNTRY)
       .order('start_date')
       .order('id')
       .range(from, to),
@@ -245,12 +252,12 @@ async function loadExternalPrimaries(events: EventRow[]): Promise<Map<string, Ev
 async function loadEventsForDay(day: string): Promise<EventRow[]> {
   const [from, to] = viennaDayBoundsUtc(day);
   return fetchAllRows<EventRow>(
-    (a, b) => supabase
+    (a, b) => forCountry(supabase
       .from('events')
       .select(EVENT_SELECT)
       .gte('start_date', from)
       .lt('start_date', to)
-      .neq('publish_status', 'suppressed')
+      .neq('publish_status', 'suppressed'), COUNTRY)
       .order('id')
       .range(a, b) as unknown as PromiseLike<{ data: EventRow[] | null; error: { message: string } | null }>,
     { label: `dedup: Tag ${day}` },
@@ -365,7 +372,7 @@ async function writeLog(pairs: LogPair[], errors: string[]): Promise<number> {
   }
 
   const current = new Set(auto.filter(p => p.breakdown.decision === 'uncertain').map(p => pairKey(p.aId, p.bId)));
-  const stale: string[] = [];
+  const stale: Array<{ id: string; event_a_id: string }> = [];
   await forEachPage<{ id: string; event_a_id: string; event_b_id: string }>(
     (from, to) => supabase
       .from('event_dedup_log')
@@ -374,15 +381,31 @@ async function writeLog(pairs: LogPair[], errors: string[]): Promise<number> {
       .eq('decided_by', 'auto')
       .order('id')
       .range(from, to),
-    (rows) => { for (const r of rows) if (!current.has(pairKey(r.event_a_id, r.event_b_id))) stale.push(r.id); },
+    (rows) => { for (const r of rows) if (!current.has(pairKey(r.event_a_id, r.event_b_id))) stale.push(r); },
     { label: 'dedup: Log lesen' },
   );
-  for (let i = 0; i < stale.length; i += 200) {
-    const { error } = await supabase.from('event_dedup_log').delete().in('id', stale.slice(i, i + 200));
+  // Ein Lauf eines Landes kennt die Paare des anderen nicht: nur eigene aufräumen.
+  const staleIds = await ownCountryPairs(stale);
+  for (let i = 0; i < staleIds.length; i += 200) {
+    const { error } = await supabase.from('event_dedup_log').delete().in('id', staleIds.slice(i, i + 200));
     if (error) errors.push(`Log aufräumen: ${error.message}`);
   }
-  console.log(`  Log: ${written} Paare geschrieben, ${stale.length} veraltete „uncertain" entfernt`);
+  console.log(`  Log: ${written} Paare geschrieben, ${staleIds.length} veraltete „uncertain" entfernt`);
   return written;
+}
+
+/** Log-Einträge, deren erste Zeile zum Land des Laufs gehört (ohne Land: alle;
+ *  eine gelöschte Zeile darf jeder Lauf aufräumen). */
+async function ownCountryPairs(rows: Array<{ id: string; event_a_id: string }>): Promise<string[]> {
+  if (!COUNTRY) return rows.map(r => r.id);
+  const countryOf = new Map<string, string>();
+  const ids = [...new Set(rows.map(r => r.event_a_id))];
+  for (let i = 0; i < ids.length; i += 200) {
+    const { data, error } = await supabase.from('events').select('id,country').in('id', ids.slice(i, i + 200));
+    if (error) throw new Error(`dedup: Land der Log-Paare: ${error.message}`);
+    for (const r of (data ?? []) as Array<{ id: string; country: string }>) countryOf.set(r.id, r.country);
+  }
+  return rows.filter(r => !countryOf.has(r.event_a_id) || inRunCountry(countryOf.get(r.event_a_id), COUNTRY)).map(r => r.id);
 }
 
 // ---------------------------------------------------------------------------
