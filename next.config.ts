@@ -421,8 +421,18 @@ const nextConfig: NextConfig = {
       { source: '/en/at-de-ch/:path*', destination: '/en', permanent: true },
     ];
   },
-  // better-sqlite3 only used by scraper scripts, not by API routes
-  serverExternalPackages: ['better-sqlite3'],
+  // better-sqlite3 only used by scraper scripts, not by API routes.
+  // node-ical: seit dem DE-Nachtlauf (PR #427) hängt es an /api/scrape. Gebündelt
+  // bekommt @js-temporal/polyfill (über rrule-temporal) per require() das
+  // ESM-Modulobjekt von jsbi statt der Klasse, `jsbi.BigInt` fehlt und der Build
+  // bricht beim Sammeln der Seitendaten ab ("l.BigInt is not a function").
+  serverExternalPackages: ['better-sqlite3', 'node-ical'],
+  // node-ical lädt require('temporal-polyfill'); Node ab 22.12 nimmt dafür die
+  // Bedingung "module-sync" (index.js + chunks/), der Tracer kopiert nur
+  // index.cjs. Ohne das ganze Paket fehlt im Standalone-Image ein Modul.
+  outputFileTracingIncludes: {
+    '/api/**/*': ['./node_modules/temporal-polyfill/**/*'],
+  },
   // Standalone output for Docker deployment (Coolify)
   output: 'standalone',
 };
