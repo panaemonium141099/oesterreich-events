@@ -1,7 +1,7 @@
 /**
  * DE-Adapter ionas (fn-29.5), Golden-Tests auf echten iCal-Exporten
  * (abgerufen 2026-10-28): Amt Sandesneben-Nusse (Amtskalender, mehrere
- * Gemeinden), Hopsten, Longuich, Parchim.
+ * Gemeinden), Hopsten, Longuich, Parchim; Ahorn (2026-11-03).
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -138,5 +138,29 @@ describe('ionas: Quelle und Amtskalender', () => {
   it('Amtskalender: Name ohne Klammerzusatz („Ahlden (Aller)")', async () => {
     const { namedMember, feedGemeinden } = await import('@/lib/scrapers/de/kontext');
     expect(namedMember({ title: 'Adventsmarkt in Ahlden' }, feedGemeinden([{ ags: '03358001' }]))?.name).toBe('Ahlden (Aller)');
+  });
+});
+
+describe('ionas: Anlagezeit ist keine Uhrzeit (Ahorn, abgerufen 2026-11-03, Abnahme fn-29.20)', () => {
+  const evs = parseIonasIcs(fx('ahorn.ics'));
+  const by = (t: string) => evs.find(e => e.title === t)!;
+
+  it('Beginn in der Minute der Anlage (CREATED 14:20:26Z = 15:20 Uhr, Beginn 15:20) bleibt ganztägig', () => {
+    expect(by('Martinsumzug Witzmannsberg')).toMatchObject({ allDay: true, start: '2026-11-14', localDate: '2026-11-14', end: undefined });
+    expect(by('Dorfweihnacht Schorkendorf')).toMatchObject({ allDay: true, start: '2026-11-28' });
+    expect(evs.filter(e => e.allDay).map(e => e.title).sort()).toEqual([
+      'Dorfweihnacht Eicha', 'Dorfweihnacht Schorkendorf', 'Dorfweihnacht Wohlbach',
+      'Martinsumzug Witzmannsberg', 'Volkstrauertag', 'Wintersonnenwende Schorkendorf',
+    ]);
+  });
+
+  it('echte Uhrzeiten bleiben („Ahorner Dorfweihnacht" 13.12. 15:00 bis 19:00)', () => {
+    const e = by('Ahorner Dorfweihnacht');
+    expect(e.allDay).toBe(false);
+    expect(new Date(e.start).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })).toBe('13.12.2026, 15:00:00');
+  });
+
+  it('die übrigen Feeds ändern sich nicht', () => {
+    for (const f of ['amt-sn.ics', 'hopsten.ics']) expect(parseIonasIcs(fx(f)).some(e => e.allDay)).toBe(false);
   });
 });

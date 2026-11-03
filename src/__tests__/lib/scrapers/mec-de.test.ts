@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { ldEventsFromHtml, toLdEvent } from '@/lib/scrapers/de/jsonld';
-import { collapseRunningRepeats } from '@/lib/scrapers/de/MecDeScraper';
+import { collapseRunningRepeats, mecShownTime, withShownTime } from '@/lib/scrapers/de/MecDeScraper';
 
 const fx = (f: string) => readFileSync(join(__dirname, 'fixtures', 'mec', f), 'utf8');
 const berlin = (iso: string) => new Date(iso).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });
@@ -55,5 +55,33 @@ describe('MEC: laufende Termine in der Monatsansicht', () => {
     const out = collapseRunningRepeats([...evs, ...serie]);
     expect(out.filter(e => e.name === 'Zwei Generationen').map(e => e.localDate)).toEqual(['2026-10-29']);
     expect(out.filter(e => e.name === 'Gymnastik')).toHaveLength(2);
+  });
+});
+
+describe('MEC: Abnahme fn-29.20 (Dorffest-Stichprobe, abgerufen 2026-11-03)', () => {
+  it('Pegau: der laufende Markt am zweiten Tag ohne Ende ist derselbe Termin', () => {
+    const evs = ldEventsFromHtml(fx('pegau-liste-auszug.html')).filter(e => e.name === 'Pegauer Weihnachtsmarkt & Adventsmesse');
+    expect(evs.map(e => e.localDate)).toEqual(['2026-11-28', '2026-11-29']);
+    const out = collapseRunningRepeats(evs);
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ localDate: '2026-11-28', end: '2026-11-29', allDay: true });
+  });
+
+  it('Hohen Viecheln: Detailseite zeigt 14:00 bis 18:00, das JSON-LD sagt 15:00; die Anzeige gilt', () => {
+    const html = fx('hohen-viecheln-detail.html');
+    const ld = ldEventsFromHtml(html).find(e => e.name === 'Adventsmarkt in Hohen Viecheln')!;
+    expect(berlin(ld.start)).toBe('28.11.2026, 15:00:00');
+    expect(mecShownTime(html)).toEqual({ start: '14:00:00', end: '18:00:00' });
+    const e = withShownTime(ld, mecShownTime(html));
+    expect(berlin(e.start)).toBe('28.11.2026, 14:00:00');
+    expect(berlin(e.end!)).toBe('28.11.2026, 18:00:00');
+  });
+
+  it('ohne angezeigte Uhrzeit, ganztägig oder mehrtägig bleibt der Termin, wie er ist', () => {
+    const e = toLdEvent({ '@type': 'Event', name: 'Markt', startDate: '2026-11-28T10:00:00+01:00', endDate: '2026-11-29T18:00:00+01:00' })!;
+    expect(withShownTime(e, { start: '14:00:00' })).toBe(e);
+    const day = toLdEvent({ '@type': 'Event', name: 'Markt', startDate: '2026-11-28' })!;
+    expect(withShownTime(day, { start: '14:00:00' })).toBe(day);
+    expect(mecShownTime('<div class="mec-single-event-time"><dd><abbr class="mec-events-abbr">Ganztägig</abbr></dd></div>')).toBeNull();
   });
 });

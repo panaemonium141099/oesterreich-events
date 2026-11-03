@@ -11,7 +11,7 @@
  * Wiederholungen kommen als einzelne VEVENTs (keine RRULE in 709 geprüften
  * Terminen aus 10 Feeds). REIN, kein I/O.
  */
-import { icalEnd, icalImage, icalText, parseIcalDate, readVEvents, type VEvent } from './ical';
+import { icalEnd, icalImage, icalText, parseIcalDate, readVEvents, type Prop, type VEvent } from './ical';
 
 export interface IonasEvent {
   /** UID ohne Datumsanhang (eine UID kann mehrere Termine tragen). */
@@ -39,6 +39,26 @@ export interface IonasEvent {
   lng?: number;
 }
 
+const BERLIN_HM = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+const BERLIN_YMD = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' });
+
+/**
+ * Uhrzeit, die nur die Anlagezeit des Eintrags ist: Gemeinde Ahorn legte am
+ * 18.12.2025 ab 15:20 Uhr Termine an, und jeder trägt die Minute seiner
+ * Anlage als Beginn (`CREATED:20251218T142026Z`, `DTSTART:20261114T152000`
+ * „Martinsumzug Witzmannsberg"; ebenso 15:21, 15:23, 15:24, 15:25, 15:27;
+ * Abnahme fn-29.20, 2026-11-03). Gleiche Minute an einem anderen Tag ist kein
+ * Zufall: Uhrzeit unbekannt, der Termin bleibt ganztägig.
+ */
+export function timeIsCreation(start: { iso: string; date: string; allDay: boolean }, created: Prop | undefined): boolean {
+  if (start.allDay || !created) return false;
+  const c = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/.exec(created.value.trim());
+  if (!c) return false;
+  const at = new Date(`${c[1]}-${c[2]}-${c[3]}T${c[4]}:${c[5]}:${c[6]}Z`);
+  const st = new Date(start.iso);
+  return BERLIN_YMD.format(at) !== start.date && BERLIN_HM.format(at) === BERLIN_HM.format(st);
+}
+
 export function parseIonasIcs(text: string): IonasEvent[] {
   return readVEvents(text).map(toEvent).filter((e): e is IonasEvent => e !== null);
 }
@@ -48,9 +68,11 @@ const text = icalText;
 function toEvent(m: VEvent): IonasEvent | null {
   const title = text(m, 'SUMMARY');
   const uidRaw = text(m, 'UID');
-  const s = m.get('DTSTART') ? parseIcalDate(m.get('DTSTART')!) : null;
-  if (!title || !uidRaw || !s) return null;
-  const end = icalEnd(s, m.get('DTEND') ? parseIcalDate(m.get('DTEND')!) : null);
+  const parsed = m.get('DTSTART') ? parseIcalDate(m.get('DTSTART')!) : null;
+  if (!title || !uidRaw || !parsed) return null;
+  const placeholder = timeIsCreation(parsed, m.get('CREATED'));
+  const s = placeholder ? { iso: parsed.date, date: parsed.date, allDay: true } : parsed;
+  const end = placeholder ? undefined : icalEnd(s, m.get('DTEND') ? parseIcalDate(m.get('DTEND')!) : null);
   const geo = text(m, 'GEO')?.split(';').map(Number);
   const hasGeo = !!geo && geo.length === 2 && geo.every(Number.isFinite) && !(geo[0] === 0 && geo[1] === 0);
   return {
