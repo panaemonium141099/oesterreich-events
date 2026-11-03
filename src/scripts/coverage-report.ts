@@ -13,7 +13,7 @@
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
-import { forEachPage } from '../lib/db/fetch-all';
+import { POSTGREST_MAX_ROWS } from '../lib/db/fetch-all';
 import { findGemeinde, loadGemeindenMaster } from '../lib/gemeinden/data';
 import { findGemeindeDe, loadGemeindenDe } from '../lib/gemeinden/de';
 import { normalizeGemeindeName } from '../lib/location/gemeinde-name';
@@ -34,7 +34,7 @@ try {
 } catch { /* ignore */ }
 
 type Gem = { name?: string; plz?: string; bundesland?: string } | null;
-type Row = { country: string | null; source_name: string | null; gem: Gem };
+type Row = { id: string; country: string | null; source_name: string | null; gem: Gem };
 
 async function main(): Promise<void> {
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
@@ -60,23 +60,29 @@ async function main(): Promise<void> {
   const fromIso = viennaDayBoundsUtc(viennaToday(new Date()))[0];
   const events: CoverageEvent[] = [];
   let unmapped = 0;
-  await forEachPage<Row>(
-    (from, to) => forCountry(supabase
+  // Seiten nach id statt Offset: mit OFFSET lief die Abfrage im Nachtlauf
+  // vom 03.11. tief im Bestand in den Statement-Timeout.
+  let afterId: string | null = null;
+  for (;;) {
+    let q = forCountry(supabase
       .from('events')
-      .select('country,source_name,gem:location_resolution->gemeinde')
+      .select('id,country,source_name,gem:location_resolution->gemeinde')
       .gte('start_date', fromIso)
       .in('publish_status', ['published', 'published_low_confidence', 'duplicate']), country)
       .order('id')
-      .range(from, to) as unknown as PromiseLike<{ data: Row[] | null; error: { message: string } | null }>,
-    (page) => {
-      for (const r of page) {
-        const id = gemeindeId(r.country, r.gem);
-        if (r.gem && !id) unmapped++;
-        events.push({ country: r.country, source_name: r.source_name, gemeindeId: id });
-      }
-    },
-    { label: 'coverage-report' },
-  );
+      .limit(POSTGREST_MAX_ROWS);
+    if (afterId) q = q.gt('id', afterId);
+    const { data, error } = await q;
+    if (error) throw new Error(`coverage-report: ${error.message}`);
+    const page = (data ?? []) as unknown as Row[];
+    if (page.length === 0) break;
+    for (const r of page) {
+      const id = gemeindeId(r.country, r.gem);
+      if (r.gem && !id) unmapped++;
+      events.push({ country: r.country, source_name: r.source_name, gemeindeId: id });
+    }
+    afterId = page[page.length - 1].id;
+  }
 
   const registry = loadRegistryDe();
   const integrations: IntegrationAssignment[] = country === 'AT' ? [] : deNachtlaufScrapers().flatMap(s => s.integrations.map(integration => ({

@@ -11,8 +11,10 @@
  *
  * Im Nachtlauf seit fn-29.18 (`nachtlauf.ts`).
  */
+import * as cheerio from 'cheerio';
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
+import { toUtcInstant } from '@/lib/pipeline/normalize-date';
 import type { RegistryEntryDe } from '@/lib/registry-de/build';
 import { loadRegistryDe, type FeedGroup } from '@/lib/registry-de/load';
 import type { ScrapedEvent } from '@/types/events';
@@ -44,22 +46,46 @@ export function mecGroups(): FeedGroup[] {
  * Die Monatsansicht wiederholt einen laufenden mehrtägigen Termin an jedem
  * angezeigten Tag, mit diesem Tag als Beginn und dem echten Ende
  * (Zella-Mehlis „Zwei Generationen" 29.10., 30.10., 31.10., 01.11., jeweils
- * bis 30.04.2027; Beginn laut Detailseite 19.09.2026). Einträge mit derselben
- * Detailseite und demselben Ende sind ein Termin; Beginn und Ende kommen
- * danach von der Detailseite.
+ * bis 30.04.2027; Beginn laut Detailseite 19.09.2026), am letzten Tag auch
+ * ohne Ende (Pegau „Weihnachtsmarkt & Adventsmesse" 28. bis 29.11. und
+ * noch einmal 29.11., Abnahme fn-29.20). Ein Eintrag, dessen Tag ein
+ * früherer Eintrag derselben Detailseite schon abdeckt, ist derselbe Termin;
+ * Beginn und Ende kommen danach von der Detailseite.
  */
 export function collapseRunningRepeats(events: LdEvent[]): LdEvent[] {
-  const first = new Map<string, LdEvent>();
-  const out: LdEvent[] = [];
+  const spans = new Map<string, LdEvent[]>();
   for (const e of events) {
-    if (!e.url || !e.end || e.end.slice(0, 10) <= e.localDate) { out.push(e); continue; }
-    const k = `${e.url}|${e.end}`;
-    const f = first.get(k);
-    if (!f) { first.set(k, e); out.push(e); }
-    else if (e.localDate < f.localDate) out[out.indexOf(f)] = e, first.set(k, e);
+    if (e.url && e.end && e.end.slice(0, 10) > e.localDate) spans.set(e.url, [...(spans.get(e.url) ?? []), e]);
   }
-  return out;
+  return events.filter(e => !e.url || !(spans.get(e.url) ?? []).some(s => s !== e && s.localDate < e.localDate && s.end!.slice(0, 10) >= e.localDate));
 }
+
+/**
+ * Uhrzeit, die die MEC-Detailseite anzeigt („14:00 - 18:00"). Das JSON-LD
+ * derselben Seite kann eine Stunde daneben liegen: Hohen Viecheln
+ * „Adventsmarkt" zeigt 14:00 bis 18:00, das JSON-LD sagt 15:00+01:00
+ * (Abnahme fn-29.20). Die Anzeige ist, was der Veranstalter eingetragen hat.
+ */
+export function mecShownTime(html: string): { start: string; end?: string } | null {
+  const $ = cheerio.load(html);
+  const t = $('.mec-single-event-time .mec-events-abbr').first().text().replace(/\s+/g, ' ').trim();
+  const m = /^(\d{1,2}):(\d{2})(?:\s*(?:Uhr)?\s*[-–]\s*(\d{1,2}):(\d{2}))?(?:\s*Uhr)?$/.exec(t);
+  if (!m) return null;
+  const hm = (h: string, min: string) => `${h.padStart(2, '0')}:${min}:00`;
+  return { start: hm(m[1], m[2]), ...(m[3] ? { end: hm(m[3], m[4]) } : {}) };
+}
+
+/** Beginn und Ende eines Termins an seinem Tag nach der angezeigten Uhrzeit. */
+export function withShownTime(e: LdEvent, shown: { start: string; end?: string } | null): LdEvent {
+  if (!shown || e.allDay) return e;
+  const endDate = e.end ? berlinDate(e.end) : e.localDate;
+  if (endDate !== e.localDate) return e;
+  const start = toUtcInstant(`${e.localDate}T${shown.start}`) as string;
+  const end = shown.end ? (toUtcInstant(`${e.localDate}T${shown.end}`) as string) : undefined;
+  return { ...e, start, end: end && end > start ? end : undefined };
+}
+
+const berlinDate = (iso: string) => (iso.length === 10 ? iso : new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' }));
 
 const termin = (e: LdEvent) => ({ uid: e.url ?? e.name, title: e.name, start: e.start, end: e.end, locationName: e.locationName, street: e.street, locality: e.locality });
 
@@ -100,7 +126,7 @@ export class MecDeScraper extends DeFeedScraper {
    * Tag statt ab ihrem Beginn (Zella-Mehlis „500 Jahre Schützentradition", seit
    * 17.05.). Gemessen 2026-10-29: 314 von 332 gleich, 7 Einzeltermine 1 bis 2
    * Tage zu früh, 4 Ausstellungen. Einzeltermine (eine Zeile je Detailseite)
-   * bekommen deshalb Datum, Ende und Bild der Detailseite; Serien behalten
+   * bekommen deshalb Datum, Ende, Bild und angezeigte Uhrzeit der Detailseite; Serien behalten
    * die Termine der Liste, die Detailseite zeigt nur den nächsten.
    */
   private async withDetailDates(listed: LdEvent[], pageUrl: string): Promise<LdEvent[]> {
@@ -112,7 +138,8 @@ export class MecDeScraper extends DeFeedScraper {
     for (const e of events) {
       if (!e.url || count.get(e.url) !== 1 || e.localDate < yesterday) { out.push(e); continue; }
       const html = await this.fetchHtmlPage(new URL(e.url, pageUrl).href);
-      const d = html ? ldEventsFromHtml(html).find(x => x.name === e.name) : undefined;
+      const ld = html ? ldEventsFromHtml(html).find(x => x.name === e.name) : undefined;
+      const d = ld && withShownTime(ld, mecShownTime(html!));
       out.push(d ? { ...e, start: d.start, end: d.end, allDay: d.allDay, localDate: d.localDate, ...(d.image ? { image: d.image, imageWidth: d.imageWidth, imageHeight: d.imageHeight } : {}) } : e);
     }
     return out;

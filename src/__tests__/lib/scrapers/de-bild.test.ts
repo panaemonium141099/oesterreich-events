@@ -45,6 +45,35 @@ describe('imageUrl: Logo, Wappen und Vektorgrafik sind kein Eventbild', () => {
   });
 });
 
+describe('imageUrl: Platzhalter, Vorlagengrafik, Dokumente und die Seite selbst (Abnahme fn-29.20)', () => {
+  it.each([
+    'https://www.plettenberg.de/typo3conf/ext/citko_events3/Resources/Public/Icons/no-image-dummy.jpg',
+    'https://www.marktsteft.de/typo3conf/ext/pizpalue/Resources/Public/Extension/news/Images/newspaper.jpg',
+    'https://www.kinding.de/layout/no-image.png',
+    'https://www.trittenheim.de/files/images/veranstaltungen/TRI_Veranstaltung_Platzhalter_01.jpg',
+    'https://www.bad-nauheim.de/resources/img/event-list-placeholder.jpg',
+    'https://www.herten.de/fileadmin/user_upload/Bilder/Systembilder/teaser-dummy-image-events.png',
+    'https://oberzentrum-suedthueringen.de/wp-content/uploads/2024/05/bg-veranstaltung-platzhalter3.jpg',
+    'https://dersau.de/wp-content/uploads/2026/10/volkstrauertag.bek2026.pdf',
+    'https://www.kirchdorf-online.de/fileadmin/Veranstaltung_melden/user_uploads/Plakat_Dorfschiessen_26.docx',
+  ])('%s', url => {
+    expect(imageUrl(url)).toBeUndefined();
+  });
+
+  it('TYPO3-JSON-LD nennt die Terminseite als Bild (Pforzheim, Wedel): kein Bild', () => {
+    const page = 'https://www.wedel.de/leben-in-wedel/veranstaltungen/veranstaltungsdetails/2026-11-25_1000/runter-vom-sofa-raus';
+    expect(imageUrl(page, page)).toBeUndefined();
+    expect(imageUrl(`${page}/`, page)).toBeUndefined();
+  });
+
+  it('Bilder neben der Seite bleiben: Download über index.php, Bild ohne Endung', () => {
+    const dump = 'https://www.klettgau.de/index.php?eID=dumpFile&t=p&p=889136&token=233e635e8c9d9f5980b405867a241017569c96a9';
+    expect(imageUrl(dump, 'https://www.klettgau.de/index.php?id=123')).toBe(dump);
+    const ceasy = 'https://www.korntal-muenchingen.de/ceasy/resource/8592?maxWidth=300&maxHeight=200';
+    expect(imageUrl(ceasy, 'https://www.korntal-muenchingen.de/veranstaltung/1')).toBe(ceasy);
+  });
+});
+
 describe('Platzhalter: dasselbe Bild an drei verschiedenen Terminen', () => {
   it('Bergenhusen: Gemeindewappen an Sitzung, Essen und Weihnachtsmarkt fällt weg, Reihe mit gleichem Titel bleibt', () => {
     const evs = parseEmIcs(fx('em', 'bergenhusen.ics'));
