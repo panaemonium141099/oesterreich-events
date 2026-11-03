@@ -3,6 +3,8 @@ nur Merkmale speichern (kein HTML). Ausgabe: JSONL, fortsetzbar."""
 import sys, json, re, os, threading, urllib.parse, urllib.robotparser
 from concurrent.futures import ThreadPoolExecutor
 import requests
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import drossel  # noqa: E402,F401  (je Server-IP nacheinander)
 
 UA = "Mozilla/5.0 (compatible; lasstreffen-research/1.0; einmaliger Startseitenabruf)"
 MARKERS = {
@@ -129,6 +131,6 @@ if __name__ == "__main__":
         h, u = line.rstrip("\n").split("\t")
         if h not in done: items.append((h, u))
     print("todo", len(items), flush=True)
-    with ThreadPoolExecutor(int(sys.argv[3]) if len(sys.argv) > 3 else 40) as ex:
+    with ThreadPoolExecutor(int(sys.argv[3]) if len(sys.argv) > 3 else drossel.THREADS) as ex:
         list(ex.map(work, items))
     print("fertig", flush=True)

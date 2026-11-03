@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 import requests, urllib3
 urllib3.disable_warnings()
 sys.path.insert(0, os.path.dirname(__file__))
+import drossel  # noqa: E402  (je Server-IP nacheinander)
 from detect import UA
 import detect2
 
@@ -90,6 +91,6 @@ def work(item):
 
 items = [(h, v) for h, v in todo.items() if h not in done]
 print("todo", len(items), collections_counter := {k: sum(1 for _, (kk, _) in items if kk == k) for k in ("leer", "kein_link", "fehler")}, flush=True)
-with ThreadPoolExecutor(40) as ex:
+with ThreadPoolExecutor(drossel.THREADS) as ex:
     list(ex.map(work, items))
 print("fertig", flush=True)

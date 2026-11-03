@@ -1,0 +1,85 @@
+# fn-29.20: Vollerhebung der deutschen Gemeinden als Quartalslauf.
+#
+# Je Gemeinde (Destatis-Stammdaten data/gemeinden-de.json, Websites aus
+# Wikidata) Startseite und Veranstaltungsseite einmal abrufen, Hersteller
+# erkennen, jede Gemeinde genau einer Stufe zuordnen und den Stand mit der
+# letzten Erhebung im Repo vergleichen (data/vollerhebung-*.csv, die neueste).
+# Skripte und Methode: docs/research/de-gemeinden/vollerhebung/run.sh,
+# docs/research/de-gemeinden/01-vollerhebung.md Abschnitt 7.
+#
+# Nur lesende GETs, robots.txt je Host, je Server-IP nacheinander mit höchstens
+# einem Abruf alle 3 s (drossel.py: verwaltungsportal und GeoCMS sperren bei
+# parallelen Abrufen auf ihren gemeinsamen Server), bis zu 100 Server
+# gleichzeitig, keine Lizenzquellen (Heimat-Info- und meinOrt-Zuordnung kommen aus der
+# letzten Erhebung). Schreibt nichts in die Datenbank und nichts ins Repo:
+# Ergebnis ist das Artefakt (vollerhebung.csv, diff.md) und die
+# Zusammenfassung des Laufs. Übernahme danach von Hand: CSV als
+# data/vollerhebung-JJJJ-MM.csv einchecken, Abschnitt „Fortschreibung“ in
+# 01-vollerhebung.md ergänzen, Registry neu bauen
+# (npm run build:registry:de -- --csv docs/research/de-gemeinden/data/vollerhebung-JJJJ-MM.csv)
+# und den Diff der Registry wie einen Adapter-Wechsel prüfen.
+#
+# Achtung: Läufe aus GitHub-Rechenzentren können Websites als „nicht
+# erreichbar“ sehen, die von woanders antworten (Sperren gegen Cloud-IPs).
+# Ein Sprung in Stufe R mit vielen „G nicht erreichbar“ ist dann kein
+# Rückgang der Gemeinden, sondern des Abrufs; die Zusammenfassung nennt die Zahl.
+
+name: Vollerhebung DE (Quartal)
+
+on:
+  schedule:
+    # 2. Tag jedes Quartals, 02:41 UTC (vor dem Nachtlauf um 03:17).
+    - cron: '41 2 2 1,4,7,10 *'
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Nur die ersten N Gemeinden (Probelauf); leer = alle'
+        required: false
+        default: ''
+
+concurrency:
+  group: vollerhebung-de
+  cancel-in-progress: false
+
+jobs:
+  erhebung:
+    runs-on: ubuntu-latest
+    # Erste Wiederholung (lokal, 2026-11-03, mit Drossel): 254 min für 8.748 Hosts.
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Abhängigkeiten
+        run: pip install requests
+
+      - name: Erhebung
+        env:
+          LIMIT: ${{ github.event.inputs.limit }}
+          PYTHONIOENCODING: utf-8
+        run: |
+          PREV=$(ls docs/research/de-gemeinden/data/vollerhebung-*.csv | sort | tail -1)
+          echo "Vergleich mit $PREV"
+          bash docs/research/de-gemeinden/vollerhebung/run.sh out "$PREV" "$LIMIT"
+
+      - name: Zusammenfassung
+        if: always()
+        run: |
+          {
+            echo "## Vollerhebung DE ($(date -u +%F))"
+            echo
+            if [ -f out/diff.md ]; then cat out/diff.md; fi
+            echo
+            echo "Nicht erreichbar (Klasse G): $(grep -c ',G nicht erreichbar,' out/gemeinden_klassifiziert.csv || true)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Ergebnis sichern
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vollerhebung-de-${{ github.run_id }}
+          path: out/
+          retention-days: 90

@@ -256,8 +256,17 @@ Gemeinden Websites umbauen.
   Gemeindeschlüssel abgebildet (551 Hauptkommunen).
 * **Zuordnung:** erste passende Stufe in der Reihenfolge der Tabelle in Abschnitt 2.
 * **Skripte:** [vollerhebung/](vollerhebung/) (`detect.py`, `detect2.py`, `detect3.py`,
-  `match_lists.py`, `classify.py`), Python 3 mit `requests`. Wiederholung empfohlen je
-  Quartal; vorher Wikidata und Destatis neu laden.
+  `match_lists.py`, `classify.py`), Python 3 mit `requests`.
+* **Quartalslauf (seit fn-29.20, 2026-11-03):** `.github/workflows/vollerhebung-de.yml`
+  am 2. Tag jedes Quartals, `bash vollerhebung/run.sh <ordner> <vorherige CSV>`:
+  `sites.py` (Gemeinden aus `data/gemeinden-de.json`, Websites aus Wikidata, Verband über
+  den Regionalschlüssel Verband + `000`; ohne Wikidata-Treffer der Host der vorherigen
+  Erhebung), dann die drei Durchgänge, `lists_from_prev.py` (Heimat-Info und meinOrt aus
+  der vorherigen Erhebung, beide Lizenzquellen werden nicht neu geladen), `classify.py`
+  und `diff.py` (Matrix und Diff, Abschnitt 9). `drossel.py`: je Server-IP höchstens ein
+  Abruf alle 3 s, bis zu 100 Server gleichzeitig; die Ersterhebung lief mit 40 Hosts
+  parallel ohne diese Grenze, verwaltungsportal und GeoCMS sperren aber bei parallelen
+  Abrufen auf ihren gemeinsamen Server.
 * **CSV-Spalten:** `ags`, `land`, `name`, `ew`, `kreis`, `vb`, `host`, `stufe`, `klasse`,
   `integration`, `vb_host`, `vb_integration`, `meinort`, `event_url`. Das ist ein
   Rechercheergebnis, keine Stammdaten-Datei für den Betrieb (die kommt im eigenen Epic).
@@ -271,4 +280,109 @@ Gemeinden Websites umbauen.
    communice, Cross7 (offene Feeds), parallel der allgemeine Parser für Stufe E.
 3. Lizenzen: WITTICH (meinOrt, Heimat-Info, Amtsblätter, Anfrage läuft), termine-regional.de,
    toubiz, TMV, cm city media (Feed), NUSSBAUM.
-4. Erhebung je Quartal wiederholen und die Stufen-Matrix fortschreiben.
+4. Erhebung je Quartal wiederholen und die Stufen-Matrix fortschreiben (seit 2026-11 als
+   Workflow, Abschnitt 7 und 9).
+
+## 9. Fortschreibung: erste Wiederholung (2026-11-03)
+
+Erster Lauf des Quartalslaufs (`vollerhebung/run.sh`, lokal, mit Drossel je Server, 254 min
+für 8.748 Hosts), Ergebnis [data/vollerhebung-2026-11.csv](data/vollerhebung-2026-11.csv).
+Websites aus Wikidata neu geladen: 10.745 Gemeinden mit Website (25 davon nur aus der
+Ersterhebung), 6.407 mit Website des Verbands, 3 Gemeinden mit anderem Host.
+
+**Lesart:** Der Rohvergleich zeigt einen Rückgang (erreicht 89,0 % → 88,1 %). Er kommt aus
+dem Abruf, nicht aus den Gemeinden: 188 Gemeinden waren diesmal nicht erreichbar, im Oktober
+schon. 150 davon liegen auf einem Server (80.69.201.211, ekom21 cms21 in Hessen, 112
+hessische Gemeinden), der vom ersten Abruf an jede Verbindung ins Leere laufen ließ
+(ConnectTimeout, auch danach noch); daher Hessen 92,4 % → 65,6 %. Unter den 10.380
+Gemeinden, die beide Male erreichbar waren, sind 32 mehr erreicht als im Oktober. Die
+CSV ist deshalb für Hessen kein Ersatz der Ersterhebung; Registry nicht daraus bauen,
+bevor ekom21 wieder antwortet.
+
+### Stufen gesamt
+
+| Stufe | vorher | jetzt | Änderung |
+|---|---:|---:|---:|
+| A API oder Feed | 3.203 | 3.075 | -128 |
+| B Hersteller-HTML | 2.872 | 2.842 | -30 |
+| C eingebetteter Fremdkalender | 511 | 485 | -26 |
+| D JSON-LD/Mikrodaten | 61 | 53 | -8 |
+| E Kalender, allgemeiner Parser | 1.847 | 1.867 | +20 |
+| V Kalender des Amts/der VG | 733 | 780 | +47 |
+| M nur meinOrt (Lizenz) | 335 | 363 | +28 |
+| R Rest | 1.187 | 1.284 | +97 |
+| erreicht A bis M | 9.562 (89,0 %) | 9.465 (88,1 %) | -97 |
+
+### Matrix Land × Stufe (Gemeinden, jetzt)
+
+| Land | Gemeinden | A | B | C | D | E | V | M | R | erreicht A bis M | vorher |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| RP | 2300 | 842 | 176 | 99 | 7 | 374 | 433 | 261 | 108 | 95,3 % | 95,3 % |
+| BY | 2056 | 779 | 428 | 175 | 13 | 393 | 26 | 4 | 238 | 88,4 % | 88,1 % |
+| SH | 1104 | 316 | 244 | 57 | 4 | 206 | 124 | 0 | 153 | 86,1 % | 84,5 % |
+| BW | 1101 | 287 | 541 | 24 | 17 | 166 | 2 | 0 | 64 | 94,2 % | 90,0 % |
+| NI | 941 | 373 | 190 | 53 | 1 | 135 | 81 | 0 | 108 | 88,5 % | 90,9 % |
+| MV | 724 | 162 | 255 | 4 | 4 | 89 | 43 | 41 | 126 | 82,6 % | 82,7 % |
+| TH | 601 | 42 | 294 | 6 | 1 | 108 | 35 | 1 | 114 | 81,0 % | 82,2 % |
+| HE | 421 | 50 | 101 | 13 | 1 | 64 | 0 | 47 | 145 | 65,6 % | 92,4 % |
+| SN | 418 | 52 | 122 | 24 | 3 | 111 | 20 | 4 | 82 | 80,4 % | 80,9 % |
+| BB | 413 | 46 | 248 | 9 | 0 | 67 | 11 | 0 | 32 | 92,3 % | 93,9 % |
+| NW | 396 | 99 | 107 | 13 | 0 | 92 | 0 | 0 | 85 | 78,5 % | 80,6 % |
+| ST | 218 | 17 | 120 | 4 | 2 | 44 | 5 | 1 | 25 | 88,5 % | 93,1 % |
+| SL | 52 | 10 | 16 | 4 | 0 | 16 | 0 | 4 | 2 | 96,2 % | 92,3 % |
+| HB | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0,0 % | 0,0 % |
+| HH | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 100,0 % | 100,0 % |
+| BE | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 100,0 % | 100,0 % |
+
+### Wechsel unter Gemeinden, die beide Male erreichbar waren (541 von 10.380)
+
+| Stufe | vorher | jetzt | Änderung |
+|---|---:|---:|---:|
+| A | 3.065 | 3.069 | +4 |
+| B | 2.855 | 2.838 | -17 |
+| C | 506 | 485 | -21 |
+| D | 61 | 53 | -8 |
+| E | 1.839 | 1.864 | +25 |
+| V | 733 | 778 | +45 |
+| M | 325 | 329 | +4 |
+| R | 996 | 964 | -32 |
+
+Häufigste Wechsel: R → E 123 (eigene Kalenderseite jetzt mit Daten), E → V 82 (eigene Seite
+diesmal ohne erkannte Termine, Kalender der VG mit Terminen), E → R 61, V → E 42, B → E 22
+(Hersteller-Merkmal nicht mehr erkannt, Kalender bleibt), C → R 18, E → M 17, R → A 16.
+Warum eine Seite die Grenze „mindestens fünf Daten“ diesmal über- oder unterschreitet, ist
+je Gemeinde nicht geprüft.
+
+### Wechsel der Stufe (724 Gemeinden)
+
+| von | nach | Gemeinden |
+|---|---|---:|
+| A | R | 129 |
+| R | E | 126 |
+| E | V | 82 |
+| E | R | 69 |
+| V | E | 42 |
+| B | R | 27 |
+| A | M | 26 |
+| C | R | 23 |
+| R | A | 22 |
+| B | E | 22 |
+| E | M | 17 |
+| E | B | 15 |
+| V | R | 14 |
+| R | V | 11 |
+| C | E | 11 |
+| E | C | 8 |
+| M | A | 7 |
+| C | V | 6 |
+| M | E | 6 |
+| V | A | 5 |
+| A | E | 5 |
+| R | C | 5 |
+| R | B | 5 |
+| D | R | 4 |
+| B | V | 4 |
+
+Nicht erreichbar insgesamt (Klasse G): 508 Gemeinden (Oktober: 181 in R mit Fehler oder
+robots.txt). Gründe je Host: ConnectTimeout 189 (davon 150 ekom21), robots.txt 97, HTTP 403
+53, TLS-Fehler 37, Verbindungsfehler 35, 404 28, 5xx 24, DNS 19.
