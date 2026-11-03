@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { planSourceIdMigrations, migrateSourceIds, type LegacyRow } from '@/lib/db/source-id-migration';
+import { planSourceIdMigrations, planSupersededRows, migrateSourceIds, type LegacyRow } from '@/lib/db/source-id-migration';
 import type { ScrapedEvent } from '@/types/events';
 
 const ev = (source_id: string, start_date: string, previous_source_id?: string, source_name = 'gem2go') =>
@@ -126,29 +126,92 @@ describe('planSourceIdMigrations', () => {
     const legacy = [row('e1', 'alt', '2026-10-10T00:00:00+00:00', 'gemeinde-registry')];
     expect(planSourceIdMigrations(events, legacy, new Set())).toEqual([]);
   });
+
+  it('gibt genaue Treffer zuerst, auch wenn die Zeile später kommt', () => {
+    // Zwei Lesarten eines Termins, beide als alte ID gemeldet: die der
+    // aktuellen Uhrzeit bleibt, gleich in welcher Reihenfolge die DB sie liefert.
+    const titled = { ...ev('neu', '2026-11-18T17:30:00.000Z', ['alt-1630', 'alt-1730'] as unknown as string), title: 'Jazz' } as ScrapedEvent;
+    const legacy = [
+      { ...row('e1', 'alt-1630', '2026-11-18T16:30:00+00:00'), title: 'Jazz' },
+      { ...row('e2', 'alt-1730', '2026-11-18T17:30:00+00:00'), title: 'Jazz' },
+    ];
+    expect(planSourceIdMigrations([titled], legacy, new Set(), new Date('2026-11-03T10:00:00Z')).map((m) => m.id)).toEqual(['e2']);
+  });
+});
+
+describe('planSupersededRows', () => {
+  const now = new Date('2026-11-03T10:00:00Z');
+  const titled = (id: string, start: string, previous: string[], title = 'Jazz', url = 'https://www.innsbrucktermine.at/a') =>
+    ({ ...ev(id, start, previous as unknown as string), title, source_url: url }) as ScrapedEvent;
+  const legacyRow = (id: string, sourceId: string, start: string, title = 'Jazz', url = 'https://www.innsbrucktermine.at/b') =>
+    ({ ...row(id, sourceId, start), title, source_url: url });
+
+  it('meldet die alte Zeile, deren Termin schon eine Zeile hat', () => {
+    const events = [titled('neu', '2026-11-18T17:30:00.000Z', ['alt'])];
+    expect(planSupersededRows(events, [legacyRow('e1', 'alt', '2026-11-18T16:30:00+00:00')], [], now).map((r) => r.id)).toEqual(['e1']);
+  });
+
+  it('lässt umgeschlüsselte Zeilen stehen', () => {
+    const events = [titled('neu', '2026-11-18T17:30:00.000Z', ['alt'])];
+    const moves = [{ id: 'e1', source_name: 'gem2go', from: 'alt', to: 'neu' }];
+    expect(planSupersededRows(events, [legacyRow('e1', 'alt', '2026-11-18T17:30:00+00:00')], moves, now)).toEqual([]);
+  });
+
+  it('verlangt denselben Wiener Tag, denselben Titel und dieselbe Website', () => {
+    const legacy = [legacyRow('e1', 'alt', '2026-11-18T16:30:00+00:00')];
+    expect(planSupersededRows([titled('neu', '2026-11-19T17:30:00.000Z', ['alt'])], legacy, [], now)).toEqual([]);
+    expect(planSupersededRows([titled('neu', '2026-11-18T17:30:00.000Z', ['alt'], 'Folk')], legacy, [], now)).toEqual([]);
+    expect(planSupersededRows([titled('neu', '2026-11-18T17:30:00.000Z', ['alt'], 'Jazz', 'https://www.innsbruck.info/a')], legacy, [], now)).toEqual([]);
+    expect(planSupersededRows([titled('neu', '2026-11-18T17:30:00.000Z', ['alt'])], [{ ...legacy[0], title: null }], [], now)).toEqual([]);
+  });
+
+  it('lässt heutige und vergangene Zeilen stehen', () => {
+    const events = [titled('neu', '2026-11-03T17:30:00.000Z', ['alt'])];
+    expect(planSupersededRows(events, [legacyRow('e1', 'alt', '2026-11-03T16:30:00+00:00')], [], now)).toEqual([]);
+  });
+
+  it('zieht nie eine Zeile zurück, deren ID ein Termin des Laufs trägt', () => {
+    // Zwei Führungen eine Stunde auseinander: die alte ID der einen ist die
+    // aktuelle der anderen.
+    const events = [titled('f10', '2026-11-18T09:00:00.000Z', ['f11']), titled('f11', '2026-11-18T10:00:00.000Z', [])];
+    expect(planSupersededRows(events, [legacyRow('e1', 'f11', '2026-11-18T10:00:00+00:00')], [], now)).toEqual([]);
+  });
 });
 
 /** Minimaler Fake: zeichnet Abfragen und Updates auf. */
-function fakeClient(rows: Array<LegacyRow & { exists?: boolean }>, failUpdate = false) {
-  const calls = { inSizes: [] as number[], updates: [] as Array<{ set: unknown; eq: Array<[string, unknown]> }> };
+function fakeClient(
+  rows: Array<LegacyRow & { exists?: boolean }>,
+  failUpdate = false,
+  duplicates: Array<{ duplicate_of: string }> = [],
+) {
+  const calls = {
+    inSizes: [] as number[],
+    updates: [] as Array<{ set: unknown; eq: Array<[string, unknown]>; in?: [string, unknown[]] }>,
+  };
   const client = {
     from: () => ({
       select: () => {
-        const filter: { name?: string; ids?: string[] } = {};
+        const filter: { name?: string; ids?: string[]; primaries?: string[] } = {};
         const q = {
           eq(col: string, v: string) { if (col === 'source_name') filter.name = v; return q; },
-          in(col: string, ids: string[]) { if (col === 'source_id') { filter.ids = ids; calls.inSizes.push(ids.length); } return q; },
-          then(resolve: (r: { data: LegacyRow[]; error: null }) => void) {
-            resolve({ data: rows.filter((r) => r.source_name === filter.name && filter.ids!.includes(r.source_id)), error: null });
+          in(col: string, ids: string[]) {
+            if (col === 'source_id') { filter.ids = ids; calls.inSizes.push(ids.length); }
+            if (col === 'duplicate_of') filter.primaries = ids;
+            return q;
+          },
+          then(resolve: (r: { data: unknown[]; error: null }) => void) {
+            if (filter.primaries) resolve({ data: duplicates.filter((d) => filter.primaries!.includes(d.duplicate_of)), error: null });
+            else resolve({ data: rows.filter((r) => r.source_name === filter.name && filter.ids!.includes(r.source_id)), error: null });
           },
         };
         return q;
       },
       update: (set: unknown) => {
-        const u = { set, eq: [] as Array<[string, unknown]> };
+        const u: { set: unknown; eq: Array<[string, unknown]>; in?: [string, unknown[]] } = { set, eq: [] };
         calls.updates.push(u);
         const q = {
           eq(col: string, v: unknown) { u.eq.push([col, v]); return q; },
+          in(col: string, v: unknown[]) { u.in = [col, v]; return q; },
           then(resolve: (r: { error: { message: string } | null }) => void) {
             resolve({ error: failUpdate ? { message: 'duplicate key value' } : null });
           },
@@ -165,7 +228,7 @@ describe('migrateSourceIds', () => {
     const events = Array.from({ length: 450 }, (_, i) => ev(`neu-${i}`, '2026-10-10', `alt-${i}`));
     const { client, calls } = fakeClient([row('e7', 'alt-7', '2026-10-10T00:00:00+00:00')]);
     const result = await migrateSourceIds(client, events);
-    expect(result).toEqual({ moved: 1, failed: 0, errors: [] });
+    expect(result).toEqual({ moved: 1, withdrawn: 0, failed: 0, errors: [] });
     expect(Math.max(...calls.inSizes)).toBeLessThanOrEqual(200);
     expect(calls.updates).toEqual([
       { set: { source_id: 'neu-7' }, eq: [['id', 'e7'], ['source_name', 'gem2go'], ['source_id', 'alt-7']] },
@@ -175,12 +238,39 @@ describe('migrateSourceIds', () => {
   it('zählt abgelehnte Updates, statt Erfolg zu melden', async () => {
     const { client } = fakeClient([row('e1', 'alt', '2026-10-10T00:00:00+00:00')], true);
     const result = await migrateSourceIds(client, [ev('neu', '2026-10-10', 'alt')]);
-    expect(result).toEqual({ moved: 0, failed: 1, errors: ['duplicate key value'] });
+    expect(result).toEqual({ moved: 0, withdrawn: 0, failed: 1, errors: ['duplicate key value'] });
   });
 
   it('tut ohne alte IDs nichts', async () => {
     const { client, calls } = fakeClient([]);
-    expect(await migrateSourceIds(client, [ev('a', '2026-10-10')])).toEqual({ moved: 0, failed: 0, errors: [] });
+    expect(await migrateSourceIds(client, [ev('a', '2026-10-10')])).toEqual({ moved: 0, withdrawn: 0, failed: 0, errors: [] });
     expect(calls.inSizes).toEqual([]);
+  });
+
+  describe('abgelöste Zeilen', () => {
+    const now = new Date('2026-11-03T10:00:00Z');
+    const jazz = { ...ev('neu', '2026-11-18T17:30:00.000Z', ['alt-1630', 'alt-1730'] as unknown as string), title: 'Jazz' } as ScrapedEvent;
+    const legacy = [
+      { ...row('e1', 'alt-1630', '2026-11-18T16:30:00+00:00'), title: 'Jazz' },
+      { ...row('e2', 'alt-1730', '2026-11-18T17:30:00+00:00'), title: 'Jazz' },
+    ];
+
+    it('zieht sie zurück wie der Rückzug', async () => {
+      const { client, calls } = fakeClient(legacy);
+      expect(await migrateSourceIds(client, [jazz], now)).toEqual({ moved: 1, withdrawn: 1, failed: 0, errors: [] });
+      expect(calls.updates[1]).toEqual({
+        set: { publish_status: 'suppressed', withdrawn_at: '2026-11-03T10:00:00.000Z' },
+        eq: [['source_name', 'gem2go']],
+        in: ['id', ['e1']],
+      });
+    });
+
+    it('lässt einen Primary mit verborgenem Duplikat und schon unterdrückte Zeilen stehen', async () => {
+      const { client, calls } = fakeClient(legacy, false, [{ duplicate_of: 'e1' }]);
+      expect((await migrateSourceIds(client, [jazz], now)).withdrawn).toBe(0);
+      expect(calls.updates).toHaveLength(1);
+      const suppressed = fakeClient([legacy[0], { ...legacy[1], publish_status: 'suppressed' }]);
+      expect((await migrateSourceIds(suppressed.client, [{ ...jazz, start_date: '2026-11-18T16:30:00.000Z' }], now)).withdrawn).toBe(0);
+    });
   });
 });

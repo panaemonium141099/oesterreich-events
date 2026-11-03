@@ -246,8 +246,9 @@
     "cms": "custom",
     "strategy": "generic-dates",
     "status": "active",
-    "notes": "Custom event platform innsbrucktermine.at. Verified HTTP 200, 961KB page. Dates confirmed (DD.MM.YYYY). Extensive event calendar with culture, sport, tradition, markets.",
-    "verifiedAt": "2026-04-02"
+    "notes": "Custom event platform innsbrucktermine.at. Verified HTTP 200, 961KB page. Dates confirmed (DD.MM.YYYY). Extensive event calendar with culture, sport, tradition, markets. 2026-11-03: Uhrzeiten wechseln mit den Importen der Seite zwischen richtig und eine Stunde zu früh (gegen landestheater.at geprüft), daher unstableTimes.",
+    "verifiedAt": "2026-04-02",
+    "unstableTimes": true
   },
   {
     "name": "Absam",

@@ -385,7 +385,13 @@ node / next.js
   anderen Tag nur ab morgen und bei gleichem Titel; mehrere alte IDs als
   Array, Registry: Hash und gekürzte ID der alten Lesart). IDs nie aus gekürzten Strings
   bilden: gemeinde-registry kürzte Base64 auf 18 Byte, das Datum fiel weg
-  (`registryEventId`, 2026-10-11). Ausgezeichnete Namen (`eventNameNodes`:
+  (`registryEventId`, 2026-10-11). Meldet ein Termin eine alte ID, die
+  schon eine Zeile neben seiner eigenen hat (gleicher Tag, Titel, Website),
+  zieht die Übernahme die alte zurück (`planSupersededRows`). Kalender,
+  deren Uhrzeiten von Import zu Import kippen (innsbrucktermine.at: mal
+  richtig, mal eine Stunde früher, 2026-11-03), tragen in der Registry
+  `unstableTimes`: source_id aus Titel, Tag und Rang am Tag
+  (`withoutStartTime`). Ausgezeichnete Namen (`eventNameNodes`:
   Schema.org-Name des Events, `.title`, `.bemHeader`, `.va_list_bez`,
   EventON) gehen Überschriften und Links vor, Text für Screenreader
   (`visibleText`: `.sr-only`, `.visually-hidden`) ist nie Teil des Titels;

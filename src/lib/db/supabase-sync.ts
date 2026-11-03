@@ -1208,9 +1208,9 @@ export async function syncEventsToSupabase(
   // versucht es erneut, solange die alten Zeilen stehen.
   try {
     const migrated = await migrateSourceIds(supabase, dedupedEvents);
-    if (migrated.moved > 0 || migrated.failed > 0) {
+    if (migrated.moved > 0 || migrated.withdrawn > 0 || migrated.failed > 0) {
       console.log(
-        `[supabase-sync] ${migrated.moved} Zeilen auf neue source_id umgeschlüsselt` +
+        `[supabase-sync] ${migrated.moved} Zeilen auf neue source_id umgeschlüsselt, ${migrated.withdrawn} abgelöste zurückgezogen` +
           (migrated.failed > 0 ? `, ${migrated.failed} abgelehnt: ${migrated.errors.join(' | ')}` : ''),
       );
     }

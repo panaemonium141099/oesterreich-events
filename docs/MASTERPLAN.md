@@ -414,6 +414,21 @@ Apéro 18.11.: Seite zeigt 17:30 bis 20:30, Registry hat 17:30 und 18:30,
 Feratel 18:30. An der Quelle zu beheben (Registry-Parser für
 innsbrucktermine), nicht im Dedup.
 
+Ursache (geprüft 03.11. gegen den Spielplan von landestheater.at):
+innsbrucktermine.at zeigt je Termin mal die richtige Uhrzeit, mal eine
+Stunde früher, je nach eigenem Import der Seite (`dateModified`), in Liste,
+Detailseite und `?date=` gleich und unabhängig vom Ende der Sommerzeit. Bei
+allen 22 Terminen mit zwei Lesarten war die abweichende eine Stunde zu
+früh; Jazz & Apéro beginnt laut Landestheater um 18:30, die Seite zeigte
+am 03.11. 17:30. Die richtige Zeit lässt sich aus der Seite allein nicht
+lesen. Behoben im Scraper: Registry-Flag `unstableTimes`, source_id aus
+Titel, Wiener Tag und Rang am Tag (`withoutStartTime`), die IDs beider
+Lesarten gehen als previous_source_id mit; die Übernahme behält die Zeile
+der aktuellen Lesart und zieht die der anderen zurück
+(`planSupersededRows`). Trockenlauf gegen Prod: 127 umgeschlüsselt, 38
+zurückgezogen, danach je Seiten-Tag so viele Zeilen wie Vorstellungen.
+Die Uhrzeit folgt weiter der Seite; die Feratel-Zeile hat die richtige.
+
 Offen und an der Quelle zu beheben (keine Dedup-Fehler):
 - Gutschein-Produkte mit Platzhalterdatum 31.12.2030 (veranstaltungskalender.net).
 - Müllabfuhr-Termine (entschieden 2026-10-14, siehe unten).
