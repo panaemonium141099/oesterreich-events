@@ -179,7 +179,7 @@ export class AllgemeinDeScraper extends DeFeedScraper {
 
   toScraped(t: AllgemeinTermin, g: FeedGroup): ScrapedEvent {
     const address = [t.street, [t.postalCode, t.locality].filter(Boolean).join(' ')].filter(Boolean).join(', ') || undefined;
-    const image = imageUrl(t.image);
+    const image = imageUrl(t.image, t.url);
     const base: ScrapedEvent = {
       source_name: this.name,
       source_id: allgemeinSourceId(t),

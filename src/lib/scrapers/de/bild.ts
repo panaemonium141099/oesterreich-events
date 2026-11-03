@@ -16,7 +16,14 @@ const IMAGE_EXT = /\.(jpe?g|png|webp|gif|avif)$/i;
  * `sandesneben.svg` an jeder Sitzung, 2026-10-29); ebenso Dateien, die sich
  * selbst Logo oder Wappen nennen (`zv-wasser-logo.jpg`, Borkheide
  * `logo-job-ev-klein.jpg`, Bergenhusen `logo_transparent-…@160w.jpg`) und
- * KI-Stockbilder (`…-ai-generated-…`, wie bei Eventfrog).
+ * KI-Stockbilder (`…-ai-generated-…`, wie bei Eventfrog). Ebenso
+ * Platzhalter, die sich so nennen (Plettenberg und Iserlohn
+ * `no-image-dummy.jpg`, Trittenheim `TRI_Veranstaltung_Platzhalter_01.jpg`,
+ * Bad Nauheim `event-list-placeholder.jpg`), Dateien aus TYPO3-Erweiterungen
+ * (`/typo3conf/ext/…`, `/_assets/…`: Vorlagengrafik, kein Bild des Termins),
+ * Dokumente und Seiten (`.pdf`, `.docx`, `.html`) und die Seite selbst:
+ * TYPO3-JSON-LD nennt als `image` teils die Terminseite (Pforzheim, Wedel;
+ * 160 Zeilen, Abnahme fn-29.20, 2026-11-03).
  */
 export function imageUrl(raw: string | undefined, base?: string): string | undefined {
   const t = raw?.trim();
@@ -31,7 +38,21 @@ export function imageUrl(raw: string | undefined, base?: string): string | undef
   const file = decodeURIComponent(u.pathname.split('/').pop() ?? '').toLowerCase();
   if (/\.svgz?$/.test(file)) return undefined;
   if (/(^|[^a-z])(logo|wappen)([^a-z]|$)/.test(file) || /ai-generated/.test(file)) return undefined;
+  if (/(^|[^a-z])(platzhalter|placeholder|dummy|no-?image)([^a-z]|$)/.test(file)) return undefined;
+  if (/\/typo3conf\/ext\/|\/_assets\//i.test(u.pathname)) return undefined;
+  if (/\.(html?|pdf|docx?|xlsx?|pptx?|odt|txt|zip)$/.test(file)) return undefined;
+  if (base && samePage(u, base)) return undefined;
   return u.href;
+}
+
+function samePage(u: URL, base: string): boolean {
+  try {
+    const b = new URL(base);
+    // Mit Query: `index.php?eID=dumpFile…` ist ein Bild neben der Seite `index.php?id=…`.
+    return u.host === b.host && u.pathname.replace(/\/+$/, '') === b.pathname.replace(/\/+$/, '') && u.search === b.search;
+  } catch {
+    return false;
+  }
 }
 
 /** Bild-URL ohne Query (`?cid=…` bei ionas ist ein Cache-Schlüssel). */
