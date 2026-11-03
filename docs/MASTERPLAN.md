@@ -375,6 +375,45 @@ selbst. Seit 2026-10-11 zählt es nur neue Duplikate am Bestand: Zeilen,
 die vor dem Beginn des letzten geschriebenen Laufs angelegt wurden
 (Tabelle `dedup_runs`), und nicht Basis-/Terminzeile derselben Serie.
 
+Rückstau 19.10. bis 03.11.2026: Kein AT-Lauf schrieb, jede Nacht endete
+mit `valve_stopped`. Auslöser war die Nachhol-Welle des Registry-Cursors
+(PR #323, 17.10.): Der Lauf vom 19.10. fand 902 Duplikate am Bestand
+(Grenze 800) und 3.865 im Zulauf, fast alle gemeinde-registry gegen
+gem2go/gemeinden-generic. Danach sperrte sich das Ventil selbst: Der Anker
+reicht höchstens 72 h zurück, älterer Zulauf zählt als Bestand, also wuchs
+der Bestand jede Nacht (9.420 am 02.11., davon rund 8.370 seit 19.10.
+angelegt). Das Ventil hat damit richtig angehalten, kann sich nach einer
+Welle aber nie selbst lösen: Ein Stopp braucht immer eine Freigabe.
+Prüfung des Probelaufs vom 02.11. (Stichproben je Grund und Quellpaar):
+Bestand mit anderem Titel 29/30 richtig, gleicher Titel 30/30, gleiche
+Quelle 20/20, Altbestand 20/20, Freigaben ohne Rollentausch 27/30 (Rest
+bekannte Muster: Ortsname als Titel, KOBV-„ABGESAGT"-Fassung derselben
+Seite). Ein Regelfehler: `venueRelation` wertete ein bloßes Gattungswort
+(„Pfarrkirche" nach Abzug des eigenen Ortsnamens) als „derselbe Ort", weil
+es in „Stadtpfarrkirche" steckt; über `visibleTwin`, das Etiketten
+ignoriert, verband das auch Orte in verschiedenen Bundesländern (Allerseelen
+Würflach/Neunkirchen, Ebenau/Pinkafeld, Garsten/Gams). Seit PR #430 ist ein
+Gattungswort auf EINER Seite schon kein Ortsbeleg mehr (Golden-Set-Fall);
+12 Zuordnungen weniger, 7 davon waren falsch. Freigabe per
+workflow_dispatch (Bestand bis 11.000, Freigaben bis 500, nur AT), Lauf
+41672206499: `written` mit 14.059 neuen Duplikaten (10.116 Bestand, 1.831
+Zulauf, 2.112 Serie), 283 Freigaben, 9 Müll. Der erste Versuch
+(41660374198) schrieb nichts: Der Runner erreichte api.lasstreffen.at von
+15:17 bis 15:23 UTC nicht (Connect-Timeout), zeitgleich baute ein Deploy auf
+demselben Server (Next-Build 739 s statt 83 s). Ventil-Stopps nicht
+während eines Deploys freigeben. `dedup_audit` danach: AT 114 sichtbare
+Restdubletten (vorher 8.402, vor dem Rückstau 67 bis 83), Grenze 100,
+also noch rot. 13 Paare entstanden erst während des Laufs, 71 entsprechen
+dem alten Normalstand, 30 sind ein neues Innsbruck-Muster: gemeinde-registry
+liest innsbrucktermine.at seit der Cursor-Welle und führt für 27 Seiten
+mehrere Zeilen am selben Tag, die sich um volle Stunden unterscheiden
+(je ein anderer `?date=`-Wert der Listen-URL). Die passende Feratel-Zeile
+passt dann zu zwei „verschiedenen" Registry-Terminen, der
+Mehrdeutigkeitsschutz verbindet sie zu Recht mit keinem. Beispiel Jazz &
+Apéro 18.11.: Seite zeigt 17:30 bis 20:30, Registry hat 17:30 und 18:30,
+Feratel 18:30. An der Quelle zu beheben (Registry-Parser für
+innsbrucktermine), nicht im Dedup.
+
 Offen und an der Quelle zu beheben (keine Dedup-Fehler):
 - Gutschein-Produkte mit Platzhalterdatum 31.12.2030 (veranstaltungskalender.net).
 - Müllabfuhr-Termine (entschieden 2026-10-14, siehe unten).
