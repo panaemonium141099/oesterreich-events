@@ -8,6 +8,7 @@ import { BlogTicketBox } from '@/components/Blog/BlogTicketBox';
 import { TourBox } from '@/components/Affiliate/TourBox';
 import { BlogStayBox } from '@/components/Blog/BlogStayBox';
 import { BlogStayList } from '@/components/Blog/BlogStayList';
+import BlogProse from '@/components/Blog/BlogProse';
 import { RelatedEvents } from '@/components/Blog/RelatedEvents';
 import { AdSlot } from '@/components/Ads/AdSlot';
 // AdSlot removed in fn-15.4 — Google AdSense was pulled completely (property
@@ -519,7 +520,7 @@ export default async function BlogPostPage({
             <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-5">
               {post.historyTitle}
             </h2>
-            <p className="text-gray-600 leading-relaxed text-lg">{post.history}</p>
+            <BlogProse text={post.history} />
           </section>
 
           {/* Fun Facts — belegte Kuriositäten, nur wenn der Post welche hat */}
@@ -623,7 +624,7 @@ export default async function BlogPostPage({
             <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-5">
               {post.whatToExpectTitle}
             </h2>
-            <p className="text-gray-600 leading-relaxed text-lg mb-6">{post.whatToExpect}</p>
+            <BlogProse text={post.whatToExpect} className="mb-6" />
             <ul className="space-y-3">
               {post.whatToExpectList.map((item, i) => (
                 <li key={i} className="flex items-start gap-4 text-gray-700">
