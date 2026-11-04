@@ -9,12 +9,19 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { appleAddress, hwPageUrl, hwWhen, parseHwList } from '@/lib/scrapers/de/hw';
 import { HwDeScraper, hwGroups, imageAllowed, parentPath } from '@/lib/scrapers/de/HwDeScraper';
 import { toSupabaseRow } from '@/lib/db/supabase-sync';
 import type { FeedGroup } from '@/lib/registry-de/load';
 import type { RegistryEntryDe } from '@/lib/registry-de/build';
+
+// Der Freigabevertrag misst gegen die Uhr (start_in_past); sie steht
+// deshalb auf dem Abrufdatum der Fixtures, sonst kippen die Zeilen mit jedem
+// Tag (Gemeinde-Dienst-Termine Anfang November 2026 waren ab 03.11. rot und
+// hielten jedes Deploy auf).
+beforeAll(() => vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-30T12:00:00Z') }));
+afterAll(() => vi.useRealTimers());
 
 const fx = (f: string) => readFileSync(join(__dirname, 'fixtures', 'hw', `${f}.html`), 'utf8');
 
