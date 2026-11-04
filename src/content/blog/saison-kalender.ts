@@ -30,6 +30,8 @@
  * automatisch, sondern öffnet einen PR zum Nachprüfen.
  */
 
+import type { SaisonTopic } from '../../lib/blog/saison-events';
+
 /** Ein geprüfter Fakt: erscheint wörtlich in der „Auf einen Blick"-Box. */
 export interface SaisonFact {
   label: string;
@@ -52,8 +54,15 @@ export interface SaisonGuideSpec {
   searchKeywords: string[];
   /** Event-Recherche: Saison-Fenster relativ zum Publish [von, bis] in Monaten. */
   monthsAhead: [number, number];
-  /** Event-Kategorien (Taxonomie-Werte) für die DB-Recherche. */
+  /** Event-Kategorien (Taxonomie-Werte) für die DB-Recherche (füllen nur auf, wenn `topic` zu wenig liefert). */
   categories: string[];
+  /**
+   * Programm zum Thema: Titel-Suchwörter im festen Saison-Fenster. Diese
+   * Events tragen den Guide; nur ohne Treffer darf er „noch nicht
+   * angekündigt" schreiben, und er wird nachgezogen, sobald Programm kommt
+   * (src/lib/blog/saison-events.ts).
+   */
+  topic?: SaisonTopic;
   /** Bestands-Posts als interne Link-Kandidaten (Slugs). */
   bestandsPosts: string[];
   /** Themen-Seiten: was die Seite abdecken muss (Recherche-Auftrag an Gemini). */
@@ -87,6 +96,10 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     ],
     monthsAhead: [0, 2],
     categories: ['Kultur & Bühne'],
+    topic: {
+      keywords: ['lange nacht der museen'],
+      window: { from: '09-25', to: '10-10' },
+    },
     bestandsPosts: ['ars-electronica-festival', 'viennale'],
     brief: [
       'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Erkläre das Prinzip (ein Ticket für alle teilnehmenden Häuser),',
@@ -129,6 +142,10 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     ],
     monthsAhead: [0, 2],
     categories: ['Märkte & Feste', 'Familie & Kinder', 'Nightlife & Party'],
+    topic: {
+      keywords: ['halloween', 'grusel', 'kürbis', 'kuerbis'],
+      window: { from: '10-10', to: '11-01' },
+    },
     bestandsPosts: ['nationalfeiertag-oesterreich'],
     brief: [
       'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Gliedere die Saison in ihre Phasen (Kürbiszeit, Warm-Up, Kernwoche, Peak).',
@@ -169,6 +186,10 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     ],
     monthsAhead: [0, 2],
     categories: ['Kultur & Bühne', 'Familie & Kinder', 'Märkte & Feste'],
+    topic: {
+      keywords: ['nationalfeiertag', 'tag der offenen tür', '26. oktober'],
+      window: { from: '10-24', to: '10-26' },
+    },
     bestandsPosts: ['halloween-oesterreich', 'lange-nacht-der-museen'],
     brief: [
       'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Beantworte zuerst die Suchfrage: was hat offen, was nicht, wie fahren',
@@ -214,6 +235,10 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     ],
     monthsAhead: [1, 4],
     categories: ['Märkte & Feste'],
+    topic: {
+      keywords: ['christkindl', 'adventmarkt', 'weihnachtsmarkt', 'adventzauber', 'advent in', 'adventdorf'],
+      window: { from: '11-10', to: '12-24' },
+    },
     bestandsPosts: [
       'wien-christkindlmarkt', 'grazer-christkindlmarkt', 'linzer-christkindlmarkt',
       'salzburger-christkindlmarkt', 'innsbruck-christkindlmarkt',
@@ -250,6 +275,10 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     ],
     monthsAhead: [1, 4],
     categories: ['Märkte & Feste', 'Kultur & Bühne'],
+    topic: {
+      keywords: ['krampus', 'perchten', 'kramperl', 'nikolaus'],
+      window: { from: '11-15', to: '01-06' },
+    },
     bestandsPosts: ['christkindlmaerkte-oesterreich'],
     brief: [
       'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Der wichtigste Erklärteil ist der Unterschied zwischen Krampus',
@@ -281,7 +310,12 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     searchKeywords: ['Silvester Wien', 'Silvester Österreich', 'Silvesterpfad', 'Neujahrskonzert Karten'],
     monthsAhead: [0, 2],
     categories: ['Märkte & Feste', 'Nightlife & Party', 'Musik'],
+    topic: {
+      keywords: ['silvester', 'neujahr', 'jahreswechsel', 'new year'],
+      window: { from: '12-30', to: '01-02' },
+    },
     bestandsPosts: ['wiener-silvesterpfad', 'wiener-neujahrskonzert'],
+    brief: 'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Decke ab: Silvesterpfade und Strassenfeste der Landeshauptstaedte, Silvesterbaelle, Silvesterkonzerte und Kabarett-Specials, Galadinner, Bergsilvester und Feuerwerke oder ihre Alternativen, das Neujahrskonzert und die Neujahrskonzerte der Bundeslaender. Nenne Veranstaltungen nur aus den bereitgestellten Events oder, als jaehrliche Tradition ohne Termin, aus der Recherche.',
   },
 
   // ── Winter & Frühjahr ───────────────────────────────────────────────────
@@ -297,7 +331,13 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     searchKeywords: ['Ballkalender Wien', 'Faschingsumzug Termine', 'Opernball', 'Bälle Österreich'],
     monthsAhead: [1, 3],
     categories: ['Kultur & Bühne', 'Märkte & Feste', 'Musik'],
+    topic: {
+      keywords: ['ball', 'fasching', 'gschnas', 'maskenball', 'faschingsumzug'],
+      excludeKeywords: ['fußball', 'fussball', 'handball', 'volleyball', 'basketball', 'paintball', 'football', 'baseball', 'floorball', 'netball'],
+      window: { from: '01-01', to: '02-28' },
+    },
     bestandsPosts: ['wiener-opernball', 'villacher-fasching'],
+    brief: 'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Decke ab: die grossen Wiener Baelle, Baelle in den Landeshauptstaedten, Faschingsumzuege und Gschnas, Villacher und Mondseer Fasching, Faschingsdienstag, was man anzieht und wie man Karten bekommt. Nenne Veranstaltungen nur aus den bereitgestellten Events oder, als jaehrliche Tradition ohne Termin, aus der Recherche.',
   },
   {
     liveBy: '02-20',
@@ -311,7 +351,12 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     searchKeywords: ['Ostermarkt Wien', 'Ostermärkte Österreich', 'Frühlingsfest', 'Narzissenfest'],
     monthsAhead: [1, 3],
     categories: ['Märkte & Feste', 'Familie & Kinder'],
+    topic: {
+      keywords: ['ostermarkt', 'osterfest', 'ostereier', 'osterhase', 'frühlingsfest', 'fruehlingsfest', 'narzissenfest', 'blütenfest'],
+      window: { from: '03-05', to: '04-25' },
+    },
     bestandsPosts: ['bregenzer-fruehling', 'narzissenfest'],
+    brief: 'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Decke ab: Ostermaerkte in den Staedten und auf Schloessern, Osterbraeuche (Ratschen, Osterfeuer, Palmbuschen), Fruehlingsfeste, Narzissenfest, Blumenmaerkte, Ausfluege mit Kindern in den Osterferien. Nenne Veranstaltungen nur aus den bereitgestellten Events oder, als jaehrliche Tradition ohne Termin, aus der Recherche.',
   },
   {
     liveBy: '04-15',
@@ -325,7 +370,13 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     searchKeywords: ['Festivals Österreich', 'Musikfestival Sommer', 'Festival Tickets', 'Open Air Österreich'],
     monthsAhead: [1, 4],
     categories: ['Musik'],
+    topic: {
+      keywords: ['festival', 'open air'],
+      excludeKeywords: ['filmfestival', 'theaterfestival', 'literaturfestival'],
+      window: { from: '06-01', to: '08-31' },
+    },
     bestandsPosts: ['nova-rock-2026', 'frequency-festival-2026', 'donauinselfest-2026', 'salzburger-festspiele'],
+    brief: 'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Decke ab: die grossen Musikfestivals (Rock, Pop, Electronic), Gratis-Festivals wie das Donauinselfest, kleine Genre-Festivals je Bundesland, Camping und Anreise, Ticketphasen. Nenne Veranstaltungen nur aus den bereitgestellten Events oder, als jaehrliche Tradition ohne Termin, aus der Recherche.',
   },
   {
     liveBy: '05-01',
@@ -339,7 +390,12 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     searchKeywords: ['Open Air Kino Wien', 'Sommerkino', 'Sommernachtskonzert', 'Open Air Veranstaltungen'],
     monthsAhead: [1, 3],
     categories: ['Kultur & Bühne', 'Musik'],
+    topic: {
+      keywords: ['open air kino', 'open-air-kino', 'sommerkino', 'kino unter sternen', 'freiluftkino', 'sommernacht', 'kino am'],
+      window: { from: '06-15', to: '08-31' },
+    },
     bestandsPosts: ['linzer-klangwolke', 'sommernachtskonzert-schoenbrunn'],
+    brief: 'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Decke ab: Open-Air-Kinos in den Staedten und am Land, Sommernachtskonzerte, Klangwolke, Sommerbuehnen, was bei Regen passiert, was man mitnimmt. Nenne Veranstaltungen nur aus den bereitgestellten Events oder, als jaehrliche Tradition ohne Termin, aus der Recherche.',
   },
   {
     liveBy: '08-01',
@@ -353,7 +409,12 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     searchKeywords: ['Herbstfeste Österreich', 'Erntedankfest', 'Almabtrieb Termine', 'Weinlesefest'],
     monthsAhead: [0, 3],
     categories: ['Märkte & Feste', 'Essen & Trinken', 'Kultur & Bühne'],
+    topic: {
+      keywords: ['erntedank', 'almabtrieb', 'weinlese', 'herbstfest', 'kirtag', 'weinherbst', 'sturmfest', 'kürbisfest', 'kastanienfest'],
+      window: { from: '09-01', to: '10-31' },
+    },
     bestandsPosts: ['kaiser-wiesn', 'aufsteirern', 'retz-weinlesefest', 'martinimarkt'],
+    brief: 'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Decke ab: Erntedankfeste, Almabtriebe, Weinlesefeste und Sturmzeit, Kirtage, Kuerbis- und Kastanienfeste, Wiesn-Formate, Herbstmaerkte. Nenne Veranstaltungen nur aus den bereitgestellten Events oder, als jaehrliche Tradition ohne Termin, aus der Recherche.',
   },
 ];
 

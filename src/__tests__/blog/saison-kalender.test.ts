@@ -110,6 +110,24 @@ describe('SAISON_KALENDER', () => {
     }
   });
 
+  it('trägt zu jedem Eintrag ein Thema mit Suchwörtern und gültigem MM-TT-Fenster, sonst zieht der Guide Events nach Score statt nach Saison', () => {
+    const MMDD = /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+    for (const s of SAISON_KALENDER) {
+      expect(s.topic, s.slug).toBeTruthy();
+      expect(s.topic!.keywords.length, s.slug).toBeGreaterThan(0);
+      for (const k of [...s.topic!.keywords, ...(s.topic!.excludeKeywords ?? [])]) {
+        expect(k, `${s.slug}: "${k}"`).toBe(k.toLowerCase().trim());
+        expect(k, `${s.slug}: "${k}"`).not.toMatch(/[,()*]/);
+      }
+      expect(s.topic!.window.from, s.slug).toMatch(MMDD);
+      expect(s.topic!.window.to, s.slug).toMatch(MMDD);
+    }
+  });
+
+  it('gibt jedem Eintrag einen Rechercheauftrag, damit die Websuche für jeden Guide läuft', () => {
+    for (const s of SAISON_KALENDER) expect(s.brief, s.slug).toBeTruthy();
+  });
+
   it('nutzt evergreen Slugs ohne Jahreszahl — sonst startet die Seite jedes Jahr ohne Autorität', () => {
     for (const s of SAISON_KALENDER) {
       expect(s.slug, s.slug).not.toMatch(/(19|20)\d{2}/);
