@@ -17,6 +17,8 @@ import {
   pickFestivals,
   pickLandingSelection,
   pickPosts,
+  PROGRAM_FROM_HOUR,
+  PROGRAM_GRACE_MS,
   readCountryTotal,
   unresolvedPrimaryIds,
   weekendWindow,
@@ -240,7 +242,10 @@ async function getLandingDataInner(now: Date): Promise<{ data: LandingData; fail
   const nowIso = now.toISOString();
   const today = viennaToday(now);
   const todayRange = viennaDayRange(today);
-  const programFrom = new Date(todayRange.start.getTime() + 17 * 3_600_000);
+  // Programm ab 17:00 Wien, bei späterem Render ab jetzt minus Gnadenfrist
+  // (die Auswahl in landing-picks schneidet gleich; sonst füllten die
+  // frühesten zehn des Abends den Pool und die Insel blendete sie aus).
+  const programFrom = new Date(Math.max(todayRange.start.getTime() + PROGRAM_FROM_HOUR * 3_600_000, now.getTime() - PROGRAM_GRACE_MS));
   const next7Start = viennaDayStart(addViennaDays(today, 7));
   const seasonEnd = viennaDayRange(addViennaDays(today, 13)).end;
   const weekendRange = weekendWindow(today);

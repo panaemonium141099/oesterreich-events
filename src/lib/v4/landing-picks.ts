@@ -232,18 +232,34 @@ export function pickTip(pins: LandingPin[], pool: Event[], today: string): Landi
 
 // ─── Programm und Wochenende ─────────────────────────────────────────────
 
+/** Programmzeilen bleiben bis 60 Minuten nach ihrem Beginn stehen (Server und Insel). */
+export const PROGRAM_GRACE_MS = 60 * 60_000;
+
 /**
  * Heute Abend: Events des Wiener Tags mit bekannter Startzeit ab 17:00,
  * nach Uhrzeit. Zeilen ohne echte Uhrzeit (Platzhalter 00:00/02:00) fallen
  * weg, sonst stünde „02:00" im Programm.
+ *
+ * Ab der Renderzeit `now` (minus Gnadenfrist) und nicht ab 17:00: die
+ * Insel blendet Zeilen aus, die über 60 Minuten laufen. Wählte der Server
+ * die zehn frühesten des Abends, blieben dem Leser um 19:28 zwei Zeilen und
+ * ab 19:31 keine, obwohl der Pool 19:00 bis 20:00 hatte (2026-11-04). Jede
+ * stündliche Revalidierung nimmt so die nächsten zehn kommenden Termine.
  */
-export function pickProgram(pool: Event[], today: string, excludeIds: Set<string>, count = PROGRAM_COUNT): Event[] {
+export function pickProgram(
+  pool: Event[],
+  today: string,
+  excludeIds: Set<string>,
+  count = PROGRAM_COUNT,
+  now: Date = new Date(),
+): Event[] {
+  const notBefore = now.getTime() - PROGRAM_GRACE_MS;
   const rows: Array<{ e: Event; t: number }> = [];
   for (const e of pool) {
     if (excludeIds.has(e.id) || !hasKnownStartTime(e)) continue;
     const d = parseEventDate(e.start_date);
     if (!d || toViennaDate(d) !== today) continue;
-    if (viennaFields(d).hour < PROGRAM_FROM_HOUR) continue;
+    if (viennaFields(d).hour < PROGRAM_FROM_HOUR || d.getTime() < notBefore) continue;
     rows.push({ e, t: d.getTime() });
   }
   return rows
@@ -328,7 +344,7 @@ export function pickLandingSelection(input: LandingSelectionInput): LandingSelec
   const season = pickSeasonEvents(editorial, input.seasonPool, used, SEASON_COUNT, now);
   for (const e of season) used.add(e.id);
 
-  const program = pickProgram(input.programPool, today, used);
+  const program = pickProgram(input.programPool, today, used, PROGRAM_COUNT, now);
   for (const e of program) used.add(e.id);
 
   const weekend = pickWeekend(input.weekendPool, used);
