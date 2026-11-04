@@ -5,7 +5,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { toSupabaseRow } from '@/lib/db/supabase-sync';
 import type { ScrapedEvent } from '@/types/events';
 import type { RegistryEntryDe } from '@/lib/registry-de/build';
@@ -20,6 +20,13 @@ import { communiceGroups } from '@/lib/scrapers/de/CommuniceDeScraper';
 import { mecGroups } from '@/lib/scrapers/de/MecDeScraper';
 import { DE_SCRAPERS, getDeScraperByName } from '@/lib/scrapers/de';
 import { feedGemeinden, namedMember } from '@/lib/scrapers/de/kontext';
+
+// Der Freigabevertrag misst gegen die Uhr (start_in_past); sie steht
+// deshalb auf dem Abrufdatum der Fixtures, sonst kippen die Zeilen mit jedem
+// Tag (Gemeinde-Dienst-Termine Anfang November 2026 waren ab 03.11. rot und
+// hielten jedes Deploy auf).
+beforeAll(() => vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-30T12:00:00Z') }));
+afterAll(() => vi.useRealTimers());
 
 const entry = (o: Partial<RegistryEntryDe>): RegistryEntryDe => ({
   ags: '01053114', name: 'X', land: 'schleswig-holstein', host: null, stufe: 'A', integration: 'ionas', url: null, checked_at: '2026-10-28', ...o,
