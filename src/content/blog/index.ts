@@ -231,6 +231,8 @@ import { post as festkonzertMit66Jahren2026 } from './posts/festkonzert-mit-66-j
 import { post as weihnachtskonzertFingerlosTschejefemFreunde2026 } from './posts/weihnachtskonzert-fingerlos-tschejefem-freunde-2026';
 import { post as jazzGrooveFestivalPrinzGrizzleyMitBand2026 } from './posts/jazz-groove-festival-prinz-grizzley-mit-band-2026';
 import { post as mariaMaTerzettFtUlliBaeerHommageAnGeorgDanzerDasA2026 } from './posts/maria-ma-terzett-ft-ulli-baeer-hommage-an-georg-danzer-das-a-2026';
+import { post as montiBetonsElvisNightGedenkkonzertZum50TodestagDesK2027 } from './posts/monti-betons-elvis-night-gedenkkonzert-zum-50-todestag-des-k-2027';
+import { post as vorchdorferNeujahrskonzert20272027 } from './posts/vorchdorfer-neujahrskonzert-2027-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -474,6 +476,8 @@ export const ALL_POSTS: FestivalPost[] = [
   weihnachtskonzertFingerlosTschejefemFreunde2026,
   jazzGrooveFestivalPrinzGrizzleyMitBand2026,
   mariaMaTerzettFtUlliBaeerHommageAnGeorgDanzerDasA2026,
+  montiBetonsElvisNightGedenkkonzertZum50TodestagDesK2027,
+  vorchdorferNeujahrskonzert20272027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
