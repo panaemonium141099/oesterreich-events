@@ -170,11 +170,19 @@ export function pickSeasonEvents(
 
 const DENIAL_RE = /(noch )?nicht (angekündigt|bekannt|veröffentlicht|festgelegt)|(noch )?keine?\s+\S*\s*(bekannt|angekündigt)|liegen (noch )?keine|nichts (angekündigt|bekannt)/i;
 const PROGRAMME_RE = /programm|veranstaltung|events?\b|termin|konzert|party|feier|fest\b|feste\b/i;
+/**
+ * Sätze über Details einzelner Veranstaltungen („das detaillierte
+ * Bühnenprogramm des Silvesterpfads ist noch nicht veröffentlicht") sind oft
+ * wahr und erlaubt; verboten ist nur die Pauschalaussage, das Programm der
+ * Saison sei unbekannt. Der erste Lauf nach PR #440 scheiterte an genau so
+ * einem Detail-Satz (2026-11-04).
+ */
+const DETAIL_RE = /detail|genaue|setlist|bühnenprogramm|buehnenprogramm|uhrzeit|einlass|ablauf|line-?up|besetzung/i;
 
 /**
  * Behauptet der Entwurf, das Programm sei unbekannt? Liefert den ersten
  * Satz, der ein Programmwort mit einer Verneinung verbindet, sonst undefined.
- * Preis-Sätze („Preise noch nicht bekannt") zählen nicht: die sind oft wahr.
+ * Preis-Sätze („Preise noch nicht bekannt") und Detail-Sätze zählen nicht.
  */
 export function deniesProgramme(draft: unknown): string | undefined {
   const texts: string[] = [];
@@ -188,6 +196,7 @@ export function deniesProgramme(draft: unknown): string | undefined {
     for (const sentence of text.split(/(?<=[.!?])\s+/)) {
       if (!DENIAL_RE.test(sentence)) continue;
       if (/preis|eintritt|kosten|€|euro/i.test(sentence)) continue;
+      if (DETAIL_RE.test(sentence)) continue;
       if (PROGRAMME_RE.test(sentence)) return sentence.trim();
     }
   }

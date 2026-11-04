@@ -106,9 +106,15 @@ describe('deniesProgramme', () => {
       intro: 'Dieser Guide hilft dir. Die konkreten Silvesterprogramme für 2026/27 sind in unserer Datenbank noch nicht angekündigt.',
     })).toMatch(/noch nicht angekündigt/);
     expect(deniesProgramme({
-      faqs: [{ answer: 'Termine, Bühnenprogramm und Uhrzeiten für 2026 sind noch nicht angekündigt.' }],
+      faqs: [{ answer: 'Konkrete Silvesterevents für 2026 sind bei uns noch nicht angekündigt.' }],
     })).toBeTruthy();
     expect(deniesProgramme({ keyFacts: { dates: 'Silvesternacht; konkrete Programme für 2026/27 sind in unserer Datenbank noch nicht angekündigt' } })).toBeTruthy();
+  });
+
+  it('lässt Detail-Aussagen zu einzelnen Veranstaltungen durch (Lauf 2026-11-04 scheiterte daran)', () => {
+    expect(deniesProgramme({ whatToExpect: 'Der Silvesterpfad läuft wieder in der Innenstadt. Das detaillierte Bühnenprogramm für heuer ist noch nicht veröffentlicht.' })).toBeUndefined();
+    expect(deniesProgramme({ faqs: [{ answer: 'Die genauen Uhrzeiten der Bühnen sind noch nicht bekannt.' }] })).toBeUndefined();
+    expect(deniesProgramme({ faqs: [{ answer: 'Termine, Bühnenprogramm und Uhrzeiten des Silvesterpfads für 2026 sind noch nicht angekündigt.' }] })).toBeUndefined();
   });
 
   it('lässt ehrliche Preisaussagen durch', () => {
