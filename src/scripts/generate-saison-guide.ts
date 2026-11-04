@@ -277,7 +277,7 @@ Schreibe auf Deutsch (de-AT). Der Guide soll Lesern helfen, die Saison zu planen
       historyTitle: { type: 'STRING' },
       history: { type: 'STRING', description: 'Hintergrund/Tradition der Saison, 1 Absatz' },
       whatToExpectTitle: { type: 'STRING' },
-      whatToExpect: { type: 'STRING' },
+      whatToExpect: { type: 'STRING', description: 'Mehrere Absätze, getrennt durch eine Leerzeile (\\n\\n); je Bundesland ein eigener Absatz, der mit dem fett gesetzten Namen beginnt (**Wien:** …), keine Großbuchstaben-Labels, kein durchgehender Fließtext' },
       whatToExpectList: { type: 'ARRAY', items: { type: 'STRING' }, description: '5-7 konkrete Highlights mit echten Event-Namen' },
       practicalInfoTitle: { type: 'STRING' },
       practicalInfo: {
