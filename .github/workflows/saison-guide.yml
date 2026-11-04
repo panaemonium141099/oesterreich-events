@@ -12,6 +12,13 @@
 #   • Fakten zu alt  -> PR zum Review, damit keine Vorjahrestermine live gehen.
 # Ein Eintrag ohne `facts` (reiner Sammel-Guide aus DB-Events) gilt als frisch.
 #
+# Nachziehen (seit 2026-11-04): ist kein neuer Guide faellig, prueft das
+# Script, ob ein geschriebener Guide inzwischen deutlich mehr Programm zum
+# Thema in der DB hat als beim letzten Stand (src/content/blog/saison-state.json)
+# und schreibt ihn dann neu (publishDate und Hero bleiben, updatedDate wandert).
+# Hintergrund: der Silvester-Guide vom 03.11. behauptete "Programm noch nicht
+# angekuendigt", waehrend ueber 300 Silvester-Events in der DB lagen.
+#
 # Secrets: CLAUDE_CODE_OAUTH_TOKEN (Abo-Token aus `claude setup-token`, seit
 # 2026-09-13 statt GEMINI_API_KEY), SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY.
 name: saison-guide
@@ -113,7 +120,11 @@ jobs:
             echo "Nichts zu committen — das Script haette failen muessen."
             exit 1
           fi
-          git commit -m "content(saison): $slug — Saison-Guide zur Frist"
+          if [ "${{ steps.gen.outputs.mode }}" = "refresh" ]; then
+            git commit -m "content(saison): $slug — Saison-Guide nachgezogen (Programm in der DB)"
+          else
+            git commit -m "content(saison): $slug — Saison-Guide zur Frist"
+          fi
           git push origin master
           gh workflow run deploy.yml --ref master
 

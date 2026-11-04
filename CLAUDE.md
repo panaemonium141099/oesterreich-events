@@ -370,7 +370,17 @@ node / next.js
   `/api/admin/landing-feature` mit `kind='sponsored'` + `sponsor_name`
   (Pflicht), Überschneidung → 409, UI `/admin/boost`, danach `revalidateLanding()`
 - `src/app/blog/…` + `src/content/blog/posts/` — 64 Posts;
-  `src/components/Blog/BlogTicketBox.tsx` = Affiliate-Ticket-Box (Eventim)
+  `src/components/Blog/BlogTicketBox.tsx` = Affiliate-Ticket-Box (Eventim).
+  Saison-Guides (`saison-guide.yml`, `generate-saison-guide.ts`, Kalender
+  `src/content/blog/saison-kalender.ts`): jeder Eintrag trägt ein `topic`
+  (Titel-Suchwörter im festen Saison-Fenster, `src/lib/blog/saison-events.ts`),
+  diese Events tragen den Guide, Kategorie-Events füllen nur auf. „Noch nicht
+  angekündigt" nur bei leerer Themenabfrage (Gate `deniesProgramme`); Websuche
+  für jeden Guide (was jedes Jahr wiederkehrt, mit Quelle), Termine und Preise
+  weiter nur aus `facts` und DB-Events. Nachziehen: ohne fälligen neuen Guide
+  schreibt das Script einen bestehenden neu, sobald die Themenabfrage deutlich
+  mehr liefert als in `saison-state.json` (Silvester 2026-11-03: „kein
+  Programm" bei über 300 Silvester-Events in der DB).
 - `src/components/Events/v4/V4TicketBox.tsx` — Ticket-CTA Event-Detail
   (Eventim-exklusiv, data-track="ticket_click")
 - `src/components/Analytics/` — PageviewTracker + ClickTracker (global im Layout)
