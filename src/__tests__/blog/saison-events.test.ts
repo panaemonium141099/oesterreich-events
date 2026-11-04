@@ -101,7 +101,7 @@ describe('pickSeasonEvents', () => {
 });
 
 describe('deniesProgramme', () => {
-  it('findet die Sätze des Silvester-Guides vom 03.11.2026', () => {
+  it('findet die Sätze des Silvester-Guides vom 03.11.2026 (Bezug auf unser Wissen)', () => {
     expect(deniesProgramme({
       intro: 'Dieser Guide hilft dir. Die konkreten Silvesterprogramme für 2026/27 sind in unserer Datenbank noch nicht angekündigt.',
     })).toMatch(/noch nicht angekündigt/);
@@ -109,16 +109,17 @@ describe('deniesProgramme', () => {
       faqs: [{ answer: 'Konkrete Silvesterevents für 2026 sind bei uns noch nicht angekündigt.' }],
     })).toBeTruthy();
     expect(deniesProgramme({ keyFacts: { dates: 'Silvesternacht; konkrete Programme für 2026/27 sind in unserer Datenbank noch nicht angekündigt' } })).toBeTruthy();
+    expect(deniesProgramme({ whatToExpect: 'Für alle vier gilt: Die Details für Silvester 2026 sind bei uns noch nicht angekündigt.' })).toBeTruthy();
   });
 
-  it('lässt Detail-Aussagen zu einzelnen Veranstaltungen durch (Lauf 2026-11-04 scheiterte daran)', () => {
+  it('lässt belegte Aussagen über einzelne Veranstaltungen durch (daran scheiterten die Läufe am 04.11.2026)', () => {
     expect(deniesProgramme({ whatToExpect: 'Der Silvesterpfad läuft wieder in der Innenstadt. Das detaillierte Bühnenprogramm für heuer ist noch nicht veröffentlicht.' })).toBeUndefined();
-    expect(deniesProgramme({ faqs: [{ answer: 'Die genauen Uhrzeiten der Bühnen sind noch nicht bekannt.' }] })).toBeUndefined();
+    expect(deniesProgramme({ whatToExpectList: ['**Salzburg.** Die Altstadt feiert jedes Jahr rund um Dom und Kapitelplatz; das offizielle Gesamtprogramm 2026 ist laut Recherche noch nicht veröffentlicht.'] })).toBeUndefined();
     expect(deniesProgramme({ faqs: [{ answer: 'Termine, Bühnenprogramm und Uhrzeiten des Silvesterpfads für 2026 sind noch nicht angekündigt.' }] })).toBeUndefined();
   });
 
   it('lässt ehrliche Preisaussagen durch', () => {
-    expect(deniesProgramme({ keyFacts: { price: 'Je nach Veranstaltung; Preise für Silvester 2026 noch nicht angekündigt' } })).toBeUndefined();
+    expect(deniesProgramme({ keyFacts: { price: 'Je nach Veranstaltung; Preise sind bei uns für Silvester 2026 noch nicht bekannt' } })).toBeUndefined();
   });
 
   it('meldet nichts bei einem Guide, der über das Programm schreibt', () => {

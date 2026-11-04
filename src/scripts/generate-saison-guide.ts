@@ -223,7 +223,7 @@ async function generateDraft(
   // Themenabfrage, nicht das Modell: mit Programm in der DB ist der Satz falsch.
   const programmeBlock = spec.topic
     ? pick.programmeKnown
-      ? `PROGRAMM ZUM THEMA: Unsere Datenbank kennt ${pick.topicCount} Veranstaltungen zu „${spec.title}" in dieser Saison, ${events.length} davon stehen unten. Das Programm IST bekannt. Schreibe nirgends, das Programm der Saison sei noch nicht angekündigt oder bekannt; schreibe über diese Veranstaltungen. Erlaubt bleibt, dass Details einer einzelnen Veranstaltung (Bühnenprogramm, Uhrzeiten, Setlist) laut Recherche noch nicht veröffentlicht sind.`
+      ? `PROGRAMM ZUM THEMA: Unsere Datenbank kennt ${pick.topicCount} Veranstaltungen zu „${spec.title}" in dieser Saison, ${events.length} davon stehen unten. Das Programm IST bekannt. Schreibe nirgends, uns oder unserer Datenbank sei das Programm noch nicht bekannt; schreibe über diese Veranstaltungen. Erlaubt bleibt, belegt und auf die einzelne Veranstaltung bezogen, dass deren Details (Bühnenprogramm, Uhrzeiten, Setlist) laut Veranstalter oder Recherche noch nicht veröffentlicht sind.`
       : `PROGRAMM ZUM THEMA: Unsere Datenbank kennt noch keine Veranstaltung zu „${spec.title}" in dieser Saison. Sag das an EINER Stelle ehrlich, aber mach daraus keinen Refrain. Erzähle stattdessen aus der Recherche, was jedes Jahr wiederkehrt (mit „traditionell" oder „jedes Jahr", ohne Termin für dieses Jahr), und nutze die Events unten nur, wenn sie zum Thema passen.`
     : '';
   // Die geprüften Fakten sind die einzige gültige Quelle für Termine und

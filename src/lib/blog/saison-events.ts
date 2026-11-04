@@ -169,20 +169,20 @@ export function pickSeasonEvents(
 }
 
 const DENIAL_RE = /(noch )?nicht (angekündigt|bekannt|veröffentlicht|festgelegt)|(noch )?keine?\s+\S*\s*(bekannt|angekündigt)|liegen (noch )?keine|nichts (angekündigt|bekannt)/i;
-const PROGRAMME_RE = /programm|veranstaltung|events?\b|termin|konzert|party|feier|fest\b|feste\b/i;
 /**
- * Sätze über Details einzelner Veranstaltungen („das detaillierte
- * Bühnenprogramm des Silvesterpfads ist noch nicht veröffentlicht") sind oft
- * wahr und erlaubt; verboten ist nur die Pauschalaussage, das Programm der
- * Saison sei unbekannt. Der erste Lauf nach PR #440 scheiterte an genau so
- * einem Detail-Satz (2026-11-04).
+ * Bezug auf unser eigenes Wissen. Alle falschen Sätze des Silvester-Guides
+ * vom 03.11.2026 hatten ihn („in unserer Datenbank noch nicht angekündigt",
+ * „bei uns noch nicht angekündigt"). Belegte Aussagen über einzelne
+ * Veranstaltungen („das Bühnenprogramm des Silvesterpfads ist laut
+ * Veranstalter noch nicht veröffentlicht") sind wahr und erlaubt; an zwei
+ * solchen Sätzen scheiterten die ersten Läufe nach PR #440.
  */
-const DETAIL_RE = /detail|genaue|setlist|bühnenprogramm|buehnenprogramm|uhrzeit|einlass|ablauf|line-?up|besetzung/i;
+const OWN_KNOWLEDGE_RE = /datenbank|bei uns|uns (noch )?(nicht )?bekannt|lasstreffen|wir (kennen|wissen|haben)/i;
 
 /**
- * Behauptet der Entwurf, das Programm sei unbekannt? Liefert den ersten
- * Satz, der ein Programmwort mit einer Verneinung verbindet, sonst undefined.
- * Preis-Sätze („Preise noch nicht bekannt") und Detail-Sätze zählen nicht.
+ * Behauptet der Entwurf, WIR kennten das Programm nicht? Liefert den ersten
+ * Satz, der eine Verneinung mit unserem eigenen Wissen verbindet, sonst
+ * undefined. Preis-Sätze („Preise bei uns noch nicht bekannt") zählen nicht.
  */
 export function deniesProgramme(draft: unknown): string | undefined {
   const texts: string[] = [];
@@ -193,11 +193,10 @@ export function deniesProgramme(draft: unknown): string | undefined {
   };
   walk(draft);
   for (const text of texts) {
-    for (const sentence of text.split(/(?<=[.!?])\s+/)) {
+    for (const sentence of text.split(/(?<=[.!?;])\s+/)) {
       if (!DENIAL_RE.test(sentence)) continue;
       if (/preis|eintritt|kosten|€|euro/i.test(sentence)) continue;
-      if (DETAIL_RE.test(sentence)) continue;
-      if (PROGRAMME_RE.test(sentence)) return sentence.trim();
+      if (OWN_KNOWLEDGE_RE.test(sentence)) return sentence.trim();
     }
   }
   return undefined;
