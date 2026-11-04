@@ -149,6 +149,10 @@ const OPTIONAL_SOURCES = new Set(['featured', 'artists', 'artistPrimaries', 'sta
  *
  *  - Build (2026-08-26): ein Deploy darf nie an der Tagesform der DB
  *    scheitern. Gescheiterte Sektionen bleiben leer, der Rest wird gebaut.
+ *    Damit so ein Build nicht eine Stunde lang ausgespielt wird, ruft
+ *    deploy.yml nach dem Health-Gate /api/cron/revalidate-landing auf und
+ *    holt `/` und `/en` einmal ab (2026-11-04: Saison-Karte auf /de leer,
+ *    /en voll, dieselbe Abfrage dreimal im statement timeout des Builds).
  *  - Laufzeit (ISR-Revalidierung): NICHT still leer rendern, sondern
  *    werfen. Next behält dann die letzte gute Seite und versucht es beim
  *    nächsten Aufruf erneut. Vorher wurde eine leere Sektion für eine
