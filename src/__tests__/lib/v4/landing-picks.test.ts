@@ -111,6 +111,22 @@ describe('pickProgram', () => {
     expect(out).toHaveLength(10);
     expect(out.map(e => e.id)).not.toContain('p0');
   });
+
+  it('nimmt ab der Renderzeit die nächsten Termine, nicht die frühesten des Abends (Befund 2026-11-04)', () => {
+    // Render um 19:28 Wien: die Insel blendet alles aus, was über 60 Minuten
+    // läuft. Wählt der Server die zehn frühesten ab 17:00, bleiben dem Leser
+    // zwei Zeilen und ab 19:31 keine, obwohl der Pool 19:00 bis 20:00 hat.
+    const render = new Date('2026-11-05T18:28:00Z');
+    const pool = [
+      ev('17', { start_date: '2026-11-05T16:00:00Z' }),   // 17:00: über 60 min her
+      ev('1815', { start_date: '2026-11-05T17:15:00Z' }), // 18:15: 73 min her
+      ev('1830', { start_date: '2026-11-05T17:30:00Z' }), // 18:30: innerhalb der Gnadenfrist
+      ev('19', { start_date: '2026-11-05T18:00:00Z' }),
+      ev('1930', { start_date: '2026-11-05T18:30:00Z' }),
+      ev('20', { start_date: '2026-11-05T19:00:00Z' }),
+    ];
+    expect(pickProgram(pool, TODAY, new Set(), 10, render).map(e => e.id)).toEqual(['1830', '19', '1930', '20']);
+  });
 });
 
 describe('pickLandingSelection: Tipp → Saison → Programm → Wochenende ohne Dubletten', () => {

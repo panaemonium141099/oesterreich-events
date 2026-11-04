@@ -19,6 +19,7 @@ import { Link } from '@/i18n/navigation';
 import { useViennaDay } from '@/lib/landing/vienna-day';
 import { weekdayLabel } from '@/lib/landing/day-labels';
 import { parseEventDate, toViennaDate } from '@/lib/utils/event-time';
+import { PROGRAM_GRACE_MS } from '@/lib/v4/landing-picks';
 
 export interface ProgramItem {
   id: string;
@@ -27,8 +28,8 @@ export interface ProgramItem {
   node: ReactNode;
 }
 
-/** Zeilen bleiben bis 60 Minuten nach ihrem Beginn stehen. */
-export const PROGRAM_GRACE_MS = 60 * 60_000;
+/** Zeilen bleiben bis 60 Minuten nach ihrem Beginn stehen (Konstante in landing-picks, wie der Server). */
+export { PROGRAM_GRACE_MS };
 
 /** Sichtbar: Start höchstens 60 Minuten her und am aktuellen Wiener Tag. */
 export function programRowVisible(start: string, now: Date, day: string): boolean {
