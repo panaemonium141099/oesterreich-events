@@ -31,3 +31,28 @@ jobs:
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh -o StrictHostKeyChecking=accept-new root@157.180.42.4 '/opt/app/deploy.sh'
+
+      # Die Startseite wird beim Build vorgerendert; scheitert dort eine
+      # Abfrage am statement_timeout (Build rendert hunderte Seiten
+      # parallel), bleibt die Sektion still leer und Next cacht die Seite
+      # eine Stunde (Saison-Karte leer: 2026-09-25 und 2026-11-04, nur /de).
+      # Deshalb nach dem Health-Gate einmal `revalidateLanding()` (curl auf
+      # /api/cron/revalidate-landing mit Bearer CRON_SECRET aus der Runtime-
+      # Env, wie der Timer um 00:05) und beide Sprachfassungen abrufen, damit
+      # der frische Render jetzt passiert und nicht erst beim ersten Besucher.
+      # Die Zahl der Saison-Picks steht im Log; sie ist kein Gate, weil eine
+      # Saison legitim leer sein kann.
+      - name: Startseite nach dem Build neu rendern
+        run: |
+          ssh -o StrictHostKeyChecking=accept-new root@157.180.42.4 '
+            set -eu
+            secret=$(sed -n "s/^CRON_SECRET=//p" /opt/app/.env.master | tr -d "\r\"\047")
+            curl -fsS -H "Authorization: Bearer $secret" http://127.0.0.1:3000/api/cron/revalidate-landing
+            echo
+            for path in / /en; do
+              for i in 1 2; do
+                html=$(curl -sS -H "Host: lasstreffen.at" -H "User-Agent: lt-deploy-warm" "http://127.0.0.1:3000$path")
+              done
+              echo "$path: $(printf "%s" "$html" | grep -o "season-pick-title" | wc -l) Saison-Picks, $(printf "%s" "$html" | grep -o "landing_tip_click" | wc -l) Tipp"
+            done
+          '

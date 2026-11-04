@@ -202,7 +202,11 @@ node / next.js
   `revalidateLanding()` (`src/lib/landing/revalidate-landing.ts`) neu, damit
   die Tagesausgabe nach Mitternacht den neuen Wiener Tag zeigt; geplant
   `OnCalendar=*-*-* 00:05:00 Europe/Vienna` (die übrigen Timer laufen in
-  UTC). Timer seit 2026-10-30 aktiv (MASTERPLAN §10.2 Punkt 5).
+  UTC). Timer seit 2026-10-30 aktiv (MASTERPLAN §10.2 Punkt 5). Dieselbe
+  Route ruft `deploy.yml` nach jedem Deploy auf und holt `/` und `/en` einmal
+  ab: der Build rendert eine Sektion still leer, wenn ihre Abfrage unter
+  Build-Last in den statement timeout läuft (2026-11-04 Saison-Karte, nur
+  /de), und die leere Seite läge sonst eine Stunde im ISR-Cache.
 - **Cloudflare (seit 2026-10-21) vor lasstreffen.at + www** (Free: Bot Fight
   Mode, WAF-Regeln, Cache nur statische Pfade); `api.lasstreffen.at` bleibt
   DNS-only. Caddy liest die Client-IP aus `CF-Connecting-IP` nur von
