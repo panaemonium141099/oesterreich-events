@@ -9,7 +9,7 @@
  * Tenors" (KUZ Eisenstadt) standen so in Wien, die Klagenfurter Eventim-
  * Zeile hing als Dublette dahinter.
  */
-import { describe, it, expect } from 'vitest';
+import { afterAll, beforeAll, describe, it, expect, vi } from 'vitest';
 import { extractFeratelDetail, type RawDetail } from '@/lib/scrapers/feratel-details';
 import { feratelVenueBelongsToEvent, mergeFeratelDetail } from '@/lib/scrapers/FeratelScraper';
 import { resolveConservativeLocation } from '@/lib/location/conservative-resolution';
@@ -21,6 +21,12 @@ import { toSupabaseRow } from '@/lib/db/supabase-sync';
 import type { ScrapedEvent } from '@/types/events';
 
 const NOW = new Date('2026-10-14T12:00:00Z');
+
+// Der Freigabevertrag misst gegen die Uhr (start_in_past); sie steht deshalb auf
+// dem Tag der Prod-Fälle, sonst kippen die Zeilen, sobald ihr Termin vorbei ist
+// (ELVIS am 04.11.2026: ab 05.11. keine Bundesland-Korrektur mehr, Deploys rot).
+beforeAll(() => vi.useFakeTimers({ toFake: ['Date'], now: NOW }));
+afterAll(() => vi.useRealTimers());
 
 // Detail-Antworten wie in feratel_event_details (Prod 2026-10-14).
 const europolis = (street: string, company: string) => ({
