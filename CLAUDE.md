@@ -61,6 +61,14 @@ node / next.js
   Pflicht: `.github/workflows/tests.yml` läuft bei jedem PR und vor jedem
   Deploy (deploy.yml wartet darauf). Ein roter Test heißt Fehler beheben
   oder bewusst geänderte Erwartung nachziehen, nie „war schon rot".
+  Die Suite läuft auf einer festen Testuhr (`src/test/clock.ts`, `TEST_NOW`
+  = 2026-11-05, aus `setup.ts`): kein Test liest die echte Uhr, ein Ergebnis
+  ändert sich nie ohne Codeänderung. Nur `Date` steht, Timer laufen echt.
+  Anderer Tag: die Datei stellt ihre Uhr selbst (`vi.useFakeTimers({ toFake:
+  ['Date'], now })`); `vi.useRealTimers()` fällt auf den Testtag zurück;
+  Tests, die Dauern über `Date.now()` messen, rufen `useRealClock()`.
+  Wächter `test-clock.test.ts`. Vorher stoppten Fixture-Termine, die
+  vergangen waren, am 03.11. und 05.11.2026 jedes Deploy.
 
 ## Betrieb / Automatisierung (Stand 2026-07)
 - **GitHub Actions `scrape-events.yml`** (täglich 03:17): 10 lastbalancierte
