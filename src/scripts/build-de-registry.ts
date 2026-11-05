@@ -210,6 +210,25 @@ async function main(): Promise<void> {
     console.error(`${problems.length} Probleme:\n  ${problems.slice(0, 30).join('\n  ')}`);
     process.exit(1);
   }
+  // Feeds hängen an der Kalenderseite; teilt sich eine Seite zwei Integrationen,
+  // bleibt die andere unberührt (VG Baunach: communice neben Heimat-Info).
+  const onlyIntegration = arg('only');
+  if (onlyIntegration) {
+    const beforeEntry = new Map(before.map(e => [e.ags, e]));
+    for (const e of entries) {
+      const old = beforeEntry.get(e.ags);
+      if (!old) continue;
+      if (e.integration !== onlyIntegration) {
+        if (old.feed_url) e.feed_url = old.feed_url;
+        else delete e.feed_url;
+      }
+      if (e.fallback?.kind === 'verband' && e.fallback.integration !== onlyIntegration) {
+        const f = old.fallback?.kind === 'verband' ? old.fallback.feed_url : undefined;
+        if (f) e.fallback.feed_url = f;
+        else delete e.fallback.feed_url;
+      }
+    }
+  }
   const diff = diffRegistry(before, entries);
   // Unveränderte Einträge behalten ihr Prüfdatum, der Diff bleibt lesbar.
   const changedAgs = new Set(diff.changed.map(c => c.ags));

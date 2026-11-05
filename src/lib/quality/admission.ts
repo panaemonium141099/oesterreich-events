@@ -177,8 +177,8 @@ const PLACEHOLDER_LOCATIONS = new Set([
   '-', '--', '?',
 ]);
 
-/** Platzhalter-Orte aus Vorlagen: Musterort, Musterstadt, Musterstraße, … */
-const SAMPLE_PLACE = /\bmuster(?:ort|stadt|dorf|gemeinde|stra(?:ß|ss)e|str\.|platz|weg|park)\b/i;
+/** Platzhalter-Orte aus Vorlagen: Musterort, Musterstadt, Musterstraße, test-ort (Willingshausen 2026-11), … */
+const SAMPLE_PLACE = /\b(?:muster|test-?)(?:ort|stadt|dorf|gemeinde|stra(?:ß|ss)e|str\.|platz|weg|park)\b/i;
 
 /** Ortsname eines Online-Termins (auch der Resolver, Status `online`). */
 export const ONLINE_LOCATION_PATTERN = /^(online|onlineevent|online-event|online event|virtuell|virtual|webinar|livestream|zoom)\b/i;
