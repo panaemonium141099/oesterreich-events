@@ -79,6 +79,15 @@ describe('Freigabevertrag DE', () => {
     expect(evaluateAdmission({ title: 'Fest', start_date: '2027-09-26T09:00:00Z', location_name: 'Musterhaus Müller', country: 'DE', latitude: 50.26, longitude: 6.83 }, opts).reasons).not.toContain('placeholder_location');
   });
 
+  it('Demo-Termin mit „test-ort": Quarantäne (Willingshausen „Veranstaltung ohne Bild mit Kategorie")', () => {
+    const v = evaluateAdmission(
+      { title: 'Veranstaltung ohne Bild mit Kategorie', start_date: '2027-11-20T00:00:00Z', location_name: 'test-ort', address: 'test-straße 24, 32234 test-ort', postal_code: '32234', country: 'DE', latitude: 50.85, longitude: 9.25 },
+      opts,
+    );
+    expect(v.reasons).toContain('placeholder_location');
+    expect(evaluateAdmission({ title: 'Fest', start_date: '2027-09-26T09:00:00Z', location_name: 'Testzentrum Nord', country: 'DE', latitude: 50.26, longitude: 6.83 }, opts).reasons).not.toContain('placeholder_location');
+  });
+
   it('Österreich unverändert: Ortsname ohne Position bleibt zulässig', () => {
     const v = evaluateAdmission({ title: 'Konzert', start_date: '2027-03-01T18:00:00Z', location_name: 'Pfarrsaal', country: 'AT' }, opts);
     expect(v.reasons).not.toContain('no_position');

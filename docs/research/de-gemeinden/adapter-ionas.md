@@ -66,3 +66,34 @@ Titel, Datum, Uhrzeit und Ort korrekt. Die erste Stichprobe fand die Demo-Termin
   für AT und DE gemeinsam.
 * Titel ohne Präposition („Weihnachtsmarkt Bann“) bekommen im Amtskalender keine
   Gemeinde und bleiben in Quarantäne.
+
+## Nachtrag 2026-11-05: Feeds von GitHub aus bestätigt
+
+Workflow `registry-de-feeds.yml`, Läufe 42076962523 und 42079807137, 224 offene Seiten. Der
+ekom21-Server 80.69.201.211, von lokal seit dem 03.11. ohne Verbindung, antwortet aus GitHub
+Actions. Der Nachtlauf liest von dort, die Feeds sind also für ihn lesbar.
+
+* **Neu mit Feed: 142 Gemeinden, dazu 2 über ihre VG** (139 neue Kalender, 135 der Gemeinden
+  in Hessen). 18 der 139 Kalender sind leer, zusammen 12.650 Termine im Jahresfenster.
+* **Prüfstand aller ionas-Kalender:** automatische Schwellen bestanden (26.117 geliefert,
+  24.826 öffentlich, Müll-Titel 0,0 %, ohne Uhrzeit 6,8 %, Dubletten 0,0 %).
+* **Stichprobe 30 Termine aus den neuen Kalendern** (fester Zufall, aus GitHub, da die Seiten
+  lokal nicht antworten): Titel 30 von 30 wie im iCal, auf 13 Detailseiten zusätzlich wörtlich
+  bestätigt (HTTP 200). Datum und Uhrzeit bei 20 Terminen gleich dem iCal-Eintrag; 10 sind
+  Serien, deren Eintrag im Protokoll ein anderer Tag derselben UID war, der einzelne Tag ist
+  dort nicht nachgeprüft. Ein Treffer falsch: Demo-Termine der Vorlage in Willingshausen
+  („Veranstaltung ohne Bild mit Kategorie“, „test-ort“). Eine Suche über alle neuen Kalender
+  fand genau diese drei; der Freigabevertrag hält `test-ort` jetzt wie `Musterort` zurück.
+* **Quelle unverändert übernommen:** Bad Vilbel führt die Straße im Ortsfeld, Münchhausen die
+  PLZ „3117“. In beiden Fällen stimmt die Gemeinde. „Veranstaltungen November 2026“ (Breuberg)
+  ist ein Sammeleintrag der Quelle. Reinheim nennt „Musterstrasse 1, 12345 Reinheim“ bei einem
+  echten Konzert: bleibt zurückgehalten.
+
+**Noch ohne Feed: 314 Gemeinden, dazu 150 über ihre VG** (260 in Rheinland-Pfalz). 301 davon:
+Seite und verlinkte Kalenderseiten nennen keinen `events.json`, das CMS ist ionas, der Kalender
+aber nicht das Modul TVM. Geprüft sind die 14 größten Websites, je ein Abruf: bitburgerland.de
+(52 Gemeinden) und otterbach-otterberg.de betten einen Kalender anderer Herkunft per iframe ein
+(eifel-direkt.de, ehrenamt.vgo-o.de), hunsrueckmittelrhein.de verlinkt eine Skript-Ansicht,
+vg-wittlich-land.de ist ionas3 ohne Kalender-Export; bei den übrigen fand die Stichprobe keinen
+Export-Hinweis, ihr Kalender ist nicht einzeln untersucht. 7 HTTP 404, 2 ohne Verbindung,
+4 ohne Seite. Der Adapter liest sie nicht; der Bericht führt sie als „kein Kalender des Adapters“.
