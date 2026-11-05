@@ -152,7 +152,13 @@ export function parseEventfrogEvents(
   events: EventfrogEvent[],
   locations: Map<string, EventfrogLocation>,
   rubrics: RubricIndex,
-  fallbackCountry: string,
+  /**
+   * Land des Abrufs (`country=` der API), gilt für jede Zeile. Das Land der
+   * Location zählt nicht: dort steht bei einzelnen Häusern ein falsches
+   * (Wiener Stadthalle „DE“, ein Haus in Bochum „BE“, 2026-11-05). Der
+   * AT-Lauf schreibt so nur AT-Zeilen, der DE-Lauf nur DE-Zeilen.
+   */
+  country: string,
 ): { events: ScrapedEvent[]; stats: ParseStats } {
   const stats: ParseStats = {
     input: events.length, cancelled: 0, hidden: 0, noTitle: 0, noLocation: 0,
@@ -174,11 +180,13 @@ export function parseEventfrogEvents(
     }
     // Mehrere Locations kommen im Bestand nicht vor (0 von 3.455); die erste
     // bekannte gilt.
+    // Fehlt sie, liefert `/locations` zu dieser ID nichts, auch einzeln
+    // abgefragt (2026-11-05: 543 von 6.426 IDs in DE, 62 von 374 in AT).
+    // Adresse und Koordinaten gibt es dann nicht, das Event entfällt.
     const loc = e.locationIds.map((id) => locations.get(id)).find(Boolean);
     if (!loc) { stats.noLocation++; continue; }
 
     const { start, end } = normalizeTimes(e.begin, e.end);
-    const country = loc.country || fallbackCountry;
     const hasCoords = isPlausibleCoord(loc.lat, loc.lng);
     const rubric = rubrics.map(e.rubricId);
     // Zeilenumbrüche im HTML sind nur Leerraum; Absätze kommen aus den Tags.

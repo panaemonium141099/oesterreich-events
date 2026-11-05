@@ -6,16 +6,18 @@
  *
  * Env: EVENTFROG_API_KEY (Public-API-Key, NICHT der Organizer-Key),
  *      EVENTFROG_COUNTRIES (optional, Standard "AT"),
+ *      EVENTFROG_IMAGES=off (optional: Bilder nicht spiegeln, Events ohne Bild),
  *      plus Supabase env für den Schreibpfad.
  *
- * DE/CH bleiben vorerst aus dem Cron (lasstreffen.de folgt): DE sind
- * ~84.000 Events, deren Bilder und Pipeline-Last erst mit der .de-Seite
- * Sinn ergeben. Manuell geht `--country DE --dry-run` jederzeit.
+ * AT und DE laufen getrennt, je mit eigenem Bericht: AT in
+ * import-eventfrog.yml, DE als Job `eventfrog-de` des DE-Nachtlaufs
+ * (scrape-events-de.yml). CH ist in keinem Cron.
+ * Manuell geht `--country CH --dry-run` jederzeit.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { EventfrogClient, eventfrogApiKey } from '@/lib/eventfrog/client';
-import { fetchAndParseEventfrog, upsertEventfrogEvents } from '@/lib/eventfrog/import';
+import { eventfrogWorkflowName, fetchAndParseEventfrog, upsertEventfrogEvents } from '@/lib/eventfrog/import';
 import { startWorkflowRun, finishWorkflowRun } from '@/lib/reporting/workflow-run';
 
 // .env.local laden (tsx macht das nicht selbst).
@@ -50,7 +52,7 @@ async function main() {
   const countries = (arg('--country') ?? process.env.EVENTFROG_COUNTRIES ?? 'AT')
     .split(',').map((c) => c.trim().toUpperCase()).filter(Boolean);
 
-  const runId = dryRun ? null : await startWorkflowRun('import-eventfrog');
+  const runId = dryRun ? null : await startWorkflowRun(eventfrogWorkflowName(countries));
   // Ab Wiener Tagesbeginn: laufende mehrtägige Events (Ausstellungen) kommen mit.
   const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Vienna' });
   const client = new EventfrogClient(apiKey);
@@ -60,7 +62,7 @@ async function main() {
   for (const r of results) {
     const s = r.stats;
     log(`${r.country}: ${s.output}/${s.input} übernommen — Dauerangebot ${s.standingOffer}, abgesagt ${s.cancelled}, `
-      + `versteckt ${s.hidden}, ohne Titel ${s.noTitle}, ohne Location ${s.noLocation}`);
+      + `versteckt ${s.hidden}, ohne Titel ${s.noTitle}, Location von der API nicht geliefert ${s.noLocation}`);
     const top = Object.entries(s.standingOfferTitles).sort((a, b) => b[1] - a[1]).slice(0, 10);
     for (const [title, n] of top) log(`  Dauerangebot: ${String(n).padStart(4)}× ${title}`);
   }
@@ -89,7 +91,8 @@ async function main() {
     return;
   }
 
-  const r = await upsertEventfrogEvents(events, log);
+  const mirrorImages = process.env.EVENTFROG_IMAGES?.trim().toLowerCase() !== 'off';
+  const r = await upsertEventfrogEvents(events, log, { mirrorImages });
   log(`FERTIG — ${r.upserted} geschrieben, ${r.errors} Fehler, ${r.filtered} gefiltert, ${r.quarantined} zur Prüfung`);
 
   await finishWorkflowRun(runId, {
@@ -99,6 +102,7 @@ async function main() {
       ...Object.fromEntries(results.flatMap((x) => [
         [`${x.country} von der API`, x.stats.input],
         [`${x.country} Dauerangebote verworfen`, x.stats.standingOffer],
+        [`${x.country} Location von der API nicht geliefert`, x.stats.noLocation],
         [`${x.country} übernommen`, x.stats.output],
       ])),
       'in die DB geschrieben': r.upserted,
@@ -108,6 +112,10 @@ async function main() {
     },
     errors: r.errors > 0 ? [`${r.errors} Events konnten nicht geschrieben werden`] : [],
   });
+
+  // Ein abgewiesener Batch kostet 100 Events. Bis 2026-11-05 blieb der Lauf
+  // dabei grün und verlor so tagelang jeden Tag 100 AT-Events.
+  if (r.errors > 0) process.exitCode = 1;
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

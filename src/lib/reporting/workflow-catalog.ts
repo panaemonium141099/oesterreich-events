@@ -39,6 +39,16 @@ const CATALOG: Record<string, WorkflowInfo> = {
       'Liest die Kalender der deutschen Gemeinden (DE-Nachtlauf), bewertet die DE-Termine und entfernt Duplikate; getrennt vom AT-Lauf.',
     schedule: 'täglich 22:17 Wien',
   },
+  'import-eventfrog': {
+    name: 'Eventfrog-Import',
+    purpose: 'Liest die Events der Eventfrog Public API für Österreich ein.',
+    schedule: 'täglich',
+  },
+  'import-eventfrog-de': {
+    name: 'Eventfrog-Import DE',
+    purpose: 'Liest die Events der Eventfrog Public API für Deutschland ein; Teil des DE-Nachtlaufs, getrennt vom AT-Import.',
+    schedule: 'täglich mit dem DE-Nachtlauf (22:17 Wien)',
+  },
   'import-eventim': {
     name: 'Eventim-Import',
     purpose: 'Liest den Eventim-PFT-Feed ein und setzt die Affiliate-Deeplinks.',

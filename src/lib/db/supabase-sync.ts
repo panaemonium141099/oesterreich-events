@@ -49,6 +49,7 @@ import { districtForLocation, bundeslandForLocation } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { toUtcInstant } from '@/lib/pipeline/normalize-date';
 import { migrateSourceIds } from '@/lib/db/source-id-migration';
+import { wellFormed } from '@/lib/db/well-formed';
 import { plzRegionOfCountry, regionOfCountry, writesAustrianRegionColumns } from '@/lib/location/ortsdaten';
 import { deLandToId } from '@/lib/gemeinden/laender-de';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
@@ -1170,9 +1171,15 @@ export async function syncEventsToSupabase(
   if (rawEvents.length === 0) return empty();
   const startedMs = Date.now();
 
+  // Halbe Zeichen aus gekürzten Texten entfernen: eines davon kostet sonst
+  // den ganzen Schreib-Batch (well-formed.ts).
+  const wellFormedEvents = rawEvents.map(e => wellFormed(e));
+  const repaired = wellFormedEvents.filter((e, i) => e !== rawEvents[i]).length;
+  if (repaired > 0) console.log(`[supabase-sync] ${repaired} Events mit zerschnittenem Zeichen bereinigt`);
+
   // Nackte Wandzeiten der Scraper in echte Instants drehen, bevor
   // irgendjemand sie liest.
-  const events = normalizeEventTimestamps(rawEvents);
+  const events = normalizeEventTimestamps(wellFormedEvents);
 
   // Harte Verwerfungen (Titel/Datum/Zeitintervall) vor dem Schreiben.
   const { valid: validEvents, rejected: filtered, rejectionReasons } = filterValidEvents(events);
