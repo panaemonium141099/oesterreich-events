@@ -6,11 +6,17 @@
  * Schreibt `reports/abdeckung.json` (Artefakt des Nachtlaufs) und die
  * Tabellen in die GitHub-Zusammenfassung des Laufs. Liest nur.
  *
+ * Für Deutschland dazu die Gemeinden ohne Termin nach Ursache
+ * (coverage-causes.ts): aus den Berichten der Shards (`reports/kalender/`) und
+ * dem Stand des letzten Laufs (`reports/kalender-vorher/`) entsteht
+ * `reports/kalender-stand.json`, das Artefakt für die nächste Nacht, und
+ * `reports/gemeinden-ohne-termin.json`.
+ *
  *   npx tsx src/scripts/coverage-report.ts [--country AT|DE]
  *
  * Im getrennten Lauf (pipeline-country.ts) nur das eigene Land.
  */
-import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 import { POSTGREST_MAX_ROWS } from '../lib/db/fetch-all';
@@ -19,7 +25,9 @@ import { findGemeindeDe, loadGemeindenDe } from '../lib/gemeinden/de';
 import { normalizeGemeindeName } from '../lib/location/gemeinde-name';
 import { loadRegistryDe } from '../lib/registry-de/load';
 import { deNachtlaufScrapers } from '../lib/scrapers/de/nachtlauf';
+import { mergeKalenderStand, type KalenderZeile } from '../lib/scrapers/de/kalender-stand';
 import { buildCoverage, coverageTable, type CoverageEvent, type CoverageGemeinde, type IntegrationAssignment } from '../lib/pipeline/coverage';
+import { buildUrsachen, ursachenTabellen, websiteKey, type UrsachenBericht } from '../lib/pipeline/coverage-causes';
 import { viennaDayBoundsUtc } from '../lib/pipeline/dedup-evidence';
 import { viennaToday } from '../lib/utils/event-time';
 import { forCountry, pipelineCountry } from '../lib/pipeline/pipeline-country';
@@ -35,6 +43,19 @@ try {
 
 type Gem = { name?: string; plz?: string; bundesland?: string } | null;
 type Row = { id: string; country: string | null; source_name: string | null; gem: Gem };
+
+/** Berichte dieser Nacht und letzter Stand; null, wenn es weder das eine noch das andere gibt. */
+function kalenderStand(now: Date): KalenderZeile[] | null {
+  const reports = join(process.cwd(), 'reports');
+  const heuteDir = join(reports, 'kalender');
+  const vorherFile = join(reports, 'kalender-vorher', 'kalender-stand.json');
+  const heute: KalenderZeile[] = existsSync(heuteDir)
+    ? readdirSync(heuteDir).filter(f => f.endsWith('.json')).flatMap(f => JSON.parse(readFileSync(join(heuteDir, f), 'utf8')) as KalenderZeile[])
+    : [];
+  const vorher: KalenderZeile[] = existsSync(vorherFile) ? JSON.parse(readFileSync(vorherFile, 'utf8')) : [];
+  if (!heute.length && !vorher.length) return null;
+  return mergeKalenderStand(vorher, heute, now);
+}
 
 async function main(): Promise<void> {
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
@@ -94,6 +115,50 @@ async function main(): Promise<void> {
   })));
 
   const report = buildCoverage(gemeinden, events, integrations);
+
+  let ursachen: UrsachenBericht | null = null;
+  const stand = country === 'AT' ? null : kalenderStand(new Date());
+  if (stand) {
+    // Zurückgehaltene kommende Termine, die der Resolver einer Gemeinde gegeben hat.
+    const zurueckgehalten = new Set<string>();
+    const zurueckgehaltenWebsites = new Set<string>();
+    let gehalteneZeilen = 0;
+    let lastId: string | null = null;
+    for (;;) {
+      let q = forCountry(supabase
+        .from('events')
+        .select('id,country,source_name,source_url,gem:location_resolution->gemeinde')
+        .gte('start_date', fromIso)
+        .in('publish_status', ['needs_review', 'draft']), 'DE')
+        .order('id')
+        .limit(POSTGREST_MAX_ROWS);
+      if (lastId) q = q.gt('id', lastId);
+      const { data, error } = await q;
+      if (error) throw new Error(`coverage-report (zurückgehalten): ${error.message}`);
+      const page = (data ?? []) as unknown as (Row & { source_url: string | null })[];
+      if (page.length === 0) break;
+      for (const r of page) {
+        gehalteneZeilen++;
+        const id = gemeindeId(r.country, r.gem);
+        if (id) zurueckgehalten.add(id);
+        else if (r.source_name && r.source_url) zurueckgehaltenWebsites.add(websiteKey(r.source_name, r.source_url));
+      }
+      lastId = page[page.length - 1].id;
+    }
+    const adapterVon = new Map<string, string[]>();
+    for (const i of integrations) for (const ags of i.gemeindeIds) adapterVon.set(ags, [...new Set([...(adapterVon.get(ags) ?? []), i.adapter])]);
+    const integrationOf = new Map(registry.map(e => [e.ags, e.integration]));
+    ursachen = buildUrsachen({
+      gemeinden: loadGemeindenDe().map(g => ({ id: g.ags, region: g.land, integration: integrationOf.get(g.ags) ?? '(nicht in der Registry)' })),
+      sichtbar: new Set(events.filter(e => e.country === 'DE' && e.gemeindeId).map(e => e.gemeindeId!)),
+      zurueckgehalten,
+      zurueckgehaltenWebsites,
+      stand,
+      adapterVon,
+    });
+    console.log(`Zurückgehalten: ${gehalteneZeilen} kommende Zeilen, ${zurueckgehalten.size} Gemeinden mit Ortsentscheidung, ${zurueckgehaltenWebsites.size} Websites ohne.`);
+  }
+
   const md = [
     `## Abdeckung der Gemeinden (${new Date().toISOString().slice(0, 10)})`,
     '',
@@ -103,11 +168,15 @@ async function main(): Promise<void> {
     '',
     ...Object.entries(report.regions).flatMap(([c, rows]) => [coverageTable(`${c} je Bundesland`, rows), '']),
     ...(country === 'AT' ? [] : [coverageTable('DE je Integration (Termine des Adapters)', report.integrations)]),
+    ...(ursachen ? ['', ursachenTabellen(ursachen)] : country === 'AT' ? [] : ['', 'Kein Kalenderstand gefunden, keine Aufteilung nach Ursache.']),
   ].join('\n');
   console.log(md);
 
   mkdirSync(join(process.cwd(), 'reports'), { recursive: true });
-  writeFileSync(join(process.cwd(), 'reports', 'abdeckung.json'), JSON.stringify({ at: new Date().toISOString(), events: events.length, unmapped, ...report }, null, 1));
+  const { gemeinden: ohneTermin, ...ursachenKurz } = ursachen ?? { gemeinden: null };
+  writeFileSync(join(process.cwd(), 'reports', 'abdeckung.json'), JSON.stringify({ at: new Date().toISOString(), events: events.length, unmapped, ...report, ...(ursachen ? { ursachen: ursachenKurz } : {}) }, null, 1));
+  if (stand) writeFileSync(join(process.cwd(), 'reports', 'kalender-stand.json'), JSON.stringify(stand));
+  if (ohneTermin) writeFileSync(join(process.cwd(), 'reports', 'gemeinden-ohne-termin.json'), JSON.stringify(ohneTermin));
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${md}\n`);
 }
 

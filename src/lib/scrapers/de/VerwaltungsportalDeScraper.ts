@@ -95,6 +95,7 @@ export class VerwaltungsportalDeScraper extends DeFeedScraper {
     // Prüfstand `de-amt-vg` (fn-29.17): nur Websites, die Gemeinden über ihr Amt lesen, ohne Cursor.
     const sites = this.onlyVerband ? vpGroups().filter(g => g.viaVerband.length > 0) : vpGroups();
     const groups = n ? spreadSample(sites, n) : this.onlyVerband ? sites : this.resumeAfterCursor(sites, g => g.host);
+    this.planCalendars(groups);
     const deadline = this.softDeadline();
     const all: ScrapedEvent[] = [];
     let done = 0;
@@ -103,7 +104,7 @@ export class VerwaltungsportalDeScraper extends DeFeedScraper {
         this.log(`Zeitbudget erreicht nach ${done} von ${groups.length} Websites${this.reachedCursor ? `; der nächste Lauf setzt nach „${this.reachedCursor}" fort` : ''}`);
         break;
       }
-      all.push(...await this.scrapeGroup(g));
+      all.push(...await this.inCalendar(g, () => this.scrapeGroup(g)));
       done++;
       // Endet das Budget mitten in der Website, liest der nächste Lauf sie neu.
       if (!n && !this.onlyVerband && !this.budgetSpent()) this.markReached(g.host);
@@ -165,7 +166,9 @@ export class VerwaltungsportalDeScraper extends DeFeedScraper {
         }
       }
     }
-    return withoutPlaceholderImages(collapseSourceDuplicates(events)).map(ev => this.toScraped(ev, g));
+    const unique = collapseSourceDuplicates(events);
+    this.noteTermine(unique);
+    return withoutPlaceholderImages(unique).map(ev => this.toScraped(ev, g));
   }
 
   toScraped(ev: VpEvent, g: VpGroup): ScrapedEvent {

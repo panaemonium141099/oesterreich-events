@@ -28,7 +28,7 @@ export class TribeDeScraper extends DeFeedScraper {
     const from = today.toISOString().slice(0, 10);
     const to = new Date(today.getTime() + 365 * 86_400_000).toISOString().slice(0, 10);
     const all: ScrapedEvent[] = [];
-    for (const g of groups) {
+    for (const g of groups) await this.inCalendar(g, async () => {
       const events: TribeEvent[] = [];
       for (let page = 1; page <= MAX_PAGES; page++) {
         const body = await this.fetchFeed(tribePageUrl(g.feedUrl, from, to, page));
@@ -44,8 +44,10 @@ export class TribeDeScraper extends DeFeedScraper {
         if (page >= p.totalPages) break;
         if (page === MAX_PAGES) this.log(`abgeschnitten nach ${MAX_PAGES} Seiten: ${g.feedUrl}`);
       }
-      all.push(...withoutPlaceholderImages(collapseSourceDuplicates(events)).map(ev => this.toScraped(ev, g)));
-    }
+      const unique = collapseSourceDuplicates(events);
+      this.noteTermine(unique);
+      all.push(...withoutPlaceholderImages(unique).map(ev => this.toScraped(ev, g)));
+    });
     this.log(`${groups.length} Feeds, ${all.length} Termine`);
     return all;
   }

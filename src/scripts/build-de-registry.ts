@@ -10,15 +10,25 @@
  * `.registry-cache/feeds.json`; ohne `--feeds` nutzt der Builder diesen Stand.
  * Am Ende gibt er den Unterschied zur bisherigen Registry aus.
  *
- * Aufruf: npm run build:registry:de [-- --feeds] [--csv <datei>]
+ * `--only <integration>`: nur die Seiten dieser Integration neu fragen. Ohne
+ * Cache gelten die Feeds der bisherigen Registry weiter, sonst fielen sie alle
+ * weg (Workflow `registry-de-feeds.yml`, läuft von dort, wo auch der Nachtlauf
+ * liest). `.registry-cache/feeds-log.json` nennt je Seite den Grund ohne Feed.
+ *
+ * Je Server (IP) nacheinander mit Pause (verwaltungsportal und GeoCMS sperren
+ * bei parallelen Abrufen auf ihren gemeinsamen Server); nach fünf Seiten ohne
+ * Verbindung in Folge fragt der Lauf diesen Server nicht weiter.
+ *
+ * Aufruf: npm run build:registry:de [-- --feeds] [--only ionas] [--csv <datei>]
  */
+import { lookup } from 'node:dns/promises';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadGemeindenDe } from '../lib/gemeinden/de';
 import { buildRegistry, diffRegistry, verbandHomeUrl, type ErhebungRow, type RegistryEntryDe } from '../lib/registry-de/build';
 import { calendarPageCandidates, feedFormat, feedUrlFromPage, looksLikeFeed } from '../lib/registry-de/feed-url';
 import { FEED_FROM_PAGE } from '../lib/registry-de/integrations';
-import { robotsAllows } from '../lib/registry-de/robots';
+import { robotsAllows, robotsCrawlDelay } from '../lib/registry-de/robots';
 
 const ROOT = process.cwd();
 const UA = 'Mozilla/5.0 (compatible; lasstreffen-registry/1.0)';
@@ -26,6 +36,10 @@ const UA_TOKEN = 'lasstreffen-registry';
 const OUT = join(ROOT, 'data', 'de-gemeinde-registry.json');
 const CACHE = join(ROOT, '.registry-cache');
 const FEEDS_FILE = join(CACHE, 'feeds-v3.json');
+const FEEDS_LOG = join(CACHE, 'feeds-log.json');
+/** Pause zwischen zwei Abrufen eines Servers, mindestens; Crawl-delay geht vor. */
+const PAUSE_MS = 1000;
+const SERVER_AUS_NACH = 5;
 
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
@@ -80,7 +94,8 @@ async function collectFeeds(rows: ErhebungRow[], known: Record<string, string | 
     // Amt/VG ohne Kalender-URL: Startseite, danach die belegten Standardseiten (fn-29.17).
     else if (FEED_FROM_PAGE.has(r.vb_integration) && r.vb_host?.trim()) pages.set(verbandHomeUrl(r.vb_host), r.vb_integration);
   }
-  const todo = [...pages].filter(([u]) => !(u in known));
+  const only = arg('only');
+  const todo = [...pages].filter(([u, integration]) => !(u in known) && (!only || integration === only));
   console.log(`Feed-Lauf: ${pages.size} Kalenderseiten, ${todo.length} offen`);
   const robots = new Map<string, Promise<string | null>>();
   const robotsOf = (url: string) => {
@@ -88,54 +103,101 @@ async function collectFeeds(rows: ErhebungRow[], known: Record<string, string | 
     if (!robots.has(origin)) robots.set(origin, fetchText(`${origin}/robots.txt`, 15000).then(r => (r && r.status < 400 ? r.text : null)));
     return robots.get(origin)!;
   };
-  const allowed = async (u: string) => robotsAllows(await robotsOf(u), u, UA_TOKEN);
-  /** Feed aus einer Seite lesen und nur übernehmen, wenn sein Abruf das erwartete Format liefert. */
-  const feedFrom = async (pageUrl: string, integration: string): Promise<string | null> => {
-    if (!(await allowed(pageUrl))) return null;
+  const log: Record<string, string> = {};
+  const pause = async (url: string) => {
+    const delay = robotsCrawlDelay(await robotsOf(url), UA_TOKEN) ?? 0;
+    await new Promise(r => setTimeout(r, Math.max(PAUSE_MS, delay * 1000)));
+  };
+  /** Feed aus einer Seite lesen und nur übernehmen, wenn sein Abruf das erwartete Format liefert; sonst der Grund. */
+  const feedFrom = async (pageUrl: string, integration: string): Promise<{ feed: string | null; reason: string }> => {
+    if (!robotsAllows(await robotsOf(pageUrl), pageUrl, UA_TOKEN)) return { feed: null, reason: 'robots' };
+    await pause(pageUrl);
     const page = await fetchText(pageUrl);
-    if (!page || page.status !== 200) return null;
+    if (!page) return { feed: null, reason: 'keine Verbindung' };
+    if (page.status !== 200) return { feed: null, reason: `HTTP ${page.status}` };
     const candidate = feedUrlFromPage(integration, page.text, page.url);
     const format = feedFormat(integration);
-    if (!candidate || !format || !(await allowed(candidate))) return null;
+    if (!candidate || !format) return { feed: null, reason: 'Seite nennt keinen Feed' };
+    if (!robotsAllows(await robotsOf(candidate), candidate, UA_TOKEN)) return { feed: null, reason: 'robots Feed' };
+    await pause(candidate);
     const feed = await fetchText(candidate);
-    return feed && feed.status === 200 && looksLikeFeed(format, feed.text) ? candidate : null;
+    if (!feed) return { feed: null, reason: 'keine Verbindung' };
+    if (feed.status !== 200) return { feed: null, reason: `Feed HTTP ${feed.status}` };
+    return looksLikeFeed(format, feed.text) ? { feed: candidate, reason: 'ok' } : { feed: null, reason: 'Feed-Format falsch' };
   };
+  // Seiten je Server: eine Warteschlange, nie zwei Abrufe gleichzeitig.
+  const servers = new Map<string, [string, string][]>();
+  for (const item of todo) {
+    const host = new URL(item[0]).hostname;
+    const ip = await lookup(host).then(r => r.address, () => `dns:${host}`);
+    servers.set(ip, [...(servers.get(ip) ?? []), item]);
+  }
+  const queue = [...servers].sort((a, b) => b[1].length - a[1].length);
   let done = 0;
   const worker = async () => {
-    while (todo.length) {
-      const [url, integration] = todo.shift()!;
-      let feed: string | null = null;
-      try {
-        feed = await feedFrom(url, integration);
-        // Die Erhebung hat oft eine Termin- oder Detailseite verlinkt: belegte
-        // Standardseiten des Herstellers als zweiter Versuch.
-        if (!feed) {
-          for (const candidate of calendarPageCandidates(integration, new URL(url).origin)) {
-            if (candidate === url) continue;
-            feed = await feedFrom(candidate, integration);
-            if (feed) break;
-          }
+    for (let next = queue.shift(); next; next = queue.shift()) {
+      const [server, items] = next;
+      let ohneVerbindung = 0;
+      for (const [url, integration] of items) {
+        if (ohneVerbindung >= SERVER_AUS_NACH) {
+          // Kein Ergebnis: bleibt offen, der nächste Lauf fragt wieder.
+          log[url] = `Server ${server} antwortet nicht`;
+          continue;
         }
-      } catch { /* Seite nicht lesbar: kein Feed */ }
-      known[url] = feed;
-      if (++done % 100 === 0) {
-        writeFileSync(FEEDS_FILE, JSON.stringify(known));
-        process.stdout.write(`\r${done}/${pages.size}`);
+        let feed: string | null = null;
+        let reason = 'Seite nicht lesbar';
+        try {
+          ({ feed, reason } = await feedFrom(url, integration));
+          // Die Erhebung hat oft eine Termin- oder Detailseite verlinkt: belegte
+          // Standardseiten des Herstellers als zweiter Versuch.
+          if (!feed && reason !== 'keine Verbindung') {
+            for (const candidate of calendarPageCandidates(integration, new URL(url).origin)) {
+              if (candidate === url) continue;
+              const r = await feedFrom(candidate, integration);
+              if (r.feed) { feed = r.feed; reason = 'ok über Standardseite'; break; }
+            }
+          }
+        } catch { /* Seite nicht lesbar: kein Feed */ }
+        ohneVerbindung = reason === 'keine Verbindung' ? ohneVerbindung + 1 : 0;
+        log[url] = reason;
+        if (reason !== 'keine Verbindung') known[url] = feed;
+        if (++done % 100 === 0) {
+          writeFileSync(FEEDS_FILE, JSON.stringify(known));
+          process.stdout.write(`\r${done}/${todo.length}`);
+        }
       }
     }
   };
-  // --workers 1: seriell (fn-29.11: verwaltungsportal sperrte nach parallelen Abrufen).
+  // --workers 1: alle Server nacheinander.
   await Promise.all(Array.from({ length: Number(arg('workers') ?? 24) }, worker));
   writeFileSync(FEEDS_FILE, JSON.stringify(known));
-  console.log('');
+  writeFileSync(FEEDS_LOG, JSON.stringify(log, null, 1));
+  const gruende = new Map<string, number>();
+  for (const r of Object.values(log)) {
+    const k = r.replace(/^Server .* antwortet nicht$/, 'Server antwortet nicht');
+    gruende.set(k, (gruende.get(k) ?? 0) + 1);
+  }
+  console.log(`\nGründe: ${[...gruende].sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(', ')}`);
   return known;
+}
+
+/** Feeds der bisherigen Registry, je Kalenderseite wie in `buildRegistry`. */
+function feedsOfRegistry(entries: RegistryEntryDe[]): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const e of entries) {
+    if (e.url && e.feed_url) out[e.url] = e.feed_url;
+    const f = e.fallback;
+    if (f?.kind === 'verband' && f.feed_url) out[f.url ?? verbandHomeUrl(f.host)] = f.feed_url;
+  }
+  return out;
 }
 
 async function main(): Promise<void> {
   const csvFile = arg('csv') ?? join(ROOT, 'docs', 'research', 'de-gemeinden', 'data', 'vollerhebung-2026-10.csv');
   const rows = parseCsv(readFileSync(csvFile, 'utf8')) as unknown as ErhebungRow[];
   mkdirSync(CACHE, { recursive: true });
-  let known: Record<string, string | null> = existsSync(FEEDS_FILE) ? JSON.parse(readFileSync(FEEDS_FILE, 'utf8')) : {};
+  const before: RegistryEntryDe[] = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : [];
+  let known: Record<string, string | null> = existsSync(FEEDS_FILE) ? JSON.parse(readFileSync(FEEDS_FILE, 'utf8')) : arg('only') ? feedsOfRegistry(before) : {};
   if (process.argv.includes('--feeds')) known = await collectFeeds(rows, known);
   const feeds = new Map(Object.entries(known).filter((e): e is [string, string] => !!e[1]));
 
@@ -145,8 +207,14 @@ async function main(): Promise<void> {
     console.error(`${problems.length} Probleme:\n  ${problems.slice(0, 30).join('\n  ')}`);
     process.exit(1);
   }
-  const before: RegistryEntryDe[] = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : [];
   const diff = diffRegistry(before, entries);
+  // Unveränderte Einträge behalten ihr Prüfdatum, der Diff bleibt lesbar.
+  const changedAgs = new Set(diff.changed.map(c => c.ags));
+  const beforeByAgs = new Map(before.map(e => [e.ags, e]));
+  for (const e of entries) {
+    const old = beforeByAgs.get(e.ags);
+    if (arg('only') && old && !changedAgs.has(e.ags)) e.checked_at = old.checked_at;
+  }
   writeFileSync(OUT, JSON.stringify(entries, null, 0).replace(/\},\{/g, '},\n{') + '\n');
   const count = (k: keyof RegistryEntryDe) => entries.filter(e => e[k] !== undefined && e[k] !== null).length;
   console.log(`${entries.length} Einträge, Feed ${count('feed_url')}, Ausweichweg ${count('fallback')}`);

@@ -24,6 +24,7 @@ import {
   getScrapersForShard,
 } from '../lib/scrapers';
 import { getDeScrapersForShard } from '../lib/scrapers/de/nachtlauf';
+import { schreibeKalenderBericht } from '../lib/scrapers/de/kalender-stand';
 import { triggerLineupPipeline, triggerMatchArtists } from '../lib/post-scrape-hook';
 
 async function main() {
@@ -54,7 +55,12 @@ async function main() {
     }
     const subset = getDeScrapersForShard(parseInt(m[1], 10), parseInt(m[2], 10));
     console.log(`DE-Shard ${m[1]}/${m[2]}: ${subset.map(s => s.name).join(', ')}`);
-    await runAllScrapers(subset);
+    try {
+      await runAllScrapers(subset);
+    } finally {
+      // Stand je Kalender für den Abdeckungsbericht (Artefakt des Shards, kalender-stand.ts).
+      schreibeKalenderBericht(subset);
+    }
     return;
   } else if (shardIndex !== -1 && args[shardIndex + 1]) {
     // --shard i/N: deterministische Teilmenge für parallele CI-Jobs

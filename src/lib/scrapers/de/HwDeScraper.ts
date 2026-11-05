@@ -77,6 +77,7 @@ export class HwDeScraper extends DeFeedScraper {
     const robots = await this.robotsTxt(new URL(url).origin);
     if (!robotsAllows(robots, url, UA_TOKEN)) {
       this.log(`robots.txt sperrt ${url}`);
+      this.noteRobots();
       return null;
     }
     await this.sleep(Math.max(this.delayMs, (robotsCrawlDelay(robots, UA_TOKEN) ?? 0) * 1000));
@@ -124,15 +125,16 @@ export class HwDeScraper extends DeFeedScraper {
   async scrape(): Promise<ScrapedEvent[]> {
     const groups = this.pickGroups(hwGroups());
     const all: ScrapedEvent[] = [];
-    for (const g of groups) {
+    for (const g of groups) await this.inCalendar(g, async () => {
       const termine = await this.calendar(g.pageUrl);
+      this.noteTermine(termine);
       // Bilder nur, wo robots.txt sie freigibt (Hirsch-&-Wölfl-Kunden sperren
       // in der Regel `/fileadmin/` und Bildendungen).
       const robots = termine.length ? await this.robotsTxt(new URL(g.pageUrl).origin) : null;
       const allowed = termine.map(t => (t.image && !imageAllowed(robots, t.image) ? { ...t, image: undefined } : t));
       const unique = collapseSourceDuplicates(allowed.map(t => ({ ...t, uid: `${t.recordId}-${t.terminId ?? t.localDate}` })));
       all.push(...withoutPlaceholderImages(unique).map(t => this.toScraped(t, g)));
-    }
+    });
     this.log(`${groups.length} Kalender, ${all.length} Termine`);
     return all;
   }

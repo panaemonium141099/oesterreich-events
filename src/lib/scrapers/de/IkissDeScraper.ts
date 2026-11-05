@@ -72,11 +72,16 @@ export class IkissDeScraper extends DeFeedScraper {
 
   /** Seite lesen (robots.txt, Pause, Zeichensatz der Website), je URL einmal. */
   private async page(url: string): Promise<string | null> {
-    if (this.pages.has(url)) return this.pages.get(url)!;
+    if (this.pages.has(url)) {
+      const cached = this.pages.get(url)!;
+      this.noteCached(cached != null);
+      return cached;
+    }
     const robots = await this.robotsTxt(new URL(url).origin);
     let html: string | null = null;
     if (!robotsAllows(robots, url, UA_TOKEN)) {
       this.log(`robots.txt sperrt ${url}`);
+      this.noteRobots();
     } else {
       await this.sleep(Math.max(this.delayMs, (robotsCrawlDelay(robots, UA_TOKEN) ?? 0) * 1000));
       const res = await this.fetchHtml(url, { retries: 2, charset: true });
@@ -168,14 +173,16 @@ export class IkissDeScraper extends DeFeedScraper {
     let read = 0;
     for (const [host, hostGroups] of this.resumeGroups([...byHost], ([h]) => h)) {
       if (this.budgetSpent()) break;
-      for (const g of hostGroups) {
+      for (const g of hostGroups) await this.inCalendar(g, async () => {
         read++;
         const termine: IkissTermin[] = [];
         for (const d of await this.calendar(g.pageUrl)) {
           const key = `${new URL(d.url).host}|${d.fid}`;
-          if (taken.has(key)) continue;
+          // Schon gelesene Termine kommen aus dem Speicher: kein zusätzlicher Abruf.
           const t = await this.termin(d);
           if (!t) continue;
+          this.noteTermine([t]);
+          if (taken.has(key)) continue;
           taken.add(key);
           termine.push(t);
         }
@@ -183,7 +190,7 @@ export class IkissDeScraper extends DeFeedScraper {
         const allowed = termine.map(t => (t.image && !imageAllowed(robots, t.image) ? { ...t, image: undefined } : t));
         const unique = collapseSourceDuplicates(allowed.map(t => ({ ...t, uid: t.fid })));
         all.push(...withoutPlaceholderImages(unique).map(t => this.toScraped(t, g)));
-      }
+      });
       if (!this.budgetSpent()) this.groupDone(host);
     }
     this.log(`${read} von ${groups.length} Kalendern auf ${byHost.size} Websites, ${all.length} Termine`);

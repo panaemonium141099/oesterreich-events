@@ -21,14 +21,16 @@ export class EventsManagerDeScraper extends DeFeedScraper {
   async scrape(): Promise<ScrapedEvent[]> {
     const groups = this.pickGroups(feedGroups('eventsmanager'));
     const all: ScrapedEvent[] = [];
-    for (const g of groups) {
+    for (const g of groups) await this.inCalendar(g, async () => {
       const ics = await this.fetchFeed(g.feedUrl);
-      if (ics == null) continue;
+      if (ics == null) return;
       const events = parseEmIcs(ics);
       const complete = emCompleteDays(events);
       if (complete.length !== events.length) this.log(`Grenze erreicht: ${g.feedUrl} (${events.length} Termine, letzter Tag ausgelassen)`);
-      all.push(...withoutPlaceholderImages(collapseSourceDuplicates(complete)).map(ev => this.toScraped(ev, g)));
-    }
+      const unique = collapseSourceDuplicates(complete);
+      this.noteTermine(unique);
+      all.push(...withoutPlaceholderImages(unique).map(ev => this.toScraped(ev, g)));
+    });
     this.log(`${groups.length} Feeds, ${all.length} Termine`);
     return all;
   }

@@ -90,20 +90,21 @@ export class DigipublicaDeScraper extends DeFeedScraper {
     const groups = this.pickGroups(digipublicaGroups());
     const cals: CalendarTermine[] = [];
     let cancelled = 0;
-    for (const g of groups) {
+    for (const g of groups) await this.inCalendar(g, async () => {
       const html = await this.fetchHtmlPage(g.pageUrl);
       const page = html == null ? null : parseDigipublicaPage(html, g.pageUrl);
       if (!page?.isCalendar) {
         this.log(`kein DigiPublica-Veranstaltungsmodul: ${g.pageUrl}`);
-        continue;
+        return;
       }
       if (page.withoutYear) this.log(`${page.withoutYear} Listeneinträge ohne Jahr nicht gelesen: ${g.pageUrl}`);
       cancelled += page.termine.filter(t => t.cancelled).length;
       const termine = page.termine.filter(t => !t.cancelled);
+      this.noteTermine(termine);
       // Bilder nur, wo robots.txt sie freigibt (Regel wie bei Hirsch & Wölfl).
       const robots = termine.length ? await this.robotsTxt(new URL(g.pageUrl).origin) : null;
       cals.push({ group: g, termine: termine.map(t => (t.image && !imageAllowed(robots, t.image) ? { ...t, image: undefined } : t)) });
-    }
+    });
     const all = acrossCalendars(cals).map(x => this.toScraped(x.termin, x.group, x.withDay));
     this.log(`${groups.length} Registry-Seiten, ${cals.length} Kalender, ${all.length} Termine, ${cancelled} abgesagt`);
     return all;

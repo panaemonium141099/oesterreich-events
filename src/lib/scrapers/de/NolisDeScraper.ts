@@ -34,9 +34,10 @@ export class NolisDeScraper extends DeFeedScraper {
     const to = new Date(today.getTime() + 365 * 86_400_000).toISOString().slice(0, 10);
     const byUid = new Map<string, { ev: NolisEvent; g: FeedGroup; home: boolean }>();
     let read = 0;
-    for (const g of groups) {
+    for (const g of groups) await this.inCalendar(g, async () => {
       const events = await this.fetchWindow(g, from, to);
-      if (events == null) continue;
+      if (events == null) return;
+      this.noteTermine(events);
       for (const ev of collapseSourceDuplicates(events)) {
         read++;
         if (ev.cancelled) continue;
@@ -44,7 +45,7 @@ export class NolisDeScraper extends DeFeedScraper {
         const cur = byUid.get(ev.uid);
         if (!cur || (home && !cur.home)) byUid.set(ev.uid, { ev, g, home });
       }
-    }
+    });
     // Derselbe Termin unter zwei IDs in zwei Portalen (Delligsen und SG
     // Leinebergland, „Basketball Training"): einer, der aus dem Feed seiner
     // Kommune, sonst die kleinste ID.
