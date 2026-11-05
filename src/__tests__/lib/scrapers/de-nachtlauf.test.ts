@@ -21,6 +21,7 @@ import {
 } from '@/lib/scrapers/de/nachtlauf';
 import { timeoutMsFor } from '@/lib/scrapers';
 import type { ScrapedEvent } from '@/types/events';
+import { useRealClock } from '@/test/clock';
 
 const workflow = readFileSync(join(process.cwd(), '.github/workflows/scrape-events-de.yml'), 'utf8');
 const atWorkflow = readFileSync(join(process.cwd(), '.github/workflows/scrape-events.yml'), 'utf8');
@@ -118,6 +119,7 @@ describe('Sperre je Website', () => {
   });
 
   it('zwei Abrufe derselben Website laufen nacheinander mit Pause, andere Websites parallel', async () => {
+    useRealClock(); // misst die Pause über Date.now()
     const log: string[] = [];
     const job = (tag: string, ms: number) => async () => {
       log.push(`${tag}+`);

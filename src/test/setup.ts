@@ -1,7 +1,12 @@
 import '@testing-library/jest-dom/vitest';
-import { vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import React from 'react';
 import deMessages from '../../messages/de.json';
+import { installTestClock, restoreTestClock } from './clock';
+
+// Feste Testuhr für jede Datei, vor ihrem Laden (Begründung in ./clock.ts).
+installTestClock();
+afterEach(restoreTestClock);
 
 // Komponenten wie V4SaveButton legen beim Rendern einen Supabase-Browser-
 // Client an. Ohne diese Variablen brach jeder Test der Event-Detail-Boxen

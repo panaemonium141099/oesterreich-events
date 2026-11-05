@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { coverageScope, planWithdrawals, probeGone, type SightingRow } from '@/lib/quality/withdrawal';
+import { useRealClock } from '@/test/clock';
 
 const NOW = new Date('2026-10-06T12:00:00Z');
 const daysAgo = (d: number) => new Date(NOW.getTime() - d * 86_400_000).toISOString();
@@ -297,6 +298,7 @@ describe('probeGone — Beleg an der Quelle', () => {
   // fn-29.18: deutsche Gemeinde-Websites nur mit robots.txt und Crawl-delay
   // (Qualitätsvertrag DE Punkt 9; Komm.ONE setzt 30 s).
   it('respectRobots: gesperrte Seiten nicht abrufen, Crawl-delay als Pause, Obergrenze je Website', async () => {
+    useRealClock(); // misst die Pause über Date.now()
     const calls: { url: string; at: number }[] = [];
     const t0 = Date.now();
     const gone = await probeGone(['https://g.de/a/1', 'https://g.de/intern/2', 'https://g.de/a/3', 'https://g.de/a/4'], {

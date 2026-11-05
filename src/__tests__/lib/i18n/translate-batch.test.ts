@@ -14,6 +14,7 @@ vi.mock('@/lib/i18n/translate-event', () => ({
 }));
 
 import { runTranslationBatch } from '@/lib/i18n/translate-batch';
+import { useRealClock } from '@/test/clock';
 
 type Row = { id: string; title: string | null; description: string | null; start_date: string };
 
@@ -179,6 +180,7 @@ describe('runTranslationBatch', () => {
   });
 
   it('bricht bei erreichter Deadline ab', async () => {
+    useRealClock(); // die Deadline läuft gegen Date.now()
     const { client } = makeSupabase(Array.from({ length: 20 }, (_, i) => row(`e${i}`)));
     translateMock.mockImplementation(
       () => new Promise(r => setTimeout(() => r({ title_en: 'T', description_en: null }), 20)),
