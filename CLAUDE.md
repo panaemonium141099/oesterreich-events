@@ -283,6 +283,16 @@ node / next.js
   Kalender einmal, Gemeinde vor Amt); `de-amt-vg` ist nur Prüfstand-Sicht, nie Nachtlauf.
   Abdeckung: `npx tsx src/scripts/amt-vg-abdeckung.ts`, Bericht
   `docs/research/de-gemeinden/adapter-amt-vg.md`.
+- **Zähler je Kalender im DE-Nachtlauf:** Adapter lesen jeden Kalender in
+  `DeFeedScraper.inCalendar` und melden Termine mit `noteTermine`
+  (`src/lib/scrapers/de/kalender-stand.ts`, Wächter `de-kalender-stand.test.ts`).
+  Shards schreiben `reports/kalender/<adapter>.json` (Artefakt), die
+  Nachbearbeitung vereint sie mit dem Stand der letzten Nacht (Artefakt
+  `de-kalender-stand`; Cursor-Adapter behalten bei „nicht dran" ihr letztes
+  Ergebnis) und teilt die Gemeinden ohne Termin nach Ursache auf
+  (`coverage-causes.ts`, `reports/abdeckung.json`, `gemeinden-ohne-termin.json`).
+  Feeds bestätigt `registry-de-feeds.yml` (workflow_dispatch, je Server
+  nacheinander, Artefakt statt Repo), von dort, wo auch der Nachtlauf liest.
 - **Nur Österreich (2026-10-08):** lasstreffen.at spielt ausschließlich
   Events mit `country = SITE_COUNTRY` (`src/lib/site-country.ts`, 'AT') aus.
   DE/CH-Events (Eventim) bleiben in der DB und im Import für spätere
