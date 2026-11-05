@@ -221,9 +221,9 @@ jobs:
           ADMISSION_RECHECK_MAX_HOLDS: ${{ github.event.inputs.admission_recheck_max_holds }}
           ADMISSION_RECHECK_MAX_RELEASES: ${{ github.event.inputs.admission_recheck_max_releases }}
 
-      - name: Generate scrape report
-        if: success()
-        run: npx tsx src/scripts/generate-scrape-report.ts || true
+      # Den Bericht schreibt die Pipeline selbst (Schritt `report`). Bis
+      # 2026-11-05 lief er hier ein zweites Mal, las den Bestand erneut und
+      # überschrieb den ersten Bericht mit einem Vergleich gegen sich selbst.
 
       - name: Upload report artifacts
         if: always()

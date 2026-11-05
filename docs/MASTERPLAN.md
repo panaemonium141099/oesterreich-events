@@ -665,11 +665,18 @@ in den Nächten davor (129).
 Datenbank-Server, ein Deploy während eines Laufs bremst dessen Abfragen.
 (2) `artist_matching` meldete im selben Lauf HTTP 500 (15:05:01, kein Build
 zu dieser Zeit, Ursache nicht untersucht) und gilt trotzdem als erledigt;
-pg_cron stößt das Matching stündlich neu an. (3) Der Bericht läuft je Nacht
-zweimal (Pipeline-Schritt und Workflow-Schritt „Generate scrape report“),
-zählt die DE-Zeilen mit (Bundesland „Unbekannt“: 112.914 von 430.811) und findet nie einen Vorgänger („No previous
-snapshot found“, `reports/` liegt nur auf dem Runner), die Spalten mit
-Veränderungen sind also immer leer.
+pg_cron stößt das Matching stündlich neu an. (3) Der Bericht findet nie
+einen Vorgänger („No previous snapshot found“, `reports/` liegt nur auf dem
+Runner), die Spalten mit Veränderungen sind also immer leer.
+
+**Nachgezogen am selben Tag:** Der Bericht lief je Nacht zweimal
+(Pipeline-Schritt und Workflow-Schritt „Generate scrape report“, der zweite
+verglich den Bericht mit sich selbst) und zählte die DE-Zeilen mit
+(Bundesland „Unbekannt“: 112.914 von 430.811). Der Workflow-Schritt ist
+entfernt, der Bericht liest nur noch die Zeilen des AT-Laufs: 321.990
+Events, 141 statt 160 Quellen (die 19 `de-…`-Adapter entfallen),
+„Unbekannt“ 4.086, die neun Bundesländer und die Gemeinde-Abdeckung
+(1.928 von 2.089) unverändert.
 
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 

@@ -15,6 +15,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { loadGemeindenMaster } from '../lib/gemeinden/data';
 import { POSTGREST_MAX_ROWS, forEachPageById } from '../lib/db/fetch-all';
+import { forCountry } from '../lib/pipeline/pipeline-country';
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import type { PaginationLogEntry } from '../lib/scrapers/GemeindeRegistryScraper';
@@ -216,15 +217,19 @@ async function fetchAllEventCounts(): Promise<{
   console.log('[report] Fetching events from Supabase...');
 
   // Seiten nach id statt nach Offset, mit Wiederholung bei überlasteter
-  // Datenbank (fetch-all.ts). Der Bericht liest den ganzen Bestand (über
-  // 430.000 Zeilen); mit Offset lief er am 05.11.2026 bei Zeile 186.000 in
-  // den Statement-Timeout, während ein Deploy auf dem Server baute.
+  // Datenbank (fetch-all.ts). Der Bericht liest den ganzen Bestand seines
+  // Landes; mit Offset lief er am 05.11.2026 bei Zeile 186.000 in den
+  // Statement-Timeout, während ein Deploy auf dem Server baute.
+  // Nur die Zeilen des AT-Laufs (alles außer DE, pipeline-country.ts): der
+  // Bericht zählt österreichische Gemeinden und Bundesländer, die DE-Zeilen
+  // standen bis 2026-11-05 als Bundesland „Unbekannt“ darin (112.914 von
+  // 430.811). Für DE steht die Abdeckung (coverage-report.ts).
   await forEachPageById<EventRow>((afterId) => {
-    const page = supabase
+    const page = forCountry(supabase
       .from('events')
       .select('id, location_name, bundesland, source_name, start_date')
       .not('location_name', 'is', null)
-      .not('source_name', 'is', null)
+      .not('source_name', 'is', null), 'AT')
       .order('id')
       .limit(POSTGREST_MAX_ROWS);
     return afterId ? page.gt('id', afterId) : page;
