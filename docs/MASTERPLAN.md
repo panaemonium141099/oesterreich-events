@@ -630,6 +630,47 @@ Server geht per IPv6 raus; der IP-gefilterte API-Token verlangt `curl -4`.
 IP-Access-Allow-Regel greift vorher. (5) `cf.threat_score` ist dauerhaft 0,
 Challenges brauchen eigene Signale (UA-Build, Land, `cf.client.bot`).
 
+### 3.15 Deploy bremst die Datenbank: Nachtlauf rot (2026-11-05)
+
+Der AT-Nachtlauf vom 05.11. (Run 42003360765) endete rot: Schritt `report`
+mit `Fetch failed at offset 186000: canceling statement due to statement
+timeout`. Während der Nachbearbeitung (13:44 bis 15:10 UTC) liefen drei
+Deploys, jeder baut das App-Image auf demselben Server wie die Datenbank.
+Die Lesefehler des Laufs liegen in diesen Fenstern: Kategorieschritt
+14:11:47 (Container-Tausch 14:11:21 bis 14:11:38, danach Startseite neu),
+Bericht 15:09:49 (Typprüfung des Builds 15:09:05 bis 15:11:57), danach
+zweimal `fetch failed` (API nicht erreichbar, 15:09:59 und 15:10:09). Am
+04.11. lief kein Deploy in der Nachbearbeitung, derselbe Bericht las
+423.056 Zeilen in 5,6 min durch. Am 03.11. dasselbe Muster (Abdeckung
+Statement-Timeout 15:15, Bericht `fetch failed` 15:16, Deploys ab 15:10;
+siehe §3.10).
+
+Anfällig war der Bericht, weil er den ganzen Bestand (alle Länder, auch
+Vergangenes, am 05.11. rund 435.000 Zeilen) in 1000er-Seiten mit Offset
+las: jede Seite liest alle Zeilen davor mit. Seitenzeit im Lauf 0,4 s am
+Anfang, 1,2 s bis Zeile 160.000, 2,4 s ab 163.000 (der Build lief seit
+15:07:23), dann Timeout. Gegen Prod ohne Last gemessen (430.811 Zeilen): mit Offset
+3 min 46 s, die Seite 0,38 s am Anfang und 1,07 s bei Zeile 420.000; nach
+id 32 s, Snapshot Byte für Byte gleich.
+
+**Behoben:** Der Bericht blättert nach id (`forEachPageById`,
+`src/lib/db/fetch-all.ts`), Lesefehler durch Überlast werden knapp fünf
+Minuten lang wiederholt (`readWithRetry`). Der Kategorieschritt schluckte
+seinen Lesefehler („Candidates: 0, Nothing to do“, Schritt grün); er liest
+jetzt über `readWithRetry` und wird sonst rot. Verloren ging nichts: die
+Nachzählung am selben Abend ergab 127 Kandidaten, alle ohne Änderung, wie
+in den Nächten davor (129).
+
+**Offen:** (1) Der Auslöser bleibt: `deploy.sh` baut auf dem
+Datenbank-Server, ein Deploy während eines Laufs bremst dessen Abfragen.
+(2) `artist_matching` meldete im selben Lauf HTTP 500 (15:05:01, kein Build
+zu dieser Zeit, Ursache nicht untersucht) und gilt trotzdem als erledigt;
+pg_cron stößt das Matching stündlich neu an. (3) Der Bericht läuft je Nacht
+zweimal (Pipeline-Schritt und Workflow-Schritt „Generate scrape report“),
+zählt die DE-Zeilen mit (Bundesland „Unbekannt“: 112.914 von 430.811) und findet nie einen Vorgänger („No previous
+snapshot found“, `reports/` liegt nur auf dem Runner), die Spalten mit
+Veränderungen sind also immer leer.
+
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
 1. **Affiliate-ID `J70` ist korrekt** und gehört uns (bestätigt). Eventim-Links im Feed

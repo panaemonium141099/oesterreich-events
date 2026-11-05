@@ -62,6 +62,7 @@ import {
   type CanonicalCategory,
 } from '../lib/category-classifier';
 import { forCountry, pipelineCountry } from '../lib/pipeline/pipeline-country';
+import { readWithRetry } from '../lib/db/fetch-all';
 
 // ─── CLI args ────────────────────────────────────────────────────────────
 function parseArgs() {
@@ -202,13 +203,13 @@ async function fetchEvents(): Promise<EventRow[]> {
   const pageSize = 1000;
   let from = 0;
 
-  while (true) {
+  const pageQuery = (offset: number) => {
     let query = supabase
       .from('events')
       .select(FETCH_COLUMNS)
       .eq('category_locked', false)
       .order('id', { ascending: true })
-      .range(from, from + pageSize - 1);
+      .range(offset, offset + pageSize - 1);
 
     if (opts.deterministicBackfill) {
       // Backfill: any row not at the current version prefix is stale.
@@ -234,15 +235,19 @@ async function fetchEvents(): Promise<EventRow[]> {
     if (opts.source) query = query.eq('source_name', opts.source);
     if (opts.changedSince) query = query.gte('updated_at', opts.changedSince);
     // Im getrennten Lauf nur das eigene Land (pipeline-country.ts).
-    query = forCountry(query, pipelineCountry());
+    return forCountry(query, pipelineCountry()) as unknown as PromiseLike<{
+      data: EventRow[] | null;
+      error: { message: string } | null;
+    }>;
+  };
 
-    const { data, error } = await query;
-    if (error) {
-      console.error('[categorize-events] fetch error:', error.message);
-      break;
-    }
-    if (!data || data.length === 0) break;
-    out.push(...(data as unknown as EventRow[]));
+  while (true) {
+    // Ein Lesefehler wirft (Schritt rot), nach Wiederholungen bei überlasteter
+    // Datenbank. Bis 2026-11-05 brach die Schleife hier still ab: „Candidates:
+    // 0, Nothing to do." und ein grüner Schritt nach einem Statement-Timeout.
+    const data = await readWithRetry<EventRow>(() => pageQuery(from), { label: 'categorize-events' });
+    if (data.length === 0) break;
+    out.push(...data);
     from += data.length;
     process.stdout.write(`  Fetched ${out.length}...\r`);
     if (data.length < pageSize) break;
