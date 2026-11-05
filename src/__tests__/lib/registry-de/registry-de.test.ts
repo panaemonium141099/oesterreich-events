@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { loadGemeindenDe } from '@/lib/gemeinden/de';
+import { calendarLinks } from '@/lib/registry-de/feed-url';
 import { buildRegistry, diffRegistry, eventPageUrl, verbandHomeUrl, type ErhebungRow, type RegistryEntryDe } from '@/lib/registry-de/build';
 import { calendarPageCandidates, feedFormat, feedUrlFromPage, looksLikeFeed } from '@/lib/registry-de/feed-url';
 import { INTEGRATIONS, stufeOf } from '@/lib/registry-de/integrations';
@@ -182,5 +183,29 @@ describe('Wächter: data/de-gemeinde-registry.json', () => {
   it('Ausweichweg nur, wo die eigene Website keinen Kalender hat', () => {
     expect(reg.filter(e => e.fallback && 'ABCDE'.includes(e.stufe)).map(e => e.ags)).toEqual([]);
     expect(reg.filter(e => (e.stufe === 'V' || e.stufe === 'M') && !e.fallback).map(e => e.ags)).toEqual([]);
+  });
+});
+
+describe('calendarLinks', () => {
+  const html = `
+    <a href="https://www.pruem.de/tourismus-freizeit/veranstaltungen/">Veranstaltungen</a>
+    <a href="/aktuelles/veranstaltungen/2026/weihnachtsmarkt-in-der-altstadt/">Termin</a>
+    <a href="https://www.eifel-direkt.de/veranstaltungen">fremd</a>
+    <a href="/veranstaltungen/programm.pdf">PDF</a>
+    <a href="/:translation/en/veranstaltungen/">en</a>
+    <a href="/kalender/?monat=3">Monat</a>
+    <a href="/rathaus/">Rathaus</a>`;
+
+  it('nur eigene Website, keine Dateien und Übersetzungen, kürzeste Pfade zuerst', () => {
+    expect(calendarLinks(html, 'https://www.pruem.de/')).toEqual([
+      'https://www.pruem.de/tourismus-freizeit/veranstaltungen/',
+      'https://www.pruem.de/aktuelles/veranstaltungen/2026/weihnachtsmarkt-in-der-altstadt/',
+    ]);
+  });
+
+  it('nie die Seite selbst, höchstens drei', () => {
+    expect(calendarLinks('<a href="/veranstaltungen/">x</a>', 'https://a.de/veranstaltungen')).toEqual([]);
+    const viele = ['a', 'b', 'c', 'd'].map(x => `<a href="/kalender/${x}/">x</a>`).join('');
+    expect(calendarLinks(viele, 'https://a.de/')).toHaveLength(3);
   });
 });

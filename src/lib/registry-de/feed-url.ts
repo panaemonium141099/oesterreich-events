@@ -126,6 +126,24 @@ export function calendarPageCandidates(integration: string, origin: string): str
   }
 }
 
+/**
+ * Kalenderseiten, auf die eine Seite derselben Website verlinkt, kürzeste Pfade
+ * zuerst: Die Erhebung hat teils die Startseite oder eine Meldung erwischt
+ * (pruem.de: Startseite, Kalender unter /tourismus-freizeit/veranstaltungen/).
+ * Nur Kandidaten, der Feed zählt erst nach dem Abruf.
+ */
+export function calendarLinks(html: string, pageUrl: string, max = 3): string[] {
+  const host = new URL(pageUrl).host;
+  const here = pageUrl.replace(/[#?].*$/, '').replace(/\/$/, '');
+  const links = hrefs(html, pageUrl, /veranstaltung|kalender|termine/i)
+    .map(u => u.replace(/#.*$/, ''))
+    .filter(u => {
+      const x = new URL(u);
+      return x.host === host && !x.search && !/\.(pdf|ics|xml|json|docx?|jpe?g|png)$/i.test(x.pathname) && !x.pathname.includes(':translation') && u.replace(/\/$/, '') !== here;
+    });
+  return [...new Set(links)].sort((a, b) => a.length - b.length || a.localeCompare(b)).slice(0, max);
+}
+
 /** Erwartetes Format des Feeds je Integration (für die Prüfung beim Abruf). */
 export function feedFormat(integration: string): 'json' | 'ics' | 'xml' | null {
   switch (integration) {
