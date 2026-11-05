@@ -21,6 +21,10 @@ on:
         description: 'Server gleichzeitig'
         required: false
         default: '8'
+      pruefstand:
+        description: 'Danach Prüfstand dieses Adapters mit der neuen Registry (z. B. de-ionas), leer = keiner'
+        required: false
+        default: ''
 
 concurrency:
   group: registry-de-feeds
@@ -43,6 +47,11 @@ jobs:
         if: always()
         run: |
           { echo '```'; tail -n 40 feed-lauf.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      # Bericht und Stichprobe liegen im Artefakt, auch wenn eine Schwelle reißt.
+      - name: Prüfstand
+        if: ${{ github.event.inputs.pruefstand != '' }}
+        continue-on-error: true
+        run: npx tsx src/scripts/pruefstand-de.ts --adapter "${{ github.event.inputs.pruefstand }}" --sample 30
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -53,4 +62,5 @@ jobs:
             .registry-cache/feeds-log.json
             .registry-cache/feeds-v3.json
             feed-lauf.txt
+            .pruefstand/*/bericht.md
           retention-days: 30

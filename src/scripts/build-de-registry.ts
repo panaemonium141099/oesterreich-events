@@ -26,7 +26,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadGemeindenDe } from '../lib/gemeinden/de';
 import { buildRegistry, diffRegistry, verbandHomeUrl, type ErhebungRow, type RegistryEntryDe } from '../lib/registry-de/build';
-import { calendarPageCandidates, feedFormat, feedUrlFromPage, looksLikeFeed } from '../lib/registry-de/feed-url';
+import { calendarLinks, calendarPageCandidates, feedFormat, feedUrlFromPage, looksLikeFeed } from '../lib/registry-de/feed-url';
 import { FEED_FROM_PAGE } from '../lib/registry-de/integrations';
 import { robotsAllows, robotsCrawlDelay } from '../lib/registry-de/robots';
 
@@ -109,7 +109,7 @@ async function collectFeeds(rows: ErhebungRow[], known: Record<string, string | 
     await new Promise(r => setTimeout(r, Math.max(PAUSE_MS, delay * 1000)));
   };
   /** Feed aus einer Seite lesen und nur übernehmen, wenn sein Abruf das erwartete Format liefert; sonst der Grund. */
-  const feedFrom = async (pageUrl: string, integration: string): Promise<{ feed: string | null; reason: string }> => {
+  const feedFrom = async (pageUrl: string, integration: string): Promise<{ feed: string | null; reason: string; links?: string[] }> => {
     if (!robotsAllows(await robotsOf(pageUrl), pageUrl, UA_TOKEN)) return { feed: null, reason: 'robots' };
     await pause(pageUrl);
     const page = await fetchText(pageUrl);
@@ -117,7 +117,7 @@ async function collectFeeds(rows: ErhebungRow[], known: Record<string, string | 
     if (page.status !== 200) return { feed: null, reason: `HTTP ${page.status}` };
     const candidate = feedUrlFromPage(integration, page.text, page.url);
     const format = feedFormat(integration);
-    if (!candidate || !format) return { feed: null, reason: 'Seite nennt keinen Feed' };
+    if (!candidate || !format) return { feed: null, reason: 'Seite nennt keinen Feed', links: calendarLinks(page.text, page.url) };
     if (!robotsAllows(await robotsOf(candidate), candidate, UA_TOKEN)) return { feed: null, reason: 'robots Feed' };
     await pause(candidate);
     const feed = await fetchText(candidate);
@@ -147,14 +147,17 @@ async function collectFeeds(rows: ErhebungRow[], known: Record<string, string | 
         let feed: string | null = null;
         let reason = 'Seite nicht lesbar';
         try {
-          ({ feed, reason } = await feedFrom(url, integration));
+          const first = await feedFrom(url, integration);
+          ({ feed, reason } = first);
           // Die Erhebung hat oft eine Termin- oder Detailseite verlinkt: belegte
-          // Standardseiten des Herstellers als zweiter Versuch.
+          // Standardseiten des Herstellers, dann die Kalenderseiten, auf die sie verlinkt.
           if (!feed && reason !== 'keine Verbindung') {
-            for (const candidate of calendarPageCandidates(integration, new URL(url).origin)) {
-              if (candidate === url) continue;
+            const tried = new Set([url]);
+            for (const candidate of [...calendarPageCandidates(integration, new URL(url).origin), ...(first.links ?? [])]) {
+              if (tried.has(candidate)) continue;
+              tried.add(candidate);
               const r = await feedFrom(candidate, integration);
-              if (r.feed) { feed = r.feed; reason = 'ok über Standardseite'; break; }
+              if (r.feed) { feed = r.feed; reason = 'ok über verlinkte Seite'; break; }
             }
           }
         } catch { /* Seite nicht lesbar: kein Feed */ }
