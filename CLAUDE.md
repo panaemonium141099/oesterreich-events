@@ -189,7 +189,19 @@ node / next.js
   Touren, Stadtspiele, Öffnungszeiten) verwirft der Parser, 2026-10-27 waren
   das 2.414 von 3.455 AT-Zeilen. Bilder nie hotlinken (API-Bedingung):
   Spiegel im Storage-Bucket `event-images/eventfrog/`, sonst kein Bild.
-  DE/CH per `EVENTFROG_COUNTRIES` erst mit lasstreffen.de (DE ~84.000 Events).
+  Das Land einer Zeile ist das abgefragte, nicht das der Location (die
+  Wiener Stadthalle steht dort als „DE“). Für rund jede zwölfte Location-ID
+  liefert `/locations` nichts, auch einzeln abgefragt; diese Events
+  entfallen (05.11.2026: AT 298, DE 2.423 nach Dauerangeboten).
+  Schreibfehler machen den Lauf rot (Exit 1).
+  **DE** (seit 2026-11-05): Job `eventfrog-de` in `scrape-events-de.yml`
+  neben den Shards (`needs` der Nachbearbeitung, weil GitHub geplante Läufe
+  Stunden später startet), `EVENTFROG_COUNTRIES: DE`, eigener Bericht
+  `import-eventfrog-de`; 84.289 Events von der API, 21.731 nach
+  Dauerangeboten, Prüfstand bestanden (21.429 öffentlich). Ohne Bilder
+  (`EVENTFROG_IMAGES: 'off'`): rund 11.200 Bilder wären 0,9 GB auf einer
+  Platte mit 87 % Belegung, und keine Seite zeigt DE; einschalten holt sie
+  im nächsten Lauf nach. CH in keinem Cron.
 - **GitHub Actions `ingest-activities.yml`** (wöchentlich): Deskline-
   Infrastruktur-POIs → `poi_activities` (Run-Bookkeeping, Dedup, Prune).
   Der OSM-Bestand (`osm_pois`) läuft NICHT im Cron — `npm run import-osm-pois`
@@ -537,6 +549,12 @@ npm run import:festivals     # data/festivals-upcoming.json → festivals + fest
   — Rotation bei Eventim angeraten (MASTERPLAN P0-Merker).
 - Dev-Umgebung Windows/Node 24: Browser-Streaming von RSC-Seiten kann lokal
   hängen (undici-TypeError) — Prod/Vercel nicht betroffen; HTML via fetch prüfen.
+- Ein halbes Emoji kostet einen ganzen Schreib-Batch: kürzt ein Scraper
+  einen Text mitten im Zeichen (`slice(0, 500)`, über hundert Stellen),
+  lehnt Postgres alle 100 Zeilen ab („invalid input syntax for type json“).
+  Der Sync entfernt halbe Zeichen deshalb vor dem Schreiben
+  (`src/lib/db/well-formed.ts`). So verlor der Eventfrog-Import bis
+  2026-11-05 täglich 100 AT-Events bei grünem Lauf.
 - PostgREST transportiert `.in()`-Filter im QUERY-STRING (auch bei PATCH):
   Listen IMMER auf ≤200 Elemente chunken, sonst bricht die Verbindung mit
   „TypeError: fetch failed" (im fn-18-Vollimport zweimal reproduziert).

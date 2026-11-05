@@ -12,6 +12,15 @@ import type { EventfrogLocation } from './types';
  * mehr listet.
  */
 
+/**
+ * Name des Laufs im Bericht (`workflow_runs`). DE läuft im DE-Nachtlauf und
+ * hat einen eigenen Bericht, damit ein roter DE-Import nicht als AT-Import
+ * in der Alarm-Mail steht.
+ */
+export function eventfrogWorkflowName(countries: readonly string[]): string {
+  return countries.length === 1 && countries[0] === 'DE' ? 'import-eventfrog-de' : 'import-eventfrog';
+}
+
 export interface CountryResult {
   country: string;
   events: ScrapedEvent[];
@@ -39,6 +48,27 @@ export async function fetchAndParseEventfrog(
   return out;
 }
 
+/** Die Events ohne Bild: kein Link auf res.eventfrog.net geht in die DB. */
+export function withoutImages(events: ScrapedEvent[]): void {
+  for (const e of events) {
+    e.image_url = undefined;
+    e.image_width = undefined;
+    e.image_height = undefined;
+    e.image_credit = undefined;
+  }
+}
+
+export interface EventfrogUpsertOptions {
+  /**
+   * Bilder in den Storage spiegeln (Standard). Ohne Spiegelung gehen die
+   * Events ohne Bild in die DB. Der DE-Lauf spiegelt vorerst nicht: rund
+   * 11.200 Bilder, 0,9 GB (Stichprobe 2026-11-05), die bis zu lasstreffen.de
+   * keine Seite zeigt, auf einer Server-Platte mit 87 % Belegung
+   * (2026-11-04). Einschalten holt sie im nächsten Lauf nach.
+   */
+  mirrorImages?: boolean;
+}
+
 export interface EventfrogUpsertResult {
   upserted: number;
   errors: number;
@@ -49,11 +79,12 @@ export interface EventfrogUpsertResult {
 /**
  * Bilder spiegeln, dann in 500er-Batches über `syncEventsToSupabase`
  * schreiben (Dedup, Freigabevertrag, Ortsauflösung wie bei jeder Quelle).
- * Ohne Spiegelung wird nicht geschrieben: sonst stünden Hotlinks in der DB.
+ * Hotlinks stehen nie in der DB: was nicht gespiegelt ist, hat kein Bild.
  */
 export async function upsertEventfrogEvents(
   events: ScrapedEvent[],
   log: (msg: string) => void = () => {},
+  options: EventfrogUpsertOptions = {},
 ): Promise<EventfrogUpsertResult> {
   const { syncEventsToSupabase, beginScrapeRun, finishScrapeRun } = await import('@/lib/db/supabase-sync');
   const { createClient } = await import('@supabase/supabase-js');
@@ -62,9 +93,14 @@ export async function upsertEventfrogEvents(
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) throw new Error('NEXT_PUBLIC_SUPABASE_URL (oder SUPABASE_URL) und SUPABASE_SERVICE_ROLE_KEY fehlen');
-  const storage = createClient(url, key, { auth: { persistSession: false } });
-  const mirror = await mirrorEventfrogImages(events, storage, log);
-  for (const s of mirror.failedSamples) log(`  Bild fehlgeschlagen: ${s}`);
+  if (options.mirrorImages === false) {
+    withoutImages(events);
+    log('Bilder: nicht gespiegelt, Events gehen ohne Bild in die DB');
+  } else {
+    const storage = createClient(url, key, { auth: { persistSession: false } });
+    const mirror = await mirrorEventfrogImages(events, storage, log);
+    for (const s of mirror.failedSamples) log(`  Bild fehlgeschlagen: ${s}`);
+  }
 
   const BATCH = 500;
   const result: EventfrogUpsertResult = { upserted: 0, errors: 0, filtered: 0, quarantined: 0 };

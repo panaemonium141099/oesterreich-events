@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       skip_scrapers:
-        description: 'Nur die DE-Nachbearbeitung, ohne Shards'
+        description: 'Nur die DE-Nachbearbeitung, ohne Shards und ohne Eventfrog'
         required: false
         default: 'false'
         type: boolean
@@ -101,9 +101,44 @@ jobs:
           retention-days: 3
           if-no-files-found: ignore
 
+  # Eventfrog für Deutschland (Public API, src/lib/eventfrog/), neben den
+  # Shards. Als Job dieses Laufs und nicht als eigener Zeitplan: GitHub startet
+  # geplante Läufe Stunden später (05.11.2026: AT-Nachtlauf 7 h, DE 4 h), nur
+  # `needs` sichert, dass die Nachbearbeitung den frischen Bestand sieht.
+  # Der AT-Import (import-eventfrog.yml) bleibt davon getrennt: eigener Lauf,
+  # eigener Bericht (workflow_runs: import-eventfrog-de). Vollabruf DE: rund
+  # 150 der 2.000 API-Anfragen am Tag.
+  # Bilder spiegelt der DE-Lauf vorerst nicht (EVENTFROG_IMAGES: 'off',
+  # Begründung in src/lib/eventfrog/import.ts): die Events gehen ohne Bild
+  # in die DB, Hotlinks nie.
+  eventfrog-de:
+    if: ${{ github.event_name == 'schedule' || github.event.inputs.skip_scrapers != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      EVENTFROG_API_KEY: ${{ secrets.EVENTFROG_API_KEY }}
+      EVENTFROG_COUNTRIES: DE
+      EVENTFROG_IMAGES: 'off'
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Import Eventfrog DE
+        run: npx tsx src/scripts/import-eventfrog.ts
+
   post:
-    # Läuft immer, auch wenn ein Shard scheitert (wie in scrape-events.yml).
-    needs: [scrape-de]
+    # Läuft immer, auch wenn ein Shard oder der Eventfrog-Import scheitert
+    # (wie in scrape-events.yml).
+    needs: [scrape-de, eventfrog-de]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 300

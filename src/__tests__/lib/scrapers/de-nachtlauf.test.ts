@@ -45,12 +45,23 @@ describe('Schalter DE_NACHTLAUF', () => {
   it('harte Grenze über dem Zeitbudget, Job-Grenze darüber, Budget im Workflow gesetzt', () => {
     expect(timeoutMsFor('de-ikiss')).toBe(DE_TIMEOUT_MIN * 60_000);
     expect(DE_TIMEOUT_MIN).toBeGreaterThan(DE_SOFT_BUDGET_MIN);
-    const job = workflow.slice(workflow.indexOf('  scrape-de:'), workflow.indexOf('  post:'));
+    const job = workflow.slice(workflow.indexOf('  scrape-de:'), workflow.indexOf('  eventfrog-de:'));
     expect(job).toContain(`SCRAPER_SOFT_BUDGET_MIN: ${DE_SOFT_BUDGET_MIN}`);
     expect(Number(/timeout-minutes: (\d+)/.exec(job)![1])).toBeGreaterThan(DE_TIMEOUT_MIN);
     expect(job).toContain(`shard: [${Array.from({ length: DE_SHARD_COUNT }, (_, i) => i).join(', ')}]`);
     expect(workflow).toContain(`DE_SHARD_COUNT: ${DE_SHARD_COUNT}`);
-    expect(workflow).toMatch(/needs: \[scrape-de\]/);
+    expect(workflow).toMatch(/needs: \[scrape-de, eventfrog-de\]/);
+  });
+
+  it('Eventfrog DE läuft als Job des DE-Laufs, nur für DE und ohne Bildspiegelung', () => {
+    const job = workflow.slice(workflow.indexOf('  eventfrog-de:'), workflow.indexOf('  post:'));
+    expect(job).toContain('EVENTFROG_COUNTRIES: DE');
+    expect(job).toContain("EVENTFROG_IMAGES: 'off'");
+    expect(job).toContain('npx tsx src/scripts/import-eventfrog.ts');
+    // Der AT-Import bleibt ein eigener Lauf und holt nur AT.
+    const atImport = readFileSync(join(process.cwd(), '.github/workflows/import-eventfrog.yml'), 'utf8');
+    expect(atImport).toContain("github.event.inputs.countries || 'AT'");
+    expect(atImport).not.toContain('EVENTFROG_IMAGES');
   });
 
   it('DE und AT sind getrennte Systeme: eigener Workflow, eigene Nachbearbeitung je Land', () => {

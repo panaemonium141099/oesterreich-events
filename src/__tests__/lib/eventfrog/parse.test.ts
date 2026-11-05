@@ -102,9 +102,15 @@ describe('parseEventfrogEvents', () => {
     const chLoc: EventfrogLocation = { ...LOC, id: 'CH', country: 'CH', zip: '8000', city: 'Zürich', lat: 47.37, lng: 8.54 };
     const { events } = parseEventfrogEvents([
       ev({ id: 'free', lowestTicketPrice: 0 }), ev({ id: 'ch', locationIds: ['CH'] }),
-    ], new Map([...locations, ['CH', chLoc]]), rubrics, 'AT');
+    ], new Map([...locations, ['CH', chLoc]]), rubrics, 'CH');
     for (const e of events) expect(e.price_min).toBeUndefined();
-    expect(events.find((e) => e.source_id === 'ch')?.country).toBe('CH');
+  });
+
+  it('nimmt das Land aus dem Abruf, nicht aus der Location', () => {
+    // Prod 2026-11-05: Eventfrog führt die Wiener Stadthalle (1150 Wien) als „DE“.
+    const stadthalle: EventfrogLocation = { ...LOC, id: 'SH', country: 'DE', zip: '1150', city: 'Wien', lat: 48.2021, lng: 16.3327 };
+    const { events } = parseEventfrogEvents([ev({ locationIds: ['SH'] })], new Map([['SH', stadthalle]]), rubrics, 'AT');
+    expect(events[0]).toMatchObject({ country: 'AT', postal_code: '1150', price_min: 25 });
   });
 
   it('stuft eine Location, die nur den Ort nennt, auf Gemeinde-Ebene', () => {
