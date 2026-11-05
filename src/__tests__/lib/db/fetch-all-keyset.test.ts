@@ -152,6 +152,19 @@ describe('Nachtlauf-Skripte', () => {
     expect(report).not.toMatch(/\.range\(/);
   });
 
+  it('der Bericht zählt nur die Zeilen des AT-Laufs', () => {
+    // DE-Zeilen haben kein Bundesland und standen als „Unbekannt“ im Bericht.
+    expect(source('generate-scrape-report.ts')).toMatch(/forCountry\([\s\S]*?,\s*'AT'\)/);
+  });
+
+  it('der Workflow ruft den Bericht nicht ein zweites Mal neben der Pipeline auf', () => {
+    const workflow = readFileSync(join(process.cwd(), '.github', 'workflows', 'scrape-events.yml'), 'utf8')
+      .split(/\r?\n/).filter((line) => !line.trim().startsWith('#')).join('\n');
+    expect(workflow).not.toContain('generate-scrape-report');
+    expect(readFileSync(join(process.cwd(), 'src', 'scripts', 'scrape-pipeline.ts'), 'utf8'))
+      .toContain('generate-scrape-report.ts');
+  });
+
   it('der Kategorieschritt liest über readWithRetry und bricht bei einem Lesefehler nicht still ab', () => {
     const categorize = source('categorize-events.ts');
     expect(categorize).toContain('readWithRetry');
