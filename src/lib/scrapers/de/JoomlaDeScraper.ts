@@ -24,9 +24,9 @@ abstract class JoomlaDeScraper extends DeFeedScraper {
     const today = new Date().toISOString().slice(0, 10);
     const all: ScrapedEvent[] = [];
     const seen = new Set<string>();
-    for (const g of groups) {
+    for (const g of groups) await this.inCalendar(g, async () => {
       const xml = await this.fetchFeed(this.rssUrl(g));
-      if (xml == null) continue;
+      if (xml == null) return;
       const links = new Set<string>();
       const termine: JoomlaTermin[] = [];
       for (const item of rssItems(xml)) {
@@ -36,7 +36,9 @@ abstract class JoomlaDeScraper extends DeFeedScraper {
         links.add(link);
         const html = await this.fetchHtmlPage(link);
         if (html == null) continue;
-        termine.push(...this.termine(html, { ...item, link }).filter(t => t.localDate >= today));
+        const gelesen = this.termine(html, { ...item, link });
+        this.noteTermine(gelesen);
+        termine.push(...gelesen.filter(t => t.localDate >= today));
       }
       const unique = collapseSourceDuplicates(termine.map(t => ({ ...t, uid: `${t.url}#${t.localDate}` })));
       for (const t of unique) {
@@ -45,7 +47,7 @@ abstract class JoomlaDeScraper extends DeFeedScraper {
         seen.add(s.source_id);
         all.push(s);
       }
-    }
+    });
     this.log(`${groups.length} Feeds, ${all.length} Termine`);
     return all;
   }

@@ -82,19 +82,20 @@ export class Open2cDeScraper extends DeFeedScraper {
     const groups = this.pickGroups(open2cGroups());
     const all: ScrapedEvent[] = [];
     let calendars = 0;
-    for (const g of groups) {
+    for (const g of groups) await this.inCalendar(g, async () => {
       const first = await this.listPage(g.pageUrl);
       if (!first?.isList) {
         this.log(`kein Open2C-Veranstaltungskalender: ${g.pageUrl}`);
-        continue;
+        return;
       }
       calendars++;
       const termine = await this.calendar(first, g.pageUrl);
+      this.noteTermine(termine);
       // Bilder nur, wo robots.txt sie freigibt (Regel wie bei Hirsch & Wölfl).
       const robots = termine.length ? await this.robotsTxt(new URL(g.pageUrl).origin) : null;
       const allowed = termine.map(t => (t.image && !imageAllowed(robots, t.image) ? { ...t, image: undefined } : t));
       all.push(...this.toScrapedAll(allowed, g));
-    }
+    });
     this.log(`${groups.length} Registry-Seiten, ${calendars} Kalender, ${all.length} Termine`);
     return all;
   }

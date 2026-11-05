@@ -37,12 +37,14 @@ export class DpCalendarDeScraper extends DeFeedScraper {
     const from = new Date();
     const to = new Date(from.getTime() + 365 * 86_400_000);
     const all: ScrapedEvent[] = [];
-    for (const g of groups) {
+    for (const g of groups) await this.inCalendar(g, async () => {
       const ics = await this.fetchFeed(g.feedUrl);
-      if (ics == null) continue;
+      if (ics == null) return;
       const events = parseDpIcs(ics, from, to).map(e => ({ ...e, ...parseEmLocation(e.location) }));
-      all.push(...collapseSourceDuplicates(events).map(ev => this.toScraped(ev, g)));
-    }
+      const unique = collapseSourceDuplicates(events);
+      this.noteTermine(unique);
+      all.push(...unique.map(ev => this.toScraped(ev, g)));
+    });
     this.log(`${groups.length} Feeds, ${all.length} Termine`);
     return all;
   }

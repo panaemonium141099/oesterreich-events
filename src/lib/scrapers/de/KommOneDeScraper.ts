@@ -91,6 +91,7 @@ export class KommOneDeScraper extends DeFeedScraper {
     const robots = await this.robotsOf(origin);
     if (!robotsAllows(robots, url, UA_TOKEN)) {
       this.log(`robots.txt sperrt ${url}`);
+      this.noteRobots();
       return null;
     }
     const delay = robotsCrawlDelay(robots, UA_TOKEN) ?? 0;
@@ -152,7 +153,11 @@ export class KommOneDeScraper extends DeFeedScraper {
     const worker = async () => {
       for (let i = next++; i < groups.length; i = next++) {
         const g = groups[i];
-        const termine = await this.calendar(g);
+        const termine = await this.inCalendar(g, async () => {
+          const gelesen = await this.calendar(g);
+          this.noteTermine(gelesen);
+          return gelesen;
+        });
         const unique = collapseSourceDuplicates([...new Map(termine.map(t => [t.id, { ...t, uid: t.id }])).values()]);
         results[i] = withoutPlaceholderImages(unique).map(t => this.toScraped(t, g));
       }

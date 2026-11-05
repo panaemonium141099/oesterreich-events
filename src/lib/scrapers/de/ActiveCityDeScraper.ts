@@ -102,26 +102,28 @@ export class ActiveCityDeScraper extends DeFeedScraper {
 
   async scrape(): Promise<ScrapedEvent[]> {
     const groups = this.pickGroups(activeCityGroups());
-    const calendars = new Map<string, { group: FeedGroup; page: ActiveCityListPage }>();
-    for (const g of groups) {
+    const calendars = new Map<string, { group: FeedGroup; source: FeedGroup; page: ActiveCityListPage }>();
+    for (const g of groups) await this.inCalendar(g, async () => {
       const first = await this.firstPage(g.pageUrl);
-      if (!first) continue;
+      if (!first) return;
       const cur = calendars.get(first.url);
       if (cur) {
+        this.sameCalendar(g, cur.source);
         cur.group.own.push(...g.own);
         cur.group.viaVerband.push(...g.viaVerband);
       } else {
-        calendars.set(first.url, { group: { ...g, feedUrl: first.url, pageUrl: first.url, own: [...g.own], viaVerband: [...g.viaVerband] }, page: first.page });
+        calendars.set(first.url, { group: { ...g, feedUrl: first.url, pageUrl: first.url, own: [...g.own], viaVerband: [...g.viaVerband] }, source: g, page: first.page });
       }
-    }
+    });
     const all: ScrapedEvent[] = [];
-    for (const [url, { group, page }] of calendars) {
+    for (const [url, { group, source, page }] of calendars) await this.inCalendar(source, async () => {
       const termine = await this.calendar(page, url);
+      this.noteTermine(termine);
       // Bilder nur, wo robots.txt sie freigibt (Regel wie bei Hirsch & Wölfl).
       const robots = termine.length ? await this.robotsTxt(new URL(url).origin) : null;
       const allowed = termine.map(t => (t.image && !imageAllowed(robots, t.image) ? { ...t, image: undefined } : t));
       all.push(...this.toScrapedAll(allowed, group));
-    }
+    });
     this.log(`${groups.length} Registry-Seiten, ${calendars.size} Kalender, ${all.length} Termine`);
     return all;
   }

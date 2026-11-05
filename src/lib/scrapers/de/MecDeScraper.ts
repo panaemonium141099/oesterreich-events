@@ -97,7 +97,7 @@ export class MecDeScraper extends DeFeedScraper {
     const groups = this.pickGroups(mecGroups());
     const all: ScrapedEvent[] = [];
     const seen = new Set<string>();
-    for (const g of groups) {
+    for (const g of groups) await this.inCalendar(g, async () => {
       let events = ldEventsFromHtml((await this.fetchHtmlPage(g.pageUrl)) ?? '');
       const archive = `${new URL(g.pageUrl).origin}/events/`;
       if (!events.length && archive !== g.pageUrl) {
@@ -105,6 +105,7 @@ export class MecDeScraper extends DeFeedScraper {
         if (events.length) g.pageUrl = archive;
       }
       events = await this.withDetailDates(events, g.pageUrl);
+      this.noteTermine(events.map(termin));
       const unique = withoutPlaceholderImages(collapseSourceDuplicates(events.map(e => ({ ...termin(e), image: e.image, ev: e }))))
         .map(x => (x.image === x.ev.image ? x.ev : { ...x.ev, image: undefined, imageWidth: undefined, imageHeight: undefined }));
       for (const ev of unique) {
@@ -114,7 +115,7 @@ export class MecDeScraper extends DeFeedScraper {
         seen.add(s.source_id);
         all.push(s);
       }
-    }
+    });
     this.log(`${groups.length} Kalenderseiten, ${all.length} Termine`);
     return all;
   }

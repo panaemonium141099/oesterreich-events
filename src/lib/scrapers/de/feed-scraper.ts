@@ -8,12 +8,17 @@
  * (`BaseScraper.softDeadline`) ruft der Adapter nichts mehr ab und liefert
  * das bis dahin Gelesene; große Adapter setzen im nächsten Lauf hinter dem
  * zuletzt fertigen Kalender fort (`resumeGroups`, `groupDone`).
+ *
+ * Zähler je Kalender (`kalender-stand.ts`): Adapter lesen jeden Kalender in
+ * `inCalendar` und melden seine Termine mit `noteTermine`; die Abrufe hier
+ * zählen von selbst hinein.
  */
 import { BaseScraper } from '../BaseScraper';
 import type { FetchHtmlResult } from '../fetch-html';
 import { robotsAllows, robotsCrawlDelay } from '@/lib/registry-de/robots';
 import { pickFeedGroups, type FeedGroup } from '@/lib/registry-de/load';
 import { sharedRobotsTxt, throughHostGate } from './host-gate';
+import { aktuellerKalender, KalenderZaehler, zaehleTermine, type KalenderZeile } from './kalender-stand';
 
 const UA_TOKEN = 'lasstreffen';
 
@@ -31,6 +36,7 @@ export abstract class DeFeedScraper extends BaseScraper {
   private cursorOrder: string[] = [];
   private cursorDone = new Set<string>();
   private cursorPrefix = 0;
+  private kalender = new KalenderZaehler();
 
   /**
    * Nur für den Prüfstand und Tests: Feeds einschränken (`limit`) bzw. nur
@@ -43,7 +49,48 @@ export abstract class DeFeedScraper extends BaseScraper {
 
   /** Kalender in Lesereihenfolge (`pickFeedGroups`: gleiche Kalender zusammen, Gemeinde vor Amt). */
   protected pickGroups(groups: FeedGroup[], key?: (feedUrl: string) => string): FeedGroup[] {
-    return pickFeedGroups(groups, { limit: this.limit, onlyVerband: this.onlyVerband, key });
+    const picked = pickFeedGroups(groups, { limit: this.limit, onlyVerband: this.onlyVerband, key });
+    this.planCalendars(picked);
+    return picked;
+  }
+
+  /** Kalender dieses Laufs für den Zähler (Adapter ohne `pickGroups`). */
+  protected planCalendars(groups: readonly FeedGroup[]): void {
+    this.kalender.plan(groups);
+  }
+
+  /** Einen Kalender lesen: Abrufe und `noteTermine` in `run` zählen für ihn. */
+  protected inCalendar<T>(g: FeedGroup, run: () => Promise<T>): Promise<T> {
+    return this.kalender.run(g, run);
+  }
+
+  /** Termine des laufenden Kalenders, vor Filtern und vor dem Zusammenlegen mit anderen Kalendern. */
+  protected noteTermine(termine: readonly { start?: string }[]): void {
+    zaehleTermine(termine);
+  }
+
+  /** Dieser Eintrag führt auf den Kalender eines früheren Eintrags (`quelle`), dessen Termine gelten auch hier. */
+  protected sameCalendar(g: FeedGroup, quelle: FeedGroup): void {
+    this.kalender.gleichWie(g, quelle);
+  }
+
+  /** robots.txt sperrte einen Abruf des laufenden Kalenders (Adapter, die robots.txt selbst prüfen). */
+  protected noteRobots(): void {
+    const k = aktuellerKalender();
+    if (k) k.robots = true;
+  }
+
+  /** Seite kam aus dem Speicher des Adapters statt aus einem Abruf. */
+  protected noteCached(ok: boolean, grund = 'Netzfehler'): void {
+    const k = aktuellerKalender();
+    if (!k) return;
+    if (ok) k.abrufe++;
+    else k.fehler(grund);
+  }
+
+  /** Stand aller Kalender dieses Laufs (`reports/kalender/<adapter>.json`). */
+  kalenderBericht(at: Date = new Date()): KalenderZeile[] {
+    return this.kalender.bericht(this.name, { cursor: this.resumesSourceList, budgetVerbraucht: this.budgetSpent(), at });
   }
 
   protected robotsTxt(origin: string): Promise<string | null> {
@@ -74,17 +121,33 @@ export abstract class DeFeedScraper extends BaseScraper {
     if (!this.budgetSpent()) return false;
     if (!this.budgetLogged) this.log(`Zeitbudget erschöpft, keine weiteren Abrufe in diesem Lauf (zuerst ${url})`);
     this.budgetLogged = true;
+    const k = aktuellerKalender();
+    if (k) k.budget = true;
     return true;
   }
 
   protected async fetchHtml(url: string, opts: Parameters<BaseScraper['fetchHtml']>[1] = {}): Promise<FetchHtmlResult> {
     if (this.budgetStop(url)) return { html: null, error: 'Zeitbudget erschöpft' };
-    return this.gated(url, () => super.fetchHtml(url, opts));
+    const res = await this.gated(url, () => super.fetchHtml(url, opts));
+    const k = aktuellerKalender();
+    if (k) {
+      if (res.html != null) k.abrufe++;
+      else k.fehler(res.error ?? 'Netzfehler');
+    }
+    return res;
   }
 
   protected async fetchPage(url: string): Promise<string> {
     if (this.budgetStop(url)) throw new Error('Zeitbudget erschöpft');
-    return this.gated(url, () => super.fetchPage(url));
+    const k = aktuellerKalender();
+    try {
+      const body = await this.gated(url, () => super.fetchPage(url));
+      if (k) k.abrufe++;
+      return body;
+    } catch (e) {
+      k?.fehler(e instanceof Error ? e.message : String(e));
+      throw e;
+    }
   }
 
   /** robots.txt prüfen und die Pause einhalten; false, wenn gesperrt. */
@@ -94,6 +157,7 @@ export abstract class DeFeedScraper extends BaseScraper {
     const robots = await this.robotsTxt(new URL(url).origin);
     if (!robotsAllows(robots, url, UA_TOKEN)) {
       this.log(`robots.txt sperrt ${url}`);
+      this.noteRobots();
       return false;
     }
     await this.sleep(Math.max(this.delayMs, (robotsCrawlDelay(robots, UA_TOKEN) ?? 0) * 1000));

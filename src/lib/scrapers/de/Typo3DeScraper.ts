@@ -168,8 +168,9 @@ export class Typo3DeScraper extends DeFeedScraper {
     const groups = this.pickGroups(typo3Groups());
     const all: ScrapedEvent[] = [];
     const ids = new Set<string>();
-    for (const g of groups) {
+    for (const g of groups) await this.inCalendar(g, async () => {
       const { status, termine } = await this.calendar(g.pageUrl);
+      this.noteTermine(termine);
       this.status.set(g.pageUrl, { status, termine: termine.length });
       // Bilder nur, wo robots.txt sie freigibt (beide Schreibweisen, wie bei Hirsch & Wölfl).
       const robots = termine.length ? await this.robotsTxt(new URL(g.pageUrl).origin) : null;
@@ -182,7 +183,7 @@ export class Typo3DeScraper extends DeFeedScraper {
         ids.add(s.source_id);
         all.push(s);
       }
-    }
+    });
     const by = new Map<CalendarStatus, number>();
     for (const { status } of this.status.values()) by.set(status, (by.get(status) ?? 0) + 1);
     this.log(`${groups.length} Kalenderseiten (${[...by].map(([k, v]) => `${k} ${v}`).join(', ')}), ${all.length} Termine`);

@@ -86,17 +86,23 @@ export class WeblicationDeScraper extends DeFeedScraper {
 
   async scrape(): Promise<ScrapedEvent[]> {
     const groups = this.pickGroups(weblicationGroups());
-    const done = new Set<string>();
+    const done = new Map<string, FeedGroup>();
     const all: ScrapedEvent[] = [];
-    for (const g of groups) {
+    for (const g of groups) await this.inCalendar(g, async () => {
       const first = await this.firstPage(g.pageUrl);
-      if (!first || done.has(first.url)) continue;
-      done.add(first.url);
+      if (!first) return;
+      const earlier = done.get(first.url);
+      if (earlier) {
+        this.sameCalendar(g, earlier);
+        return;
+      }
+      done.set(first.url, g);
       const termine = await this.calendar(first.page, first.url);
+      this.noteTermine(termine);
       const robots = termine.length ? await this.robotsTxt(new URL(first.url).origin) : null;
       const allowed = termine.map(t => (t.image && !imageAllowed(robots, t.image) ? { ...t, image: undefined } : t));
       all.push(...this.toScrapedAll(allowed, g));
-    }
+    });
     this.log(`${groups.length} Kalender, ${all.length} Termine`);
     return all;
   }

@@ -141,7 +141,7 @@ export class AllgemeinDeScraper extends DeFeedScraper {
       for (let hostGroups = queue.shift(); hostGroups; hostGroups = queue.shift()) {
         for (const g of hostGroups) {
           if (Date.now() > deadline) return;
-          const termine = await this.readCalendar(g.feedUrl, today);
+          const termine = await this.inCalendar(g, () => this.readCalendar(g.feedUrl, today));
           if (termine.length) pagesWithEvents++;
           read.push({ g, termine: withoutPlaceholderImages(collapseSourceDuplicates(termine.map(t => ({ ...t, uid: t.key })))) });
         }
@@ -168,6 +168,7 @@ export class AllgemeinDeScraper extends DeFeedScraper {
       // Folgeseiten (Saarbrücken, Greetsiel, Mannheim, Prüfstand 2026-10-30).
       const all = parseAllgemeinPage(html, next, '', url).filter(t => !seen.has(t.key));
       if (all.length === 0) break;
+      this.noteTermine(all);
       for (const t of all) seen.add(t.key);
       const termine = all.filter(t => t.localDate >= today);
       out.push(...termine);

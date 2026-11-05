@@ -27,12 +27,13 @@ export class IonasDeScraper extends DeFeedScraper {
     const from = today.toISOString().slice(0, 10);
     const to = new Date(today.getTime() + 365 * 86_400_000).toISOString().slice(0, 10);
     const all: ScrapedEvent[] = [];
-    for (const g of groups) {
+    for (const g of groups) await this.inCalendar(g, async () => {
       const ics = await this.fetchFeed(ionasIcsUrl(g.feedUrl, from, to));
-      if (ics == null) continue;
+      if (ics == null) return;
       const events = withoutPlaceholderImages(collapseSourceDuplicates(parseIonasIcs(ics)));
+      this.noteTermine(events);
       all.push(...events.map(ev => this.toScraped(ev, g)));
-    }
+    });
     this.log(`${groups.length} Feeds, ${all.length} Termine`);
     return all;
   }
