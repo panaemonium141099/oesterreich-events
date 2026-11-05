@@ -9,12 +9,17 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { kommOneWhen, parseKommOneList, parseKommOneRss } from '@/lib/scrapers/de/kommone';
 import { KommOneDeScraper, kommOneGroups } from '@/lib/scrapers/de/KommOneDeScraper';
 import { toSupabaseRow } from '@/lib/db/supabase-sync';
 import type { FeedGroup } from '@/lib/registry-de/load';
 import type { RegistryEntryDe } from '@/lib/registry-de/build';
+
+// Der Freigabevertrag misst gegen die Uhr (start_in_past); sie steht deshalb auf
+// dem Abrufdatum der Fixtures, sonst kippen die Zeilen mit jedem Tag.
+beforeAll(() => vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-30T12:00:00Z') }));
+afterAll(() => vi.useRealTimers());
 
 const fx = (f: string) => readFileSync(join(__dirname, 'fixtures', 'kommone', f), 'utf8');
 

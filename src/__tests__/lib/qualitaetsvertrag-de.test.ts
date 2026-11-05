@@ -4,13 +4,18 @@
  * Fälle aus dem Prod-Bestand vom 2026-10-28 (8.403 künftige DE-Zeilen von
  * Eventim und Eventfrog) und aus der DE-Vollerhebung.
  */
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { toSupabaseRow } from '@/lib/db/supabase-sync';
 import { evaluateAdmission } from '@/lib/quality/admission';
 import { municipalServiceKind } from '@/lib/category-classifier/municipal-service';
 import { deLandToId } from '@/lib/gemeinden/laender-de';
 import { plzRegionOfCountry, regionOfCountry } from '@/lib/location/ortsdaten';
 import type { ScrapedEvent } from '@/types/events';
+
+// Der Freigabevertrag misst gegen die Uhr (start_in_past); sie steht deshalb auf
+// dem Tag des Prod-Bestands, sonst kippen die Fälle, sobald ihr Termin vorbei ist.
+beforeAll(() => vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-28T12:00:00Z') }));
+afterAll(() => vi.useRealTimers());
 
 const base = {
   source_name: 'eventfrog',
