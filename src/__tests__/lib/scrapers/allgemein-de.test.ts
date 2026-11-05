@@ -9,7 +9,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { parseAllgemeinPage, recordTime, allgemeinSourceId, type AllgemeinTermin } from '@/lib/scrapers/de/allgemein';
 import { findDateExprs } from '@/lib/scrapers/de/datum';
 import { AllgemeinDeScraper, allgemeinGroups, isStartseite } from '@/lib/scrapers/de/AllgemeinDeScraper';
@@ -17,6 +17,11 @@ import { toSupabaseRow } from '@/lib/db/supabase-sync';
 import { loadRegistryDe, type FeedGroup } from '@/lib/registry-de/load';
 
 const TODAY = '2026-10-29';
+
+// Der Freigabevertrag misst gegen die Uhr (start_in_past); sie steht deshalb auf
+// dem Abrufdatum der Fixtures, sonst kippen die Zeilen mit jedem Tag.
+beforeAll(() => vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-29T12:00:00Z') }));
+afterAll(() => vi.useRealTimers());
 
 function page(name: string): { html: string; url: string } {
   const html = readFileSync(join(__dirname, 'fixtures', 'de-allgemein', `${name}.html`), 'utf8');

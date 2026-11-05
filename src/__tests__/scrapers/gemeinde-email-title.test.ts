@@ -13,10 +13,15 @@
  * Steht in der Event-Kachel ein Vereins-Kontaktblock vor der Ueberschrift,
  * gewinnt der mailto:-Anchor.
  */
-import { describe, it, expect } from 'vitest';
+import { afterAll, beforeAll, describe, it, expect, vi } from 'vitest';
 import { GenericGemeindeScraper } from '../../lib/scrapers/GenericGemeindeScraper';
 import { GemeindeRegistryScraper } from '../../lib/scrapers/GemeindeRegistryScraper';
 import { isContactHandleTitle } from '../../lib/scrapers/detail-extract/validate';
+
+// Der Parser verwirft vergangene Termine: die Uhr steht vor den Terminen der
+// Kacheln (15. und 20.11.2026), sonst findet er ab dann nichts mehr.
+beforeAll(() => vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-30T12:00:00Z') }));
+afterAll(() => vi.useRealTimers());
 
 // Nachgebaute Gemeinde-Kachel: Kontaktzeile steht VOR der Ueberschrift.
 const TILE_HTML = `<!doctype html><html><body><ul>

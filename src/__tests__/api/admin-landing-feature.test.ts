@@ -8,7 +8,7 @@
  * die Startseite neu gebaut. Supabase und revalidatePath sind gemockt.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { afterAll, beforeAll, describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { viennaDayRange } from '@/lib/utils/event-time';
 
@@ -71,6 +71,11 @@ function post(body: unknown) {
     }),
   );
 }
+
+// Die Route misst gegen die Uhr (Fenster ab jetzt, Tag nicht in der Vergangenheit):
+// sie steht auf dem Tag von DAY, sonst antwortet sie ab dem Folgetag 422.
+beforeAll(() => vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-11-05T10:00:00Z') }));
+afterAll(() => vi.useRealTimers());
 
 const DAY = '2026-11-05';
 const EVENT = {

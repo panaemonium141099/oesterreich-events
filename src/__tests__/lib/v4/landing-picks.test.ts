@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { afterAll, beforeAll, describe, it, expect, vi } from 'vitest';
 import type { Event } from '@/types/events';
 import type { FestivalPost } from '@/content/blog/types';
 import {
@@ -19,6 +19,11 @@ import {
 // Donnerstag, 5. November 2026, 11:00 Wien (CET = UTC+1).
 const NOW = new Date('2026-11-05T10:00:00Z');
 const TODAY = '2026-11-05';
+
+// pickProgram misst per Vorgabe gegen die Uhr (Renderzeit): die steht auf NOW,
+// sonst fallen die Abendtermine der Tests ab dem Abend des 05.11.2026 heraus.
+beforeAll(() => vi.useFakeTimers({ toFake: ['Date'], now: NOW }));
+afterAll(() => vi.useRealTimers());
 
 const ev = (id: string, over: Partial<Event> = {}): Event => ({
   id,
