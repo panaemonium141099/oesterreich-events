@@ -237,6 +237,7 @@ import { post as bolschoiDonKosakenChorAdventskonzert2026 } from './posts/bolsch
 import { post as yogaDrinksWeihnachtsfeiernInnsbruck2026 } from './posts/yoga-drinks-weihnachtsfeiern-innsbruck-2026';
 import { post as theaterAusserKontrolle2026 } from './posts/theater-ausser-kontrolle-2026';
 import { post as dieZauberfloeteKinderoperInDerKrypta2026 } from './posts/die-zauberfloete-kinderoper-in-der-krypta-2026';
+import { post as diagonale2027 } from './posts/diagonale-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -486,6 +487,7 @@ export const ALL_POSTS: FestivalPost[] = [
   yogaDrinksWeihnachtsfeiernInnsbruck2026,
   theaterAusserKontrolle2026,
   dieZauberfloeteKinderoperInDerKrypta2026,
+  diagonale2027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
