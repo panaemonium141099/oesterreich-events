@@ -630,6 +630,48 @@ Server geht per IPv6 raus; der IP-gefilterte API-Token verlangt `curl -4`.
 IP-Access-Allow-Regel greift vorher. (5) `cf.threat_score` ist dauerhaft 0,
 Challenges brauchen eigene Signale (UA-Build, Land, `cf.client.bot`).
 
+### 3.15 Postfach office@lasstreffen.at auf dem eigenen Server (2026-11-06)
+
+**Stand:** Der MX-Eintrag zeigte seit der Übernahme von Internex auf
+`mail.lasstreffen.at`, einen Namen ohne Adresse; Mail an die Domain kam
+nirgends an. Seit 06.11. läuft auf dem Hetzner-Server ein eigener Mailserver,
+nativ per apt, kein Container: Postfix nimmt auf Port 25 an und übergibt per
+LMTP an Dovecot 2.4, ein virtuelles Postfach `office@lasstreffen.at` (Maildir
+unter `/var/vmail`, Quota 2 GB, damit das Postfach die knappe Platte nicht
+füllt), Abruf über IMAPS 993, Versand über Submission 465/587 mit dem
+Postfach-Login. `postmaster@`, `abuse@`, `kontakt@` und `contact@` landen im
+selben Postfach (die letzten beiden stehen als Kontakt in den User-Agents der
+Scraper). Alles andere an der Domain lehnt Postfix beim Empfang mit 550 ab,
+auch `noreply@`.
+
+**Versand über Brevo:** Hetzner sperrt ausgehend Port 25 (gemessen, 587 geht).
+Postfix gibt deshalb alles an das Brevo-SMTP-Relay weiter, mit den
+Zugangsdaten, die Supabase-Auth schon nutzt (`SMTP_USER`/`SMTP_PASS` in
+`/opt/supabase/.env`); Brevo signiert mit dem DKIM-Schlüssel der Domain. Der
+Brevo-API-Key taugt nicht als SMTP-Passwort (535). Mails von `office@` zählen
+in dasselbe Tageskontingent wie die Mails der Website (Free: 300 am Tag).
+
+**Zertifikat:** Ein Site-Block `mail.lasstreffen.at` im Caddyfile existiert
+nur, damit Caddy das Zertifikat holt und erneuert; `lt-mail-cert.timer`
+(täglich 04:40 UTC, `/usr/local/sbin/lt-mail-cert-sync`) kopiert es nach
+`/etc/lt-mail/tls` und lädt Postfix und Dovecot neu, wenn es sich geändert hat.
+DNS: A `mail` → 157.180.42.4, DNS-only (`docs/ops/cloudflare/cf-setup.py`).
+
+**Betrieb:** Setup idempotent in `docs/ops/mail/setup-mail.sh` (Kopie und
+Kurzdoku auf dem Server unter `/etc/lt-mail/`). Das Passwort erzeugt das
+Skript einmal, es liegt nur auf dem Server (`/root/office-mail-zugang.txt`).
+fail2ban-Jails `dovecot` und `postfix-sasl`. Logs `/var/log/mail.log`.
+
+**Belege (05./06.11.):** von außen ohne Anmeldung: `office@` 250, fremdes
+Ziel 554 „Relay access denied“, unbekannte Adresse 550, AUTH auf Port 25 nicht
+angeboten und auf 587 erst nach STARTTLS; fremder Absender mit
+Postfach-Login 553; alle vier Ports mit gültigem Let's-Encrypt-Zertifikat;
+Mail von außen über den MX (Brevo → Port 25) lag im Posteingang; Versand als
+`office@` laut Brevo-Ereignisprotokoll zugestellt.
+
+**Offen:** kein Spamfilter; `/var/vmail` ist in keinem Backup; der Wächter
+(`lt-watchdog`) prüft die Maildienste nicht.
+
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
 1. **Affiliate-ID `J70` ist korrekt** und gehört uns (bestätigt). Eventim-Links im Feed
