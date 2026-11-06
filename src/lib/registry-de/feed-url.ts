@@ -98,6 +98,8 @@ export function feedUrlFromPage(integration: string, html: string, pageUrl: stri
         // auch …/veranstaltungskalender/rss (Mitteldithmarschen)
         ?? one(hrefs(html, pageUrl, /veranstaltung[^"'?#]*\/rss\b/i));
     case 'tribe':
+      // Die Erhebung nennt teils den Endpunkt selbst (euscheid.de: `index.php?rest_route=/tribe/events/v1/`).
+      if (/[?&]rest_route=\/tribe\/events\/v1/.test(pageUrl)) return `${origin}/?rest_route=/tribe/events/v1/events`;
       // Fester REST-Pfad des Plugins (theeventscalendar.com, an 4 von 4 Gemeinden belegt).
       return /tribe-events|the-events-calendar/i.test(html) ? `${origin}/wp-json/tribe/events/v1/events` : null;
     case 'eventsmanager':
@@ -142,6 +144,17 @@ export function calendarLinks(html: string, pageUrl: string, max = 3): string[] 
       return x.host === host && !x.search && !/\.(pdf|ics|xml|json|docx?|jpe?g|png)$/i.test(x.pathname) && !x.pathname.includes(':translation') && u.replace(/\/$/, '') !== here;
     });
   return [...new Set(links)].sort((a, b) => a.length - b.length || a.localeCompare(b)).slice(0, max);
+}
+
+/**
+ * Zweite Adresse desselben Feeds, wenn die erste nicht antwortet: WordPress ohne
+ * sprechende Adressen kennt `/wp-json/` nicht (bruchhausen.eu, rheinbreitbach.de:
+ * HTTP 404), die REST-API liegt dann unter `?rest_route=`.
+ */
+export function feedAlternatives(integration: string, feedUrl: string): string[] {
+  if (integration !== 'tribe' || !feedUrl.includes('/wp-json/')) return [];
+  const u = new URL(feedUrl);
+  return [`${u.origin}/?rest_route=${u.pathname.replace(/^.*\/wp-json/, '')}`];
 }
 
 /** Erwartetes Format des Feeds je Integration (für die Prüfung beim Abruf). */

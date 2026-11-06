@@ -19,14 +19,14 @@
  * bei parallelen Abrufen auf ihren gemeinsamen Server); nach fünf Seiten ohne
  * Verbindung in Folge fragt der Lauf diesen Server nicht weiter.
  *
- * Aufruf: npm run build:registry:de [-- --feeds] [--only ionas] [--csv <datei>]
+ * Aufruf: npm run build:registry:de [-- --feeds] [--only ionas,tribe] [--csv <datei>]
  */
 import { lookup } from 'node:dns/promises';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadGemeindenDe } from '../lib/gemeinden/de';
 import { buildRegistry, diffRegistry, verbandHomeUrl, type ErhebungRow, type RegistryEntryDe } from '../lib/registry-de/build';
-import { calendarLinks, calendarPageCandidates, feedFormat, feedUrlFromPage, looksLikeFeed } from '../lib/registry-de/feed-url';
+import { calendarLinks, calendarPageCandidates, feedAlternatives, feedFormat, feedUrlFromPage, looksLikeFeed } from '../lib/registry-de/feed-url';
 import { FEED_FROM_PAGE } from '../lib/registry-de/integrations';
 import { robotsAllows, robotsCrawlDelay } from '../lib/registry-de/robots';
 
@@ -70,6 +70,12 @@ function parseCsv(text: string): Record<string, string>[] {
   return body.map(r => Object.fromEntries(head.map((h, i) => [h, r[i] ?? ''])));
 }
 
+/** `--only ionas,tribe`: nur diese Integrationen. */
+function onlyIntegrations(): Set<string> | null {
+  const only = arg('only');
+  return only ? new Set(only.split(',').map(s => s.trim())) : null;
+}
+
 async function fetchText(url: string, timeoutMs = 20000): Promise<{ status: number; url: string; text: string } | null> {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), timeoutMs);
@@ -94,8 +100,8 @@ async function collectFeeds(rows: ErhebungRow[], known: Record<string, string | 
     // Amt/VG ohne Kalender-URL: Startseite, danach die belegten Standardseiten (fn-29.17).
     else if (FEED_FROM_PAGE.has(r.vb_integration) && r.vb_host?.trim()) pages.set(verbandHomeUrl(r.vb_host), r.vb_integration);
   }
-  const only = arg('only');
-  const todo = [...pages].filter(([u, integration]) => !(u in known) && (!only || integration === only));
+  const only = onlyIntegrations();
+  const todo = [...pages].filter(([u, integration]) => !(u in known) && (!only || only.has(integration)));
   console.log(`Feed-Lauf: ${pages.size} Kalenderseiten, ${todo.length} offen`);
   const robots = new Map<string, Promise<string | null>>();
   const robotsOf = (url: string) => {
@@ -118,12 +124,16 @@ async function collectFeeds(rows: ErhebungRow[], known: Record<string, string | 
     const candidate = feedUrlFromPage(integration, page.text, page.url);
     const format = feedFormat(integration);
     if (!candidate || !format) return { feed: null, reason: 'Seite nennt keinen Feed', links: calendarLinks(page.text, page.url) };
-    if (!robotsAllows(await robotsOf(candidate), candidate, UA_TOKEN)) return { feed: null, reason: 'robots Feed' };
-    await pause(candidate);
-    const feed = await fetchText(candidate);
-    if (!feed) return { feed: null, reason: 'keine Verbindung' };
-    if (feed.status !== 200) return { feed: null, reason: `Feed HTTP ${feed.status}` };
-    return looksLikeFeed(format, feed.text) ? { feed: candidate, reason: 'ok' } : { feed: null, reason: 'Feed-Format falsch' };
+    let last = 'robots Feed';
+    for (const url of [candidate, ...feedAlternatives(integration, candidate)]) {
+      if (!robotsAllows(await robotsOf(url), url, UA_TOKEN)) continue;
+      await pause(url);
+      const feed = await fetchText(url);
+      if (!feed) return { feed: null, reason: 'keine Verbindung' };
+      if (feed.status === 200 && looksLikeFeed(format, feed.text)) return { feed: url, reason: 'ok' };
+      last = feed.status === 200 ? 'Feed-Format falsch' : `Feed HTTP ${feed.status}`;
+    }
+    return { feed: null, reason: last };
   };
   // Seiten je Server: eine Warteschlange, nie zwei Abrufe gleichzeitig.
   const servers = new Map<string, [string, string][]>();
@@ -212,17 +222,17 @@ async function main(): Promise<void> {
   }
   // Feeds hängen an der Kalenderseite; teilt sich eine Seite zwei Integrationen,
   // bleibt die andere unberührt (VG Baunach: communice neben Heimat-Info).
-  const onlyIntegration = arg('only');
-  if (onlyIntegration) {
+  const only = onlyIntegrations();
+  if (only) {
     const beforeEntry = new Map(before.map(e => [e.ags, e]));
     for (const e of entries) {
       const old = beforeEntry.get(e.ags);
       if (!old) continue;
-      if (e.integration !== onlyIntegration) {
+      if (!only.has(e.integration)) {
         if (old.feed_url) e.feed_url = old.feed_url;
         else delete e.feed_url;
       }
-      if (e.fallback?.kind === 'verband' && e.fallback.integration !== onlyIntegration) {
+      if (e.fallback?.kind === 'verband' && !only.has(e.fallback.integration)) {
         const f = old.fallback?.kind === 'verband' ? old.fallback.feed_url : undefined;
         if (f) e.fallback.feed_url = f;
         else delete e.fallback.feed_url;

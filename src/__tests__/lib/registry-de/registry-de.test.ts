@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { loadGemeindenDe } from '@/lib/gemeinden/de';
-import { calendarLinks } from '@/lib/registry-de/feed-url';
+import { calendarLinks, feedAlternatives, feedUrlFromPage } from '@/lib/registry-de/feed-url';
 import { buildRegistry, diffRegistry, eventPageUrl, verbandHomeUrl, type ErhebungRow, type RegistryEntryDe } from '@/lib/registry-de/build';
 import { calendarPageCandidates, feedFormat, feedUrlFromPage, looksLikeFeed } from '@/lib/registry-de/feed-url';
 import { INTEGRATIONS, stufeOf } from '@/lib/registry-de/integrations';
@@ -207,5 +207,13 @@ describe('calendarLinks', () => {
     expect(calendarLinks('<a href="/veranstaltungen/">x</a>', 'https://a.de/veranstaltungen')).toEqual([]);
     const viele = ['a', 'b', 'c', 'd'].map(x => `<a href="/kalender/${x}/">x</a>`).join('');
     expect(calendarLinks(viele, 'https://a.de/')).toHaveLength(3);
+  });
+});
+
+describe('The Events Calendar ohne sprechende Adressen', () => {
+  it('der Endpunkt als Kalenderseite und die zweite Adresse über rest_route', () => {
+    expect(feedUrlFromPage('tribe', '{}', 'http://www.euscheid.de/index.php?rest_route=/tribe/events/v1/')).toBe('http://www.euscheid.de/?rest_route=/tribe/events/v1/events');
+    expect(feedAlternatives('tribe', 'https://bruchhausen.eu/wp-json/tribe/events/v1/events')).toEqual(['https://bruchhausen.eu/?rest_route=/tribe/events/v1/events']);
+    expect(feedAlternatives('ionas', 'https://a.de/kalender/events.json')).toEqual([]);
   });
 });

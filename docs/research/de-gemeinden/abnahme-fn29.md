@@ -318,18 +318,39 @@ antwortet, ist nicht geprüft (Abschnitt 4).
 * **Heede: Verein und Titel ohne Trenner** (Nr. 30). Fix in `nameText` (`<br>` als
   Trenner) zusammen mit `previous_source_id` für die Listenzeilen, deren ID den Titel trägt.
 * **MEC: Uhrzeit nur in der Anzeige** bei ganztägigem JSON-LD (Pegau 15:00, Rhens).
-* **Zähler je Kalender im Nachtlauf:** gelesen ja/nein, Termine gesamt, davon kommend. Erst
-  damit lässt sich jede der 4.943 Gemeinden ohne Termin einer Ursache zuordnen (leer, nicht
-  gelesen, gesperrt, nur zurückgehalten).
-* **ionas ohne bestätigten Feed (456 Gemeinden):** Feeds prüfen und in der Registry
-  nachtragen (`npm run build:registry:de -- --feeds`).
+* **Zähler je Kalender im Nachtlauf:** erledigt (PR #450), Zahlen in Abschnitt 5.
+* **ionas ohne bestätigten Feed (456 Gemeinden):** 142 nachgetragen (PR #454), Rest in
+  Abschnitt 5.
 * **Rückzug bei 404 einer Detailseite, die die Liste weiter führt** (Püttlingen Nr. 43): der
   404-Beleg trifft dann einen stattfindenden Termin. Prüfen, ob der Rückzug die Liste als
   Gegenbeleg lesen sollte.
-* **ekom21-Server 80.69.201.211** (112 hessische ionas/cms21-Gemeinden): von hier seit dem
-  03.11. kein Verbindungsaufbau, Registry ohne Feed. Einmal von GitHub aus prüfen (ein Abruf
-  je Website, nacheinander), dann Feeds bestätigen (`build:registry:de -- --feeds`) oder die
-  Sperre beim Betreiber klären. Bis dahin die CSV 2026-11 für Hessen nicht in die Registry
-  übernehmen.
+* **ekom21-Server 80.69.201.211:** antwortet aus GitHub Actions, 135 hessische Gemeinden mit
+  Feed (PR #454). Lokal weiterhin ohne Verbindung; Feed-Läufe deshalb über
+  `registry-de-feeds.yml`.
 * **GeoCMS und Sitepark** (fn-29.15, 95 Gemeinden): Server sperren, Neuversuch ab 06.11.
 * **Lizenzquellen** (fn-29.19, 1.845 Gemeinden) und Cross7 (fn-29.9, entfällt).
+
+## 5. Fortschreibung 06.11.: Gemeinden ohne Termin nach Ursache
+
+DE-Nachtlauf 42144835784 (06.11., grün, erster Lauf mit Zähler je Kalender, Bericht
+`scrape-reports-de/abdeckung.json`): **3.851 von 10.749 Gemeinden mit Termin (35,8 %)**, am
+05.11. 2.855, Ziel 7.503. Lesend gegen Prod am selben Tag gezählt (3.828, einige Termine lagen
+inzwischen in der Vergangenheit): 2.718 Gemeinden mit Termin aus einem Gemeinde-Adapter, 1.711
+aus Eventfrog (erstmals im Nachtlauf, 21.247 geschrieben), 463 aus Eventim; nur aus Eventfrog
+828, nur aus Eventim 52, nur aus den Adaptern 2.039.
+
+| Ursache der 6.898 Gemeinden ohne Termin | Gemeinden |
+|---|---:|
+| kein Kalender im Nachtlauf | 2.773 |
+| gelesen und leer | 1.633 |
+| nicht gelesen | 850 |
+| in dieser Rotation noch nicht dran (802 verwaltungsportal) | 814 |
+| gelesen, kommende Termine, keiner bei dieser Gemeinde | 710 |
+| gelesen mit Terminen, aber keiner kommend | 106 |
+| Termine nur zurückgehalten | 12 |
+
+Nicht gelesen: kein Kalender des Adapters 731, HTTP 404 57, Netzfehler 21, robots.txt 18,
+HTTP 403 13, HTTP 401 6, HTTP 503 4. Kalender im letzten Stand: 3.741 gelesen, 709 nicht dran,
+119 Fehler, 10 robots.txt. „Gelesen und leer“ heißt: der Abruf kam an, der Adapter erkannte
+keinen Termin; Kalender mit Zeitfenster (ionas, Tribe) melden vergangene Termine gar nicht.
+
