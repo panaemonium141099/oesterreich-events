@@ -29,7 +29,7 @@ async function activateBoost(sessionId: string): Promise<Result> {
     return { ok: false, message: 'Ungültige Checkout-Referenz.' };
   }
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return { ok: false, message: 'Server nicht vollständig konfiguriert — bitte melde dich unter dev@glatzdev.com.' };
+    return { ok: false, message: 'Server nicht vollständig konfiguriert — bitte melde dich unter office@lasstreffen.at.' };
   }
 
   // 1. Zahlungsstatus direkt bei Stripe erfragen
@@ -45,7 +45,7 @@ async function activateBoost(sessionId: string): Promise<Result> {
   }
   const eventId = session.metadata?.event_id;
   if (!eventId) {
-    return { ok: false, message: 'Der Zahlung ist kein Event zugeordnet — bitte melde dich unter dev@glatzdev.com.' };
+    return { ok: false, message: 'Der Zahlung ist kein Event zugeordnet — bitte melde dich unter office@lasstreffen.at.' };
   }
 
   // 2. Boost setzen (Service-Role — Spalten sind nicht anon-schreibbar)
@@ -61,7 +61,7 @@ async function activateBoost(sessionId: string): Promise<Result> {
     .single();
   if (readErr || !event) {
     console.error('[boost/erfolg] event read failed:', readErr);
-    return { ok: false, message: 'Event nicht gefunden — bitte melde dich unter dev@glatzdev.com (Zahlung ist bei uns registriert).' };
+    return { ok: false, message: 'Event nicht gefunden — bitte melde dich unter office@lasstreffen.at (Zahlung ist bei uns registriert).' };
   }
 
   const boostUntil = computeBoostUntil(event.start_date as string);
@@ -71,7 +71,7 @@ async function activateBoost(sessionId: string): Promise<Result> {
     .eq('id', eventId);
   if (updErr) {
     console.error('[boost/erfolg] boost update failed:', updErr);
-    return { ok: false, message: 'Aktivierung fehlgeschlagen — bitte melde dich unter dev@glatzdev.com (Zahlung ist bei uns registriert).' };
+    return { ok: false, message: 'Aktivierung fehlgeschlagen — bitte melde dich unter office@lasstreffen.at (Zahlung ist bei uns registriert).' };
   }
 
   console.log(`[boost/erfolg] boost aktiviert: event=${eventId} until=${boostUntil} session=${sessionId}`);
@@ -135,7 +135,7 @@ export default async function BoostErfolgPage({
         </div>
 
         <p className="text-white/30 text-xs mt-10">
-          Fragen oder Probleme? dev@glatzdev.com — die Zahlung ist über Stripe dokumentiert.
+          Fragen oder Probleme? office@lasstreffen.at — die Zahlung ist über Stripe dokumentiert.
         </p>
       </div>
     </div>

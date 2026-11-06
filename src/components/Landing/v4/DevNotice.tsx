@@ -6,7 +6,7 @@
 
 import { useTranslations } from 'next-intl';
 
-export const DEV_CONTACT = 'dev@glatzdev.com';
+export const DEV_CONTACT = 'support@lasstreffen.at';
 
 export function DevNotice() {
   const t = useTranslations('Landing');

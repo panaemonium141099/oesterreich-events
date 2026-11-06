@@ -235,14 +235,18 @@ node / next.js
   per API mit `/root/.cloudflare-token` (IP-gefiltert, `curl -4`), Skript
   `docs/ops/cloudflare/cf-setup.py`; Plan/Rückwege
   `docs/ops/cloudflare-proxy-2026-10.md`, Betrieb MASTERPLAN §3.14.
-- **Postfach office@lasstreffen.at (seit 2026-11-06):** eigener Mailserver auf
-  dem Hetzner-Server, nativ per apt: Postfix (25 Empfang, 465/587 Submission)
-  und Dovecot 2.4 (IMAPS 993), ein virtuelles Postfach, Quota 2 GB. Versand
-  über das Brevo-SMTP-Relay (Hetzner sperrt ausgehend Port 25), zählt ins
+- **Postfächer office@ und support@lasstreffen.at (seit 2026-11-06):** eigener
+  Mailserver auf dem Hetzner-Server, nativ per apt: Postfix (25 Empfang,
+  465/587 Submission) und Dovecot 2.4 (IMAPS 993), virtuelle Postfächer mit
+  je 2 GB Quota (Liste `BOXES` im Setup-Skript). Versand über das
+  Brevo-SMTP-Relay (Hetzner sperrt ausgehend Port 25), zählt ins
   Brevo-Tageskontingent der Website. Zertifikat für `mail.lasstreffen.at` holt
   Caddy (Site-Block), `lt-mail-cert.timer` übergibt es. Setup idempotent:
   `docs/ops/mail/setup-mail.sh`; Zugangsdaten nur auf dem Server
-  (`/root/office-mail-zugang.txt`); Betrieb MASTERPLAN §3.16.
+  (`/root/<name>-mail-zugang.txt`); Betrieb MASTERPLAN §3.16. Die Website
+  nennt `office@` als Kontakt und `support@` im Entwicklungs-Hinweis der
+  Startseite (`DevNotice`); Formular-Benachrichtigungen gehen weiter an
+  `BUSINESS_LEADS_EMAIL`.
 - **pg_cron in Supabase:** MV-Refreshes (event_stats_cache 30 min,
   event_map_points stündlich), match-artists stündlich.
 

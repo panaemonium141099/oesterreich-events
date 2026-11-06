@@ -717,6 +717,17 @@ Postfach-Login 553; alle vier Ports mit gültigem Let's-Encrypt-Zertifikat;
 Mail von außen über den MX (Brevo → Port 25) lag im Posteingang; Versand als
 `office@` laut Brevo-Ereignisprotokoll zugestellt.
 
+**Nachgezogen am selben Tag:** zweites Postfach `support@lasstreffen.at`
+(eigener Login, `/root/support-mail-zugang.txt`; die Postfächer stehen als
+Liste `BOXES` im Setup-Skript, jedes sendet nur unter der eigenen Adresse,
+Beleg: support-Login mit Absender `office@` 553). Die Website nennt seither
+`office@lasstreffen.at` als Kontakt (Footer, Impressum, Datenschutz, AGB,
+Über uns, Quellen, Für Firmen, Boost-Erfolgsseite) und `support@lasstreffen.at`
+im Entwicklungs-Hinweis der Startseite (`DevNotice`). Unverändert an
+`dev@glatzdev.com`: die Benachrichtigungen der Formulare
+(`BUSINESS_LEADS_EMAIL` in `/api/business/lead` und `/api/events/inserat`)
+und der VAPID-Kontakt der Push-Nachrichten.
+
 **Offen:** kein Spamfilter; `/var/vmail` ist in keinem Backup; der Wächter
 (`lt-watchdog`) prüft die Maildienste nicht.
 

@@ -243,9 +243,9 @@ describe('Footer mit Hinweiszeile', () => {
   it('zeigt den Entwicklungs-Hinweis ohne Gedankenstrich mit Mail-Link', () => {
     render(<Footer notice={<DevNotice/>}/>);
     const notice = screen.getByTestId('footer-notice');
-    expect(notice).toHaveTextContent('Die Seite ist in Entwicklung, technische Fehler sind möglich. Feedback bitte an dev@glatzdev.com.');
+    expect(notice).toHaveTextContent('Die Seite ist in Entwicklung, technische Fehler sind möglich. Feedback bitte an support@lasstreffen.at.');
     expect(notice.textContent).not.toContain('—');
-    expect(within(notice).getByRole('link', { name: 'dev@glatzdev.com' })).toHaveAttribute('href', 'mailto:dev@glatzdev.com');
+    expect(within(notice).getByRole('link', { name: 'support@lasstreffen.at' })).toHaveAttribute('href', 'mailto:support@lasstreffen.at');
     expect(screen.getByText('Event inserieren')).toBeInTheDocument();
     expect(screen.getByText('Für Firmen')).toBeInTheDocument();
   });

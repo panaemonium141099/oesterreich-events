@@ -96,7 +96,7 @@ export function Footer({ notice }: { notice?: ReactNode } = {}) {
           <Link href="/quellen" className={NAV_LINK}>
             {t('sources')}
           </Link>
-          <a href="mailto:dev@glatzdev.com" className={NAV_LINK}>
+          <a href="mailto:office@lasstreffen.at" className={NAV_LINK}>
             {t('contact')}
           </a>
         </nav>
