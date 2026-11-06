@@ -47,8 +47,8 @@ export default function ImpressumPage() {
             <h2 className="text-lg font-semibold text-white mb-3">Kontakt</h2>
             <p>
               E-Mail:{' '}
-              <a href="mailto:dev@glatzdev.com" className="text-white/90 underline underline-offset-2 hover:text-white transition-colors">
-                dev@glatzdev.com
+              <a href="mailto:office@lasstreffen.at" className="text-white/90 underline underline-offset-2 hover:text-white transition-colors">
+                office@lasstreffen.at
               </a>
             </p>
           </section>

@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # Mailserver fuer lasstreffen.at auf dem Hetzner-Server (idempotent).
 #
-#   Postfach:  office@lasstreffen.at (Dovecot, Maildir unter /var/vmail, 2 GB Quota)
+#   Postfaecher: office@ und support@lasstreffen.at (Dovecot, Maildir unter
+#              /var/vmail, je 2 GB Quota). Weiteres Postfach: Name in BOXES.
 #   Empfang:   Postfix auf Port 25, Zustellung per LMTP an Dovecot
 #   Abruf:     IMAPS 993
-#   Versand:   Submission 465/587 (Anmeldung mit dem Postfach), weiter ueber das
+#   Versand:   Submission 465/587 (Anmeldung mit dem Postfach, Absender nur die
+#              eigene Adresse), weiter ueber das
 #              Brevo-SMTP-Relay: Hetzner sperrt ausgehend Port 25, und Brevo
 #              signiert mit dem DKIM-Schluessel der Domain (brevo1/brevo2._domainkey).
 #   TLS:       Zertifikat fuer mail.lasstreffen.at holt Caddy (Site-Block im
@@ -12,15 +14,15 @@
 #
 # Aufruf auf dem Server:  ssh root@157.180.42.4 'bash -s' < docs/ops/mail/setup-mail.sh
 # Pakete vorher: postfix (Auswahl "No configuration"), dovecot-imapd, dovecot-lmtpd.
-# Das Passwort erzeugt das Skript einmal und legt es nur auf dem Server ab:
-#   /root/office-mail-zugang.txt (0600). Es wird nie ausgegeben.
+# Die Passwoerter erzeugt das Skript je Postfach einmal und legt sie nur auf dem
+# Server ab: /root/<name>-mail-zugang.txt (0600). Sie werden nie ausgegeben.
 set -euo pipefail
 
 DOMAIN=lasstreffen.at
 HOST=mail.lasstreffen.at
-BOX=office@lasstreffen.at
+BOXES="office support"           # je Name ein Postfach <name>@$DOMAIN
+ALIAS_TO=office@lasstreffen.at   # Ziel fuer postmaster@, abuse@, kontakt@, contact@
 TLS=/etc/lt-mail/tls
-ZUGANG=/root/office-mail-zugang.txt
 CADDY_CERTS=/var/lib/docker/volumes/supabase_caddy_data/_data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/$HOST
 
 step() { printf '\n== %s\n' "$*"; }
@@ -90,19 +92,23 @@ Persistent=true
 WantedBy=timers.target
 EOF
 
-# ---------------------------------------------------------------- Postfach
-step "Postfach $BOX"
-if grep -q "^$BOX:" /etc/dovecot/users 2>/dev/null; then
-  echo "  vorhanden (Passwort unveraendert)"
-else
+# -------------------------------------------------------------- Postfaecher
+step "Postfaecher"
+for NAME in $BOXES; do
+  ADDR="$NAME@$DOMAIN"
+  ZUGANG="/root/$NAME-mail-zugang.txt"
+  if grep -q "^$ADDR:" /etc/dovecot/users 2>/dev/null; then
+    echo "  $ADDR vorhanden (Passwort unveraendert)"
+    continue
+  fi
   PW=$(openssl rand -base64 48 | tr -dc 'A-Za-z0-9' | cut -c1-28)
   HASH=$(printf '%s' "$PW" | openssl passwd -6 -stdin)
   ( umask 077
-    printf '%s:{SHA512-CRYPT}%s\n' "$BOX" "$HASH" > /etc/dovecot/users
+    printf '%s:{SHA512-CRYPT}%s\n' "$ADDR" "$HASH" >> /etc/dovecot/users
     cat > "$ZUGANG" <<EOF
-Postfach office@lasstreffen.at (angelegt $(date +%F))
+Postfach $ADDR (angelegt $(date +%F))
 
-Benutzername:  $BOX
+Benutzername:  $ADDR
 Passwort:      $PW
 
 Empfang (IMAP):  $HOST   Port 993   SSL/TLS
@@ -114,17 +120,17 @@ Passwort aendern: neuen Hash mit
 in /etc/dovecot/users eintragen ({SHA512-CRYPT} davor lassen), kein Neustart noetig.
 EOF
   )
-  chown root:dovecot /etc/dovecot/users
-  chmod 0640 /etc/dovecot/users
   unset PW HASH
-  echo "  angelegt, Zugangsdaten in $ZUGANG"
-fi
+  echo "  $ADDR angelegt, Zugangsdaten in $ZUGANG"
+done
+chown root:dovecot /etc/dovecot/users
+chmod 0640 /etc/dovecot/users
 
 # ----------------------------------------------------------------- Dovecot
 step "Dovecot"
 [ -e /etc/dovecot/dovecot.conf.ubuntu ] || cp -a /etc/dovecot/dovecot.conf /etc/dovecot/dovecot.conf.ubuntu
 cat > /etc/dovecot/dovecot.conf <<EOF
-# lasstreffen.at: ein virtuelles Postfach, IMAPS + LMTP. Erzeugt von
+# lasstreffen.at: virtuelle Postfaecher, IMAPS + LMTP. Erzeugt von
 # docs/ops/mail/setup-mail.sh (Repo). Die conf.d-Beispiele von Ubuntu werden
 # bewusst nicht eingebunden; Original: dovecot.conf.ubuntu.
 dovecot_config_version = 2.4.0
@@ -236,14 +242,19 @@ step "Postfix"
 # Systempost an root gab es bisher nicht (kein MTA): weiter verwerfen.
 grep -q '^root:' /etc/aliases || printf 'root: /dev/null\n' >> /etc/aliases
 
-printf '%s OK\n' "$BOX" > /etc/postfix/vmailbox
+: > /etc/postfix/vmailbox
+: > /etc/postfix/sender_login
+for NAME in $BOXES; do
+  printf '%s OK\n' "$NAME@$DOMAIN" >> /etc/postfix/vmailbox
+  # jedes Postfach sendet nur unter der eigenen Adresse
+  printf '%s %s\n' "$NAME@$DOMAIN" "$NAME@$DOMAIN" >> /etc/postfix/sender_login
+done
 cat > /etc/postfix/virtual <<EOF
-postmaster@$DOMAIN $BOX
-abuse@$DOMAIN $BOX
-kontakt@$DOMAIN $BOX
-contact@$DOMAIN $BOX
+postmaster@$DOMAIN $ALIAS_TO
+abuse@$DOMAIN $ALIAS_TO
+kontakt@$DOMAIN $ALIAS_TO
+contact@$DOMAIN $ALIAS_TO
 EOF
-printf '%s %s\n' "$BOX" "$BOX" > /etc/postfix/sender_login
 
 # Brevo-Relay: dieselben SMTP-Zugangsdaten, mit denen Supabase-Auth versendet.
 python3 - <<'EOF'
@@ -370,4 +381,6 @@ systemctl restart postfix
 sleep 2
 systemctl is-active dovecot postfix | tr '\n' ' '; echo
 ss -tlnH | awk '{print $4}' | grep -E ':(25|465|587|993|143)$' | sort -u | tr '\n' ' '; echo
-doveadm user "$BOX" | sed 's/^/  /'
+for NAME in $BOXES; do
+  printf '  %s -> %s\n' "$NAME@$DOMAIN" "$(doveadm user -f home "$NAME@$DOMAIN")"
+done

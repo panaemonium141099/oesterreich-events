@@ -529,10 +529,10 @@ export default function QuellenPage() {
                 Sie sind Veranstalter und möchten Ihre Daten korrigieren, ergänzen
                 oder entfernen lassen? Kontaktieren Sie uns gerne unter{' '}
                 <a
-                  href="mailto:dev@glatzdev.com"
+                  href="mailto:office@lasstreffen.at"
                   className="text-white/70 underline underline-offset-2 hover:text-white transition-colors"
                 >
-                  dev@glatzdev.com
+                  office@lasstreffen.at
                 </a>
                 .
               </p>

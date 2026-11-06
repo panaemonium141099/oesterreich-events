@@ -176,7 +176,7 @@ export default function AGBPage() {
             <h2 className="text-lg font-semibold text-white mb-3">9. Kündigung und Kontolöschung</h2>
             <p>
               Sie können Ihr Benutzerkonto jederzeit und ohne Angabe von Gründen löschen. Die Löschung
-              kann über die Kontoeinstellungen oder per E-Mail an dev@glatzdev.com beantragt werden.
+              kann über die Kontoeinstellungen oder per E-Mail an office@lasstreffen.at beantragt werden.
             </p>
             <p className="mt-2">
               Der Betreiber ist berechtigt, Benutzerkonten bei Verstößen gegen diese AGB vorübergehend zu

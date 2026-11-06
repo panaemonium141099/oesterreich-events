@@ -193,10 +193,10 @@ export default function UeberUnsPage() {
               sichergehen wollt, dass eure Termine korrekt erfasst werden — schreibt mir
               direkt an&nbsp;
               <a
-                href="mailto:dev@glatzdev.com"
+                href="mailto:office@lasstreffen.at"
                 className="underline underline-offset-2 text-white/90 hover:text-white"
               >
-                dev@glatzdev.com
+                office@lasstreffen.at
               </a>
               . Antworten gibt&apos;s in der Regel binnen 48 Stunden.
             </p>
