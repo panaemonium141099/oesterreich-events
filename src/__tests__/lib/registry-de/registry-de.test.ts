@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { loadGemeindenDe } from '@/lib/gemeinden/de';
-import { calendarLinks, feedAlternatives, feedUrlFromPage } from '@/lib/registry-de/feed-url';
+import { calendarLinks, feedAlternatives } from '@/lib/registry-de/feed-url';
 import { buildRegistry, diffRegistry, eventPageUrl, verbandHomeUrl, type ErhebungRow, type RegistryEntryDe } from '@/lib/registry-de/build';
 import { calendarPageCandidates, feedFormat, feedUrlFromPage, looksLikeFeed } from '@/lib/registry-de/feed-url';
 import { INTEGRATIONS, stufeOf } from '@/lib/registry-de/integrations';
