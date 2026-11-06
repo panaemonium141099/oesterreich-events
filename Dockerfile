@@ -50,7 +50,12 @@ RUN npm ci
 RUN npm install sharp
 
 COPY . .
-RUN npm run build
+
+# Die Server-Env (Schlüssel für das Vorrendern) gilt nur für diesen Schritt:
+# der GitHub-Runner reicht sie als BuildKit-Secret `buildenv` herein
+# (scripts/deploy/build-image.sh), im Image und in seinen Schichten bleibt
+# nichts davon. Ohne Secret gilt, was im Build-Kontext liegt.
+RUN --mount=type=secret,id=buildenv,target=/app/.env.production.local npm run build
 
 # ─── Stage 3: Production runner ───────────────────────────────────────────────
 FROM node:22-slim AS runner
