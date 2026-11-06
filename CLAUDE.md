@@ -242,7 +242,7 @@ node / next.js
   Brevo-Tageskontingent der Website. Zertifikat für `mail.lasstreffen.at` holt
   Caddy (Site-Block), `lt-mail-cert.timer` übergibt es. Setup idempotent:
   `docs/ops/mail/setup-mail.sh`; Zugangsdaten nur auf dem Server
-  (`/root/office-mail-zugang.txt`); Betrieb MASTERPLAN §3.15.
+  (`/root/office-mail-zugang.txt`); Betrieb MASTERPLAN §3.16.
 - **pg_cron in Supabase:** MV-Refreshes (event_stats_cache 30 min,
   event_map_points stündlich), match-artists stündlich.
 
@@ -572,6 +572,16 @@ npm run import:festivals     # data/festivals-upcoming.json → festivals + fest
   Ende. Mehr als 1000 Zeilen nur über `fetchAllRows`/`forEachPage`
   (`src/lib/db/fetch-all.ts`); Wächter `postgrest-row-cap.test.ts`. So lief
   der Dedup bis 2026-09-24 nur über vergangene Tage.
+- Ganze Tabellen nach id blättern, nicht mit Offset (`forEachPageById` in
+  `src/lib/db/fetch-all.ts`): eine Offset-Seite liest alle Zeilen davor mit
+  (Bericht über 430.811 Events gegen Prod: 3 min 46 s mit Offset, 32 s nach
+  id, gleiches Ergebnis). Baut ein Deploy das App-Image auf dem Datenbank-Server,
+  reicht das für den Statement-Timeout: Bericht des AT-Nachtlaufs am
+  05.11.2026 bei Offset 186.000, Abdeckung am 03.11. Lesefehler durch
+  Überlast (`statement timeout`, `fetch failed`) wiederholt `readWithRetry`
+  knapp fünf Minuten lang, andere werfen sofort. Ein Lesefehler ist nie
+  „nichts zu tun“: der Kategorieschritt meldete so am 05.11. Erfolg. Wächter
+  `fetch-all-keyset.test.ts`, Befund MASTERPLAN §3.15.
 - Funktionen in public sind seit 2026-10-08 standardmäßig NICHT öffentlich
   (Default-Privileges von supabase_admin und postgres, Migration
   `20261008130000_funktionen_execute_rechte.sql`): neue oder per DROP neu

@@ -14,7 +14,8 @@
  */
 import { createClient } from '@supabase/supabase-js';
 import { loadGemeindenMaster } from '../lib/gemeinden/data';
-import { POSTGREST_MAX_ROWS } from '../lib/db/fetch-all';
+import { POSTGREST_MAX_ROWS, forEachPageById } from '../lib/db/fetch-all';
+import { forCountry } from '../lib/pipeline/pipeline-country';
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import type { PaginationLogEntry } from '../lib/scrapers/GemeindeRegistryScraper';
@@ -188,6 +189,7 @@ async function querySQL<T = Record<string, unknown>>(sql: string): Promise<T[]> 
 // ─── Practical Data Fetching (TypeScript aggregation) ────────────────────────
 
 interface EventRow {
+  id: string;
   location_name: string;
   bundesland: string;
   source_name: string;
@@ -212,27 +214,27 @@ async function fetchAllEventCounts(): Promise<{
   let totalEvents = 0;
   let futureEvents = 0;
 
-  // Seiten zu POSTGREST_MAX_ROWS; mehr liefert der Server nicht (früher 10000
-  // mit Abbruch bei kurzer Seite: der Bericht zählte nur 1000 Events).
-  const PAGE_SIZE = POSTGREST_MAX_ROWS;
-  let offset = 0;
-
   console.log('[report] Fetching events from Supabase...');
 
-  // Ende erst bei leerer Seite (kurze Seite kann gekürzt sein).
-  while (true) {
-    const { data, error } = await supabase
+  // Seiten nach id statt nach Offset, mit Wiederholung bei überlasteter
+  // Datenbank (fetch-all.ts). Der Bericht liest den ganzen Bestand seines
+  // Landes; mit Offset lief er am 05.11.2026 bei Zeile 186.000 in den
+  // Statement-Timeout, während ein Deploy auf dem Server baute.
+  // Nur die Zeilen des AT-Laufs (alles außer DE, pipeline-country.ts): der
+  // Bericht zählt österreichische Gemeinden und Bundesländer, die DE-Zeilen
+  // standen bis 2026-11-05 als Bundesland „Unbekannt“ darin (112.914 von
+  // 430.811). Für DE steht die Abdeckung (coverage-report.ts).
+  await forEachPageById<EventRow>((afterId) => {
+    const page = forCountry(supabase
       .from('events')
-      .select('location_name, bundesland, source_name, start_date')
+      .select('id, location_name, bundesland, source_name, start_date')
       .not('location_name', 'is', null)
-      .not('source_name', 'is', null)
+      .not('source_name', 'is', null), 'AT')
       .order('id')
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) throw new Error(`Fetch failed at offset ${offset}: ${error.message}`);
-    if (!data || data.length === 0) break;
-
-    for (const row of data as EventRow[]) {
+      .limit(POSTGREST_MAX_ROWS);
+    return afterId ? page.gt('id', afterId) : page;
+  }, (data) => {
+    for (const row of data) {
       totalEvents++;
       const bl = normBundesland(row.bundesland);
       const isFuture = row.start_date >= now;
@@ -262,9 +264,8 @@ async function fetchAllEventCounts(): Promise<{
       bundeslandTotals.set(bl, (bundeslandTotals.get(bl) || 0) + 1);
     }
 
-    offset += data.length;
     process.stdout.write(`\r[report] Fetched ${totalEvents.toLocaleString()} events...`);
-  }
+  }, { label: 'report' });
 
   console.log(`\n[report] Total: ${totalEvents.toLocaleString()} events, ${futureEvents.toLocaleString()} upcoming`);
   return { gemeindeSourceCounts, gemeindeBundesland, sourceTotals, bundeslandTotals, totalEvents, futureEvents };
