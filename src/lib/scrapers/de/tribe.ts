@@ -140,7 +140,10 @@ function toEvent(e: RawEvent): TribeEvent | null {
 /** Seite N der REST-Liste für die Tage `from` bis `to` (Ortszeit der Website). */
 export function tribePageUrl(feedUrl: string, from: string, to: string, page: number): string {
   const u = new URL(feedUrl);
+  // WordPress ohne sprechende Adressen: der Pfad steht im Parameter `rest_route`.
+  const route = u.searchParams.get('rest_route');
   u.search = '';
+  if (route) u.searchParams.set('rest_route', route);
   u.searchParams.set('per_page', '50');
   u.searchParams.set('start_date', `${from} 00:00:00`);
   u.searchParams.set('end_date', `${to} 23:59:59`);
