@@ -235,6 +235,8 @@ import { post as montiBetonsElvisNightGedenkkonzertZum50TodestagDesK2027 } from 
 import { post as vorchdorferNeujahrskonzert20272027 } from './posts/vorchdorfer-neujahrskonzert-2027-2027';
 import { post as bolschoiDonKosakenChorAdventskonzert2026 } from './posts/bolschoi-don-kosaken-chor-adventskonzert-2026';
 import { post as yogaDrinksWeihnachtsfeiernInnsbruck2026 } from './posts/yoga-drinks-weihnachtsfeiern-innsbruck-2026';
+import { post as theaterAusserKontrolle2026 } from './posts/theater-ausser-kontrolle-2026';
+import { post as dieZauberfloeteKinderoperInDerKrypta2026 } from './posts/die-zauberfloete-kinderoper-in-der-krypta-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -482,6 +484,8 @@ export const ALL_POSTS: FestivalPost[] = [
   vorchdorferNeujahrskonzert20272027,
   bolschoiDonKosakenChorAdventskonzert2026,
   yogaDrinksWeihnachtsfeiernInnsbruck2026,
+  theaterAusserKontrolle2026,
+  dieZauberfloeteKinderoperInDerKrypta2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
