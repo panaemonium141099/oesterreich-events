@@ -238,6 +238,8 @@ import { post as yogaDrinksWeihnachtsfeiernInnsbruck2026 } from './posts/yoga-dr
 import { post as theaterAusserKontrolle2026 } from './posts/theater-ausser-kontrolle-2026';
 import { post as dieZauberfloeteKinderoperInDerKrypta2026 } from './posts/die-zauberfloete-kinderoper-in-der-krypta-2026';
 import { post as diagonale2027 } from './posts/diagonale-2027';
+import { post as kernoelamazonenKugelKeksKabarettComedyFestival20262026 } from './posts/kernoelamazonen-kugel-keks-kabarett-comedy-festival-2026-2026';
+import { post as post52GalakonzertOriginalTirolerKaiserjaegermusik2026 } from './posts/52-galakonzert-original-tiroler-kaiserjaegermusik-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -488,6 +490,8 @@ export const ALL_POSTS: FestivalPost[] = [
   theaterAusserKontrolle2026,
   dieZauberfloeteKinderoperInDerKrypta2026,
   diagonale2027,
+  kernoelamazonenKugelKeksKabarettComedyFestival20262026,
+  post52GalakonzertOriginalTirolerKaiserjaegermusik2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
