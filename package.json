@@ -1,6 +1,7 @@
 {
   "name": "lasstreffen-at",
   "version": "1.0.0",
+  "private": true,
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -94,7 +95,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "UNLICENSED",
   "engines": {
     "node": "22.x"
   },
