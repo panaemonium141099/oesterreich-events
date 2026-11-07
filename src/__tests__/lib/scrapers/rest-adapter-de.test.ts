@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { lkrgEmbed, lkrgEventsUrl, parseLkrgEvents } from '@/lib/scrapers/de/lkrg';
 import { parseRegiogateDetail, parseRegiogateList, regiogateDay, toRegiogateTermin } from '@/lib/scrapers/de/regiogate';
-import { geocmsListUrl, parseGeocmsDetail, parseGeocmsList, toGeocmsTermin } from '@/lib/scrapers/de/geocms';
+import { geocmsListUrl, geocmsPagerUrls, parseGeocmsDetail, parseGeocmsList, toGeocmsTermin } from '@/lib/scrapers/de/geocms';
 import { LkrgDeScraper } from '@/lib/scrapers/de/LkrgDeScraper';
 import { toSupabaseRow } from '@/lib/db/supabase-sync';
 import type { FeedGroup } from '@/lib/registry-de/load';
@@ -87,10 +87,12 @@ describe('regiogate: Karten und Detailseite', () => {
 
 describe('GeoCMS: Liste und Detailseite', () => {
   it('Listen-URL mit Fenster und Offset', () => {
-    const u = new URL(geocmsListUrl('https://www.koethen-anhalt.de/de/veranstaltungen.html', '2026-11-07', '2027-11-07', 40));
+    const u = new URL(geocmsListUrl('https://www.koethen-anhalt.de/de/veranstaltungen.html', '2026-11-07', '2027-11-07'));
     expect(u.searchParams.get('min_date')).toBe('07.11.2026');
     expect(u.searchParams.get('max_date')).toBe('07.11.2027');
-    expect(u.searchParams.get('gcevent[pager]')).toBe('40');
+    const pager = geocmsPagerUrls(fx('geocms', 'koenigswinter-liste.html'), 'https://www.koenigswinter.de/de/veranstaltungskalender.html');
+    expect(pager).toContain('https://www.koenigswinter.de/de/veranstaltungskalender.html?btp_event%5Bp_2_361_1081%5D=10');
+    expect(pager.length).toBeGreaterThanOrEqual(4);
   });
 
   it('Zeilen: Schlüssel mit Datum, Uhrzeit, Zeitraum „01. bis 30. November", Kategorie', () => {
@@ -98,6 +100,19 @@ describe('GeoCMS: Liste und Detailseite', () => {
     expect(rows.length).toBeGreaterThanOrEqual(1);
     expect(rows[0]).toMatchObject({ key: 'event-81327-1233-de-1-2026-11-01-10-00', localDate: '2026-11-01', time: '10:00', endTime: '18:00', lastDate: '2026-11-30', category: 'Familien und Kinder' });
     expect(rows[0].url).toBe('https://www.koethen-anhalt.de/de/veranstaltungen/event/82169,1233/lesestart-set-kostenlos-erhaeltlich-in-der-kinderbibliothek-koethen-01-11-2026.html');
+  });
+
+  it('Vorlagen ohne Kennung: Nebra (Datum und Uhrzeit im Text), Königswinter (li.media, Zeitraum)', () => {
+    const [n] = parseGeocmsList(fx('geocms', 'nebra-liste.html'), 'https://www.stadt-nebra.de/de/veranstaltungen.html');
+    expect(n).toMatchObject({ key: 'event-20609-1067-2026-11-07', title: 'Öffentliche Sonderführung in der Arche Nebra', localDate: '2026-11-07', time: '11:00', locationName: 'Arche Nebra', category: 'Bildung, Vorträge' });
+    const [k] = parseGeocmsList(fx('geocms', 'koenigswinter-liste.html'), 'https://www.koenigswinter.de/de/veranstaltungskalender.html');
+    expect(k).toMatchObject({ key: 'event-144403-1081-2026-10-17', title: 'PEKiP-Kurs', localDate: '2026-10-17', time: '09:30', endTime: '11:00', lastDate: '2026-12-12', locationName: 'Yoga fürs Leben' });
+  });
+
+  it('Karten-Vorlage (Oebisfelde): Uhrzeit aus der Karte, Suchparameter nicht im Detail-Link', () => {
+    const [o] = parseGeocmsList(fx('geocms', 'oebisfelde-liste.html'), 'https://www.stadt-oebisfelde-weferlingen.de/de/veranstaltungen.html?min_date=07.11.2026&max_date=07.11.2027&btp_event%5Bp_1_29_1096%5D=60');
+    expect(o).toMatchObject({ title: 'Silvesterparty mit Feuerwerk', localDate: '2026-12-31', time: '20:00' });
+    expect(o.url).toBe('https://www.stadt-oebisfelde-weferlingen.de/de/veranstaltung-detail/event/33321,1096/silvesterparty-mit-feuerwerk-31-12-2026.html');
   });
 
   it('Detailseite: Veranstaltungsort mit PLZ und Straße, Ticket-Link', () => {

@@ -14,7 +14,7 @@ import { imageCredit, imageUrl, withoutPlaceholderImages } from './bild';
 import { collapseSourceDuplicates, terminContext } from './kontext';
 import { seitenGruppen } from './seiten-gruppen';
 import { ownTown } from './DesklineDeScraper';
-import { GEOCMS_PAGE_SIZE, geocmsListUrl, isGeocmsPage, parseGeocmsDetail, parseGeocmsList, toGeocmsTermin, type GeocmsDetail, type GeocmsRow, type GeocmsTermin } from './geocms';
+import { geocmsListUrl, geocmsPagerUrls, isGeocmsPage, parseGeocmsDetail, parseGeocmsList, toGeocmsTermin, type GeocmsDetail, type GeocmsRow, type GeocmsTermin } from './geocms';
 
 /**
  * Höchstens so viele Listenseiten à 20 je Kalender und so viele Detailseiten;
@@ -40,9 +40,13 @@ export class GeocmsDeScraper extends DeFeedScraper {
     let withList = 0;
     for (const g of groups) await this.inCalendar(g, async () => {
       const rows = new Map<string, GeocmsRow>();
+      const seen = new Set<string>();
+      const queue = [geocmsListUrl(g.pageUrl, from, to)];
       let first = true;
-      for (let page = 0; page < MAX_PAGES; page++) {
-        const url = geocmsListUrl(g.pageUrl, from, to, page * GEOCMS_PAGE_SIZE);
+      while (queue.length && seen.size < MAX_PAGES) {
+        const url = queue.shift()!;
+        if (seen.has(url)) continue;
+        seen.add(url);
         const html = await this.fetchHtmlPage(url);
         if (html == null) break;
         const list = parseGeocmsList(html, url);
@@ -51,10 +55,14 @@ export class GeocmsDeScraper extends DeFeedScraper {
           break;
         }
         first = false;
-        const before = rows.size;
         for (const r of list) if (!rows.has(r.key)) rows.set(r.key, r);
-        if (rows.size === before || list.length < GEOCMS_PAGE_SIZE) break;
-        if (page + 1 === MAX_PAGES) this.log(`abgeschnitten nach ${MAX_PAGES} Seiten: ${g.pageUrl}`);
+        // Pager-Links der Seite (je Website ein anderer Parameter), mit dem Datumsfenster.
+        for (const next of geocmsPagerUrls(html, url)) {
+          const u = new URL(next);
+          for (const [k, v] of new URL(url).searchParams) if (/_date$/.test(k)) u.searchParams.set(k, v);
+          if (!seen.has(u.href)) queue.push(u.href);
+        }
+        if (seen.size === MAX_PAGES && queue.length) this.log(`abgeschnitten nach ${MAX_PAGES} Seiten: ${g.pageUrl}`);
       }
       if (!rows.size) return;
       withList++;

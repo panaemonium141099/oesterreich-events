@@ -25,6 +25,8 @@ export interface GeocmsRow {
   /** Letzter Tag bei „01. bis 30. November". */
   lastDate?: string;
   category?: string;
+  /** Ort aus der Liste (Nebra, Königswinter). */
+  locationName?: string;
   image?: string;
 }
 
@@ -63,50 +65,85 @@ export function isGeocmsPage(html: string): boolean {
   return /gc_gcevent|gcevent-list|GeoCMS/i.test(html);
 }
 
-export function geocmsListUrl(pageUrl: string, from: string, to: string, offset: number): string {
+export function geocmsListUrl(pageUrl: string, from: string, to: string): string {
   const u = new URL(pageUrl);
   const de = (d: string) => `${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(0, 4)}`;
   u.searchParams.set('min_date', de(from));
   u.searchParams.set('max_date', de(to));
-  if (offset > 0) u.searchParams.set('gcevent[pager]', String(offset));
   return u.href;
 }
 
-export const GEOCMS_PAGE_SIZE = 20;
 
+/**
+ * Zeilen der Liste. Drei Vorlagen (07.11.2026): Köthen `article.gcevent-list-row`
+ * mit Termin-Kennung im `title` des Links und `gcevent-list-day`; Nebra
+ * `article.gcevent-list-row` ohne Kennung, Datum „07.11.2026 ab 11:00 Uhr" in
+ * `gcevent-list-datetime`; Königswinter `li.media` mit `h4 a` und „17.10.2026 -
+ * 12.12.2026 von 09:30 Uhr bis 11:00 Uhr". Gemeinsam: der Detail-Link
+ * `/event/<ID>,<Mandant>/<slug>-TT-MM-JJJJ.html` trägt den Tag.
+ */
 export function parseGeocmsList(html: string, pageUrl: string): GeocmsRow[] {
   const $ = cheerio.load(html);
-  const out: GeocmsRow[] = [];
-  $('article.gcevent-list-row').each((_, el) => {
-    const row = $(el);
-    const a = row.find('.gcevent-list-title a').first();
+  const out = new Map<string, GeocmsRow>();
+  $('a[href*="/event/"]').each((_, el) => {
+    const a = $(el);
     const href = a.attr('href');
-    const key = /\((event-\d+-\d+-[a-z]{2}-\d+-\d{4}-\d{2}-\d{2}-\d{2}-\d{2})\)/.exec(a.attr('title') ?? '')?.[1];
+    const m = href ? /\/event\/(\d+),(\d+)\/[^/?#]*?-(\d{2})-(\d{2})-(\d{4})\.html/.exec(href) : null;
     const title = text(a.text());
-    if (!href || !key || !title) return;
-    const m = /-(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})$/.exec(key)!;
-    const localDate = `${m[1]}-${m[2]}-${m[3]}`;
-    const timeFromKey = `${m[4]}:${m[5]}`;
-    const dt = text(row.find('.gcevent-list-datetime').first().text());
+    if (!href || !m || !title) return;
+    const slugDate = `${m[5]}-${m[4]}-${m[3]}`;
+    const keyFromTitle = /\((event-\d+-\d+-[a-z]{2}-\d+-\d{4}-\d{2}-\d{2}-\d{2}-\d{2})\)/.exec(a.attr('title') ?? '')?.[1];
+    // Zeile: Artikel (Köthen, Nebra), Listenpunkt (Königswinter) oder Karte `div.card` (Oebisfelde).
+    const row = a.closest('article, li, .card, .gcevent-list-row');
+    const container = row.length ? row : a.parent();
+    const dtEl = container.find('.gcevent-list-datetime, .card-text.date').first();
+    const dt = text(dtEl.length ? dtEl.text() : container.find('.icon-calendar-day').first().parent().text());
+    const dates = [...dt.matchAll(/(\d{2})\.(\d{2})\.(\d{4})/g)].map(x => `${x[3]}-${x[2]}-${x[1]}`);
     const times = [...dt.matchAll(/(\d{1,2})[:.](\d{2})\s*Uhr/g)].map(x => `${x[1].padStart(2, '0')}:${x[2]}`);
-    const time = times[0] ?? (timeFromKey !== '00:00' ? timeFromKey : undefined);
-    const year = text(row.find('.gcevent-list-day-year').first().text()) || m[1];
-    const range = /bis\s+(\d{1,2})\.\s*([A-Za-zäöüÄÖÜ]+)/.exec(text(row.find('.gcevent-list-day-month').first().text()));
-    const lastDate = range && MONTHS[range[2].toLowerCase()] ? `${year}-${MONTHS[range[2].toLowerCase()]}-${range[1].padStart(2, '0')}` : undefined;
-    const img = row.find('.gcevent-listview-image img').first().attr('src');
-    out.push({
+    const localDate = keyFromTitle ? keyFromTitle.slice(-16, -6) : slugDate;
+    const keyTime = keyFromTitle?.slice(-5).replace('-', ':');
+    const time = times[0] ?? (keyTime && keyTime !== '00:00' ? keyTime : undefined);
+    const key = keyFromTitle ?? `event-${m[1]}-${m[2]}-${localDate}`;
+    if (out.has(key)) return;
+    const year = text(container.find('.gcevent-list-day-year').first().text()) || localDate.slice(0, 4);
+    const range = /bis\s+(\d{1,2})\.\s*([A-Za-zäöüÄÖÜ]+)/.exec(text(container.find('.gcevent-list-day-month').first().text()));
+    const lastFromDay = range && MONTHS[range[2].toLowerCase()] ? `${year}-${MONTHS[range[2].toLowerCase()]}-${range[1].padStart(2, '0')}` : undefined;
+    const lastDate = lastFromDay ?? (dates.length > 1 ? dates[dates.length - 1] : undefined);
+    const img = container.find('img').first().attr('src');
+    const cat = text(container.find('.gcevent-list-categories, .text-muted').first().text()).split('|')[0].trim();
+    // Die Liste hängt ihre Suchparameter an jeden Link (Halberstadt `?min_date=…&btp_event[…]=10`).
+    const url = new URL(href.replace(/&amp;/g, '&'), pageUrl);
+    url.search = '';
+    out.set(key, {
       key,
-      url: new URL(href, pageUrl).href,
+      url: url.href,
       title,
       localDate,
       time,
       endTime: times[1],
       lastDate: lastDate && lastDate > localDate ? lastDate : undefined,
-      category: text(row.find('.gcevent-list-categories').first().text()).split('|')[0].trim() || undefined,
-      ...(img ? { image: new URL(img, pageUrl).href } : {}),
+      category: cat || undefined,
+      locationName: text(container.find('.gcevent-list-location-span').first().text()) || undefined,
+      ...(img ? { image: new URL(img.trim(), pageUrl).href } : {}),
     });
   });
-  return out;
+  return [...out.values()];
+}
+
+/** Weitere Seiten der Liste aus dem Pager (`a[data-offset]`, Parameter je Website verschieden). */
+export function geocmsPagerUrls(html: string, pageUrl: string): string[] {
+  const $ = cheerio.load(html);
+  const out = new Set<string>();
+  $('a[data-offset][href]').each((_, el) => {
+    const off = Number($(el).attr('data-offset'));
+    if (!Number.isFinite(off) || off <= 0) return;
+    try {
+      out.add(new URL($(el).attr('href')!.replace(/&amp;/g, '&'), pageUrl).href);
+    } catch {
+      // kein Link
+    }
+  });
+  return [...out];
 }
 
 export function parseGeocmsDetail(html: string, pageUrl: string): GeocmsDetail | null {
@@ -161,7 +198,7 @@ export function toGeocmsTermin(row: GeocmsRow, detail: GeocmsDetail | null): Geo
     category: row.category,
     description: detail?.description,
     ticketUrl: detail?.ticketUrl,
-    locationName: detail?.locationName,
+    locationName: detail?.locationName ?? row.locationName,
     street: detail?.street,
     postalCode: detail?.postalCode,
     locality: detail?.locality,
