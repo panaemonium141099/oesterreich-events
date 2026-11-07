@@ -41,7 +41,10 @@ jobs:
       # Env, wie der Timer um 00:05) und beide Sprachfassungen abrufen, damit
       # der frische Render jetzt passiert und nicht erst beim ersten Besucher.
       # Die Zahl der Saison-Picks steht im Log; sie ist kein Gate, weil eine
-      # Saison legitim leer sein kann.
+      # Saison legitim leer sein kann. Seit 2026-11-07 macht der Server das
+      # bei jedem Start selbst (src/instrumentation.ts → warm-on-start.ts,
+      # auch nach ISR-Guard und Reboot); dieser Schritt bleibt als Beleg im
+      # Deploy-Log.
       - name: Startseite nach dem Build neu rendern
         run: |
           ssh -o StrictHostKeyChecking=accept-new root@157.180.42.4 '

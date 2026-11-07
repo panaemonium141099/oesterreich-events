@@ -435,6 +435,11 @@ const nextConfig: NextConfig = {
   },
   // Standalone output for Docker deployment (Coolify)
   output: 'standalone',
+  // Die Startseite wiederholt im Build gescheiterte Abfragen bis zu 150 s
+  // (LANDING_TIMEOUT_MS.build in get-landing-data.ts); der Standard von 60 s
+  // würde den Build an genau dieser Geduld scheitern lassen. Wächter in
+  // landing-query-failures.test.ts.
+  staticPageGenerationTimeout: 180,
 };
 
 const withBundleAnalyzer = bundleAnalyzer({
