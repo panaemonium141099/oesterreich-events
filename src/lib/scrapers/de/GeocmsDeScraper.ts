@@ -16,9 +16,15 @@ import { seitenGruppen } from './seiten-gruppen';
 import { ownTown } from './DesklineDeScraper';
 import { GEOCMS_PAGE_SIZE, geocmsListUrl, isGeocmsPage, parseGeocmsDetail, parseGeocmsList, toGeocmsTermin, type GeocmsDetail, type GeocmsRow, type GeocmsTermin } from './geocms';
 
-/** Höchstens so viele Listenseiten à 20 je Kalender und so viele Detailseiten. */
+/**
+ * Höchstens so viele Listenseiten à 20 je Kalender und so viele Detailseiten;
+ * nach drei Detailseiten in Folge ohne Antwort gilt die Website als
+ * gedrosselt (Köthen: 46 Seiten in 78 min, Prüfstand 07.11.2026), die
+ * übrigen Termine kommen ohne Adresse aus der Liste.
+ */
 const MAX_PAGES = 15;
-const MAX_DETAILS = 300;
+const MAX_DETAILS = 80;
+const MAX_FAILS_IN_ROW = 3;
 
 export class GeocmsDeScraper extends DeFeedScraper {
   readonly name = 'de-geocms';
@@ -53,14 +59,19 @@ export class GeocmsDeScraper extends DeFeedScraper {
       if (!rows.size) return;
       withList++;
       const termine: GeocmsTermin[] = [];
-      for (const row of [...rows.values()].slice(0, MAX_DETAILS)) {
+      let fails = 0;
+      let read = 0;
+      for (const row of rows.values()) {
         let detail = this.details.get(row.url);
-        if (detail === undefined) {
+        if (detail === undefined && read < MAX_DETAILS && fails < MAX_FAILS_IN_ROW) {
+          read++;
           const page = await this.fetchHtmlPage(row.url);
           detail = page ? parseGeocmsDetail(page, row.url) : null;
+          fails = page ? 0 : fails + 1;
+          if (fails === MAX_FAILS_IN_ROW) this.log(`Detailseiten antworten nicht mehr, Rest ohne Adresse: ${g.pageUrl}`);
           this.details.set(row.url, detail);
-        } else this.noteCached(detail != null);
-        termine.push(toGeocmsTermin(row, detail));
+        } else if (detail !== undefined) this.noteCached(detail != null);
+        termine.push(toGeocmsTermin(row, detail ?? null));
       }
       this.noteTermine(termine);
       const unique = collapseSourceDuplicates(termine.map(t => ({ ...t, uid: t.key })));
