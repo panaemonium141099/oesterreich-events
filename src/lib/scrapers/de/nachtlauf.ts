@@ -41,6 +41,7 @@ export const DE_NACHTLAUF: Readonly<Record<string, string>> = {
   'de-deskline': 'adapter-deskline.md',
   'de-destinationone': 'adapter-destinationone.md',
   'de-lkrg': 'adapter-lkrg.md',
+  'de-regiogate': 'adapter-regiogate.md',
 };
 
 export const DE_SHARD_COUNT = 3;
@@ -87,6 +88,7 @@ const DE_SCRAPER_WEIGHTS: Readonly<Record<string, number>> = {
   'de-deskline': 5,
   'de-destinationone': 10,
   'de-lkrg': 5,
+  'de-regiogate': 10,
 };
 const DEFAULT_WEIGHT = 10;
 

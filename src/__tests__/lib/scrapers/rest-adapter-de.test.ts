@@ -71,6 +71,11 @@ describe('regiogate: Karten und Detailseite', () => {
     expect(regiogateDay('08.11.2026, 11:00 Uhr', TODAY)).toBe('2026-11-08');
   });
 
+  it('zweite Detail-Vorlage (Grünwald): Tag, Monatskürzel, Uhrzeit', () => {
+    const d = parseRegiogateDetail(fx('regiogate', 'gruenwald-detail.html'), 'https://www.gemeinde-gruenwald.de/rathaus/veranstaltungskalender/index.html?ev%5Bid%5D=4119')!;
+    expect(d).toMatchObject({ title: 'Benefizkonzert des Rotary Club Grünwald', dateText: '10.11.', timeText: '19:00 Uhr', locationName: 'August Everding Saal', street: 'Ebertstraße 1', postalCode: '82031', locality: 'Grünwald' });
+  });
+
   it('Detailseite: Adresse mit PLZ, ohne Uhrzeit ganztägig', () => {
     const d = parseRegiogateDetail(fx('regiogate', 'chamerau-detail.html'), 'https://www.chamerau.de/aktuelles/veranstaltungen/index.html?ev%5Bid%5D=138')!;
     expect(d).toMatchObject({ title: 'Gemeinsamer Jahrtag KuRK und FFW Lederdorn', dateText: '07.11.', locationName: 'KuRK Lederdorn', postalCode: '93466', locality: 'Chamerau' });

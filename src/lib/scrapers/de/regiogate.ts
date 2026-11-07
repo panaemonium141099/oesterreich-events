@@ -41,6 +41,7 @@ export interface RegiogateTermin {
 }
 
 const text = (s: string | undefined) => (s ?? '').replace(/\s+/g, ' ').trim();
+const MONTH_ABBR: Record<string, string> = { jan: '01', feb: '02', mär: '03', mrz: '03', apr: '04', mai: '05', jun: '06', jul: '07', aug: '08', sep: '09', okt: '10', nov: '11', dez: '12' };
 
 export function isRegiogatePage(html: string): boolean {
   return /cdn\.regiogate\.net|recon CMS|data-recon-lyb/.test(html);
@@ -101,10 +102,15 @@ export function parseRegiogateDetail(html: string, pageUrl: string): RegiogateDe
   const ort = text(box.find('.events-address-ort').first().text());
   const plz = /^(\d{5})\s+(.*)$/.exec(ort);
   const img = box.find('img').first().attr('src');
+  // Zweite Vorlage (Grünwald): Tag, Monatskürzel und Uhrzeit in `catalog-details__datetime`.
+  const dt = box.find('.catalog-details__datetime').first();
+  const month = MONTH_ABBR[text(dt.find('.catalog-details__month').text()).toLowerCase().slice(0, 3)];
+  const day = text(dt.find('.catalog-details__day').text());
+  const altDate = dt.length && month && /^\d{1,2}$/.test(day) ? `${day.padStart(2, '0')}.${month}.` : '';
   return {
     title: text(box.find('.catalog-details__title').first().text()) || undefined,
-    dateText: text(box.find('.datebox__date').first().text()),
-    timeText: text(box.find('.datebox__time').first().text()),
+    dateText: text(box.find('.datebox__date').first().text()) || altDate,
+    timeText: text(box.find('.datebox__time').first().text()) || text(dt.find('.catalog-details__time').text()),
     locationName: text(box.find('.events-address-title').first().text()) || undefined,
     street: text(box.find('.events-address-str').first().text()) || undefined,
     postalCode: plz?.[1],
