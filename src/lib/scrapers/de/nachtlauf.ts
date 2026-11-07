@@ -38,6 +38,9 @@ export const DE_NACHTLAUF: Readonly<Record<string, string>> = {
   'de-open2c': 'adapter-open2c.md',
   'de-activecity': 'adapter-activecity.md',
   'de-verwaltungsportal': 'adapter-verwaltungsportal.md',
+  'de-deskline': 'adapter-deskline.md',
+  'de-destinationone': 'adapter-destinationone.md',
+  'de-lkrg': 'adapter-lkrg.md',
 };
 
 export const DE_SHARD_COUNT = 3;
@@ -80,6 +83,10 @@ const DE_SCRAPER_WEIGHTS: Readonly<Record<string, number>> = {
   'de-digipublica': 5,
   'de-open2c': 5,
   'de-activecity': 5,
+  // Prüfstand 07.11.2026: Deskline 220 Abrufe in 4 min, destination.one 278 Abrufe (große JSON-Seiten) in 10 min.
+  'de-deskline': 5,
+  'de-destinationone': 10,
+  'de-lkrg': 5,
 };
 const DEFAULT_WEIGHT = 10;
 

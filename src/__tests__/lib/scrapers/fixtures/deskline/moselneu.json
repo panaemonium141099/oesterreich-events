@@ -1,0 +1,320 @@
+{
+ "data": [
+  {
+   "id": "04445db5-8269-4edb-8886-0b59dff94262",
+   "dbCode": "RPT",
+   "name": "Zeichenkünstler - Kreativkurs für Kinder",
+   "date": "2026-11-07T00:00:00",
+   "hasMoreDates": true,
+   "startTimeDurations": [
+    {
+     "time": "00:00",
+     "weekDays": 127,
+     "duration": 0
+    }
+   ],
+   "criteria": [
+    {
+     "groupName": "Kurse / Seminare",
+     "items": [
+      {
+       "name": "Diverse Kurse/Seminare/Workshops"
+      }
+     ]
+    }
+   ],
+   "location": {
+    "place": "Stadtmuseum Simeonstift",
+    "town": "Trier",
+    "regions": [
+     "Trier",
+     "Mosel",
+     "Rheinland-Pfalz"
+    ],
+    "country": "Deutschland",
+    "coordinate": {
+     "long": 6.64346694946289,
+     "lat": 49.7594091999372
+    }
+   },
+   "descriptions": [
+    {
+     "description": "Kinder ab 8 Jahren kommen im Kurs „Zeichenkünstler“ auf ihre Kosten und lernen dort Tricks und Kniffe für richtig gutes Malen: Im nächsten Kurs geht es um das große Thema „Porträts“ – bei kindgerechten Führung durch das Museum lernen die Kinder Porträts aus unterschiedlichen Epochen kennen. Anschlie",
+     "type": 32
+    },
+    {
+     "description": "Thema: Porträt-Zeichenkurs",
+     "type": 33
+    }
+   ],
+   "images": [
+    {
+     "urls": [
+      "//resc.deskline.net/images/RPT/1/35298e90-d350-4306-b1d0-d9fa0d78220f/10/.jpg"
+     ],
+     "copyright": "",
+     "license": "",
+     "author": "",
+     "ai": {
+      "isAiGenerated": false
+     }
+    }
+   ],
+   "mainCriteria": null
+  },
+  {
+   "id": "908b07f5-3811-486f-b443-090ae4dfd2f6",
+   "dbCode": "RPT",
+   "name": "Altstadtführung Koblenz 2026 - Deutschsprachig",
+   "date": "2026-11-07T10:30:00",
+   "hasMoreDates": true,
+   "startTimeDurations": [
+    {
+     "time": "10:30",
+     "weekDays": 32,
+     "duration": 2
+    }
+   ],
+   "criteria": [
+    {
+     "groupName": "Exkursionen / Ausflüge",
+     "items": [
+      {
+       "name": "Besichtigung / Führung"
+      },
+      {
+       "name": "Stadtführung"
+      }
+     ]
+    }
+   ],
+   "location": {
+    "place": "Start: Tourist-Information",
+    "town": "Koblenz",
+    "regions": [
+     "Koblenz",
+     "Romantischer Rhein",
+     "Rheinland-Pfalz"
+    ],
+    "country": "Deutschland",
+    "coordinate": {
+     "long": 7.5963468,
+     "lat": 50.3587828
+    }
+   },
+   "descriptions": [
+    {
+     "description": "Lernen Sie eine der ältesten Städte Deutschlands bei einem Rundgang durch die historische Altstadt kennen. Die romantischen Gassen zwischen der Basilika St. Kastor und der Liebfrauenkirche, das Kaiser-Wilhelm-Denkmal am Deutschen Eck, der Schängelbrunnen und das Forum Confluentes am Zentralplatz sin",
+     "type": 32
+    },
+    {
+     "description": "<p class=\"dw\">Rundgang durch die historische Altstadt. </p>",
+     "type": 33
+    }
+   ],
+   "images": [
+    {
+     "urls": [
+      "//resc.deskline.net/images/RPT/1/70462da1-d1e2-473e-ae77-fb6ce5b5402d/10/Deutsches_Eck.jpg"
+     ],
+     "copyright": "Koblenz-Touristik, Dominik Ketz",
+     "license": "",
+     "author": "",
+     "ai": {
+      "isAiGenerated": false
+     }
+    },
+    {
+     "urls": [
+      "//resc.deskline.net/images/RPT/1/cf758c31-9723-4deb-b75e-65da171d88b2/10/Seilbahn.jpg"
+     ],
+     "copyright": "Koblenz-Touristik, Dominik Ketz",
+     "license": "",
+     "author": "",
+     "ai": {
+      "isAiGenerated": false
+     }
+    },
+    {
+     "urls": [
+      "//resc.deskline.net/images/RPT/1/49bf4925-fdaf-4e70-8191-c3847cb6fb88/10/Altstadtf%c3%bchrung_Koblenz.jpg"
+     ],
+     "copyright": "Koblenz-Touristik",
+     "license": "CC BY-SA Namensnennung - Weitergabe unter gleichen Bedingungen(BY-SA)",
+     "author": "Johannes Bruchhof",
+     "ai": {
+      "isAiGenerated": false
+     }
+    }
+   ],
+   "mainCriteria": {
+    "name": "Stadtführung"
+   }
+  },
+  {
+   "id": "36d35bae-e861-472b-b85a-21af99d91f93",
+   "dbCode": "RPT",
+   "name": "Kinoevent - Rammstein / Live in Mexico City",
+   "date": "2026-11-07T17:45:00",
+   "hasMoreDates": false,
+   "startTimeDurations": [
+    {
+     "time": "17:45",
+     "weekDays": 32,
+     "duration": 110
+    }
+   ],
+   "criteria": [
+    {
+     "groupName": "Diverse Veranstaltungen",
+     "items": [
+      {
+       "name": "Moseleifel Veranstaltungen"
+      }
+     ]
+    },
+    {
+     "groupName": "Geschäftsfelder",
+     "items": [
+      {
+       "name": "Kultur (Saisonverlängerung)"
+      }
+     ]
+    },
+    {
+     "groupName": "Theater / Show / Tanz / Film / Kleinkunst",
+     "items": [
+      {
+       "name": "Kino"
+      }
+     ]
+    }
+   ],
+   "location": {
+    "place": "Kinopalast, Brautweg 3",
+    "town": "Wittlich",
+    "regions": [
+     "Wittlich Stadt & Land",
+     "Mosel",
+     "Rheinland-Pfalz"
+    ],
+    "country": "Deutschland",
+    "coordinate": {
+     "long": 6.8936314576721,
+     "lat": 49.98357626576
+    }
+   },
+   "descriptions": [
+    {
+     "description": "<p class=\"dw\"><p class=\"dw\">Wenn Rammstein in Mexiko-City auf die Bühne kommen, wird aus einem Konzert ein Ausnahmezustand. Drei ausverkaufte Abende, fast 200.000 Fans und eine Show aus Feuer, Rauch, Pyrotechnik und monumentalen Bildern.<br class=\"dw\">RAMMSTEIN – LIVE IN MEXICO CITY bringt die legen",
+     "type": 32
+    },
+    {
+     "description": "<p class=\"dw\"><b class=\"dw\">Kinoevent&nbsp;&nbsp; -</b> <b class=\"dw\">RAMMSTEIN - LIVE IN MEXICO CITY</b></p><p class=\"dw\"><br class=\"dw\"></p><p class=\"dw\"><br class=\"dw\"><br class=\"dw\"></p><p class=\"dw\"><b class=\"dw\"><br class=\"dw\"></b></p>",
+     "type": 33
+    }
+   ],
+   "images": [
+    {
+     "urls": [
+      "//resc.deskline.net/images/RPT/1/cc07716e-83d4-4cf5-9da2-7480d2de7ef2/10/Ramstein_Live_in_Mexico_City.png"
+     ],
+     "copyright": "© Kinopalast Vulkaneifel & Eifel, Mosel, Hunsrück",
+     "license": "CC BY-SA Namensnennung - Weitergabe unter gleichen Bedingungen(BY-SA)",
+     "author": "© Kinopalast Vulkaneifel & Eifel, Mosel, Hunsrück",
+     "ai": {
+      "isAiGenerated": false
+     }
+    }
+   ],
+   "mainCriteria": null
+  },
+  {
+   "id": "fc3a0509-898a-43c5-b10b-4fb245f1af97",
+   "dbCode": "RPT",
+   "name": "Weinwanderung mit Niko Lehmen in Zell",
+   "date": "2026-11-07T15:00:00",
+   "hasMoreDates": true,
+   "startTimeDurations": [
+    {
+     "time": "15:00",
+     "weekDays": 32,
+     "duration": 150
+    }
+   ],
+   "criteria": [
+    {
+     "groupName": "Diverse Veranstaltungen",
+     "items": [
+      {
+       "name": "Weinprobe"
+      }
+     ]
+    },
+    {
+     "groupName": "Exkursionen / Ausflüge",
+     "items": [
+      {
+       "name": "Geführte Wanderungen"
+      }
+     ]
+    }
+   ],
+   "location": {
+    "place": "Zeller Schwarze Katz Brunnen",
+    "town": "Zell",
+    "regions": [
+     "Zeller Land",
+     "Mosel",
+     "Rheinland-Pfalz"
+    ],
+    "country": "Deutschland",
+    "coordinate": {
+     "long": 7.18155176040713,
+     "lat": 50.0254702219634
+    }
+   },
+   "descriptions": [
+    {
+     "description": "Auf einer ca. 3,5–4 km langen Route (Dauer ca. 2,5 Stunden) genießen Sie herrliche Ausblicke, erfahren Spannendes über den Weinanbau und die Region und können dabei 5 ausgesuchte Weine unserer Winzer verkosten.<br class=\"dw\"><br class=\"dw\">Zum Start begrüßen wir Sie mit einem erfrischenden Mosel-Sek",
+     "type": 32
+    },
+    {
+     "description": "Erleben Sie eine genussvolle Weinwanderung durch die malerischen Moselweinberge!",
+     "type": 33
+    }
+   ],
+   "images": [
+    {
+     "urls": [
+      "//resc.deskline.net/images/RPT/1/d2f727ce-cf51-4450-8fc0-09df99ea11db/10/Logo.png"
+     ],
+     "copyright": "Peter Lehmen, https://www.weingut-lehmen.de/",
+     "license": "CC BY-SA Namensnennung - Weitergabe unter gleichen Bedingungen(BY-SA)",
+     "author": "Peter Lehmen",
+     "ai": {
+      "isAiGenerated": false
+     }
+    },
+    {
+     "urls": [
+      "//resc.deskline.net/images/RPT/1/2d2123e9-d997-4a7f-946b-7bb7250e652c/10/Wanderung.jpg"
+     ],
+     "copyright": "ZLT",
+     "license": "CC BY-SA Namensnennung - Weitergabe unter gleichen Bedingungen(BY-SA)",
+     "author": "Niko Lehmen",
+     "ai": {
+      "isAiGenerated": false
+     }
+    }
+   ],
+   "mainCriteria": null
+  }
+ ],
+ "paging": {
+  "pageNo": 0,
+  "pageSize": 400,
+  "pageCount": 5,
+  "totalRecordCount": 1942
+ }
+}
