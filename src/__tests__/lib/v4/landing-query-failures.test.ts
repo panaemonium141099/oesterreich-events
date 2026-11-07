@@ -1,4 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { TEST_NOW } from '@/test/clock';
 
 // Steuerbarer Supabase-Mock: jede Abfrage auf `events` mit `overlaps` ohne
 // `or` (die Saison-Abfrage; Dorffeste filtern zusätzlich per `or` auf den
@@ -45,7 +48,20 @@ vi.mock('@supabase/supabase-js', () => {
   return { createClient: () => ({ from: (t: string) => chain(t), rpc }) };
 });
 
-import { getLandingData } from '@/lib/v4/get-landing-data';
+import { getLandingData, LANDING_RETRY_DELAYS_MS, LANDING_TIMEOUT_MS } from '@/lib/v4/get-landing-data';
+
+// Die Build-Wiederholungen warten Sekunden bis Minuten: Timer stellen, Uhr
+// vorspulen. `vi.useRealTimers()` fällt über die Testuhr auf den Testtag zurück.
+const withFakeTimers = async <T,>(run: () => Promise<T>, ms: number): Promise<T> => {
+  vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'], now: TEST_NOW });
+  try {
+    const p = run();
+    await vi.advanceTimersByTimeAsync(ms);
+    return await p;
+  } finally {
+    vi.useRealTimers();
+  }
+};
 
 describe('Landing: gescheiterte Abfragen werden nicht als leere Sektion gecacht', () => {
   const phase = process.env.NEXT_PHASE;
@@ -65,10 +81,37 @@ describe('Landing: gescheiterte Abfragen werden nicht als leere Sektion gecacht'
     await expect(getLandingData()).rejects.toThrow(/season/);
   });
 
-  it('im Build bleibt nur die gescheiterte Sektion leer, der Rest wird gebaut', async () => {
+  it('im Build wird geduldig wiederholt: nach fünf Timeouts ist die Saison-Karte gefüllt', async () => {
+    // Build 2026-11-06 21:06: drei Versuche binnen 1,2 s, alle im statement
+    // timeout, die Karte leer ins Image gebacken. Der Build hat Zeit.
     process.env.NEXT_PHASE = 'phase-production-build';
-    seasonFailures = 3;
-    const d = await getLandingData();
+    seasonFailures = 5;
+    const d = await withFakeTimers(() => getLandingData(), LANDING_TIMEOUT_MS.build);
+    expect(seasonCalls).toBe(6);
+    expect(d.season.picks.map((p) => p.id)).toEqual(['s1']);
+  });
+
+  it('next build gibt der Seite mehr Zeit als der Build-Fahrplan braucht (staticPageGenerationTimeout)', () => {
+    // Standard 60 s: Next bricht den Render ab und der Build scheitert nach drei Anläufen.
+    const config = readFileSync(resolve(process.cwd(), 'next.config.ts'), 'utf-8');
+    const match = config.match(/staticPageGenerationTimeout:\s*(\d+)/);
+    expect(match, 'staticPageGenerationTimeout fehlt in next.config.ts').not.toBeNull();
+    expect(Number(match![1]) * 1000).toBeGreaterThan(LANDING_TIMEOUT_MS.build);
+  });
+
+  it('der Build-Fahrplan passt in sein Zeitfenster und ist länger als der der Laufzeit', () => {
+    const sum = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0);
+    expect(sum(LANDING_RETRY_DELAYS_MS.build)).toBeLessThan(LANDING_TIMEOUT_MS.build);
+    expect(sum(LANDING_RETRY_DELAYS_MS.runtime)).toBeLessThan(LANDING_TIMEOUT_MS.runtime);
+    expect(LANDING_RETRY_DELAYS_MS.build.length).toBeGreaterThan(LANDING_RETRY_DELAYS_MS.runtime.length);
+    expect(sum(LANDING_RETRY_DELAYS_MS.build)).toBeGreaterThanOrEqual(60_000);
+  });
+
+  it('im Build bleibt nur die dauerhaft gescheiterte Sektion leer, der Rest wird gebaut', async () => {
+    process.env.NEXT_PHASE = 'phase-production-build';
+    seasonFailures = 99;
+    const d = await withFakeTimers(() => getLandingData(), LANDING_TIMEOUT_MS.build);
+    expect(seasonCalls).toBe(LANDING_RETRY_DELAYS_MS.build.length + 1);
     expect(d.season.picks).toEqual([]);
     expect(d.countryTotal).toBe(88123);
   });
