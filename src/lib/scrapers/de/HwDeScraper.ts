@@ -97,7 +97,8 @@ export class HwDeScraper extends DeFeedScraper {
    */
   async calendar(pageUrl: string): Promise<HwTermin[]> {
     let first = await this.listPage(pageUrl);
-    if (first && !first.isList && !first.oldModule) {
+    // Auch wenn sie nicht lesbar ist: Bretzfeld, Sexau u. a. nennen das Meldeformular (HTTP 401).
+    if (!first || (!first.isList && !first.oldModule)) {
       const parent = parentPath(pageUrl);
       const up = parent ? await this.listPage(parent) : null;
       if (up?.isList || up?.oldModule) first = up;

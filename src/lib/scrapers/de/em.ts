@@ -41,6 +41,8 @@ const COUNTRY = /^(deutschland|germany|de)$/i;
  * Deutschland" oder „Name, Straße, PLZ Ort". Ohne PLZ ist der letzte Teil vor
  * dem Land der Ort, wenn er keine Straße ist.
  */
+const LAND = /^(Baden-Württemberg|Bayern|Berlin|Brandenburg|Bremen|Hamburg|Hessen|Mecklenburg-Vorpommern|Niedersachsen|Nordrhein-Westfalen|Rheinland-Pfalz|Saarland|Sachsen|Sachsen-Anhalt|Schleswig-Holstein|Thüringen)$/i;
+
 export function parseEmLocation(raw: string | undefined): Pick<EmEvent, 'locationName' | 'street' | 'postalCode' | 'locality'> {
   if (!raw) return {};
   // Ein Link ist kein Ort (Bensheim „https://nachtderausbildung-bensheim.de/").
@@ -67,6 +69,9 @@ export function parseEmLocation(raw: string | undefined): Pick<EmEvent, 'locatio
   let si = -1;
   for (let i = parts.length - 1; i >= 0; i--) if (STREET.test(parts[i])) { si = i; break; }
   const street = si >= 0 ? parts.splice(si, 1)[0] : undefined;
+  // „Sportheim Hausen, Hausen, Am Kellerbrunnen 14, 97647 Bayern“: das Land steht auf
+  // dem Platz des Orts, der Ort davor (Fladungen, Glowe, Nachtlauf 06.11.2026).
+  if (locality && LAND.test(locality)) locality = parts.length > 1 ? parts.pop() : undefined;
   return { locationName: parts.length ? parts.join(', ') : undefined, street, postalCode, locality };
 }
 
