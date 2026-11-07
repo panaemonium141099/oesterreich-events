@@ -20,6 +20,8 @@ import { communiceGroups } from '@/lib/scrapers/de/CommuniceDeScraper';
 import { mecGroups } from '@/lib/scrapers/de/MecDeScraper';
 import { DE_SCRAPERS, getDeScraperByName } from '@/lib/scrapers/de';
 import { feedGemeinden, namedMember } from '@/lib/scrapers/de/kontext';
+import type { GemeindeDe } from '@/lib/gemeinden/de';
+import { parseEmLocation } from '@/lib/scrapers/de/em';
 
 // Der Freigabevertrag misst gegen die Uhr (start_in_past); sie steht
 // deshalb auf dem Abrufdatum der Fixtures, sonst kippen die Zeilen mit jedem
@@ -196,11 +198,48 @@ describe('Golden: Amtskalender → Zeile', () => {
       expect(r.publish_status).toBe('published');
     });
 
-    it('„Steinhöfel OT Jänickendorf“ ohne Straße: Ort nicht belegt, Quarantäne statt Amtsmittelpunkt', () => {
+    it('„Steinhöfel OT Jänickendorf“ ohne Straße: die Gemeinde, kein Pin, nicht der Amtsmittelpunkt', () => {
       const r = one('Glühweinfest in Jänickendorf');
       expect(r.start_date).toBe('2026-11-28');
-      expect(r.location_resolution.gemeinde).toBeNull();
-      expect(r.publish_status).toBe('needs_review');
+      expect(r.location_resolution.gemeinde?.name).toBe('Steinhöfel');
+      expect((r.location_resolution as unknown as { allowed: { pin: boolean } }).allowed.pin).toBe(false);
     });
+  });
+});
+
+describe('Titel nennt die Mitgliedsgemeinde (Stichprobe Amtskalender 06.11.2026)', () => {
+  const g = (name: string) => ({ ags: name, name, plz: '00000', land: 'bayern', lat: 50, lng: 10, plzAll: ['00000'] }) as unknown as GemeindeDe;
+  const amt = [g('Boostedt'), g('Ahlbeck'), g('Witzin'), g('Dommitzsch'), g('Roth'), g('Kropp'), g('Wesendorf'), g('Dettum')];
+  const name = (title: string, locationName?: string) => namedMember({ title, locationName }, amt)?.name ?? null;
+
+  it('eigener Abschnitt, nach „Gemeinde“, am Ende', () => {
+    expect(name('Boostedt: Spielenachmittag mit dem Seniorenclub', 'Hof Lübbe')).toBe('Boostedt');
+    expect(name('Dorftanz, Ahlbeck')).toBe('Ahlbeck');
+    expect(name('Witzin • Anglerheim • Preisskat')).toBe('Witzin');
+    expect(name('1. Sitzung des Rates der Gemeinde Dettum')).toBe('Dettum');
+    expect(name('Adventsmarkt Dommitzsch')).toBe('Dommitzsch');
+  });
+
+  it('Absender, Personen und Verwaltung nennen keinen Ort', () => {
+    expect(name('Kirche Kropp: Kinderchor')).toBeNull();
+    expect(name('Konzert mit Hans Roth')).toBeNull();
+    expect(name('Sitzung des Haushaltsausschusses der Samtgemeinde Wesendorf')).toBeNull();
+    expect(name('Sitzung der Gemeinde Dettum', 'Rathaus der Samtgemeinde Sickte')).toBeNull();
+  });
+
+  it('zwei genannte Gemeinden ergeben keine', () => {
+    expect(name('Martinsumzug, Witzin, Ahlbeck')).toBeNull();
+  });
+});
+
+describe('Ortsfeld mit Ortsteil und Bundesland', () => {
+  it('Events Manager: das Land auf dem Platz des Orts', () => {
+    expect(parseEmLocation('Sportheim Hausen, Hausen, Am Kellerbrunnen 14, 97647 Bayern')).toMatchObject({ locality: 'Hausen', locationName: 'Sportheim Hausen', postalCode: '97647', street: 'Am Kellerbrunnen 14' });
+    expect(parseEmLocation('Am Kliff 29, 18551 Mecklenburg-Vorpommern').locality).toBeUndefined();
+  });
+
+  it('Kurzform eines Namens mit Zusatz unter einer PLZ mit mehreren Gemeinden: „Dahme“ ist „Dahme/Mark“', () => {
+    const { row } = toSupabaseRow({ source_name: 'de-test', source_id: 'x', source_url: 'https://a.de/', title: 'Töpfern', start_date: '2027-03-01T10:00:00Z', location_name: 'una Ceramics', address: 'Hauptstr. 5, 15936 Dahme', postal_code: '15936', city: 'Dahme', country: 'DE' } as ScrapedEvent, new Map(), new Map());
+    expect((row as unknown as { location_resolution: { gemeinde?: { name: string } } }).location_resolution.gemeinde?.name).toBe('Dahme/Mark');
   });
 });

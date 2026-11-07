@@ -23,15 +23,39 @@ import { DeFeedScraper } from './feed-scraper';
 import { imageCredit, imageUrl, withoutPlaceholderImages } from './bild';
 import { collapseSourceDuplicates, otherGemeindeNamed, sameTerminKey, terminContext, type FeedTermin } from './kontext';
 import { allgemeinSourceId, parseAllgemeinPage, type AllgemeinTermin } from './allgemein';
+import { calendarLinks } from '@/lib/registry-de/feed-url';
 
 /** Integrationen der Vollerhebung ohne Hersteller-Schema (Stufen D und E). */
 export const ALLGEMEIN_INTEGRATIONS = new Set(['jsonld', 'html_generic', 'js_oder_feed']);
 
+/** Hersteller-Adapter, die nur einen bestätigten Feed lesen. */
+const BRAUCHT_FEED = new Set(['ionas', 'tribe', 'eventsmanager', 'jevents', 'icagenda']);
+/** Hersteller-Adapter, die eine Kalenderseite der Registry lesen. */
+const BRAUCHT_SEITE = new Set(['txnews', 'contao_events', 'calendarize', 'events2', 'sfeventmgt', 'activecity', 'digipublica', 'hwext', 'ceasy', 'weblication', 'open2c', 'communice', 'komm1', 'mec']);
+
 /**
- * Startseiten liest der Adapter nicht: dort stehen Termine neben Meldungen
- * („Halbseitige Sperrung der Fahrbahn" mit Datumsspanne auf havelberg.de,
- * „Öffentliche Bekanntmachung … Wahl" auf hausen-am-tann.de, Probe
- * 2026-10-29), und die Kachel unterscheidet beides nicht.
+ * Kalender, den dieser Adapter liest: eigene Integrationen, und alles, was der
+ * Hersteller-Adapter nicht lesen kann (Nachtlauf 06.11.2026: 731 Gemeinden
+ * „kein Kalender des Adapters“). Die CMS-Kennung sagt nichts über den Kalender:
+ * ionas-Seiten ohne Kalendermodul führen Tabellen (vg-goellheim.de) oder
+ * verlinken die Seite. Lizenzquellen bleiben draußen, DPCalendar auch: seine
+ * Mikrodaten tragen die Zeit in UTC, die Regel „Wandzeit“ läge eine Stunde daneben
+ * (Feldafing „Spieleabend“: 17:00+00:00, Seite 18:00).
+ */
+export function allgemeinSeite(integration: string, url: string | null | undefined, feed: string | undefined, host: string | null | undefined): string | null {
+  const home = host ? `https://www.${host.replace(/^www\./, '')}/` : null;
+  if (ALLGEMEIN_INTEGRATIONS.has(integration)) return url ?? home;
+  if (BRAUCHT_FEED.has(integration)) return feed ? null : url ?? home;
+  if (BRAUCHT_SEITE.has(integration)) return url ? null : home;
+  return null;
+}
+
+/**
+ * Startseiten liest der Adapter nicht als Kalender: dort stehen Termine neben
+ * Meldungen („Halbseitige Sperrung der Fahrbahn" mit Datumsspanne auf
+ * havelberg.de, „Öffentliche Bekanntmachung … Wahl" auf hausen-am-tann.de, Probe
+ * 2026-10-29), und die Kachel unterscheidet beides nicht. Er folgt nur ihren
+ * Kalenderlinks.
  */
 export function isStartseite(url: string): boolean {
   return /^\/(?:index\.(?:php|html?)|home|startseite)?\/?$/i.test(new URL(url).pathname);
@@ -61,10 +85,28 @@ export function allgemeinGroups(entries: RegistryEntryDe[] = loadRegistryDe()): 
     if (!g) { g = { feedUrl: url, pageUrl: url, own: [], viaVerband: [] }; groups.set(k, g); }
     return g;
   };
+  // Aufgefangene Einträge nur auf Websites, die kein Hersteller-Adapter liest:
+  // Die Shard-Aufteilung hält so jede Website in einem Shard (`nachtlauf.ts`).
+  const herstellerLiest = new Set<string>();
+  const liest = (integration: string, url: string | null | undefined, feed: string | undefined) => {
+    if (ALLGEMEIN_INTEGRATIONS.has(integration)) return;
+    const page = BRAUCHT_FEED.has(integration) ? feed : BRAUCHT_SEITE.has(integration) ? url : undefined;
+    if (page) herstellerLiest.add(bare(new URL(page).host));
+  };
   for (const e of entries) {
-    if (ALLGEMEIN_INTEGRATIONS.has(e.integration) && e.url && !isStartseite(e.url)) group(e.url).own.push(e);
+    liest(e.integration, e.url, e.feed_url);
+    if (e.fallback?.kind === 'verband') liest(e.fallback.integration, e.fallback.url, e.fallback.feed_url);
+  }
+  const seite = (integration: string, url: string | null | undefined, feed: string | undefined, host: string | null | undefined) => {
+    const page = allgemeinSeite(integration, url, feed, host);
+    return page && !ALLGEMEIN_INTEGRATIONS.has(integration) && herstellerLiest.has(bare(new URL(page).host)) ? null : page;
+  };
+  for (const e of entries) {
+    const own = seite(e.integration, e.url, e.feed_url, e.host);
+    if (own) group(own).own.push(e);
     const f = e.fallback;
-    if (f?.kind === 'verband' && ALLGEMEIN_INTEGRATIONS.has(f.integration) && f.url && !isStartseite(f.url)) group(f.url).viaVerband.push(e);
+    const viaAmt = f?.kind === 'verband' ? seite(f.integration, f.url, f.feed_url, f.host) : null;
+    if (viaAmt) group(viaAmt).viaVerband.push(e);
   }
   for (const g of groups.values()) {
     for (const e of byHost.get(bare(new URL(g.feedUrl).host)) ?? []) {
@@ -113,6 +155,15 @@ export function sharedCalendars<T extends FeedTermin>(read: { g: FeedGroup; term
   return out;
 }
 
+/**
+ * Trägt eine verlinkte Seite einen Kalender? Eine Liste hat mehrere Termine, ein
+ * einzelner Treffer steht in einem Artikel (horstmar.de „…um 19:00 Uhr im Borchorster
+ * Hof“ wurde zum Titel), nur ausgezeichnete Termine gelten für sich.
+ */
+export function istKalender(termine: readonly { strategie?: string }[]): boolean {
+  return termine.length >= 2 || termine.some(t => t.strategie !== 'liste');
+}
+
 const berlinToday = () => new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Berlin' }).slice(0, 10);
 
 export class AllgemeinDeScraper extends DeFeedScraper {
@@ -153,15 +204,41 @@ export class AllgemeinDeScraper extends DeFeedScraper {
     return all;
   }
 
-  /** Kalenderseite samt Folgeseiten, solange sie neue Termine bringen. */
+  /**
+   * Termine einer Registry-Seite. Bleibt sie ohne kommenden Termin (oder ist sie
+   * die Startseite), folgt der Adapter ihren Kalenderlinks und nimmt die erste
+   * Seite mit kommenden Terminen: die Erhebung hat teils die Startseite, eine
+   * Meldung oder eine Unterseite erwischt (Seitenprobe 06.11.2026, pruem.de,
+   * weeze.de, mitwitz.de).
+   */
   private async readCalendar(url: string, today: string): Promise<AllgemeinTermin[]> {
+    let base = url;
+    let first = await this.fetchHtmlPage(base);
+    // Registry-Seite tot (amt-huettener-berge.de, 16 Gemeinden: alter Pfad 404,
+    // Kalender heute unter /das-amt/termine): von der Startseite aus suchen.
+    if (first == null && !isStartseite(url)) {
+      base = new URL('/', url).href;
+      first = await this.fetchHtmlPage(base);
+    }
+    if (first == null) return [];
+    const direct = isStartseite(base) ? [] : await this.readPages(base, first, today);
+    if (direct.length) return direct;
+    for (const link of calendarLinks(first, base)) {
+      const termine = await this.readPages(link, null, today);
+      if (istKalender(termine)) return termine;
+    }
+    return [];
+  }
+
+  /** Kalenderseite samt Folgeseiten, solange sie neue Termine bringen. */
+  private async readPages(url: string, firstHtml: string | null, today: string): Promise<AllgemeinTermin[]> {
     const out: AllgemeinTermin[] = [];
     const seen = new Set<string>();
     const visited = new Set<string>();
     let next: string | null = url;
     for (let page = 0; next && page <= MAX_FOLLOW_PAGES; page++) {
       visited.add(next);
-      const html = await this.fetchHtmlPage(next);
+      const html: string | null = page === 0 && firstHtml != null ? firstHtml : await this.fetchHtmlPage(next);
       if (html == null) break;
       // Weiter, solange die Seite neue Termine trägt, auch vergangene: eine
       // Liste, die mit gestrigen Terminen beginnt, hat die künftigen auf den
