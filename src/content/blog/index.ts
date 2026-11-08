@@ -242,6 +242,7 @@ import { post as kernoelamazonenKugelKeksKabarettComedyFestival20262026 } from '
 import { post as post52GalakonzertOriginalTirolerKaiserjaegermusik2026 } from './posts/52-galakonzert-original-tiroler-kaiserjaegermusik-2026';
 import { post as neujahrskonzert2027ErwinSteinhauerOoeConcertSchrammeln2027 } from './posts/neujahrskonzert-2027-erwin-steinhauer-ooe-concert-schrammeln-2027';
 import { post as xzibitKingmakerEuropeanTourPt22026 } from './posts/xzibit-kingmaker-european-tour-pt-2-2026';
+import { post as salamMusicArtsFestival2027 } from './posts/salam-music-arts-festival-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -496,6 +497,7 @@ export const ALL_POSTS: FestivalPost[] = [
   post52GalakonzertOriginalTirolerKaiserjaegermusik2026,
   neujahrskonzert2027ErwinSteinhauerOoeConcertSchrammeln2027,
   xzibitKingmakerEuropeanTourPt22026,
+  salamMusicArtsFestival2027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
