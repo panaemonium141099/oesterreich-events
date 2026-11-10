@@ -245,6 +245,8 @@ import { post as xzibitKingmakerEuropeanTourPt22026 } from './posts/xzibit-kingm
 import { post as salamMusicArtsFestival2027 } from './posts/salam-music-arts-festival-2027';
 import { post as benefizkonzertImAdvent2026 } from './posts/benefizkonzert-im-advent-2026';
 import { post as konzertWinterwonderlandBigbandKoeflach2026 } from './posts/konzert-winterwonderland-bigband-koeflach-2026';
+import { post as luisAusSuedtirolPfiatiDieAbschiedstour2026 } from './posts/luis-aus-suedtirol-pfiati-die-abschiedstour-2026';
+import { post as linzMammaMiaPartyKonzert2026 } from './posts/linz-mamma-mia-party-konzert-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -502,6 +504,8 @@ export const ALL_POSTS: FestivalPost[] = [
   salamMusicArtsFestival2027,
   benefizkonzertImAdvent2026,
   konzertWinterwonderlandBigbandKoeflach2026,
+  luisAusSuedtirolPfiatiDieAbschiedstour2026,
+  linzMammaMiaPartyKonzert2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
