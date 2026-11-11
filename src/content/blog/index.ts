@@ -247,6 +247,8 @@ import { post as benefizkonzertImAdvent2026 } from './posts/benefizkonzert-im-ad
 import { post as konzertWinterwonderlandBigbandKoeflach2026 } from './posts/konzert-winterwonderland-bigband-koeflach-2026';
 import { post as luisAusSuedtirolPfiatiDieAbschiedstour2026 } from './posts/luis-aus-suedtirol-pfiati-die-abschiedstour-2026';
 import { post as linzMammaMiaPartyKonzert2026 } from './posts/linz-mamma-mia-party-konzert-2026';
+import { post as vorweihnachtlichesKlavierkonzertMitMarioEritreo2026 } from './posts/vorweihnachtliches-klavierkonzert-mit-mario-eritreo-2026';
+import { post as zuendstoffLive2026 } from './posts/zuendstoff-live-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -506,6 +508,8 @@ export const ALL_POSTS: FestivalPost[] = [
   konzertWinterwonderlandBigbandKoeflach2026,
   luisAusSuedtirolPfiatiDieAbschiedstour2026,
   linzMammaMiaPartyKonzert2026,
+  vorweihnachtlichesKlavierkonzertMitMarioEritreo2026,
+  zuendstoffLive2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
