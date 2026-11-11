@@ -167,8 +167,8 @@ export abstract class DeFeedScraper extends BaseScraper {
   /** HTML-Seite über `BaseScraper.fetchHtml` (nur HTML, Größengrenze), wenn robots.txt sie erlaubt. */
   protected async fetchHtmlPage(url: string): Promise<string | null> {
     if (!(await this.gate(url))) return null;
-    const { html } = await this.fetchHtml(url);
-    if (html == null) this.log(`nicht lesbar: ${url}`);
+    const { html, error } = await this.fetchHtml(url);
+    if (html == null) this.log(`nicht lesbar: ${url}${error ? `: ${error}` : ''}`);
     return html;
   }
 

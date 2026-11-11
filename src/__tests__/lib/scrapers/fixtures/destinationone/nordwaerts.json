@@ -1,0 +1,1612 @@
+{
+ "status": "OK",
+ "count": 3,
+ "overallcount": 223,
+ "items": [
+  {
+   "global_id": "e_101378956",
+   "id": "101378956",
+   "title": "Kranichfahrt mit der Moorbahn ins Tister Bauernmoor",
+   "type": "Event",
+   "categories": [
+    "Besichtigung & Führung sonstige",
+    "Geführter Rundgang",
+    "Vogelschutzgebiet",
+    "Naturschutzgebiet"
+   ],
+   "texts": [
+    {
+     "rel": "details",
+     "type": "text/html",
+     "value": "<p>Während der Vogelzüge fahren wir Sie mit der Moorbahn in das Tister Bauernmoor. Ein tolles Familien-Erlebnis. Die Kraniche legen wieder einen Zwischenstopp zum Rasten und Schlafen im Tister Bauernm"
+    },
+    {
+     "rel": "details",
+     "type": "text/plain",
+     "value": "Während der Vogelzüge fahren wir Sie mit der Moorbahn in das Tister Bauernmoor. Ein tolles Familien-Erlebnis. Die Kraniche legen wieder einen Zwischenstopp zum Rasten und Schlafen im Tister Bauernmoor"
+    },
+    {
+     "rel": "teaser",
+     "type": "text/html",
+     "value": "<h2>Moorbahnfahrten zur Beobachtung der einfliegenden Kraniche zur Abenddämmerung<br type=\"_moz\"></h2>"
+    },
+    {
+     "rel": "teaser",
+     "type": "text/plain",
+     "value": "Moorbahnfahrten zur Beobachtung der einfliegenden Kraniche zur Abenddämmerung"
+    },
+    {
+     "rel": "PRICE_INFO",
+     "type": "text/plain",
+     "value": "Fahrpreise:\nErwachsene            €  5,–\nKinder 6-14 Jahre   €  3,–\nKinder bis 5 Jahre Frei\nEC-Kartenzahlung ist nicht möglich.\n  "
+    },
+    {
+     "rel": "WEB_SEO_TITEL",
+     "type": "text/plain",
+     "value": "Kranichfahrt der Moorbahn ins Tister Bauernmoor"
+    },
+    {
+     "rel": "WEB_SEO_BESCHREIBUNG",
+     "type": "text/plain",
+     "value": "Während der Vogelzüge fahren wir Sie mit der Moorbahn in das Tister Bauernmoor. Ein tolles Familien-Erlebnis. Die Kraniche legen wieder einen Zwischenstopp zum Rasten und Schlafen im Tister Bauernmoor"
+    },
+    {
+     "rel": "WEB_SEO_KEYWORDS",
+     "type": "text/plain",
+     "value": "Kraniche Vogelzug,Moorbahnfahrt,Bauernmoor "
+    },
+    {
+     "rel": "directions",
+     "type": "text/plain",
+     "value": "Über die A1\nEgal ob von Bremen oder Hamburg kommend, einfach Richtung Sittensen fahren. Den Kreisel an der 2. Ausfahrt verlassen (quasi geradeaus fahren). Nach ca. 500 m an der nächsten Ampelkreuzung "
+    },
+    {
+     "rel": "SocialTitle",
+     "type": "text/plain",
+     "value": "Kranichfahrt der Moorbahn ins Tister Bauernmoor"
+    },
+    {
+     "rel": "SocialDescription",
+     "type": "text/plain",
+     "value": "Während der Vogelzüge fahren wir Sie mit der Moorbahn in das Tister Bauernmoor. Ein tolles Familien-Erlebnis. Die Kraniche legen wieder einen Zwischenstopp zum Rasten und Schlafen im Tister Bauernmoor"
+    }
+   ],
+   "country": "Deutschland",
+   "areas": [
+    "Landkreis Rotenburg (Wümme)",
+    "Niedersachsen"
+   ],
+   "city": "Tiste",
+   "zip": "27419",
+   "street": "Hauptstraße 70",
+   "phone": "+49 4282 911509",
+   "web": "http://www.moorbahn.de/die-bahn/kranichbeobachtung-mit-bahnfahrt/",
+   "email": "moorbahn.burgsittensen@gmail.com",
+   "author": "",
+   "geo": {
+    "main": {
+     "latitude": 53.279284,
+     "longitude": 9.5672933
+    },
+    "entry": [],
+    "attributes": []
+   },
+   "ratings": [
+    {
+     "type": "eT4",
+     "value": 75
+    }
+   ],
+   "cuisine_types": [],
+   "payment": [],
+   "media_objects": [
+    {
+     "rel": "venuewebsite",
+     "url": "http://www.moorbahn.de/",
+     "latitude": null,
+     "longitude": null,
+     "value": ""
+    },
+    {
+     "rel": "canonical",
+     "url": "https://www.moorbahn.de/die-bahn/kranichbeobachtung-mit-bahnfahrt/",
+     "latitude": null,
+     "longitude": null,
+     "value": ""
+    },
+    {
+     "rel": "directions",
+     "url": "https://www.moorbahn.de/anfahrt/",
+     "latitude": null,
+     "longitude": null,
+     "value": ""
+    },
+    {
+     "rel": "PRICE_KARTENLINK",
+     "url": "https://www.moorbahn.de/die-bahn/nikolausfahrten/",
+     "latitude": null,
+     "longitude": null,
+     "value": "Link zum Kartenverkauf"
+    },
+    {
+     "rel": "default",
+     "url": "https://dam.destination.one/2685535/f97170a09222fd10538498d59c362f35244cc12f9525182bd977257c6b5411ed/moorbahnfahrt-ins-tister-bauernmoor.jpg",
+     "type": "image/jpeg",
+     "source": "Bernd Herzig Moorbahnverein",
+     "latitude": 53.2792014,
+     "longitude": 9.5673436,
+     "prio": 2,
+     "description": "Während der Vogelzüge fahren wir Sie mit der Moorbahn in das Tister Bauernmoor. Ein tolles Familien-Erlebnis. Die Kraniche legen wieder einen Zwischenstopp zum Rasten und Schlafen im Tister Bauernmoor ein. <br>",
+     "seasons": 3584,
+     "license": "CC-BY-SA",
+     "width": 4592,
+     "height": 3448,
+     "alt": "Moorbahnfahrt ins Tister Bauernmoor",
+     "id": "m_2685535",
+     "value": "Moorbahnfahrt ins Tister Bauernmoor"
+    },
+    {
+     "rel": "default",
+     "url": "https://dam.destination.one/4289714/d1685e265ad42b00086987d4cdb945cd1fb6feafdb15021b5a4256ecb495790a/kraniche-tister-bauernmoor-jpg.jpg",
+     "type": "image/jpeg",
+     "source": "BERND_HERZIG_TISTE, BHT",
+     "latitude": 53.2735799376605,
+     "longitude": 9.56844806671143,
+     "description": "Kraniche im Tister Bauernmoor",
+     "width": 1024,
+     "height": 683,
+     "id": "m_4289714",
+     "value": "Kraniche Tister Bauernmoor.jpg"
+    },
+    {
+     "rel": "default",
+     "url": "https://dam.destination.one/4289760/dcb806c906c7a6fe435f4caf908f61809ac951ae139c313fb3be22d94afa0770/kraniche-im-moor.jpg",
+     "type": "image/jpeg",
+     "source": "Janet Meyer",
+     "latitude": null,
+     "longitude": null,
+     "description": "Kraniche im flachen Moorwasser",
+     "license": "CC-BY-SA",
+     "width": 4674,
+     "height": 3116,
+     "id": "m_4289760",
+     "value": "Kraniche im Moor"
+    },
+    {
+     "rel": "imagegallery",
+     "url": "https://dam.destination.one/3517642/6d6500d153fb12370d4176a219206145bbbad285a3153a508af7ef0d5baf03cd/nikolausfahrt-moorbahn-burgsittensen.png",
+     "type": "image/png",
+     "source": "Moorbahnverein Burgsittensen, Bernd Herzig",
+     "latitude": null,
+     "longitude": null,
+     "description": "Der Nikolaus führt eine Gruppe Kinder zurück zum Moorbahnhof.<br><br>",
+     "seasons": 2048,
+     "focusX": -0.35,
+     "focusY": -0.12,
+     "license": "CC0",
+     "width": 800,
+     "height": 533,
+     "alt": "Nikolausfahrt Moorbahn Burgsittensen",
+     "id": "m_3517642",
+     "value": "Nikolausfahrt Moorbahn Burgsittensen"
+    }
+   ],
+   "keywords": [
+    "Kranichbeobachtung",
+    "import_source_eT4",
+    "import_sourceid_101120870"
+   ],
+   "timeIntervals": [
+    {
+     "weekdays": [],
+     "start": "2025-12-14T11:30:00+01:00",
+     "end": "2025-12-14T17:00:00+01:00",
+     "tz": "Europe/Berlin"
+    },
+    {
+     "weekdays": [],
+     "start": "2025-12-14T11:45:00+01:00",
+     "end": "2025-12-14T12:45:00+01:00",
+     "tz": "Europe/Berlin",
+     "interval": 1
+    },
+    {
+     "weekdays": [],
+     "start": "2025-12-14T12:25:00+01:00",
+     "end": "2025-12-14T13:25:00+01:00",
+     "tz": "Europe/Berlin",
+     "interval": 1
+    },
+    {
+     "weekdays": [],
+     "start": "2025-12-14T13:10:00+01:00",
+     "end": "2025-12-14T14:10:00+01:00",
+     "tz": "Europe/Berlin",
+     "interval": 1
+    },
+    {
+     "weekdays": [],
+     "start": "2025-12-14T13:50:00+01:00",
+     "end": "2025-12-14T14:50:00+01:00",
+     "tz": "Europe/Berlin",
+     "interval": 1
+    },
+    {
+     "weekdays": [],
+     "start": "2025-12-14T14:35:00+01:00",
+     "end": "2025-12-14T15:35:00+01:00",
+     "tz": "Europe/Berlin",
+     "interval": 1
+    },
+    {
+     "weekdays": [],
+     "start": "2025-12-14T15:15:00+01:00",
+     "end": "2025-12-14T16:15:00+01:00",
+     "tz": "Europe/Berlin",
+     "interval": 1
+    },
+    {
+     "weekdays": [],
+     "start": "2026-10-22T16:45:00+02:00",
+     "end": "2026-10-22T19:00:00+02:00",
+     "repeatUntil": "2026-10-24T19:00:00+02:00",
+     "tz": "Europe/Berlin",
+     "freq": "Daily",
+     "interval": 1
+    },
+    {
+     "weekdays": [],
+     "start": "2026-10-25T15:30:00+01:00",
+     "end": "2026-10-25T17:30:00+01:00",
+     "repeatUntil": "2026-11-01T17:30:00+01:00",
+     "tz": "Europe/Berlin",
+     "freq": "Daily",
+     "interval": 1
+    },
+    {
+     "weekdays": [],
+     "start": "2026-11-02T15:15:00+01:00",
+     "end": "2026-11-02T17:15:00+01:00",
+     "repeatUntil": "2026-11-08T17:15:00+01:00",
+     "tz": "Europe/Berlin",
+     "freq": "Daily",
+     "interval": 1
+    },
+    {
+     "weekdays": [],
+     "start": "2026-12-12T11:45:00+01:00",
+     "end": "2026-12-12T12:45:00+01:00",
+     "tz": "Europe/Berlin"
+    },
+    {
+     "weekdays": [],
+     "start": "2026-12-12T12:25:00+01:00",
+     "end": "2026-12-12T13:25:00+01:00",
+     "tz": "Europe/Berlin"
+    },
+    {
+     "weekdays": [],
+     "start": "2026-12-12T13:10:00+01:00",
+     "end": "2026-12-12T14:10:00+01:00",
+     "tz": "Europe/Berlin"
+    },
+    {
+     "weekdays": [],
+     "start": "2026-12-12T13:50:00+01:00",
+     "end": "2026-12-12T14:50:00+01:00",
+     "tz": "Europe/Berlin"
+    },
+    {
+     "weekdays": [],
+     "start": "2026-12-12T14:35:00+01:00",
+     "end": "2026-12-12T15:35:00+01:00",
+     "tz": "Europe/Berlin"
+    },
+    {
+     "weekdays": [],
+     "start": "2026-12-12T15:15:00+01:00",
+     "end": "2026-12-12T16:15:00+01:00",
+     "tz": "Europe/Berlin"
+    },
+    {
+     "weekdays": [],
+     "start": "2026-12-12T15:55:00+01:00",
+     "end": "2026-12-12T16:55:00+01:00",
+     "tz": "Europe/Berlin"
+    }
+   ],
+   "kitchenTimeIntervals": [],
+   "deliveryTimeIntervals": [],
+   "numbers": [
+    {
+     "type": "OBJECT_PARKING_ANZAHL",
+     "value": 15
+    },
+    {
+     "type": "OBJECT_PARKING_GARAGE"
+    },
+    {
+     "type": "OBJECT_PARKING_BUS",
+     "value": 2
+    },
+    {
+     "type": "PRICE_ADULT",
+     "value": 5
+    },
+    {
+     "type": "PRICE_CHILD",
+     "value": 3
+    }
+   ],
+   "name": "Moorbahn Burgsittensen e.V.",
+   "attributes": [
+    {
+     "key": "license",
+     "value": "CC-BY-SA"
+    },
+    {
+     "key": "licenseurl",
+     "value": "https://creativecommons.org/licenses/by-sa/4.0/deed.de"
+    },
+    {
+     "key": "Currency",
+     "value": "EUR"
+    },
+    {
+     "key": "VO_Id",
+     "value": "279306"
+    },
+    {
+     "key": "VO_CategoryName",
+     "value": "Adresse"
+    },
+    {
+     "key": "VA_Id",
+     "value": "279306"
+    },
+    {
+     "key": "VA_CategoryName",
+     "value": "Adresse"
+    },
+    {
+     "key": "interval_first_match_start",
+     "value": "2026-11-07T15:15:00+01"
+    },
+    {
+     "key": "interval_first_match_end",
+     "value": "2026-11-07T17:15:00+01"
+    },
+    {
+     "key": "interval_match_count",
+     "value": "9"
+    },
+    {
+     "key": "interval_last_match_start",
+     "value": "2026-12-12T15:55:00+01"
+    },
+    {
+     "key": "interval_last_match_end",
+     "value": "2026-12-12T16:55:00+01"
+    }
+   ],
+   "features": [
+    "Touristische Veranstaltung",
+    "für jedes Wetter",
+    "Barrierefrei",
+    "Zielgruppe Jugendliche",
+    "Zielgruppe Erwachsene",
+    "Zielgruppe Familien",
+    "Zielgruppe Senioren",
+    "für Kinder (0-3 Jahre)",
+    "für Kinder (3-6 Jahre)",
+    "für Kinder (6-10 Jahre)",
+    "für Kinder (ab 10 Jahre)",
+    "für Gruppen",
+    "für Familien",
+    "für Individualgäste",
+    "Deutsch",
+    "kostenpflichtig",
+    "Barzahlung vor Ort"
+   ],
+   "addresses": [
+    {
+     "name": "Samtgemeinde Sittensen",
+     "web": "http://www.sittensen.de/",
+     "rel": "author"
+    },
+    {
+     "name": "Ansprechpartner für Urlaub und Freizeit: Touristikverband LK Rotenburg",
+     "web": "https://www.nordwaerts.de/",
+     "rel": "organisation"
+    },
+    {
+     "name": "Touristikbüro",
+     "web": "",
+     "email": "",
+     "rel": "copyright"
+    },
+    {
+     "name": "Moorbahn Burgsittensen e.V.",
+     "city": "Tiste",
+     "zip": "27419",
+     "street": "Hauptstraße 70",
+     "phone": "+49 4282 911509",
+     "web": "http://www.moorbahn.de/",
+     "email": "moorbahn.burgsittensen@gmail.com",
+     "rel": "organizer"
+    }
+   ],
+   "created": "2026-10-22T09:31:00+02:00",
+   "changed": "2026-10-22T10:50:00+02:00",
+   "source": {
+    "url": "http://destination.one/",
+    "value": "destination.one"
+   },
+   "company": "",
+   "district": "",
+   "postoffice": "",
+   "phone2": "",
+   "timeIntervalExceptions": [],
+   "occurrences": [],
+   "seasons": [],
+   "subitems": [],
+   "hyperObjects": []
+  },
+  {
+   "global_id": "e_101196265",
+   "id": "101196265",
+   "title": "Hurricane Festival",
+   "type": "Event",
+   "categories": [
+    "Festival"
+   ],
+   "texts": [
+    {
+     "rel": "details",
+     "type": "text/html",
+     "value": "Das Hurricane Festival blickte im Jahr 2026 auf drei Jahrzehnte voller legendärer Konzerte, prägender Künstlerinnen und Künstler und unvergesslicher Festivalmomente zurück. Was einst als Vision begann"
+    },
+    {
+     "rel": "details",
+     "type": "text/plain",
+     "value": "Das Hurricane Festival blickte im Jahr 2026 auf drei Jahrzehnte voller legendärer Konzerte, prägender Künstlerinnen und Künstler und unvergesslicher Festivalmomente zurück. Was einst als Vision begann"
+    },
+    {
+     "rel": "teaser",
+     "type": "text/html",
+     "value": "<h2>Das Hurricane Festival lässt Scheeßel beben<br type=\"_moz\"></h2>"
+    },
+    {
+     "rel": "teaser",
+     "type": "text/plain",
+     "value": "Das Hurricane Festival lässt Scheeßel beben"
+    },
+    {
+     "rel": "PRICE_INFO",
+     "type": "text/plain",
+     "value": "Festivalpass ab 159,00 Euro (Preisstufe 1)\nCampingpass ab 59,00 Euro"
+    },
+    {
+     "rel": "WEB_SEO_TITEL",
+     "type": "text/plain",
+     "value": "Hurricane Festival"
+    },
+    {
+     "rel": "WEB_SEO_BESCHREIBUNG",
+     "type": "text/plain",
+     "value": "Jährliches Open-Air-Musikfestival auf dem Eichenring Scheeßel in Niedersachsen am dritten Wochenende im Juni."
+    },
+    {
+     "rel": "WEB_SEO_KEYWORDS",
+     "type": "text/plain",
+     "value": "Hurricane Festival, Musikfestival Niedersachsen, Open-Air Festival Deutschland, Festival Scheeßel, Rockfestival Niedersachsen, Indie Festival Deutschland, Live-Musik Festival, Festival Norddeutschland"
+    },
+    {
+     "rel": "directions",
+     "type": "text/plain",
+     "value": "Anreise mit dem Auto:\nBitte nicht dem Navi, sondern der Beschilderung folgen. \n\nAnreise mit der Bahn:\nVom Bahnhof Scheeßel sind es ca. 15 Minuten zu Fuß zum Festivalgelände."
+    },
+    {
+     "rel": "SocialTitle",
+     "type": "text/plain",
+     "value": "Hurricane Festival"
+    },
+    {
+     "rel": "SocialDescription",
+     "type": "text/plain",
+     "value": "Jährliches Open-Air-Musikfestival auf dem Eichenring Scheeßel in Niedersachsen am dritten Wochenende im Juni."
+    },
+    {
+     "rel": "w3w",
+     "type": "text/plain",
+     "value": "pflegen.grenzen.beugbar"
+    }
+   ],
+   "country": "Deutschland",
+   "areas": [
+    "Landkreis Rotenburg (Wümme)",
+    "Niedersachsen"
+   ],
+   "city": "Scheeßel",
+   "zip": "27383",
+   "street": "Westerveseder Landstraße",
+   "phone": "+49 40 / 743059 - 49",
+   "web": "https://hurricane.de/de/",
+   "email": "hurricane@fkpscorpio.com",
+   "author": "",
+   "geo": {
+    "main": {
+     "latitude": 53.15742504504576,
+     "longitude": 9.521369934082031
+    },
+    "entry": [],
+    "attributes": []
+   },
+   "ratings": [
+    {
+     "type": "eT4",
+     "value": 50
+    },
+    {
+     "type": "order",
+     "value": 99.0001
+    }
+   ],
+   "cuisine_types": [],
+   "payment": [],
+   "media_objects": [
+    {
+     "rel": "venuewebsite",
+     "url": "https://hurricane.de/de/",
+     "latitude": null,
+     "longitude": null,
+     "value": ""
+    },
+    {
+     "rel": "video",
+     "url": "https://www.youtube.com/embed/kQff2j-Mj34?si=EwkO_IPKZG3VHRuI",
+     "latitude": null,
+     "longitude": null,
+     "description": "",
+     "value": "Hurricane Festival 2025 – THE OFFICIAL AFTERMOVIE "
+    },
+    {
+     "rel": "canonical",
+     "url": "https://www.nordwaerts.de/kultur-veranstaltungen/event/hurricane-festival-101196265/",
+     "latitude": null,
+     "longitude": null,
+     "value": ""
+    },
+    {
+     "rel": "socialmedia",
+     "url": "https://www.facebook.com/hurricanefestival/",
+     "latitude": null,
+     "longitude": null,
+     "value": "Facebook"
+    },
+    {
+     "rel": "socialmedia",
+     "url": "https://www.instagram.com/hurricanefestival/",
+     "latitude": null,
+     "longitude": null,
+     "value": "Instagram"
+    },
+    {
+     "rel": "socialmedia",
+     "url": "https://www.youtube.com/user/HurricaneFstvl",
+     "latitude": null,
+     "longitude": null,
+     "value": "YouTube"
+    },
+    {
+     "rel": "socialmedia",
+     "url": "https://www.tiktok.com/@hurricanefestival?lang=de-DE",
+     "latitude": null,
+     "longitude": null,
+     "value": "TikTok"
+    },
+    {
+     "rel": "wikipedia",
+     "url": "https://de.wikipedia.org/wiki/Hurricane_Festival",
+     "latitude": null,
+     "longitude": null,
+     "value": "Wikipedia"
+    },
+    {
+     "rel": "socialmedia",
+     "url": "https://www.whatsapp.com/channel/0029VaFU5On4yltJ6O3Yfj2D",
+     "latitude": null,
+     "longitude": null,
+     "value": "WhatsApp"
+    },
+    {
+     "rel": "socialmedia",
+     "url": "https://www.threads.com/@hurricanefestival",
+     "latitude": null,
+     "longitude": null,
+     "value": "Threads"
+    },
+    {
+     "rel": "directions",
+     "url": "https://hurricane.de/de/infos/anreise/",
+     "latitude": null,
+     "longitude": null,
+     "value": ""
+    },
+    {
+     "rel": "PRICE_KARTENLINK",
+     "url": "https://www.ticket-onlineshop.com/ols/hurricane/?gad_source=1&gad_campaignid=22988144134&gclid=EAIaIQobChMIq5mR6uutkgMViquDBx0j4hdREAAYASAAEgLGSPD_BwE",
+     "latitude": null,
+     "longitude": null,
+     "value": "Link zum Kartenverkauf"
+    },
+    {
+     "rel": "default",
+     "url": "https://dam.destination.one/3666938/976e57dad86b9a89f5046bf5876d7946208fa9507108c431412ad8431ae1388d/f-nf-musikfans-vor-dem-eingang-vom-hurricane-festival.jpg",
+     "type": "image/jpeg",
+     "source": "FKP Scorpio, Antonina Polukhina",
+     "latitude": 53.157717,
+     "longitude": 9.5210056,
+     "prio": 6,
+     "description": "Fünf Musikfans posen vor der Kamera vor dem Eingang vom Hurricane Festival mit dem riesigen goldenen Schriftzug \"Hurricane\"<br>",
+     "seasons": 224,
+     "focusX": 0.07,
+     "focusY": -0.1,
+     "license": "CC-BY-SA",
+     "width": 2000,
+     "height": 1333,
+     "alt": "Fünf Musikfans vor dem Eingang vom Hurricane Festival",
+     "id": "m_3666938",
+     "value": "Fünf Musikfans vor dem Eingang vom Hurricane Festival"
+    },
+    {
+     "rel": "imagegallery",
+     "url": "https://dam.destination.one/3659718/b37291e23d1cb3dfcd891a5e7b1ef4a0632a0adc295d1793f43c4ec02fd9a764/blick-auf-die-b-hne-auf-dem-hurricane-festival.jpg",
+     "type": "image/jpeg",
+     "source": "Touristikverband LK Rotenburg, Petra Welz",
+     "latitude": 53.157717,
+     "longitude": 9.5210056,
+     "prio": 1,
+     "description": "Blick auf die Bühne auf dem Hurricane Festival am sonnigen Tag, im Vordergrund sind die vielen Fans zu sehen<br>",
+     "seasons": 224,
+     "focusX": -0.12,
+     "focusY": -0.04,
+     "license": "CC-BY-SA",
+     "copyrightWeb": "https://www.nordwaerts.de/",
+     "width": 3823,
+     "height": 2153,
+     "alt": "Blick auf die Bühne auf dem Hurricane Festival",
+     "id": "m_3659718",
+     "value": "Blick auf die Bühne auf dem Hurricane Festival"
+    },
+    {
+     "rel": "imagegallery",
+     "url": "https://dam.destination.one/3659716/86e8c3279cc4467619347c4ea6b5250b1237cd775c8b29e642ee59f53c2fb7de/beleuchteter-schriftzug-hurricane.jpg",
+     "type": "image/jpeg",
+     "source": "Touristikverband LK Rotenburg, Petra Welz",
+     "latitude": 53.157717,
+     "longitude": 9.5210056,
+     "prio": 2,
+     "description": "Blau und grün beleuchteter riesiger Schriftzug \"Hurricane\" bei Nacht",
+     "seasons": 224,
+     "focusX": -0.44,
+     "focusY": -0.02,
+     "license": "CC-BY-SA",
+     "copyrightWeb": "https://www.nordwaerts.de/",
+     "width": 4000,
+     "height": 2252,
+     "alt": "Beleuchteter Schriftzug Hurricane",
+     "id": "m_3659716",
+     "value": "Beleuchteter Schriftzug Hurricane"
+    },
+    {
+     "rel": "imagegallery",
+     "url": "https://dam.destination.one/3666936/c4fb17e862a1659a711f3383b60b6a0aacd129f8c8000295a1be980d7f68fd7d/blick-auf-das-gel-nde-vom-hurricane-festival.jpg",
+     "type": "image/jpeg",
+     "source": "FKP Scorpio, Lars Fricke",
+     "latitude": 53.157717,
+     "longitude": 9.5210056,
+     "prio": 3,
+     "description": "Blick vom Dach der Bühne auf das Gelände vom Hurricane Festival mit den Publikumsmassen<br>",
+     "seasons": 224,
+     "focusX": 0.1,
+     "focusY": 0.42,
+     "license": "CC-BY-SA",
+     "width": 5272,
+     "height": 3948,
+     "alt": "Blick auf das Gelände vom Hurricane Festival",
+     "id": "m_3666936",
+     "value": "Blick auf das Gelände vom Hurricane Festival"
+    },
+    {
+     "rel": "imagegallery",
+     "url": "https://dam.destination.one/3666941/99198ef8c214261fd169e1fe3cd1397c3b6cf897af47b0b5d4a2502166203464/blick-ber-das-abendliche-hurricane-festivalgel-nde.jpg",
+     "type": "image/jpeg",
+     "source": "FKP Scorpio, Peter Detje",
+     "latitude": 53.157717,
+     "longitude": 9.5210056,
+     "prio": 4,
+     "description": "Blick über das Hurricane-Festivalgelände bei Sonnenuntergang, auf der rechten Seite ist die Hauptbühne zu sehen<br>",
+     "seasons": 224,
+     "focusX": 0.3,
+     "focusY": -0.16,
+     "license": "CC-BY-SA",
+     "width": 5432,
+     "height": 3621,
+     "alt": "Blick über das abendliche Hurricane-Festivalgelände",
+     "id": "m_3666941",
+     "value": "Blick über das abendliche Hurricane-Festivalgelände"
+    },
+    {
+     "rel": "imagegallery",
+     "url": "https://dam.destination.one/3666940/1efe807fa24b14b40f50c3e767d423e370a30ac9c0a85f50edca31beb8a225db/fans-vor-der-b-hne-beim-hurricane-festival.jpg",
+     "type": "image/jpeg",
+     "source": "FKP Scorpio, LINE TSOJ",
+     "latitude": 53.157717,
+     "longitude": 9.5210056,
+     "prio": 5,
+     "description": "Blick von der Bühne aus auf die feiernden Fans vor der Bühne beim Hurricane Festival<br>",
+     "seasons": 224,
+     "focusX": -0.17,
+     "focusY": 0.22,
+     "license": "CC-BY-SA",
+     "width": 2500,
+     "height": 1667,
+     "alt": "Fans vor der Bühne beim Hurricane Festival",
+     "id": "m_3666940",
+     "value": "Fans vor der Bühne beim Hurricane Festival"
+    },
+    {
+     "rel": "imagegallery",
+     "url": "https://dam.destination.one/3666945/914d86ee3172db094e7c41c485c2065feb22ec127152f77f561569a063515a56/pause-auf-dem-hurricane-festival.jpg",
+     "type": "image/jpeg",
+     "source": "FKP Scorpio, Line Tsoj",
+     "latitude": 53.157717,
+     "longitude": 9.5210056,
+     "prio": 7,
+     "description": "Vier Festival-Gänger sitzen im Vordergrund, während im Hintergrund an den Ständen auf dem Hurricane Festival buntes Treiben ist",
+     "seasons": 224,
+     "focusX": -0.04,
+     "license": "CC-BY-SA",
+     "width": 2500,
+     "height": 1667,
+     "alt": "Pause auf dem Hurricane Festival",
+     "id": "m_3666945",
+     "value": "Pause auf dem Hurricane Festival"
+    },
+    {
+     "rel": "imagegallery",
+     "url": "https://dam.destination.one/3666943/2cfd1ad8decdbc46259197c0f50d711bf447e2d65744e4e6ed735b353b528722/konzert-auf-dem-hurricane-festival.jpg",
+     "type": "image/jpeg",
+     "source": "FKP Scorpio, Line Tsoj",
+     "latitude": 53.157717,
+     "longitude": 9.5210056,
+     "prio": 8,
+     "description": "Auf der Bühne beim Hurricane Festival ist eine Feuershow zu sehen, im Vordergrund steht viel Publikum<br>",
+     "seasons": 224,
+     "focusX": 0.06,
+     "focusY": -0.33,
+     "license": "CC-BY-SA",
+     "width": 2500,
+     "height": 1667,
+     "alt": "Konzert auf dem Hurricane Festival",
+     "id": "m_3666943",
+     "value": "Konzert auf dem Hurricane Festival"
+    },
+    {
+     "rel": "imagegallery",
+     "url": "https://dam.destination.one/3666942/be4a5e16258ba2057194ddff2a25d2d455aa8a780e290ee9eaa38f9c3ea88449/konzert-auf-dem-hurricane-festival-bei-nacht.jpg",
+     "type": "image/jpeg",
+     "source": "FKP Scorpio, ANNA VIS",
+     "latitude": 53.157717,
+     "longitude": 9.5210056,
+     "prio": 9,
+     "description": "Auf einem schräg aufgenommenen nächtlichen Konzert auf dem Hurricane Festival ist lilafarbenes und rotes Licht zu sehen, im Vordergrund feiert das Publikum<br>",
+     "focusX": 0.04,
+     "focusY": -0.31,
+     "license": "CC-BY-SA",
+     "width": 5472,
+     "height": 3648,
+     "alt": "Konzert auf dem Hurricane Festival bei Nacht",
+     "id": "m_3666942",
+     "value": "Konzert auf dem Hurricane Festival bei Nacht"
+    },
+    {
+     "rel": "imagegallery",
+     "url": "https://dam.destination.one/3666944/3effa3dc3e2ea712eeb48305caf03fb6ecbf98027f151d3ddcc9278f863065b4/publikum-und-b-hne-auf-dem-hurricane-festival.jpg",
+     "type": "image/jpeg",
+     "source": "FKP Scorpio, Peter Detje",
+     "latitude": 53.157717,
+     "longitude": 9.5210056,
+     "prio": 10,
+     "description": "Eine Band spielt in der Dämmerung auf dem Hurricane Festival, im Vordergrund ist das Publikum zu sehen",
+     "seasons": 224,
+     "focusX": -0.04,
+     "focusY": -0.52,
+     "license": "CC-BY-SA",
+     "width": 4643,
+     "height": 3095,
+     "alt": "Publikum und Bühne auf dem Hurricane Festival",
+     "id": "m_3666944",
+     "value": "Publikum und Bühne auf dem Hurricane Festival"
+    },
+    {
+     "rel": "imagegallery",
+     "url": "https://dam.destination.one/3666939/d73436e6899565286848c44a484ea7ba55fef66f63e4629f2f505845ea2ac445/spa-auf-dem-zeltplatz-beim-hurricane-festival.jpg",
+     "type": "image/jpeg",
+     "source": "FKP Scorpio, Julia Schwendner",
+     "latitude": 53.157717,
+     "longitude": 9.5210056,
+     "prio": 11,
+     "description": "Vier Musikbegeisterte mit Sonnenbrillen haben Spaß auf dem Zeltplatz beim Hurricane Festival, eine Frau sitzt im Bollerwagen<br>",
+     "seasons": 224,
+     "focusX": -0.03,
+     "focusY": 0.54,
+     "license": "CC-BY-SA",
+     "width": 3818,
+     "height": 5727,
+     "alt": "Spaß auf dem Zeltplatz beim Hurricane Festival",
+     "id": "m_3666939",
+     "value": "Spaß auf dem Zeltplatz beim Hurricane Festival"
+    },
+    {
+     "rel": "imagegallery",
+     "url": "https://dam.destination.one/3666937/7011ba2a7d6291af01d8b0ce23bfca918154283b5af8c04731c8fdff10a93d8b/vier-musikfans-flirten-auf-dem-hurricane-festival.jpg",
+     "type": "image/jpeg",
+     "source": "FKP Scorpio, ANNA VIS",
+     "latitude": 53.157717,
+     "longitude": 9.5210056,
+     "prio": 12,
+     "description": "Zwei junge Frauen feiern am frühen Abend auf dem Hurricane Festival, zwei Männer gehen lachend vorbei<br>",
+     "seasons": 224,
+     "focusX": 0.14,
+     "focusY": 0.05,
+     "license": "CC-BY-SA",
+     "width": 5472,
+     "height": 3648,
+     "alt": "Vier Musikfans flirten auf dem Hurricane Festival",
+     "id": "m_3666937",
+     "value": "Vier Musikfans flirten auf dem Hurricane Festival"
+    }
+   ],
+   "keywords": [],
+   "timeIntervals": [
+    {
+     "weekdays": [],
+     "start": "2026-06-19T00:00:00+02:00",
+     "end": "2026-06-20T00:00:00+02:00",
+     "tz": "Europe/Berlin"
+    },
+    {
+     "weekdays": [],
+     "start": "2026-06-20T00:00:00+02:00",
+     "end": "2026-06-21T00:00:00+02:00",
+     "tz": "Europe/Berlin"
+    },
+    {
+     "weekdays": [],
+     "start": "2026-06-21T00:00:00+02:00",
+     "end": "2026-06-22T00:00:00+02:00",
+     "tz": "Europe/Berlin"
+    },
+    {
+     "weekdays": [],
+     "start": "2027-06-18T00:00:00+02:00",
+     "end": "2027-06-21T00:00:00+02:00",
+     "tz": "Europe/Berlin"
+    }
+   ],
+   "kitchenTimeIntervals": [],
+   "deliveryTimeIntervals": [],
+   "numbers": [
+    {
+     "type": "PRICE_ADULT",
+     "value": 159
+    }
+   ],
+   "name": "Eichenring (Hurricane-Festivalgelände)",
+   "attributes": [
+    {
+     "key": "license",
+     "value": "CC0"
+    },
+    {
+     "key": "licenseurl",
+     "value": "https://creativecommons.org/publicdomain/zero/1.0/deed.de"
+    },
+    {
+     "key": "Currency",
+     "value": "EUR"
+    },
+    {
+     "key": "VO_Id",
+     "value": "293097"
+    },
+    {
+     "key": "VO_CategoryName",
+     "value": "Adresse"
+    },
+    {
+     "key": "VA_Id",
+     "value": "293099"
+    },
+    {
+     "key": "VA_CategoryName",
+     "value": "Adresse"
+    },
+    {
+     "key": "interval_first_match_start",
+     "value": "2027-06-18T00:00:00+02"
+    },
+    {
+     "key": "interval_first_match_end",
+     "value": "2027-06-21T00:00:00+02"
+    },
+    {
+     "key": "interval_match_count",
+     "value": "1"
+    }
+   ],
+   "features": [
+    "Open Air",
+    "Touristische Veranstaltung",
+    "Zielgruppe Erwachsene",
+    "für Gruppen",
+    "für Individualgäste",
+    "Deutsch",
+    "Englisch",
+    "Kartenvorverkauf",
+    "kostenpflichtig",
+    "American Express",
+    "Mastercard",
+    "Paypal",
+    "Visa",
+    "Alternative",
+    "Elektro",
+    "HipHop",
+    "Indie",
+    "Pop",
+    "Rock",
+    "Barrierefreie Sanitäreinrichtungen",
+    "Barrierefreie Zugänge (Rollstuhl, taktile Bodenleitsysteme)",
+    "Chat- oder Hotline-Support",
+    "Digitale Wegweiser und interaktive Hallenpläne",
+    "Erste-Hilfe-Stationen mit medizinischem Personal",
+    "Event-App mit Programm, Karten, Live-Updates",
+    "Getränkeservice",
+    "Infopoints und mobile Service-Teams vor Ort",
+    "Ladestationen für Smartphones & Laptops",
+    "Mehrsprachige Informationsmaterialien",
+    "Priorisierter Einlass für mobilitätseingeschränkte Gäste",
+    "Refill (kostenfrei Trinkwasser)",
+    "Ruhige Zonen / Rückzugsräume",
+    "Shuttle- oder Transferdienste",
+    "Verpflegung gegen Aufpreis",
+    "WLAN-Zugang kostenpflichtig"
+   ],
+   "addresses": [
+    {
+     "name": "Gemeinde Scheeßel",
+     "web": "https://www.scheessel.de/",
+     "rel": "author"
+    },
+    {
+     "name": "Ansprechpartner für Urlaub und Freizeit: Touristikverband LK Rotenburg",
+     "web": "https://www.nordwaerts.de/",
+     "rel": "organisation"
+    },
+    {
+     "name": "FKP Scorpio Konzertproduktionen GmbH",
+     "city": "Hamburg",
+     "zip": "22767",
+     "street": "Große Elbstraße 277a",
+     "phone": "+49 40 / 85388 - 888",
+     "fax": "+49 40 / 85388 - 999",
+     "web": "https://fkpscorpio.de/de/",
+     "email": "info@fkpscorpio.com",
+     "rel": "organizer"
+    }
+   ],
+   "created": "2026-01-28T08:15:00+01:00",
+   "changed": "2026-09-29T10:45:00+02:00",
+   "source": {
+    "url": "http://destination.one/",
+    "value": "destination.one"
+   },
+   "company": "",
+   "district": "27383 Scheeßel-Westervesede",
+   "postoffice": "",
+   "phone2": "",
+   "timeIntervalExceptions": [],
+   "occurrences": [],
+   "seasons": [],
+   "subitems": [
+    {
+     "id": "100050795",
+     "title": "Freibad \"BeekeBad Scheeßel\"",
+     "type": "Relation_Meine Empfehlungen_Poi",
+     "geo": {
+      "main": {
+       "latitude": 53.18065550362808,
+       "longitude": 9.485106468200684,
+       "value": ""
+      },
+      "entry": [],
+      "attributes": []
+     },
+     "categories": [
+      "",
+      "",
+      "",
+      ""
+     ],
+     "features": [],
+     "texts": [
+      {
+       "rel": "description",
+       "type": "text/html",
+       "value": "<h2>Das Familienfreibad mit Wohlfühlatmosphäre<br type=\"_moz\"></h2>"
+      }
+     ],
+     "ratings": [],
+     "media_objects": [
+      {
+       "rel": "default",
+       "url": "https://dam.destination.one/205421/ebf0ce29bed8e580dd88e39c3152b911f7a51fadbc9e7de8a21874b4244ba4c7/wasserrutsche-im-freibad-beekebad-in-schee-el.png",
+       "type": "image/png",
+       "source": "Gemeinde Scheeßel",
+       "latitude": 53.1809255512753,
+       "longitude": 9.48527812957764,
+       "prio": 1,
+       "description": "Die kurvige Wasserrutsche bietet eine schönen Spaß für Groß und Klein im Scheeßeler Freibad",
+       "focusX": 0.6,
+       "focusY": -0.27,
+       "license": "CC-BY-SA",
+       "width": 1920,
+       "height": 1080,
+       "alt": "Wasserrutsche im Freibad BeekeBad in Scheeßel",
+       "value": "Wasserrutsche im Freibad BeekeBad in Scheeßel"
+      },
+      {
+       "rel": "imagegallery",
+       "url": "https://dam.destination.one/205422/208b44d1576907457c7788ab4d52944ff599508806729b41c5aa5cee645e72a3/abh-ngen-im-beekebad-schee-el.png",
+       "type": "image/png",
+       "source": "Gemeinde Scheeßel",
+       "latitude": 53.18069255,
+       "longitude": 9.48408542475429,
+       "prio": 2,
+       "description": "Vier Personen pausieren mit dem Rücken im Wasser und den Füßen an der Kante des Scheeßeler Schwimmbeckens",
+       "focusX": 0.05,
+       "focusY": -0.11,
+       "license": "CC-BY-SA",
+       "width": 1920,
+       "height": 1080,
+       "alt": "Abhängen im BeekeBad Scheeßel",
+       "value": "Abhängen im BeekeBad Scheeßel"
+      },
+      {
+       "rel": "imagegallery",
+       "url": "https://dam.destination.one/205423/a3d7473281acb412d66fcec405b5ee659958dbb70ac2eb1a9a08c8b19ae04100/beach-volleyballfeld-im-beekebad-schee-el.png",
+       "type": "image/png",
+       "source": "Gemeinde Scheeßel",
+       "latitude": 53.1806555036281,
+       "longitude": 9.48510646820068,
+       "prio": 3,
+       "description": "Das Scheeßeler Freibad verfügt über ein Beach-Volleyballfeld",
+       "focusX": -0.57,
+       "focusY": 0.68,
+       "license": "CC-BY-SA",
+       "width": 1920,
+       "height": 1080,
+       "alt": "Beach-Volleyballfeld im BeekeBad Scheeßel ",
+       "value": "Beach-Volleyballfeld im BeekeBad Scheeßel "
+      }
+     ],
+     "keywords": [],
+     "numbers": [],
+     "attributes": [],
+     "instructions": [],
+     "subitems": []
+    },
+    {
+     "id": "100050826",
+     "title": "Heimatmuseum Scheeßel",
+     "type": "Relation_Meine Empfehlungen_Poi",
+     "geo": {
+      "main": {
+       "latitude": 53.16962067446939,
+       "longitude": 9.478830099105835,
+       "value": ""
+      },
+      "entry": [],
+      "attributes": []
+     },
+     "categories": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+     ],
+     "features": [],
+     "texts": [
+      {
+       "rel": "description",
+       "type": "text/html",
+       "value": "<h2>Ein lebendiges Museum mit Tradition und dem Weltkulturerbe Blaudruck<br type=\"_moz\"></h2>"
+      }
+     ],
+     "ratings": [],
+     "media_objects": [
+      {
+       "rel": "default",
+       "url": "https://dam.destination.one/1136544/83be0a6b1d9e006a4030eb00936ff69ffa71168e22d5e021b8f559c6bf5691b1/der-meyerhof-des-heimatmuseum-schee-el.png",
+       "type": "image/png",
+       "author": "info@heimatverein-scheessel.de",
+       "source": "Heimatverein \"Niedersachsen\" e.V. Scheeßel",
+       "latitude": 53.1696206744694,
+       "longitude": 9.47883009910583,
+       "description": "Es ist anzunehmen, dass der denkmalgeschützte Meyerhof der älteste der ehemaligen sechs Vollhöfe in Scheeßel ist. Er wurde zum ersten Mal im Jahr 1320 urkundlich erwähnt.",
+       "focusX": 0.03,
+       "focusY": 0.16,
+       "license": "CC-BY-SA",
+       "copyrightWeb": "https://www.heimatverein-scheessel.de/",
+       "width": 1920,
+       "height": 1080,
+       "alt": "Der Meyerhof des Heimatmuseum Scheeßel",
+       "value": "Der Meyerhof des Heimatmuseum Scheeßel"
+      },
+      {
+       "rel": "imagegallery",
+       "url": "https://dam.destination.one/1136541/7d99a39230c3f8a9f43efa4cb9290d3f9ff472bdd3aa7a30848bc3988f8c90cb/das-heimathaus-des-heimatmuseums-schee-el.png",
+       "type": "image/png",
+       "author": "info@heimatverein-scheessel.de",
+       "source": "Heimatverein \"Niedersachsen\" e.V. Scheeßel",
+       "latitude": 53.1695549,
+       "longitude": 9.4776699,
+       "description": "Das Heimathaus ist das zweite Gebäude-Ensemble des Heimatmuseums. Das dreischiffige Hallenhaus mit Mitteldiele, beidseitigen Viehställen und Viehboxen, entstand um 1830.<br><br>",
+       "focusX": 0.04,
+       "focusY": -0.19,
+       "license": "CC-BY-SA",
+       "copyrightWeb": "https://www.heimatverein-scheessel.de/",
+       "width": 1920,
+       "height": 1080,
+       "alt": "Das Heimathaus des Heimatmuseums Scheeßel",
+       "value": "Das Heimathaus des Heimatmuseums Scheeßel"
+      },
+      {
+       "rel": "imagegallery",
+       "url": "https://dam.destination.one/1136542/8880b8b7b9670859e0056ecdd7acfea50e006c3708316bab8f32440950d5b014/honigspeicher-und-schafstall-des-heimatmuseum-schee-el.png",
+       "type": "image/png",
+       "author": "info@heimatverein-scheessel.de",
+       "source": "Heimatverein \"Niedersachsen\" e.V. Scheeßel",
+       "latitude": 53.1722222222222,
+       "longitude": 9.47777777777778,
+       "description": "Dieser Honigspeicher wurde um 1850 erbaut und wird als Ausstellungs- und Sitzungsraum verwendet<p></p><p>Der ebenerdige Raum im Erdgeschoss ist Ausstellungs- und Vorführraum zum Thema Imkerei. Der Bodenraum wurde ausgebaut und dient als Sitzungszimmer und Regieraum bei Veranstaltungen auf dem Gelände.</p><p>Der ehemalige Schafstall befand sich in der Feldmark von Groß Meckelsen im Landkreis Rotenburg und wurde ab 1968 hier wiederaufgebaut.Schafstall&nbsp; Tanz- und Trachtengruppe „De Beekscheepers“ sollte darin einen Übungsraum auf dem Heimat-hausgelände bekommen.</p><p>Am 23. August 1969 konnte der Schafstall eingeweiht und der Tanz- und Trachtengruppe „De Beekscheepers“ feierlich übergeben werden.</p>",
+       "focusX": -0.23,
+       "focusY": -0.04,
+       "license": "CC-BY-SA",
+       "copyrightWeb": "https://www.heimatverein-scheessel.de/",
+       "width": 1920,
+       "height": 1080,
+       "alt": "Honigspeicher und Schafstall des Heimatmuseum Scheeßel",
+       "value": "Honigspeicher und Schafstall des Heimatmuseum Scheeßel"
+      },
+      {
+       "rel": "imagegallery",
+       "url": "https://dam.destination.one/1136549/caea0cf49c65eb1e6aad98a0b646d1cf6995601c6cee208d8a38d0bf63b97845/museumsdag-und-markt-an-de-beek.png",
+       "type": "image/png",
+       "author": "info@heimatverein-scheessel.de",
+       "source": "Heimatverein \"Niedersachsen\" e.V. Scheeßel",
+       "latitude": 53.169555556696,
+       "longitude": 9.47766736149788,
+       "description": "Seit dem 1. Mai 1980 findet jährlich dieses Fest in Scheeßel statt. Unter anderem mit verschiedenen Volkstänzen. Organisiert und veranstaltet wird es vom Heimatverein Scheeßel, der Tanz- und Trachtengruppe \"De Beekscheepers\", der Gemeinde Scheeßel und dem TV Scheeßel",
+       "focusX": 0.01,
+       "focusY": -0.03,
+       "license": "CC-BY-SA",
+       "copyrightWeb": "https://www.heimatverein-scheessel.de/",
+       "width": 1920,
+       "height": 1080,
+       "alt": "Museumsdag und Markt an de Beek",
+       "value": "Museumsdag und Markt an de Beek"
+      }
+     ],
+     "keywords": [],
+     "numbers": [],
+     "attributes": [],
+     "instructions": [],
+     "subitems": []
+    },
+    {
+     "id": "100050988",
+     "title": "St.-Lucas-Kirche - Scheeßel",
+     "type": "Relation_Meine Empfehlungen_Poi",
+     "geo": {
+      "main": {
+       "latitude": 53.16933769280972,
+       "longitude": 9.482402801513672,
+       "value": ""
+      },
+      "entry": [],
+      "attributes": []
+     },
+     "categories": [
+      "",
+      "",
+      "",
+      "",
+      ""
+     ],
+     "features": [],
+     "texts": [
+      {
+       "rel": "description",
+       "type": "text/html",
+       "value": "<h2>Ein Ort der Besinnung und Ruhe sowie einer über 600 Jahre alten Linde auf dem Kirchenvorplatz<br></h2>"
+      }
+     ],
+     "ratings": [],
+     "media_objects": [
+      {
+       "rel": "default",
+       "url": "https://dam.destination.one/1434812/b449e8accadd7bdc64ce10404d23d92b8bd1ec4c112b5bb5a6de2aa13231c710/das-kirchenschiff-der-st-lucas-kirche-in-schee-el.png",
+       "type": "image/png",
+       "source": "Udo Fischer - Touristikverband LK Rotenburg",
+       "latitude": 53.1694647132173,
+       "longitude": 9.48232769966125,
+       "description": "Von der Seite ist das weiße Kirchenschiff der St.-Lucas-Kirche mit den großen Fenstern gut zu erkennen",
+       "focusX": -0.34,
+       "focusY": 0.28,
+       "license": "CC-BY-SA",
+       "width": 2616,
+       "height": 1472,
+       "alt": "Das Kirchenschiff der St.-Lucas-Kirche in Scheeßel",
+       "value": "Das Kirchenschiff der St.-Lucas-Kirche in Scheeßel"
+      },
+      {
+       "rel": "imagegallery",
+       "url": "https://dam.destination.one/2284735/ad47f66d11921f06edf29f1b30da28dfdcc236fc8cef1db6a48ee74fcf56e872/st-lucas-kirche-in-schee-el-blick-von-oben.png",
+       "type": "image/png",
+       "source": "Cord Gerken",
+       "latitude": 53.1694373797437,
+       "longitude": 9.4823169708252,
+       "prio": 1,
+       "description": "Blick von oben auf das Kirchenschiff in der St.-Lucas-Kirche Scheeßel<br>",
+       "focusX": 0.03,
+       "focusY": -0.6,
+       "license": "CC-BY-SA",
+       "width": 1920,
+       "height": 1080,
+       "alt": "St.-Lucas-Kirche in Scheeßel - Blick von Oben",
+       "value": "St.-Lucas-Kirche in Scheeßel - Blick von Oben"
+      },
+      {
+       "rel": "imagegallery",
+       "url": "https://dam.destination.one/1434813/c99a30ca69b20eecfba75d6259daaebcd44151d2ad7b2e05b9cdf58243437444/st-lucas-kirche-in-schee-el.png",
+       "type": "image/png",
+       "source": "Udo Fischer - Touristikverband LK Rotenburg",
+       "latitude": 53.1694711446204,
+       "longitude": 9.48233842849731,
+       "description": "Die Kirche in der seitlichen Ansicht mit Kirchturm, vor der sagenumwobenen und imposanten Gerichtslinde",
+       "focusX": -0.71,
+       "focusY": -0.07,
+       "license": "CC-BY-SA",
+       "width": 1920,
+       "height": 1080,
+       "alt": "St.-Lucas-Kirche in Scheeßel",
+       "value": "St.-Lucas-Kirche in Scheeßel"
+      }
+     ],
+     "keywords": [],
+     "numbers": [],
+     "attributes": [],
+     "instructions": [],
+     "subitems": []
+    },
+    {
+     "id": "100241186",
+     "title": "Bahnhof Scheeßel",
+     "type": "Relation_Meine Empfehlungen_Poi",
+     "geo": {
+      "main": {
+       "latitude": 53.16534520153358,
+       "longitude": 9.496049880981445,
+       "value": ""
+      },
+      "entry": [],
+      "attributes": []
+     },
+     "categories": [
+      "",
+      "",
+      "",
+      ""
+     ],
+     "features": [],
+     "texts": [
+      {
+       "rel": "description",
+       "type": "text/html",
+       "value": "<h2>Zwischenbahnhof mit geschichtsträchtiger Architektur</h2>"
+      }
+     ],
+     "ratings": [],
+     "media_objects": [],
+     "keywords": [],
+     "numbers": [],
+     "attributes": [],
+     "instructions": [],
+     "subitems": []
+    }
+   ],
+   "hyperObjects": []
+  },
+  {
+   "global_id": "e_101350355",
+   "id": "101350355",
+   "title": "La Papaya Topola & Die Peanuts",
+   "type": "Event",
+   "categories": [
+    "Konzert",
+    "Sprechtheater"
+   ],
+   "texts": [
+    {
+     "rel": "details",
+     "type": "text/html",
+     "value": "…ist eine Erzähltheatergeschichte von Dario Fo, die etwa um 1100 entstanden ist und mit Sicherheit von einer Frau, einer Spielfrau erfunden und aufgezeichnet wurde. In der Fabel geht es um den Schäfer"
+    },
+    {
+     "rel": "details",
+     "type": "text/plain",
+     "value": "…ist eine Erzähltheatergeschichte von Dario Fo, die etwa um 1100 entstanden ist und mit Sicherheit von einer Frau, einer Spielfrau erfunden und aufgezeichnet wurde. In der Fabel geht es um den Schäfer"
+    },
+    {
+     "rel": "teaser",
+     "type": "text/html",
+     "value": "<h2><strong>Geschichten und Musik im Foyer...eine betörende, anregende und herzzerreißende Geschichte mit Karin Schroeder</strong></h2>"
+    },
+    {
+     "rel": "teaser",
+     "type": "text/plain",
+     "value": "Geschichten und Musik im Foyer...eine betörende, anregende und herzzerreißende Geschichte mit Karin Schroeder"
+    },
+    {
+     "rel": "PRICE_INFO",
+     "type": "text/plain",
+     "value": "EUR 23,00€\nErmäßigt 17,00 € für Schüler und Studierende"
+    },
+    {
+     "rel": "WEB_SEO_TITEL",
+     "type": "text/plain",
+     "value": "La Papaya Topola & Die Peanuts"
+    },
+    {
+     "rel": "WEB_SEO_BESCHREIBUNG",
+     "type": "text/plain",
+     "value": "Geschichten und Musik im Foyer...eine betörende, anregende und herzzerreißende Geschichte mit Karin Schroeder"
+    },
+    {
+     "rel": "WEB_SEO_KEYWORDS",
+     "type": "text/plain",
+     "value": "Geschichten, Theater metronom, Papaya, Peanuts"
+    },
+    {
+     "rel": "SocialTitle",
+     "type": "text/plain",
+     "value": "La Papaya Topola & Die Peanuts"
+    },
+    {
+     "rel": "SocialDescription",
+     "type": "text/plain",
+     "value": "Geschichten und Musik im Foyer...eine betörende, anregende und herzzerreißende Geschichte mit Karin Schroeder"
+    },
+    {
+     "rel": "w3w",
+     "type": "text/plain",
+     "value": "beisein.schneien.ertönt"
+    }
+   ],
+   "country": "Deutschland",
+   "areas": [
+    "Landkreis Rotenburg (Wümme)",
+    "Niedersachsen"
+   ],
+   "city": "Visselhövede",
+   "zip": "27374",
+   "street": "Hütthof 1",
+   "phone": "+49 4262 / 1399",
+   "web": "http://theater-metronom.de/veranstaltung/?event=la-papaya-topola-musik-mit-den-peanuts-2026-11-07",
+   "email": "buero@theater-metronom.de",
+   "author": "",
+   "geo": {
+    "main": {
+     "latitude": 53.028411750000004,
+     "longitude": 9.557504641431866
+    },
+    "entry": [],
+    "attributes": []
+   },
+   "ratings": [
+    {
+     "type": "eT4",
+     "value": 75
+    }
+   ],
+   "cuisine_types": [],
+   "payment": [],
+   "media_objects": [
+    {
+     "rel": "venuewebsite",
+     "url": "http://www.theater-metronom.de/",
+     "latitude": null,
+     "longitude": null,
+     "value": ""
+    },
+    {
+     "rel": "canonical",
+     "url": "https://www.nordwaerts.de/kultur-veranstaltungen/event/la-papaya-topola-die-peanuts-101350355/",
+     "latitude": null,
+     "longitude": null,
+     "value": ""
+    },
+    {
+     "rel": "PRICE_KARTENLINK",
+     "url": "https://theater-metronom.de/veranstaltung/?event=la-papaya-topola-musik-mit-den-peanuts-2026-11-07",
+     "latitude": null,
+     "longitude": null,
+     "value": "Link zum Kartenverkauf"
+    },
+    {
+     "rel": "default",
+     "url": "https://dam.destination.one/4223752/c6d99c6be936634ca820ee5c2f3c2fe110db331345efae9e5edf5e6b2400ae23/zusammenschnitt-papaya-topola-und-peanuts.png",
+     "type": "image/png",
+     "source": "Reinhard Röhrs, Fred Heitmann",
+     "latitude": null,
+     "longitude": null,
+     "license": "CC-BY-SA",
+     "width": 1279,
+     "height": 720,
+     "alt": "Zusammenschnitt Papaya Topola und Peanuts",
+     "id": "m_4223752",
+     "value": "Zusammenschnitt Papaya Topola und Peanuts"
+    }
+   ],
+   "keywords": [],
+   "timeIntervals": [
+    {
+     "weekdays": [],
+     "start": "2026-11-07T20:00:00+01:00",
+     "end": "2026-11-07T21:30:00+01:00",
+     "tz": "Europe/Berlin"
+    }
+   ],
+   "kitchenTimeIntervals": [],
+   "deliveryTimeIntervals": [],
+   "numbers": [
+    {
+     "type": "OBJECT_PARKING_ANZAHL",
+     "value": 30
+    },
+    {
+     "type": "PRICE_ADULT",
+     "value": 23
+    },
+    {
+     "type": "PRICE_REDUCED",
+     "value": 17
+    }
+   ],
+   "name": "Theater Metronom",
+   "attributes": [
+    {
+     "key": "license",
+     "value": "CC-BY"
+    },
+    {
+     "key": "licenseurl",
+     "value": "https://creativecommons.org/licenses/by/4.0/deed.de"
+    },
+    {
+     "key": "Currency",
+     "value": "EUR"
+    },
+    {
+     "key": "VO_Id",
+     "value": "100104744"
+    },
+    {
+     "key": "VO_CategoryName",
+     "value": "POI"
+    },
+    {
+     "key": "VA_Id",
+     "value": "327537"
+    },
+    {
+     "key": "VA_CategoryName",
+     "value": "Adresse"
+    },
+    {
+     "key": "interval_first_match_start",
+     "value": "2026-11-07T20:00:00+01"
+    },
+    {
+     "key": "interval_first_match_end",
+     "value": "2026-11-07T21:30:00+01"
+    },
+    {
+     "key": "interval_match_count",
+     "value": "1"
+    }
+   ],
+   "features": [
+    "Zielgruppe Erwachsene",
+    "für Individualgäste",
+    "Deutsch",
+    "Barzahlung vor Ort",
+    "Überweisung"
+   ],
+   "addresses": [
+    {
+     "name": "Theater Metronom Karin Schröder",
+     "city": "Visselhövede",
+     "zip": "27374",
+     "street": "Hütthof 1",
+     "phone": "042621351",
+     "web": "http://theater-metronom.de/",
+     "email": "info@theater-metronom.de",
+     "rel": "author"
+    },
+    {
+     "name": "Lüneburger Heide GmbH",
+     "web": "https://www.lueneburger-heide.de/",
+     "email": "info@lueneburger-heide.de",
+     "rel": "organisation"
+    },
+    {
+     "name": "Stadt Visselhövede",
+     "web": "",
+     "email": "",
+     "rel": "copyright"
+    },
+    {
+     "name": "Theater Metronom",
+     "city": "Visselhövede",
+     "zip": "27374",
+     "street": "Hütthof 1",
+     "phone": "042621351",
+     "web": "http://theater-metronom.de/",
+     "email": "info@theater-metronom.de",
+     "rel": "organizer"
+    }
+   ],
+   "created": "2026-09-08T08:11:00+02:00",
+   "changed": "2026-10-22T09:06:00+02:00",
+   "source": {
+    "url": "http://destination.one/",
+    "value": "destination.one"
+   },
+   "company": "",
+   "district": "",
+   "postoffice": "",
+   "phone2": "",
+   "timeIntervalExceptions": [],
+   "occurrences": [],
+   "seasons": [],
+   "subitems": [],
+   "hyperObjects": []
+  }
+ ]
+}

@@ -25,8 +25,13 @@ import { Open2cDeScraper } from './Open2cDeScraper';
 import { ActiveCityDeScraper } from './ActiveCityDeScraper';
 import { VerwaltungsportalDeScraper } from './VerwaltungsportalDeScraper';
 import { AmtVgDeScraper } from './AmtVgDeScraper';
+import { DesklineDeScraper } from './DesklineDeScraper';
+import { DestinationOneDeScraper } from './DestinationOneDeScraper';
+import { LkrgDeScraper } from './LkrgDeScraper';
+import { RegiogateDeScraper } from './RegiogateDeScraper';
+import { GeocmsDeScraper } from './GeocmsDeScraper';
 
-export const DE_SCRAPERS: BaseScraper[] = [new IonasDeScraper(), new NolisDeScraper(), new TribeDeScraper(), new EventsManagerDeScraper(), new MecDeScraper(), new DpCalendarDeScraper(), new JEventsDeScraper(), new ICagendaDeScraper(), new HwDeScraper(), new IkissDeScraper(), new KommOneDeScraper(), new CommuniceDeScraper(), new CeasyDeScraper(), new WeblicationDeScraper(), new Typo3DeScraper(), new AllgemeinDeScraper(), new DigipublicaDeScraper(), new Open2cDeScraper(), new ActiveCityDeScraper(), new VerwaltungsportalDeScraper()];
+export const DE_SCRAPERS: BaseScraper[] = [new IonasDeScraper(), new NolisDeScraper(), new TribeDeScraper(), new EventsManagerDeScraper(), new MecDeScraper(), new DpCalendarDeScraper(), new JEventsDeScraper(), new ICagendaDeScraper(), new HwDeScraper(), new IkissDeScraper(), new KommOneDeScraper(), new CommuniceDeScraper(), new CeasyDeScraper(), new WeblicationDeScraper(), new Typo3DeScraper(), new AllgemeinDeScraper(), new DigipublicaDeScraper(), new Open2cDeScraper(), new ActiveCityDeScraper(), new VerwaltungsportalDeScraper(), new DesklineDeScraper(), new DestinationOneDeScraper(), new LkrgDeScraper(), new RegiogateDeScraper(), new GeocmsDeScraper()];
 
 /** Nur Prüfstand: Sichten auf die Adapter oben, nie im Nachtlauf (fn-29.17). */
 export const DE_PRUEFSTAND_SCRAPERS: BaseScraper[] = [new AmtVgDeScraper()];
