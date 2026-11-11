@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { ALL_POSTS } from '@/content/blog';
 import { factSourceErrors, factSourceUrls, hasConcreteDate } from '@/lib/blog/fact-sources';
 import type { FestivalPost } from '@/content/blog/types';
+import { useRealClock } from '@/test/clock';
 
 /**
  * Wächter: Jeder Blogpost mit Termin nennt die Quellen seiner Fakten und den
@@ -26,11 +27,18 @@ const OHNE_BELEGE = new Set<string>([
   'herbstfeste-erntedank-oesterreich',
 ]);
 
-// Einen Tag Spielraum: geprüft nach Wiener Datum, gemessen in UTC.
-const TOMORROW = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+// Einen Tag Spielraum: geprüft nach Wiener Datum, gemessen in UTC. Nach der
+// ECHTEN Uhr, nicht der Testuhr: der Autowriter schreibt checkedAt mit dem
+// Tag seines Laufs, und ab dem 07.11.2026 lag jeder neue Post in der
+// Zukunft der Testuhr (TEST_NOW 05.11.) und stoppte jedes Deploy.
+const tomorrow = (): string => {
+  useRealClock();
+  return new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+};
 
 describe('Blogposts belegen ihre Fakten (factSources)', () => {
   it('jeder Post mit Termin trägt Quellen und Prüfdatum', () => {
+    const TOMORROW = tomorrow();
     const failures = ALL_POSTS
       .filter((p) => hasConcreteDate(p) && !OHNE_BELEGE.has(p.slug))
       .flatMap((p) => factSourceErrors(p, TOMORROW).map((e) => `${p.slug}: ${e}`));
@@ -48,6 +56,7 @@ describe('Blogposts belegen ihre Fakten (factSources)', () => {
   });
 
   it('eingetragene Belege sind auch bei Posts ohne Termin gültig', () => {
+    const TOMORROW = tomorrow();
     const failures = ALL_POSTS
       .filter((p) => p.factSources)
       .flatMap((p) => factSourceErrors(p, TOMORROW).map((e) => `${p.slug}: ${e}`));

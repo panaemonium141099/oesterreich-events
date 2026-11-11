@@ -240,6 +240,15 @@ import { post as dieZauberfloeteKinderoperInDerKrypta2026 } from './posts/die-za
 import { post as diagonale2027 } from './posts/diagonale-2027';
 import { post as kernoelamazonenKugelKeksKabarettComedyFestival20262026 } from './posts/kernoelamazonen-kugel-keks-kabarett-comedy-festival-2026-2026';
 import { post as post52GalakonzertOriginalTirolerKaiserjaegermusik2026 } from './posts/52-galakonzert-original-tiroler-kaiserjaegermusik-2026';
+import { post as neujahrskonzert2027ErwinSteinhauerOoeConcertSchrammeln2027 } from './posts/neujahrskonzert-2027-erwin-steinhauer-ooe-concert-schrammeln-2027';
+import { post as xzibitKingmakerEuropeanTourPt22026 } from './posts/xzibit-kingmaker-european-tour-pt-2-2026';
+import { post as salamMusicArtsFestival2027 } from './posts/salam-music-arts-festival-2027';
+import { post as benefizkonzertImAdvent2026 } from './posts/benefizkonzert-im-advent-2026';
+import { post as konzertWinterwonderlandBigbandKoeflach2026 } from './posts/konzert-winterwonderland-bigband-koeflach-2026';
+import { post as luisAusSuedtirolPfiatiDieAbschiedstour2026 } from './posts/luis-aus-suedtirol-pfiati-die-abschiedstour-2026';
+import { post as linzMammaMiaPartyKonzert2026 } from './posts/linz-mamma-mia-party-konzert-2026';
+import { post as vorweihnachtlichesKlavierkonzertMitMarioEritreo2026 } from './posts/vorweihnachtliches-klavierkonzert-mit-mario-eritreo-2026';
+import { post as zuendstoffLive2026 } from './posts/zuendstoff-live-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -492,6 +501,15 @@ export const ALL_POSTS: FestivalPost[] = [
   diagonale2027,
   kernoelamazonenKugelKeksKabarettComedyFestival20262026,
   post52GalakonzertOriginalTirolerKaiserjaegermusik2026,
+  neujahrskonzert2027ErwinSteinhauerOoeConcertSchrammeln2027,
+  xzibitKingmakerEuropeanTourPt22026,
+  salamMusicArtsFestival2027,
+  benefizkonzertImAdvent2026,
+  konzertWinterwonderlandBigbandKoeflach2026,
+  luisAusSuedtirolPfiatiDieAbschiedstour2026,
+  linzMammaMiaPartyKonzert2026,
+  vorweihnachtlichesKlavierkonzertMitMarioEritreo2026,
+  zuendstoffLive2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()

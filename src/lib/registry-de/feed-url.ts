@@ -134,6 +134,8 @@ export function calendarPageCandidates(integration: string, origin: string): str
  * (pruem.de: Startseite, Kalender unter /tourismus-freizeit/veranstaltungen/).
  * Nur Kandidaten, der Feed zählt erst nach dem Abruf.
  */
+const NO_CALENDAR_PATH = /:translation|abfall|m(?:ü|ue|%c3%bc)ll|\/feed\b|\/rss\b|archiv|terminvergabe|terminbuchung|terminreservierung/i;
+
 export function calendarLinks(html: string, pageUrl: string, max = 3): string[] {
   const host = new URL(pageUrl).host;
   const here = pageUrl.replace(/[#?].*$/, '').replace(/\/$/, '');
@@ -141,7 +143,7 @@ export function calendarLinks(html: string, pageUrl: string, max = 3): string[] 
     .map(u => u.replace(/#.*$/, ''))
     .filter(u => {
       const x = new URL(u);
-      return x.host === host && !x.search && !/\.(pdf|ics|xml|json|docx?|jpe?g|png)$/i.test(x.pathname) && !x.pathname.includes(':translation') && u.replace(/\/$/, '') !== here;
+      return x.host === host && !x.search && !/\.(pdf|ics|xml|json|docx?|jpe?g|png)$/i.test(x.pathname) && !NO_CALENDAR_PATH.test(x.pathname) && u.replace(/\/$/, '') !== here;
     });
   return [...new Set(links)].sort((a, b) => a.length - b.length || a.localeCompare(b)).slice(0, max);
 }

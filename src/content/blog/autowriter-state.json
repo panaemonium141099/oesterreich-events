@@ -815,6 +815,54 @@
       "slug": "52-galakonzert-original-tiroler-kaiserjaegermusik-2026",
       "title": "52. Galakonzert - Original Tiroler Kaiserjägermusik",
       "writtenAt": "2026-11-07T00:56:13.101Z"
+    },
+    {
+      "eventId": "65acce18-7bfe-43b7-a617-cb4648e050d4",
+      "slug": "neujahrskonzert-2027-erwin-steinhauer-ooe-concert-schrammeln-2027",
+      "title": "Neujahrskonzert 2027 - Erwin Steinhauer & OÖ. Concert-Schrammeln",
+      "writtenAt": "2026-11-08T00:28:22.405Z"
+    },
+    {
+      "eventId": "75cdf209-29d9-4d0a-a2c0-2150f51ce4f1",
+      "slug": "xzibit-kingmaker-european-tour-pt-2-2026",
+      "title": "Xzibit - Kingmaker European Tour PT.2",
+      "writtenAt": "2026-11-08T00:30:35.694Z"
+    },
+    {
+      "eventId": "3131f3de-ee92-49a7-bcf7-781a61a36147",
+      "slug": "benefizkonzert-im-advent-2026",
+      "title": "Benefizkonzert im Advent",
+      "writtenAt": "2026-11-09T00:47:10.023Z"
+    },
+    {
+      "eventId": "201659e3-9598-4e38-8099-2b093cf5a666",
+      "slug": "konzert-winterwonderland-bigband-koeflach-2026",
+      "title": "Konzert Winterwonderland - Bigband Köflach",
+      "writtenAt": "2026-11-09T00:48:26.955Z"
+    },
+    {
+      "eventId": "4e364437-63c3-4196-b3dc-0106ce8e6e38",
+      "slug": "luis-aus-suedtirol-pfiati-die-abschiedstour-2026",
+      "title": "Luis aus Südtirol - Pfiati - Die Abschiedstour",
+      "writtenAt": "2026-11-10T03:28:02.061Z"
+    },
+    {
+      "eventId": "a5df9dcc-c1f5-4375-81cd-9404b65e4c7e",
+      "slug": "linz-mamma-mia-party-konzert-2026",
+      "title": "Linz - Mamma Mia Party / Konzert",
+      "writtenAt": "2026-11-10T03:31:33.375Z"
+    },
+    {
+      "eventId": "fa2b5746-14fb-4ab3-94d7-a1722ed01de9",
+      "slug": "vorweihnachtliches-klavierkonzert-mit-mario-eritreo-2026",
+      "title": "Vorweihnachtliches Klavierkonzert - Mit Mario Eritreo",
+      "writtenAt": "2026-11-11T01:13:50.948Z"
+    },
+    {
+      "eventId": "17baa346-8a36-4827-b283-40015e6edd4b",
+      "slug": "zuendstoff-live-2026",
+      "title": "Zündstoff LIVE",
+      "writtenAt": "2026-11-11T01:15:03.353Z"
     }
   ],
   "stayGuides": [
@@ -853,6 +901,7 @@
     "osterfestspiele-salzburg:2027-03-20",
     "guitar-festival-rust:2027-03-21",
     "full-metal-mountain:2027-03-29",
-    "diagonale:2027-04-07"
+    "diagonale:2027-04-07",
+    "salam-music:2027-04-09"
   ]
 }

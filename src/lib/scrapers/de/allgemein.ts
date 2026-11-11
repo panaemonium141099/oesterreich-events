@@ -269,12 +269,20 @@ function rowTitle($: cheerio.CheerioAPI, $r: $El): { title: string; node: $El } 
     }
   }
   const named: { title: string; node: $El }[] = [];
+  // Datumszelle mit eigenem Text („Sonntag, 18.04.2027 Tag der Vereine Ort: Bogenbinderhalle"
+  // neben „Vereine der Stadt Ronneburg"): welches der Name ist, sagt die Zeile nicht.
+  let dateCellText = false;
   cells.each((i, c) => {
-    if (findDateExprs($(c).text()).length > 0) return;
+    const exprs = findDateExprs($(c).text());
+    if (exprs.length > 0) {
+      const rest = squash($(c).text()).replace(/\d{1,2}[.:]\d{0,2}[.:]?\d{0,4}|\b(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|mo|di|mi|do|fr|sa|so|uhr|von|bis|ab|am|um|januar|februar|märz|april|mai|juni|juli|august|september|oktober|november|dezember)\b\.?/gi, ' ');
+      if ((rest.match(/\p{L}{3,}/gu) ?? []).length >= 2) dateCellText = true;
+      return;
+    }
     const t = cellTitle(cells.eq(i));
     if (t) named.push({ title: t, node: cells.eq(i) });
   });
-  return named.length === 1 ? named[0] : null;
+  return named.length === 1 && !dateCellText ? named[0] : null;
 }
 
 /**

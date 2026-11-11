@@ -9,10 +9,11 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { resetHostGate } from '@/lib/scrapers/de/host-gate';
 import { parseAllgemeinPage, recordTime, allgemeinSourceId, type AllgemeinTermin } from '@/lib/scrapers/de/allgemein';
 import { findDateExprs } from '@/lib/scrapers/de/datum';
-import { AllgemeinDeScraper, allgemeinGroups, isStartseite } from '@/lib/scrapers/de/AllgemeinDeScraper';
+import { AllgemeinDeScraper, allgemeinGroups, allgemeinSeite, isStartseite, istKalender } from '@/lib/scrapers/de/AllgemeinDeScraper';
 import { toSupabaseRow } from '@/lib/db/supabase-sync';
 import { loadRegistryDe, type FeedGroup } from '@/lib/registry-de/load';
 
@@ -165,7 +166,7 @@ describe('Ort und Gemeinde-Dienst', () => {
     expect(r.publish_status).not.toMatch(/^published/);
   });
 
-  it('Amt am Stettiner Haff: Amtskalender, Termin ohne genannte Gemeinde nicht öffentlich mit Ort', () => {
+  it('Amt am Stettiner Haff: Amtskalender, der Titel nennt die Gemeinde, nicht die Kalender-Gemeinde', () => {
     const { url } = page('stettiner-haff');
     const g = groupFor(url);
     // Registry: Hintersee führt die Seite; die übrigen Amtsgemeinden teilen die Website.
@@ -173,8 +174,8 @@ describe('Ort und Gemeinde-Dienst', () => {
     expect(g.viaVerband.length).toBeGreaterThan(1);
     const t = byTitle(termine('stettiner-haff'), 'Halloween-Party, Eggesin');
     const r = row(t, url);
-    expect(r.location_resolution.gemeinde?.name).not.toBe('Hintersee');
-    expect(r.latitude == null || r.publish_status !== 'published').toBe(true);
+    expect(r.location_resolution.gemeinde?.name).toBe('Eggesin');
+    expect((r.location_resolution as unknown as { allowed: { pin: boolean } }).allowed.pin).toBe(false);
   });
 });
 
@@ -275,19 +276,38 @@ describe('Titel aus Links', () => {
 });
 
 describe('Registry und Identität', () => {
-  it('Startseiten liest der Adapter nicht', () => {
+  it('Startseiten erkennt der Adapter', () => {
     expect(isStartseite('https://www.havelberg.de/')).toBe(true);
     expect(isStartseite('https://www.amteider.de/index.php')).toBe(true);
     expect(isStartseite('https://www.kellinghusen.de/veranstaltungen')).toBe(false);
-    const urls = new Set(allgemeinGroups().map(g => g.feedUrl));
-    expect(urls.has('https://www.havelberg.de/')).toBe(false);
   });
 
-  it('jede Kalenderseite der Stufen D und E (außer Startseiten) steht in genau einer Gruppe', () => {
+  it('jeder Eintrag, den kein Hersteller-Adapter lesen kann, steht in genau einer Gruppe', () => {
     const groups = allgemeinGroups();
-    const expected = loadRegistryDe().filter(e => ['jsonld', 'html_generic', 'js_oder_feed'].includes(e.integration) && e.url && !isStartseite(e.url));
     const own = groups.flatMap(g => g.own);
-    expect(own.length).toBe(expected.length);
+    expect(new Set(own.map(e => e.ags)).size).toBe(own.length);
+    // Eigene Integrationen vollständig; Aufgefangene, soweit kein Hersteller-Adapter die Website liest.
+    const eigene = loadRegistryDe().filter(e => ['jsonld', 'html_generic', 'js_oder_feed'].includes(e.integration) && (e.url || e.host));
+    expect(own.filter(e => ['jsonld', 'html_generic', 'js_oder_feed'].includes(e.integration)).length).toBe(eigene.length);
+  });
+
+  it('Auffang nie auf einer Website, die ein Hersteller-Adapter liest (Shards)', () => {
+    const e = (ags: string, integration: string, url: string | null, feed_url?: string) => ({ ags, name: ags, land: 'bayern', host: 'a.de', stufe: 'A' as const, integration, url, ...(feed_url ? { feed_url } : {}), checked_at: '2026-11-06' });
+    const groups = allgemeinGroups([e('1', 'ionas', 'https://a.de/kalender/', 'https://a.de/kalender/events.json'), e('2', 'ionas', 'https://a.de/termine/'), { ...e('3', 'ionas', 'https://b.de/termine/'), host: 'b.de' }]);
+    expect(groups.map(g => g.feedUrl)).toEqual(['https://b.de/termine/']);
+  });
+
+  it('auffangen nur, was der Hersteller-Adapter nicht liest; Lizenzquellen nie', () => {
+    expect(allgemeinSeite('ionas', 'https://a.de/k', 'https://a.de/k/events.json', 'a.de')).toBeNull();
+    expect(allgemeinSeite('dpcalendar', 'https://a.de/k', undefined, 'a.de')).toBeNull();
+    expect(allgemeinSeite('ionas', 'https://a.de/k', undefined, 'a.de')).toBe('https://a.de/k');
+    expect(allgemeinSeite('tribe', null, undefined, 'www.a.de')).toBe('https://www.a.de/');
+    expect(allgemeinSeite('txnews', 'https://a.de/k', undefined, 'a.de')).toBeNull();
+    expect(allgemeinSeite('txnews', null, undefined, 'a.de')).toBe('https://www.a.de/');
+    expect(allgemeinSeite('html_generic', null, undefined, 'a.de')).toBe('https://www.a.de/');
+    for (const lizenz of ['nolis', 'heimatinfo', 'cross7', 'toubiz', 'meinort', 'fehler', 'kein_link']) {
+      expect(allgemeinSeite(lizenz, 'https://a.de/k', undefined, 'a.de'), lizenz).toBeNull();
+    }
   });
 
   it('source_id aus Detailseite und Tag, ohne Titeltext; stabil', () => {
@@ -295,5 +315,66 @@ describe('Registry und Identität', () => {
     const id = allgemeinSourceId(t);
     expect(id).toMatch(/^allg-kellinghusen\.de-[0-9a-f]{16}-2026-10-31$/);
     expect(allgemeinSourceId(byTitle(termine('kellinghusen'), 'Halloween im Museum - Der letzte Ton'))).toBe(id);
+  });
+});
+
+describe('Startseite und Seite ohne Termine: Kalenderlinks', () => {
+  const liste = `<ul>${[1, 2, 3].map(n => `<li><time datetime="2027-0${n}-01">01.0${n}.2027</time> <h3><a href="/t/${n}">Fest ${n}</a></h3></li>`).join('')}</ul>`;
+  const seite = (body: string) => new Response(`<html><body>${body}</body></html>`, { headers: { 'content-type': 'text/html' } });
+  const group = (url: string): FeedGroup => ({ feedUrl: url, pageUrl: url, own: [], viaVerband: [] });
+  class Lauf extends AllgemeinDeScraper {
+    protected delayMs = 0;
+    constructor(private readonly groupsForTest: FeedGroup[]) { super(); }
+    protected pickGroups() { return this.groupsForTest; }
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    resetHostGate();
+  });
+
+  it('Termine auf der Startseite zählen nicht, die verlinkte Kalenderseite schon', async () => {
+    const calls: string[] = [];
+    vi.stubGlobal('fetch', vi.fn(async (input: string | URL) => {
+      const u = String(input);
+      calls.push(u);
+      if (u.endsWith('/robots.txt')) return new Response('', { status: 404 });
+      if (u === 'https://a.example/') return seite(`${liste}<a href="/aktuelles/veranstaltungen/">Veranstaltungen</a><a href="/abfallkalender/">Abfall</a>`);
+      if (u === 'https://a.example/aktuelles/veranstaltungen/') return seite(liste);
+      return new Response('', { status: 404 });
+    }));
+    const s = new Lauf([group('https://a.example/')]);
+    const events = await s.scrape();
+    expect(events.length).toBe(3);
+    expect(calls.some(u => u.includes('abfall'))).toBe(false);
+    expect(s.kalenderBericht()[0]).toMatchObject({ ergebnis: 'gelesen', termine: 3 });
+  });
+
+  it('verlinkte Seite mit einem einzelnen Listentreffer ist ein Artikel, kein Kalender', () => {
+    expect(istKalender([{ strategie: 'liste' }])).toBe(false);
+    expect(istKalender([{ strategie: 'liste' }, { strategie: 'liste' }])).toBe(true);
+    expect(istKalender([{ strategie: 'jsonld' }])).toBe(true);
+    expect(istKalender([])).toBe(false);
+  });
+
+  it('Tabellenzeile: Datumszelle mit eigenem Text neben einer Textzelle ergibt keinen Titel (Ronneburg)', () => {
+    const html = `<table><tr><td>Vereine der Stadt Ronneburg</td><td>Sonntag, 18.04.2027<br/>Tag der Vereine<br/>Ort: Bogenbinderhalle</td></tr><tr><td>Feuerwehr</td><td>Samstag, 24.04.2027<br/>Maibaum stellen<br/>Ort: Markt</td></tr></table>`;
+    expect(parseAllgemeinPage(html, 'https://ronneburg.example/v', '').map(t => t.title)).not.toContain('Vereine der Stadt Ronneburg');
+    const klar = `<table><tr><td>Sa, 24.04.2027, 14 Uhr</td><td>Maibaum stellen</td></tr><tr><td>Sonntag, 25.04.2027 ab 10 Uhr</td><td>Frühschoppen</td></tr></table>`;
+    expect(parseAllgemeinPage(klar, 'https://b.example/v', '').map(t => t.title).sort()).toEqual(['Frühschoppen', 'Maibaum stellen']);
+  });
+
+  it('Seite mit Terminen: kein weiterer Abruf', async () => {
+    const calls: string[] = [];
+    vi.stubGlobal('fetch', vi.fn(async (input: string | URL) => {
+      const u = String(input);
+      calls.push(u);
+      if (u.endsWith('/robots.txt')) return new Response('', { status: 404 });
+      if (u === 'https://b.example/termine') return seite(`${liste}<a href="/veranstaltungen/">mehr</a>`);
+      return new Response('', { status: 404 });
+    }));
+    const events = await new Lauf([group('https://b.example/termine')]).scrape();
+    expect(events.length).toBe(3);
+    expect(calls.filter(u => u.includes('/veranstaltungen/'))).toEqual([]);
   });
 });
