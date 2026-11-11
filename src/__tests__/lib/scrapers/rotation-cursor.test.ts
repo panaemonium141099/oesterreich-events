@@ -37,6 +37,15 @@ import { BaseScraper } from '@/lib/scrapers/BaseScraper';
 import {
   GemeindeRegistryScraper, isScrapeableEntry, loadRegistryEntries, registryCursorKey,
 } from '@/lib/scrapers/GemeindeRegistryScraper';
+import { Gem2GoScraper } from '@/lib/scrapers/Gem2GoScraper';
+import { GemeindeListScraper } from '@/lib/scrapers/GemeindeListScraper';
+import { GenericGemeindeScraper, genericPageCursorKey } from '@/lib/scrapers/GenericGemeindeScraper';
+import { GEM2GO_GEMEINDEN_LISTE } from '@/lib/scrapers/gemeinden/gem2goGemeinden';
+import { GEMEINDEN } from '@/lib/scrapers/gemeinden/gemeindeList';
+import { withStammdaten } from '@/lib/scrapers/gemeinden/stammdaten';
+import { gemeindeCursorKey } from '@/lib/scrapers/rotation-cursor';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { ScrapedEvent } from '@/types/events';
 
 const keys = (n: number) => Array.from({ length: n }, (_, i) => `k${String(i).padStart(4, '0')}`);
@@ -178,6 +187,83 @@ describe('gemeinde-registry', () => {
     await scraper.scrape();
     expect(spy.mock.calls.length).toBeGreaterThan(0);
     expect(scraper.reachedCursor).toBeNull();
+  });
+});
+
+/**
+ * Nächte eines Aggregators mit gemessener Reichweite: `step` stubbt den
+ * Abruf je Eintrag und rückt die Uhr um `secondsPerEntry` vor.
+ */
+async function nights(
+  scraper: BaseScraper,
+  count: number,
+  secondsPerEntry: number,
+  step: (scraper: BaseScraper, onEntry: (key: string) => void) => void,
+): Promise<{ reached: Set<string>; perNight: number[] }> {
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.spyOn(console, 'log').mockImplementation(() => {});
+  vi.spyOn(scraper as unknown as { sleep: () => Promise<void> }, 'sleep').mockResolvedValue();
+  const reached = new Set<string>();
+  step(scraper, (key) => {
+    reached.add(key);
+    vi.setSystemTime(Date.now() + secondsPerEntry * 1000);
+  });
+  const perNight: number[] = [];
+  try {
+    for (let n = 0; n < count; n++) {
+      const before = reached.size;
+      scraper.rotationCursor = scraper.reachedCursor;
+      await scraper.scrape();
+      perNight.push(reached.size - before);
+    }
+  } finally {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  }
+  return { reached, perNight };
+}
+
+describe('gem2go, gemeinden, gemeinden-generic', () => {
+  const gem2go = withStammdaten(GEM2GO_GEMEINDEN_LISTE).filter(g => g.website !== 'https://none');
+  const liste = withStammdaten(GEMEINDEN).filter(g => g.website !== 'https://none');
+  const pages = (JSON.parse(readFileSync(join(process.cwd(), 'data', 'gemeinden-event-pages.json'), 'utf8')) as Array<{ gemeinde: { name: string; bundesland: string; idKey: string }; eventPageUrl: string }>)
+    .flatMap(p => { const [g] = withStammdaten([p.gemeinde]); return g ? [{ ...p, gemeinde: g }] : []; });
+
+  it('Schlüssel von gem2go und gemeinden sind eindeutig', () => {
+    for (const list of [gem2go, liste]) {
+      const k = list.map(gemeindeCursorKey);
+      expect(k.filter((x, i) => k.indexOf(x) !== i)).toEqual([]);
+    }
+  });
+
+  it('gem2go (1.218 je Nacht laut Prod) erreicht jede Gemeinde in zwei Nächten', async () => {
+    const scraper = new Gem2GoScraper();
+    const { reached, perNight } = await nights(scraper, 2, (240 * 60) / 1218, (s, onEntry) => {
+      vi.spyOn(s as unknown as { fetchWithTimeout: () => Promise<string | null> }, 'fetchWithTimeout').mockResolvedValue(null);
+      vi.spyOn(s as unknown as { tryFallbackDiscovery: (g: { gkz: string; listName: string }) => Promise<ScrapedEvent[]> }, 'tryFallbackDiscovery')
+        .mockImplementation(async (g) => { onEntry(gemeindeCursorKey(g)); return []; });
+    });
+    expect(perNight[0]).toBeGreaterThan(1100);
+    expect(reached.size).toBe(gem2go.length);
+  });
+
+  it('gemeinden setzt über den Zweig ohne Kalender (continue) hinweg fort', async () => {
+    const scraper = new GemeindeListScraper();
+    const { reached } = await nights(scraper, 2, 60, (s, onEntry) => {
+      vi.spyOn(s as unknown as { findCalendarUrl: (g: { gkz: string; listName: string }) => Promise<string | null> }, 'findCalendarUrl')
+        .mockImplementation(async (g) => { onEntry(gemeindeCursorKey(g)); return null; });
+    });
+    expect(reached.size).toBe(liste.length);
+  });
+
+  it('gemeinden-generic erreicht jede Seite in zwei Nächten', async () => {
+    const scraper = new GenericGemeindeScraper();
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const { reached } = await nights(scraper, 2, (240 * 60) / 600, (s, onEntry) => {
+      vi.spyOn(s as unknown as { scrapeGemeinde: (p: (typeof pages)[number]) => Promise<ScrapedEvent[]> }, 'scrapeGemeinde')
+        .mockImplementation(async (p) => { onEntry(genericPageCursorKey(p)); return []; });
+    });
+    expect(reached.size).toBe(new Set(pages.map(genericPageCursorKey)).size);
   });
 });
 

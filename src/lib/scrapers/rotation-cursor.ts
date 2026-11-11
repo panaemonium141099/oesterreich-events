@@ -21,6 +21,16 @@
  * nie sein Index, und müssen in der Liste eindeutig sein.
  */
 
+/**
+ * Schlüssel einer Gemeinde aus einer Scraper-Liste: Kennziffer und
+ * Listenname. Die Kennziffer allein ist nicht eindeutig, fusionierte
+ * Gemeinden führen eigene Einträge unter derselben Kennziffer (Matrei am
+ * Brenner, Mühlbachl, Pfons).
+ */
+export function gemeindeCursorKey(g: { gkz: string; listName: string }): string {
+  return `${g.gkz} ${g.listName}`;
+}
+
 /** Reihenfolge nach Code-Einheiten, unabhängig von der Locale des Runners. */
 function compareKeys(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;

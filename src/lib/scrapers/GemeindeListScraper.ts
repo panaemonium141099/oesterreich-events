@@ -6,6 +6,7 @@ import { GEMEINDEN as GEMEINDEN_LISTE } from './gemeinden/gemeindeList';
 import { withStammdaten } from './gemeinden/stammdaten';
 
 import type { ScrapedEvent } from '@/types/events';
+import { gemeindeCursorKey } from './rotation-cursor';
 import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
 import { isEventType } from '../connectors/json-ld-connector';
 import { eventNameNodes, firstText, isNamelessTitle, isTitleCandidate, visibleText } from './event-title';
@@ -29,6 +30,7 @@ type GemeindeInfo = ReturnType<typeof gemeindenListe>[number];
  */
 export class GemeindeListScraper extends BaseScraper {
   readonly name = 'gemeinden';
+  override readonly resumesSourceList = true;
 
   /** Timeout pro einzelner URL-Probe in ms */
   private readonly probeTimeoutMs = 5000;
@@ -69,16 +71,21 @@ export class GemeindeListScraper extends BaseScraper {
 
     // Vierter Kommunal-Aggregator mit demselben Alles-oder-Nichts-Problem
     // wie gem2go & Co (Telemetrie 2026-07-15: Timeout nach 25 min, Daten
-    // verworfen) → Soft-Budget + Tagesrotation, s. BaseScraper.
+    // verworfen) → Soft-Budget mit Teilergebnis, der nächste Lauf setzt
+    // nach der zuletzt bearbeiteten Gemeinde fort (BaseScraper.resumeAfterCursor).
+    // Prod 2026-10 schafft die 251 Gemeinden in 33 bis 45 min.
     const deadline = this.softDeadline();
-    const rotated = this.rotateDaily(gemeindenListe().filter(g => g.website !== 'https://none'));
+    const rotated = this.resumeAfterCursor(gemeindenListe().filter(g => g.website !== 'https://none'), gemeindeCursorKey);
 
     for (let i = 0; i < rotated.length; i++) {
       if (Date.now() > deadline) {
-        this.log(`Soft-Budget erreicht nach ${i}/${rotated.length} Gemeinden — liefere ${allEvents.length} Events als Teilergebnis`);
+        this.log(`Soft-Budget erreicht nach ${i}/${rotated.length} Gemeinden, liefere ${allEvents.length} Events als Teilergebnis; der nächste Lauf setzt nach „${this.reachedCursor}" fort`);
         break;
       }
       const gemeinde = rotated[i];
+      // Abgebrochen wird nur zwischen zwei Gemeinden: ab hier gilt sie als
+      // bearbeitet, auch wenn der Zweig ohne Kalender mit continue weitergeht.
+      this.markReached(gemeindeCursorKey(gemeinde));
       try {
         this.log(`[${i + 1}/${gemeindenListe().length}] ${gemeinde.name} (${gemeinde.bundesland})...`);
 
