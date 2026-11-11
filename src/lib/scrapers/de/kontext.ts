@@ -38,7 +38,36 @@ const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
  */
 export function namedMember(ev: { title: string; locationName?: string }, candidates: GemeindeDe[]): GemeindeDe | null {
   const hits = namedGemeinden(ev, candidates, 'any');
-  return hits.length === 1 ? hits[0] : null;
+  if (hits.length) return hits.length === 1 ? hits[0] : null;
+  // Nennt der Ort die Verwaltung, spricht er gegen den Titel („Ausschuss der Gemeinde
+  // Egestorf“ tagt in „Samtgemeinde Hanstedt“): der Ort bleibt offen.
+  const loc = ev.locationName ?? '';
+  if (withoutVerband(loc) !== loc) return null;
+  const inTitle = titleGemeinden(ev.title, candidates);
+  return inTitle.length === 1 ? inTitle[0] : null;
+}
+
+/**
+ * Titel, die die Gemeinde an fester Stelle nennen (Stichprobe 2.736 zurückgehaltene
+ * Zeilen aus Amtskalendern, 06.11.2026): als eigener Abschnitt („Boostedt: Tanzen“,
+ * „Dorftanz, Ahlbeck“, „Witzin • Anglerheim • Skat“), nach „Gemeinde“ („Sitzung des
+ * Rates der Gemeinde Dettum“) oder am Ende („Adventsmarkt Dommitzsch“). Nicht nach
+ * „mit“ oder „von“ („Konzert mit Hans Roth“); die Verwaltung (`VERBAND_LABEL`) nennt
+ * keine Gemeinde („Ausschuss der Samtgemeinde Wesendorf“). Mitten im Titel reicht
+ * nicht: „Kirche Kropp: Kinderchor“, „SKV Königstein - Stammtisch“ sind Absender.
+ */
+function titleGemeinden(title: string, candidates: GemeindeDe[]): GemeindeDe[] {
+  const t = title.replace(VERBAND_LABEL, ' ').replace(/\s+/g, ' ').trim();
+  const parts = t.split(/\s*(?:[,•|:]|\s[-–]\s)\s*/).map(p => p.trim());
+  return candidates.filter(g => {
+    const name = g.name.split(',')[0].replace(/\s*\(.*\)\s*$/, '').trim();
+    if (name.length < 3) return false;
+    const n = escapeRe(name);
+    if (parts.includes(name)) return true;
+    if (new RegExp(String.raw`(?<![\p{L}-])(?:Gemeinde|Ortsgemeinde|Stadt|Markt)\s+${n}(?![\p{L}-])`, 'u').test(t)) return true;
+    if (new RegExp(String.raw`(?:^|\s)(?:mit|von|und|feat\.?)\s+(?:\S+\s+)?${n}$`, 'iu').test(t)) return false;
+    return new RegExp(String.raw`\s${n}$`, 'u').test(t);
+  });
 }
 
 /**

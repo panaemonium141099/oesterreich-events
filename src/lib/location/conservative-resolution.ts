@@ -317,7 +317,10 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
   }
 
   // ── Genannter Ort (Quellfeld oder Adresstext) ─────────────────────
-  const cityText = hasText(input.city) ? input.city.trim() : extractCityFromAddress(input.address, od?.plzDigits ?? 4);
+  const rawCity = hasText(input.city) ? input.city.trim() : extractCityFromAddress(input.address, od?.plzDigits ?? 4);
+  // „Stechlin OT Neuglobsow“, „Gransee, OT Dannenwalde“, „Zepelin / OT Oettelin“:
+  // die Gemeinde steht vor dem Ortsteil (deutsche Gemeinde-Kalender, Nachtlauf 06.11.2026).
+  const cityText = od?.plzDigits === 5 && rawCity ? rawCity.replace(/\s*[,/-]?\s*\b(?:OT|Ortsteil)\b\.?:?\s+.*$/i, '').trim() || rawCity : rawCity;
 
   // ── PLZ gegen genannten Ort und Bundesland ────────────────────────
   // Liegt die PLZ weder in der genannten Gemeinde noch im genannten
@@ -371,7 +374,9 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
       // amtliche Hauptgemeinde der PLZ (hauptgemeindeFuerPlz) oder das
       // deklarierte Bundesland, nie über Reihenfolge oder Nähe.
       const key = cityText ? normalizeGemeindeName(cityText) : null;
-      const byName = key ? refs.find(r => normalizeGemeindeName(r.name) === key) : undefined;
+      // Kurzform eines deutschen Namens mit Zusatz: „Dahme“ unter 15936 ist „Dahme/Mark“.
+      const withSuffix = key && od.plzDigits === 5 ? refs.filter(r => normalizeGemeindeName(r.name).startsWith(`${key} `)) : [];
+      const byName = key ? refs.find(r => normalizeGemeindeName(r.name) === key) ?? (withSuffix.length === 1 ? withSuffix[0] : undefined) : undefined;
       // Ortsteil, den die PLZ-Referenz einer Gemeinde zuordnet („Mahlow",
       // 15831 → Blankenfelde-Mahlow); vor der Hauptgemeinde, sonst landete
       // der Ortsteil in der Gemeinde mit der Amts-PLZ.

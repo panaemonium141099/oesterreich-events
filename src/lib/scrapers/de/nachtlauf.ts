@@ -69,7 +69,7 @@ const DE_SCRAPER_WEIGHTS: Readonly<Record<string, number>> = {
   'de-ikiss': 130,
   'de-communice': 40,
   'de-kommone': 30,
-  'de-allgemein': 25,
+  'de-allgemein': 45,
   'de-ionas': 25,
   'de-tribe': 25,
   'de-hwveranstaltung': 25,

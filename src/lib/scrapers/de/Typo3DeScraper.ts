@@ -11,6 +11,9 @@
  * Kontext wie bei den übrigen DE-Adaptern (`kontext.ts`). Im Nachtlauf
  * seit fn-29.18 (`nachtlauf.ts`).
  */
+import { calendarLinks } from '@/lib/registry-de/feed-url';
+import { parseAllgemeinPage } from './allgemein';
+import { isStartseite, istKalender } from './AllgemeinDeScraper';
 import { applyGemeindeContext } from '../gemeinde-context';
 import { ortsdatenFor } from '@/lib/location/ortsdaten';
 import { loadRegistryDe, type FeedGroup } from '@/lib/registry-de/load';
@@ -83,7 +86,7 @@ export function mergeSameTermin(termine: CmsTermin[]): CmsTermin[] {
   return [...out.values()];
 }
 
-export type CalendarStatus = 'contao' | 'typo3' | 'jsonld' | 'kein_kalender' | 'nicht_lesbar';
+export type CalendarStatus = 'contao' | 'typo3' | 'jsonld' | 'liste' | 'kein_kalender' | 'nicht_lesbar';
 
 export class Typo3DeScraper extends DeFeedScraper {
   readonly name = 'de-typo3';
@@ -150,6 +153,20 @@ export class Typo3DeScraper extends DeFeedScraper {
     return termine;
   }
 
+  /** Kommende Termine des allgemeinen Parsers: auf der Seite (nie auf der Startseite), sonst über ihre Kalenderlinks. */
+  private async listeOderLink(html: string, pageUrl: string): Promise<CmsTermin[]> {
+    const today = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Berlin' }).slice(0, 10);
+    const kommend = (h: string, u: string) => parseAllgemeinPage(h, u, '', u).filter(t => t.localDate >= today);
+    const direkt = isStartseite(pageUrl) ? [] : kommend(html, pageUrl);
+    if (direkt.length) return direkt;
+    for (const link of calendarLinks(html, pageUrl)) {
+      const page = await this.fetchHtmlPage(link);
+      const termine = page == null ? [] : kommend(page, link);
+      if (istKalender(termine)) return termine;
+    }
+    return [];
+  }
+
   /** Termine einer Kalenderseite und welche Vorlage sie trägt. */
   async calendar(pageUrl: string): Promise<{ status: CalendarStatus; termine: CmsTermin[] }> {
     const html = await this.fetchHtmlPage(pageUrl);
@@ -161,7 +178,10 @@ export class Typo3DeScraper extends DeFeedScraper {
     const t = parseTypo3Page(html, pageUrl);
     if (t.ext) return { status: 'typo3', termine: mergeSameTermin(await this.typo3(t)) };
     if (t.termine.length) return { status: 'jsonld', termine: mergeSameTermin(t.termine) };
-    return { status: 'kein_kalender', termine: [] };
+    // Keine Kalender-Erweiterung erkannt: Viele `txnews`-Seiten führen eine einfache
+    // Liste (renchen.de, lamerdingen.de) oder verlinken ihren Kalender (Seitenprobe 06.11.2026).
+    const liste = await this.listeOderLink(html, pageUrl);
+    return liste.length ? { status: 'liste', termine: mergeSameTermin(liste) } : { status: 'kein_kalender', termine: [] };
   }
 
   async scrape(): Promise<ScrapedEvent[]> {
