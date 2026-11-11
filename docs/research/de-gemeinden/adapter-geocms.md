@@ -21,6 +21,7 @@ Termin die Detailseite (höchstens 80 je Kalender). `source_id` =
 | Detail-Links tragen die Suchparameter der Liste | Halberstadt `…/siegfried-07-11-2026.html?min_date=…&btp_event[…]=10` | Quelle ohne Query, sonst wechselt die `source_url` mit der Listenseite |
 | Hoster drosseln Detailseiten | Köthen: nach rund 20 Abrufen `fetch failed`, direkt per curl 200 in 1,1 s; ebenso Zerbst, Nebra, Weida-Land | Nach drei Fehlern in Folge keine weiteren Detailseiten, der Rest kommt mit Datum, Uhrzeit und Ort aus der Liste (8 Kalender im Prüfstand) |
 | Keine Termine | 11 Seiten (Kirchheimbolanden, Laatzen, Wethautal, Tangermünde, …): Seite ohne Terminliste oder leer im Fenster | „keine Termine" im Log |
+| destination.one-Seite unter GeoCMS | Balgstädt, Gleina, Goseck (eigene Seite) und Freyburg, Karsdorf (über die VG): Kalender `pages.et4.de/de/saale-unstrut-tourismus/…`, eine öffentliche Experience mit 393 Terminen (11.11.2026) | liest `de-destinationone`, `de-geocms` lässt die Seite aus (`readsPage`); im Abdeckungsbericht stehen die fünf weiter unter GeoCMS, deren Termine zählen dort nicht |
 | Seite fehlt | Muldestausee `veranstaltungskalender.html` HTTP 404, auch ohne Parameter | Kalender zählt als Fehler |
 
 ## Ergebnis (2026-11-11)
@@ -42,6 +43,13 @@ Stichprobe (30 öffentliche Zeilen) gegen die Quellseite: 15 live gegen die Deta
 Prüfstand-Cache geprüft (5 Detailseiten, 10 Listeneinträge). 30 von 30 Titel, Tag und
 Uhrzeit korrekt (Köthen „Berufs- und Gewerbemesse": Liste „Samstag 13. März 2027, von
 10:00 Uhr bis 17:00 Uhr", Zeile 13.03.2027 10:00).
+
+## Nachtlauf
+
+Gewicht 130 (gut zwei Stunden im Prüfstand). Die Shard-Aufteilung legt höchstens zehn
+Adapter in einen Shard (`DE_MAX_ADAPTERS_PER_SHARD`, so viele startet ein Shard
+gleichzeitig) und zählt nur Seiten, die ein Adapter liest; vorher verband
+`pages.et4.de` GeoCMS mit der großen Gruppe in Shard 0 (11 Adapter).
 
 ## Offen
 

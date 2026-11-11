@@ -54,6 +54,12 @@ Uhrzeit der Zeile („Di., 10 Nov. 07:00 - 13:00" bzw. Liste „Termine"); Baltr
 „Beginn des Schatzkofferspiels" (22.03.2027 10:00) zeigt auf der Seite keine Terminliste,
 die API nennt den Termin mit `interval_first_match_start 2027-03-22T10:00`.
 
+## Nachtrag 2026-11-11
+
+Der Adapter liest auch die Experience-Seiten, die die Registry unter GeoCMS führt
+(Saale-Unstrut: Balgstädt, Gleina, Goseck, Freyburg, Karsdorf); die Experience
+`saale-unstrut-tourismus` ist öffentlich (393 Termine am 11.11.2026).
+
 ## Offen
 
 * Lizenz der Datensätze: `attributes.license` (CC0, CC-BY, CC-BY-SA) liegt vor, wird
