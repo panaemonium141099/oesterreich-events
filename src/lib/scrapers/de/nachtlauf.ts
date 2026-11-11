@@ -42,6 +42,7 @@ export const DE_NACHTLAUF: Readonly<Record<string, string>> = {
   'de-destinationone': 'adapter-destinationone.md',
   'de-lkrg': 'adapter-lkrg.md',
   'de-regiogate': 'adapter-regiogate.md',
+  'de-geocms': 'adapter-geocms.md',
 };
 
 export const DE_SHARD_COUNT = 3;
@@ -89,6 +90,8 @@ const DE_SCRAPER_WEIGHTS: Readonly<Record<string, number>> = {
   'de-destinationone': 10,
   'de-lkrg': 5,
   'de-regiogate': 10,
+  // Prüfstand 11.11.2026: rund 385 Abrufe, gedrosselte Hoster, gut zwei Stunden.
+  'de-geocms': 130,
 };
 const DEFAULT_WEIGHT = 10;
 
