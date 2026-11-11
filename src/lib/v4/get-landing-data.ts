@@ -151,10 +151,14 @@ const OPTIONAL_SOURCES = new Set(['featured', 'artists', 'artistPrimaries', 'sta
  *
  *  - Build (2026-08-26): ein Deploy darf nie an der Tagesform der DB
  *    scheitern. Gescheiterte Sektionen bleiben leer, der Rest wird gebaut.
- *    Damit so ein Build nicht eine Stunde lang ausgespielt wird, ruft
- *    deploy.yml nach dem Health-Gate /api/cron/revalidate-landing auf und
- *    holt `/` und `/en` einmal ab (2026-11-04: Saison-Karte auf /de leer,
- *    /en voll, dieselbe Abfrage dreimal im statement timeout des Builds).
+ *    Was der Build rendert, liegt als Vorrender im Image und kommt nach
+ *    jedem Container-Neustart (Deploy, ISR-Guard, Reboot) wieder hervor,
+ *    bis die Seite neu gerendert ist. Deshalb zweierlei: der Build hat
+ *    Zeit und wiederholt geduldig (LANDING_RETRY_DELAYS_MS.build, 2026-11-06:
+ *    drei Versuche binnen 1,2 s, alle im statement timeout, Karte leer ins
+ *    Image gebacken), und jeder Serverstart rendert die Seite neu
+ *    (src/instrumentation.ts → warm-on-start.ts), nicht nur das Deploy
+ *    (deploy.yml, seit 2026-11-04).
  *  - Laufzeit (ISR-Revalidierung): NICHT still leer rendern, sondern
  *    werfen. Next behält dann die letzte gute Seite und versucht es beim
  *    nächsten Aufruf erneut. Vorher wurde eine leere Sektion für eine
@@ -164,13 +168,14 @@ const OPTIONAL_SOURCES = new Set(['featured', 'artists', 'artistPrimaries', 'sta
 export async function getLandingData(now: Date = new Date()): Promise<LandingData> {
   let timer: ReturnType<typeof setTimeout> | null = null;
   try {
+    const timeoutMs = isBuildPhase() ? LANDING_TIMEOUT_MS.build : LANDING_TIMEOUT_MS.runtime;
     const result = await Promise.race([
       getLandingDataInner(now),
-      new Promise<null>(resolve => { timer = setTimeout(() => resolve(null), 15_000); }),
+      new Promise<null>(resolve => { timer = setTimeout(() => resolve(null), timeoutMs); }),
     ]);
     if (!result) {
-      if (!isBuildPhase()) throw new Error('[landing] getLandingData timeout (15s)');
-      console.error('[landing] getLandingData timeout (15s) im Build: leere Sektionen');
+      if (!isBuildPhase()) throw new Error(`[landing] getLandingData timeout (${timeoutMs / 1000}s)`);
+      console.error(`[landing] getLandingData timeout (${timeoutMs / 1000}s) im Build: leere Sektionen`);
       return emptyLanding(now);
     }
     if (result.failed.length > 0) {
@@ -193,18 +198,36 @@ export async function getLandingData(now: Date = new Date()): Promise<LandingDat
 type QueryResult<T = unknown> = { data: T | null; error: { message: string } | null };
 
 /**
- * Eine Abfrage mit bis zu zwei Wiederholungen. Unter Last (Build rendert
- * hunderte Seiten parallel) scheitern Abfragen vereinzelt am
- * statement_timeout; ein zweiter Versuch geht fast immer durch.
+ * Wartezeiten zwischen den Versuchen einer Abfrage und Gesamtbudget je Render.
+ *
+ * Laufzeit: ein Besucher wartet, zwei schnelle Wiederholungen, dann wirft
+ * der Render und Next behält die letzte gute Seite. Build: niemand wartet,
+ * aber das Ergebnis wird ins Image gebacken; unter Build-Last (hunderte
+ * Seiten parallel, Postgres auf demselben Server) kamen drei Versuche
+ * binnen 1,2 s alle im statement timeout zurück (2026-09-25, 2026-11-04,
+ * 2026-11-06). Rund anderthalb Minuten Abstand reichen, bis die anderen
+ * Seiten durch sind.
+ */
+export const LANDING_RETRY_DELAYS_MS = {
+  runtime: [400, 800],
+  build: [1_000, 3_000, 8_000, 15_000, 30_000, 30_000],
+} as const;
+export const LANDING_TIMEOUT_MS = { runtime: 15_000, build: 150_000 } as const;
+
+/**
+ * Eine Abfrage mit Wiederholungen nach LANDING_RETRY_DELAYS_MS. Unter Last
+ * scheitern Abfragen vereinzelt am statement_timeout; ein zweiter Versuch
+ * geht zur Laufzeit fast immer durch, im Build braucht es Geduld.
  */
 async function withRetry<T = unknown[]>(
   label: string,
   run: () => PromiseLike<QueryResult<T>>,
   failed: string[],
 ): Promise<QueryResult<T>> {
+  const delays: readonly number[] = isBuildPhase() ? LANDING_RETRY_DELAYS_MS.build : LANDING_RETRY_DELAYS_MS.runtime;
   let res: QueryResult<T> = { data: null, error: { message: 'nicht ausgeführt' } };
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (attempt > 0) await new Promise(r => setTimeout(r, 400 * attempt));
+  for (let attempt = 0; attempt <= delays.length; attempt++) {
+    if (attempt > 0) await new Promise(r => setTimeout(r, delays[attempt - 1]));
     try {
       res = await run();
     } catch (err) {

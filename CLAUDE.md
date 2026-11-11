@@ -226,7 +226,15 @@ node / next.js
   Route ruft `deploy.yml` nach jedem Deploy auf und holt `/` und `/en` einmal
   ab: der Build rendert eine Sektion still leer, wenn ihre Abfrage unter
   Build-Last in den statement timeout läuft (2026-11-04 Saison-Karte, nur
-  /de), und die leere Seite läge sonst eine Stunde im ISR-Cache.
+  /de), und die leere Seite läge sonst eine Stunde im ISR-Cache. Dieser
+  Vorrender liegt im Image und kommt nach JEDEM Container-Neustart (ISR-Guard,
+  Reboot) wieder hervor (06./07.11.2026 Saison-Karte leer trotz Deploy-Warm).
+  Deshalb seit 2026-11-07 zweierlei: im Build wiederholt jede Abfrage
+  geduldig (`LANDING_RETRY_DELAYS_MS.build`, rund 90 s, Budget 150 s), und
+  `src/instrumentation.ts` rendert bei jedem Serverstart neu
+  (`src/lib/landing/warm-on-start.ts`: wartet auf /api/health, ruft die
+  Route mit `CRON_SECRET`, holt `/` und `/en` je zweimal, bis zu drei Runden;
+  aus mit `LANDING_WARM_ON_START=off`, Log-Präfix `[landing-warm]`).
 - **Cloudflare (seit 2026-10-21) vor lasstreffen.at + www** (Free: Bot Fight
   Mode, WAF-Regeln, Cache nur statische Pfade); `api.lasstreffen.at` bleibt
   DNS-only. Caddy liest die Client-IP aus `CF-Connecting-IP` nur von

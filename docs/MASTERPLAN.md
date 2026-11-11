@@ -585,6 +585,16 @@ erkennbare Aufgabe; der Watchdog kennt die Recreate-Frequenz nicht
 (sinnvoll: Alarm ab 4 Recreates/24 h). Wurzel-Fix für den ISR-Cache
 bleibt ein `cacheHandler` mit Größenlimit.
 
+**Nachtrag 2026-11-07 (Saison-Karte leer):** Jeder Recreate wirft auch den
+Laufzeit-Render der Startseite weg; dann liegt wieder der Vorrender aus dem
+Build vor, und der war am 06.11. 21:06 ohne Saison-Karte (Saison- und
+Dorffeste-Abfrage dreimal binnen 1,2 s im statement timeout, Build-Log
+Run 42293037715; der Deploy-Warm danach zählte 12 Picks, nur im
+Laufzeit-Cache). Seitdem: Build wiederholt geduldig (`LANDING_RETRY_DELAYS_MS
+.build`, Budget 150 s) und `src/instrumentation.ts` rendert die Startseite
+bei jedem Serverstart neu (`warm-on-start.ts`, Log `[landing-warm]`), nicht
+nur deploy.yml.
+
 ### 3.14 Cloudflare als Proxy vor der Website (2026-10-21)
 
 **Anlass:** AdSense-Einschränkung seit 16.09. durch Bot-Farmen mit
