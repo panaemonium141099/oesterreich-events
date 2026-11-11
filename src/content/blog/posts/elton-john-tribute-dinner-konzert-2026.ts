@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/the-musical-sound-elton-john-tribute-dinner-konzert-hotel-das-weitzer-21913915/?affiliate=J70",
   "publishDate": "2026-10-08",
   "updatedDate": "2026-10-08",
+  "factSources": {
+    "checkedAt": "2026-10-08",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/the-musical-sound-elton-john-tribute-dinner-konzert-hotel-das-weitzer-21913915/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 7. November 2026 bringt Karsten Kenzel mit Band die großen Elton-John-Hits ins Weitzer nach Graz. Dazu gibt es ein 3-Gang-Menü aus der Hausküche. Alle Infos zu Tickets, Programm und Anreise.",
   "category": "Musik & Festival",

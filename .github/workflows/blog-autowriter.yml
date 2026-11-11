@@ -27,6 +27,11 @@ on:
     # Sonntags 03:40 UTC zusätzlich EIN Unterkunfts-Guide (fn-21,
     # Rubrik "Übernachten", rotierende Topic-Liste im Script).
     - cron: '40 3 * * 0'
+    # Täglich 04:10 UTC: Festival-Vorschau. Schreibt einen Post für jedes
+    # Festival aus der festivals-Tabelle, das in ~5 Monaten beginnt
+    # (Fenster 138-152 Tage, jede Ausgabe genau einmal). Ohne fälliges
+    # Festival endet der Lauf ohne Commit.
+    - cron: '10 4 * * *'
   workflow_dispatch:
     inputs:
       count:
@@ -35,6 +40,10 @@ on:
         default: '2'
       stayguide:
         description: 'true = Unterkunfts-Guide statt Event-Posts'
+        required: false
+        default: 'false'
+      festivals:
+        description: 'true = Festival-Vorschau (5 Monate vor Beginn) statt Event-Posts'
         required: false
         default: 'false'
 
@@ -76,12 +85,13 @@ jobs:
       # Laeufe — ein manueller Start soll immer schreiben.
       - name: Heute schon geschrieben?
         id: today
-        if: github.event_name == 'schedule' && github.event.schedule != '40 3 * * 0'
+        if: github.event_name == 'schedule' && github.event.schedule != '40 3 * * 0' && github.event.schedule != '10 4 * * *'
         run: |
           git fetch --deepen=30 origin master >/dev/null 2>&1 || true
-          # Stay-Guides (Slug "uebernachten-…") zaehlen nicht: die laufen sonntags
-          # in einem eigenen Slot und sollen die Event-Posts nicht blockieren.
-          if git log --since="$(date -u +%F)T00:00:00Z" --author="blog-autowriter" --grep="Autowriter" --oneline | grep -v "uebernachten-" | grep -q .; then
+          # Stay-Guides (Slug "uebernachten-…") und Festival-Vorschauen
+          # ("Festival-Autowriter") zaehlen nicht: die laufen in eigenen Slots
+          # und sollen die Event-Posts nicht blockieren.
+          if git log --since="$(date -u +%F)T00:00:00Z" --author="blog-autowriter" --grep="Autowriter" --oneline | grep -v "uebernachten-" | grep -v "Festival-Autowriter" | grep -q .; then
             echo "done=true" >> "$GITHUB_OUTPUT"
             echo "Heute ist bereits ein Autowriter-Commit auf master — nichts zu tun."
           else
@@ -90,7 +100,7 @@ jobs:
 
       - name: Write blog posts
         id: write
-        if: github.event.schedule != '40 3 * * 0' && github.event.inputs.stayguide != 'true' && steps.today.outputs.done != 'true'
+        if: github.event.schedule != '40 3 * * 0' && github.event.schedule != '10 4 * * *' && github.event.inputs.stayguide != 'true' && github.event.inputs.festivals != 'true' && steps.today.outputs.done != 'true'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -126,23 +136,52 @@ jobs:
           fi
           exit $code
 
+      - name: Write festival previews (5 Monate vor Beginn)
+        id: festwrite
+        if: github.event.schedule == '10 4 * * *' || github.event.inputs.festivals == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          set +e
+          npx tsx src/scripts/blog-autowriter.ts --festivals --count ${{ github.event.inputs.count || '2' }}
+          code=$?
+          if [ "$code" = "75" ]; then
+            echo "::warning::Abo-Sitzungslimit erreicht — die Festival-Vorschau versucht es morgen erneut (Fenster hat zwei Wochen Nachlauf)."
+            echo "ratelimited=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          exit $code
+
       - name: Commit & push
-        if: steps.today.outputs.done != 'true' && steps.write.outputs.ratelimited != 'true' && steps.staywrite.outputs.ratelimited != 'true'
+        id: commit
+        if: steps.today.outputs.done != 'true' && steps.write.outputs.ratelimited != 'true' && steps.staywrite.outputs.ratelimited != 'true' && steps.festwrite.outputs.ratelimited != 'true'
         run: |
           git config user.name "blog-autowriter[bot]"
           git config user.email "noreply@lasstreffen.at"
           git add src/content/blog public/images/blog
           if git diff --cached --quiet; then
+            # Festival-Slot ohne faelliges Festival ist ein regulaerer No-op.
+            if [ -n "${{ steps.festwrite.outcome }}" ] && [ "${{ steps.festwrite.outcome }}" = "success" ] && [ -z "${{ steps.festwrite.outputs.slugs }}" ]; then
+              echo "Kein Festival im 5-Monats-Fenster faellig — nichts zu committen."
+              echo "nothing=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
             echo "Nichts zu committen — Script hätte failen müssen."
             exit 1
           fi
-          git commit -m "content(blog): Autowriter $(date -u +%F) — ${{ steps.write.outputs.slugs || steps.staywrite.outputs.slugs }}"
+          if [ -n "${{ steps.festwrite.outputs.slugs }}" ]; then
+            git commit -m "content(blog): Festival-Autowriter $(date -u +%F) — ${{ steps.festwrite.outputs.slugs }}"
+          else
+            git commit -m "content(blog): Autowriter $(date -u +%F) — ${{ steps.write.outputs.slugs || steps.staywrite.outputs.slugs }}"
+          fi
           git push origin master
 
       # Pushes aus Workflows loesen keine push-Trigger aus (GitHub-Schutz
       # gegen Rekursion) — ohne diesen Schritt kaeme der neue Post nie live.
       - name: Deploy anstossen
-        if: steps.today.outputs.done != 'true' && steps.write.outputs.ratelimited != 'true' && steps.staywrite.outputs.ratelimited != 'true'
+        if: steps.today.outputs.done != 'true' && steps.write.outputs.ratelimited != 'true' && steps.staywrite.outputs.ratelimited != 'true' && steps.festwrite.outputs.ratelimited != 'true' && steps.commit.outputs.nothing != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run deploy.yml --ref master

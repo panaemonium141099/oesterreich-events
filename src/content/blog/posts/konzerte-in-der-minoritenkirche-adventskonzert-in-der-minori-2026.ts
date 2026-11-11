@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/konzerte-in-der-minoritenkirche-minoritenkirche-21734444/?affiliate=J70",
   "publishDate": "2026-10-06",
   "updatedDate": "2026-10-06",
+  "factSources": {
+    "checkedAt": "2026-10-06",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/konzerte-in-der-minoritenkirche-minoritenkirche-21734444/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Die Reihe „Konzerte in der Minoritenkirche“ lädt im Dezember zum Adventskonzert. Am 13. Dezember erklingt Musik in einer der frühesten gotischen Kirchen im Osten Österreichs, nur wenige Schritte von der Hofburg entfernt.",
   "category": "Kultur & Bühne",

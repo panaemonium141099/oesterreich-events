@@ -18,8 +18,10 @@ vi.mock('@/components/Discover/v4', () => ({
       <button type="button" onClick={() => onModeChange('list')}>list</button>
     </div>
   ),
-  V4EntdeckenListMode: ({ initialFilters }: { initialFilters?: { search?: string } }) => (
-    <div data-testid="list-mode">{initialFilters?.search ?? ''}</div>
+  V4EntdeckenListMode: ({ initialFilters }: { initialFilters?: { search?: string; dateFrom?: string; dateTo?: string } }) => (
+    <div data-testid="list-mode" data-from={initialFilters?.dateFrom} data-to={initialFilters?.dateTo}>
+      {initialFilters?.search ?? ''}
+    </div>
   ),
   V4EntdeckenSmartMode: ({ initialQuery }: { initialQuery?: string }) => (
     <div data-testid="smart-mode">{initialQuery ?? ''}</div>
@@ -61,5 +63,23 @@ describe('/entdecken — Modus folgt der URL', () => {
       '/entdecken?search=Jazz&mode=smart',
       { scroll: false },
     );
+  });
+
+  // Tagesausgabe (fn-30.6): „Ganzes Programm" und „Alle anzeigen" der
+  // Startseite verlinken einen Tagesbereich als ?von=&bis= (Wiener Tage).
+  it('setzt dateFrom/dateTo aus ?von=&bis=, nur mit gültigen Kalendertagen', () => {
+    setMockSearchParams({ von: '2026-10-30', bis: '2026-11-01' });
+    render(<EntdeckenPage />);
+    const list = screen.getByTestId('list-mode');
+    expect(list).toHaveAttribute('data-from', '2026-10-30');
+    expect(list).toHaveAttribute('data-to', '2026-11-01');
+  });
+
+  it('ignoriert ungültige von/bis-Werte', () => {
+    setMockSearchParams({ von: 'heute', bis: '2026-02-30' });
+    render(<EntdeckenPage />);
+    const list = screen.getByTestId('list-mode');
+    expect(list).not.toHaveAttribute('data-from');
+    expect(list).not.toHaveAttribute('data-to');
   });
 });

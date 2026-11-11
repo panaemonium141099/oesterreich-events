@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/sonos-cliq-planet-kumpel-tour-2026-flex-20866344/?affiliate=J70",
   "publishDate": "2026-08-30",
   "updatedDate": "2026-08-30",
+  "factSources": {
+    "checkedAt": "2026-08-30",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/sonos-cliq-planet-kumpel-tour-2026-flex-20866344/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 31. Oktober 2026 bringt das Hip-Hop-Duo $ONO$ CLIQ ihre \"Planet Kumpel Tour\" ins Flex nach Wien. Freuen Sie sich auf \"liebevoll-auf-die-Fresse-Musik\" mit Hardstyle-Elementen und eine klare Botschaft.",
   "category": "Musik & Festival",

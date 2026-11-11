@@ -92,6 +92,8 @@ export interface EventRow {
   admission_decision?: string | null;
   /** Vom Rückzug gesetzt (Quelle listet das Event nicht mehr). */
   withdrawn_at?: string | null;
+  /** Land des Events ('AT', 'DE', …); Ventil und Audit rechnen je Land. */
+  country?: string | null;
 }
 
 /**

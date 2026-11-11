@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/science-busters-for-kids-wer-nichts-weiss-muss-alles-glauben-artbox-st-gertraud-20895933/?affiliate=J70",
   "publishDate": "2026-09-08",
   "updatedDate": "2026-09-08",
+  "factSources": {
+    "checkedAt": "2026-09-08",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/science-busters-for-kids-wer-nichts-weiss-muss-alles-glauben-artbox-st-gertraud-20895933/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Die Science Busters for Kids bringen ihre einzigartige Mischung aus Wissenschaftskabarett und spannenden Experimenten nach Sankt Gertraud, Kärnten. Erleben Sie eine lehrreiche Show für die ganze Familie, die zeigt, wie faszinierend Wissenschaft sein kann.",
   "category": "Kultur & Bühne",

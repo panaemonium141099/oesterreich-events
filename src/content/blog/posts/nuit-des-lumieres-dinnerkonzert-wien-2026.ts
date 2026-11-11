@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/nuit-des-lumieres-dinnerkonzert-wien-mirage-21867227/?affiliate=J70",
   "publishDate": "2026-10-03",
   "updatedDate": "2026-10-03",
+  "factSources": {
+    "checkedAt": "2026-10-03",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/nuit-des-lumieres-dinnerkonzert-wien-mirage-21867227/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Mozart, Vivaldi und Coldplay im Kerzenschein: Die Nuit des Lumières verbindet am 29. November 2026 im Mirage im Prater ein 5-Gänge-Dinner mit einem Konzert in drei Akten.",
   "category": "Kultur & Bühne",

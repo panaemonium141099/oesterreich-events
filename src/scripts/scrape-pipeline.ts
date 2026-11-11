@@ -8,6 +8,7 @@
  *   npx tsx src/scripts/scrape-pipeline.ts --trigger github_dispatch --skip-geocoding
  *   npx tsx src/scripts/scrape-pipeline.ts --dry-run --trigger manual
  *   npx tsx src/scripts/scrape-pipeline.ts --skip-lineups   # ohne Festival-Lineups
+ *   npx tsx src/scripts/scrape-pipeline.ts --skip-scrapers --country DE   # nur DE-Zeilen
  */
 import { readFileSync, existsSync, rmSync } from 'fs';
 import { join } from 'path';
@@ -35,6 +36,7 @@ import { triggerMatchArtists } from '../lib/post-scrape-hook';
 // Only pass --env-file flag when the file actually exists.
 const envFlag = existsSync(join(process.cwd(), '.env.local')) ? '--env-file=.env.local ' : '';
 import { runStep } from '../lib/pipeline/step-runner';
+import { pipelineCountry, stepRunsFor } from '../lib/pipeline/pipeline-country';
 import {
   createPipelineRun,
   finalizePipelineRun,
@@ -70,6 +72,7 @@ function parseArgs(): PipelineOptions {
     skipDedup: has('--skip-dedup'),
     skipIndexing: has('--skip-indexing'),
     dryRun: has('--dry-run'),
+    country: pipelineCountry(args),
   };
 }
 
@@ -92,6 +95,10 @@ function execStep(label: string, cmd: string): void {
 
 async function main() {
   const opts = parseArgs();
+  // Die Schritte laufen als eigene Prozesse und lesen das Land aus der Umgebung.
+  if (opts.country) process.env.PIPELINE_COUNTRY = opts.country;
+  else delete process.env.PIPELINE_COUNTRY;
+  const runs = (step: string) => stepRunsFor(step, opts.country ?? null);
   const steps: Record<string, StepResult> = {};
   let runId: string | null = null;
 
@@ -108,7 +115,9 @@ async function main() {
     github_run_id: process.env.GITHUB_RUN_ID || null,
     github_run_url: process.env.GITHUB_RUN_URL || null,
     dry_run: opts.dryRun || false,
+    country: opts.country ?? null,
   };
+  if (opts.country) console.log(`[pipeline] Land: ${opts.country} (nur Zeilen dieses Landes)`);
 
   if (!opts.dryRun) {
     try {
@@ -135,7 +144,7 @@ async function main() {
       }, steps);
     }
 
-    if (!opts.skipVenues) {
+    if (!opts.skipVenues && runs('venues')) {
       steps.venues = await runStep('venues', async () => {
         execStep('Venue feed ingestion', `npx tsx ${envFlag}src/scripts/scrape-venues.ts`);
       }, steps);
@@ -147,7 +156,7 @@ async function main() {
     // ein eigener Workflow-Schritt mit continue-on-error: 839 abgewiesene
     // Upserts je Nacht (events_bundesland_check) blieben grün. Jetzt macht
     // ein Schreibfehler den Schritt rot (reportStepReason).
-    if (!opts.skipLineups) {
+    if (!opts.skipLineups && runs('festival_lineups')) {
       steps.festival_lineups = await runStep('festival_lineups', async () => {
         execStep('Festival lineups + derived events', `npx tsx ${envFlag}src/scripts/scrape-festival-lineups.ts`);
       }, steps);
@@ -177,12 +186,14 @@ async function main() {
     // 200-Antwort). Bei ~73k vermessenen Zukunfts-Events ist jedes Bild
     // so etwa alle 30 Naechte erneut dran; zusammen mit ~700 neuen und
     // 500 requeued bleibt der Lauf unter dem 4000er-Deckel.
-    steps.image_probe = await runStep('image_probe', async () => {
-      execStep(
-        'Probe image widths',
-        `npx tsx ${envFlag}src/scripts/probe-image-widths.ts --limit 4000 --requeue-failed 500 --recheck-measured 2500`,
-      );
-    }, steps);
+    if (runs('image_probe')) {
+      steps.image_probe = await runStep('image_probe', async () => {
+        execStep(
+          'Probe image widths',
+          `npx tsx ${envFlag}src/scripts/probe-image-widths.ts --limit 4000 --requeue-failed 500 --recheck-measured 2500`,
+        );
+      }, steps);
+    }
 
     if (!opts.skipCategorization) {
       if (!opts.skipCategorizationBackfill) {
@@ -204,7 +215,7 @@ async function main() {
     // fn-25 C3: Adress-Geocoder (Nominatim, 1,2 s Takt, Tagesbudget) füllt
     // den Cache für Eventadressen mit Hausnummer und entscheidet die
     // betroffenen Events über den gemeinsamen Resolver neu.
-    if (!opts.skipGeocoding) {
+    if (!opts.skipGeocoding && runs('address_geocoding')) {
       steps.address_geocoding = await runStep('address_geocoding', async () => {
         // 1 Anfrage je 1,2 s: 1.500 Adressen sind 30 Minuten, innerhalb der
         // Nominatim-Regel (max. 1/s) und weit unter Massengeocodierung.
@@ -254,20 +265,24 @@ async function main() {
     // Wächter: keine schreibende SECURITY-DEFINER-Funktion darf für anon
     // ausführbar sein (sonst kann jeder publish_status ändern). Prüft den
     // echten Prod-Zustand, nicht nur die Migrationsdateien.
-    steps.security_audit = await runStep('security_audit', async () => {
-      execStep('Audit public write RPCs', `npx tsx ${envFlag}src/scripts/security-audit.ts`);
-    }, steps);
+    if (runs('security_audit')) {
+      steps.security_audit = await runStep('security_audit', async () => {
+        execStep('Audit public write RPCs', `npx tsx ${envFlag}src/scripts/security-audit.ts`);
+      }, steps);
+    }
 
-    steps.artist_matching = await runStep('artist_matching', async () => {
-      await triggerMatchArtists();
-    }, steps);
+    if (runs('artist_matching')) {
+      steps.artist_matching = await runStep('artist_matching', async () => {
+        await triggerMatchArtists();
+      }, steps);
+    }
 
     // KI-Enrichment + Embeddings entfernt (2026-07, MASTERPLAN §6 —
     // Grundsatz-Entscheidung: kein KI-Enrichment mehr, Datenqualität
     // deterministisch an der Quelle). Die enrich-*-Scripts wurden gelöscht;
     // Kategorien kommen aus dem deterministischen Classifier oben.
 
-    if (!opts.skipIndexing) {
+    if (!opts.skipIndexing && runs('indexing')) {
       steps.indexing = await runStep('indexing', async () => {
         // Submits event URLs to IndexNow (Bing/Yandex) and Google Indexing
         // API. Defaults to --since<pipeline_start_iso> so only freshly-
@@ -281,13 +296,25 @@ async function main() {
     // Report generation (always runs, no dependencies)
     // fn-25 O1: Kennzahlen zur Ortsqualität (Abdeckung, Konflikte, Drift,
     // Wiederholbarkeit) mit Alarmgrenzen → workflow_runs 'location-audit'.
-    steps.location_metrics = await runStep('location_metrics', async () => {
-      execStep('Location metrics', `npx tsx ${envFlag}src/scripts/location-metrics.ts`);
+    if (runs('location_metrics')) {
+      steps.location_metrics = await runStep('location_metrics', async () => {
+        execStep('Location metrics', `npx tsx ${envFlag}src/scripts/location-metrics.ts`);
+      }, steps);
+    }
+
+    // fn-29.18: Gemeinden mit mindestens einem kommenden Termin je Land,
+    // Bundesland und DE-Integration (reports/abdeckung.json + Zusammenfassung).
+    steps.coverage = await runStep('coverage', async () => {
+      execStep('Coverage per country and integration', `npx tsx ${envFlag}src/scripts/coverage-report.ts`);
     }, steps);
 
-    steps.report = await runStep('report', async () => {
-      execStep('Generate scrape report', `npx tsx ${envFlag}src/scripts/generate-scrape-report.ts`);
-    }, steps);
+    // Der Bericht zählt die österreichischen Gemeinden; für DE steht die
+    // Abdeckung (coverage) an seiner Stelle.
+    if (runs('report')) {
+      steps.report = await runStep('report', async () => {
+        execStep('Generate scrape report', `npx tsx ${envFlag}src/scripts/generate-scrape-report.ts`);
+      }, steps);
+    }
 
   } finally {
     results.steps = steps;
@@ -301,7 +328,7 @@ async function main() {
     // stehen in source_runs.
     if (opts.skipScrapers && !opts.dryRun && results.scraper_results.length === 0) {
       try {
-        results.scraper_results = await loadScraperResultsFromSourceRuns();
+        results.scraper_results = await loadScraperResultsFromSourceRuns(12, opts.country ?? null);
         results.total_events_scraped = results.scraper_results.reduce((n, r) => n + r.events_found, 0);
         results.total_events_updated = results.scraper_results.reduce((n, r) => n + r.events_updated, 0);
         const failed = results.scraper_results.filter((r) => r.status !== 'success').length;

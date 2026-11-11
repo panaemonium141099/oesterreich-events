@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/orgelkonzert-peterskirche-wien-krypta-21722636/?affiliate=J70",
   "publishDate": "2026-09-26",
   "updatedDate": "2026-09-26",
+  "factSources": {
+    "checkedAt": "2026-09-26",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/orgelkonzert-peterskirche-wien-krypta-21722636/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Nur in der Vorweihnachtszeit öffnet die Kapelle der Krypta unter der Wiener Peterskirche ihre Türen. Mario Eritreo spielt dort Bach, Mozart, Chopin, Vivaldi und mehr, eine Stunde lang und ohne Pause.",
   "category": "Kultur & Bühne",

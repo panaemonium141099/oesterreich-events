@@ -7,7 +7,7 @@ import {
   getCategoryFromSlug,
   isTimeFilter,
 } from '@/lib/landing-slugs';
-import { loadBundeslandPage } from '@/lib/landing-data';
+import { loadBundeslandPage, loadBundeslandShelves } from '@/lib/landing-data';
 import { bilingualAlternates } from '@/lib/seo/canonical';
 import { LandingPageShell } from '@/components/Landing/LandingPageShell';
 import { routing, type AppLocale } from '@/i18n/routing';
@@ -90,8 +90,11 @@ export default async function BundeslandCategoryTimePage({
 
   if (!category || !timeFilter) notFound();
 
-  const data = await loadBundeslandPage(bundesland, category, timeFilter, locale);
+  const [data, shelves] = await Promise.all([
+    loadBundeslandPage(bundesland, category, timeFilter, locale),
+    loadBundeslandShelves(bundesland, category, timeFilter),
+  ]);
   if (!data) notFound();
 
-  return <LandingPageShell {...data} />;
+  return <LandingPageShell {...data} shelves={shelves} />;
 }

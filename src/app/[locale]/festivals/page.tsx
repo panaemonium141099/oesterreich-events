@@ -93,6 +93,7 @@ export default async function FestivalsPage({
       ...(rest as Festival),
       image_url:
         parentEvent?.image_url
+        ?? f.image_url
         ?? (override?.imageUrl ?? null)
         ?? festivalCategoryFallback(f.id),
       href,

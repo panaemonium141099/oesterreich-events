@@ -10,7 +10,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fetchAndParseEventim, upsertEventimEvents } from '@/lib/eventim/import';
-import type { NotBookableStats } from '@/lib/eventim/parse';
+import type { NotBookableStats, EventimArtistsByEvent } from '@/lib/eventim/parse';
 import { startWorkflowRun, finishWorkflowRun } from '@/lib/reporting/workflow-run';
 
 // Load .env.local (Next.js does this automatically, but tsx does not) — needed
@@ -44,7 +44,9 @@ async function main() {
 
   console.log('[eventim] downloading + parsing feed…');
   const notBookable: NotBookableStats = {};
-  let events = await fetchAndParseEventim(new Date().toISOString(), notBookable);
+  // fn-30: Serien-Künstler je Event, Schlüssel source_id (eventId des Feeds).
+  const artists: EventimArtistsByEvent = new Map();
+  let events = await fetchAndParseEventim(new Date().toISOString(), notBookable, artists);
   console.log(`[eventim] ${events.length} events after filtering (future, ticket, non-cancelled, AT/DE/CH)`);
 
   if (limit && events.length > limit) {
@@ -67,6 +69,9 @@ async function main() {
   console.log('[eventim] by category:', byCategory);
   console.log(`[eventim] bookable (ticket_url set): ${bookable}/${events.length}`);
   console.log(`[eventim] AT events without bundesland: ${atNoBundesland}`);
+  const eventsWithArtists = events.filter((e) => (artists.get(e.source_id)?.length ?? 0) > 0).length;
+  const artistRows = events.reduce((n, e) => n + (artists.get(e.source_id)?.length ?? 0), 0);
+  console.log(`[eventim] Künstler: ${eventsWithArtists}/${events.length} Events mit Künstlern, ${artistRows} Zeilen laut Feed`);
   // Ein Event ohne Ticket-Link verdient nichts — die Ursachen gehoeren
   // deshalb ins Log UND in den Bericht, nicht nur die Summe.
   const ohneLink = Object.entries(notBookable).sort((a, b) => b[1].count - a[1].count);
@@ -89,12 +94,18 @@ async function main() {
   }
 
   if (dryRun) {
-    console.log('\n[eventim] DRY RUN — no DB writes.');
+    console.log('\n[eventim] DRY RUN — no DB writes (Events und Künstler: 0 geschrieben, 0 gelöscht).');
     return;
   }
 
-  const r = await upsertEventimEvents(events, (m) => console.log(`[eventim] ${m}`));
+  const r = await upsertEventimEvents(events, (m) => console.log(`[eventim] ${m}`), { artists });
   console.log(`[eventim] DONE — ${r.upserted} upserted, ${r.errors} errors, ${r.filtered} filtered`);
+  if (r.artists) {
+    console.log(`[eventim] Künstler: ${r.artists.written} Zeilen geschrieben, ${r.artists.deleted} gelöscht (${r.artists.eventsWithArtists} Events mit Künstlern, ${r.artists.unresolved} Events nicht in der DB)`);
+  }
+  if (r.artistsError) {
+    console.error(`[eventim] Künstler-Schritt FEHLGESCHLAGEN (Event-Import bleibt gültig): ${r.artistsError}`);
+  }
 
   const ohneLinkGesamt = events.length - bookable;
   await finishWorkflowRun(runId, {
@@ -102,7 +113,7 @@ async function main() {
     // Ticket-Link sind KEIN Fehler des Imports — sie kommen so aus dem
     // Feed —, gehoeren aber prominent in den Bericht, weil sie direkt auf
     // die Affiliate-Einnahmen durchschlagen.
-    status: r.errors > 0 ? 'partial' : 'success',
+    status: r.errors > 0 || r.artistsError ? 'partial' : 'success',
     summary: `${r.upserted.toLocaleString('de-AT')} Events importiert, `
       + `${ohneLinkGesamt.toLocaleString('de-AT')} davon ohne Ticket-Link `
       + `(${((100 * ohneLinkGesamt) / Math.max(events.length, 1)).toFixed(1)} % — verdienen nichts)`,
@@ -113,6 +124,9 @@ async function main() {
       'OHNE Ticket-Link': ohneLinkGesamt,
       'Anteil ohne Link': `${((100 * ohneLinkGesamt) / Math.max(events.length, 1)).toFixed(1)} %`,
       'Upsert-Fehler': r.errors,
+      'Events mit Künstlern': eventsWithArtists,
+      'Künstler-Zeilen geschrieben': r.artists?.written ?? 0,
+      'Künstler-Zeilen gelöscht': r.artists?.deleted ?? 0,
       ...Object.fromEntries(Object.entries(byCountry).map(([k, v]) => [`Land ${k}`, v])),
     },
     // Die Ursachen als Einzelposten: eine Zeile je Grund, mit Anzahl.
@@ -124,8 +138,15 @@ async function main() {
       excerpt: `Grund laut Feed: ${reason}`,
       url: e.sample,
     })),
-    errors: r.errors > 0 ? [`${r.errors} Events konnten nicht geschrieben werden`] : [],
+    errors: [
+      ...(r.errors > 0 ? [`${r.errors} Events konnten nicht geschrieben werden`] : []),
+      ...(r.artistsError ? [`Künstler-Schritt fehlgeschlagen: ${r.artistsError}`] : []),
+    ],
   });
+
+  // Der Künstler-Schritt macht den Lauf rot, nimmt den Event-Import aber
+  // nicht zurück: Bericht und Exit-Code tragen beides.
+  if (r.artistsError) process.exitCode = 1;
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

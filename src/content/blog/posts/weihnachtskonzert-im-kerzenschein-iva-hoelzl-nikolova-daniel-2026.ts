@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/halbturner-schlosskonzerte-weihnachtskonzert-im-kerzenschein-iva-hoelzl-nikolova-daniel-strahilevitz-schloss-halbturn-22006291/?affiliate=J70",
   "publishDate": "2026-10-01",
   "updatedDate": "2026-10-01",
+  "factSources": {
+    "checkedAt": "2026-10-01",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/halbturner-schlosskonzerte-weihnachtskonzert-im-kerzenschein-iva-hoelzl-nikolova-daniel-strahilevitz-schloss-halbturn-22006291/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Schubert, Brahms, Chopin und Weihnachtslieder bei Kerzenschein: Iva Hölzl-Nikolova und Daniel Strahilevitz spielen im barocken Freskensaal von Schloss Halbturn. Davor lockt der Pannonische Weihnachtsmarkt.",
   "category": "Kultur & Bühne",

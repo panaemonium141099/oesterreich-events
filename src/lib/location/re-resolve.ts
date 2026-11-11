@@ -17,8 +17,7 @@ import { loadLocationEvidence } from './evidence';
 import { resolveEventLocation, type ResolvedLocation } from './resolver';
 import { applyAdmissionToPosition, positionFromPlzOnly } from './contract';
 import { evaluateAdmission, type AdmissionVerdict } from '@/lib/quality/admission';
-import { bundeslandFromPolygon } from '@/lib/eventim/bundesland-from-geo';
-import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
+import { plzRegionOfCountry, regionOfCountry, writesAustrianRegionColumns } from './ortsdaten';
 import { districtForLocation, bundeslandForLocation } from '@/lib/plz-district';
 import type { SourceCoordsPrecision } from './types';
 
@@ -127,11 +126,17 @@ export function inputFromStoredRow(row: StoredEventLocationRow): LocationInput {
     };
   }
   const sourceCoords = row.geocoding_confidence === 'scraper';
+  // Altzeilen ohne Rohwerte außerhalb Österreichs: ihre Anzeigespalten lief
+  // der frühere österreichische Normalizer durch („Haus im Ennstal" statt der
+  // Halle, Eventim DE, Prod 2026-10-28). Mit den DE-Ortsdaten (fn-29.2) würde
+  // eine solche PLZ eine Gemeinde belegen und die Zeile mit falschem Ortsnamen
+  // wieder freigeben. Ableitungen außerhalb AT nur aus Quellenwerten.
+  const legacyForeign = (row.country ?? 'AT') !== 'AT';
   return {
     title: row.title,
     location_name: row.location_name,
     address: row.address,
-    postal_code: row.postal_code,
+    postal_code: legacyForeign ? null : row.postal_code,
     city: null,
     bundesland: sourceBundeslandOf(row),
     country: row.country,
@@ -201,9 +206,9 @@ export function publishChangeFor(
 }
 
 let regionWarned = false;
-function regionOfCoords(lat: number, lng: number): string | null {
+function regionOfCoords(lat: number, lng: number, country?: string): string | null {
   try {
-    return bundeslandFromPolygon(lat, lng);
+    return regionOfCountry(lat, lng, country);
   } catch (e) {
     if (!regionWarned) {
       regionWarned = true;
@@ -245,7 +250,7 @@ function contract(row: StoredEventLocationRow, decision: ResolvedLocation): { de
       longitude: decision.longitude,
       coords_from_plz: positionFromPlzOnly(decision),
     },
-    { regionOf: regionOfCoords, plzRegionOf: getBundeslandFromPLZ },
+    { regionOf: regionOfCoords, plzRegionOf: plzRegionOfCountry },
   );
   const c = applyAdmissionToPosition(decision, admission);
   if (c.reasons.length === 0 && c.status === decision.status) return { decision, admission };
@@ -306,7 +311,10 @@ export async function reResolveStoredEvents(
     const publishChange = publishChangeFor(row, decision);
     // Bundesland und Bezirk über dieselben Funktionen wie der Schreibpfad:
     // Quelle (nach Korrektur des Vertrags), sonst Gemeinde bzw. PLZ.
-    const bundesland = bundeslandForLocation(admission.correctedBundesland ?? inputs[i].bundesland, decision.gemeinde, decision.postal_code);
+    const regionColumns = writesAustrianRegionColumns(decision.country);
+    const bundesland = regionColumns
+      ? bundeslandForLocation(admission.correctedBundesland ?? inputs[i].bundesland, decision.gemeinde, decision.postal_code)
+      : null;
     // Altzeilen ohne Rohwerte tragen oft die Amts-PLZ ihrer Gemeinde aus dem
     // früheren Koordinatenabgleich (Boudicca: Stadthalle „Roland-Rainer-Platz
     // 1, 1150 Wien" mit PLZ 1010); die Entscheidung hält sie für eine
@@ -319,7 +327,7 @@ export async function reResolveStoredEvents(
       !raw && decision.gemeinde && postalCode === decision.gemeinde.plz
         ? 'registry'
         : decision.postal_code ? decision.provenance.postal_code : null;
-    const district = districtForLocation(decision.gemeinde, postalCode, bundesland, row.district, postalCodeProvenance);
+    const district = regionColumns ? districtForLocation(decision.gemeinde, postalCode, bundesland, row.district, postalCodeProvenance) : null;
     const unchanged =
       (row.bundesland ?? null) === bundesland &&
       (row.district ?? null) === district &&

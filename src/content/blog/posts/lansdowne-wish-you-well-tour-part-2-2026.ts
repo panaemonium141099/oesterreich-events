@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/lansdowne-wish-you-well-tour-part-2-dornbirn-conrad-sohm-21861067/?affiliate=J70",
   "publishDate": "2026-09-22",
   "updatedDate": "2026-09-22",
+  "factSources": {
+    "checkedAt": "2026-09-22",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/lansdowne-wish-you-well-tour-part-2-dornbirn-conrad-sohm-21861067/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 15. Oktober 2026 macht Lansdowne auf der zweiten Etappe der Wish You Well Tour im Dornbirner Conrad Sohm Halt. Support kommt von Joe Hermes &amp; Trackside, Beginn ist 20:00 Uhr.",
   "category": "Musik & Festival",

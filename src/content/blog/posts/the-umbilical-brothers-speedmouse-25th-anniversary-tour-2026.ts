@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/the-umbilical-brothers-dom-im-berg-21076861/?affiliate=J70",
   "publishDate": "2026-08-26",
   "updatedDate": "2026-08-26",
+  "factSources": {
+    "checkedAt": "2026-08-26",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/the-umbilical-brothers-dom-im-berg-21076861/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Das australische Comedy-Duo The Umbilical Brothers bringt seine Kultshow \"Speedmouse\" auf die Bühne des Dom im Berg in Graz. Freuen Sie sich auf eine rasante Mischung aus Live-Action, Rücklauf, Zeitlupe und einzigartiger Körperbeherrschung. Ein unvergesslicher Abend voller Lachen ist garantiert!",
   "category": "Kultur & Bühne",

@@ -101,6 +101,22 @@ export function V4EventDetail({
   const sourceAttribution = resolveSourceAttribution(event);
   // Dubletten-Quellen: der Dedup hat ihre Inhalte in diese Zeile übernommen.
   const alsoListedSources = buildAlsoListedSources(sourceAttribution, duplicateSources ?? []);
+  // SEO-Bilder-Fix: Mini-Bilder (<600px, vermessen in image_width)
+  // durch große Kategorie-Fallbacks ersetzen — konsistent mit dem
+  // JSON-LD-Bild, damit Googles Thumbnail nie Pixelmatsch zeigt.
+  const heroImage = resolvePrimaryEventImage({
+    imageUrl: event.image_url,
+    imageWidth: event.image_width,
+    sourceId: event.source_id,
+    category: event.category,
+    title: event.title,
+    bundesland: event.bundesland,
+  });
+  // Bildnachweis nur am Bild der Quelle, nie am eigenen Kategoriebild.
+  const showsSourceImage = (event.images?.length ?? 0) > 1 || heroImage === event.image_url?.trim();
+  const heroImageCredit = showsSourceImage && event.image_credit
+    ? { credit: event.image_credit, sourceUrl: event.source_url ?? sourceAttribution.url }
+    : null;
 
   return (
     <div className="bg-[var(--v4-surface)] min-h-screen">
@@ -109,18 +125,9 @@ export function V4EventDetail({
         startDate={event.start_date}
         locationName={event.location_name}
         city={event.bundesland}
-        // SEO-Bilder-Fix: Mini-Bilder (<600px, vermessen in image_width)
-        // durch große Kategorie-Fallbacks ersetzen — konsistent mit dem
-        // JSON-LD-Bild, damit Googles Thumbnail nie Pixelmatsch zeigt.
-        imageUrl={resolvePrimaryEventImage({
-          imageUrl: event.image_url,
-          imageWidth: event.image_width,
-          sourceId: event.source_id,
-          category: event.category,
-          title: event.title,
-          bundesland: event.bundesland,
-        })}
+        imageUrl={heroImage}
         images={event.images}
+        imageCredit={heroImageCredit}
       />
 
       <div className="max-w-[1180px] mx-auto px-5 md:px-14 py-8 md:py-12 grid grid-cols-1 md:grid-cols-[1fr_400px] gap-8 md:gap-12 pb-[120px] md:pb-12">

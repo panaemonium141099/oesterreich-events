@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Landing Redesign</title>
+<meta name="description" content="Drei Varianten für die Startseite von lasstreffen.at, Desktop und Handy, mit echten Events vom 29.10.2026.">
+<style>
+:root{--bg:#0a0a0c;--ink:#fff;--muted:rgba(255,255,255,.55);--line:rgba(255,255,255,.1);color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Geist,Inter,system-ui,sans-serif}
+.bar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.bar b{font-size:14px;margin-right:10px}
+.bar button{font:inherit;font-size:13px;font-weight:600;color:var(--muted);background:none;border:1px solid var(--line);padding:7px 14px;border-radius:999px;cursor:pointer}
+.bar button.on{background:#fff;color:#0a0a0c;border-color:#fff}
+.bar .vp{margin-left:auto;display:flex;gap:6px}
+.bar p{width:100%;margin:6px 0 0;font-size:13px;color:var(--muted);line-height:1.5}
+.stage{height:calc(100% - 92px);display:flex;justify-content:center;background:#000}
+iframe{border:0;width:100%;height:100%;background:#0a0a0c}
+iframe.m{width:390px;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+</style></head><body>
+<div class="bar"><b>Startseite: Varianten</b>
+<button class="on" data-v="d-tagesausgabe">D · Tagesausgabe</button><button data-v="a-buehne">A · Saison-Bühne</button><button data-v="b-heute">B · Heute in Österreich</button><button data-v="c-einstiege">C · Einstiege</button>
+<div class="vp"><button class="on" data-w="d">Desktop</button><button data-w="m">Handy</button></div>
+<p id="note"></p></div>
+<div class="stage"><iframe id="f" src="d-tagesausgabe.html" title="Variante"></iframe></div>
+<script>
+const notes={
+'d-tagesausgabe':'Nach dem Feedback vom 29.10.: Datumszeile wie ein Zeitungskopf, darunter eine Bühne aus vier ungleichen Karten mit je einer Rolle: Tipp des Tages (ein Veranstalter pro Tag, als Gesponsert gekennzeichnet), Saison, Karte mit den Pins von heute, Künstler mit Folgen-Knopf. Darunter wechseln die Formen: Programmliste, Poster-Spur, Regionen, Festivals und Blog als Listen, Freizeit bei Regen.',
+'a-buehne':'Ein großes Saisonbild als Bühne (Martiniloben), darauf der Slogan, Datum und Zahl, Suche und Schnell-Chips; rechts die Saison-Picks als Panel. Darunter die Regale von /entdecken plus Region, Freizeit, Festivals, Blog. Newsletter und Konto als Zeilen, nicht als Kästen.',
+'b-heute':'Kopf wie /entdecken (Titel links, Datum und Zahl rechts), Suche mit Orts-Chips, dann die Top-Picks-Bühne mit dem Tipp des Tages; die Saison als farbiges Band mit Poster-Karten. Die konsequenteste Variante, die Landing wird zur kuratierten Ausgabe von heute.',
+'c-einstiege':'Suche zuerst, dann sechs Einstiegskacheln mit echten Bildern: Saison (doppelt breit), Heute Abend, Wochenende, Konzerte, Karte. Wer weiß was er will, ist nach einem Klick dort; darunter dieselben Regale.'};
+const f=document.getElementById('f'),note=document.getElementById('note');let v='d-tagesausgabe',w='d';
+function go(){f.src=v+'.html';f.className=w==='m'?'m':'';note.textContent=notes[v];document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('[data-w]').forEach(b=>b.classList.toggle('on',b.dataset.w===w));}
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{v=b.dataset.v;go()});document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{w=b.dataset.w;go()});go();
+</script></body></html>

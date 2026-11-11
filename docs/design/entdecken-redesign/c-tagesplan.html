@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Entdecken – Variante C: Tagesplan</title>
+<link rel="stylesheet" href="base.css">
+<style>
+.head{padding:34px 0 0}
+.head h1{margin:0;font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.head h1 span{color:var(--ink30)}
+.fbar{display:flex;gap:8px;align-items:center;margin:22px 0 0;padding:12px 0;border-top:1px solid var(--h2);border-bottom:1px solid var(--h2);position:sticky;top:56px;background:var(--surface);z-index:6;overflow-x:auto;scrollbar-width:none}
+.fbar::-webkit-scrollbar{display:none}
+.fbar .sep{width:1px;height:22px;background:var(--h3);margin:0 4px;flex:none}
+.fbar .cnt{margin-left:auto;font-size:13px;color:var(--ink50);white-space:nowrap}
+/* Highlights */
+.hl{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 8px}
+@media(max-width:720px){.hl{grid-template-columns:repeat(2,1fr)}}
+.hl a{position:relative;height:150px;border-radius:12px;overflow:hidden;background:var(--elev)}
+.hl img{width:100%;height:100%;object-fit:cover;object-position:top}
+.hl .ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(5,5,6,.9))}
+.hl b{position:absolute;left:12px;right:12px;bottom:11px;font-size:14px;font-weight:800;letter-spacing:-.015em;line-height:1.2}
+.hl i{position:absolute;left:12px;top:10px;font-style:normal;font-size:11px;font-weight:700;color:#0a0a0c;background:#fff;padding:3px 6px;border-radius:5px}
+/* Tagesblöcke */
+.dayblock{display:grid;grid-template-columns:150px 1fr;gap:0 28px;padding:30px 0 10px;border-top:1px solid var(--h2);margin-top:22px}
+.dayblock:first-of-type{border-top:0}
+.dstick{position:sticky;top:116px;align-self:start}
+.dstick .n{font-size:72px;font-weight:800;letter-spacing:-.06em;line-height:.9}
+.dstick .d{font-size:15px;font-weight:700;margin-top:6px}
+.dstick .d em{font-style:normal;color:var(--ink50);font-weight:500;display:block;font-size:13px;margin-top:2px}
+.dstick .k{display:inline-block;margin-top:12px;font-size:11.5px;font-weight:700;color:var(--amber);border:1px solid rgba(245,185,66,.4);padding:4px 8px;border-radius:6px}
+@media(max-width:720px){.dayblock{grid-template-columns:1fr}.dstick{position:static;display:flex;align-items:baseline;gap:12px;margin-bottom:10px}.dstick .n{font-size:40px}.dstick .k{margin:0 0 0 auto}}
+.rows{display:flex;flex-direction:column}
+.r{display:grid;grid-template-columns:56px 64px 1fr auto;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--h2)}
+.r .tm{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.r img{width:64px;height:64px;border-radius:8px;object-fit:cover;background:var(--elev)}
+.r h3{margin:0;font-size:15.5px;font-weight:700;letter-spacing:-.015em;line-height:1.25}
+.r p{margin:4px 0 0;font-size:13px;color:var(--ink50)}
+.r p b{color:var(--ink70);font-weight:600}
+.r .ct{display:inline-block;margin-left:8px;font-size:11px;font-weight:700;color:var(--ink50);border:1px solid var(--h3);padding:2px 7px;border-radius:5px;vertical-align:1px}
+.r .rt{display:flex;align-items:center;gap:14px}
+.r .pr{font-size:14px;font-weight:700;min-width:60px;text-align:right}
+.r .tk{font-size:12.5px;font-weight:700;color:#0a0a0c;background:var(--amber);padding:8px 14px;border-radius:8px;white-space:nowrap}
+.r .tk.o{background:transparent;color:var(--ink70);border:1px solid var(--h3)}
+@media(max-width:720px){.r{grid-template-columns:48px 1fr;gap:10px 12px}.r .tm{grid-row:1}.r img{display:none}.r .rt{grid-column:1/-1;justify-content:space-between}.r .pr{text-align:left}}
+.rmore{padding:14px 0 0;font-size:13.5px;font-weight:700;color:var(--ink70)}
+.end{padding:50px 0 70px;text-align:center;color:var(--ink30);font-size:13px}
+</style></head><body>
+<div class="nav wrap"><span class="logo">lass<b>treffen</b>.at</span><div class="links"><span class="on">Entdecken</span><span>Freizeit</span><span>Künstler</span><span>Karte</span><span>Meine Pläne</span></div><div class="search">⌕ Künstler, Event oder Ort</div><span class="cta">Anmelden</span></div>
+
+<div class="wrap">
+  <header class="head"><h1>Entdecken <span>Österreich</span></h1></header>
+  <div class="fbar"><span class="chip on">Heute</span><span class="chip">Morgen</span><span class="chip">Wochenende</span><span class="chip">📅 Datum</span><span class="sep"></span><span class="chip">📍 Ganz Österreich ▾</span><span class="chip">Kategorie ▾</span><span class="chip">Preis ▾</span><span class="chip">Gratis</span><span class="cnt">1.284 Events</span></div>
+
+  <div class="hl" id="hl"></div>
+  <div id="days"></div>
+  <div class="end">Alles geladen bis Sonntag, 25. Oktober. Datum wählen für später.</div>
+</div>
+
+<script src="data.js"></script>
+<script>
+const hl=[EVENTS[15],EVENTS[7],EVENTS[14],EVENTS[1]];
+document.getElementById('hl').innerHTML = hl.map(e=>`<a><img src="${e.img}" alt=""><div class="ov"></div><i>Heute ${e.time}</i><b>${e.t}</b></a>`).join('');
+const row=e=>`<a class="r"><span class="tm">${e.time}</span><img src="${e.img}" alt=""><div><h3>${e.t}<span class="ct">${e.cat}</span></h3><p><b>${e.venue}</b> · ${e.city}</p></div><div class="rt"><span class="pr ${e.price==='Gratis'?'free':''}">${e.price}</span><span class="tk ${e.price==='Gratis'||e.price==='Spende'?'o':''}">${e.price==='Gratis'||e.price==='Spende'?'Merken':'Tickets'}</span></div></a>`;
+document.getElementById('days').innerHTML = DAYS.map((d,i)=>{const ev=EVENTS.filter(e=>e.day===i).sort((a,b)=>a.time.localeCompare(b.time));if(!ev.length)return'';return `<section class="dayblock"><div class="dstick"><div class="n">${d.n}</div><div class="d">${['Donnerstag','Freitag','Samstag','Sonntag'][i]}<em>${d.m.replace('.','ober')} 2026</em></div><span class="k">${d.k}</span></div><div class="rows">${ev.map(row).join('')}<div class="rmore">Alle ${[312,287,402,255][i]} Events am ${d.d} anzeigen ›</div></div></section>`}).join('');
+</script>
+</body></html>

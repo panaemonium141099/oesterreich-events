@@ -1,4 +1,6 @@
-export { V4ArtistsHero } from './V4ArtistsHero';
-export { V4ArtistSearchResult } from './V4ArtistSearchResult';
-export { V4FollowedArtistsGrid, type FollowedArtistWithMatches } from './V4FollowedArtistsGrid';
-export { V4MatchingEvents } from './V4MatchingEvents';
+export { ArtistsWall } from './ArtistsWall';
+export { ArtistSheet } from './ArtistSheet';
+export { ArtistProfile, artistHref } from './ArtistProfile';
+export { ArtistPageClient } from './ArtistPageClient';
+export { useFollowed } from './use-followed';
+export { ArtistCard, ArtistRow, ArtistAvatar, FollowButton } from './artist-ui';

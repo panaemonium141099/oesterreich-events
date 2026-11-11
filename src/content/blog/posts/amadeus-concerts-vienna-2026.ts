@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/amadeus-concerts-vienna-kuenstlerhaus-22012230/?affiliate=J70",
   "publishDate": "2026-09-27",
   "updatedDate": "2026-09-27",
+  "factSources": {
+    "checkedAt": "2026-09-27",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/amadeus-concerts-vienna-kuenstlerhaus-22012230/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Walzer, Polkas und große Klassik in kleiner Runde: Die Amadeus Concerts Vienna spielen am 28. November 2026 im Salon Karlsplatz im Künstlerhaus. Mit fünf Musikern, Sopran und einem Glas Sekt danach.",
   "category": "Kultur & Bühne",

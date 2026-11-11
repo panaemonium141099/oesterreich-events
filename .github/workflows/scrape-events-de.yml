@@ -1,0 +1,254 @@
+name: Scrape Events DE
+
+# DE-Nachtlauf (fn-29.18) als eigenes System neben scrape-events.yml (AT):
+# gleicher Code, gleiche Datenbank, aber eigener Zeitplan, eigene Shards und
+# eigene Nachbearbeitung, die nur DE-Zeilen anfasst (scrape-pipeline.ts
+# --country DE, src/lib/pipeline/pipeline-country.ts). Ein roter DE-Lauf
+# hält den AT-Lauf nicht auf und macht ihn nicht rot, und umgekehrt.
+#
+# Zeitplan: 22:17 Wien. Die Shards brauchen gut 3 h (Zeitbudget je Adapter
+# 180 min), die Nachbearbeitung endet damit lange vor der AT-Nachbearbeitung
+# (AT-Shards ab 03:17, rund 4 h). Läuft die AT-Nachbearbeitung trotzdem noch
+# (verspäteter Start bei GitHub), wartet die DE-Nachbearbeitung auf sie;
+# AT wartet nie auf DE.
+
+on:
+  schedule:
+    - cron: '17 22 * * *'
+      timezone: Europe/Vienna
+  workflow_dispatch:
+    inputs:
+      skip_scrapers:
+        description: 'Nur die DE-Nachbearbeitung, ohne Shards und ohne Eventfrog'
+        required: false
+        default: 'false'
+        type: boolean
+      # Freigabe nach einem Ventil-Stopp des DE-Dedup: Bericht (Artefakt
+      # scrape-reports-de/dedup-plan.json) prüfen, dann mit höheren Grenzen
+      # neu starten (am schnellsten mit skip_scrapers).
+      dedup_max_new_duplicates:
+        description: 'Dedup DE: Grenze neue Duplikate am Bestand (leer = 800)'
+        required: false
+        default: ''
+      dedup_max_inflow_duplicates:
+        description: 'Dedup DE: Grenze neue Duplikate im Zulauf (leer = 4000)'
+        required: false
+        default: ''
+      dedup_max_releases:
+        description: 'Dedup DE: Grenze Freigaben (leer = 300)'
+        required: false
+        default: ''
+      dedup_max_garbage:
+        description: 'Dedup DE: Grenze Müll-Unterdrückungen (leer = 1000)'
+        required: false
+        default: ''
+      admission_recheck_max_holds:
+        description: 'Nachprüfung DE: Grenze Haltungen (leer = 500)'
+        required: false
+        default: ''
+      admission_recheck_max_releases:
+        description: 'Nachprüfung DE: Grenze Freigaben (leer = 300)'
+        required: false
+        default: ''
+
+# Nie zwei DE-Läufe gleichzeitig: die Sperre je Website (host-gate.ts) gilt
+# je Prozess, zwei Läufe würden dieselben Gemeinde-Server doppelt abfragen.
+concurrency:
+  group: scrape-events-de
+  cancel-in-progress: false
+
+env:
+  # Muss DE_SHARD_COUNT in src/lib/scrapers/de/nachtlauf.ts entsprechen
+  # (Matrix unten, Wächter de-nachtlauf.test.ts).
+  DE_SHARD_COUNT: 3
+
+jobs:
+  # Adapter mit gemeinsamer Website im selben Shard (nachtlauf.ts),
+  # Zeitbudget je Adapter 180 min, danach Teilergebnis; iKISS und
+  # verwaltungsportal setzen im nächsten Lauf fort.
+  scrape-de:
+    if: ${{ github.event_name == 'schedule' || github.event.inputs.skip_scrapers != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2]
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SCRAPER_SOFT_BUDGET_MIN: 180
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Scrape DE shard ${{ matrix.shard }}/${{ env.DE_SHARD_COUNT }}
+        run: npx tsx src/scripts/scrape.ts --de-shard ${{ matrix.shard }}/${{ env.DE_SHARD_COUNT }}
+      # Stand je Kalender (src/lib/scrapers/de/kalender-stand.ts) für den Abdeckungsbericht.
+      - name: Kalenderstand des Shards sichern
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: de-kalender-shard-${{ matrix.shard }}
+          path: reports/kalender/
+          retention-days: 3
+          if-no-files-found: ignore
+
+  # Eventfrog für Deutschland (Public API, src/lib/eventfrog/), neben den
+  # Shards. Als Job dieses Laufs und nicht als eigener Zeitplan: GitHub startet
+  # geplante Läufe Stunden später (05.11.2026: AT-Nachtlauf 7 h, DE 4 h), nur
+  # `needs` sichert, dass die Nachbearbeitung den frischen Bestand sieht.
+  # Der AT-Import (import-eventfrog.yml) bleibt davon getrennt: eigener Lauf,
+  # eigener Bericht (workflow_runs: import-eventfrog-de). Vollabruf DE: rund
+  # 150 der 2.000 API-Anfragen am Tag.
+  # Bilder spiegelt der DE-Lauf vorerst nicht (EVENTFROG_IMAGES: 'off',
+  # Begründung in src/lib/eventfrog/import.ts): die Events gehen ohne Bild
+  # in die DB, Hotlinks nie.
+  eventfrog-de:
+    if: ${{ github.event_name == 'schedule' || github.event.inputs.skip_scrapers != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      EVENTFROG_API_KEY: ${{ secrets.EVENTFROG_API_KEY }}
+      EVENTFROG_COUNTRIES: DE
+      EVENTFROG_IMAGES: 'off'
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Import Eventfrog DE
+        run: npx tsx src/scripts/import-eventfrog.ts
+
+  post:
+    # Läuft immer, auch wenn ein Shard oder der Eventfrog-Import scheitert
+    # (wie in scrape-events.yml).
+    needs: [scrape-de, eventfrog-de]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    permissions:
+      contents: read
+      actions: read
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      # Abdeckung nach Ursache: Kalenderstand der Shards dieser Nacht und der
+      # zuletzt gesicherte Stand (Adapter mit Cursor lesen je Nacht nur einen
+      # Teil ihrer Kalender). Fehlt eines, nennt der Bericht das.
+      - name: Kalenderstand der Shards holen
+        if: ${{ github.event_name == 'schedule' || github.event.inputs.skip_scrapers != 'true' }}
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: de-kalender-shard-*
+          merge-multiple: true
+          path: reports/kalender/
+
+      - name: Kalenderstand des letzten Laufs holen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=de-kalender-stand&per_page=10" --jq '[.artifacts[] | select(.expired == false)][0].workflow_run.id // empty')
+          if [ -z "$run" ]; then
+            echo "Noch kein gesicherter Kalenderstand."
+            exit 0
+          fi
+          gh run download "$run" --repo "$GITHUB_REPOSITORY" -n de-kalender-stand -D reports/kalender-vorher || echo "::warning::Kalenderstand von Run $run nicht lesbar"
+
+      # Beide Nachbearbeitungen schreiben in dieselbe Datenbank (Micro-
+      # Instanz): nie gleichzeitig. Höchstens 180 min, danach läuft DE
+      # trotzdem (die Zeilen sind getrennt, es geht nur um die Last).
+      - name: Warten, bis keine AT-Nachbearbeitung läuft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 36); do
+            busy=""
+            for id in $(gh run list --repo "$GITHUB_REPOSITORY" --workflow scrape-events.yml --status in_progress --json databaseId --jq '.[].databaseId'); do
+              if gh run view "$id" --repo "$GITHUB_REPOSITORY" --json jobs --jq '.jobs[] | select(.name == "post" and .status == "in_progress") | .name' | grep -q post; then
+                busy="$id"
+              fi
+            done
+            if [ -z "$busy" ]; then
+              echo "Keine AT-Nachbearbeitung aktiv."
+              exit 0
+            fi
+            echo "AT-Nachbearbeitung läuft (Run $busy), warte 5 min ($i/36)"
+            sleep 300
+          done
+          echo "::warning::AT-Nachbearbeitung läuft seit 180 min, DE startet trotzdem"
+
+      - name: DE-Nachbearbeitung (score → withdrawal → admission_recheck → dedup → dedup_audit → coverage)
+        run: |
+          TRIGGER="cron"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TRIGGER="github_dispatch"
+          fi
+          npx tsx src/scripts/scrape-pipeline.ts --trigger "$TRIGGER" --skip-scrapers --country DE
+        env:
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          DEDUP_REPORT_PATH: reports/dedup-plan.json
+          DEDUP_MAX_NEW_DUPLICATES: ${{ github.event.inputs.dedup_max_new_duplicates }}
+          DEDUP_MAX_INFLOW_DUPLICATES: ${{ github.event.inputs.dedup_max_inflow_duplicates }}
+          DEDUP_MAX_RELEASES: ${{ github.event.inputs.dedup_max_releases }}
+          DEDUP_MAX_GARBAGE: ${{ github.event.inputs.dedup_max_garbage }}
+          ADMISSION_RECHECK_REPORT_PATH: reports/admission-recheck.json
+          ADMISSION_RECHECK_MAX_HOLDS: ${{ github.event.inputs.admission_recheck_max_holds }}
+          ADMISSION_RECHECK_MAX_RELEASES: ${{ github.event.inputs.admission_recheck_max_releases }}
+
+      - name: Upload report artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scrape-reports-de
+          path: reports/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Kalenderstand für die nächste Nacht sichern
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: de-kalender-stand
+          path: reports/kalender-stand.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Finalize if pipeline crashed (scoped to this run)
+        if: always()
+        run: npx tsx src/scripts/finalize-stale-runs.ts --github-run-id "$GITHUB_RUN_ID"
+        env:
+          GITHUB_RUN_ID: ${{ github.run_id }}

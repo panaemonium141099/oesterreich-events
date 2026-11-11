@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/poxrucker-sisters-horizont-support-roba-rosentalroz-festival-kulturhaus-feistritz-im-rosental-22036075/?affiliate=J70",
   "publishDate": "2026-10-06",
   "updatedDate": "2026-10-06",
+  "factSources": {
+    "checkedAt": "2026-10-06",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/poxrucker-sisters-dna-tour-kulturhaus-feistritz-im-rosental-22036075/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Am 6. November bringen die Poxrucker Sisters ihr Programm „Horizont“ ins Kulturhaus Feistritz im Rosental. Support ist Roba, Beginn um 18:00 Uhr, Tickets ab 38 Euro.",
   "category": "Musik & Festival",

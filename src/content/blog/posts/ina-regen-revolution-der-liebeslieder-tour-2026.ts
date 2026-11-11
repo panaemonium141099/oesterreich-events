@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/ina-regen-revolution-der-liebeslieder-tour-globe-wien-marx-halle-20949332/?affiliate=J70",
   "publishDate": "2026-10-07",
   "updatedDate": "2026-10-07",
+  "factSources": {
+    "checkedAt": "2026-10-07",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/ina-regen-revolution-der-liebeslieder-tour-globe-wien-marx-halle-20949332/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Ina Regen kommt mit ihrer Live-Band und dem neuen Album „Revolution der Liebeslieder“ ins Globe Wien. Neue Songs, vertraute Lieblingsstücke und ein Abend voller Gefühl. Tickets gibt es ab 46,90 €.",
   "category": "Musik & Festival",

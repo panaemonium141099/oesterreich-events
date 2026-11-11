@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/angelo-kelly-band-ready-to-rock-tour-2026-orpheum-graz-20746953/?affiliate=J70",
   "publishDate": "2026-08-27",
   "updatedDate": "2026-08-27",
+  "factSources": {
+    "checkedAt": "2026-08-27",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/angelo-kelly-band-ready-to-rock-tour-2026-orpheum-graz-20746953/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Nach einer kreativen Pause kehrt Angelo Kelly 2026 mit seiner \"READY TO ROCK\" Tour zurück auf die Bühne. Freuen Sie sich auf neue Songs, Solohits und Kelly Family Klassiker in intimer Atmosphäre im Orpheum Graz.",
   "category": "Musik & Festival",

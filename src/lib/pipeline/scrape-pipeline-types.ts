@@ -1,4 +1,5 @@
 // src/lib/pipeline/scrape-pipeline-types.ts
+import type { PipelineCountry } from './pipeline-country';
 
 export type PipelineTrigger = 'cron' | 'manual' | 'github_dispatch';
 
@@ -44,6 +45,8 @@ export interface PipelineResults {
   github_run_id: string | null;
   github_run_url: string | null;
   dry_run: boolean;
+  /** Land des Laufs (`--country`); null = alle Länder. */
+  country?: PipelineCountry | null;
 }
 
 export interface PipelineOptions {
@@ -64,6 +67,8 @@ export interface PipelineOptions {
   /** Skip submitting new URLs to IndexNow + Google Indexing API. */
   skipIndexing?: boolean;
   dryRun?: boolean;
+  /** Nur die Zeilen dieses Landes (src/lib/pipeline/pipeline-country.ts). */
+  country?: PipelineCountry | null;
 }
 
 /** Error patterns that indicate transient/retryable failures */

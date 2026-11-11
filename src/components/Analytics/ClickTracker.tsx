@@ -34,6 +34,9 @@ export function ClickTracker() {
       if (id) data.id = id;
       const provider = el.getAttribute('data-track-provider');
       if (provider) data.provider = provider;
+      // fn-30: Art des Tipps des Tages (sponsored/auto) am landing_tip_click.
+      const kind = el.getAttribute('data-track-kind');
+      if (kind) data.kind = kind;
       const href = el.getAttribute('href');
       if (href) data.href = href;
 

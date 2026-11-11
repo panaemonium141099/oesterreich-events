@@ -1,0 +1,982 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//wp-events-plugin.com//7.4.11//EN
+TZID:Europe/Berlin
+X-WR-TIMEZONE:Europe/Berlin
+BEGIN:VEVENT
+UID:1234@laubach-online.de
+DTSTART:20261029T090000Z
+DTEND:20261029T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2026-1
+ 0-29/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1568@laubach-online.de
+DTSTART:20261030T190000Z
+DTEND:20261030T220000Z
+DTSTAMP:20260703T145523Z
+URL:https://laubach-online.de/events/country-abend-mit-shota-adamashvili/
+SUMMARY:Country - Abend mit Shota Adamashvili
+DESCRIPTION:Es gibt wohl kaum einen Country-Sänger\, der so einsam ist wie
+  Shota Adamashvili. Er ist der einzige in Georgien – nicht im amerikanis
+ chen Bundesstaat\, sondern in dem Land\, das an der Grenze zwischen Europa
+  und Asien liegt. Sein amerikanischer Akzent verwirrt die Leute oft\, wenn
+  sie ihn zum ersten Mal fragen\, woher er kommt. Geboren und aufgewachsen 
+ in der kleinen Stadt Bolnisi in der Republik Georgien\, hätte Shota Adama
+ shvili nie gedacht\, dass er eines Tages Country-Musiker werden würde. Ab
+ er der Film „The Electric Horseman“ veränderte sein Leben für immer.
+  Der Soundtrack „My Heroes Have Always Been Cowboys“ weckte seinen Tra
+ um\, ein reisender Singer/Songwriter zu werden. Der Gewinn von sechs bedeu
+ tenden Auszeichnungen bei den Caucasus Music Awards Phoenix und den Texas 
+ Sounds International Country Music Awards beweist\, dass nicht nur seine t
+ reuen Fans\, sondern auch die professionelle Musikszene seine aufrichtige 
+ und gekonnte Leidenschaft als Country-Musiker.
+CATEGORIES:Konzerte
+LOCATION:Braumanufaktur Laubach\, Gerhart-Hautmann-Straße 1\, Laubach\, 35
+ 321\, Deutschland
+GEO:50.542969;8.987482
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Gerhart-Hautmann-Straße 1\
+ , Laubach\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Braumanufaktur 
+ Laubach:geo:50.542969,8.987482
+END:VEVENT
+BEGIN:VEVENT
+UID:1599@laubach-online.de
+DTSTART:20261030T193000Z
+DTEND:20261030T220000Z
+DTSTAMP:20261008T111419Z
+URL:https://laubach-online.de/events/der-stadttheater-bus-bringt-sie-zu-de
+ m-schauspiel-jakob-der-luegner-nach-dem-roman-von-jurek-becker/
+SUMMARY:Der Stadttheater-Bus bringt Sie zu dem Schauspiel „Jakob der Lüg
+ ner“ nach dem Roman von Jurek Becker
+DESCRIPTION:„Seit gestern sind die Zeiten nicht mehr normal\, seit gester
+ n ist morgen auch noch ein Tag“\nZufällig erfährt Jakob Heym\, dass di
+ e ersehnte Befreiung des Ghettos\, in dem er und die anderen gefangen sind
+ \, kurz bevorsteht. Damit man ihm glaubt\, behauptet er im Besitz eines Ra
+ dios zu sein. Ab diesem Moment wirkt jeder Hauch einer Na-chricht wie neue
+ s Lebenselixier und stiftet Hoffnung\, sodass Jakobs Lügen zur einzigen W
+ ahrheit werden\, die das Leben retten können.\nJurek Beckers herzbeklemme
+ nder\, uneitler und mit sanftem\, lakonischem Humor geschriebener Roman 
+ „Jakob der Lügner"\, erschien 1969 als erster Teil seiner Hol-ocaust- T
+ rilogie und wurde in mehr als zwanzig Sprachen übersetzt. Nun haben Chris
+ tine Becker und Andy Murray eine exklusive Bühnenfassung erarbeitet. Regi
+ sseur Thomas Krupa interessiert sich für die Überzeitlichkeit der Parabe
+ l\, für die Verführungskraft der Lüge\, ebenso wie die moralischen Grau
+ zonen des Über-lebens. Und für die große Kunst des Geschichtenerzählen
+ s in einer Zeit\, in der Macht und Desinformation zweifelhaft eng beieinan
+ der liegen.\nFür diese Fahrt gilt: Wer mit dem Stadttheaterbus mitfahren 
+ will\, kann bis 14 Tage vor der Aufführung Karten inklusive Busfahrt in d
+ en Rathäusern oder in den Tourismusbüros der einzelnen Städte kaufen.\n
+ Am Aufführungstag fährt der Bus um 18:05 Uhr in Laubach (Sparkasse)\, um
+  18:15 Uhr in Villingen (Volksbank\, Hochstraße 5)\, um 18:25 Uhr in Hung
+ en (Rathaus)\, um 18:35 Uhr in Langsdorf (Haltestelle Licher Pforte)\, um 
+ 18:45 Uhr in Lich (Hal-testelle Heinrich- Neeb-Straße) und um 18:50 Uhr a
+ n der Haltestelle Garbenteicher Straße ab.\nKarten für diese Theaterfahr
+ t erhalten Sie ab sofort zu 35\,00 € (PG 2) sowie 39\,00 € (PG 1) bei 
+ der Stadtverwaltung Hungen (Tel. 06402-850)\, dem Laubacher Kultur- und To
+ urismusbüro (06405-921-372) und dem Bürgerbüro Lich (06404-806-100).
+ATTACH;FMTTYPE=image/jpeg:https://laubach-online.de/wp-content/uploads/202
+ 2/12/Theater.jpg
+CATEGORIES:Konzerte
+LOCATION:Sparkassen Parkplatz\, August Krieger Straße 19\, Laubach\, 35321
+ \, Deutschland
+GEO:50.541442;8.986713
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=August Krieger Straße 19\,
+  Laubach\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Sparkassen Parkp
+ latz:geo:50.541442,8.986713
+END:VEVENT
+BEGIN:VEVENT
+UID:1591@laubach-online.de
+DTSTART:20261101T130000Z
+DTEND:20261101T180000Z
+DTSTAMP:20261005T081011Z
+URL:https://laubach-online.de/events/theatergruppe-freienseen/
+SUMMARY:Theatergruppe Freienseen
+DESCRIPTION:Die Theatergruppe Freienseen präsentiert:\nAber bitte mit Sche
+ idung!\nEinlass ab 13 Uhr\, Beginn 14 Uhr\, es gibt Kaffee und Kuchen.
+ATTACH;FMTTYPE=image/jpeg:https://laubach-online.de/wp-content/uploads/202
+ 6/10/1.November_2026-pdf.jpg
+CATEGORIES:Konzerte
+LOCATION:Heinrich Norwig Halle Freienseen\, Oberseener Weg\, 35321\, Deutsc
+ hland
+GEO:50.560367;9.048943
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Oberseener Weg\, 35321\, De
+ utschland;X-APPLE-RADIUS=100;X-TITLE=Heinrich Norwig Halle Freienseen:geo:
+ 50.560367,9.048943
+END:VEVENT
+BEGIN:VEVENT
+UID:1235@laubach-online.de
+DTSTART:20261105T090000Z
+DTEND:20261105T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2026-1
+ 1-05/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1601@laubach-online.de
+DTSTART:20261106T160000Z
+DTEND:20261106T180000Z
+DTSTAMP:20261008T111540Z
+URL:https://laubach-online.de/events/der-stadttheater-bus-bringt-sie-zu-de
+ m-schauspiel-margaret-heldin-fuer-alle-faelle-schauspiel-frei-nach-dem-mae
+ rchen-von-dora-gimesi/
+SUMMARY:Der Stadttheater-Bus bringt Sie zu dem Schauspiel „Margaret: Held
+ in für alle Fälle" Schauspiel frei nach dem Märchen von Dóra Gimési
+DESCRIPTION:Margaret: Heldin für alle Fälle Schauspiel frei nach dem Mär
+ chen von Dóra Gimési\nTextfassung von Simone Sterr FAMILIENSTÜCK | 6. D
+ EZEMBER 2026 | 16:00 UHR | AB 6 JAHREN\nSimon ist Märchenerzähler\, doch
+  es läuft nicht gut für ihn: Alle Märchen ähneln sich\, wie langweilig
+ ! Aber dann kommt Margaret und rüttelt alles durcheinander. Ihr Berufswun
+ sch: Heldin. Und sie kennt ein Märchen\, das es in sich hat. Darin macht 
+ sich eine junge Frau auf in die Welt\, schlagt eine riesige Seeschlange in
+  die Flucht\, trifft Kobolde und Hexen\, lernt das Schwert zu führen und 
+ den Wind zu lesen. Ein großes Abenteuer mit Zauber und Fantasie im Große
+ n Haus.\nFür diese Fahrt gilt: Wer mit dem Stadttheaterbus mitfahren will
+ \, kann bis 14 Tage vor der Aufführung Karten inklusive Busfahrt in den R
+ athäusern oder in den Tourismusbüros der einzelnen Städte kaufen.\nAm A
+ ufführungstag fährt der Bus um 18:05 Uhr in Laubach (Sparkasse)\, um 18:
+ 15 Uhr in Villingen (Volksbank\, Hochstraße 5)\, um 18:25 Uhr in Hungen (
+ Rathaus)\, um 18:35 Uhr in Langsdorf (Haltestelle Licher Pforte)\, um 18:4
+ 5 Uhr in Lich (Hal-testelle Heinrich- Neeb-Straße) und um 18:50 Uhr an de
+ r Haltestelle Garbenteicher Straße ab.\nKarten für diese Theaterfahrt er
+ halten Sie ab sofort zu PK 1: 27\,50 € | PK 2: 23\,50 € | Kinder bis 1
+ 4 Jahre: 16\,50 € bei der Stadtverwaltung Hungen (Tel. 06402-850)\, dem 
+ Laubacher Kultur- und Tourismusbüro (06405-921-372) und dem Bürgerbüro 
+ Lich (06404-806-100).
+ATTACH;FMTTYPE=image/jpeg:https://laubach-online.de/wp-content/uploads/202
+ 2/12/Theater.jpg
+CATEGORIES:Konzerte
+LOCATION:Sparkassen Parkplatz\, August Krieger Straße 19\, Laubach\, 35321
+ \, Deutschland
+GEO:50.541442;8.986713
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=August Krieger Straße 19\,
+  Laubach\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Sparkassen Parkp
+ latz:geo:50.541442,8.986713
+END:VEVENT
+BEGIN:VEVENT
+UID:1573@laubach-online.de
+DTSTART:20261106T190000Z
+DTEND:20261106T220000Z
+DTSTAMP:20260727T075735Z
+URL:https://laubach-online.de/events/stefan-keil-una/
+SUMMARY:Stefan Keil &amp\; Una
+DESCRIPTION:Das Duo präsentiert seine neueste CD und begeistert mit den gr
+ ößten Hits von Neil Young.\nEin fulminanter Mix aus Eigenkompositionen\,
+  Gecovertem und Improvisiertem!
+CATEGORIES:Konzerte
+LOCATION:Braumanufaktur Laubach\, Gerhart-Hautmann-Straße 1\, Laubach\, 35
+ 321\, Deutschland
+GEO:50.542969;8.987482
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Gerhart-Hautmann-Straße 1\
+ , Laubach\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Braumanufaktur 
+ Laubach:geo:50.542969,8.987482
+END:VEVENT
+BEGIN:VEVENT
+UID:1598@laubach-online.de
+DTSTART:20261108T180000Z
+DTEND:20261108T203000Z
+DTSTAMP:20261006T113524Z
+URL:https://laubach-online.de/events/konzert-von-saxism/
+SUMMARY:Konzert von Saxism
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://laubach-online.de/wp-content/uploads/202
+ 6/10/Saxism_Ruppertsburg_komprimiert_200kb.jpg
+CATEGORIES:Konzerte
+LOCATION:Ev. Kirche Rupperstburg\, Mönchsgasse 14\, Laubach\, 35321\, Deut
+ schland
+GEO:50.5168;8.964964
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Mönchsgasse 14\, Laubach\,
+  35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Ev. Kirche Rupperstburg:ge
+ o:50.5168,8.964964
+END:VEVENT
+BEGIN:VEVENT
+UID:1236@laubach-online.de
+DTSTART:20261112T090000Z
+DTEND:20261112T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2026-1
+ 1-12/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1574@laubach-online.de
+DTSTART:20261113T190000Z
+DTEND:20261113T220000Z
+DTSTAMP:20260727T081725Z
+URL:https://laubach-online.de/events/logo-dieband/
+SUMMARY:LOGO - dieBand
+DESCRIPTION:alles Deutsche\, von BAP bis Westernhagen steht auf dem Program
+ m der beliebten Band.
+CATEGORIES:Konzerte
+LOCATION:Braumanufaktur Laubach\, Gerhart-Hautmann-Straße 1\, Laubach\, 35
+ 321\, Deutschland
+GEO:50.542969;8.987482
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Gerhart-Hautmann-Straße 1\
+ , Laubach\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Braumanufaktur 
+ Laubach:geo:50.542969,8.987482
+END:VEVENT
+BEGIN:VEVENT
+UID:1594@laubach-online.de
+DTSTART:20261115T140000Z
+DTEND:20261115T170000Z
+DTSTAMP:20261026T075654Z
+URL:https://laubach-online.de/events/finisage-der-gemeinschaftsausstellung
+ -von-michael-ackermann-und-josef-krahforst-2/
+SUMMARY:Finisage - der Gemeinschaftsausstellung von Michael Ackermann und J
+ osef Krahforst
+DESCRIPTION:Finisage der Gemeinschaftsausstellung von den regionalen Künst
+ lern Michael Ackermann und Josef Krahforst
+LOCATION:Kunstraum des Kunstforum Laubach e.V.\, Obere Langgasse 17\, Lauba
+ ch\, Hessen\, 35321\, Deutschland
+GEO:49.318706;8.425405
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Obere Langgasse 17\, Laubac
+ h\, Hessen\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Kunstraum des 
+ Kunstforum Laubach e.V.:geo:49.318706,8.425405
+END:VEVENT
+BEGIN:VEVENT
+UID:1593@laubach-online.de
+DTSTART:20261115T140000Z
+DTEND:20261115T170000Z
+DTSTAMP:20261005T081313Z
+URL:https://laubach-online.de/events/finisage-der-gemeinschaftsausstellung
+ -von-michael-ackermann-und-josef-krahforst/
+SUMMARY:Finisage - der Gemeinschaftsausstellung von Michael Ackermann und J
+ osef Krahforst
+DESCRIPTION:Finisage der Gemeinschaftsausstellung von den regionalen Künst
+ lern Michael Ackermann und Josef Krahforst
+LOCATION:Kunstraum des Kunstforum Laubach e.V.\, Obere Langgasse 17\, Lauba
+ ch\, Hessen\, 35321\, Deutschland
+GEO:49.318706;8.425405
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Obere Langgasse 17\, Laubac
+ h\, Hessen\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Kunstraum des 
+ Kunstforum Laubach e.V.:geo:49.318706,8.425405
+END:VEVENT
+BEGIN:VEVENT
+UID:1237@laubach-online.de
+DTSTART:20261119T090000Z
+DTEND:20261119T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2026-1
+ 1-19/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1575@laubach-online.de
+DTSTART:20261119T190000Z
+DTEND:20261119T220000Z
+DTSTAMP:20260727T081336Z
+URL:https://laubach-online.de/events/james-dean-kindle-max-braun/
+SUMMARY:James Dean Kindle &amp\; Max Braun
+DESCRIPTION:Habt ihr gewusst dass feinster Country Pop nicht nur aus Nashvi
+ lle/ Tennessee sondern auch aus Berlin kommen kann?\n\nUnd das zusammen mi
+ t Max Braun! Die beiden müsst ihr mal googeln! Erlebt sie live bei uns in
+  der Braumanufaktur
+CATEGORIES:Konzerte
+LOCATION:Braumanufaktur Laubach\, Gerhart-Hautmann-Straße 1\, Laubach\, 35
+ 321\, Deutschland
+GEO:50.542969;8.987482
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Gerhart-Hautmann-Straße 1\
+ , Laubach\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Braumanufaktur 
+ Laubach:geo:50.542969,8.987482
+END:VEVENT
+BEGIN:VEVENT
+UID:1600@laubach-online.de
+DTSTART:20261120T193000Z
+DTEND:20261120T220000Z
+DTSTAMP:20261008T111711Z
+URL:https://laubach-online.de/events/der-stadttheater-bus-bringt-sie-zu-de
+ m-schauspiel-die-bruecke-von-mostar-von-igor-memic/
+SUMMARY:Der Stadttheater-Bus bringt Sie zu dem Schauspiel „Die Brücke vo
+ n Mostar" von Igor Memic
+DESCRIPTION:Mina und Leila sind beste Freundinnen. Mit Sasha und Mili ist d
+ as Kleeblatt perfekt. Doch dann kommt der Krieg. Plötzlich scheint\nes wi
+ chtig\, auf welcher Seite der Brücke man lebt\, an was man glaubt\, wo ma
+ n herkommt. Als einzige Überlebende erzählt die\naltere Mina ihre Geschi
+ chte. Eine Geschichte vom Krieg\, der die Jugend klaut\, doch nicht die Se
+ elen kassieren kann\; von Verlust\nund Schmerz aber auch von Liebe und Fre
+ undschaft und vom Mut\, füreinander einzustehen über alle Widrigkeiten h
+ inweg.\nFür diese Fahrt gilt: Wer mit dem Stadttheaterbus mitfahren will\
+ , kann bis 14 Tage vor der Aufführung Karten inklusive Busfahrt in den Ra
+ thäusern oder in den Tourismusbüros der einzelnen Städte kaufen.\nAm Au
+ fführungstag fährt der Bus um 18:05 Uhr in Laubach (Sparkasse)\, um 18:1
+ 5 Uhr in Villingen (Volksbank\, Hochstraße 5)\, um 18:25 Uhr in Hungen (R
+ athaus)\, um 18:35 Uhr in Langsdorf (Haltestelle Licher Pforte)\, um 18:45
+  Uhr in Lich (Haltestelle Heinrich- Neeb-Straße) und um 18:50 Uhr an der 
+ Haltestelle Garbenteicher Straße ab.\nKarten für diese Theaterfahrt erha
+ lten Sie ab sofort zu 35\,00 € (PG 2) sowie 39\,00 € (PG 1) bei der St
+ adtverwaltung Hungen (Tel. 06402-850)\, dem Laubacher Kultur- und Tourismu
+ sbüro (06405-921-372) und dem Bürgerbüro Lich (06404-806-100).
+ATTACH;FMTTYPE=image/jpeg:https://laubach-online.de/wp-content/uploads/202
+ 2/12/Theater.jpg
+CATEGORIES:Konzerte
+LOCATION:Sparkassen Parkplatz\, August Krieger Straße 19\, Laubach\, 35321
+ \, Deutschland
+GEO:50.541442;8.986713
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=August Krieger Straße 19\,
+  Laubach\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Sparkassen Parkp
+ latz:geo:50.541442,8.986713
+END:VEVENT
+BEGIN:VEVENT
+UID:1576@laubach-online.de
+DTSTART:20261121T190000Z
+DTEND:20261121T220000Z
+DTSTAMP:20260727T081221Z
+URL:https://laubach-online.de/events/aline-deanna/
+SUMMARY:Aline Deanna
+DESCRIPTION:Sie ist wieder da!\nAm Samstag\, 21. November 2026 um 19 Uhr pr
+ äsentieren wir wieder die kanadische Singer/ Songwriterin mit ihrer Violi
+ ne.\n\nDiesmal in der evangelischen Kirche zu Ruppertsburg.\n\nAline bring
+ t uns ihre neuesten Country and Western-Stücke aber auch Melancholisches 
+ mit!
+ATTACH;FMTTYPE=image/jpeg:https://laubach-online.de/wp-content/uploads/202
+ 6/07/Aline-Deanna.jpg
+CATEGORIES:Konzerte
+LOCATION:Ev. Kirche Rupperstburg\, Mönchsgasse 14\, Laubach\, 35321\, Deut
+ schland
+GEO:50.5168;8.964964
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Mönchsgasse 14\, Laubach\,
+  35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Ev. Kirche Rupperstburg:ge
+ o:50.5168,8.964964
+END:VEVENT
+BEGIN:VEVENT
+UID:1595@laubach-online.de
+DTSTART:20261122T160000Z
+DTEND:20261122T190000Z
+DTSTAMP:20261005T081513Z
+URL:https://laubach-online.de/events/vernissage-der-malerin-sabine-kalus/
+SUMMARY:Vernissage der Malerin Sabine Kalus
+DESCRIPTION:Die Illustratorin und Malerin Sabine Kalus stellt erstmalig Ihr
+ e Zeichungen und Bilder aus\, die sie bislang der Öffentlichkeit vorentha
+ lten hat.\nSeien Sie gespannt!
+LOCATION:Kunstraum des Kunstforum Laubach e.V.\, Obere Langgasse 17\, Lauba
+ ch\, Hessen\, 35321\, Deutschland
+GEO:49.318706;8.425405
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Obere Langgasse 17\, Laubac
+ h\, Hessen\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Kunstraum des 
+ Kunstforum Laubach e.V.:geo:49.318706,8.425405
+END:VEVENT
+BEGIN:VEVENT
+UID:1238@laubach-online.de
+DTSTART:20261126T090000Z
+DTEND:20261126T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2026-1
+ 1-26/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1577@laubach-online.de
+DTSTART:20261127T190000Z
+DTEND:20261127T220000Z
+DTSTAMP:20260727T081007Z
+URL:https://laubach-online.de/events/tyff-die-aelteste-nachwuchsband-deuts
+ chlands/
+SUMMARY:Tyff - die älteste Nachwuchsband Deutschlands
+DESCRIPTION:Deutschlands älteste Nachwuchsband zeigt euch was sie drauf ha
+ t. Lasst euch begeistern - Eintritt frei (gegen Spende)
+CATEGORIES:Konzerte
+LOCATION:Braumanufaktur Laubach\, Gerhart-Hautmann-Straße 1\, Laubach\, 35
+ 321\, Deutschland
+GEO:50.542969;8.987482
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Gerhart-Hautmann-Straße 1\
+ , Laubach\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Braumanufaktur 
+ Laubach:geo:50.542969,8.987482
+END:VEVENT
+BEGIN:VEVENT
+UID:1603@laubach-online.de
+DTSTART:20261128T143000Z
+DTEND:20261128T170000Z
+DTSTAMP:20261020T080704Z
+URL:https://laubach-online.de/events/repair-cafe-8/
+SUMMARY:Repair Café
+DESCRIPTION:Das Repair-Café im November\nReparieren – Kommunizieren – 
+ Schnabulieren. Am Samstag\, 28. November öffnet das Repair-Café in Lauba
+ ch von 14:30 bis 17:00 Uhr im Alten Bahnhof wieder seine Türen. Ehrenamtl
+ iche Reparateure bieten kostenfrei kleinere Reparaturen in folgenden Berei
+ chen an:\n• Elektronik (z.B. Musikanlagen\, Küchengeräte\, Lampen\, TV
+  u.a.)\n• Mechanik (Haushaltsgeräte wie Küchenmixer\, Föhn u.a.)\n•
+  IT (Computer\, Tablets\, Smartphones\, Drucker u.a.)\n• Näharbeiten (z
+ .B. Annähen von Knöpfen\, Stopfen von Löchern)\nFür IT-Hilfen und Näh
+ arbeiten melden Sie sich bitte unter den unten genannten Kontaktdaten vora
+ b an.\nWährend der Wartezeit besteht die Möglichkeit\, sich bei Kaffee\,
+  Kuchen und kühlen Getränken zu begegnen\, zu fachsimpeln und auszutausc
+ hen.\nUnterstützt wird das Angebot durch das Repair-Café in Pohlheim\, d
+ as Mehrgenerationenhaus der Oberhessischen Diakonie\, die Stadt Laubach so
+ wie durch den Seniorenbeirat.\nWeitere Unterstützung ist gerne gesehen 
+ – Sollten Sie Interesse haben\, sich an dem Projekt technisch\, handwerk
+ lich oder organisatorisch zu beteiligen oder wünschen Sie weitere Informa
+ tionen\, wenden Sie sich gerne an das Team im Familienzentrum Alter Bahnho
+ f unter 0 64 05 – 921 460 oder an soziales@laubach-online.de.
+CATEGORIES:Märkte &amp; Feste
+LOCATION:Alter Bahnhof\, Bahnhofstraße 33\, 35321 Laubach\, Deutschland
+GEO:50.541713;8.984776
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Bahnhofstraße 33\, 35321 L
+ aubach\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Alter Bahnhof:geo:50.54171
+ 3,8.984776
+END:VEVENT
+BEGIN:VEVENT
+UID:1587@laubach-online.de
+DTSTART:20261128T150000Z
+DTEND:20261128T220000Z
+DTSTAMP:20261027T110724Z
+URL:https://laubach-online.de/events/33176/
+SUMMARY:Weihnachtsmarkt Laubach
+DESCRIPTION:Der älteste Weihnachtsmarkt Oberhessens lädt ein\nErleben Sie
+  Weihnachtsatmosphäre pur in der wunderschönen Kulisse unserer mittelalt
+ erlichen Altstadt! Am 28. und 29. November 2026 verwandeln sich der Markt-
+  und Kirchplatz in Laubach in ein stimmungsvolles Weihnachtsdorf.\nFreuen 
+ Sie sich auf ein Meer aus Lichterketten\, liebevoll dekorierte Stände und
+  den Duft von frisch gebackenen Waffeln\, Apfelküchlein\, Fruchtpunsch un
+ d Glühwein-Variationen.\n\n\n\n\n\nDie Highlights auf einen Blick\n\n 	\n
+ \n 	Festliche Eröffnung: Traditioneller ökumenischer Gottesdienst am Sam
+ stag um 15:00 Uhr\, gefolgt von einem Konzert des Musikvereins 1832 Laubac
+ h e.V. um 15:30 Uhr an der Friedrichsburg.\n 	Kreativ-Basar im evangelisch
+ en Gemeindehaus: Stöbern Sie an beiden Tagen durch stilvolles Kunsthandwe
+ rk – von Schmuck\, Keramik und Holzarbeiten bis hin zu handgestrickten U
+ nikaten und Weihnachtsgestecken.\n 	Leuchtende Kinderaugen: Der Nikolaus k
+ ommt am Samstag um 17:30 Uhr mit der Kutsche persönlich für eine Bescher
+ ung der kleinen Gäste auf den Markt.\n 	Kinder-Bastelaktion: Am Samstag l
+ ädt die evangelische Kirchengemeinde von 15:30 bis 17:30 Uhr zum gemeinsa
+ men Basteln in die Kirche ein.\n\n\n\n\n\n\n\n\n\nÖffnungszeiten\n\n 	\n\
+ n 	Samstag\, 28. November 2026: Ab 15:00 Uhr (Kreativbasar &amp\; Marktst
+ ände)\n 	Sonntag\, 29. November 2026: Ab 12:00 Uhr (Kreativbasar &amp\; M
+ arktstände)\n\n\n\n\n\n\nLänger verweilen und genießen: Wenn das offizi
+ elle Programm endet\, fängt die Gemütlichkeit erst richtig an. Bleiben S
+ ie gerne auch in den Abendstunden rund um die Hütten auf dem Markt- und K
+ irchplatz und genießen Sie die magische Stimmung bei heißen Kakao-\, Kaf
+ fee- und Glühweinspezialitäten.\n\n"Mit einem attraktiven Programm und v
+ ielfältigen kreativen sowie kulinarischen Angeboten wird eine Menge gebot
+ en für die sicherlich wieder zahlreichen Besucherinnen und Besucher"\, fr
+ eut sich Bürgermeister Matthias Meyer auf das festliche Wochenende.\n\n\n
+ \n\n\nKontakt &amp\; Informationen\n\n\nHaben Sie Fragen zum Weihnachtsmar
+ kt? Die Tourist-Information der Stadt Laubach hilft Ihnen gerne weiter:\n\
+ n 	\n\n 	Telefon: 06405 – 921 372\n 	E-Mail: tourist-info@laubach-online
+ .de\n\n\n\n\nWir freuen uns auf Ihren Besuch in der Weihnachtsstadt Laubac
+ h!\n\n\n\n\n\n\n\n
+ATTACH;FMTTYPE=image/jpeg:https://laubach-online.de/wp-content/uploads/202
+ 6/09/Weihnachtsmarkt.jpg
+CATEGORIES:Märkte &amp; Feste
+LOCATION:Markt- und Kirchplatz\, Marktplatz\, Laubach\, Deutschland
+GEO:50.54235;8.99029
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Marktplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Markt- und Kirchplatz:geo:50.54235,8.99
+ 029
+END:VEVENT
+BEGIN:VEVENT
+UID:1588@laubach-online.de
+DTSTART:20261129T120000Z
+DTEND:20261129T180000Z
+DTSTAMP:20261027T110611Z
+URL:https://laubach-online.de/events/weihnachtsmarkt-laubach-2/
+SUMMARY:Weihnachtsmarkt Laubach
+DESCRIPTION:Der älteste Weihnachtsmarkt Oberhessens lädt ein!\nErleben Si
+ e Weihnachtsatmosphäre pur in der wunderschönen Kulisse unserer mittelal
+ terlichen Altstadt! Am 28. und 29. November 2026 verwandeln sich der Markt
+ - und Kirchplatz in Laubach in ein stimmungsvolles Weihnachtsdorf.\nFreuen
+  Sie sich auf ein Meer aus Lichterketten\, liebevoll dekorierte Stände un
+ d den Duft von frisch gebackenen Waffeln\, Apfelküchlein\, Fruchtpunsch u
+ nd Glühwein-Variationen.\n\n\n\n\n\nDie Highlights auf einen Blick\n\n 	\
+ n\n 	Kreativ-Basar im evangelischen Gemeindehaus: Stöbern Sie an beiden T
+ agen durch stilvolles Kunsthandwerk – von Schmuck\, Keramik und Holzarbe
+ iten bis hin zu handgestrickten Unikaten und Weihnachtsgestecken.\n 	Leuch
+ tende Kinderaugen: Der Nikolaus kommt am Sonntag mit der Kutsche um 16 Uhr
+  persönlich für eine Bescherung der kleinen Gäste auf den Markt.\n 	Kon
+ zert in der Kirchen des Chors Songlines aus Lich um 16 Uhr\n\n\n\n\n\n\n\n
+ \n"Mit einem attraktiven Programm und vielfältigen kreativen sowie kulina
+ rischen Angeboten wird eine Menge geboten für die sicherlich wieder zahlr
+ eichen Besucherinnen und Besucher"\, freut sich Bürgermeister Matthias Me
+ yer auf das festliche Wochenende.\n\n\n\n\n\nKontakt &amp\; Informationen\
+ n\n\nHaben Sie Fragen zum Weihnachtsmarkt? Die Tourist-Information der Sta
+ dt Laubach hilft Ihnen gerne weiter:\n\n 	\n\n 	Telefon: 06405 – 921 321
+ \n 	E-Mail: tourist-info@laubach-online.de\n\n\n\n\nWir freuen uns auf Ihr
+ en Besuch in der Weihnachtsstadt Laubach!\n\n\n\n\n\n\n\n
+ATTACH;FMTTYPE=image/jpeg:https://laubach-online.de/wp-content/uploads/202
+ 6/09/Weihnachtsmarkt.jpg
+CATEGORIES:Märkte &amp; Feste
+LOCATION:Markt- und Kirchplatz\, Marktplatz\, Laubach\, Deutschland
+GEO:50.54235;8.99029
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Marktplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Markt- und Kirchplatz:geo:50.54235,8.99
+ 029
+END:VEVENT
+BEGIN:VEVENT
+UID:1239@laubach-online.de
+DTSTART:20261203T090000Z
+DTEND:20261203T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2026-1
+ 2-03/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1240@laubach-online.de
+DTSTART:20261210T090000Z
+DTEND:20261210T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2026-1
+ 2-10/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1596@laubach-online.de
+DTSTART:20261212T170000Z
+DTEND:20261212T190000Z
+DTSTAMP:20261005T081703Z
+URL:https://laubach-online.de/events/my-campfire-songbook/
+SUMMARY:My Campfire Songbook
+DESCRIPTION:Mit "My Campfire Songbook" möchten wir uns bei unseren Freunde
+ n und Förderern für ein wunderbares\nKulturjahr bedanken. Es ist gleichz
+ eit Anspron für noch mehr feine Kunst und Kultur im heimischen Raum.
+CATEGORIES:Konzerte
+LOCATION:Stadtkirche Laubach\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Stadtkirche Laubach:geo:50.542791,8.990
+ 438
+END:VEVENT
+BEGIN:VEVENT
+UID:1241@laubach-online.de
+DTSTART:20261217T090000Z
+DTEND:20261217T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2026-1
+ 2-17/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1242@laubach-online.de
+DTSTART:20261224T090000Z
+DTEND:20261224T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2026-1
+ 2-24/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1243@laubach-online.de
+DTSTART:20261231T090000Z
+DTEND:20261231T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2026-1
+ 2-31/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1597@laubach-online.de
+DTSTART:20261231T120000Z
+DTEND:20261231T150000Z
+DTSTAMP:20261005T081818Z
+URL:https://laubach-online.de/events/finisage-der-malerin-und-illustratori
+ n-sabine-kalus/
+SUMMARY:Finisage - der Malerin und Illustratorin Sabine Kalus
+DESCRIPTION:Finisage der Malerin und Illustratorin Sabine Kalus. Sie zeigte
+  uns bisher unveröffentlichte Zeichnungen und Bilder. Heute haben Sie let
+ zmalig Gelegenheit diese Bilder zu sehen und zu erwerben.
+LOCATION:Kunstraum des Kunstforum Laubach e.V.\, Obere Langgasse 17\, Lauba
+ ch\, Hessen\, 35321\, Deutschland
+GEO:49.318706;8.425405
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Obere Langgasse 17\, Laubac
+ h\, Hessen\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Kunstraum des 
+ Kunstforum Laubach e.V.:geo:49.318706,8.425405
+END:VEVENT
+BEGIN:VEVENT
+UID:1511@laubach-online.de
+DTSTART:20261231T140000Z
+DTEND:20261231T180000Z
+DTSTAMP:20260218T103300Z
+URL:https://laubach-online.de/events/laubacher-silvester-gluehen-2026-orig
+ inal/
+SUMMARY:Laubacher Silvester-glühen 2026 "Original"
+DESCRIPTION:
+ATTACH;FMTTYPE=image/jpeg:https://laubach-online.de/wp-content/uploads/202
+ 6/02/Visit-2026-1-klein-b.jpg
+CATEGORIES:Märkte &amp; Feste
+LOCATION:Markt- und Kirchplatz\, Marktplatz\, Laubach\, Deutschland
+GEO:50.54235;8.99029
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Marktplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Markt- und Kirchplatz:geo:50.54235,8.99
+ 029
+END:VEVENT
+BEGIN:VEVENT
+UID:1244@laubach-online.de
+DTSTART:20270107T090000Z
+DTEND:20270107T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 1-07/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1245@laubach-online.de
+DTSTART:20270114T090000Z
+DTEND:20270114T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 1-14/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1246@laubach-online.de
+DTSTART:20270121T090000Z
+DTEND:20270121T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 1-21/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1578@laubach-online.de
+DTSTART:20270123T190000Z
+DTEND:20270123T190000Z
+DTSTAMP:20260727T080753Z
+URL:https://laubach-online.de/events/sercan-oeztuerk-anatolische-folkmusik
+ /
+SUMMARY:Sercan Öztürk - anatolische Folkmusik
+DESCRIPTION:Anatolische Folkmusik live und intensiv am Samstag\, dem 23. Ja
+ nuar 2027 um 19.00 Uhr!\n\nEin Leckerbissen nicht nur für unsere türkisc
+ hen Freunde
+ATTACH;FMTTYPE=image/jpeg:https://laubach-online.de/wp-content/uploads/202
+ 6/07/Sercan-Oeztuerk.jpg
+CATEGORIES:Konzerte
+LOCATION:Braumanufaktur Laubach\, Gerhart-Hautmann-Straße 1\, Laubach\, 35
+ 321\, Deutschland
+GEO:50.542969;8.987482
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Gerhart-Hautmann-Straße 1\
+ , Laubach\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Braumanufaktur 
+ Laubach:geo:50.542969,8.987482
+END:VEVENT
+BEGIN:VEVENT
+UID:1247@laubach-online.de
+DTSTART:20270128T090000Z
+DTEND:20270128T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 1-28/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1248@laubach-online.de
+DTSTART:20270204T090000Z
+DTEND:20270204T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 2-04/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1249@laubach-online.de
+DTSTART:20270211T090000Z
+DTEND:20270211T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 2-11/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1250@laubach-online.de
+DTSTART:20270218T090000Z
+DTEND:20270218T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 2-18/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1251@laubach-online.de
+DTSTART:20270225T090000Z
+DTEND:20270225T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 2-25/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1579@laubach-online.de
+DTSTART:20270226T190000Z
+DTEND:20270226T220000Z
+DTSTAMP:20260727T080032Z
+URL:https://laubach-online.de/events/holly-carter/
+SUMMARY:Holly Carter
+DESCRIPTION:Die britische Singer/ Songwriterin Holly Carter wird zusammen m
+ it ihrem Partner Joe Wilkins am Freitag\, dem 26. Februar 2027 um 19 Uhr w
+ ieder auf der Bühne der Braumanufaktur stehen. Erinnert ihr euch noch? Di
+ e beiden waren bereits Ende 2025 bei uns und sorgten für Begeisterungsst
+ ürme!!
+CATEGORIES:Konzerte
+LOCATION:Braumanufaktur Laubach\, Gerhart-Hautmann-Straße 1\, Laubach\, 35
+ 321\, Deutschland
+GEO:50.542969;8.987482
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Gerhart-Hautmann-Straße 1\
+ , Laubach\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Braumanufaktur 
+ Laubach:geo:50.542969,8.987482
+END:VEVENT
+BEGIN:VEVENT
+UID:1252@laubach-online.de
+DTSTART:20270304T090000Z
+DTEND:20270304T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 3-04/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1253@laubach-online.de
+DTSTART:20270311T090000Z
+DTEND:20270311T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 3-11/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1580@laubach-online.de
+DTSTART:20270313T190000Z
+DTEND:20270313T220000Z
+DTSTAMP:20260727T075926Z
+URL:https://laubach-online.de/events/die-tors/
+SUMMARY:Die Tors
+DESCRIPTION:Erinnert ihr euch noch an "The Doors" - (Riders on the Sorm\, L
+ ight my Fire etc)?\nWir präsentieren euch die "Tors" - eine Tribute-Band 
+ der Doors am Samstag\, dem 13. März 2027 um 19 Uhr in der Braumanufaktur.
+ \nEintritt frei - gegen Spende!
+ATTACH;FMTTYPE=image/jpeg:https://laubach-online.de/wp-content/uploads/202
+ 6/07/Tors.jpg
+CATEGORIES:Konzerte
+LOCATION:Braumanufaktur Laubach\, Gerhart-Hautmann-Straße 1\, Laubach\, 35
+ 321\, Deutschland
+GEO:50.542969;8.987482
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Gerhart-Hautmann-Straße 1\
+ , Laubach\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Braumanufaktur 
+ Laubach:geo:50.542969,8.987482
+END:VEVENT
+BEGIN:VEVENT
+UID:1254@laubach-online.de
+DTSTART:20270318T090000Z
+DTEND:20270318T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 3-18/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1255@laubach-online.de
+DTSTART:20270325T090000Z
+DTEND:20270325T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 3-25/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1256@laubach-online.de
+DTSTART:20270401T090000Z
+DTEND:20270401T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 4-01/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1257@laubach-online.de
+DTSTART:20270408T090000Z
+DTEND:20270408T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 4-08/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1581@laubach-online.de
+DTSTART:20270409T190000Z
+DTEND:20270409T220000Z
+DTSTAMP:20260727T075818Z
+URL:https://laubach-online.de/events/tidemore/
+SUMMARY:Tidemore
+DESCRIPTION:Die beiden Brüder bilden das Indie-Akustik-Duo aus Berlin und 
+ könnt ihr live erleben am Freitag\, dem 9. April 2027 um 19 Uhr in der Br
+ aumanufaktur.\n\nLasst euch begeistern bei freiem Eintritt (gegen Spende)!
+CATEGORIES:Konzerte
+LOCATION:Braumanufaktur Laubach\, Gerhart-Hautmann-Straße 1\, Laubach\, 35
+ 321\, Deutschland
+GEO:50.542969;8.987482
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Gerhart-Hautmann-Straße 1\
+ , Laubach\, 35321\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Braumanufaktur 
+ Laubach:geo:50.542969,8.987482
+END:VEVENT
+BEGIN:VEVENT
+UID:1258@laubach-online.de
+DTSTART:20270415T090000Z
+DTEND:20270415T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 4-15/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+BEGIN:VEVENT
+UID:1259@laubach-online.de
+DTSTART:20270422T090000Z
+DTEND:20270422T130000Z
+DTSTAMP:20250218T142632Z
+URL:https://laubach-online.de/events/wochenmarkt-auf-dem-kirchplatz-2027-0
+ 4-22/
+SUMMARY:Wochenmarkt auf dem Kirchplatz
+DESCRIPTION:Wochenmarkt mit Mittagstisch für kleines Geld. Informationen u
+ nter Facebook
+LOCATION:Kirchplatz\, Kirchplatz\, Laubach\, Deutschland
+GEO:50.542791;8.990438
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Kirchplatz\, Laubach\, Deut
+ schland;X-APPLE-RADIUS=100;X-TITLE=Kirchplatz:geo:50.542791,8.990438
+END:VEVENT
+END:VCALENDAR

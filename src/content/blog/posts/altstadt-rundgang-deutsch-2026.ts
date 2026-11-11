@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/graz-tourismus-altstadt-rundgaenge-2026-graztourismus-20736962/?affiliate=J70",
   "publishDate": "2026-08-29",
   "updatedDate": "2026-08-29",
+  "factSources": {
+    "checkedAt": "2026-08-29",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/graz-tourismus-altstadt-rundgaenge-2026-graztourismus-20736962/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Erleben Sie die Grazer Altstadt, ein UNESCO-Weltkulturerbe, bei einem geführten Rundgang. Entdecken Sie enge Gassen, imposante Bauten und erfahren Sie mehr über die reiche Geschichte und Kultur dieser faszinierenden Stadt. Ein Muss für jeden Graz-Besuch!",
   "category": "Kultur & Tradition",

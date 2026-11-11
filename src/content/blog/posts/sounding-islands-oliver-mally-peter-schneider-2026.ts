@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/oliver-mally-peter-schneider-loewensaal-hohenems-21111145/?affiliate=J70",
   "publishDate": "2026-08-28",
   "updatedDate": "2026-08-28",
+  "factSources": {
+    "checkedAt": "2026-08-28",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/oliver-mally-peter-schneider-loewensaal-hohenems-21111145/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Tauchen Sie ein in die Welt von Blues und Americana, wenn \"Sir\" Oliver Mally und Peter Schneider am 13. Oktober 2026 den Löwensaal Hohenems mit ihrer einzigartigen musikalischen Interaktion erfüllen. Ein Abend voller Emotionen und virtuoser Klänge erwartet Sie.",
   "category": "Musik & Festival",

@@ -375,6 +375,60 @@ selbst. Seit 2026-10-11 zählt es nur neue Duplikate am Bestand: Zeilen,
 die vor dem Beginn des letzten geschriebenen Laufs angelegt wurden
 (Tabelle `dedup_runs`), und nicht Basis-/Terminzeile derselben Serie.
 
+Rückstau 19.10. bis 03.11.2026: Kein AT-Lauf schrieb, jede Nacht endete
+mit `valve_stopped`. Auslöser war die Nachhol-Welle des Registry-Cursors
+(PR #323, 17.10.): Der Lauf vom 19.10. fand 902 Duplikate am Bestand
+(Grenze 800) und 3.865 im Zulauf, fast alle gemeinde-registry gegen
+gem2go/gemeinden-generic. Danach sperrte sich das Ventil selbst: Der Anker
+reicht höchstens 72 h zurück, älterer Zulauf zählt als Bestand, also wuchs
+der Bestand jede Nacht (9.420 am 02.11., davon rund 8.370 seit 19.10.
+angelegt). Das Ventil hat damit richtig angehalten, kann sich nach einer
+Welle aber nie selbst lösen: Ein Stopp braucht immer eine Freigabe.
+Prüfung des Probelaufs vom 02.11. (Stichproben je Grund und Quellpaar):
+Bestand mit anderem Titel 29/30 richtig, gleicher Titel 30/30, gleiche
+Quelle 20/20, Altbestand 20/20, Freigaben ohne Rollentausch 27/30 (Rest
+bekannte Muster: Ortsname als Titel, KOBV-„ABGESAGT"-Fassung derselben
+Seite). Ein Regelfehler: `venueRelation` wertete ein bloßes Gattungswort
+(„Pfarrkirche" nach Abzug des eigenen Ortsnamens) als „derselbe Ort", weil
+es in „Stadtpfarrkirche" steckt; über `visibleTwin`, das Etiketten
+ignoriert, verband das auch Orte in verschiedenen Bundesländern (Allerseelen
+Würflach/Neunkirchen, Ebenau/Pinkafeld, Garsten/Gams). Seit PR #430 ist ein
+Gattungswort auf EINER Seite schon kein Ortsbeleg mehr (Golden-Set-Fall);
+12 Zuordnungen weniger, 7 davon waren falsch. Freigabe per
+workflow_dispatch (Bestand bis 11.000, Freigaben bis 500, nur AT), Lauf
+41672206499: `written` mit 14.059 neuen Duplikaten (10.116 Bestand, 1.831
+Zulauf, 2.112 Serie), 283 Freigaben, 9 Müll. Der erste Versuch
+(41660374198) schrieb nichts: Der Runner erreichte api.lasstreffen.at von
+15:17 bis 15:23 UTC nicht (Connect-Timeout), zeitgleich baute ein Deploy auf
+demselben Server (Next-Build 739 s statt 83 s). Ventil-Stopps nicht
+während eines Deploys freigeben. `dedup_audit` danach: AT 114 sichtbare
+Restdubletten (vorher 8.402, vor dem Rückstau 67 bis 83), Grenze 100,
+also noch rot. 13 Paare entstanden erst während des Laufs, 71 entsprechen
+dem alten Normalstand, 30 sind ein neues Innsbruck-Muster: gemeinde-registry
+liest innsbrucktermine.at seit der Cursor-Welle und führt für 27 Seiten
+mehrere Zeilen am selben Tag, die sich um volle Stunden unterscheiden
+(je ein anderer `?date=`-Wert der Listen-URL). Die passende Feratel-Zeile
+passt dann zu zwei „verschiedenen" Registry-Terminen, der
+Mehrdeutigkeitsschutz verbindet sie zu Recht mit keinem. Beispiel Jazz &
+Apéro 18.11.: Seite zeigt 17:30 bis 20:30, Registry hat 17:30 und 18:30,
+Feratel 18:30. An der Quelle zu beheben (Registry-Parser für
+innsbrucktermine), nicht im Dedup.
+
+Ursache (geprüft 03.11. gegen den Spielplan von landestheater.at):
+innsbrucktermine.at zeigt je Termin mal die richtige Uhrzeit, mal eine
+Stunde früher, je nach eigenem Import der Seite (`dateModified`), in Liste,
+Detailseite und `?date=` gleich und unabhängig vom Ende der Sommerzeit. Bei
+allen 22 Terminen mit zwei Lesarten war die abweichende eine Stunde zu
+früh; Jazz & Apéro beginnt laut Landestheater um 18:30, die Seite zeigte
+am 03.11. 17:30. Die richtige Zeit lässt sich aus der Seite allein nicht
+lesen. Behoben im Scraper: Registry-Flag `unstableTimes`, source_id aus
+Titel, Wiener Tag und Rang am Tag (`withoutStartTime`), die IDs beider
+Lesarten gehen als previous_source_id mit; die Übernahme behält die Zeile
+der aktuellen Lesart und zieht die der anderen zurück
+(`planSupersededRows`). Trockenlauf gegen Prod: 127 umgeschlüsselt, 38
+zurückgezogen, danach je Seiten-Tag so viele Zeilen wie Vorstellungen.
+Die Uhrzeit folgt weiter der Seite; die Feratel-Zeile hat die richtige.
+
 Offen und an der Quelle zu beheben (keine Dedup-Fehler):
 - Gutschein-Produkte mit Platzhalterdatum 31.12.2030 (veranstaltungskalender.net).
 - Müllabfuhr-Termine (entschieden 2026-10-14, siehe unten).
@@ -531,6 +585,162 @@ erkennbare Aufgabe; der Watchdog kennt die Recreate-Frequenz nicht
 (sinnvoll: Alarm ab 4 Recreates/24 h). Wurzel-Fix für den ISR-Cache
 bleibt ein `cacheHandler` mit Größenlimit.
 
+**Nachtrag 2026-11-07 (Saison-Karte leer):** Jeder Recreate wirft auch den
+Laufzeit-Render der Startseite weg; dann liegt wieder der Vorrender aus dem
+Build vor, und der war am 06.11. 21:06 ohne Saison-Karte (Saison- und
+Dorffeste-Abfrage dreimal binnen 1,2 s im statement timeout, Build-Log
+Run 42293037715; der Deploy-Warm danach zählte 12 Picks, nur im
+Laufzeit-Cache). Seitdem: Build wiederholt geduldig (`LANDING_RETRY_DELAYS_MS
+.build`, Budget 150 s) und `src/instrumentation.ts` rendert die Startseite
+bei jedem Serverstart neu (`warm-on-start.ts`, Log `[landing-warm]`), nicht
+nur deploy.yml.
+
+### 3.14 Cloudflare als Proxy vor der Website (2026-10-21)
+
+**Anlass:** AdSense-Einschränkung seit 16.09. durch Bot-Farmen mit
+Browser-UA (AWS-Headless, Tencent, Baidu-Render-Crawler Chrome/99 aus
+116.179.33.x). Jede Welle wurde einzeln in Caddy gesperrt (§3-Memos,
+`Caddyfile` Bot-Sperre I bis III). Seit 21.10. läuft `lasstreffen.at` und
+`www` hinter Cloudflare Free (Zone `962399ba2ed7d14167caf40733fdee2d`,
+Nameserver cortney/jacob.ns.cloudflare.com, Registrar Internex). Bot Fight
+Mode, drei WAF-Regeln (Block Chrome/99-UA, Managed Challenge für
+Chrome-Builds unter 140 und für nicht verifizierte Clients aus China, je ohne
+`cf.client.bot` und robots.txt), IP-Allow für den eigenen Server, TLS Full
+(strict), Email-Obfuscation aus, Cache nur für `/_next/static`, `/_next/image`,
+`/icons`, `/images`, `/favicon` (Rest Bypass). `api.lasstreffen.at`, `neu`,
+`flights`, MX/TXT/DKIM bleiben DNS-only. Caddy bleibt zweite Schicht:
+`trusted_proxies` aus den Cloudflare-Netzen (`lt-cf-ranges.timer`, täglich),
+`client_ip_headers CF-Connecting-IP`, alle Sperrlisten als `client_ip`-Matcher,
+Rate-Limit-Key `{client_ip}`. Plan, Rückwege und Skripte:
+`docs/ops/cloudflare-proxy-2026-10.md`, `docs/ops/cloudflare/`.
+
+**Belege nach dem Cutover (21.10., 13:05 bis 13:20 UTC):** `cf-ray` und
+`server: cloudflare` auf jeder Antwort; Caddy-Log zeigt `remote_ip` aus dem
+Cloudflare-Netz und `client_ip` = echte Client-IP (82.218.41.127 über
+172.68.50.203); `/api/health` 200 über den Edge auch mit curl-UA (IP-Allow);
+Chrome/99-UA 403 schon am Edge, Chrome/124 Managed Challenge
+(`cf-mitigated: challenge`), Headless-Signatur weiterhin 403 von Caddy;
+statische Assets `cf-cache-status` MISS dann HIT, HTML DYNAMIC; Rate-Limit
+120/min greift pro Client über Cloudflare (429 mit `retry-after: 15`); Let's
+Encrypt HTTP-01 durch den Proxy funktioniert (Wegwerf-Host `cf-test`
+bekam um 13:07 ein Zertifikat); AdSense-Script lädt auf Event-Seiten ohne
+CSP-Fehler; im zehnminütigen Caddy-Volllog kamen 7 Googlebot- und 22
+bingbot-Abrufe über Cloudflare mit 200 an (`client_ip` aus den
+verifizierten Netzen, keine Challenge).
+
+**Fallen:** (1) Cloudflares Universal-SSL-Zertifikat war nach der
+Aktivierung rund acht Minuten `pending_validation`; solange scheitert jeder
+HTTPS-Handshake am Edge für Resolver, die schon die Cloudflare-IPs kennen.
+Richtig ist: Zone mit DNS-only-Records anlegen, Nameserver umstellen, erst
+nach `certificate_packs status=active` die Records proxien. (2) nic.at
+veröffentlicht die Zone stündlich, die Delegation war 55 Minuten nach dem
+Internex-Eintrag draußen; Resolver halten NS-Einträge bis 3 h. (3) Der
+Server geht per IPv6 raus; der IP-gefilterte API-Token verlangt `curl -4`.
+(4) Bot Fight Mode ist nicht per WAF-Regel umgehbar, nur eine
+IP-Access-Allow-Regel greift vorher. (5) `cf.threat_score` ist dauerhaft 0,
+Challenges brauchen eigene Signale (UA-Build, Land, `cf.client.bot`).
+
+### 3.15 Deploy bremst die Datenbank: Nachtlauf rot (2026-11-05)
+
+Der AT-Nachtlauf vom 05.11. (Run 42003360765) endete rot: Schritt `report`
+mit `Fetch failed at offset 186000: canceling statement due to statement
+timeout`. Während der Nachbearbeitung (13:44 bis 15:10 UTC) liefen drei
+Deploys, jeder baut das App-Image auf demselben Server wie die Datenbank.
+Die Lesefehler des Laufs liegen in diesen Fenstern: Kategorieschritt
+14:11:47 (Container-Tausch 14:11:21 bis 14:11:38, danach Startseite neu),
+Bericht 15:09:49 (Typprüfung des Builds 15:09:05 bis 15:11:57), danach
+zweimal `fetch failed` (API nicht erreichbar, 15:09:59 und 15:10:09). Am
+04.11. lief kein Deploy in der Nachbearbeitung, derselbe Bericht las
+423.056 Zeilen in 5,6 min durch. Am 03.11. dasselbe Muster (Abdeckung
+Statement-Timeout 15:15, Bericht `fetch failed` 15:16, Deploys ab 15:10;
+siehe §3.10).
+
+Anfällig war der Bericht, weil er den ganzen Bestand (alle Länder, auch
+Vergangenes, am 05.11. rund 435.000 Zeilen) in 1000er-Seiten mit Offset
+las: jede Seite liest alle Zeilen davor mit. Seitenzeit im Lauf 0,4 s am
+Anfang, 1,2 s bis Zeile 160.000, 2,4 s ab 163.000 (der Build lief seit
+15:07:23), dann Timeout. Gegen Prod ohne Last gemessen (430.811 Zeilen): mit Offset
+3 min 46 s, die Seite 0,38 s am Anfang und 1,07 s bei Zeile 420.000; nach
+id 32 s, Snapshot Byte für Byte gleich.
+
+**Behoben:** Der Bericht blättert nach id (`forEachPageById`,
+`src/lib/db/fetch-all.ts`), Lesefehler durch Überlast werden knapp fünf
+Minuten lang wiederholt (`readWithRetry`). Der Kategorieschritt schluckte
+seinen Lesefehler („Candidates: 0, Nothing to do“, Schritt grün); er liest
+jetzt über `readWithRetry` und wird sonst rot. Verloren ging nichts: die
+Nachzählung am selben Abend ergab 127 Kandidaten, alle ohne Änderung, wie
+in den Nächten davor (129).
+
+**Offen:** (1) Der Auslöser bleibt: `deploy.sh` baut auf dem
+Datenbank-Server, ein Deploy während eines Laufs bremst dessen Abfragen.
+(2) `artist_matching` meldete im selben Lauf HTTP 500 (15:05:01, kein Build
+zu dieser Zeit, Ursache nicht untersucht) und gilt trotzdem als erledigt;
+pg_cron stößt das Matching stündlich neu an. (3) Der Bericht findet nie
+einen Vorgänger („No previous snapshot found“, `reports/` liegt nur auf dem
+Runner), die Spalten mit Veränderungen sind also immer leer.
+
+**Nachgezogen am selben Tag:** Der Bericht lief je Nacht zweimal
+(Pipeline-Schritt und Workflow-Schritt „Generate scrape report“, der zweite
+verglich den Bericht mit sich selbst) und zählte die DE-Zeilen mit
+(Bundesland „Unbekannt“: 112.914 von 430.811). Der Workflow-Schritt ist
+entfernt, der Bericht liest nur noch die Zeilen des AT-Laufs: 321.990
+Events, 141 statt 160 Quellen (die 19 `de-…`-Adapter entfallen),
+„Unbekannt“ 4.086, die neun Bundesländer und die Gemeinde-Abdeckung
+(1.928 von 2.089) unverändert.
+
+### 3.16 Postfach office@lasstreffen.at auf dem eigenen Server (2026-11-06)
+
+**Stand:** Der MX-Eintrag zeigte seit der Übernahme von Internex auf
+`mail.lasstreffen.at`, einen Namen ohne Adresse; Mail an die Domain kam
+nirgends an. Seit 06.11. läuft auf dem Hetzner-Server ein eigener Mailserver,
+nativ per apt, kein Container: Postfix nimmt auf Port 25 an und übergibt per
+LMTP an Dovecot 2.4, ein virtuelles Postfach `office@lasstreffen.at` (Maildir
+unter `/var/vmail`, Quota 2 GB, damit das Postfach die knappe Platte nicht
+füllt), Abruf über IMAPS 993, Versand über Submission 465/587 mit dem
+Postfach-Login. `postmaster@`, `abuse@`, `kontakt@` und `contact@` landen im
+selben Postfach (die letzten beiden stehen als Kontakt in den User-Agents der
+Scraper). Alles andere an der Domain lehnt Postfix beim Empfang mit 550 ab,
+auch `noreply@`.
+
+**Versand über Brevo:** Hetzner sperrt ausgehend Port 25 (gemessen, 587 geht).
+Postfix gibt deshalb alles an das Brevo-SMTP-Relay weiter, mit den
+Zugangsdaten, die Supabase-Auth schon nutzt (`SMTP_USER`/`SMTP_PASS` in
+`/opt/supabase/.env`); Brevo signiert mit dem DKIM-Schlüssel der Domain. Der
+Brevo-API-Key taugt nicht als SMTP-Passwort (535). Mails von `office@` zählen
+in dasselbe Tageskontingent wie die Mails der Website (Free: 300 am Tag).
+
+**Zertifikat:** Ein Site-Block `mail.lasstreffen.at` im Caddyfile existiert
+nur, damit Caddy das Zertifikat holt und erneuert; `lt-mail-cert.timer`
+(täglich 04:40 UTC, `/usr/local/sbin/lt-mail-cert-sync`) kopiert es nach
+`/etc/lt-mail/tls` und lädt Postfix und Dovecot neu, wenn es sich geändert hat.
+DNS: A `mail` → 157.180.42.4, DNS-only (`docs/ops/cloudflare/cf-setup.py`).
+
+**Betrieb:** Setup idempotent in `docs/ops/mail/setup-mail.sh` (Kopie und
+Kurzdoku auf dem Server unter `/etc/lt-mail/`). Das Passwort erzeugt das
+Skript einmal, es liegt nur auf dem Server (`/root/office-mail-zugang.txt`).
+fail2ban-Jails `dovecot` und `postfix-sasl`. Logs `/var/log/mail.log`.
+
+**Belege (05./06.11.):** von außen ohne Anmeldung: `office@` 250, fremdes
+Ziel 554 „Relay access denied“, unbekannte Adresse 550, AUTH auf Port 25 nicht
+angeboten und auf 587 erst nach STARTTLS; fremder Absender mit
+Postfach-Login 553; alle vier Ports mit gültigem Let's-Encrypt-Zertifikat;
+Mail von außen über den MX (Brevo → Port 25) lag im Posteingang; Versand als
+`office@` laut Brevo-Ereignisprotokoll zugestellt.
+
+**Nachgezogen am selben Tag:** zweites Postfach `support@lasstreffen.at`
+(eigener Login, `/root/support-mail-zugang.txt`; die Postfächer stehen als
+Liste `BOXES` im Setup-Skript, jedes sendet nur unter der eigenen Adresse,
+Beleg: support-Login mit Absender `office@` 553). Die Website nennt seither
+`office@lasstreffen.at` als Kontakt (Footer, Impressum, Datenschutz, AGB,
+Über uns, Quellen, Für Firmen, Boost-Erfolgsseite) und `support@lasstreffen.at`
+im Entwicklungs-Hinweis der Startseite (`DevNotice`). Unverändert an
+`dev@glatzdev.com`: die Benachrichtigungen der Formulare
+(`BUSINESS_LEADS_EMAIL` in `/api/business/lead` und `/api/events/inserat`)
+und der VAPID-Kontakt der Push-Nachrichten.
+
+**Offen:** kein Spamfilter; `/var/vmail` ist in keinem Backup; der Wächter
+(`lt-watchdog`) prüft die Maildienste nicht.
+
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
 1. **Affiliate-ID `J70` ist korrekt** und gehört uns (bestätigt). Eventim-Links im Feed
@@ -606,6 +816,21 @@ Suchvolumen statt Datenbestand. Code: `src/lib/search/smart-query.ts` +
 `/api/search/semantic`; Concierge (Gemini + Google-Grounding) unverändert.
 Das ist vereinbar mit dem Enrichment-Ausstieg: dessen Problem waren Tokens
 für 300k Events, nicht KI im Request-Pfad.
+**Oberfläche neu seit 2026-10-23** (Befund `docs/design/smart-suche-analyse-
+2026-10-23.md`, Mockups `docs/design/smart-planer/`): der Concierge-Chat im
+Smart-Tab brachte in 30 Tagen 35 Suchen und einen Klick auf ein Ergebnis
+(10 bis 17 s Prosa, Treffer als Mini-Zeilen). Jetzt Freitext-Feld →
+`/api/search/semantic` → Verstanden-Chips, ein deterministischer
+Concierge-Satz, Poster-Regale nach Tag oder Tagesphase, Plan-Leiste
+(`V4SmartPlanner`). Stufe 0 dazu: Intent-Fehler werden in Prod geloggt,
+Intent läuft über `CONCIERGE_PROVIDER` (Prod OpenAI) mit dem anderen
+Anbieter als Reserve, Wort-Fallback ohne Stoppwörter wie „von", konkrete
+Tage/Monate im Parser, Serien auf eine Karte, `parsed.unmatched_terms` für
+ehrliche Leere. `/api/search/chat` bleibt als API, kein UI mehr. Offen:
+AdSense-Auto-Anzeigen (Anchor über dem Eingabefeld, Intent-Links im Text)
+im AdSense-Konto für /entdecken ausschließen; Venues (312 k OSM-Lokale,
+79 k mit Öffnungszeiten) sind nicht an die Suche angebunden, Specials
+(Happy Hour) gibt es in keiner Quelle.
 
 **Was die Qualität stattdessen sichert:**
 
@@ -657,6 +882,11 @@ Boost 29 € / Business-Abo 49 €/M / Live-Anbindung ab 199 € auf
 (0 Leads). Die Outreach-Maschine (Discovery→Enrich→Draft→Send, läuft täglich) ist der
 Vertriebskanal; ihr Verkaufsargument sind die Klickzahlen aus 7.1.2
 („dein Event hatte X Aufrufe — für 29 € heben wir es hervor").
+Seit fn-30 (2026-10-29) gibt es dazu den **Tipp des Tages** auf der Startseite:
+ein buchbarer Platz je Wiener Kalendertag (`landing_features.kind =
+'sponsored'`, Buchung über `/admin/boost`, Pflicht-Label „Anzeige“ plus
+Sponsorname nach § 26 MedienG / § 6 ECG, Klicks als `landing_tip_click`);
+Abrechnung weiterhin manuell, kein Checkout (§10.2 Punkt 5).
 
 ### 7.3 Weitere Quellen (Reihenfolge nach Realismus)
 
@@ -781,14 +1011,16 @@ kleinen APIs treffen lassen.
    `page.tsx` ruft kein `getLandingContext()` mehr; `getLandingData()` nutzt
    einen cookie-freien Anon-Client → `/` ist wieder echte ISR-Route
    (verifiziert: `.next/prerender-manifest.json` enthält `/` mit
-   `initialRevalidateSeconds: 3600`). Neue Route `GET /api/me/landing`
-   liefert Matches + Badge-ID-Sets; `<PersonalizedMatches/>` (Client)
-   rendert den Anon-Teaser im statischen HTML und tauscht nur bei
-   sichtbarem `sb-*`-Cookie auf die Matches-Sektion (anonyme Besucher
-   feuern keinen Request). Bewusster Trade-off: personalisierte
-   Karten-Badges (inplan/match/lineup) erscheinen auf der Landing vorerst
-   nicht mehr server-seitig; die ID-Sets liegen in der API für spätere
-   Client-Hydration.
+   `initialRevalidateSeconds: 3600`). Route `GET /api/me/landing`: seit
+   fn-30 (2026-10-29) ist die Kachel „Diese Woche live“ (`ArtistsLive`,
+   Client) ihr einziger Leser und ruft sie nur bei sichtbarem
+   `sb-*`-Cookie (anonyme Besucher feuern keinen Request). Die Route
+   liefert `followedLive` (gefolgte Künstler mit Eventim-Termin in den
+   nächsten 7 Tagen aus `event_artists`, Abgleich in JS über
+   `normalizeArtistName`) und `followedNames`; die Kachel zeigt gefolgte
+   Künstler zuerst und füllt aus der stündlichen Rotation auf drei auf.
+   `matches` und die ID-Sets (`savedEventIds`, `artistMatchEventIds`,
+   `lineupMatchEventIds`) liefert sie weiter, ohne Leser.
 2. ✅ **Doppeltes `auth.getUser()`** — durch (1) miterledigt: die Landing
    ruft gar kein getUser mehr; nur die Middleware macht den einen Refresh.
 3. ~~`.limit(8)`~~ — obsolet: die unbegrenzte notifications-Query läuft
@@ -796,6 +1028,30 @@ kleinen APIs treffen lassen.
    /api/me/landing-Call (60-Tage-Fenster begrenzt sie inhaltlich).
 4. Middleware-Session-Refresh auf die Routen beschränken, die ihn wirklich brauchen
    (auth-gated Seiten), statt auf jede Seite. *(offen)*
+5. **Tagesausgabe (fn-30, 2026-10-29): Mitternacht und Buchungen.** Die
+   Startseite rechnet in Wiener Kalendertagen (Datumszeile, Tipp des Tages,
+   Programm „Heute Abend“), bleibt aber eine ISR-Shell mit `revalidate = 3600`.
+   Zwei Wege halten sie frisch: `/api/admin/landing-feature` ruft nach jeder
+   Buchung `revalidateLanding()` (`src/lib/landing/revalidate-landing.ts`:
+   `/[locale]` als Seitenmuster plus `/` und `/en`), und
+   `GET /api/cron/revalidate-landing` (Bearer `CRON_SECRET` Pflicht, fail
+   closed) macht dasselbe um **00:05 Europe/Vienna**, und seit 2026-11-04
+   ruft `deploy.yml` die Route nach jedem Deploy auf und holt `/` und `/en`
+   einmal ab (Befund: Saison-Abfrage dreimal im statement timeout des Builds,
+   Build-Modus rendert die Sektion still leer, /de eine Stunde ohne
+   Saison-Karte, /en voll). *Ops, eingerichtet am 2026-10-30 (`lt-cron@revalidate-landing.timer`, erster Lauf manuell geprüft):*
+   Timer `lt-cron@revalidate-landing.timer` auf Hetzner nach dem Muster der
+   anderen `lt-cron@`-Timer (curl auf `127.0.0.1:3000/api/cron/revalidate-landing`
+   mit Bearer), `OnCalendar=*-*-* 00:05:00 Europe/Vienna` (die übrigen Timer
+   laufen in UTC; hier zählt die Wiener Mitternacht, sonst springt der Tag bei
+   Sommer-/Winterzeit eine Stunde zu früh oder zu spät). `vercel.json` hat
+   keine Crons mehr. Buchungen: `landing_features.kind` (`sponsored` = Tipp
+   des Tages, ein Platz je Wiener Tag, Pflicht `sponsor_name`, Überschneidung
+   → 409; `editorial` = Saison-Karte wie bisher), Admin-UI `/admin/boost`
+   (Art, Sponsor, Tag, Status aktiv/geplant/abgelaufen/nicht sichtbar).
+   Voraussetzung in Prod: Migration `20261029200100_landing_features_kind.sql`
+   plus `NOTIFY pgrst, 'reload schema'`, sonst antwortet PostgREST auf
+   `kind`/`sponsor_name` mit 400 und die Route mit 500.
 
 ### 10.3 Filter & Karte: Queries eliminieren statt beschleunigen
 

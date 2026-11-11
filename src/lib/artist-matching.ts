@@ -23,6 +23,7 @@ import {
   type ArtistAlertEmailData,
 } from '@/lib/email';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { stripDiacritics, normalizeArtistName } from '@/lib/artists/normalize-name';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -84,20 +85,9 @@ export function qualifiesForDescriptionMatch(normalizedName: string): boolean {
   return normalizedName.trim().length >= 6;
 }
 
-/**
- * Strip diacritics from a string for normalized comparison.
- * e.g., "Osterreich" with umlaut -> "Osterreich"
- */
-export function stripDiacritics(str: string): string {
-  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-}
-
-/**
- * Normalize an artist name: lowercase + strip diacritics.
- */
-export function normalizeArtistName(name: string): string {
-  return stripDiacritics(name.toLowerCase().trim());
-}
+// Normalisierer liegen client-sicher in @/lib/artists/normalize-name
+// (ArtistsLive auf der Startseite braucht sie ohne Mailversand im Bundle).
+export { stripDiacritics, normalizeArtistName };
 
 // ── False-positive filter ────────────────────────────────────────────────────
 

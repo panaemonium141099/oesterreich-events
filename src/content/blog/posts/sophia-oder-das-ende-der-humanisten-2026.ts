@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/sophia-oder-das-ende-der-humanisten-kammerspiele-der-josefstadt-kammerspiele-der-josefstadt-21842255/?affiliate=J70",
   "publishDate": "2026-08-27",
   "updatedDate": "2026-08-27",
+  "factSources": {
+    "checkedAt": "2026-08-27",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/sophia-oder-das-ende-der-humanisten-kammerspiele-der-josefstadt-kammerspiele-der-josefstadt-21842255/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Tauchen Sie ein in Moritz Rinkes packendes Theaterstück \"SOPHIA oder Das Ende der Humanisten\" in den Kammerspielen der Josefstadt. Eine Science-Fiction-Komödie, die die Grenzen zwischen Mensch und Maschine neu definiert und zum Nachdenken über die Zukunft anregt.",
   "category": "Kultur & Bühne",

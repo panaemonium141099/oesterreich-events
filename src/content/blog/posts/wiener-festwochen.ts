@@ -1,5 +1,18 @@
 import type { FestivalPost } from '../types';
 
+// Termine, Spielorte, Eröffnung, Preise, Zahlen, Adresse und Geschichte geprüft am
+// 2026-10-28 gegen festwochen.at: /programm/produktionen (im Browser, Zeitraum
+// 15. Mai bis 21. Juni 2026, Spielorte), /eroeffnung-2026 (22. Mai, Heldenplatz, freier
+// Eintritt), /mythen-des-alltags (Preise 4 bis 55 Euro), /en/vienna-festival-in-numbers
+// (38 Tage, 35 Produktionen, 170 Vorstellungen, 89 Gratis-Veranstaltungen, 35 Spielorte),
+// /impressum (Lehárgasse 11/1/6, 1060 Wien; Intendant Milo Rau), /en/75-years-vienna-festival
+// (Gründung 1951), /en/join-the-peoples-republic (2027 ohne Termin); Intendanz-Jahre laut
+// de.wikipedia.org/wiki/Wiener_Festwochen. Falsch waren: „über 100 Produktionen“ und
+// „sechs Wochen“ (2026: 35 Produktionen mit Eintritt, 38 Tage), „Tickets ab ca. 15 Euro“,
+// „Eröffnungskonzert am Rathausplatz“ (2026 Heldenplatz), „Festwochen Junior“, Spielorte
+// Prater/Stadtpark, „Festival of Resistance ab 2021“ (Milo Rau ist seit 2024 Intendant),
+// „von der Stadt Wien gegründet“ (nicht belegt) und jsonLd 8. Mai bis 21. Juni 2026.
+// Termin 2027 ist noch nicht veröffentlicht.
 export const post: FestivalPost = {
   slug: 'wiener-festwochen',
   title: 'Wiener Festwochen',
@@ -7,81 +20,86 @@ export const post: FestivalPost = {
   heroImage: '/images/blog/wiener-festwochen/hero.jpg',
   thumbnailImage: '/images/blog/wiener-festwochen/thumb.jpg',
   publishDate: '2026-03-31',
-  updatedDate: '2026-03-31',
+  updatedDate: '2026-10-28',
+  factSources: {
+    checkedAt: '2026-10-28',
+    urls: [
+      'https://www.festwochen.at/programm/produktionen',
+      'https://www.festwochen.at/en/vienna-festival-in-numbers',
+      'https://www.festwochen.at/impressum',
+      'https://www.festwochen.at/mythen-des-alltags',
+      'https://www.festwochen.at/eroeffnung-2026',
+      'https://de.wikipedia.org/wiki/Wiener_Festwochen',
+      'https://www.festwochen.at/en/join-the-peoples-republic',
+    ],
+  },
   readingTime: 6,
   excerpt:
-    'Sechs Wochen lang bespielt das Wiener Festwochen-Festival die bedeutendsten Spielstätten der Stadt. Internationale Theaterproduktionen, Opern, Konzerte und Performances auf höchstem Niveau.',
+    'Jedes Jahr im Mai und Juni bespielen die Wiener Festwochen Theater, Hallen und Plätze in ganz Wien. 2026 feierte das Festival vom 15. Mai bis 21. Juni sein 75-Jahr-Jubiläum, die Termine 2027 folgen.',
   category: 'Kultur & Tradition',
   categoryColor: 'bg-teal-700 text-white',
   keyFacts: {
-    dates: 'Mai – Mitte Juni',
-    location: 'Diverse Spielstätten in Wien (Volkstheater, Burgtheater, Odeon, Rathaus u.a.)',
-    address: 'Hauptquartier: Lehárgasse 11, 1060 Wien',
-    genre: 'Theater, Oper, Musik, Performance, Tanz',
-    price: 'Tickets ab ca. € 15 | Eröffnungskonzert am Rathausplatz kostenlos',
+    dates: '2026: 15. Mai bis 21. Juni (Eröffnung am 22. Mai). Termine 2027 folgen',
+    location: 'Rund 35 Spielorte in ganz Wien (2026 u. a. Volkstheater, Odeon, Akademietheater, MuseumsQuartier, Festivalzentrum am Badeschiff)',
+    address: 'Büro: Lehárgasse 11/1/6, 1060 Wien',
+    genre: 'Oper, Musiktheater, Theater, Tanz, Performance, Konzert',
+    price: 'je nach Produktion (2026 z. B. Volkstheater: 4 Euro Stehplatz bis 55 Euro) | Eröffnung und viele Formate bei freiem Eintritt',
     website: 'https://www.festwochen.at',
-    capacity: 'Über 100 Produktionen, mehrere tausend Besucher täglich',
+    capacity: '2026: 35 Produktionen mit Eintritt, 170 Vorstellungen, 89 Veranstaltungen bei freiem Eintritt',
     since: '1951',
   },
-  lineup: [
-    { name: 'Eröffnungskonzert Rathausplatz', role: 'headliner', stage: 'Rathausplatz' },
-    { name: 'Schauspiel-Hauptprogramm', role: 'headliner', stage: 'Burgtheater' },
-    { name: 'Musiktheater-Premieren', role: 'headliner', stage: 'Volkstheater' },
-    { name: 'Performance & Installationen', role: 'special', stage: 'Diverse Orte' },
-    { name: 'Gratisveranstaltungen Open Air', role: 'support', stage: 'Stadtpark, Prater' },
-  ],
-  lineupNote: 'Das vollständige Programm erscheint Anfang April auf der Festwochen-Website.',
+  lineup: [],
   intro:
-    'Seit 1951 markieren die Wiener Festwochen alljährlich den kulturellen Höhepunkt des Wiener Frühlings. Sechs Wochen lang verwandeln Regisseure, Choreografen und Musiker aus aller Welt die Bühnen der Stadt in ein Labor der darstellenden Künste. Ob klassische Oper unter freiem Himmel, avantgardistisches Theaterprojekt in einer Fabrikhalle oder groß angelegtes Musikschauspiel auf der Burgtheater-Bühne – die Festwochen setzen immer wieder neue Maßstäbe und gelten als einer der bedeutendsten Kulturtermine Europas.',
-  historyTitle: 'Sieben Jahrzehnte Kulturavantgarde',
+    'Seit 1951 gehören die Wiener Festwochen zum Wiener Frühsommer. Jedes Jahr im Mai und Juni bringen Regisseurinnen, Choreografen und Musikerinnen aus aller Welt ihre Produktionen auf die Bühnen der Stadt, vom Musiktheater im Odeon bis zur Performance in einer Halle des MuseumsQuartiers. 2026 feierte das Festival unter dem Motto „Republic of Gods“ sein 75-Jahr-Jubiläum, mit einer Eröffnung bei freiem Eintritt am Heldenplatz.',
+  historyTitle: '75 Jahre Festwochen',
   history:
-    'Die Wiener Festwochen wurden 1951 von der Stadt Wien gegründet, um nach dem Zweiten Weltkrieg wieder internationales Kulturleben nach Wien zu bringen. Das erste Programm umfasste noch hauptsächlich Wiener Institutionen; im Laufe der Jahrzehnte öffnete sich das Festival immer stärker für internationale Gastproduktionen. Unter legendären Intendanten wie Luc Bondy, Klaus Bachler, Markus Hinterhäuser und Milo Rau wurden die Festwochen zu einem Treffpunkt der internationalen Theateravantgarde. Besonders das „Festival of Resistance" unter Milo Rau sorgte ab 2021 für weltweites Aufsehen.',
+    'Erste Festwochen-Veranstaltungen gab es bereits 1927; 1951, noch in der Besatzungszeit, wurden die Wiener Festwochen neu begründet. Seither hat sich das Festival immer stärker für internationale Gastspiele und Koproduktionen geöffnet. Geprägt haben es Intendanten wie Klaus Bachler (1991 bis 1996), Luc Bondy (2002 bis 2013), Markus Hinterhäuser (2014 bis 2016) und Christophe Slagmuylder (2019 bis 2023). Seit 2024 leitet Milo Rau die Festwochen; im ersten Jahr rief er die „Freie Republik Wien“ aus, 2026 folgte das Jubiläumsprogramm „Republic of Gods“.',
   whatToExpectTitle: 'Was erwartet dich bei den Festwochen?',
   whatToExpect:
-    'Das Festwochen-Programm gliedert sich in Musiktheater, Schauspiel und performative Formate. Internationale Uraufführungen und Koproduktionen mit den bedeutendsten Theaterhäusern der Welt machen den Kern aus. Dazu kommen zahlreiche kostenlose Open-Air-Veranstaltungen, Diskussionen und Kunstinstallationen im öffentlichen Raum.',
+    'Das Programm reicht von Oper und Musiktheater über Schauspiel und Tanz bis zu Performance, Konzert, Film und Debatte. Den Kern bilden Eigen- und Koproduktionen sowie Uraufführungen. Dazu kommen Formate bei freiem Eintritt, vor allem rund um das Festivalzentrum, das 2026 als „Haus der Republik“ am Badeschiff lag.',
   whatToExpectList: [
-    'Über 100 Produktionen in 6 Wochen – von klassisch bis radikal zeitgenössisch',
-    'Internationale Uraufführungen und Koproduktionen',
-    'Kostenloser Einlass bei ausgewählten Open-Air-Events',
-    'Spielstätten: Burgtheater, Volkstheater, Odeon, Prater, Rathausplatz und mehr',
-    'Programm für junges Publikum: Festwochen Junior',
-    'Diskussionen, Symposien und Backstage-Führungen',
+    '2026: 35 Produktionen mit Eintritt, davon 13 Uraufführungen',
+    '21 Eigen- und Koproduktionen im Jubiläumsjahr 2026',
+    'Eröffnung bei freiem Eintritt, 2026 am Heldenplatz mit Patti Smith, übertragen von ORF 2 und 3sat',
+    'Festivalzentrum mit Konzerten, Partys und Debatten, vieles bei freiem Eintritt',
+    'Spielorte 2026 u. a. Volkstheater, Odeon, Akademietheater, Schauspielhaus und MuseumsQuartier',
+    'Workshops für Kinder und Jugendliche, Filmreihen und Gespräche',
   ],
   practicalInfoTitle: 'Praktische Infos zu den Wiener Festwochen',
   practicalInfo: [
     {
       icon: '🎟️',
       label: 'Tickets',
-      text: 'Tickets ab April im Festwochen-Vorverkauf. Viele beliebte Produktionen sind schnell ausverkauft.',
+      text: 'Karten gibt es über festwochen.at, die Preise hängen von Produktion und Spielort ab. Viele Vorstellungen sind ausverkauft: 2026 waren es 119 von 170.',
     },
     {
       icon: '🆓',
       label: 'Gratis-Events',
-      text: 'Das Eröffnungskonzert am Rathausplatz und zahlreiche Open-Air-Formate sind kostenlos.',
+      text: 'Die Eröffnung und viele Formate im Festivalzentrum, etwa Konzerte, Partys und Debatten, sind bei freiem Eintritt.',
     },
     {
       icon: '🚇',
       label: 'Anreise',
-      text: 'Alle Spielstätten sind mit U-Bahn, Bus oder Straßenbahn gut erreichbar. Kein Parkplatz nötig.',
+      text: 'Die Spielorte liegen über die ganze Stadt verteilt; welche es sind, steht bei jeder Produktion auf festwochen.at.',
     },
     {
       icon: '📅',
-      label: 'Programmtipp',
-      text: 'Spätestens bei Programmveröffentlichung (April) buchen – internationale Topproduktionen sind rasch vergriffen.',
+      label: 'Programm 2027',
+      text: 'Termine und Programm 2027 sind noch nicht veröffentlicht. Sobald sie feststehen, früh buchen: gefragte Produktionen sind rasch vergriffen.',
     },
   ],
   gallery: [],
   ctaText: 'Theater- und Kultur-Events in Wien',
   ctaLink: '/map?category=Kultur&region=Wien',
-  seoTitle: 'Wiener Festwochen 2026 – Programm, Tickets & Infos',
+  seoTitle: 'Wiener Festwochen: Programm, Tickets & Infos',
   seoDescription:
-    'Wiener Festwochen: 6 Wochen internationales Theater, Oper und Performance in Wien. Programm, Tickets und Gratis-Events für Mai/Juni 2026.',
+    'Wiener Festwochen: jedes Jahr im Mai und Juni internationales Theater, Musiktheater, Tanz und Performance in Wien. Rückblick 2026, Tickets und Gratis-Formate.',
   keywords: [
     'Wiener Festwochen',
     'Festwochen Wien 2026',
     'Theater Festival Wien',
     'Wien Kultur Mai',
-    'Burgtheater Festival',
+    'Milo Rau Festwochen',
     'Vienna Festival Weeks',
     'Festwochen Programm',
     'Wien Theaterkultur',
@@ -90,13 +108,13 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Wiener Festwochen 2026',
-    startDate: '2026-05-08',
+    startDate: '2026-05-15',
     endDate: '2026-06-21',
-    location: 'Lehárgasse 11, 1060 Wien, Austria',
+    location: 'Wien, Austria',
     addressCountry: 'AT',
     url: 'https://www.festwochen.at',
     description:
-      'Die Wiener Festwochen sind Wiens internationales Festival für Musik, Theater und Performance mit über 100 Produktionen in 6 Wochen.',
+      'Die Wiener Festwochen sind Wiens internationales Festival für Musik, Theater und Performance; 2026 mit 35 Produktionen mit Eintritt an rund 35 Spielorten.',
     image:
       'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1600&q=85&auto=format&fit=crop',
   },

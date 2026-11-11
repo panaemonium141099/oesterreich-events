@@ -21,7 +21,7 @@
  * 2026-10-14). Die alten IDs in den Erwartungen sind die der Prod-Zeilen:
  * genau diese Zeilen muss der Sync übernehmen.
  */
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, afterAll, vi } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import * as cheerio from 'cheerio';
@@ -37,10 +37,9 @@ import type { ScrapedEvent } from '@/types/events';
 const fixture = (name: string) => readFileSync(join(__dirname, 'fixtures', name), 'utf8');
 
 // Die Registry verwirft vergangene Termine: die Fixtures sind vom 14.10.2026.
-beforeAll(() => {
-  vi.useFakeTimers({ toFake: ['Date'] });
-  vi.setSystemTime(new Date('2026-10-14T08:00:00Z'));
-});
+// Auf Modulebene, weil die Parser schon beim Sammeln (describe) laufen.
+vi.useFakeTimers({ toFake: ['Date'] });
+vi.setSystemTime(new Date('2026-10-14T08:00:00Z'));
 afterAll(() => {
   vi.useRealTimers();
 });

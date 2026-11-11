@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/vier-gaenge-gourmet-dinner-im-restaurant-bolena-genuss-in-der-wiener-josefstadt-bolena-22000487/?affiliate=J70",
   "publishDate": "2026-09-25",
   "updatedDate": "2026-09-25",
+  "factSources": {
+    "checkedAt": "2026-09-25",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/vier-gaenge-gourmet-dinner-im-restaurant-bolena-genuss-in-der-wiener-josefstadt-bolena-22000487/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Vier Gänge, ausgezeichnete Küche und österreichische Top-Weine: Am 27. November 2026 lädt das Bolena in der Wiener Josefstadt zum Gourmet Dinner. Alles zu Menü, Preisen und Anreise.",
   "category": "Kulinarik & Tradition",

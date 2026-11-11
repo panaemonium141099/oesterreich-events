@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/zipf-zapf-fest-bauhof-semriach-22038690/?affiliate=J70",
   "publishDate": "2026-09-15",
   "updatedDate": "2026-09-15",
+  "factSources": {
+    "checkedAt": "2026-09-15",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/zipf-zapf-fest-bauhof-semriach-22038690/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 10. Oktober 2026 wird der Bauhof Semriach zur Festbierhalle: Fassanstich mit Freibier um 18 Uhr, die Ursprung Buam, Jazz Gitti, ein beheiztes Discozelt und ein Autodrom im Außenbereich.",
   "category": "Kultur & Tradition",

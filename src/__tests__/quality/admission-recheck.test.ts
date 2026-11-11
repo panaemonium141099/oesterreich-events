@@ -160,3 +160,19 @@ describe('Dedup: Duplikat jenseits des Horizonts wird nicht als Ersatz sichtbar'
     expect(underlyingStatus({ title: 'Konzert', start_date: SOON, quality_score: 80, admission_decision: 'admit' })).toBe('published');
   });
 });
+
+describe('planRecheckRow: gesperrte Personen (2026-10-25)', () => {
+  it('hält eine sichtbare Zeile mit gesperrter Person im Titel zurück', () => {
+    const c = planRecheckRow(row({ title: 'Gunkl - Apropos übrigens', publish_status: 'published' }), NOW);
+    expect(c).toMatchObject({ action: 'hold', publish_status: 'needs_review', added: ['blocked_performer'] });
+  });
+
+  it('gibt eine gehaltene Zeile nicht frei, solange der Grund besteht', () => {
+    const held = row({
+      title: 'Gunkl & Breinschmid - Doppelbass',
+      publish_status: 'needs_review',
+      reasons: ['admission:blocked_performer'],
+    });
+    expect(planRecheckRow(held, NOW)).toBeNull();
+  });
+});

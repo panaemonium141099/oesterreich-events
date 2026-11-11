@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-27T16:05:26.859348Z",
+  "depends_on": [],
+  "epic": "fn-28-de-gemeindekalender-dorffeste-in-jeder",
+  "id": "fn-28-de-gemeindekalender-dorffeste-in-jeder.9",
+  "priority": 9,
+  "spec_path": ".flow/tasks/fn-28-de-gemeindekalender-dorffeste-in-jeder.9.md",
+  "status": "todo",
+  "title": "Gemeindekalender Hessen",
+  "updated_at": "2026-10-27T16:05:27.239179Z"
+}

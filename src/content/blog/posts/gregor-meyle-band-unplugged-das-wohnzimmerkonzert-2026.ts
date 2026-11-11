@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/gregor-meyle-band-unplugged-das-wohnzimmerkonzert-rathaussaal-telfs-20830598/?affiliate=J70",
   "publishDate": "2026-10-03",
   "updatedDate": "2026-10-03",
+  "factSources": {
+    "checkedAt": "2026-10-03",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/gregor-meyle-band-unplugged-das-wohnzimmerkonzert-rathaussaal-telfs-20830598/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Am 7. November 2026 kommt Gregor Meyle mit Band und seiner Unplugged-Tour „Das Wohnzimmerkonzert“ in den RathausSaal Telfs. Erwarten Sie reduzierte Songs, Geschichten und viel Nähe.",
   "category": "Musik & Festival",

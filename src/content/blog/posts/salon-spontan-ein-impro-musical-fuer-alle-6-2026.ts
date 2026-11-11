@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/salon-spontan-ein-impro-musical-fuer-alle-6-kabarett-niedermair-21610334/?affiliate=J70",
   "publishDate": "2026-10-10",
   "updatedDate": "2026-10-10",
+  "factSources": {
+    "checkedAt": "2026-10-10",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/salon-spontan-ein-impro-musical-fuer-alle-6-kabarett-niedermair-21610334/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Kein Skript, keine Wiederholung: Bei Salon Spontan entscheidet das Publikum, wohin die Reise geht. Am 13. Dezember 2026 entsteht im Kabarett Niedermair in Wien ein Musical für alle ab 6, live und improvisiert.",
   "category": "Kultur & Bühne",

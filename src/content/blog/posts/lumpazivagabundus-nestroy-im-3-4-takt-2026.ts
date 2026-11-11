@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/lumpazivagabundus-nestroy-im-34-takt-metropol-21908265/?affiliate=J70",
   "publishDate": "2026-08-28",
   "updatedDate": "2026-08-28",
+  "factSources": {
+    "checkedAt": "2026-08-28",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/lumpazivagabundus-nestroy-im-34-takt-metropol-21908265/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Erleben Sie Johann Nestroys zeitlose Zauberposse 'Lumpazivagabundus' in einer mitreißenden musikalischen Adaption. Das Wiener Metropol präsentiert eine Eigenproduktion mit schwungvoller Musik von Carl Michael Ziehrer.",
   "category": "Kultur & Bühne",

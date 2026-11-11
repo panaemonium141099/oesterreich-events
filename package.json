@@ -1,6 +1,7 @@
 {
   "name": "lasstreffen-at",
   "version": "1.0.0",
+  "private": true,
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -24,6 +25,7 @@
     "scrape:wien-clubs": "tsx src/scripts/scrape.ts --source wien-clubs",
     "scrape:ticketmaster": "tsx src/scripts/scrape.ts --source ticketmaster",
     "import:eventim": "tsx src/scripts/import-eventim.ts",
+    "import:eventfrog": "tsx src/scripts/import-eventfrog.ts",
     "import:activities": "tsx src/scripts/import-activities.ts",
     "match:viator": "tsx src/scripts/match-viator.ts",
     "scrape:tirol": "tsx src/scripts/scrape.ts --source tirol.at",
@@ -77,6 +79,7 @@
     "scrape:venues": "tsx --env-file=.env.local src/scripts/scrape-venues.ts",
     "match-artists": "tsx --env-file=.env.local src/scripts/match-artists.ts",
     "seed:festivals": "tsx --env-file=.env.local src/scripts/seed-festivals.ts",
+    "import:festivals": "tsx --env-file=.env.local src/scripts/import-upcoming-festivals.ts",
     "source-trust": "tsx --env-file=.env.local src/scripts/compute-source-trust.ts",
     "scrape:pipeline": "tsx --env-file=.env.local src/scripts/scrape-pipeline.ts",
     "scrape:report": "tsx --env-file=.env.local src/scripts/generate-scrape-report.ts",
@@ -84,11 +87,15 @@
     "import:manual-lineups": "tsx --env-file=.env.local src/scripts/import-manual-lineups.ts",
     "refresh": "tsx --env-file=.env.local src/scripts/scrape-pipeline.ts --trigger manual",
     "blog:autowriter": "tsx --env-file=.env.local src/scripts/blog-autowriter.ts",
-    "build:stammdaten": "tsx src/scripts/build-gemeinden-master.ts && tsx src/scripts/build-plz-ort-slugs.ts"
+    "build:stammdaten": "tsx src/scripts/build-gemeinden-master.ts && tsx src/scripts/build-plz-ort-slugs.ts",
+    "build:stammdaten:de": "tsx src/scripts/build-stammdaten-de.ts",
+    "build:registry:de": "tsx src/scripts/build-de-registry.ts",
+    "pruefstand:de": "tsx --env-file-if-exists=.env.local src/scripts/pruefstand-de.ts",
+    "pruefstand:at-referenz": "tsx --env-file=.env.local src/scripts/pruefstand-at-referenz.ts"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "UNLICENSED",
   "engines": {
     "node": "22.x"
   },

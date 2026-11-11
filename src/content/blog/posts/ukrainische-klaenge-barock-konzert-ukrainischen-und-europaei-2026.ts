@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/festival-der-ukrainischen-kunst-dnipro-meerscheinschloessl-22234310/?affiliate=J70",
   "publishDate": "2026-10-15",
   "updatedDate": "2026-10-15",
+  "factSources": {
+    "checkedAt": "2026-10-15",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/festival-der-ukrainischen-kunst-dnipro-meerscheinschloessl-22234310/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 6. November erklingen im Grazer Meerscheinschlössl Werke von Corelli, Händel und Mozart neben Berezovsky und Bortniansky. Ein Konzert des ersten Festivals der ukrainischen Kunst DNIPRO.",
   "category": "Kultur & Bühne",

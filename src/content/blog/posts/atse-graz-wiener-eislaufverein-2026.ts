@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/atse-graz-heimspiele-202627-merkur-eisstadion-22121475/?affiliate=J70",
   "publishDate": "2026-10-11",
   "updatedDate": "2026-10-11",
+  "factSources": {
+    "checkedAt": "2026-10-11",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/atse-graz-heimspiele-202627-merkur-eisstadion-22121475/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Der ATSE Graz trifft im Merkur Eisstadion auf den Wiener Eislaufverein. Wir haben alles zusammengefasst, was Sie zu Tickets, Anreise und Geschichte des Grazer Traditionsvereins wissen müssen.",
   "category": "Sport & Outdoor",

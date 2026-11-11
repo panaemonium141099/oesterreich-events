@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/konzerte-in-der-minoritenkirche-minoritenkirche-21734462/?affiliate=J70",
   "publishDate": "2026-10-13",
   "updatedDate": "2026-10-13",
+  "factSources": {
+    "checkedAt": "2026-10-13",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/konzerte-in-der-minoritenkirche-minoritenkirche-21734462/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Kurz vor Heiligabend erklingt in der Minoritenkirche Barockmusik zur Weihnachtszeit. Rund 70 Minuten festliche Musik in einer der ältesten Kirchen Wiens, nur wenige Schritte von der Hofburg entfernt.",
   "category": "Kultur & Bühne",

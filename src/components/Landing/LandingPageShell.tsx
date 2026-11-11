@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import type { Event } from '@/types/events';
-import { EventListCard } from '@/components/Events/EventListCard';
+import { HubShelves, type HubShelvesProps } from '@/components/Hub/HubShelves';
+import { HubEventGrid } from '@/components/Hub/HubEventGrid';
 import { FilterChips, type FilterChip } from './FilterChips';
 import { InternalLinks, type LinkGroup } from './InternalLinks';
 import { LoadMoreEvents } from './LoadMoreEvents';
@@ -40,6 +41,8 @@ interface LandingPageShellProps {
   /** Optional hybrid-bridge CTA (e.g. <HubSearchCTA/>) rendered under the
    *  intro — links into /entdecken scoped to this region. */
   searchCta?: ReactNode;
+  /** Regale über der Liste (Variante „Regale" wie /entdecken). Ohne: nur das Raster. */
+  shelves?: Pick<HubShelvesProps, 'events' | 'links' | 'hide'> | null;
 }
 
 /**
@@ -58,6 +61,7 @@ export function LandingPageShell({
   paginationParams,
   intro,
   searchCta,
+  shelves,
 }: LandingPageShellProps) {
   const t = useTranslations('HubLanding');
   // Cursor for pagination: last event's ID from server batch
@@ -74,48 +78,48 @@ export function LandingPageShell({
         }}
       />
 
-      <main className="min-h-screen bg-surface text-white">
-        <div className="max-w-4xl mx-auto px-4 py-8">
+      <main className="min-h-screen bg-[var(--v4-surface)] text-[var(--v4-ink)]">
+        <div className="max-w-[1180px] mx-auto px-4 md:px-14 pt-6 md:pt-8 pb-20">
           {/* Breadcrumbs */}
-          <nav className="flex items-center gap-1.5 text-xs text-white/40 mb-6">
+          <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-[12.5px] text-[var(--v4-ink-50)] mb-4">
             {breadcrumbs.map((crumb, i) => (
               <span key={i} className="flex items-center gap-1.5">
                 {i > 0 && <span>/</span>}
                 {crumb.href ? (
                   <Link
                     href={crumb.href}
-                    className="hover:text-white/70 transition-colors"
+                    className="hover:text-[var(--v4-ink-70)] transition-colors"
                   >
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span className="text-white/60">{crumb.label}</span>
+                  <span className="text-[var(--v4-ink-70)]">{crumb.label}</span>
                 )}
               </span>
             ))}
           </nav>
 
           {/* H1 + Subtitle */}
-          <div className="mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">
+          <header className="mb-6">
+            <h1 className="m-0 text-[34px] md:text-[40px] font-extrabold tracking-[-0.035em] leading-[1.05] text-[var(--v4-ink)]">
               {title}
             </h1>
-            <p className="text-sm text-white/50">{subtitle}</p>
-          </div>
+            <p className="mt-1.5 mb-0 text-[14px] text-[var(--v4-ink-50)]">{subtitle}</p>
+          </header>
 
           {/* Editorial intro — renders only on routes that have a curated
               entry in landing-intros.ts (typically Bundesland + Stadt root
               pages). Sub-filter views (/wien/heute, /wien/musik/heute)
               deliberately don't carry the intro to avoid duplicate content. */}
           {intro && (
-            <section className="mb-8 max-w-3xl text-white/70 leading-relaxed text-sm md:text-base">
-              <p className="text-base md:text-lg text-white/85 mb-4 font-medium">
+            <section className="mb-7 max-w-3xl text-[var(--v4-ink-70)] leading-relaxed text-sm md:text-[15px]">
+              <p className="text-base md:text-[17px] text-[var(--v4-ink)] mb-3 font-medium">
                 {intro.lead}
               </p>
-              <p className="mb-4">{intro.body}</p>
+              <p className="mb-3">{intro.body}</p>
               {intro.tips && (
-                <p className="text-white/60 border-l-2 border-white/20 pl-4 italic">
-                  <span className="text-white/80 font-semibold not-italic">{t('insiderTip')} </span>
+                <p className="text-[var(--v4-ink-50)] border-l-2 border-[var(--v4-hairline-3)] pl-4 italic">
+                  <span className="text-[var(--v4-ink-70)] font-semibold not-italic">{t('insiderTip')} </span>
                   {intro.tips}
                 </p>
               )}
@@ -123,34 +127,33 @@ export function LandingPageShell({
           )}
 
           {/* Hybrid bridge → /entdecken scoped to this region (optional). */}
-          {searchCta && <div className="mb-8">{searchCta}</div>}
+          {searchCta && <div className="mb-7">{searchCta}</div>}
 
           {/* Filter Chips */}
-          <div className="mb-6">
+          <div className="mb-5">
             <FilterChips chips={filterChips} />
           </div>
 
-          {/* Event List */}
+          {/* Regale */}
+          {shelves && <HubShelves {...shelves} />}
+
+          {/* Vollständige Liste */}
           {events.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {events.map((event) => (
-                <EventListCard key={event.id} event={event} />
-              ))}
-            </div>
+            <HubEventGrid title={t('allEvents')} sub={subtitle} events={events}>
+              {/* Load More (Client Component) */}
+              <LoadMoreEvents
+                apiParams={paginationParams}
+                initialCursor={initialCursor}
+                hasMore={hasMore}
+              />
+            </HubEventGrid>
           ) : (
             <div className="text-center py-16">
-              <p className="text-white/40 text-sm">
+              <p className="text-[var(--v4-ink-50)] text-sm">
                 {t('noEventsForFilter')}
               </p>
             </div>
           )}
-
-          {/* Load More (Client Component) */}
-          <LoadMoreEvents
-            apiParams={paginationParams}
-            initialCursor={initialCursor}
-            hasMore={hasMore}
-          />
 
           {/* Internal Links */}
           <InternalLinks groups={internalLinks} />

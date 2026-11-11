@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/house-of-banksy-an-unauthorized-exhibition-house-of-banksy-wien-zeitfensterticket-metastadt-22155765/?affiliate=J70",
   "publishDate": "2026-10-05",
   "updatedDate": "2026-10-05",
+  "factSources": {
+    "checkedAt": "2026-10-05",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/house-of-banksy-an-unauthorized-exhibition-house-of-banksy-wien-zeitfensterticket-metastadt-22155765/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Ab 23. Oktober 2026 zeigt „House of Banksy“ in der METAStadt Wien über 150 inszenierte Reproduktionen von Banksys Werken. Eine unautorisierte Hommage an den anonymen Künstler, erstmals in Österreich.",
   "category": "Kultur & Bühne",

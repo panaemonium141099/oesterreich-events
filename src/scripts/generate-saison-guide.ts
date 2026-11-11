@@ -20,19 +20,45 @@
  *
  * Bewusst KEIN Event-Daten-Enrichment (Grundsatz MASTERPLAN §6).
  *
- * Aufruf: npx tsx src/scripts/generate-saison-guide.ts [--slug <s>] [--force] [--dry-run]
- *   ohne --slug: der faellige Kalender-Eintrag mit der naechsten Frist.
- *   Existiert die Post-Datei schon, wird uebersprungen (ausser --force).
+ * PROGRAMM ZUM THEMA (seit 2026-11-04): Eintraege mit `topic` holen zuerst
+ * die Events ihres Themas (Titel-Suchwoerter im festen Saison-Fenster), die
+ * Kategorie-Events fuellen nur auf, wenn das Thema zu wenig hergibt
+ * (src/lib/blog/saison-events.ts). Der Silvester-Guide vom 03.11. schrieb
+ * „Programm noch nicht angekuendigt", weil die Score-Sortierung ueber ein
+ * Zwei-Monats-Fenster nur Novemberkonzerte lieferte, waehrend ueber 300
+ * Silvester-Events in der DB lagen. Die Websuche laeuft fuer JEDEN Guide
+ * (was findet jedes Jahr statt, mit Quelle), nicht nur fuer Themen-Seiten.
+ *
+ * NACHZIEHEN: ein geschriebener Guide wird neu generiert, sobald die
+ * Themenabfrage deutlich mehr liefert als beim letzten Stand
+ * (`needsRefresh`, Stand in src/content/blog/saison-state.json). Slug,
+ * publishDate und Hero bleiben, updatedDate wandert.
+ *
+ * Aufruf: npx tsx src/scripts/generate-saison-guide.ts [--slug <s>] [--force] [--refresh] [--dry-run] [--check]
+ *   ohne --slug: der faellige Kalender-Eintrag mit der naechsten Frist,
+ *   sonst der naechste Guide, der nachgezogen werden muss.
+ *   --refresh: nur nachziehen, keine neuen Guides.
+ *   --check: nur die Event-Auswahl ausgeben (ohne Websuche und Modell).
+ *   Existiert die Post-Datei schon, wird uebersprungen (ausser --force,
+ *   das die Seite wie ein Nachziehen neu schreibt).
  * Exit 0 + Datei geschrieben = Workflow publiziert bzw. macht einen PR;
  * Exit 78 = nichts zu tun.
  *
  * Ausgaben fuer den Workflow (GITHUB_OUTPUT): slug, review ("true" wenn die
- * Fakten zu alt sind und ein Mensch draufschauen muss).
+ * Fakten zu alt sind und ein Mensch draufschauen muss), mode ("new" oder
+ * "refresh").
  */
 import { readFileSync, writeFileSync, existsSync, appendFileSync, mkdirSync, readdirSync, rmSync } from 'fs';
 import { join } from 'path';
-import { createClient } from '@supabase/supabase-js';
+import { pathToFileURL } from 'url';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { findCommonsPhoto, fetchImage, layoutFor } from '../lib/blog/hero-image';
+import { factSourceUrls } from '../lib/blog/fact-sources';
+import {
+  topicWindow, pickSeasonEvents, matchesTopic, needsRefresh, deniesProgramme,
+  type SaisonEvent, type SeasonPick, type SaisonGuideState,
+} from '../lib/blog/saison-events';
+import { SITE_COUNTRY } from '../lib/site-country';
 import { claudeText, claudeJson, ClaudeRateLimitError } from '../lib/llm/claude-cli';
 import {
   SAISON_KALENDER, daysUntilDeadline, isDue, factsAreStale,
@@ -47,29 +73,53 @@ const MODEL_COMPOSE = process.env.CLAUDE_BLOG_MODEL_COMPOSE || 'opus';
 
 const POSTS_DIR = join(process.cwd(), 'src', 'content', 'blog', 'posts');
 const INDEX_PATH = join(process.cwd(), 'src', 'content', 'blog', 'index.ts');
+const STATE_PATH = join(process.cwd(), 'src', 'content', 'blog', 'saison-state.json');
 
-interface ResearchEvent {
-  title: string;
-  start_date: string;
-  location_name: string | null;
-  bundesland: string | null;
-  price_text: string | null;
-}
+type ResearchEvent = SaisonEvent;
+const EVENT_COLUMNS = 'title,start_date,location_name,bundesland,price_text,source_url,event_score';
 
-async function researchEvents(spec: SaisonGuideSpec): Promise<ResearchEvent[]> {
+function supabase(): SupabaseClient {
   const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) throw new Error('SUPABASE_URL / Key fehlen');
-  const sb = createClient(url, key, { auth: { persistSession: false } });
+  return createClient(url, key, { auth: { persistSession: false } });
+}
 
-  const from = new Date();
+/**
+ * Programm zum Thema: sichtbare AT-Events, deren Titel ein Suchwort des
+ * Themas traegt, im festen Saison-Fenster. Hoechstens 1000 Zeilen je
+ * Antwort (PostgREST-Deckel), fuer die Auswahl von 36 reicht das.
+ */
+async function topicEvents(sb: SupabaseClient, spec: SaisonGuideSpec, today: Date): Promise<ResearchEvent[]> {
+  if (!spec.topic) return [];
+  const { from, to } = topicWindow(spec.topic.window, today);
+  const orFilter = spec.topic.keywords.map((k) => `title.ilike.*${k.replace(/[,()*]/g, '')}*`).join(',');
+  const { data, error } = await sb
+    .from('events')
+    .select(EVENT_COLUMNS)
+    .eq('country', SITE_COUNTRY)
+    .eq('publish_status', 'published')
+    .gte('start_date', `${from}T00:00:00Z`)
+    .lte('start_date', `${to}T23:59:59Z`)
+    .or(orFilter)
+    .order('event_score', { ascending: false })
+    .limit(1000);
+  if (error) throw new Error(`Themen-Abfrage fehlgeschlagen: ${error.message}`);
+  // Ausschlusswoerter (z. B. „fußball" bei „ball") prueft erst der Client.
+  return (data ?? []).filter((e) => matchesTopic(e.title, spec.topic!));
+}
+
+/** Kategorie-Events im relativen Saison-Fenster (die bisherige Abfrage). */
+async function categoryEvents(sb: SupabaseClient, spec: SaisonGuideSpec, today: Date): Promise<ResearchEvent[]> {
+  const from = new Date(today);
   from.setMonth(from.getMonth() + spec.monthsAhead[0]);
-  const to = new Date();
+  const to = new Date(today);
   to.setMonth(to.getMonth() + spec.monthsAhead[1]);
 
   const { data, error } = await sb
     .from('events')
-    .select('title,start_date,location_name,bundesland,price_text,event_score,category')
+    .select(EVENT_COLUMNS)
+    .eq('country', SITE_COUNTRY)
     .gte('start_date', from.toISOString())
     .lte('start_date', to.toISOString())
     .eq('publish_status', 'published')
@@ -77,20 +127,36 @@ async function researchEvents(spec: SaisonGuideSpec): Promise<ResearchEvent[]> {
     .order('event_score', { ascending: false })
     .limit(120);
   if (error) throw new Error(`Event-Recherche fehlgeschlagen: ${error.message}`);
+  return data ?? [];
+}
 
-  // Regional streuen: max. 5 pro Bundesland, damit der Guide ganz
-  // Österreich abdeckt statt nur Wien.
-  const perBl = new Map<string, number>();
-  const picked: ResearchEvent[] = [];
-  for (const e of data ?? []) {
-    const bl = e.bundesland ?? 'unbekannt';
-    const n = perBl.get(bl) ?? 0;
-    if (n >= 5) continue;
-    perBl.set(bl, n + 1);
-    picked.push(e);
-    if (picked.length >= 36) break;
-  }
-  return picked;
+/**
+ * Events fuer den Guide: Thementreffer zuerst, Kategorie-Events nur zum
+ * Auffuellen. Regional gestreut (max. 5 je Bundesland im ersten Durchgang),
+ * damit der Guide ganz Oesterreich abdeckt statt nur Wien.
+ */
+async function researchEvents(spec: SaisonGuideSpec, today = new Date()): Promise<SeasonPick> {
+  const sb = supabase();
+  const topic = await topicEvents(sb, spec, today);
+  const generic = topic.length >= 9 ? [] : await categoryEvents(sb, spec, today);
+  return pickSeasonEvents(topic, generic);
+}
+
+/** Nur die Zahl der Thementreffer (fuer die Nachzieh-Entscheidung, ohne Zeilen). */
+async function topicCount(sb: SupabaseClient, spec: SaisonGuideSpec, today: Date): Promise<number> {
+  return (await topicEvents(sb, spec, today)).length;
+}
+
+function readState(): Record<string, SaisonGuideState> {
+  if (!existsSync(STATE_PATH)) return {};
+  return JSON.parse(readFileSync(STATE_PATH, 'utf8')) as Record<string, SaisonGuideState>;
+}
+
+function writeState(slug: string, entry: SaisonGuideState): void {
+  const state = readState();
+  state[slug] = entry;
+  const sorted = Object.fromEntries(Object.keys(state).sort().map((k) => [k, state[k]]));
+  writeFileSync(STATE_PATH, `${JSON.stringify(sorted, null, 2)}\n`, 'utf8');
 }
 
 /**
@@ -101,11 +167,14 @@ async function researchEvents(spec: SaisonGuideSpec): Promise<ResearchEvent[]> {
  * weiter (die Fakten stehen ja im Kalender).
  */
 async function groundedResearch(spec: SaisonGuideSpec): Promise<string> {
-  if (!spec.brief) return '';
+  // Jeder Guide wird recherchiert, nicht nur Themen-Seiten mit `brief`:
+  // was jedes Jahr stattfindet, laesst sich belegen, auch wenn die Ausgabe
+  // dieses Jahres noch nicht angekuendigt ist (Silvester-Guide 2026-11-03).
   const prompt = `Recherchiere per Websuche den aktuellen Stand zu "${spec.title}" in Oesterreich fuer die kommende Saison.
-${spec.brief}
+${spec.brief ?? ''}
+Trage zusaetzlich zusammen, welche Veranstaltungen, Braeuche und Orte zu dieser Saison JEDES JAHR wiederkehren (in allen Bundeslaendern, nicht nur Wien): Name, Ort, Veranstalter, seit wann, was dort typischerweise passiert. Diese Angaben duerfen in den Guide, ohne dass ein Termin fuer dieses Jahr feststeht.
 ${spec.sources?.length ? `Bevorzugte Primaerquellen: ${spec.sources.join(', ')}` : ''}
-Antworte in Stichpunkten auf Deutsch. Schreibe zu jeder Angabe dazu, woher sie stammt.
+Antworte in Stichpunkten auf Deutsch. Schreibe zu jeder Angabe die URL dazu, woher sie stammt. Nenne nichts ohne Quelle.
 Wenn etwas fuer die kommende Saison noch nicht offiziell angekuendigt ist, schreibe das ausdruecklich hin, statt eine Vermutung zu formulieren.`;
   try {
     return await claudeText(prompt, {
@@ -146,9 +215,17 @@ function unsupportedDates(draft: Record<string, unknown>, allowed: string): stri
 
 async function generateDraft(
   spec: SaisonGuideSpec,
-  events: ResearchEvent[],
+  pick: SeasonPick,
   research: string,
 ): Promise<Record<string, unknown>> {
+  const events = pick.events;
+  // Ob der Guide „noch nicht angekuendigt" schreiben darf, entscheidet die
+  // Themenabfrage, nicht das Modell: mit Programm in der DB ist der Satz falsch.
+  const programmeBlock = spec.topic
+    ? pick.programmeKnown
+      ? `PROGRAMM ZUM THEMA: Unsere Datenbank kennt ${pick.topicCount} Veranstaltungen zu „${spec.title}" in dieser Saison, ${events.length} davon stehen unten. Das Programm IST bekannt. Schreibe nirgends, uns oder unserer Datenbank sei das Programm noch nicht bekannt; schreibe über diese Veranstaltungen. Erlaubt bleibt, belegt und auf die einzelne Veranstaltung bezogen, dass deren Details (Bühnenprogramm, Uhrzeiten, Setlist) laut Veranstalter oder Recherche noch nicht veröffentlicht sind.`
+      : `PROGRAMM ZUM THEMA: Unsere Datenbank kennt noch keine Veranstaltung zu „${spec.title}" in dieser Saison. Sag das an EINER Stelle ehrlich, aber mach daraus keinen Refrain. Erzähle stattdessen aus der Recherche, was jedes Jahr wiederkehrt (mit „traditionell" oder „jedes Jahr", ohne Termin für dieses Jahr), und nutze die Events unten nur, wenn sie zum Thema passen.`
+    : '';
   // Die geprüften Fakten sind die einzige gültige Quelle für Termine und
   // Preise. Die Grounding-Recherche liefert nur Material für die Prosa.
   const factsBlock = spec.facts?.length
@@ -159,8 +236,8 @@ ${spec.facts.map((f) => `- ${f.label}: ${f.value}`).join('\n')}
     : '';
   const researchBlock = research
     ? `
-HINTERGRUND-RECHERCHE (Material für die Prosa, NICHT Faktenquelle für Termine oder Preise; im Zweifel gelten die geprüften Fakten oben):
-${research.slice(0, 6000)}
+HINTERGRUND-RECHERCHE (Material für die Prosa, NICHT Faktenquelle für Termine oder Preise; im Zweifel gelten die geprüften Fakten oben). Was hier als jährlich wiederkehrend belegt ist, darfst du als Tradition nennen („findet jedes Jahr statt"), aber ohne Datum oder Preis für diese Saison, solange der Termin nicht oben in den Fakten oder Events steht:
+${research.slice(0, 8000)}
 `
     : '';
 
@@ -170,7 +247,7 @@ Thema: ${spec.title} — ${spec.subtitle}
 Such-Intentionen der Leser: ${spec.searchKeywords.join(', ')}
 ${spec.brief ? `
 AUFTRAG: ${spec.brief}
-` : ''}${factsBlock}
+` : ''}${factsBlock}${programmeBlock ? `\n${programmeBlock}\n` : ''}
 ECHTE Events aus unserer Datenbank für diese Saison (nutze sie als konkrete Beispiele im Text, korrekt nach Bundesland; erfinde KEINE zusätzlichen Events oder Preise):
 ${events.map((e) => `- ${e.title} | ${e.start_date.slice(0, 10)} | ${e.location_name ?? '?'} | ${e.bundesland ?? '?'}${e.price_text ? ` | ${e.price_text}` : ''}`).join('\n')}
 ${researchBlock}
@@ -200,7 +277,7 @@ Schreibe auf Deutsch (de-AT). Der Guide soll Lesern helfen, die Saison zu planen
       historyTitle: { type: 'STRING' },
       history: { type: 'STRING', description: 'Hintergrund/Tradition der Saison, 1 Absatz' },
       whatToExpectTitle: { type: 'STRING' },
-      whatToExpect: { type: 'STRING' },
+      whatToExpect: { type: 'STRING', description: 'Mehrere Absätze, getrennt durch eine Leerzeile (\\n\\n); je Bundesland ein eigener Absatz, der mit dem fett gesetzten Namen beginnt (**Wien:** …), keine Großbuchstaben-Labels, kein durchgehender Fließtext' },
       whatToExpectList: { type: 'ARRAY', items: { type: 'STRING' }, description: '5-7 konkrete Highlights mit echten Event-Namen' },
       practicalInfoTitle: { type: 'STRING' },
       practicalInfo: {
@@ -289,10 +366,44 @@ async function resolveSaisonHero(spec: SaisonGuideSpec): Promise<SaisonHero> {
   };
 }
 
+/** Was beim Nachziehen aus der bestehenden Seite erhalten bleibt. */
+interface ExistingPost {
+  publishDate: string;
+  hero: SaisonHero;
+}
+
+/**
+ * Bestehende Seite lesen (Nachziehen): publishDate und Hero bleiben, damit
+ * die URL ihre Autoritaet und ihr Bild behaelt. Laesst sich die Datei nicht
+ * laden, startet die Seite wie neu.
+ */
+async function readExistingPost(slug: string): Promise<ExistingPost | undefined> {
+  const file = join(POSTS_DIR, `${slug}.ts`);
+  if (!existsSync(file)) return undefined;
+  try {
+    const mod = (await import(pathToFileURL(file).href)) as { post?: Record<string, unknown> };
+    const p = mod.post;
+    if (!p || typeof p.publishDate !== 'string' || typeof p.heroImage !== 'string') return undefined;
+    return {
+      publishDate: p.publishDate,
+      hero: {
+        heroImage: p.heroImage,
+        ...(typeof p.heroImageCredit === 'string' ? { heroImageCredit: p.heroImageCredit } : {}),
+        ...(p.heroLayout === 'poster' ? { heroLayout: 'poster' as const, heroImageWidth: Number(p.heroImageWidth) || undefined } : {}),
+      },
+    };
+  } catch (err) {
+    console.warn(`Bestehende Seite ${slug} nicht lesbar (${String(err)}) — wird wie neu geschrieben.`);
+    return undefined;
+  }
+}
+
 function writePostFile(
   spec: SaisonGuideSpec,
   gen: Record<string, unknown>,
   hero: SaisonHero,
+  events: ResearchEvent[],
+  existing?: ExistingPost,
 ): string {
   const today = new Date().toISOString().slice(0, 10);
   // Die geprüften Fakten stehen als eigener practicalInfo-Block ganz oben —
@@ -309,8 +420,14 @@ function writePostFile(
     heroImage: hero.heroImage,
     ...(hero.heroImageCredit ? { heroImageCredit: hero.heroImageCredit } : {}),
     ...(hero.heroLayout === 'poster' ? { heroLayout: 'poster', heroImageWidth: hero.heroImageWidth } : {}),
-    publishDate: today,
+    publishDate: existing?.publishDate ?? today,
     updatedDate: today,
+    // Belege der Termine: Primärquellen der geprüften Fakten und die Quellen
+    // der DB-Events, aus denen der Entwurf Daten nehmen durfte (Gate oben).
+    factSources: {
+      checkedAt: spec.facts?.length && spec.factsVerified ? spec.factsVerified : today,
+      urls: factSourceUrls(spec.sources ?? [], events.map((e) => e.source_url)),
+    },
     readingTime: gen.readingTime ?? 7,
     excerpt: gen.excerpt,
     category: spec.category,
@@ -392,15 +509,59 @@ function pickDue(force: boolean): SaisonGuideSpec | undefined {
     .sort((a, b) => daysUntilDeadline(a) - daysUntilDeadline(b))[0];
 }
 
+/**
+ * Der naechste Guide, der nachgezogen werden muss: geschrieben, mit Thema,
+ * in der Saison (Arbeitsfenster bis Fensterende) und mit deutlich mehr
+ * Programm als beim letzten Stand. Eine Themenabfrage je Kandidat, hoechstens
+ * eine Handvoll am Tag.
+ */
+async function pickRefresh(today: Date): Promise<{ spec: SaisonGuideSpec; topicCount: number } | undefined> {
+  const state = readState();
+  const sb = supabase();
+  const candidates = SAISON_KALENDER
+    .filter((s) => s.topic && existsSync(join(POSTS_DIR, `${s.slug}.ts`)))
+    .filter((s) => isDue(s, today) && topicWindow(s.topic!.window, today).to >= today.toISOString().slice(0, 10))
+    .sort((a, b) => daysUntilDeadline(a, today) - daysUntilDeadline(b, today));
+  for (const spec of candidates) {
+    const count = await topicCount(sb, spec, today);
+    const prev = state[spec.slug];
+    console.log(`Nachzieh-Check ${spec.slug}: ${count} Thementreffer (Stand ${prev ? `${prev.topicCount} am ${prev.writtenAt}` : 'keiner'})`);
+    if (needsRefresh(prev, count, today)) return { spec, topicCount: count };
+  }
+  return undefined;
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const slugIdx = args.indexOf('--slug');
   const force = args.includes('--force');
+  const refreshOnly = args.includes('--refresh');
   const dryRun = args.includes('--dry-run');
+  // --check: nur die Event-Auswahl zeigen (keine Websuche, kein Modell).
+  const checkOnly = args.includes('--check');
+  const today = new Date();
 
-  const spec = slugIdx !== -1
-    ? SAISON_KALENDER.find((s) => s.slug === args[slugIdx + 1])
-    : pickDue(force);
+  let spec: SaisonGuideSpec | undefined;
+  if (slugIdx !== -1) {
+    spec = SAISON_KALENDER.find((s) => s.slug === args[slugIdx + 1]);
+    if (!spec) {
+      console.error(`Unbekannter Kalender-Slug: ${args[slugIdx + 1]}`);
+      process.exit(1);
+    }
+    if (existsSync(join(POSTS_DIR, `${spec.slug}.ts`)) && !force) {
+      console.log(`${spec.slug} existiert bereits — nichts zu tun (--force schreibt die Seite neu).`);
+      process.exit(78);
+    }
+  } else if (!refreshOnly) {
+    spec = pickDue(force);
+  }
+  if (!spec) {
+    const refresh = await pickRefresh(today);
+    if (refresh) {
+      spec = refresh.spec;
+      console.log(`Nachziehen: ${spec.slug} (${refresh.topicCount} Thementreffer)`);
+    }
+  }
 
   if (!spec) {
     // Nur ungeschriebene Einträge zählen, sonst meldete das Log einen längst
@@ -409,20 +570,23 @@ async function main() {
       .filter((s) => !existsSync(join(POSTS_DIR, `${s.slug}.ts`)))
       .sort((a, b) => daysUntilDeadline(a) - daysUntilDeadline(b))[0];
     console.log(next
-      ? `Kein Saison-Guide fällig. Nächster: ${next.slug} startet in ${daysUntilDeadline(next) - next.leadDays} Tagen (liveBy ${next.liveBy}).`
-      : 'Kein Saison-Guide fällig. Alle Kalendereinträge sind geschrieben.');
-    process.exit(78);
-  }
-  if (existsSync(join(POSTS_DIR, `${spec.slug}.ts`)) && !force) {
-    console.log(`${spec.slug} existiert bereits — nichts zu tun.`);
+      ? `Kein Saison-Guide fällig oder nachzuziehen. Nächster: ${next.slug} startet in ${daysUntilDeadline(next) - next.leadDays} Tagen (liveBy ${next.liveBy}).`
+      : 'Kein Saison-Guide fällig oder nachzuziehen. Alle Kalendereinträge sind geschrieben.');
     process.exit(78);
   }
 
-  const rest = daysUntilDeadline(spec);
-  console.log(`Generiere Saison-Guide: ${spec.title} (Frist ${spec.liveBy}, noch ${rest} Tage)`);
+  const existing = await readExistingPost(spec.slug);
+  const mode = existing ? 'refresh' : 'new';
+  const rest = daysUntilDeadline(spec, today);
+  console.log(`${mode === 'refresh' ? 'Ziehe nach' : 'Generiere'}: ${spec.title} (Frist ${spec.liveBy}, noch ${rest} Tage)`);
 
-  const events = await researchEvents(spec);
-  console.log(`${events.length} Events recherchiert (regional gestreut).`);
+  const pick = await researchEvents(spec, today);
+  const events = pick.events;
+  console.log(`${events.length} Events ausgewählt (${pick.topicCount} Thementreffer, Programm ${pick.programmeKnown ? 'bekannt' : 'unbekannt'}).`);
+  if (checkOnly) {
+    for (const e of events) console.log(`  ${e.start_date.slice(0, 10)} | ${e.bundesland ?? '?'} | ${e.title} | ${e.location_name ?? '?'}`);
+    process.exit(0);
+  }
   // Themen-Seiten tragen ihre Fakten im Kalender und funktionieren auch dann,
   // wenn die DB für das Thema noch wenig hergibt (Krampusläufe im September).
   // Reine Sammel-Guides leben dagegen ausschließlich von den Events.
@@ -435,7 +599,7 @@ async function main() {
   const research = await groundedResearch(spec);
   if (research) console.log(`Grounding-Recherche: ${research.length} Zeichen`);
 
-  const gen = await generateDraft(spec, events, research);
+  const gen = await generateDraft(spec, pick, research);
 
   // Gate gegen erfundene Termine: jede Datumsangabe im Entwurf muss aus den
   // geprüften Fakten oder aus echten DB-Events stammen.
@@ -453,26 +617,37 @@ async function main() {
     console.error(`Entwurf verworfen — nicht belegte Datumsangaben: ${bogus.join(', ')}`);
     process.exit(1);
   }
+  // Gate gegen den falschen Refrain: mit Programm in der DB darf der Guide
+  // nicht behaupten, es sei nichts angekündigt.
+  if (pick.programmeKnown && spec.topic) {
+    const denial = deniesProgramme(gen);
+    if (denial) {
+      console.error(`Entwurf verworfen — behauptet trotz ${pick.topicCount} Thementreffern, das Programm sei unbekannt: „${denial}"`);
+      process.exit(1);
+    }
+  }
 
   if (dryRun) {
-    console.log(`DRY-RUN ok: ${spec.slug} — "${String(gen.excerpt).slice(0, 120)}…"`);
+    console.log(`DRY-RUN ok (${mode}): ${spec.slug} — "${String(gen.excerpt).slice(0, 120)}…"`);
     process.exit(0);
   }
 
-  const hero = await resolveSaisonHero(spec);
-  const file = writePostFile(spec, gen, hero);
+  const hero = existing?.hero ?? await resolveSaisonHero(spec);
+  const file = writePostFile(spec, gen, hero, events, existing);
   registerInIndex(spec);
+  writeState(spec.slug, { topicCount: pick.topicCount, writtenAt: today.toISOString().slice(0, 10) });
 
   // Alte Fakten => ein Mensch schaut drauf, statt dass Vorjahrestermine
   // stillschweigend live gehen.
   const review = factsAreStale(spec);
   setOutput('slug', spec.slug);
+  setOutput('mode', mode);
   setOutput('review', review ? 'true' : 'false');
-  console.log(`Geschrieben: ${file} + Registrierung in index.ts`);
+  console.log(`Geschrieben: ${file} + Registrierung in index.ts + Stand in saison-state.json`);
   if (review) {
     console.log(`::warning::Fakten für ${spec.slug} zuletzt am ${spec.factsVerified ?? 'nie'} geprüft — geht als PR zum Review statt live.`);
   }
-  console.log(`::notice::Saison-Guide ${spec.slug} generiert (${events.length} Events, Frist ${spec.liveBy})`);
+  console.log(`::notice::Saison-Guide ${spec.slug} ${mode === 'refresh' ? 'nachgezogen' : 'generiert'} (${events.length} Events, ${pick.topicCount} zum Thema, Frist ${spec.liveBy})`);
 }
 
 main().then(

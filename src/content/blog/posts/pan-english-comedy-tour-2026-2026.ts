@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/the-comedy-pub-pan-english-comedy-tour-2026-the-comedy-pub-21899016/?affiliate=J70",
   "publishDate": "2026-09-26",
   "updatedDate": "2026-09-26",
+  "factSources": {
+    "checkedAt": "2026-09-26",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/the-comedy-pub-pan-english-comedy-tour-2026-the-comedy-pub-21899016/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 24. Oktober 2026 macht die PANČ English Comedy Tour Halt in Wien: Headliner Glenn Wool, Host Teshky und Rising Star Luka Dimitrijević bringen englischsprachigen Stand-up in den intimen Comedy Pub.",
   "category": "Kultur & Bühne",

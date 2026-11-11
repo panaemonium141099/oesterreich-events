@@ -65,3 +65,44 @@ export function findResidualDuplicates(
   }
   return out;
 }
+
+export interface CountryAudit {
+  country: string;
+  /** Sichtbare Events ab heute. */
+  visible: number;
+  residual: number;
+  /** Restdubletten je 10.000 sichtbare Events. */
+  rate: number;
+  limit: number;
+}
+
+/**
+ * Restdubletten je Land (fn-29.18). Österreich hat die feste Grenze
+ * `maxAt`. Jedes andere Land darf je sichtbarem Event nicht mehr haben, als
+ * die österreichische Grenze erlaubt (Qualitätsvertrag DE: Dedup-Audit
+ * nicht schlechter als AT), mindestens 10. Ein Paar zählt zum Land seiner
+ * ersten Zeile. Ein Lauf ohne AT-Zeilen (getrennter DE-Lauf) gibt die Zahl
+ * der sichtbaren AT-Events als `atVisible` mit.
+ */
+export function auditByCountry(events: EventRow[], residual: ResidualPair[], maxAt: number, atVisible?: number): CountryAudit[] {
+  const visible = new Map<string, number>();
+  for (const e of events) {
+    if (!VISIBLE.has(e.publish_status ?? '')) continue;
+    const c = e.country ?? 'AT';
+    visible.set(c, (visible.get(c) ?? 0) + 1);
+  }
+  const pairs = new Map<string, number>();
+  for (const { a } of residual) {
+    const c = a.country ?? 'AT';
+    pairs.set(c, (pairs.get(c) ?? 0) + 1);
+  }
+  const atBase = atVisible ?? visible.get('AT') ?? 0;
+  const countries = [...new Set([...visible.keys(), ...pairs.keys()])]
+    .sort((x, y) => (x === 'AT' ? -1 : y === 'AT' ? 1 : x.localeCompare(y)));
+  return countries.map(country => {
+    const v = visible.get(country) ?? 0;
+    const r = pairs.get(country) ?? 0;
+    const limit = country === 'AT' || atBase === 0 ? maxAt : Math.max(10, Math.ceil((maxAt * v) / atBase));
+    return { country, visible: v, residual: r, rate: v ? Math.round((r / v) * 100_000) / 10 : 0, limit };
+  });
+}

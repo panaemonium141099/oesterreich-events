@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/bolschoi-don-kosaken-petja-houdjakov-bolschoi-don-kosaken-kirche-st-michael-21909761/?affiliate=J70",
   "publishDate": "2026-10-07",
   "updatedDate": "2026-10-07",
+  "factSources": {
+    "checkedAt": "2026-10-07",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/bolschoi-don-kosaken-petja-houdjakov-bolschoi-don-kosaken-kirche-st-michael-21909761/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Am 2. Dezember 2026 singen die Bolschoi Don Kosaken in der Kirche St. Michael in Fischamend. Das Adventkonzert ist Teil einer Tournee durch Niederösterreich. Hier finden Sie alle bekannten Infos.",
   "category": "Kultur & Tradition",

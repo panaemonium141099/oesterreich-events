@@ -122,7 +122,6 @@ import { post as symphonieorchesterVorarlbergKonzert3DiakunSchumannDvor2026 } fr
 import { post as averageKayo2026 } from './posts/average-kayo-2026';
 import { post as oskarHaagLostCauseTour20262026 } from './posts/oskar-haag-lost-cause-tour-2026-2026';
 import { post as charityFestival2Tagesticket2026 } from './posts/charity-festival-2-tagesticket-2026';
-import { post as gunklAproposUebrigens2026 } from './posts/gunkl-apropos-uebrigens-2026';
 import { post as post4GaengeGourmetDinner2026 } from './posts/4-gaenge-gourmet-dinner-2026';
 import { post as orgelkonzertBachMozartChopinUA2026 } from './posts/orgelkonzert-bach-mozart-chopin-u-a-2026';
 import { post as panEnglishComedyTour20262026 } from './posts/pan-english-comedy-tour-2026-2026';
@@ -171,6 +170,85 @@ import { post as rudyGiovanniniWeihnachtskonzert2026 } from './posts/rudy-giovan
 import { post as ramazuriCoffeeshockCompanyDieWeltIstNichtGenugTour2026 } from './posts/ramazuri-coffeeshock-company-die-welt-ist-nicht-genug-tour-2026';
 import { post as winterFestival20262026 } from './posts/winter-festival-2026-2026';
 import { post as palaisOfLightsACandlelitJourney2026 } from './posts/palais-of-lights-a-candlelit-journey-2026';
+import { post as nandEsWaereSchoenTour2026 } from './posts/nand-es-waere-schoen-tour-2026';
+import { post as andreasFernerBroFessorCheckstDu2026 } from './posts/andreas-ferner-bro-fessor-checkst-du-2026';
+import { post as uebernachtenLinzStaedtetrip } from './posts/uebernachten-linz-staedtetrip';
+import { post as weihnachtskonzertBoziniKoncertLichterglanzDerStimmenSi2026 } from './posts/weihnachtskonzert-bozini-koncert-lichterglanz-der-stimmen-si-2026';
+import { post as erotikUndFetischMesse2026 } from './posts/erotik-und-fetisch-messe-2026';
+import { post as weihnachtskonzertKlangquadrat2026 } from './posts/weihnachtskonzert-klangquadrat-2026';
+import { post as vivaldi4SeasonsCrossoverKonzert2026 } from './posts/vivaldi-4-seasons-crossover-konzert-2026';
+import { post as falcoVillaFuehrungJaenner2027 } from './posts/falco-villa-fuehrung-jaenner-2027';
+import { post as impulsoTenorsTotalChristmas2026 } from './posts/impulso-tenors-total-christmas-2026';
+import { post as jazzWineMoreMusicFestivalEintagesticketFuerSamstag2026 } from './posts/jazz-wine-more-music-festival-eintagesticket-fuer-samstag-2026';
+import { post as theMagicForest2026 } from './posts/the-magic-forest-2026';
+import { post as konzertVoicePassionSongsFromOutlanderVikingsTheLast2026 } from './posts/konzert-voice-passion-songs-from-outlander-vikings-the-last-2026';
+import { post as konzertOldSchoolBasterdsVintageChristmasMusicShow2026 } from './posts/konzert-old-school-basterds-vintage-christmas-music-show-2026';
+import { post as post29GuinnessIrishChristmasFestival2026 } from './posts/29-guinness-irish-christmas-festival-2026';
+import { post as jodokcelloWorldTour2026 } from './posts/jodokcello-world-tour-2026';
+import { post as benefizkonzertKrebshilfe2026DarknessConfidence2026 } from './posts/benefizkonzert-krebshilfe-2026-darkness-confidence-2026';
+import { post as weihnachtlicheLesungFriedrichVonThun2026 } from './posts/weihnachtliche-lesung-friedrich-von-thun-2026';
+import { post as konzerteInDerMinoritenkircheTrioCarusoDieDreiTenoere2026 } from './posts/konzerte-in-der-minoritenkirche-trio-caruso-die-drei-tenoere-2026';
+import { post as karaokeNight2026 } from './posts/karaoke-night-2026';
+import { post as post3TageJazz2027 } from './posts/3-tage-jazz-2027';
+import { post as artacts2027 } from './posts/artacts-2027';
+import { post as classicEsterhazy2027 } from './posts/classic-esterhazy-2027';
+import { post as elevateFestival2027 } from './posts/elevate-festival-2027';
+import { post as folkArtFestival2026 } from './posts/folk-art-festival-2026';
+import { post as imagoDei2027 } from './posts/imago-dei-2027';
+import { post as impulsFestival2027 } from './posts/impuls-festival-2027';
+import { post as musiksommerBadSchallerbach2027 } from './posts/musiksommer-bad-schallerbach-2027';
+import { post as akkordeonfestivalWien2027 } from './posts/akkordeonfestival-wien-2027';
+import { post as interpenetration2026 } from './posts/interpenetration-2026';
+import { post as jazzwerkstattGraz2026 } from './posts/jazzwerkstatt-graz-2026';
+import { post as klassikImBurghof2026 } from './posts/klassik-im-burghof-2026';
+import { post as lisztFestivalRaiding2027 } from './posts/liszt-festival-raiding-2027';
+import { post as mozartwoche2027 } from './posts/mozartwoche-2027';
+import { post as musicaSacraLinz2026 } from './posts/musica-sacra-linz-2026';
+import { post as onTheCouch2026 } from './posts/on-the-couch-2026';
+import { post as resonanzen2027 } from './posts/resonanzen-2027';
+import { post as tirolerFestspieleErlWinter2026 } from './posts/tiroler-festspiele-erl-winter-2026';
+import { post as trickyWomen2027 } from './posts/tricky-women-2027';
+import { post as wienModern2026 } from './posts/wien-modern-2026';
+import { post as winterfest2026 } from './posts/winterfest-2026';
+import { post as genesisLightshowOrgelkonzert2027 } from './posts/genesis-lightshow-orgelkonzert-2027';
+import { post as toniMoerwaldPalazzo2026 } from './posts/toni-moerwald-palazzo-2026';
+import { post as psalmFestival2027 } from './posts/psalm-festival-2027';
+import { post as winterWoodstockDerBlasmusik2027 } from './posts/winter-woodstock-der-blasmusik-2027';
+import { post as blackValleyBigBandChristmas2026 } from './posts/black-valley-big-band-christmas-2026';
+import { post as hitparade1600Vol22026 } from './posts/hitparade-1600-vol-2-2026';
+import { post as konzertZumJahresausklangPhilharmonicEnsemble2026 } from './posts/konzert-zum-jahresausklang-philharmonic-ensemble-2026';
+import { post as konzerteInDerMinoritenkircheItalienischeBarockGala2026 } from './posts/konzerte-in-der-minoritenkirche-italienische-barock-gala-2026';
+import { post as osterfestspieleSalzburg2027 } from './posts/osterfestspiele-salzburg-2027';
+import { post as internationalGuitarFestivalRust2027 } from './posts/international-guitar-festival-rust-2027';
+import { post as pumucklDasWeihnachtsfest2026 } from './posts/pumuckl-das-weihnachtsfest-2026';
+import { post as bachBeiNachtKlavierkonzertStefanDonner2026 } from './posts/bach-bei-nacht-klavierkonzert-stefan-donner-2026';
+import { post as fullMetalMayrhofen2027 } from './posts/full-metal-mayrhofen-2027';
+import { post as theaterverandTirolSKasermandlOntour2026 } from './posts/theaterverand-tirol-s-kasermandl-ontour-2026';
+import { post as dreiHaselnuesseFuerAschenbroedelNikolausTour2027 } from './posts/drei-haselnuesse-fuer-aschenbroedel-nikolaus-tour-2027';
+import { post as kingNoOneTheBurdenOfEmpathyTour20262026 } from './posts/king-no-one-the-burden-of-empathy-tour-2026-2026';
+import { post as riesenOrgelKonzert2026 } from './posts/riesen-orgel-konzert-2026';
+import { post as festkonzertMit66Jahren2026 } from './posts/festkonzert-mit-66-jahren-2026';
+import { post as weihnachtskonzertFingerlosTschejefemFreunde2026 } from './posts/weihnachtskonzert-fingerlos-tschejefem-freunde-2026';
+import { post as jazzGrooveFestivalPrinzGrizzleyMitBand2026 } from './posts/jazz-groove-festival-prinz-grizzley-mit-band-2026';
+import { post as mariaMaTerzettFtUlliBaeerHommageAnGeorgDanzerDasA2026 } from './posts/maria-ma-terzett-ft-ulli-baeer-hommage-an-georg-danzer-das-a-2026';
+import { post as montiBetonsElvisNightGedenkkonzertZum50TodestagDesK2027 } from './posts/monti-betons-elvis-night-gedenkkonzert-zum-50-todestag-des-k-2027';
+import { post as vorchdorferNeujahrskonzert20272027 } from './posts/vorchdorfer-neujahrskonzert-2027-2027';
+import { post as bolschoiDonKosakenChorAdventskonzert2026 } from './posts/bolschoi-don-kosaken-chor-adventskonzert-2026';
+import { post as yogaDrinksWeihnachtsfeiernInnsbruck2026 } from './posts/yoga-drinks-weihnachtsfeiern-innsbruck-2026';
+import { post as theaterAusserKontrolle2026 } from './posts/theater-ausser-kontrolle-2026';
+import { post as dieZauberfloeteKinderoperInDerKrypta2026 } from './posts/die-zauberfloete-kinderoper-in-der-krypta-2026';
+import { post as diagonale2027 } from './posts/diagonale-2027';
+import { post as kernoelamazonenKugelKeksKabarettComedyFestival20262026 } from './posts/kernoelamazonen-kugel-keks-kabarett-comedy-festival-2026-2026';
+import { post as post52GalakonzertOriginalTirolerKaiserjaegermusik2026 } from './posts/52-galakonzert-original-tiroler-kaiserjaegermusik-2026';
+import { post as neujahrskonzert2027ErwinSteinhauerOoeConcertSchrammeln2027 } from './posts/neujahrskonzert-2027-erwin-steinhauer-ooe-concert-schrammeln-2027';
+import { post as xzibitKingmakerEuropeanTourPt22026 } from './posts/xzibit-kingmaker-european-tour-pt-2-2026';
+import { post as salamMusicArtsFestival2027 } from './posts/salam-music-arts-festival-2027';
+import { post as benefizkonzertImAdvent2026 } from './posts/benefizkonzert-im-advent-2026';
+import { post as konzertWinterwonderlandBigbandKoeflach2026 } from './posts/konzert-winterwonderland-bigband-koeflach-2026';
+import { post as luisAusSuedtirolPfiatiDieAbschiedstour2026 } from './posts/luis-aus-suedtirol-pfiati-die-abschiedstour-2026';
+import { post as linzMammaMiaPartyKonzert2026 } from './posts/linz-mamma-mia-party-konzert-2026';
+import { post as vorweihnachtlichesKlavierkonzertMitMarioEritreo2026 } from './posts/vorweihnachtliches-klavierkonzert-mit-mario-eritreo-2026';
+import { post as zuendstoffLive2026 } from './posts/zuendstoff-live-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -178,8 +256,10 @@ export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './
 /** All blog posts sorted by publishDate descending (newest first). */import { post as herbstfesteErntedankOesterreich } from './posts/herbstfeste-erntedank-oesterreich';
 import { post as christkindlmaerkteOesterreich } from './posts/christkindlmaerkte-oesterreich';
 import { post as krampuslaufPerchtenlaufOesterreich } from './posts/krampuslauf-perchtenlauf-oesterreich';
+import { post as silvesterOesterreich } from './posts/silvester-oesterreich';
 
 export const ALL_POSTS: FestivalPost[] = [
+  silvesterOesterreich,
   krampuslaufPerchtenlaufOesterreich,
   christkindlmaerkteOesterreich,
   herbstfesteErntedankOesterreich,
@@ -303,7 +383,6 @@ export const ALL_POSTS: FestivalPost[] = [
   averageKayo2026,
   oskarHaagLostCauseTour20262026,
   charityFestival2Tagesticket2026,
-  gunklAproposUebrigens2026,
   post4GaengeGourmetDinner2026,
   orgelkonzertBachMozartChopinUA2026,
   panEnglishComedyTour20262026,
@@ -352,6 +431,85 @@ export const ALL_POSTS: FestivalPost[] = [
   ramazuriCoffeeshockCompanyDieWeltIstNichtGenugTour2026,
   winterFestival20262026,
   palaisOfLightsACandlelitJourney2026,
+  nandEsWaereSchoenTour2026,
+  andreasFernerBroFessorCheckstDu2026,
+  uebernachtenLinzStaedtetrip,
+  weihnachtskonzertBoziniKoncertLichterglanzDerStimmenSi2026,
+  erotikUndFetischMesse2026,
+  weihnachtskonzertKlangquadrat2026,
+  vivaldi4SeasonsCrossoverKonzert2026,
+  falcoVillaFuehrungJaenner2027,
+  impulsoTenorsTotalChristmas2026,
+  jazzWineMoreMusicFestivalEintagesticketFuerSamstag2026,
+  theMagicForest2026,
+  konzertVoicePassionSongsFromOutlanderVikingsTheLast2026,
+  konzertOldSchoolBasterdsVintageChristmasMusicShow2026,
+  post29GuinnessIrishChristmasFestival2026,
+  jodokcelloWorldTour2026,
+  benefizkonzertKrebshilfe2026DarknessConfidence2026,
+  weihnachtlicheLesungFriedrichVonThun2026,
+  konzerteInDerMinoritenkircheTrioCarusoDieDreiTenoere2026,
+  karaokeNight2026,
+  post3TageJazz2027,
+  artacts2027,
+  classicEsterhazy2027,
+  elevateFestival2027,
+  folkArtFestival2026,
+  imagoDei2027,
+  impulsFestival2027,
+  musiksommerBadSchallerbach2027,
+  akkordeonfestivalWien2027,
+  interpenetration2026,
+  jazzwerkstattGraz2026,
+  klassikImBurghof2026,
+  lisztFestivalRaiding2027,
+  mozartwoche2027,
+  musicaSacraLinz2026,
+  onTheCouch2026,
+  resonanzen2027,
+  tirolerFestspieleErlWinter2026,
+  trickyWomen2027,
+  wienModern2026,
+  winterfest2026,
+  genesisLightshowOrgelkonzert2027,
+  toniMoerwaldPalazzo2026,
+  psalmFestival2027,
+  winterWoodstockDerBlasmusik2027,
+  blackValleyBigBandChristmas2026,
+  hitparade1600Vol22026,
+  konzertZumJahresausklangPhilharmonicEnsemble2026,
+  konzerteInDerMinoritenkircheItalienischeBarockGala2026,
+  osterfestspieleSalzburg2027,
+  internationalGuitarFestivalRust2027,
+  pumucklDasWeihnachtsfest2026,
+  bachBeiNachtKlavierkonzertStefanDonner2026,
+  fullMetalMayrhofen2027,
+  theaterverandTirolSKasermandlOntour2026,
+  dreiHaselnuesseFuerAschenbroedelNikolausTour2027,
+  kingNoOneTheBurdenOfEmpathyTour20262026,
+  riesenOrgelKonzert2026,
+  festkonzertMit66Jahren2026,
+  weihnachtskonzertFingerlosTschejefemFreunde2026,
+  jazzGrooveFestivalPrinzGrizzleyMitBand2026,
+  mariaMaTerzettFtUlliBaeerHommageAnGeorgDanzerDasA2026,
+  montiBetonsElvisNightGedenkkonzertZum50TodestagDesK2027,
+  vorchdorferNeujahrskonzert20272027,
+  bolschoiDonKosakenChorAdventskonzert2026,
+  yogaDrinksWeihnachtsfeiernInnsbruck2026,
+  theaterAusserKontrolle2026,
+  dieZauberfloeteKinderoperInDerKrypta2026,
+  diagonale2027,
+  kernoelamazonenKugelKeksKabarettComedyFestival20262026,
+  post52GalakonzertOriginalTirolerKaiserjaegermusik2026,
+  neujahrskonzert2027ErwinSteinhauerOoeConcertSchrammeln2027,
+  xzibitKingmakerEuropeanTourPt22026,
+  salamMusicArtsFestival2027,
+  benefizkonzertImAdvent2026,
+  konzertWinterwonderlandBigbandKoeflach2026,
+  luisAusSuedtirolPfiatiDieAbschiedstour2026,
+  linzMammaMiaPartyKonzert2026,
+  vorweihnachtlichesKlavierkonzertMitMarioEritreo2026,
+  zuendstoffLive2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()

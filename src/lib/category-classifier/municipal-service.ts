@@ -32,25 +32,42 @@
  * REIN, kein I/O.
  */
 
-export type MunicipalServiceKind = 'waste' | 'consultation' | 'klimaticket' | 'dorfservice';
+export type MunicipalServiceKind = 'waste' | 'consultation' | 'klimaticket' | 'dorfservice' | 'office_closed';
+
+/**
+ * Schließung der Verwaltung („Meldeamt geschlossen", Rosenthal am Rennsteig,
+ * fn-29.7): ein Verwaltungswort und „geschlossen" als ganzes Wort;
+ * „Geschlossene Gesellschaft im Rathaus" ist eine Veranstaltung.
+ */
+const OFFICE_RE = /\b(?:\w*amt|rathaus|b[üu]rgerb[üu]ro|b[üu]rgerservice|verwaltung|gemeindeb[üu]ro|bauhof)\b/i;
+const CLOSED_RE = /\bgeschlossen\b/i;
 
 /** Abfuhr, Sammelstellen und Sammelaktionen der Abfallwirtschaft. */
 const WASTE_RE = new RegExp(
   [
-    '(?:sperr|rest|bio|haus|sonder|gr[üu]n|gift)m[üu]ll',
+    // Problemmüll (Open2C Jesenwang „Problemmüllsamlung“, fn-29.15).
+    '(?:sperr|rest|bio|haus|sonder|gr[üu]n|gift|problem)m[üu]ll',
     'm[üu]ll[- ]?(?:abfuhr|abhol|entsorgung|termin|kalender|hof|s[äa]ck|tonne|insel)',
     'abfuhrtermin', 'abfallsammel', 'abfallwirtschaft', 'abfallkalender', 'bioabfall',
     'altpapier', 'altstoff', 'altglas', 'altkleider', 'altmetall', 'elektroalt', 'elektroschrott',
     'alt[- ]?speise[öo]l', 'speise[öo]l[- ]?(?:entsorgung|sammlung)',
     'problemstoff', 'schadstoffsammlung', 'sperrgut', 'autowrack',
+    // Deutsche Entsprechungen (fn-29.2): Restabfall = Restmüll, Blaue Tonne =
+    // Papiertonne, Schadstoffmobil und Problemabfall = Problemstoff.
+    'restabfall', 'blaue\\s+tonne', 'schadstoffmobil', 'problemabfall',
+    // „Annahme Gartenabfälle" (Rantrum, Kompostieranlage, fn-29.16).
+    'gartenabf[äa]ll',
     'wertstoff[- ]?(?:hof|sammel|zentrum|insel)', 'recycling[- ]?(?:hof|zentrum)', 'deponie',
     '(?:papier|bio|rest)[- ]?tonne', 'papier\\s*-?\\s*(?:rote\\s+)?tonne', 'rote\\s+tonne',
     'gelbe(?:r|n|\\(r\\))?\\s+(?:s[äa]ck|tonne)',
     '(?:leicht|metall|kunststoff)[- ]?verpackung', 'verpackungskunststoff',
     'papier[- ]?(?:abhol|abfuhr|sammlung|entsorgung)',
     'kompost[- ]?(?:abfuhr|sammlung|abhol|tonne)',
-    'gr[üu]nschnitt', 'gr[üu]ngut', 'h[äa]cksel(?:dienst|aktion)',
-    'christb[äa]um\\w*[\\s-]*(?:entsorgung|abhol|abfuhr|sammlung)',
+    'gr[üu]nschnitt', 'gr[üu]ngut',
+    // Laubannahme am Bauhof (Wacken, fn-29.8).
+    'laub[- ]?(?:annahme|abgabe|abfuhr|entsorgung)','h[äa]cksel(?:dienst|aktion|platz)',
+    '(?:christ|weihnachts)b[äa]um\\w*[\\s-]*(?:entsorgung|abhol|abfuhr|sammlung)',
+    '(?:abholung|abfuhr|sammlung|entsorgung)\\s+(?:der\\s+)?(?:christ|weihnachts)b[äa]um',
     '(?:agrar|silo|landwirtschafts)[- ]?(?:folie|ballen|planen)',
   ].join('|'),
   'i',
@@ -82,7 +99,7 @@ const EVENT_FORMAT_RE = new RegExp(
 );
 
 /** Sprechtage, Sprechstunden, Beratungstage (Sozial-, Bau-, Notar-, ÖGK-, SVS-…). */
-const CONSULTATION_RE = /sprechtag|sprechstunde|beratungstag/i;
+const CONSULTATION_RE = /sprechtag|sprechstunde|beratungstag|beratungstermin/i;
 
 /** „Klimaticket", „VOR-KlimaTicket", „Klimaticket Ö" als ganzer Titel. */
 const KLIMATICKET_ONLY_RE = /^(?:(?:vor|oö|nö|ö)[- ]?)?klima[- ]?ticket(?:\s+(?:ö|österreich|vor|oö|nö|classic|region))?$/i;
@@ -116,6 +133,7 @@ export function municipalServiceKind(title: string | null | undefined): Municipa
   if (CONSULTATION_RE.test(t)) return 'consultation';
   if (KLIMATICKET_ONLY_RE.test(core) || KLIMATICKET_LENDING_RE.test(t)) return 'klimaticket';
   if (DORFSERVICE_ONLY_RE.test(core)) return 'dorfservice';
+  if (OFFICE_RE.test(t) && CLOSED_RE.test(t)) return 'office_closed';
 
   const waste =
     WASTE_RE.test(t) ||

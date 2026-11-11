@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-27T16:05:24.795154Z",
+  "depends_on": [],
+  "epic": "fn-28-de-gemeindekalender-dorffeste-in-jeder",
+  "id": "fn-28-de-gemeindekalender-dorffeste-in-jeder.6",
+  "priority": 6,
+  "spec_path": ".flow/tasks/fn-28-de-gemeindekalender-dorffeste-in-jeder.6.md",
+  "status": "todo",
+  "title": "Gemeindekalender Niedersachsen",
+  "updated_at": "2026-10-27T16:05:25.140826Z"
+}

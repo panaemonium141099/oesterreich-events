@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-27T16:05:28.950328Z",
+  "depends_on": [],
+  "epic": "fn-28-de-gemeindekalender-dorffeste-in-jeder",
+  "id": "fn-28-de-gemeindekalender-dorffeste-in-jeder.12",
+  "priority": 12,
+  "spec_path": ".flow/tasks/fn-28-de-gemeindekalender-dorffeste-in-jeder.12.md",
+  "status": "todo",
+  "title": "Gemeindekalender Nordrhein-Westfalen",
+  "updated_at": "2026-10-27T16:05:29.316822Z"
+}

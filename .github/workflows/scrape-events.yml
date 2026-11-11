@@ -9,6 +9,11 @@ name: Scrape Events Pipeline
 #      → geocoding → master_coords → scoring → withdrawal → dedup → artist_matching
 #      → indexing → report
 # Das 6h-Limit gilt PRO JOB — jeder Shard hat also reichlich Luft.
+#
+# Nur Österreich (und die übrigen Nicht-DE-Zeilen, z. B. Eventim CH): der
+# DE-Nachtlauf ist ein eigenes System (scrape-events-de.yml, 22:17 Wien) mit
+# eigenen Shards und eigener Nachbearbeitung. Die Nachbearbeitung hier läuft
+# mit --country AT und fasst keine DE-Zeile an.
 
 on:
   schedule:
@@ -47,6 +52,13 @@ on:
         default: ''
       dedup_max_garbage:
         description: 'Dedup: Grenze Müll-Unterdrückungen (leer = 1000)'
+        required: false
+        default: ''
+      # Das Ventil rechnet je Land (fn-29.18). Die Grenzen oben gelten nur
+      # für dieses Land, die übrigen behalten die Standardgrenzen. DE hat
+      # seinen eigenen Lauf (scrape-events-de.yml).
+      dedup_limits_country:
+        description: 'Dedup: Grenzen oben nur für dieses Land (AT, CH; leer = alle)'
         required: false
         default: ''
       # Freigabe nach einem Ventil-Stopp der Nachprüfung des Freigabevertrags
@@ -185,13 +197,13 @@ jobs:
 
       - run: npm ci
 
-      - name: Post-processing pipeline (normalize → geocode → score → withdrawal → admission_recheck → dedup → indexing → report)
+      - name: Post-processing pipeline (normalize → geocode → score → withdrawal → admission_recheck → dedup → indexing → coverage → report)
         run: |
           TRIGGER="cron"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TRIGGER="github_dispatch"
           fi
-          ARGS="--trigger $TRIGGER --skip-scrapers --skip-venues"
+          ARGS="--trigger $TRIGGER --skip-scrapers --skip-venues --country AT"
           if [ "${{ github.event.inputs.skip_geocoding }}" = "true" ]; then
             ARGS="$ARGS --skip-geocoding"
           fi
@@ -204,13 +216,14 @@ jobs:
           DEDUP_MAX_INFLOW_DUPLICATES: ${{ github.event.inputs.dedup_max_inflow_duplicates }}
           DEDUP_MAX_RELEASES: ${{ github.event.inputs.dedup_max_releases }}
           DEDUP_MAX_GARBAGE: ${{ github.event.inputs.dedup_max_garbage }}
+          DEDUP_LIMITS_COUNTRY: ${{ github.event.inputs.dedup_limits_country }}
           ADMISSION_RECHECK_REPORT_PATH: reports/admission-recheck.json
           ADMISSION_RECHECK_MAX_HOLDS: ${{ github.event.inputs.admission_recheck_max_holds }}
           ADMISSION_RECHECK_MAX_RELEASES: ${{ github.event.inputs.admission_recheck_max_releases }}
 
-      - name: Generate scrape report
-        if: success()
-        run: npx tsx src/scripts/generate-scrape-report.ts || true
+      # Den Bericht schreibt die Pipeline selbst (Schritt `report`). Bis
+      # 2026-11-05 lief er hier ein zweites Mal, las den Bestand erneut und
+      # überschrieb den ersten Bericht mit einem Vergleich gegen sich selbst.
 
       - name: Upload report artifacts
         if: always()

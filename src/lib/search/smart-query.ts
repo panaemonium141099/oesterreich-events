@@ -176,8 +176,17 @@ export interface ParsedFilters {
  * geschrieben hatte. Gecappt auf 60 km (bbox-Vorfilter der RPC).
  */
 export function detectRadiusKm(raw: string): number | null {
-  const m = raw.toLowerCase().match(/\b(\d{1,3})\s*km\b/);
+  const q = raw.toLowerCase();
+  const m = q.match(/\b(\d{1,3})\s*km\b/);
   if (!m) return null;
+  // "Lauf 10km", "Halbmarathon 21 km": die Kilometer sind die Strecke,
+  // kein Suchradius (2026-10-23: "Lauf 10km November" suchte im
+  // 10-km-Umkreis statt nach Läufen). Nur mit Umkreis-Wort gilt die Zahl
+  // trotzdem als Radius.
+  if (/\b(lauf|läufe|laufen|run|marathon|halbmarathon|rennen|radtour|radrennen|wanderung|strecke|distanz|triathlon)\b/.test(q)
+    && !/\b(umkreis|radius|umgebung)\b/.test(q)) {
+    return null;
+  }
   const km = parseInt(m[1], 10);
   if (!Number.isFinite(km) || km < 2) return null;
   return Math.min(km, 60);
@@ -187,6 +196,72 @@ export function detectRadiusKm(raw: string): number | null {
 // Erkennung liegt neben dem Classifier, weil der Freigabevertrag
 // Gemeinde-Dienste damit von jeder Fläche nimmt.
 export { isWasteOrAdminEvent } from '@/lib/category-classifier/municipal-service';
+
+/** Monatsnamen und gängige Kürzel → Monatsnummer (1–12). */
+const MONTHS: Record<string, number> = {
+  jänner: 1, januar: 1, jan: 1, februar: 2, feb: 2, märz: 3, maerz: 3, mär: 3, april: 4, apr: 4,
+  mai: 5, juni: 6, jun: 6, juli: 7, jul: 7, august: 8, aug: 8, september: 9, sep: 9, sept: 9,
+  oktober: 10, okt: 10, november: 11, nov: 11, dezember: 12, dez: 12,
+};
+const MONTH_WORDS = Object.keys(MONTHS).sort((a, b) => b.length - a.length).join('|');
+/** Nur ausgeschriebene Monate gelten allein; Kürzel ("jan", "dez") nur
+ *  hinter einer Tageszahl, sonst wird "Jan Delay" zum Jänner. */
+const MONTH_FULL_WORDS = ['jänner', 'januar', 'februar', 'märz', 'maerz', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'dezember']
+  .sort((a, b) => b.length - a.length).join('|');
+const MONTH_RE = new RegExp(`\\b(\\d{1,2})\\.?\\s+(${MONTH_WORDS})\\b|\\b(${MONTH_FULL_WORDS})\\b`);
+const DAY_MONTH_RE = /\b(\d{1,2})\.\s?(\d{1,2})\.?(?:(\d{2,4}))?\b/;
+
+/**
+ * "24.10", "am 23.10.", "21 dez", "November" → Fenster + Signal.
+ * Tag ohne Jahr meint das NÄCHSTE Vorkommen (heute zählt); ein Monat
+ * ohne Tag läuft von heute bzw. vom Monatsersten bis zum Monatsende.
+ */
+export function detectExplicitDate(
+  q: string,
+  today: string,
+): { start: Date; end: Date; signal: string } | null {
+  const [ty, tm] = today.split('-').map(Number);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const dayWindow = (year: number, month: number, day: number) => {
+    const iso = `${year}-${pad(month)}-${pad(day)}`;
+    if (new Date(`${iso}T00:00:00Z`).toISOString().slice(0, 10) !== iso) return null; // 31.11., 30.02.
+    const r = viennaDayRange(iso);
+    return { start: r.start, end: r.end, signal: `date:${iso}` };
+  };
+
+  const dm = q.match(DAY_MONTH_RE);
+  if (dm) {
+    const day = Number(dm[1]);
+    const month = Number(dm[2]);
+    if (day >= 1 && day <= 31 && month >= 1 && month <= 12) {
+      let year = dm[3] ? (dm[3].length === 2 ? 2000 + Number(dm[3]) : Number(dm[3])) : ty;
+      if (!dm[3] && `${year}-${pad(month)}-${pad(day)}` < today) year += 1;
+      const w = dayWindow(year, month, day);
+      if (w) return w;
+    }
+  }
+
+  const mm = q.match(MONTH_RE);
+  if (!mm) return null;
+  const monthName = (mm[2] ?? mm[3]).toLowerCase();
+  const month = MONTHS[monthName];
+  if (!month) return null;
+  if (mm[1]) {
+    const day = Number(mm[1]);
+    let year = ty;
+    if (`${year}-${pad(month)}-${pad(day)}` < today) year += 1;
+    const w = dayWindow(year, month, day);
+    if (w) return w;
+  }
+  const year = month < tm ? ty + 1 : ty;
+  const firstDay = year === ty && month === tm ? today : `${year}-${pad(month)}-01`;
+  const lastDay = new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
+  return {
+    start: viennaDayRange(firstDay).start,
+    end: viennaDayRange(lastDay).end,
+    signal: `month:${year}-${pad(month)}`,
+  };
+}
 
 export function parseQuery(raw: string, now: Date = new Date()): { text: string; filters: ParsedFilters } {
   const q = raw.toLowerCase();
@@ -247,6 +322,17 @@ export function parseQuery(raw: string, now: Date = new Date()): { text: string;
       filters.afterDate = range.start;
       filters.beforeDate = range.end;
       signals.push(`weekday:${wd[1]}`);
+    } else {
+      // Konkrete Tage und Monate, wie sie Nutzer wirklich tippen
+      // (Protokoll 2026-10: "24.10 steiermark", "Blasmusik am 23.10",
+      // "Ab 21 dez in bregenz", "Lauf 10km November"). Vorher fiel das
+      // durch und die Suche zeigte irgendwas ab heute.
+      const explicit = detectExplicitDate(q, today);
+      if (explicit) {
+        filters.afterDate = explicit.start;
+        filters.beforeDate = explicit.end;
+        signals.push(explicit.signal);
+      }
     }
   }
 
@@ -273,6 +359,9 @@ export function parseQuery(raw: string, now: Date = new Date()): { text: string;
     /\b(gratis|kostenlos|free|umsonst|billig|günstig|cheap)\b/gi,
     /\b(umkreis|radius|umgebung)\b/gi,
     /\b\d{1,3}\s*km\b/gi,
+    /\b(am\s+|ab\s+)?\d{1,2}\.\s?\d{1,2}\.?(\d{2,4})?\b/g,
+    new RegExp(`\\b(am\\s+|ab\\s+)?\\d{1,2}\\.?\\s+(${MONTH_WORDS})\\b`, 'gi'),
+    new RegExp(`\\b(am\\s+|ab\\s+)?(${MONTH_FULL_WORDS})\\b`, 'gi'),
     /\b(ich bin|ich will|ich möchte|ich suche|suche|will|möchte)\b/gi,
     /\b(in|im|bei|nähe|nahe|rund um|um|nach|aus)\b/gi,
   ];

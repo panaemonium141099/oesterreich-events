@@ -655,6 +655,72 @@ export type Database = {
           updated_at?: string
         }
       }
+      // Startseiten-Pins (/admin/boost). kind: 'sponsored' = Tipp des Tages mit
+      // Pflicht-Label „Anzeige“ + sponsor_name, 'editorial' = Saison-Karte.
+      // Migrationen 20260924180000_landing_features, 20261029200100_landing_features_kind.
+      landing_features: {
+        Row: {
+          id: string
+          event_id: string
+          starts_at: string
+          ends_at: string | null
+          note: string | null
+          kind: 'sponsored' | 'editorial'
+          sponsor_name: string | null
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          starts_at?: string
+          ends_at?: string | null
+          note?: string | null
+          kind?: 'sponsored' | 'editorial'
+          sponsor_name?: string | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          event_id?: string
+          starts_at?: string
+          ends_at?: string | null
+          note?: string | null
+          kind?: 'sponsored' | 'editorial'
+          sponsor_name?: string | null
+          created_by?: string | null
+          created_at?: string
+        }
+      }
+      // Künstler je Event aus dem Eventim-Feed (Migration 20261029200000_event_artists).
+      // PK (event_id, artist_id); der Import ersetzt je Event die Zeilen des Feeds.
+      event_artists: {
+        Row: {
+          event_id: string
+          artist_id: string
+          artist_name: string
+          artist_image: string | null
+          evo_link: string | null
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          event_id: string
+          artist_id: string
+          artist_name: string
+          artist_image?: string | null
+          evo_link?: string | null
+          source?: string
+          updated_at?: string
+        }
+        Update: {
+          artist_name?: string
+          artist_image?: string | null
+          evo_link?: string | null
+          source?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }

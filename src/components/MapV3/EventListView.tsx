@@ -36,34 +36,15 @@ const T = {
 import { formatTime } from '@/lib/utils/date';
 import { distanceKm } from '@/lib/geolocation';
 import { locationOutputs } from '@/lib/location/gating';
-import { displayDistrictName } from '@/lib/districtsAT';
+import { districtDisplayName } from '@/lib/districtsAT';
 import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { useDetailHydration } from '@/lib/v4/use-detail-hydration';
 import { decodeEntities } from '@/lib/utils/decode-entities';
 import { EVENT_TZ, addViennaDays, toViennaDate, viennaDayStart, viennaToday, viennaWeekday } from '@/lib/utils/event-time';
 
-/**
- * Category → tinted gradient pair for placeholders. Uses the same hue
- * family as the CatChip so a missing image still feels "on-brand" for
- * the event type instead of being a generic gray block.
- */
-const CAT_GRADIENT: Record<string, [string, string]> = {
-  Musik: ['#a855f7', '#7e22ce'],
-  'Kultur & Bühne': ['#3b82f6', '#1d4ed8'],
-  'Nightlife & Party': ['#ec4899', '#9d174d'],
-  'Essen & Trinken': ['#f59e0b', '#b45309'],
-  'Märkte & Feste': ['#10b981', '#047857'],
-  'Sport & Bewegung': ['#ef4444', '#b91c1c'],
-  'Natur & Abenteuer': ['#22c55e', '#15803d'],
-  'Wissen & Karriere': ['#0ea5e9', '#0369a1'],
-  'Familie & Kinder': ['#f472b6', '#be185d'],
-  'Community & Freizeit': ['#8b5cf6', '#5b21b6'],
-  'Wellness & Spiritualität': ['#06b6d4', '#0e7490'],
-};
-function gradientFor(cat?: string | null): [string, string] {
-  return (cat && CAT_GRADIENT[cat]) || ['#94a3b8', '#475569'];
-}
+import { gradientFor } from '@/components/Discover/v4/category-gradient';
+import { priceBadge } from '@/lib/v4/price-badge';
 
 export type ListSortMode = 'date' | 'distance' | 'score';
 
@@ -273,8 +254,8 @@ export function EventListView({
 
         {/* Loading skeletons — only on first load, otherwise keep stale */}
         {loading && events.length === 0 && (
-          <div style={{ paddingTop: 22 }}>
-            {Array.from({ length: 6 }).map((_, i) => (
+          <div className="v4-poster-grid" style={{ marginTop: 22 }}>
+            {Array.from({ length: 10 }).map((_, i) => (
               <SkeletonRow key={i} />
             ))}
           </div>
@@ -304,13 +285,7 @@ export function EventListView({
                   {t(ads.length === 1 ? 'nEventsOne' : 'nEventsMany', { count: ads.length })}
                 </span>
               </header>
-              <div
-                style={{
-                  display: 'grid',
-                  gap: 14,
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 360px), 1fr))',
-                }}
-              >
+              <div className="v4-poster-grid">
                 {ads.map((ev) => (
                   <BigRow key={ev.id} ev={ev} userLocation={userLocation} isAd />
                 ))}
@@ -346,13 +321,7 @@ export function EventListView({
                   {t(g.events.length === 1 ? 'nEventsOne' : 'nEventsMany', { count: g.events.length })}
                 </span>
               </header>
-              <div
-                style={{
-                  display: 'grid',
-                  gap: 14,
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 360px), 1fr))',
-                }}
-              >
+              <div className="v4-poster-grid">
                 {g.events.map((ev) => (
                   <BigRow
                     key={ev.id}
@@ -377,6 +346,12 @@ export function EventListView({
 
 /* ─── Card ─────────────────────────────────────────────────────────────── */
 
+/**
+ * Poster-Karte (Variante „Regale", 2026-10-22): quadratisches Bild mit
+ * Datum/Uhrzeit oben links und Preis unten rechts, darunter Titel und Ort.
+ * Vorher eine Querformat-Zeile mit 132-px-Bild und „Öffnen"-Knopf, deren
+ * Textblock meist halb leer blieb.
+ */
 function BigRow({
   ev,
   userLocation,
@@ -387,17 +362,16 @@ function BigRow({
   isAd?: boolean;
 }) {
   // Track image errors locally so a 404'd scraper image swaps to the
-  // category-gradient placeholder instead of leaving an empty box. The
-  // map markers don't surface this because Mapbox just falls back to a
-  // generic dot — but in the list the photo is half the visual weight,
-  // so a graceful fallback matters.
+  // category-gradient placeholder instead of leaving an empty box.
   const [imgFailed, setImgFailed] = useState(false);
   const t = useTranslations('MapPage');
   const tCat = useTranslations('Categories');
+  const tDisc = useTranslations('Discover');
   const locale = useLocale();
   const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
 
-  const time = formatTime(ev.start_date);
+  const pending = ev.title == null;
+  const time = pending ? null : formatTime(ev.start_date);
   const cat = ev.category || 'Sonstiges';
   const title = decodeEntities(ev.title || '');
   // fn-25 C5: keine Kilometerangabe aus einem Gemeinde-Mittelpunkt.
@@ -408,35 +382,26 @@ function BigRow({
   const dateLabel = formatDateLabel(ev.start_date, fmt, t('groupHeute'), t('groupMorgen'));
   const showImage = !!ev.image_url && !imgFailed;
   const [g1, g2] = gradientFor(cat);
+  const price = pending
+    ? null
+    : priceBadge(ev, { free: tDisc('chipFree'), from: (p) => t('priceFrom', { price: p }) }, fmt);
+  const place = ev.district
+    ? districtDisplayName(ev.district)
+    : ev.bundesland
+      ? bundeslandDisplayName(ev.bundesland, locale)
+      : '';
 
   return (
     <Link
       href={buildEventUrlV2(ev)}
       className="press-haptic mv3-list-card"
-      style={{
-        display: 'flex',
-        gap: 14,
-        padding: 12,
-        background: 'var(--v4-surface-elevated)',
-        borderRadius: 14,
-        border: `1px solid ${T.border}`,
-        cursor: 'pointer',
-        textAlign: 'left',
-        width: '100%',
-        fontFamily: 'inherit',
-        textDecoration: 'none',
-        color: 'inherit',
-        // Hover/focus animation defined in globals.css → .mv3-list-card:hover
-        transition: 'transform 0.18s ease-out, border-color 0.18s ease-out',
-      }}
+      style={{ display: 'block', minWidth: 0, textDecoration: 'none', color: 'inherit', fontFamily: 'inherit' }}
     >
       <div
         style={{
-          width: 132,
-          height: 132,
-          borderRadius: 10,
-          flexShrink: 0,
           position: 'relative',
+          aspectRatio: '1',
+          borderRadius: 12,
           overflow: 'hidden',
           background: showImage ? T.panel : `linear-gradient(135deg, ${g1}, ${g2})`,
         }}
@@ -446,7 +411,7 @@ function BigRow({
             src={ev.image_url!}
             alt=""
             fill
-            sizes="132px"
+            sizes="(max-width: 720px) 50vw, 220px"
             unoptimized
             onError={() => setImgFailed(true)}
             style={{ objectFit: 'cover' }}
@@ -457,7 +422,6 @@ function BigRow({
               position: 'absolute',
               inset: 0,
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'rgba(255,255,255,0.95)',
@@ -470,7 +434,7 @@ function BigRow({
               lineHeight: 1.2,
             }}
           >
-            {categoryLabel(tCat, cat)}
+            {pending ? '' : categoryLabel(tCat, cat)}
           </div>
         )}
         <span
@@ -478,37 +442,31 @@ function BigRow({
             position: 'absolute',
             top: 8,
             left: 8,
-            padding: '4px 8px',
+            padding: '4px 7px',
             borderRadius: 6,
-            background: 'rgba(255,255,255,0.95)',
-            backdropFilter: 'blur(6px)',
-            WebkitBackdropFilter: 'blur(6px)',
-            fontSize: 10,
-            fontWeight: 700,
+            background: '#fff',
+            fontSize: 11.5,
+            fontWeight: 800,
             color: '#0a0a0c',
-            letterSpacing: '0.04em',
-            border: '1px solid rgba(0,0,0,0.18)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
           }}
         >
-          {dateLabel.toUpperCase()}
+          {dateLabel}{time ? ` · ${time}` : ''}
         </span>
-        {time && (
+        {price && (
           <span
             style={{
               position: 'absolute',
               bottom: 8,
-              left: 8,
-              padding: '4px 8px',
+              right: 8,
+              padding: '4px 7px',
               borderRadius: 6,
-              background: 'rgba(0,0,0,0.65)',
-              fontSize: 10.5,
+              background: 'rgba(10,10,12,0.8)',
+              fontSize: 11.5,
               fontWeight: 700,
               color: '#fff',
-              letterSpacing: '0.04em',
             }}
           >
-            {time}
+            {price}
           </span>
         )}
         {isAd && (
@@ -531,24 +489,20 @@ function BigRow({
         )}
       </div>
 
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '4px 0', gap: 6 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7, flexWrap: 'wrap' }}>
-            <CategoryChip cat={categoryLabel(tCat, cat)} />
-            {ev.location_name && (
-              <span style={{ fontSize: 11.5, color: T.ink60, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                · {ev.location_name}
-              </span>
-            )}
-          </div>
+      {pending ? (
+        <div style={{ marginTop: 10 }}>
+          <div style={{ height: 14, background: T.panel, borderRadius: 4, width: '80%' }} />
+          <div style={{ height: 12, background: T.panel, borderRadius: 4, width: '55%', marginTop: 6 }} />
+        </div>
+      ) : (
+        <div style={{ marginTop: 10, minWidth: 0 }}>
           <div
             style={{
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: 700,
-              lineHeight: 1.25,
-              letterSpacing: '-0.018em',
+              lineHeight: 1.3,
+              letterSpacing: '-0.01em',
               color: T.ink,
-              marginBottom: 6,
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
@@ -557,78 +511,26 @@ function BigRow({
           >
             {title}
           </div>
+          <div style={{ marginTop: 3, fontSize: 12.5, color: T.ink60, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {[ev.location_name, place].filter(Boolean).join(' · ')}
+          </div>
           {km != null && (
-            <div style={{ fontSize: 12, color: T.ink60, fontWeight: 500 }}>
+            <div style={{ marginTop: 2, fontSize: 12, color: T.ink60, fontWeight: 500 }}>
               {t('kmAway', { km: km.toLocaleString(fmt), min: Math.round(km * 1.4) })}
             </div>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 12, color: T.ink50, fontWeight: 500 }}>
-            {ev.district
-              ? t('districtPrefix', { name: displayDistrictName(ev.district) })
-              : ev.bundesland
-                ? t('bundeslandPrefix', { name: bundeslandDisplayName(ev.bundesland, locale) })
-                : ''}
-          </span>
-          <span
-            style={{
-              padding: '6px 12px',
-              borderRadius: 8,
-              background: 'var(--v4-ink)',
-              color: '#0a0a0c',
-              fontSize: 12,
-              fontWeight: 600,
-              letterSpacing: '-0.005em',
-            }}
-          >
-            {t('open')}
-          </span>
-        </div>
-      </div>
+      )}
     </Link>
-  );
-}
-
-function CategoryChip({ cat }: { cat: string }) {
-  return (
-    <span
-      style={{
-        padding: '4px 9px',
-        fontSize: 11,
-        fontWeight: 600,
-        borderRadius: 9999,
-        background: T.panel,
-        border: `1px solid ${T.border}`,
-        color: T.ink70,
-        whiteSpace: 'nowrap',
-      }}
-    >
-      {cat}
-    </span>
   );
 }
 
 function SkeletonRow() {
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: 14,
-        padding: 12,
-        background: 'var(--v4-surface-elevated)',
-        borderRadius: 14,
-        border: `1px solid ${T.border}`,
-        marginBottom: 14,
-      }}
-    >
-      <div style={{ width: 132, height: 132, borderRadius: 10, background: T.panel, flexShrink: 0 }} />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, padding: '4px 0' }}>
-        <div style={{ height: 14, background: T.panel, borderRadius: 4, width: '40%' }} />
-        <div style={{ height: 18, background: T.panel, borderRadius: 4, width: '85%' }} />
-        <div style={{ height: 14, background: T.panel, borderRadius: 4, width: '60%' }} />
-        <div style={{ height: 12, background: T.panel, borderRadius: 4, width: '30%', marginTop: 'auto' }} />
-      </div>
+    <div>
+      <div style={{ aspectRatio: '1', borderRadius: 12, background: 'var(--v4-surface-elevated)' }} />
+      <div style={{ height: 14, background: T.panel, borderRadius: 4, width: '80%', marginTop: 10 }} />
+      <div style={{ height: 12, background: T.panel, borderRadius: 4, width: '55%', marginTop: 6 }} />
     </div>
   );
 }

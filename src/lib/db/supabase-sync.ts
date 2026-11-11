@@ -49,8 +49,9 @@ import { districtForLocation, bundeslandForLocation } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { toUtcInstant } from '@/lib/pipeline/normalize-date';
 import { migrateSourceIds } from '@/lib/db/source-id-migration';
-import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
-import { bundeslandFromPolygon } from '@/lib/eventim/bundesland-from-geo';
+import { wellFormed } from '@/lib/db/well-formed';
+import { plzRegionOfCountry, regionOfCountry, writesAustrianRegionColumns } from '@/lib/location/ortsdaten';
+import { deLandToId } from '@/lib/gemeinden/laender-de';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
 import { generateEventSlug } from '@/lib/utils/slugify';
 import { scoreAndAdmit } from '@/lib/quality/score-event';
@@ -91,9 +92,9 @@ import {
  */
 let regionWarned = false;
 
-function regionOfCoords(lat: number, lng: number): string | null {
+function regionOfCoords(lat: number, lng: number, country?: string): string | null {
   try {
-    return bundeslandFromPolygon(lat, lng);
+    return regionOfCountry(lat, lng, country);
   } catch (e) {
     if (!regionWarned) {
       regionWarned = true;
@@ -175,7 +176,8 @@ export function normalizeTicketUrl(raw: string | null | undefined): string | nul
   return url.toString();
 }
 
-function getSupabaseAdminClient() {
+/** Service-Role-Client des Schreibpfads (auch für den Künstler-Schritt des Eventim-Imports). */
+export function getSupabaseAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
@@ -325,7 +327,7 @@ async function prefetchExistingRows(
  * Namen, die Entscheidung liefert Position, PLZ, Gemeinde, Status,
  * Genauigkeit und die erlaubte Ausspielung. Kein Namensabgleich mehr.
  */
-function locationInputOf(event: ScrapedEvent, existingId?: string | null): LocationInput {
+export function locationInputOf(event: ScrapedEvent, existingId?: string | null): LocationInput {
   return {
     event_id: existingId ?? null,
     source_name: event.source_name,
@@ -735,7 +737,7 @@ export function toSupabaseRow(
       postal_code: resolved.postalCode,
       // Kanonisierte Bundesland-ID, damit die Polygon-Gegenprobe dieselbe
       // Schreibweise vergleicht, die auch in der Zeile landet.
-      bundesland: bundeslandToId(event.bundesland) ?? null,
+      bundesland: (decision.country === 'DE' ? deLandToId(event.bundesland) : bundeslandToId(event.bundesland)) ?? null,
       country: event.country ?? null,
       category: canonical.category,
       latitude: finalLat,
@@ -747,7 +749,7 @@ export function toSupabaseRow(
       source_url: event.source_url,
       ticket_url: finalTicketUrl,
     },
-    { regionOf: regionOfCoords, plzRegionOf: getBundeslandFromPLZ },
+    { regionOf: regionOfCoords, plzRegionOf: plzRegionOfCountry },
   );
 
   // `scoreAndAdmit` hat den Freigabevertrag gegen dieselben FINALEN Werte
@@ -770,7 +772,10 @@ export function toSupabaseRow(
   // Nennt die Quelle kein Bundesland, gilt das der Ortsentscheidung (Gemeinde,
   // sonst eindeutige PLZ). Der Vertrag oben hat nur die Angabe der Quelle
   // geprüft; dabei bleibt es (siehe bundeslandForLocation).
-  const finalBundesland = bundeslandForLocation(score.corrected.bundesland, decision.gemeinde, resolved.postalCode);
+  // Nur österreichische Zeilen führen Bundesland und Bezirk in den Spalten
+  // (CHECK bzw. FK, siehe writesAustrianRegionColumns).
+  const regionColumns = writesAustrianRegionColumns(decision.country);
+  const finalBundesland = regionColumns ? bundeslandForLocation(score.corrected.bundesland, decision.gemeinde, resolved.postalCode) : null;
 
   // Ortsstatus nach dem Freigabevertrag: eine verworfene Koordinate oder
   // ein Orts-Widerspruch macht aus der Entscheidung einen Konflikt bzw.
@@ -851,7 +856,7 @@ export function toSupabaseRow(
   // Danach greift der PLZ-Fallback (der validiert bereits selbst), sonst
   // bleibt die Spalte NULL. Ein fehlender Bezirk kostet Filter-Treffer,
   // ein ungueltiger kostet 100 Events.
-  const finalDistrict = districtForLocation(
+  const finalDistrict = !regionColumns ? null : districtForLocation(
     decision.gemeinde,
     resolved.postalCode ?? event.postal_code,
     finalBundesland,
@@ -1166,9 +1171,15 @@ export async function syncEventsToSupabase(
   if (rawEvents.length === 0) return empty();
   const startedMs = Date.now();
 
+  // Halbe Zeichen aus gekürzten Texten entfernen: eines davon kostet sonst
+  // den ganzen Schreib-Batch (well-formed.ts).
+  const wellFormedEvents = rawEvents.map(e => wellFormed(e));
+  const repaired = wellFormedEvents.filter((e, i) => e !== rawEvents[i]).length;
+  if (repaired > 0) console.log(`[supabase-sync] ${repaired} Events mit zerschnittenem Zeichen bereinigt`);
+
   // Nackte Wandzeiten der Scraper in echte Instants drehen, bevor
   // irgendjemand sie liest.
-  const events = normalizeEventTimestamps(rawEvents);
+  const events = normalizeEventTimestamps(wellFormedEvents);
 
   // Harte Verwerfungen (Titel/Datum/Zeitintervall) vor dem Schreiben.
   const { valid: validEvents, rejected: filtered, rejectionReasons } = filterValidEvents(events);
@@ -1204,9 +1215,9 @@ export async function syncEventsToSupabase(
   // versucht es erneut, solange die alten Zeilen stehen.
   try {
     const migrated = await migrateSourceIds(supabase, dedupedEvents);
-    if (migrated.moved > 0 || migrated.failed > 0) {
+    if (migrated.moved > 0 || migrated.withdrawn > 0 || migrated.failed > 0) {
       console.log(
-        `[supabase-sync] ${migrated.moved} Zeilen auf neue source_id umgeschlüsselt` +
+        `[supabase-sync] ${migrated.moved} Zeilen auf neue source_id umgeschlüsselt, ${migrated.withdrawn} abgelöste zurückgezogen` +
           (migrated.failed > 0 ? `, ${migrated.failed} abgelehnt: ${migrated.errors.join(' | ')}` : ''),
       );
     }

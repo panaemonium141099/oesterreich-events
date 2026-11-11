@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Entdecken Redesign</title>
+<meta name="description" content="Drei Gestaltungsvarianten für lasstreffen.at/entdecken zum Vergleich.">
+<style>
+:root{--bg:#0a0a0c;--ink:#fff;--muted:rgba(255,255,255,.55);--line:rgba(255,255,255,.1)}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#0a0a0c}}
+:root[data-theme="dark"]{--bg:#0a0a0c}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}
+.bar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.bar b{font-size:14px;margin-right:10px}
+.bar button{font:inherit;font-size:13px;font-weight:600;color:var(--muted);background:none;border:1px solid var(--line);padding:7px 14px;border-radius:999px;cursor:pointer}
+.bar button.on{background:#fff;color:#0a0a0c;border-color:#fff}
+.bar .vp{margin-left:auto;display:flex;gap:6px}
+.bar p{width:100%;margin:6px 0 0;font-size:13px;color:var(--muted);line-height:1.5}
+.stage{height:calc(100% - 92px);display:flex;justify-content:center;background:#000}
+iframe{border:0;width:100%;height:100%;background:#0a0a0c}
+iframe.m{width:390px;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+</style></head><body>
+<div class="bar"><b>Entdecken: Varianten</b>
+<button class="on" data-v="a-poster">A · Poster-Grid</button><button data-v="b-regale">B · Regale</button><button data-v="c-tagesplan">C · Tagesplan</button>
+<div class="vp"><button class="on" data-w="d">Desktop</button><button data-w="m">Handy</button></div>
+<p id="note"></p></div>
+<div class="stage"><iframe id="f" src="a-poster.html" title="Variante"></iframe></div>
+<script>
+const notes={'a-poster':'Vorbild Dice.fm / Eventbrite: Hochkant-Poster mit Datum, Venue und Preis, Schnellfilter und Kategorie-Leiste oben statt verstecktem Filter, Tage als klebrige Zwischenüberschrift.','b-regale':'Vorbild Netflix / Airbnb: drei Top-Picks als Bühne, dann kuratierte Querscroll-Regale (Heute Abend, Wochenende, Kabarett, Gratis), Regionen als Bildkacheln, darunter das volle Raster. Regionsfotos sind Platzhalter.','c-tagesplan':'Vorbild Resident Advisor / Songkick: Datum als große Zahl links, dichte Zeilen mit Uhrzeit, Venue, Preis und Ticket-Knopf, Filter als feste Leiste. Höchste Dichte, beste Scanbarkeit.'};
+const f=document.getElementById('f'),note=document.getElementById('note');let v='a-poster',w='d';
+function go(){f.src=v+'.html';f.className=w==='m'?'m':'';note.textContent=notes[v];document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('[data-w]').forEach(b=>b.classList.toggle('on',b.dataset.w===w));}
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{v=b.dataset.v;go()});document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{w=b.dataset.w;go()});go();
+</script></body></html>

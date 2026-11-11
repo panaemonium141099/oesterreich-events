@@ -1,0 +1,1044 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+  <title>Veranstaltungskalender</title>
+  <link>https://www.aichwald.de/start/freizeit+_+kultur/veranstaltungskalender.html</link>
+  <atom:link href="https://www.aichwald.de/site/Aichwald-Responsive/zmrss/15099216/rss.xml" rel="self" type="application/rss+xml"></atom:link>
+  <description></description>
+  <language>de</language>
+  <lastBuildDate>Fri, 30 Oct 2026 21:00:19 +0100</lastBuildDate>
+  <generator>dvv-Zusatzmodule - 10.14.6</generator>
+
+  <item>
+    <title><![CDATA[30.10.2026  Kürbisschnitzen]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523256696802/index.html?nodeID=523256696802</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-10-30"><abbr title="Freitag">Fr</abbr>, 30.10.2026</span>
+|
+<span class="uhr">16 und 17 Uhr </span> Kürbisschnitzen Maschinenhalle Neuwieshof Fetzer</header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+Krummhardt
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-10-30"><abbr title="Freitag">Fr</abbr>, 30.10.2026</span>
+|
+<span class="uhr">16 und 17 Uhr </span> Kürbisschnitzen Maschinenhalle Neuwieshof Fetzer</header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+Krummhardt
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+Kulturverein Krummhardt e.V.
+<!-- h5y/ ellink.vm -->
+<div class="homepage">
+<span class="label">Homepage</span>
+<span class="value"><a class="externerLink neuFensterLink" href="http://www.kulturverein-krummhardt.de" rel="external noopener" target="_blank">www.kulturverein-krummhardt.de</a></span>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523256696802/index.html</guid>
+    <pubDate>Fri, 30 Oct 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  <item>
+    <title><![CDATA[31.10.2026  Aichwald Gospel Singers        ]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523256794008/index.html?nodeID=523256794008</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-10-31"><abbr title="Samstag">Sa</abbr>, 31.10.2026</span>
+|
+<span class="uhr">18 Uhr </span> Aichwald Gospel Singers         </header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+
+<div class="vCard">
+<div class="organization">Ev. Kirche Aichelberg</div>
+<div class="street-address">Strümpfelbacher Straße</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald-Aichelberg</span></div>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-10-31"><abbr title="Samstag">Sa</abbr>, 31.10.2026</span>
+|
+<span class="uhr">18 Uhr </span> Aichwald Gospel Singers         </header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+<!-- zmcontactmin.vm -->
+<div class="vCard">
+<div class="organization">Ev. Kirche Aichelberg</div>
+<div class="street-address">Strümpfelbacher Straße</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald-Aichelberg</span></div>
+</div>
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+Evangelische Gesamtkirchengemeinde Aichwald
+<!-- h5y/ ellink.vm -->
+<div class="homepage">
+<span class="label">Homepage</span>
+<span class="value"><a class="httpsLink externerLink neuFensterLink" href="https://www.aichwald-evangelisch.de/" rel="external noopener" target="_blank">www.aichwald-evangelisch.de</a></span>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523256794008/index.html</guid>
+    <pubDate>Sat, 31 Oct 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  <item>
+    <title><![CDATA[05.11.2026  Herrenvolleyball]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523252622010/index.html?nodeID=523252622010</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-05"><abbr title="Donnerstag">Do</abbr>, 05.11.2026</span>
+|
+<span class="uhr">20-22 Uhr </span> Herrenvolleyball Abt. Volleyball</header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+
+<div class="vCard">
+<div class="organization">Neue Sporthalle (Schanbach)</div>
+<div class="street-address">Krummhardter Straße 54</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-05"><abbr title="Donnerstag">Do</abbr>, 05.11.2026</span>
+|
+<span class="uhr">20-22 Uhr </span> Herrenvolleyball Abt. Volleyball</header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+<!-- zmcontactmin.vm -->
+<div class="vCard">
+<div class="organization">Neue Sporthalle (Schanbach)</div>
+<div class="street-address">Krummhardter Straße 54</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+</div>
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+ASV Aichwald
+<div class="homepage"><a class="externerLink neuFensterLink" href="http://www.asv-aichwald.de" rel="external noopener" target="_blank">ASV Aichwald</a></div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523252622010/index.html</guid>
+    <pubDate>Thu, 05 Nov 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  <item>
+    <title><![CDATA[06.11.2026  Aus voller Kehle für die Seele]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523252622013/index.html?nodeID=523252622013</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-06"><abbr title="Freitag">Fr</abbr>, 06.11.2026</span>
+|
+<span class="uhr">19 Uhr </span> Aus voller Kehle für die Seele </header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+
+<div class="vCard">
+<div class="organization">Schurwaldhalle Aichwald</div>
+<div class="street-address">Krummhardter Straße 54</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald-Schanbach</span></div>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-06"><abbr title="Freitag">Fr</abbr>, 06.11.2026</span>
+|
+<span class="uhr">19 Uhr </span> Aus voller Kehle für die Seele </header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+<!-- zmcontactmin.vm -->
+<div class="vCard">
+<div class="organization">Schurwaldhalle Aichwald</div>
+<div class="street-address">Krummhardter Straße 54</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald-Schanbach</span></div>
+</div>
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+Krummhardter Dorflädle
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523252622013/index.html</guid>
+    <pubDate>Fri, 06 Nov 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  <item>
+    <title><![CDATA[06.11.2026  Musikalisch-literarischer Abend mit Dr. Waltraud Falardeau (Vortrag) und Sabine Burkhardt (Flöte):]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523256643701/index.html?nodeID=523256643701</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-06"><abbr title="Freitag">Fr</abbr>, 06.11.2026</span>
+Musikalisch-literarischer Abend mit Dr. Waltraud Falardeau (Vortrag) und Sabine Burkhardt (Flöte): "Mensch, lerne tanzen" (Augustinus) - Über Bewegung und Tanz, Lebensfreude und Leichtigkeit.</header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+
+<div class="vCard">
+<div class="organization">Bücherei Aichwald</div>
+<div class="street-address">Hauptstrasse 17</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+<div class="mail">
+<span class="bez">E-Mail</span>
+<span class="value"><a class="email" href="mailto:buecherei@aichwald.de">buecherei@aichwald.de</a></span>
+</div>
+<div class="tel">
+<span class="bez">Telefon</span>
+<span class="value"><span class="tel">30519-33</span></span>
+</div>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-06"><abbr title="Freitag">Fr</abbr>, 06.11.2026</span>
+Musikalisch-literarischer Abend mit Dr. Waltraud Falardeau (Vortrag) und Sabine Burkhardt (Flöte): "Mensch, lerne tanzen" (Augustinus) - Über Bewegung und Tanz, Lebensfreude und Leichtigkeit.</header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+<!-- zmcontactmin.vm -->
+<div class="vCard">
+<div class="organization">Bücherei Aichwald</div>
+<div class="street-address">Hauptstrasse 17</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+<div class="mail">
+<span class="bez">E-Mail</span>
+<span class="value"><a class="email" href="mailto:buecherei@aichwald.de">buecherei@aichwald.de</a></span>
+</div>
+<div class="tel">
+<span class="bez">Telefon</span>
+<span class="value"><span class="tel">30519-33</span></span>
+</div>
+</div>
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+Bücherei Aichwald
+<div class="homepage"><a class="internerLink neuFensterLink" href="http://www.aichwald.de/,Lde/start/Freizeit_+Kultur_+Touristik/Ortsbuecherei.html" target="_blank">www.aichwald.de/,Lde/start/Freizeit_+Kultur_+Touristik/Ortsbuecherei.html</a></div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523256643701/index.html</guid>
+    <pubDate>Fri, 06 Nov 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  <item>
+    <title><![CDATA[07.11.2026  Vorlesetreff für Kinder ab 4 Jahren]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523252622014/index.html?nodeID=523252622014</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-07"><abbr title="Samstag">Sa</abbr>, 07.11.2026</span>
+|
+<span class="uhr">11 Uhr </span> Vorlesetreff für Kinder ab 4 Jahren </header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+
+<div class="vCard">
+<div class="organization">Bücherei Aichwald</div>
+<div class="street-address">Hauptstrasse 17</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+<div class="mail">
+<span class="bez">E-Mail</span>
+<span class="value"><a class="email" href="mailto:buecherei@aichwald.de">buecherei@aichwald.de</a></span>
+</div>
+<div class="tel">
+<span class="bez">Telefon</span>
+<span class="value"><span class="tel">30519-33</span></span>
+</div>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-07"><abbr title="Samstag">Sa</abbr>, 07.11.2026</span>
+|
+<span class="uhr">11 Uhr </span> Vorlesetreff für Kinder ab 4 Jahren </header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+<!-- zmcontactmin.vm -->
+<div class="vCard">
+<div class="organization">Bücherei Aichwald</div>
+<div class="street-address">Hauptstrasse 17</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+<div class="mail">
+<span class="bez">E-Mail</span>
+<span class="value"><a class="email" href="mailto:buecherei@aichwald.de">buecherei@aichwald.de</a></span>
+</div>
+<div class="tel">
+<span class="bez">Telefon</span>
+<span class="value"><span class="tel">30519-33</span></span>
+</div>
+</div>
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+Bücherei Aichwald
+<div class="homepage"><a class="internerLink neuFensterLink" href="http://www.aichwald.de/,Lde/start/Freizeit_+Kultur_+Touristik/Ortsbuecherei.html" target="_blank">www.aichwald.de/,Lde/start/Freizeit_+Kultur_+Touristik/Ortsbuecherei.html</a></div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523252622014/index.html</guid>
+    <pubDate>Sat, 07 Nov 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  <item>
+    <title><![CDATA[07.11.2026  Martinsritt]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523257112903/index.html?nodeID=523257112903</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-07"><abbr title="Samstag">Sa</abbr>, 07.11.2026</span>
+|
+<span class="uhr">17:15 Uhr </span> Martinsritt </header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+
+<div class="vCard">
+<div class="organization">Katholische Kirche in Aichelberg</div>
+<div class="street-address">Höhenweg</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-07"><abbr title="Samstag">Sa</abbr>, 07.11.2026</span>
+|
+<span class="uhr">17:15 Uhr </span> Martinsritt </header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+<!-- zmcontactmin.vm -->
+<div class="vCard">
+<div class="organization">Katholische Kirche in Aichelberg</div>
+<div class="street-address">Höhenweg</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+</div>
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+Katholische Kirchengemeinde Baltmannsweiler/Aichwald
+<!-- h5y/ ellink.vm -->
+<div class="homepage">
+<span class="label">Homepage</span>
+<span class="value"><a class="externerLink neuFensterLink" href="http://www.katholische-kirche-baltmannsweiler-aichwald.de" rel="external noopener" target="_blank">www.katholische-kirche-baltmannsweiler-aichwald.de</a></span>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523257112903/index.html</guid>
+    <pubDate>Sat, 07 Nov 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  <item>
+    <title><![CDATA[07.11.2026  Einweihung Kindergarte/Schule Aichschieß]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523256269300/index.html?nodeID=523256269300</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-07"><abbr title="Samstag">Sa</abbr>, 07.11.2026</span>
+|
+<span class="uhr">14-17 Uhr </span> Einweihung Kindergarte/Schule Aichschieß </header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+Aichschieß
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-07"><abbr title="Samstag">Sa</abbr>, 07.11.2026</span>
+|
+<span class="uhr">14-17 Uhr </span> Einweihung Kindergarte/Schule Aichschieß </header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+Aichschieß
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+Gemeinde Aichwald
+<div class="homepage"><a class="internerLink neuFensterLink" href="http://www.aichwald.de" target="_blank">www.aichwald.de</a></div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523256269300/index.html</guid>
+    <pubDate>Sat, 07 Nov 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  <item>
+    <title><![CDATA[08.11.2026  Lighthouse Gottesdienst]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523253970801/index.html?nodeID=523253970801</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-08"><abbr title="Sonntag">So</abbr>, 08.11.2026</span>
+|
+<span class="uhr">10 Uhr </span> Lighthouse Gottesdienst </header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+
+<div class="vCard">
+<div class="organization">Ev. Kirche Aichelberg</div>
+<div class="street-address">Strümpfelbacher Straße</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald-Aichelberg</span></div>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-08"><abbr title="Sonntag">So</abbr>, 08.11.2026</span>
+|
+<span class="uhr">10 Uhr </span> Lighthouse Gottesdienst </header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+<!-- zmcontactmin.vm -->
+<div class="vCard">
+<div class="organization">Ev. Kirche Aichelberg</div>
+<div class="street-address">Strümpfelbacher Straße</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald-Aichelberg</span></div>
+</div>
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+Evangelische Gesamtkirchengemeinde Aichwald
+<!-- h5y/ ellink.vm -->
+<div class="homepage">
+<span class="label">Homepage</span>
+<span class="value"><a class="httpsLink externerLink neuFensterLink" href="https://www.aichwald-evangelisch.de/" rel="external noopener" target="_blank">www.aichwald-evangelisch.de</a></span>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523253970801/index.html</guid>
+    <pubDate>Sun, 08 Nov 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  <item>
+    <title><![CDATA[08.11.2026  Festgottesdienst mit Mittagessen]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523257112904/index.html?nodeID=523257112904</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-08"><abbr title="Sonntag">So</abbr>, 08.11.2026</span>
+|
+<span class="uhr">10:30 Uhr </span> Festgottesdienst mit Mittagessen </header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+
+<div class="vCard">
+<div class="organization">Katholische Kirche in Aichelberg</div>
+<div class="street-address">Höhenweg</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-08"><abbr title="Sonntag">So</abbr>, 08.11.2026</span>
+|
+<span class="uhr">10:30 Uhr </span> Festgottesdienst mit Mittagessen </header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+<!-- zmcontactmin.vm -->
+<div class="vCard">
+<div class="organization">Katholische Kirche in Aichelberg</div>
+<div class="street-address">Höhenweg</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+</div>
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+Katholische Kirchengemeinde Baltmannsweiler/Aichwald
+<!-- h5y/ ellink.vm -->
+<div class="homepage">
+<span class="label">Homepage</span>
+<span class="value"><a class="externerLink neuFensterLink" href="http://www.katholische-kirche-baltmannsweiler-aichwald.de" rel="external noopener" target="_blank">www.katholische-kirche-baltmannsweiler-aichwald.de</a></span>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523257112904/index.html</guid>
+    <pubDate>Sun, 08 Nov 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  <item>
+    <title><![CDATA[10.11.2026  Vortrag (Kultur): Kulturgeschichtliches über Weihnachten]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523253547462/index.html?nodeID=523253547462</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-10"><abbr title="Dienstag">Di</abbr>, 10.11.2026</span>
+|
+<span class="uhr">14 - 16:30 Uhr</span> Vortrag (Kultur): Kulturgeschichtliches über Weihnachten Referentin: Frau Dr. Karin de la Roi-Frey</header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+
+<div class="vCard">
+<div class="organization">Schurwaldhalle Aichwald, Vereinsraum 1</div>
+<div class="borrow">Schanbach</div>
+<div class="street-address">Krummhardter Straße 54</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-10"><abbr title="Dienstag">Di</abbr>, 10.11.2026</span>
+|
+<span class="uhr">14 - 16:30 Uhr</span> Vortrag (Kultur): Kulturgeschichtliches über Weihnachten Referentin: Frau Dr. Karin de la Roi-Frey</header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+<!-- zmcontactmin.vm -->
+<div class="vCard">
+<div class="organization">Schurwaldhalle Aichwald, Vereinsraum 1</div>
+<div class="borrow">Schanbach</div>
+<div class="street-address">Krummhardter Straße 54</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+</div>
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+Landfrauenverein Aichwald e.V.
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523253547462/index.html</guid>
+    <pubDate>Tue, 10 Nov 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  <item>
+    <title><![CDATA[11.11.2026  PV-Sprechstunde]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523252622015/index.html?nodeID=523252622015</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-11"><abbr title="Mittwoch">Mi</abbr>, 11.11.2026</span>
+PV-Sprechstunde (Anmeldung über Homepage erforderlich)</header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+
+<div class="vCard">
+<div class="organization">Rathaus Aichwald</div>
+<div class="street-address">Seestrasse 8</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+<div class="tel">
+<span class="bez">Telefon</span>
+<span class="value"><span class="tel">369090</span></span>
+</div>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-11"><abbr title="Mittwoch">Mi</abbr>, 11.11.2026</span>
+PV-Sprechstunde (Anmeldung über Homepage erforderlich)</header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+<!-- zmcontactmin.vm -->
+<div class="vCard">
+<div class="organization">Rathaus Aichwald</div>
+<div class="street-address">Seestrasse 8</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+<div class="tel">
+<span class="bez">Telefon</span>
+<span class="value"><span class="tel">369090</span></span>
+</div>
+</div>
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+Gemeinde Aichwald
+<div class="homepage"><a class="internerLink neuFensterLink" href="http://www.aichwald.de" target="_blank">www.aichwald.de</a></div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523252622015/index.html</guid>
+    <pubDate>Wed, 11 Nov 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  <item>
+    <title><![CDATA[12.11.2026  Blutspende]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523257105354/index.html?nodeID=523257105354</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-12"><abbr title="Donnerstag">Do</abbr>, 12.11.2026</span>
+|
+<span class="uhr">15-19 Uhr</span> Blutspende </header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+
+<div class="vCard">
+<div class="organization">Schurwaldhalle Aichwald</div>
+<div class="street-address">Krummhardter Straße 54</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald-Schanbach</span></div>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-12"><abbr title="Donnerstag">Do</abbr>, 12.11.2026</span>
+|
+<span class="uhr">15-19 Uhr</span> Blutspende </header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+<!-- zmcontactmin.vm -->
+<div class="vCard">
+<div class="organization">Schurwaldhalle Aichwald</div>
+<div class="street-address">Krummhardter Straße 54</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald-Schanbach</span></div>
+</div>
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+Deutsches Rotes Kreuz - Ortsverein Aichwald (DRK)
+<div class="homepage"><a class="externerLink neuFensterLink" href="http://www.drk-aichwald.de" rel="external noopener" target="_blank">www.drk-aichwald.de</a></div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523257105354/index.html</guid>
+    <pubDate>Thu, 12 Nov 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  <item>
+    <title><![CDATA[13.11.2026-22.11.2026  Aichwalder Kunsttage 2026]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523257105352/index.html?nodeID=523257105352</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-13"><abbr title="Freitag">Fr</abbr>, 13.11.2026</span>
+-
+<span class="dtend" title="2026-11-22"><abbr title="Sonntag">So</abbr>, 22.11.2026</span>
+|
+<span class="uhr">Sa. 14-19 Uhr; So. 11-18 Uhr</span> Aichwalder Kunsttage 2026 </header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+
+<div class="vCard">
+<div class="organization">Ev. Gemeindehaus Schanbach</div>
+<div class="street-address">Gartenstraße 10</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+<div class="mail">
+<span class="bez">E-Mail</span>
+<span class="value"><a class="email" href="mailto:pfarramt.aichwald@elk-wue.de">pfarramt.aichwald@elk-wue.de</a></span>
+</div>
+<div class="tel">
+<span class="bez">Telefon</span>
+<span class="value"><span class="tel">0711 364709</span></span>
+</div>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-13"><abbr title="Freitag">Fr</abbr>, 13.11.2026</span>
+-
+<span class="dtend" title="2026-11-22"><abbr title="Sonntag">So</abbr>, 22.11.2026</span>
+|
+<span class="uhr">Sa. 14-19 Uhr; So. 11-18 Uhr</span> Aichwalder Kunsttage 2026 </header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+<!-- zmcontactmin.vm -->
+<div class="vCard">
+<div class="organization">Ev. Gemeindehaus Schanbach</div>
+<div class="street-address">Gartenstraße 10</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+<div class="mail">
+<span class="bez">E-Mail</span>
+<span class="value"><a class="email" href="mailto:pfarramt.aichwald@elk-wue.de">pfarramt.aichwald@elk-wue.de</a></span>
+</div>
+<div class="tel">
+<span class="bez">Telefon</span>
+<span class="value"><span class="tel">0711 364709</span></span>
+</div>
+</div>
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+Aichwalder Kunsttage e.V.
+<div class="homepage"><a class="httpsLink externerLink neuFensterLink" href="https://aichwalder-kunsttage.de/" rel="external noopener" target="_blank">aichwalder-kunsttage.de</a></div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523257105352/index.html</guid>
+    <pubDate>Fri, 13 Nov 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  <item>
+    <title><![CDATA[13.11.2026  Vernissage]]></title>
+    <link>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523257105350/index.html?nodeID=523257105350</link>
+    <description><![CDATA[
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-13"><abbr title="Freitag">Fr</abbr>, 13.11.2026</span>
+|
+<span class="uhr">18 Uhr </span> Vernissage </header>
+
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+
+<div class="vCard">
+<div class="organization">Ev. Kirche in Schanbach</div>
+<div class="street-address">Hauptstrasse</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+</div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article>]]></description>
+    <content:encoded><![CDATA[<div><!-- h5y/ elpagezeit.vm -->
+<article class="zmItem vevent " >
+<header class="summary">
+<span class="dtstart" title="2026-11-13"><abbr title="Freitag">Fr</abbr>, 13.11.2026</span>
+|
+<span class="uhr">18 Uhr </span> Vernissage </header>
+<!-- h5y/ ellocation.vm -->
+<section class="zmOrt">
+<header class="label">Veranstaltungsort</header>
+<div class="data">
+<!-- zmcontactmin.vm -->
+<div class="vCard">
+<div class="organization">Ev. Kirche in Schanbach</div>
+<div class="street-address">Hauptstrasse</div>
+<div class="cityline"><span class="postal-code">73773</span> <span class="locality">Aichwald</span></div>
+</div>
+</div>
+</section>
+<!-- h5y/ elveranstalter.vm -->
+<section class="zmVeranstalter">
+<header class="label">Veranstalter</header>
+<div class="data">
+Aichwalder Kunsttage e.V.
+<div class="homepage"><a class="httpsLink externerLink neuFensterLink" href="https://aichwalder-kunsttage.de/" rel="external noopener" target="_blank">aichwalder-kunsttage.de</a></div>
+</div>
+</section>
+<aside class="description">
+</aside>
+<footer>
+
+
+</footer>
+</article></div>]]></content:encoded>
+    <guid>https://www.aichwald.de/site/Aichwald-Responsive/node/15099216/zmdetail_523257105350/index.html</guid>
+    <pubDate>Fri, 13 Nov 2026 00:00:00 +0100</pubDate>
+  </item>
+
+  </channel>
+</rss>

@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/die-musik-von-harry-potter-das-konzert-steinbruch-st-margarethen-21179221/?affiliate=J70",
   "publishDate": "2026-09-01",
   "updatedDate": "2026-09-01",
+  "factSources": {
+    "checkedAt": "2026-09-01",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/die-musik-von-harry-potter-das-konzert-steinbruch-st-margarethen-21179221/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Tauchen Sie ein in die zauberhafte Welt von Harry Potter – ein Konzerterlebnis, das im atemberaubenden Steinbruch St. Margarethen geplant war. Wichtige Informationen zur Absage und zum Ticketstatus finden Sie hier.",
   "category": "Musik & Festival",

@@ -114,6 +114,57 @@ describe('parseQuery', () => {
     expect(detectRadiusKm('konzerte in wien')).toBeNull();
   });
 
+  it('detectRadiusKm: Kilometer einer Laufstrecke sind kein Suchradius', () => {
+    expect(detectRadiusKm('Lauf 10km November')).toBeNull();
+    expect(detectRadiusKm('halbmarathon 21 km wien')).toBeNull();
+    expect(detectRadiusKm('lauf treff umkreis 10 km')).toBe(10);
+  });
+
+  it('erkennt konkrete Tage: "24.10", "am 23.10.", "21 dez" (nächstes Vorkommen)', () => {
+    // NOW = Mi 2026-07-08
+    const a = parseQuery('24.10 steiermark', NOW);
+    expect(vDay(a.filters.afterDate)).toBe(24);
+    expect(vDay(a.filters.beforeDate)).toBe(24);
+    expect(a.filters.keywordSignals).toContain('date:2026-10-24');
+    expect(a.text).not.toContain('24.10');
+
+    const b = parseQuery('Blasmusik am 23.10.', NOW);
+    expect(b.filters.keywordSignals).toContain('date:2026-10-23');
+    expect(b.text).toContain('Blasmusik');
+
+    const c = parseQuery('Ab 21 dez in bregenz', NOW);
+    expect(c.filters.keywordSignals).toContain('date:2026-12-21');
+
+    // Tag liegt vor heute → nächstes Jahr
+    const d = parseQuery('konzert am 5.3.', NOW);
+    expect(d.filters.keywordSignals).toContain('date:2027-03-05');
+  });
+
+  it('erkennt Monatsnamen als Fenster bis Monatsende, Kürzel nur mit Tageszahl', () => {
+    const a = parseQuery('Lauf 10km November', NOW);
+    expect(a.filters.keywordSignals).toContain('month:2026-11');
+    expect(vDay(a.filters.afterDate)).toBe(1);
+    expect(vDay(a.filters.beforeDate)).toBe(30);
+    expect(a.text).toContain('Lauf');
+    expect(a.text).not.toMatch(/november/i);
+
+    // laufender Monat: ab heute
+    const b = parseQuery('was geht im juli', NOW);
+    expect(b.filters.keywordSignals).toContain('month:2026-07');
+    expect(vDay(b.filters.afterDate)).toBe(8);
+
+    // "Jan Delay" ist ein Künstler, kein Jänner
+    const c = parseQuery('Konzert Jan Delay', NOW);
+    expect(c.filters.keywordSignals.some(s => s.startsWith('month:') || s.startsWith('date:'))).toBe(false);
+    expect(c.text).toContain('Jan');
+  });
+
+  it('"heute" gewinnt vor einem konkreten Datum', () => {
+    const r = parseQuery('heute oder am 24.10', NOW);
+    expect(r.filters.keywordSignals).toContain('today');
+    expect(r.filters.keywordSignals.some(s => s.startsWith('date:'))).toBe(false);
+  });
+
   it('strippt Umkreis-Wörter aus dem Intent-Text', () => {
     const { text } = parseQuery('naturpark eisenstadt umkreis 20 km', NOW);
     expect(text.toLowerCase()).not.toContain('umkreis');

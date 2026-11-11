@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/neil-diamond-moments-komm-zentrum-21626310/?affiliate=J70",
   "publishDate": "2026-09-18",
   "updatedDate": "2026-09-18",
+  "factSources": {
+    "checkedAt": "2026-09-18",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/neil-diamond-moments-komm-zentrum-21626310/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 17. Oktober 2026 bringt Jess Robin, bekannt als \"The European Neil Diamond\", seine Show \"Neil Diamond Moments\" ins KOMM-Zentrum Leitersdorf. Ein Jubiläumsabend mit Live-Band in der Steiermark.",
   "category": "Musik & Festival",

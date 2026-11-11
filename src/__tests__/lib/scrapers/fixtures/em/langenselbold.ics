@@ -1,0 +1,1252 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//wp-events-plugin.com//7.4.12//EN
+TZID:Europe/Berlin
+X-WR-TIMEZONE:Europe/Berlin
+BEGIN:VEVENT
+UID:1386@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261029T080000
+DTEND;TZID=Europe/Berlin:20261029T130000
+DTSTAMP:20251016T112520Z
+URL:https://langenselbold.de/veranstaltungskalender/langenselbolder-wochen
+ markt-2026-10-29/
+SUMMARY:Langenselbolder Wochenmarkt
+DESCRIPTION:Es ist wieder Markttag in Langenselbold! Jeden Donnerstag im Br
+ ühlweg auf dem Parkplatz an der Gründauhalle von 8 bis 13 Uhr könnt ihr
+  unsere vielfältige Auswahl an frischen Produkten direkt von Händlerinne
+ n und Händler sowie Erzeugerinnen und Erzeuger aus der Region entdecken.\
+ n\nBei unserem Wochenmarkt findet ihr alles für euren heimischen Einkauf!
+  Von herzhaften Fleisch- und Wurstwaren über frisches Geflügel und Fisch
+  bis hin zu Meeresfrüchten\, herrlich duftenden Backwaren und besonderer 
+ Feinkost!\n\nKommt vorbei\, unterstützt lokale Produzentinnen und Produze
+ nten und genießt frische\, hochwertige Produkte! Wir freuen uns auf euch!
+ \n\nAnfahrt:\nBrühlweg\, 63505 Langenselbold
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/FB_I
+ MG_1706979067839-e1707120931153.jpg
+CATEGORIES:Wochenmarkt
+LOCATION:Parkplatz an der Gründauhalle\, Brühlweg\, Langenselbold\, Deuts
+ chland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Brühlweg\, Langenselbold\,
+  Deutschland;X-APPLE-RADIUS=100;X-TITLE=Parkplatz an der Gründauhalle:geo
+ :0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2040@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261029T120000
+DTEND;TZID=Europe/Berlin:20261029T133000
+DTSTAMP:20260313T164157Z
+URL:https://langenselbold.de/veranstaltungskalender/eintopf-mittagstisch-d
+ er-evang-kirchengemeinde-2025-12-25-2026-01-01-2026-01-08-2026-01-15-2026-
+ 01-22-2026-01-29-2026-02-05-2026-02-12-2026-02-19-2026-02-26-2026-03-05-20
+ 26-03-12-2026-03-22-2026-10-29/
+SUMMARY:EinTopf-Mittagstisch der evang. Kirchengemeinde
+DESCRIPTION:Die evangelische Kirchengemeinde bietet einen freundlichen Rahm
+ en für ein gemeinsames Essen an\, das auch die Möglichkeit zu einer anre
+ genden Kommunikation unter den Gästen beinhaltet.\n\nJeder ist herzlich w
+ illkommen und gibt was ihm möglich ist.\n\nDas Katharina-von-Bora-Haus\, 
+ Hinserdorfstr. 2 ist dazu donnerstags von 12 bis 13:30 Uhr für alle Bürg
+ er und Bürgerinnen der Ortsgemeinschaft geöffnet.\n\nBitte melden Sie si
+ ch bis Montagmorgen an unter der Nummer: 06184-2893
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/2024
+ 0207_095405-rotated.jpg
+CATEGORIES:Gastronomie,Kirchen,Senioren
+LOCATION:Katharina-von-Bora-Haus\, Hinserdorfstraße 2a\, Langenselbold\, 6
+ 3505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Hinserdorfstraße 2a\, Lang
+ enselbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Katharina-von-B
+ ora-Haus:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2405@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261030T120000
+DTEND;TZID=Europe/Berlin:20261030T133000
+DTSTAMP:20260911T130631Z
+URL:https://langenselbold.de/veranstaltungskalender/selbolder-mittagstisch
+ /
+SUMMARY:Selbolder Mittagstisch
+DESCRIPTION:Kostenbeitrag: 4\,50 Euro\nAnmeldung bitte 10 Tage vorher bei K
+ arin Heidecke\, Telefon 06184 62530
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/Kinz
+ igaue-Juli2026-1.webp
+CATEGORIES:Senioren
+LOCATION:Feuer- und Rettungswache Langenselbold\, Carl-Friedrich-Benz-Str. 
+ 2-4\, 63505 Langenselbold\, Langenselbold\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Carl-Friedrich-Benz-Str. 2-
+ 4\, 63505 Langenselbold\, Langenselbold\, Deutschland;X-APPLE-RADIUS=100;X
+ -TITLE=Feuer- und Rettungswache Langenselbold:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2356@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261030T190000
+DTEND;TZID=Europe/Berlin:20261030T190000
+DTSTAMP:20260711T094832Z
+URL:https://langenselbold.de/veranstaltungskalender/und-mittendrin-der-bir
+ nbaum-lesung-mit-ute-mank/
+SUMMARY:"Und mittendrin der Birnbaum" - Lesung mit Ute Mank
+DESCRIPTION:"Und mittendrin der Birnbaum"\nLesung mit Ute Mank\n\nDatum: 3
+ 0.10.2026\nOrt: Stucksaal im Schloss Langenselbold\nUhrzeit: Beginn 19 U
+ hr- Einlass ab 18.30\nKosten: 13€ im Büchermeer oder online bei Eventi
+ m- light zzgl. Gebühren\n\n&nbsp\;\n\nVom Wissen und Wegschauen: über Ze
+ rbrechlichkeit und Hoffnung in dunklen Zeiten\n\nEs ist ein milder Frühso
+ mmer\, als Dora nach vielen Jahrzehnten in ihren Heimatort Hausen zurückk
+ ehrt. Stundenlang wandert sie durch die fremd-vertrauten Straßen - zu ihr
+ em Elternhaus\, aber auch zu dem Fachwerkhaus\, in dem einst ihre beste Fr
+ eundin wohnte. Als sie entdeckt\, dass vor diesem Haus Stolpersteine verle
+ gt wurden\, ist Dora fassungslos. Denn dort liegen nur vier Steine\, sie w
+ eiß aber genau\, dass es fünf sein müssten. Einer fehlt\, nämlich der 
+ ihrer ehemals besten Freundin Fanny. Was ist damals mit ihr geschehen?\n\n
+ In ihrem mitreißenden Roman erzählt Ute Mank die Geschichte eines Dorfes
+  in dunklen Zeiten\, die Geschichte zweier Mädchen\, die durch den Krieg 
+ getrennt werden\, und die Geschichte einer schicksalhaften Rettung.\n\nUte
+  Mank wurde in Marburg geboren. Sie ist Mutter von zwei erwachsenen Töcht
+ ern\, lernte einen Gesundheitsberuf\, studierte Erziehungswissenschaften u
+ nd promovierte später nebenberuflich. Ihr erster Roman ›Wildtriebe‹ e
+ rschien 2021 und war für den Klaus-Michael-Kühne-Preis nominiert. Sie le
+ bt mit ihrer Familie in Hessen.\n\nKarten gibt es im Büchermeer oder onli
+ ne zzgl. Gebühren bei Eventim-light\n\nDas Buch erscheint ca. Mitte Septe
+ mber 2026!\n\nZum Ticketshop
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/mank
+ _ute_08-web.webp
+CATEGORIES:Kultur,Lesung,Ticketshop
+LOCATION:Langenselbolder Schloss – Stucksaal\, Schloßpark 3\, Langenselb
+ old\, 63505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schloßpark 3\, Langenselbo
+ ld\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Langenselbolder Schlos
+ s – Stucksaal:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2426@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261031T140000
+DTEND;TZID=Europe/Berlin:20261031T180000
+DTSTAMP:20261021T115646Z
+URL:https://langenselbold.de/veranstaltungskalender/ki-workshop/
+SUMMARY:KI Workshop
+DESCRIPTION:Am Samstag\, 31. Oktober\, 14-18 Uhr bietet die IT-Expertin Ulr
+ ike Pollack in einem vierstündigen Workshop allen Teilnehmenden die Mögl
+ ichkeit\, praktische Erfahrungen mit der Anwendung von KI zu sammeln. Beis
+ pielsweise Bilder erstellen\, eine Reise oder eine Fahrradtour planen oder
+  kleine und größere Reparaturprobleme im Haushalt lösen. Mit praktische
+ n Übungen nähern wir uns den Möglichkeiten\, die künstliche Intelligen
+ z uns bietet. Hier sind der Kreativität keine Grenzen gesetzt. Dabei steh
+ en einige Mitglieder des Digitaltreffs bereit\, individuelle Hilfestellung
+ en zu leisten. Die Teilnehmenden des Workshops werden gebeten eigene Lapto
+ ps\, Tablets oder Smartphones mitzubringen.\n\nDie Veranstaltungen finden 
+ im DRK-Familienzentrum\, 1. Stock\, Am Bürgerplatz 1\, in Langenselbold s
+ tatt. Das Angebot ist kostenlos. Der Raum ist barrierefrei zugänglich.\n\
+ nFür den Workshop am 31.10. wird um Anmeldung gebeten.
+CATEGORIES:Senioren,Vorträge
+LOCATION:DRK Familienzentrum\, 1. Stock\, Am Bürgerplatz 1\, Langenselbold
+ \, Hessen\, 63505\, MKK\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Am Bürgerplatz 1\, Langens
+ elbold\, Hessen\, 63505\, MKK\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=DRK
+  Familienzentrum\, 1. Stock:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2203@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261101T093000
+DTEND;TZID=Europe/Berlin:20261101T103000
+DTSTAMP:20261029T110904Z
+URL:https://langenselbold.de/veranstaltungskalender/selbolder-lauftreff/
+SUMMARY:Selbolder Lauftreff
+DESCRIPTION:Offener Selbolder Lauftreff!\n\nSchnapp dir das richtige Schuhw
+ erk und komm sonntags um 9:30 Uhr zum Start an die Gründauhalle (Brühlwe
+ g 6). Eine Mitgliedschaft im TVL ist nicht erforderlich\, unterstützt na
+ türlich aber den Verein und das Angebot. Als Einstiegskriterium solltest 
+ du in der Lage sein\, ungefähr 60 Minuten in deinem Tempo zu joggen. Die 
+ Geschwindigkeit richtet sich nach den Teilnehmenden\, gegebenenfalls wird 
+ in unterschiedlichen Geschwindigkeitsgruppen gelaufen.\n\nVerantwortlich i
+ st Ahmed Bulih. Eine vorherige Anmeldung ist nicht nötig\, Rückfragen od
+ er sonstige Informationen sind unter lauftreff@tv1886.de zu erhalten.
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/selb
+ older-lauftreff.webp
+CATEGORIES:Sport,Tourismus/Freizeit
+LOCATION:Gründauhalle\, Brühlweg 6\, Langenselbold\, 63505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Brühlweg 6\, Langenselbold
+ \, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Gründauhalle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2422@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261101T110000
+DTEND;TZID=Europe/Berlin:20261101T140000
+DTSTAMP:20261002T112237Z
+URL:https://langenselbold.de/veranstaltungskalender/kinderflohmarkt-2/
+SUMMARY:Kinderflohmarkt
+DESCRIPTION:Am 01.11.26\, in der Zeit von 11:00 – 14:00 Uhr\, findet der 
+ Kinderflohmarkt\, in der Klosterberghalle\, Langenselbold\, statt. Ausrich
+ ter ist der Förderverein Krippenhaus Langenselbold e. V.\nwww.fv-krippenh
+ aus-langenselbold.de\n&nbsp\;\n\n&nbsp\;\n\n
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/logo
+ -krippenhaus-langenselbold.webp
+CATEGORIES:Flohmarkt
+LOCATION:Klosterberghalle\, Schloßstraße\, Langenselbold\, Hessen\, 63505
+ \, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schloßstraße\, Langenselb
+ old\, Hessen\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Klosterbergh
+ alle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2270@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261102T090000
+DTEND;TZID=Europe/Berlin:20261102T120000
+DTSTAMP:20260626T092124Z
+URL:https://langenselbold.de/veranstaltungskalender/beratung-information-r
+ und-um-kindertagespflege-und-kinderbetreuung-2026-06-01-2026-06-08-2026-06
+ -15-2026-06-22-2026-06-29-2026-07-06-2026-07-13-2026-07-20-2026-07-27-2026
+ -08-03-2026-08-1-26-2026-11-02/
+SUMMARY:Beratung & Information rund um Kindertagespflege und Kinderbetreuun
+ g
+DESCRIPTION:Jeden Montag findet im DRK-Familienzentrum in Langenselbold im 
+ FZ Büro (Erdgeschoss) eine Beratung rund um Kindertagespflege und Kinderb
+ etreuung von 9:00 Uhr bis 12:00 Uhr statt.\n\nAnsprechpartnerIn: Frau Fati
+ ma Gad\n\nAnmeldungen unter tagespflege@drk-kita.de oder telefonisch unter
+  der 06184 940 99 75.\n\nWeitere Infos zu den Angeboten des DRK-Familienze
+ ntrums finden sie unter:https://www.drk-kita.de/start/aktuelles/aktuelles/
+ termine-/-veranstaltungen.html
+CATEGORIES:Beratungsangebote,Kinder/Jugend
+LOCATION:DRK Familienzentrum\, Am Bürgerplatz 1\, Langenselbold\, 63505\, 
+ Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Am Bürgerplatz 1\, Langens
+ elbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=DRK Familienzentru
+ m:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2400@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261102T100000
+DTEND;TZID=Europe/Berlin:20261102T113000
+DTSTAMP:20260910T105603Z
+URL:https://langenselbold.de/veranstaltungskalender/digitaltreff-fuer-seni
+ oren-5/
+SUMMARY:Digitaltreff für Senioren
+DESCRIPTION:Hilfe rund um Computer\, Smartphone und Tablet
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/IMG_
+ 8401-2-1-scaled.webp
+LOCATION:DRK Familienzentrum Langenselbold\, Am Bürgerplatz 1\, Langenselb
+ old\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Am Bürgerplatz 1\, Langens
+ elbold\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=DRK Familienzentrum Langen
+ selbold:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2347@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261102T150000
+DTEND;TZID=Europe/Berlin:20261102T180000
+DTSTAMP:20260907T104353Z
+URL:https://langenselbold.de/veranstaltungskalender/naehtreff-5/
+SUMMARY:Nähtreff
+DESCRIPTION:Am 2. November 2026 findet um 15 Uhr das Angebot "Nähtreff" de
+ r Evangelischen Kirchengemeinde im DRK-Familienzentrum Langenselbold statt
+ .\n\nAnsprechpartnerin: Katja Wenzel\, Tel.: 06184 938463\n\nWir stellen v
+ ier Nähmaschinen und diverses Nähzubehör zur Verfügung und freuen uns 
+ auf gemeinsames Kreativsein!\n\nEin Angebot der Evangelischen Kirchengemei
+ nde.
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/Foto
+ -Naehtreff-4.webp
+LOCATION:DRK Familienzentrum Langenselbold\, Am Bürgerplatz 1\, Langenselb
+ old\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Am Bürgerplatz 1\, Langens
+ elbold\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=DRK Familienzentrum Langen
+ selbold:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2313@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261103T141500
+DTEND;TZID=Europe/Berlin:20261103T151500
+DTSTAMP:20260626T152702Z
+URL:https://langenselbold.de/veranstaltungskalender/englisch-iii-fuer-seni
+ oren-2026-06-30-2026-07-07-2026-07-14-2026-07-21-2026-07-28-2026-08-04-202
+ 6-08-11-2026-08-18-2026-08-25-2026-09-01-2026-09-08-2026-09-15-2026-09-22-
+ 2026-09-29-2026-27-2026-11-03/
+SUMMARY:Englisch III für Senioren
+DESCRIPTION:Wöchentlich findet dienstags von 14:15 bis 15:15 Uhr das Angeb
+ ot "Englisch III für Senioren" im DRK-Familienzentrum in Langenselbold (F
+ Z2 im Obergeschoss) statt.\n\nKursleitung: Karin Schwarz-Kögel\n\nEine An
+ meldung erfolgt über die Stadt Langenselbold per Mail über c.stuttmann@l
+ angenselbold.de oder telefonisch über die 06184 80 24 03.\n\nEine Veranst
+ altung in Zusammenarbeit mit dem DRK-Familienzentrum und der Stadt Langens
+ elbold.\nWeitere Angebote des Familienzentrums finden Sie unter: https://w
+ ww.drk-kita.de/start/aktuelles/aktuelles/termine-/-veranstaltungen.html
+CATEGORIES:Senioren
+LOCATION:DRK Familienzentrum\, Am Bürgerplatz 1\, Langenselbold\, 63505\, 
+ Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Am Bürgerplatz 1\, Langens
+ elbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=DRK Familienzentru
+ m:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2341@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261103T190000
+DTEND;TZID=Europe/Berlin:20261103T220000
+DTSTAMP:20260907T104539Z
+URL:https://langenselbold.de/veranstaltungskalender/selbold-spielt-spielea
+ bend-fuer-alle-spielebegeisterte-ab-16-jahren-2/
+SUMMARY:Selbold spielt! Spieleabend für alle Spielebegeisterte ab 16 Jahre
+ n
+DESCRIPTION:Am 03. November 2026 findet ab 19:00 Uhr das Angebot "Selbold s
+ pielt! Spieleabend für alle Spielbegeisterte ab 16 Jahren" im Katharina-v
+ on-Bora-Haus in Langenselbold statt.\n\nEine Zusammenarbeit zwischen der E
+ vangelische Kirchengemeinde &amp\; Spielwaren "Kinderkram" Langenselbold
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/Bild
+ -Selbold-spielt-4.webp
+CATEGORIES:Tourismus/Freizeit
+LOCATION:Katharina-von-Bora-Haus\, Hinserdorfstraße 2a\, Langenselbold\, 6
+ 3505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Hinserdorfstraße 2a\, Lang
+ enselbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Katharina-von-B
+ ora-Haus:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2428@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261104T150000
+DTEND;TZID=Europe/Berlin:20261104T170000
+DTSTAMP:20261025T130003Z
+URL:https://langenselbold.de/veranstaltungskalender/buechertreff-stadt-bue
+ cherei/
+SUMMARY:Büchertreff Stadt Bücherei
+DESCRIPTION:250 Jahre Jane Austen
+LOCATION:Stucksaal im Schloss Langenselbold\, Schlosspark\, Langenselbold\,
+  63505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schlosspark\, Langenselbold
+ \, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Stucksaal im Schloss Lan
+ genselbold:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2414@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261104T150000
+DTEND;TZID=Europe/Berlin:20261104T170000
+DTSTAMP:20260911T131002Z
+URL:https://langenselbold.de/veranstaltungskalender/buechertreff-der-stadt
+ buecherei-2/
+SUMMARY:Büchertreff der Stadtbücherei
+DESCRIPTION:250 Jahre E.T.A. Hofmann
+LOCATION:Stucksaal im Schloss Langenselbold\, Schlosspark\, Langenselbold\,
+  63505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schlosspark\, Langenselbold
+ \, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Stucksaal im Schloss Lan
+ genselbold:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:1387@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261105T080000
+DTEND;TZID=Europe/Berlin:20261105T130000
+DTSTAMP:20251016T112520Z
+URL:https://langenselbold.de/veranstaltungskalender/langenselbolder-wochen
+ markt-2026-11-05/
+SUMMARY:Langenselbolder Wochenmarkt
+DESCRIPTION:Es ist wieder Markttag in Langenselbold! Jeden Donnerstag im Br
+ ühlweg auf dem Parkplatz an der Gründauhalle von 8 bis 13 Uhr könnt ihr
+  unsere vielfältige Auswahl an frischen Produkten direkt von Händlerinne
+ n und Händler sowie Erzeugerinnen und Erzeuger aus der Region entdecken.\
+ n\nBei unserem Wochenmarkt findet ihr alles für euren heimischen Einkauf!
+  Von herzhaften Fleisch- und Wurstwaren über frisches Geflügel und Fisch
+  bis hin zu Meeresfrüchten\, herrlich duftenden Backwaren und besonderer 
+ Feinkost!\n\nKommt vorbei\, unterstützt lokale Produzentinnen und Produze
+ nten und genießt frische\, hochwertige Produkte! Wir freuen uns auf euch!
+ \n\nAnfahrt:\nBrühlweg\, 63505 Langenselbold
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/FB_I
+ MG_1706979067839-e1707120931153.jpg
+CATEGORIES:Wochenmarkt
+LOCATION:Parkplatz an der Gründauhalle\, Brühlweg\, Langenselbold\, Deuts
+ chland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Brühlweg\, Langenselbold\,
+  Deutschland;X-APPLE-RADIUS=100;X-TITLE=Parkplatz an der Gründauhalle:geo
+ :0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2041@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261105T120000
+DTEND;TZID=Europe/Berlin:20261105T133000
+DTSTAMP:20260313T164157Z
+URL:https://langenselbold.de/veranstaltungskalender/eintopf-mittagstisch-d
+ er-evang-kirchengemeinde-2025-12-25-2026-01-01-2026-01-08-2026-01-15-2026-
+ 01-22-2026-01-29-2026-02-05-2026-02-12-2026-02-19-2026-02-26-2026-03-05-20
+ 26-03-12-2026-03-29-2026-11-05/
+SUMMARY:EinTopf-Mittagstisch der evang. Kirchengemeinde
+DESCRIPTION:Die evangelische Kirchengemeinde bietet einen freundlichen Rahm
+ en für ein gemeinsames Essen an\, das auch die Möglichkeit zu einer anre
+ genden Kommunikation unter den Gästen beinhaltet.\n\nJeder ist herzlich w
+ illkommen und gibt was ihm möglich ist.\n\nDas Katharina-von-Bora-Haus\, 
+ Hinserdorfstr. 2 ist dazu donnerstags von 12 bis 13:30 Uhr für alle Bürg
+ er und Bürgerinnen der Ortsgemeinschaft geöffnet.\n\nBitte melden Sie si
+ ch bis Montagmorgen an unter der Nummer: 06184-2893
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/2024
+ 0207_095405-rotated.jpg
+CATEGORIES:Gastronomie,Kirchen,Senioren
+LOCATION:Katharina-von-Bora-Haus\, Hinserdorfstraße 2a\, Langenselbold\, 6
+ 3505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Hinserdorfstraße 2a\, Lang
+ enselbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Katharina-von-B
+ ora-Haus:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2411@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261105T140000
+DTEND;TZID=Europe/Berlin:20261105T153000
+DTSTAMP:20260911T130854Z
+URL:https://langenselbold.de/veranstaltungskalender/sitztanzgruppe-farbens
+ piel-2/
+SUMMARY:Sitztanzgruppe Farbenspiel
+DESCRIPTION:Info-Telefon: 06184 3148
+LOCATION:Katharina-von-Bora-Haus\, Hinserdorfstraße 2a\, Langenselbold\, 6
+ 3505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Hinserdorfstraße 2a\, Lang
+ enselbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Katharina-von-B
+ ora-Haus:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2412@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261105T150000
+DTEND;TZID=Europe/Berlin:20261105T170000
+DTSTAMP:20260911T130912Z
+URL:https://langenselbold.de/veranstaltungskalender/treffen-fuer-angehoeri
+ ge-von-menschen-mit-demenz-2/
+SUMMARY:Treffen für Angehörige von Menschen mit Demenz
+DESCRIPTION:Leitung: Heike Dürr-Böhmer\nInfos per Email: h.duerrboehmer@g
+ mail.com
+LOCATION:Bürgerplatz 1 Langenselbold\, Bürgerplatz 1\, Langenselbold\, He
+ ssen\, 63505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Bürgerplatz 1\, Langenselb
+ old\, Hessen\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Bürgerplatz
+  1 Langenselbold:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2229@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261105T191500
+DTEND;TZID=Europe/Berlin:20261105T220000
+DTSTAMP:20260625T152353Z
+URL:https://langenselbold.de/veranstaltungskalender/das-leben-ist-zum-tanz
+ en-da-2026-06-04-2026-07-02-2026-08-06-2026-09-03-2026-10-01-2026-11-05/
+SUMMARY:Das Leben ist zum Tanzen da
+DESCRIPTION:Der TV Langenselbold lädt zum Tanzabend ein!\nTaucht mit uns e
+ in in die Welt des Discofox.\n\nUnser Motto:\n“Das Leben ist zum Tanzen 
+ da!”\nWir laden euch herzlich ein\, mit uns in gemütlicher Atmosphäre 
+ das Tanzbein zu\nschwingen.\nOb jung oder junggeblieben – alle Tanzbegei
+ sterten mit Discofox-Erfahrung sind\nwillkommen!\nAuch Einzeltanzende sind
+  herzlich willkommen und finden bei uns schnell Anschluss.\nIm Vordergrund
+  stehen Spaß\, Rhythmus und gemeinsame Freude am Tanzen.\n\nWann &amp\; W
+ o:\n1. und 3. Donnerstag im Monat\nim Vereinsheim der Gründauhalle – 1.
+  Stock\nBrühlweg 6\, 63505 Langenselbold\ngetanzt wird auf gepflegtem Par
+ kettboden\n19:15 Uhr: kleine Aufwärmeinheit mit einer Discofox-Figur\n19:
+ 30 – 22:00 Uhr: offizieller Tanzabend\n\nKosten:\nMitglieder tanzen grat
+ is.\nGäste sind willkommen für 4\,- Euro.\n\nExtra:\nGetränke-Ausschank
+ \nkleine Knabbereien\nviele kostenlose Parkplätze direkt vor der Halle\nK
+ ommt vorbei\, tanzt mit und verbringt einen unvergesslichen Abend – wir 
+ freuen uns auf\neuch!\n\n100% Das Leben ist zum tanzen da\n100% Tanzabend\
+ n100% TVL\n\n&nbsp\;
+CATEGORIES:Sport,TV Langenselbold
+LOCATION:Vereinsheim der Gründauhalle\, Brühlweg 6\, Langenselbold\, Hess
+ en\, 63505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Brühlweg 6\, Langenselbold
+ \, Hessen\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Vereinsheim der
+  Gründauhalle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2081@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261106T193000
+DTEND;TZID=Europe/Berlin:20261106T193000
+DTSTAMP:20260610T110531Z
+URL:https://langenselbold.de/veranstaltungskalender/stand-up-comedy-mit-mi
+ chaela-hartnagel-keil-das-innere-kind-will-raus/
+SUMMARY:Stand-up Comedy mit Michaela Hartnagel-Keil – „Das innere Kind 
+ will raus“
+DESCRIPTION:Mit ihrem neuen Programm „Das innere Kind“ bringt Michaela 
+ Hartnagel-Keil frischen Humor und jede Menge Energie auf die Bühne. Die a
+ us dem HR-Fernsehen bekannte Moderatorin steht seit vier Jahren regelmäß
+ ig vor der Kamera und begeistert nun auch live ihr Publikum.\n\nIn ihrem a
+ ktuellen Bühnenprogramm verbindet sie persönliche Geschichten mit sponta
+ nen Interaktionen und nimmt das Publikum mit auf eine ebenso unterhaltsame
+  wie überraschende Reise in die Welt des „inneren Kindes“. Dabei blei
+ bt kein Auge trocken: Mit Charme\, Witz und einem feinen Gespür für Situ
+ ationskomik sorgt sie für durchgehende Lacher im Saal.\n\nOb pointierte A
+ lltagsbeobachtungen oder improvisierte Momente im direkten Austausch mit d
+ en Zuschauerinnen und Zuschauern – Michaela Hartnagel-Keil beweist\, das
+ s Humor vor allem dann entsteht\, wenn man sich selbst nicht allzu ernst n
+ immt.\n\nEin Abend voller Leichtigkeit\, Lebensfreude und ehrlichem Lachen
+  ist garantiert.
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/vk-m
+ ichaela-hartnagel-keil.webp
+CATEGORIES:Comedy/Kabarett,Kultur,Prominent,Ticketshop
+LOCATION:Schlosskeller Langenselbold\, Schloßpark 3\, Langenselbold\, 6350
+ 5\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schloßpark 3\, Langenselbo
+ ld\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Schlosskeller Langense
+ lbold:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2357@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261107T190000
+DTEND;TZID=Europe/Berlin:20261107T190000
+DTSTAMP:20260711T095514Z
+URL:https://langenselbold.de/veranstaltungskalender/whisky-tasting-fuer-fo
+ rtgeschrittene-mit-hans-georg-wuersching/
+SUMMARY:Whisky-Tasting für "Fortgeschrittene" Mit: Hans-Georg Würsching
+DESCRIPTION:Whisky-Tasting für "Fortgeschrittene"\nMit: Hans-Georg Würsch
+ ing\n\nDatum: 07.11.2026\nOrt: Stucksaal im Schloss Langenselbold\nUhrzeit
+ : Beginn 19 Uhr- Einlass ab 18.30\nKosten: NUR VORVERKAUF 50€- inklusive
+  Verkostung\, Getränke und einem kleinen Fingerfood-Buffet von Reiner Erd
+ t von der Hessenkrone in Hüttengesäß\n\n&nbsp\;\n\nIch freue mich\, das
+ s Hans-Georg Würsching wieder den Weg nach Langenselbold findet\, um übe
+ r Whisky zu erzählen.\n\nEr hat nicht nur einen Import für Whisky\nhttps
+ ://www.cluaran.de/\n\nnein\, er schreibt auch Whisky- Krimis.\n\nSo waren 
+ die letzten Veranstaltungen immer eine Kombination aus Verkostung und Lesu
+ ng.\n\nBei dieser Veranstaltung geht es nur um Whisky\, es wird nicht gele
+ sen. Da aus den Einsteigern inzwischen Fortgeschrittene geworden sind\,  
+ geht es dieses Mal mehr um die Brennereien in Bildern und den dazugehörig
+ en Whisky mit Sensorik und nicht mehr um detaillierte Infos zur Herstellun
+ g.\n\nIn der Pause gibt es ein kleines aber feines Fingerfood\, welches vo
+ n Reiner Erdt aus dem Restaurant "Hessenkrone" geliefert wird. Er ist selb
+ st ein großer Whiskyliebhaber und trifft mit seinen Ideen auch immer den 
+ geschmacklichen Nerv der Gäste. Dazu gibt es Getränke.\n\nIm Eintrittspr
+ eis ist dies alles (Whisky- Tasting\, Buffet und Getränke) enthalten\, so
+  dass Sie sich auf einen sorglosen Abend freuen dürfen.\n\nBitte haben Si
+ e Verständnis dafür\, dass es für diese Veranstaltung KEINE ABENDKASSE!
+  gibt.\n\n&nbsp\;\n\nZum Ticketshop
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/DSC_
+ 9386.webp
+CATEGORIES:Kultur,Ticketshop,Vorträge
+LOCATION:Langenselbolder Schloss – Stucksaal\, Schloßpark 3\, Langenselb
+ old\, 63505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schloßpark 3\, Langenselbo
+ ld\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Langenselbolder Schlos
+ s – Stucksaal:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:1886@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261107T200000
+DTEND;TZID=Europe/Berlin:20261107T200000
+DTSTAMP:20260903T122102Z
+URL:https://langenselbold.de/veranstaltungskalender/hot-stuff-feat-baba-ex
+ plosion/
+SUMMARY:Hot Stuff feat. BABA Explosion
+DESCRIPTION:Double Feature\nHot Stuff feat. BABA Explosion\nSamstag 07.11.2
+ 026 um 20 Uhr\nKlosterberghalle – Langenselbold\nEintritt im Vorverkauf\
+ nEUR 28\,50 Sitzplatz\nEUR 25\,00 Stehplatz\n\n20 Jahre ABBA-Tribute mit B
+ ABA Explosio\n30 Jahre 70s &amp\; 80s Discomusic mit Hot Stuff\n\nEs werde
+ n die größten Hits von ABBA und die erfolgreichsten und bekanntesten Son
+ gs der Disco-Ära\, der Siebziger und Achtziger Jahre gefeiert und mit vol
+ ler Energie auf die Bühne gebracht.  Wenn zwei Ausnahme-Livebands gemein
+ sam ein Jubiläum feiern\, darf sich das Publikum auf ein echtes musikalis
+ ches Feuerwerk freuen.\n\nBABA Explosion\, seit zwei Jahrzehnten als eine 
+ der renommiertesten ABBA-Tribute-Bands Deutschlands unterwegs\, widmet sic
+ h dem Werk der schwedischen Popikonen mit höchstem Anspruch und spürbare
+ r Leidenschaft. Die Band setzt sich bewusst von vielen anderen Tribute-Act
+ s ab und verzichtet komplett auf digitale Einspielungen – alles ist live
+ \, filigran arrangiert und voller Dynamik.  Überraschende musikalische Z
+ itate\, rockige oder lateinamerikanische Elemente und kreative Übergänge
+  verleihen Hits wie „SOS“\, „Mamma Mia“\, „Waterloo“ oder „D
+ ancing Queen“ eine besondere Note\, ohne dabei den authentischen ABBA-So
+ und zu verlieren. Die starken Stimmen der Sängerinnen\, die Bühnenpräse
+ nz der Band sowie ein emotionales „ABBA-Unplugged“-Set machen das Erle
+ bnis komplett und lassen die Magie der 70er und 80er Jahre neu aufleben.\n
+ \nHot Stuff wiederum bringt seit über 30 Jahren die Glamourwelt der Disco
+ zeit europaweit auf die Bühne – in Hallen\, Clubs\, auf Open-Airs\, Fir
+ menevents und Gala-Bühnen. Über 1500 Konzerte sprechen für sich. Künst
+ ler wie Kool &amp\; The Gang\, Gloria Gaynor\, Rednex oder Culture Beat ze
+ igten sich bereits begeistert vom unverwechselbaren Sound und der Energie 
+ der Band. Frontmann Charles Johnson\, vielen bekannt durch seine beeindruc
+ kenden Auftritte bei „The Voice of Germany“\, und Sängerin Ina Morgan
+ \, die bereits mit Udo Lindenberg\, Chris Norman und Avantasia tourte\, ve
+ rleihen den großen Disco-Hymnen der 70er und 80er eine besondere Stimmgew
+ alt. Begleitet von erstklassigen Musikern und inspiriert durch moderne Ret
+ ro-Acts wie Bruno Mars\, Daft Punk oder Justin Timberlake\, sorgt Hot Stuf
+ f für eine Show voller Rhythmus\, Glitzer und Tanzstimmung.\n\nWenn BABA 
+ Explosion und Hot Stuff an einem Abend zusammentreffen\, entstehen zwei Sh
+ ows\, die sich perfekt ergänzen.\n\nDie zeitlosen Melodien von ABBA treff
+ en auf die pulsierende Energie der Discohits – live\, leidenschaftlich u
+ nd mitreißend. Ein Double Feature voller Nostalgie\, Hits\, Emotionen und
+  Tanzgarantie.\n\nLet’s have a good time and dance!\n\nbaba-explosion.de
+ \n\nhotstuff-music.de
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/07.1
+ 1-web.webp
+CATEGORIES:Konzerte,Kultur,Prominent,Ticketshop
+LOCATION:Klosterberghalle\, Schloßstraße\, Langenselbold\, Hessen\, 63505
+ \, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schloßstraße\, Langenselb
+ old\, Hessen\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Klosterbergh
+ alle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2204@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261108T093000
+DTEND;TZID=Europe/Berlin:20261108T103000
+DTSTAMP:20261029T110905Z
+URL:https://langenselbold.de/veranstaltungskalender/selbolder-lauftreff/
+SUMMARY:Selbolder Lauftreff
+DESCRIPTION:Offener Selbolder Lauftreff!\n\nSchnapp dir das richtige Schuhw
+ erk und komm sonntags um 9:30 Uhr zum Start an die Gründauhalle (Brühlwe
+ g 6). Eine Mitgliedschaft im TVL ist nicht erforderlich\, unterstützt na
+ türlich aber den Verein und das Angebot. Als Einstiegskriterium solltest 
+ du in der Lage sein\, ungefähr 60 Minuten in deinem Tempo zu joggen. Die 
+ Geschwindigkeit richtet sich nach den Teilnehmenden\, gegebenenfalls wird 
+ in unterschiedlichen Geschwindigkeitsgruppen gelaufen.\n\nVerantwortlich i
+ st Ahmed Bulih. Eine vorherige Anmeldung ist nicht nötig\, Rückfragen od
+ er sonstige Informationen sind unter lauftreff@tv1886.de zu erhalten.
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/selb
+ older-lauftreff.webp
+CATEGORIES:Sport,Tourismus/Freizeit
+LOCATION:Gründauhalle\, Brühlweg 6\, Langenselbold\, 63505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Brühlweg 6\, Langenselbold
+ \, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Gründauhalle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2271@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261109T090000
+DTEND;TZID=Europe/Berlin:20261109T120000
+DTSTAMP:20260626T092124Z
+URL:https://langenselbold.de/veranstaltungskalender/beratung-information-r
+ und-um-kindertagespflege-und-kinderbetreuung-2026-06-01-2026-06-08-2026-06
+ -15-2026-06-22-2026-06-29-2026-07-06-2026-07-13-2026-07-20-2026-07-27-2026
+ -08-03-2026-08-1-02-2026-11-09/
+SUMMARY:Beratung & Information rund um Kindertagespflege und Kinderbetreuun
+ g
+DESCRIPTION:Jeden Montag findet im DRK-Familienzentrum in Langenselbold im 
+ FZ Büro (Erdgeschoss) eine Beratung rund um Kindertagespflege und Kinderb
+ etreuung von 9:00 Uhr bis 12:00 Uhr statt.\n\nAnsprechpartnerIn: Frau Fati
+ ma Gad\n\nAnmeldungen unter tagespflege@drk-kita.de oder telefonisch unter
+  der 06184 940 99 75.\n\nWeitere Infos zu den Angeboten des DRK-Familienze
+ ntrums finden sie unter:https://www.drk-kita.de/start/aktuelles/aktuelles/
+ termine-/-veranstaltungen.html
+CATEGORIES:Beratungsangebote,Kinder/Jugend
+LOCATION:DRK Familienzentrum\, Am Bürgerplatz 1\, Langenselbold\, 63505\, 
+ Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Am Bürgerplatz 1\, Langens
+ elbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=DRK Familienzentru
+ m:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2287@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261109T093000
+DTEND;TZID=Europe/Berlin:20261109T103000
+DTSTAMP:20260626T094831Z
+URL:https://langenselbold.de/veranstaltungskalender/gehirnjogging-fuer-sen
+ ioren-2026-07-13-2026-08-10-2026-09-14-2026-10-12-2026-11-09/
+SUMMARY:Gehirnjogging für Senioren
+DESCRIPTION:Jeden 2. und 4. Montag im Monat findet von 9:30 Uhr bis 10:30 U
+ hr die Veranstaltungsreihe "Gehirnjogging für Senioren" im DRK-Familienze
+ ntrum (FZ1 im Erdgeschoss) in Langenselbold statt.\n\nKursleiterin: Berbel
+  Holz\n\nAnmeldungen bei der Stadt Langenselbold unter c.stuttmann@langens
+ elbold.de oder telefonisch unter der 06184 80 24 03.\n\nEine Veranstaltung
+  des DRK-Familienzentrums in Kooperation mit der Stadt Langenselbold. Weit
+ ere Informationen für die Angebote des Familienzentrums finden Sie unter 
+ https://www.drk-kita.de/start/aktuelles/aktuelles/termine-/-veranstaltunge
+ n.html.
+CATEGORIES:Senioren
+LOCATION:DRK Familienzentrum\, Am Bürgerplatz 1\, Langenselbold\, 63505\, 
+ Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Am Bürgerplatz 1\, Langens
+ elbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=DRK Familienzentru
+ m:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2379@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261109T143000
+DTEND;TZID=Europe/Berlin:20261109T163000
+DTSTAMP:20261022T132139Z
+URL:https://langenselbold.de/veranstaltungskalender/kino-in-der-klosterber
+ ghalle/
+SUMMARY:Kino in der Klosterberghalle
+DESCRIPTION:Geliebte Köchin mit Juliette Binoch\,\nüppig\, romantisch\, b
+ erauschend...\nEintritt 5\,00 Euro
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/2026
+ -seniorenkino-Juliette-Binoch.webp
+CATEGORIES:Kultur,Senioren
+LOCATION:Klosterberghalle in Langenselbold\, Schloßstraße\, Langenselbold
+ \, Hessen\, 63505\, Hanau\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schloßstraße\, Langenselb
+ old\, Hessen\, 63505\, Hanau\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Klos
+ terberghalle in Langenselbold:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2314@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261110T141500
+DTEND;TZID=Europe/Berlin:20261110T151500
+DTSTAMP:20260626T152702Z
+URL:https://langenselbold.de/veranstaltungskalender/englisch-iii-fuer-seni
+ oren-2026-06-30-2026-07-07-2026-07-14-2026-07-21-2026-07-28-2026-08-04-202
+ 6-08-11-2026-08-18-2026-08-25-2026-09-01-2026-09-08-2026-09-15-2026-09-22-
+ 2026-09-29-2026-03-2026-11-10/
+SUMMARY:Englisch III für Senioren
+DESCRIPTION:Wöchentlich findet dienstags von 14:15 bis 15:15 Uhr das Angeb
+ ot "Englisch III für Senioren" im DRK-Familienzentrum in Langenselbold (F
+ Z2 im Obergeschoss) statt.\n\nKursleitung: Karin Schwarz-Kögel\n\nEine An
+ meldung erfolgt über die Stadt Langenselbold per Mail über c.stuttmann@l
+ angenselbold.de oder telefonisch über die 06184 80 24 03.\n\nEine Veranst
+ altung in Zusammenarbeit mit dem DRK-Familienzentrum und der Stadt Langens
+ elbold.\nWeitere Angebote des Familienzentrums finden Sie unter: https://w
+ ww.drk-kita.de/start/aktuelles/aktuelles/termine-/-veranstaltungen.html
+CATEGORIES:Senioren
+LOCATION:DRK Familienzentrum\, Am Bürgerplatz 1\, Langenselbold\, 63505\, 
+ Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Am Bürgerplatz 1\, Langens
+ elbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=DRK Familienzentru
+ m:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2377@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261111T143000
+DTEND;TZID=Europe/Berlin:20261111T163000
+DTSTAMP:20260907T100419Z
+URL:https://langenselbold.de/veranstaltungskalender/weckmann-trifft-st-mar
+ tin/
+SUMMARY:Weckmann trifft St. Martin
+DESCRIPTION:Weckmänner\, dazu Butter und selbstgemachte Marmelade\, ein Be
+ such von St. Martin\, den Kindern der evangelischen Kindertagesstätte und
+  musikalische Untermalung von Ruth Marthiensen stehen auf dem Programm.
+CATEGORIES:Kinder/Jugend
+LOCATION:Katharina-von-Bora-Haus\, Hinserdorfstraße 2a\, Langenselbold\, 6
+ 3505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Hinserdorfstraße 2a\, Lang
+ enselbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Katharina-von-B
+ ora-Haus:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:1388@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261112T080000
+DTEND;TZID=Europe/Berlin:20261112T130000
+DTSTAMP:20251016T112520Z
+URL:https://langenselbold.de/veranstaltungskalender/langenselbolder-wochen
+ markt-2026-11-12/
+SUMMARY:Langenselbolder Wochenmarkt
+DESCRIPTION:Es ist wieder Markttag in Langenselbold! Jeden Donnerstag im Br
+ ühlweg auf dem Parkplatz an der Gründauhalle von 8 bis 13 Uhr könnt ihr
+  unsere vielfältige Auswahl an frischen Produkten direkt von Händlerinne
+ n und Händler sowie Erzeugerinnen und Erzeuger aus der Region entdecken.\
+ n\nBei unserem Wochenmarkt findet ihr alles für euren heimischen Einkauf!
+  Von herzhaften Fleisch- und Wurstwaren über frisches Geflügel und Fisch
+  bis hin zu Meeresfrüchten\, herrlich duftenden Backwaren und besonderer 
+ Feinkost!\n\nKommt vorbei\, unterstützt lokale Produzentinnen und Produze
+ nten und genießt frische\, hochwertige Produkte! Wir freuen uns auf euch!
+ \n\nAnfahrt:\nBrühlweg\, 63505 Langenselbold
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/FB_I
+ MG_1706979067839-e1707120931153.jpg
+CATEGORIES:Wochenmarkt
+LOCATION:Parkplatz an der Gründauhalle\, Brühlweg\, Langenselbold\, Deuts
+ chland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Brühlweg\, Langenselbold\,
+  Deutschland;X-APPLE-RADIUS=100;X-TITLE=Parkplatz an der Gründauhalle:geo
+ :0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2042@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261112T120000
+DTEND;TZID=Europe/Berlin:20261112T133000
+DTSTAMP:20260313T164157Z
+URL:https://langenselbold.de/veranstaltungskalender/eintopf-mittagstisch-d
+ er-evang-kirchengemeinde-2025-12-25-2026-01-01-2026-01-08-2026-01-15-2026-
+ 01-22-2026-01-29-2026-02-05-2026-02-12-2026-02-19-2026-02-26-2026-03-05-20
+ 26-03-12-2026-03-05-2026-11-12/
+SUMMARY:EinTopf-Mittagstisch der evang. Kirchengemeinde
+DESCRIPTION:Die evangelische Kirchengemeinde bietet einen freundlichen Rahm
+ en für ein gemeinsames Essen an\, das auch die Möglichkeit zu einer anre
+ genden Kommunikation unter den Gästen beinhaltet.\n\nJeder ist herzlich w
+ illkommen und gibt was ihm möglich ist.\n\nDas Katharina-von-Bora-Haus\, 
+ Hinserdorfstr. 2 ist dazu donnerstags von 12 bis 13:30 Uhr für alle Bürg
+ er und Bürgerinnen der Ortsgemeinschaft geöffnet.\n\nBitte melden Sie si
+ ch bis Montagmorgen an unter der Nummer: 06184-2893
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/2024
+ 0207_095405-rotated.jpg
+CATEGORIES:Gastronomie,Kirchen,Senioren
+LOCATION:Katharina-von-Bora-Haus\, Hinserdorfstraße 2a\, Langenselbold\, 6
+ 3505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Hinserdorfstraße 2a\, Lang
+ enselbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Katharina-von-B
+ ora-Haus:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2417@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261113T150000
+DTEND;TZID=Europe/Berlin:20261113T163000
+DTSTAMP:20260911T131048Z
+URL:https://langenselbold.de/veranstaltungskalender/tanznachmittag-3/
+SUMMARY:Tanznachmittag
+DESCRIPTION:Infos bei Barbara Kremer\, Mobil 0151 588 932 50
+LOCATION:Katharina-von-Bora-Haus\, Hinserdorfstraße 2a\, Langenselbold\, 6
+ 3505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Hinserdorfstraße 2a\, Lang
+ enselbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Katharina-von-B
+ ora-Haus:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:1940@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261113T160000
+DTEND;TZID=Europe/Berlin:20261113T173000
+DTSTAMP:20260625T144500Z
+URL:https://langenselbold.de/veranstaltungskalender/basteltreff-7/
+SUMMARY:Basteltreff
+DESCRIPTION:Es wird wieder gebastelt!\nKommt einfach vorbei und habt jede M
+ enge Spaß\, etwas Kreatives zu erstellen.\nFür Mitglieder der Krabbelstu
+ be ist die Teilnahme kostenlos\, Nicht-Mitglieder bezahlen einen Kostenbet
+ rag von 4 € pro Kind.\nWir wünschen Euch viel Spaß!
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/IMG-
+ 20240202-WA0009-e1707126626837.jpg
+CATEGORIES:Kinder/Jugend
+LOCATION:Krabbel- und Spielstube Langenselbold e.V.\, Schulstr. 4\, Langens
+ elbold\, Hessen\, 63505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schulstr. 4\, Langenselbold
+ \, Hessen\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Krabbel- und Sp
+ ielstube Langenselbold e.V.:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:1826@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261114T200000
+DTEND;TZID=Europe/Berlin:20261114T200000
+DTSTAMP:20260610T110605Z
+URL:https://langenselbold.de/veranstaltungskalender/simon-garfunkel-reviva
+ l-band-feelin-groovy/
+SUMMARY:Simon & Garfunkel Revival Band - Feelin' Groovy
+DESCRIPTION:Simon &amp\; Garfunkel Revival Band\nSamstag 14.11.2026 um 20:0
+ 0 Uhr\n\nKlosterberghalle Langenselbold\nSchlossstraße\n63505 Langenselbo
+ ld\n\n&nbsp\;\n\nTickets unter: Dehm Events - Ticketshop - Alle Events\n\n
+ oder Telefon: 06055 - 6167\n\nUnd allen bekannten reservix-Vorverkaufsstel
+ len\n\n&nbsp\;
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/SG-R
+ evival-Band.jpg
+CATEGORIES:Konzerte,Kultur,Prominent,Ticketshop
+LOCATION:Klosterberghalle\, Schloßstraße\, Langenselbold\, Hessen\, 63505
+ \, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schloßstraße\, Langenselb
+ old\, Hessen\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Klosterbergh
+ alle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2205@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261115T093000
+DTEND;TZID=Europe/Berlin:20261115T103000
+DTSTAMP:20261029T110905Z
+URL:https://langenselbold.de/veranstaltungskalender/selbolder-lauftreff/
+SUMMARY:Selbolder Lauftreff
+DESCRIPTION:Offener Selbolder Lauftreff!\n\nSchnapp dir das richtige Schuhw
+ erk und komm sonntags um 9:30 Uhr zum Start an die Gründauhalle (Brühlwe
+ g 6). Eine Mitgliedschaft im TVL ist nicht erforderlich\, unterstützt na
+ türlich aber den Verein und das Angebot. Als Einstiegskriterium solltest 
+ du in der Lage sein\, ungefähr 60 Minuten in deinem Tempo zu joggen. Die 
+ Geschwindigkeit richtet sich nach den Teilnehmenden\, gegebenenfalls wird 
+ in unterschiedlichen Geschwindigkeitsgruppen gelaufen.\n\nVerantwortlich i
+ st Ahmed Bulih. Eine vorherige Anmeldung ist nicht nötig\, Rückfragen od
+ er sonstige Informationen sind unter lauftreff@tv1886.de zu erhalten.
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/selb
+ older-lauftreff.webp
+CATEGORIES:Sport,Tourismus/Freizeit
+LOCATION:Gründauhalle\, Brühlweg 6\, Langenselbold\, 63505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Brühlweg 6\, Langenselbold
+ \, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Gründauhalle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2272@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261116T090000
+DTEND;TZID=Europe/Berlin:20261116T120000
+DTSTAMP:20260626T092124Z
+URL:https://langenselbold.de/veranstaltungskalender/beratung-information-r
+ und-um-kindertagespflege-und-kinderbetreuung-2026-06-01-2026-06-08-2026-06
+ -15-2026-06-22-2026-06-29-2026-07-06-2026-07-13-2026-07-20-2026-07-27-2026
+ -08-03-2026-08-1-09-2026-11-16/
+SUMMARY:Beratung & Information rund um Kindertagespflege und Kinderbetreuun
+ g
+DESCRIPTION:Jeden Montag findet im DRK-Familienzentrum in Langenselbold im 
+ FZ Büro (Erdgeschoss) eine Beratung rund um Kindertagespflege und Kinderb
+ etreuung von 9:00 Uhr bis 12:00 Uhr statt.\n\nAnsprechpartnerIn: Frau Fati
+ ma Gad\n\nAnmeldungen unter tagespflege@drk-kita.de oder telefonisch unter
+  der 06184 940 99 75.\n\nWeitere Infos zu den Angeboten des DRK-Familienze
+ ntrums finden sie unter:https://www.drk-kita.de/start/aktuelles/aktuelles/
+ termine-/-veranstaltungen.html
+CATEGORIES:Beratungsangebote,Kinder/Jugend
+LOCATION:DRK Familienzentrum\, Am Bürgerplatz 1\, Langenselbold\, 63505\, 
+ Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Am Bürgerplatz 1\, Langens
+ elbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=DRK Familienzentru
+ m:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2404@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261116T173000
+DTEND;TZID=Europe/Berlin:20261116T190000
+DTSTAMP:20260910T111508Z
+URL:https://langenselbold.de/veranstaltungskalender/digital-auf-draht-vort
+ raege-3/
+SUMMARY:Digital auf Draht - Vorträge
+DESCRIPTION:Fotobuch erstellen
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/IMG_
+ 8402-3-1-scaled.webp
+LOCATION:DRK Familienzentrum Langenselbold\, Am Bürgerplatz 1\, Langenselb
+ old\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Am Bürgerplatz 1\, Langens
+ elbold\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=DRK Familienzentrum Langen
+ selbold:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2315@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261117T141500
+DTEND;TZID=Europe/Berlin:20261117T151500
+DTSTAMP:20260626T152702Z
+URL:https://langenselbold.de/veranstaltungskalender/englisch-iii-fuer-seni
+ oren-2026-06-30-2026-07-07-2026-07-14-2026-07-21-2026-07-28-2026-08-04-202
+ 6-08-11-2026-08-18-2026-08-25-2026-09-01-2026-09-08-2026-09-15-2026-09-22-
+ 2026-09-29-2026-10-2026-11-17/
+SUMMARY:Englisch III für Senioren
+DESCRIPTION:Wöchentlich findet dienstags von 14:15 bis 15:15 Uhr das Angeb
+ ot "Englisch III für Senioren" im DRK-Familienzentrum in Langenselbold (F
+ Z2 im Obergeschoss) statt.\n\nKursleitung: Karin Schwarz-Kögel\n\nEine An
+ meldung erfolgt über die Stadt Langenselbold per Mail über c.stuttmann@l
+ angenselbold.de oder telefonisch über die 06184 80 24 03.\n\nEine Veranst
+ altung in Zusammenarbeit mit dem DRK-Familienzentrum und der Stadt Langens
+ elbold.\nWeitere Angebote des Familienzentrums finden Sie unter: https://w
+ ww.drk-kita.de/start/aktuelles/aktuelles/termine-/-veranstaltungen.html
+CATEGORIES:Senioren
+LOCATION:DRK Familienzentrum\, Am Bürgerplatz 1\, Langenselbold\, 63505\, 
+ Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Am Bürgerplatz 1\, Langens
+ elbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=DRK Familienzentru
+ m:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:1389@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261119T080000
+DTEND;TZID=Europe/Berlin:20261119T130000
+DTSTAMP:20251016T112520Z
+URL:https://langenselbold.de/veranstaltungskalender/langenselbolder-wochen
+ markt-2026-11-19/
+SUMMARY:Langenselbolder Wochenmarkt
+DESCRIPTION:Es ist wieder Markttag in Langenselbold! Jeden Donnerstag im Br
+ ühlweg auf dem Parkplatz an der Gründauhalle von 8 bis 13 Uhr könnt ihr
+  unsere vielfältige Auswahl an frischen Produkten direkt von Händlerinne
+ n und Händler sowie Erzeugerinnen und Erzeuger aus der Region entdecken.\
+ n\nBei unserem Wochenmarkt findet ihr alles für euren heimischen Einkauf!
+  Von herzhaften Fleisch- und Wurstwaren über frisches Geflügel und Fisch
+  bis hin zu Meeresfrüchten\, herrlich duftenden Backwaren und besonderer 
+ Feinkost!\n\nKommt vorbei\, unterstützt lokale Produzentinnen und Produze
+ nten und genießt frische\, hochwertige Produkte! Wir freuen uns auf euch!
+ \n\nAnfahrt:\nBrühlweg\, 63505 Langenselbold
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/FB_I
+ MG_1706979067839-e1707120931153.jpg
+CATEGORIES:Wochenmarkt
+LOCATION:Parkplatz an der Gründauhalle\, Brühlweg\, Langenselbold\, Deuts
+ chland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Brühlweg\, Langenselbold\,
+  Deutschland;X-APPLE-RADIUS=100;X-TITLE=Parkplatz an der Gründauhalle:geo
+ :0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2043@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261119T120000
+DTEND;TZID=Europe/Berlin:20261119T133000
+DTSTAMP:20260313T164157Z
+URL:https://langenselbold.de/veranstaltungskalender/eintopf-mittagstisch-d
+ er-evang-kirchengemeinde-2025-12-25-2026-01-01-2026-01-08-2026-01-15-2026-
+ 01-22-2026-01-29-2026-02-05-2026-02-12-2026-02-19-2026-02-26-2026-03-05-20
+ 26-03-12-2026-03-12-2026-11-19/
+SUMMARY:EinTopf-Mittagstisch der evang. Kirchengemeinde
+DESCRIPTION:Die evangelische Kirchengemeinde bietet einen freundlichen Rahm
+ en für ein gemeinsames Essen an\, das auch die Möglichkeit zu einer anre
+ genden Kommunikation unter den Gästen beinhaltet.\n\nJeder ist herzlich w
+ illkommen und gibt was ihm möglich ist.\n\nDas Katharina-von-Bora-Haus\, 
+ Hinserdorfstr. 2 ist dazu donnerstags von 12 bis 13:30 Uhr für alle Bürg
+ er und Bürgerinnen der Ortsgemeinschaft geöffnet.\n\nBitte melden Sie si
+ ch bis Montagmorgen an unter der Nummer: 06184-2893
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/2024
+ 0207_095405-rotated.jpg
+CATEGORIES:Gastronomie,Kirchen,Senioren
+LOCATION:Katharina-von-Bora-Haus\, Hinserdorfstraße 2a\, Langenselbold\, 6
+ 3505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Hinserdorfstraße 2a\, Lang
+ enselbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Katharina-von-B
+ ora-Haus:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2368@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261119T160000
+DTEND;TZID=Europe/Berlin:20261119T160000
+DTSTAMP:20260818T101432Z
+URL:https://langenselbold.de/veranstaltungskalender/kindertheater-petterss
+ on-und-findus-feuerwerk-fuer-den-fuchs/
+SUMMARY:Kindertheater: Pettersson und Findus – Feuerwerk für den Fuchs
+DESCRIPTION:Pettersson und Findus – Feuerwerk für den Fuchs\n\nAm Donner
+ stag\, 19. November\, sind Pettersson und Findus in der Klosterberghalle L
+ angenselbold zu Gast. Das Theatrium Steinau präsentiert die beliebte Gesc
+ hichte „Pettersson und Findus – Feuerwerk für den Fuchs“ nach den B
+ üchern von Sven Nordqvist.\n\nEin Fuchs treibt sein Unwesen und hat es au
+ f Petterssons Hühner abgesehen. Doch Findus will nicht einfach abwarten\,
+  bis der Fuchs eines Tages zuschlägt. Gemeinsam mit Pettersson schmiedet 
+ er einen Plan\, um dem hungrigen Räuber ein für alle Mal den Appetit auf
+  Hühner zu verderben. Dafür müssen zunächst die etwas durchgeknallten 
+ Hühner überzeugt werden\, ein paar Federn für ein falsches Huhn zu opfe
+ rn. Und damit beginnt ein turbulentes Abenteuer mit jeder Menge verrückte
+ r Ideen\, überraschenden Einfällen und natürlich einem ordentlichen Feu
+ erwerk.\n\nDie Inszenierung des Theatriums Steinau verbindet Figurentheate
+ r mit einer humorvollen und fantasievollen Geschichte und sorgt für beste
+  Unterhaltung für die ganze Familie.\n\nDie Vorstellung beginnt um 16:00 
+ Uhr und dauert rund 55 Minuten. Das Stück ist für Kinder ab 4 Jahren gee
+ ignet.\n\nTermin: Donnerstag\, 19. November 2026\, 16:00 Uhr\nOrt: Kloster
+ berghalle Langenselbold\nEintritt: Kinder ab 4 Jahren 7 €\, Erwachsene 1
+ 0 €\nKinder unter 4 Jahren: Eintritt frei
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/pett
+ erson-und-findus.webp
+CATEGORIES:Kultur,Prominent,Theater,Ticketshop
+LOCATION:Klosterberghalle\, Schloßstraße\, Langenselbold\, Hessen\, 63505
+ \, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schloßstraße\, Langenselb
+ old\, Hessen\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Klosterbergh
+ alle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2222@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261119T191500
+DTEND;TZID=Europe/Berlin:20261119T220000
+DTSTAMP:20260625T152504Z
+URL:https://langenselbold.de/veranstaltungskalender/das-leben-ist-zum-tanz
+ en-da-2-2026-11-19/
+SUMMARY:Das Leben ist zum Tanzen da
+DESCRIPTION:Der TV Langenselbold lädt zum Tanzabend ein!\nTaucht mit uns e
+ in in die Welt des Discofox.\n\nUnser Motto:\n“Das Leben ist zum Tanzen 
+ da!”\nWir laden euch herzlich ein\, mit uns in gemütlicher Atmosphäre 
+ das Tanzbein zu\nschwingen.\nOb jung oder junggeblieben – alle Tanzbegei
+ sterten mit Discofox-Erfahrung sind\nwillkommen!\nAuch Einzeltanzende sind
+  herzlich willkommen und finden bei uns schnell Anschluss.\nIm Vordergrund
+  stehen Spaß\, Rhythmus und gemeinsame Freude am Tanzen.\n\nWann &amp\; W
+ o:\n1. und 3. Donnerstag im Monat\nim Vereinsheim der Gründauhalle – 1.
+  Stock\nBrühlweg 6\, 63505 Langenselbold\ngetanzt wird auf gepflegtem Par
+ kettboden\n19:15 Uhr: kleine Aufwärmeinheit mit einer Discofox-Figur\n19:
+ 30 – 22:00 Uhr: offizieller Tanzabend\n\nKosten:\nMitglieder tanzen grat
+ is.\nGäste sind willkommen für 4\,- Euro.\n\nExtra:\nGetränke-Ausschank
+ \nkleine Knabbereien\nviele kostenlose Parkplätze direkt vor der Halle\nK
+ ommt vorbei\, tanzt mit und verbringt einen unvergesslichen Abend – wir 
+ freuen uns auf\neuch!\n\n100% Das Leben ist zum tanzen da\n100% Tanzabend\
+ n100% TVL\n\n&nbsp\;
+CATEGORIES:Sport,TV Langenselbold
+LOCATION:Vereinsheim der Gründauhalle\, Brühlweg 6\, Langenselbold\, Hess
+ en\, 63505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Brühlweg 6\, Langenselbold
+ \, Hessen\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Vereinsheim der
+  Gründauhalle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2406@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261120T120000
+DTEND;TZID=Europe/Berlin:20261120T133000
+DTSTAMP:20260911T130655Z
+URL:https://langenselbold.de/veranstaltungskalender/selbolder-mittagstisch
+ -2/
+SUMMARY:Selbolder Mittagstisch
+DESCRIPTION:Kostenbeitrag: 4\,50 Euro\nAnmeldung bitte 10 Tage vorher bei K
+ arin Heidecke\, Telefon 06184 62530
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/Kinz
+ igaue-Juli2026-2.webp
+CATEGORIES:Senioren
+LOCATION:Heimatmuseum Langenselbold\, Schloßpark 6\, Langenselbold\, 63505
+ \, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schloßpark 6\, Langenselbo
+ ld\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Heimatmuseum Langensel
+ bold:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2139@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261120T150000
+DTEND;TZID=Europe/Berlin:20261120T180000
+DTSTAMP:20260615T084917Z
+URL:https://langenselbold.de/veranstaltungskalender/repair-cafe-2/
+SUMMARY:Repair-Café
+DESCRIPTION:Reparieren statt wegwerfen!\nWir Reparieren:\n-Kleine Haushalts
+ geräte\n-Gartengeräte (Ohne Kraftstoffe)\n-Elektro-Kleingeräte\n-Spielz
+ eug\n-Fahrräder\n-Rollatoren\n-Und vieles mehr
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/Logo
+ -Repair-Cafe-hohe-Aufloesung-2.webp
+CATEGORIES:Beratungsangebote,Senioren
+LOCATION:Geschäftsstelle der Bürgerhilfe Langenselbold\, Marktplatz 9a\, 
+ Langenselbold\, 63505\, Main-Kinzig-Kreis\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Marktplatz 9a\, Langenselbo
+ ld\, 63505\, Main-Kinzig-Kreis\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Ge
+ schäftsstelle der Bürgerhilfe Langenselbold:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2169@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261121T100000
+DTEND;TZID=Europe/Berlin:20261121T130000
+DTSTAMP:20260625T135957Z
+URL:https://langenselbold.de/veranstaltungskalender/jugend-einsatz-team-je
+ t-der-dlrg-langenselbold-komm-ins-team-4/
+SUMMARY:Jugend-Einsatz-Team (JET) der DLRG Langenselbold: KOMM INS TEAM
+DESCRIPTION:Du bist zwischen 12 und 16 Jahre alt\, hast mindestens das Schw
+ immabzeichen Gold und Lust auf Teamgeist\, Action und jede Menge Neues? Da
+ nn komm in das Jugend-Einsatz-Team der DLRG Ortsgruppe Langenselbold e.V.!
+ \n\nEgal ob du bereits ein Mitglied im Verein bist oder einfach nur mal re
+ inschnuppern möchtest\, hier ist jeder und jeder willkommen!\n\nWas dich 
+ erwartet:\n\n 	Spiel\, Spaß und Action rund um den Wasserrettungsdienst\n
+  	Spannende Einblicke in das Bootswesen und in die Strömungsrettung\n 	Al
+ les rund um Erste Hilfe\, Einsatzfahrzeuge und Rettungsgeräte\n 	Gemeinsa
+ me Ausflüge und coole Aktionen gemeinsam im Team\n\nDie Treffen finden ei
+ nmal im Monat (meistens samstags von 10:00 bis 13:00 Uhr) an wechselnden O
+ rten wie dem Kinzigsee\, dem Freibad oder der Alten Mädchenschule in Lang
+ enselbold statt. Genauere Infos kannst du dem Flyer entnehmen.\n\nZum Schn
+ uppern kannst du dich ganz einfach per E-Mail an jet@langenselbold.dlrg.de
+  anmelden.\n\n&nbsp\;\n\nOrt: Wird rechtzeitig bekannt gegeben.
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/dlrg
+ -komm-ins-team.webp
+CATEGORIES:Kinzigsee,Sport
+END:VEVENT
+BEGIN:VEVENT
+UID:2059@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261121T170000
+DTEND;TZID=Europe/Berlin:20261121T210000
+DTSTAMP:20260420T103118Z
+URL:https://langenselbold.de/veranstaltungskalender/1-nachtflohmarkt-koste
+ rberghalle-langenselbold/
+SUMMARY:1. Nachtflohmarkt - Kosterberghalle Langenselbold
+DESCRIPTION:1.NACHTFLOHMARKT LANGENSELBOLD\nDESIGN · HANDMADE · FASHION 
+ · TRÖDEL · MUSIC &amp\; DRINKS\n\nWir freuen uns sehr\, euch mitteilen 
+ zu können\, dass wir mit der Klosterberghalle in Langenselbold eine weite
+ re Location für unseren beliebten Nachtflohmarkt dazugewinnen konnten!\n\
+ nMeldet euch gerne schon im Facebook-Event an\, damit ihr keine Neuigkeite
+ n und Updates verpasst.\n\nAuch an diesem Standort bleibt unser Konzept be
+ stehen:\nWir legen großen Wert auf einen ausgewogenen Mix aus kreativem D
+ esign- und Handmade-Markt mit besonderen Ausstellerinnen und Ausstellern a
+ us den Bereichen Schmuck\, Handmade\, Design und vielen weiteren kreativen
+  Ideen.\nGleichzeitig sind auch Privatpersonen herzlich willkommen\, die g
+ ut erhaltene Kleidung\, Trödel oder besondere Fundstücke anbieten möcht
+ en\, damit diese ein neues Zuhause finden.\n\nUnser Markt lebt von dieser 
+ Mischung aus Kreativität\, individuellen Stücken und persönlichen Liebl
+ ingsdingen.\n\nWichtig bleibt dabei: KEINE Neuware und KEINE Fake-Artikel!
+ \n--------------------------------------------------------\nStandgebühr:\
+ n12\,00€ pro Meter (Mindestgröße 2 Meter)\nZusätzlich bieten wir die 
+ Möglichkeit Tische anzumieten.\nNatürlich kann jeder auch kostenlos eige
+ ne Tisch mitbringen!\nUnsere Tische haben eine Größe von: 130 x 65 cm un
+ d kosten 3\,00€ pro Stück.\nEinfach im Anmeldeformular entsprechend aus
+ wählen.\n--------------------------------------------------------\nANMELD
+ UNG AB 24.10.2026 NUR HIER MÖGLICH:\nwww.fab-city.de\n-------------------
+ -------------------------------------\nFACTS:\nFreitag\, 21.11.2026\nBesuc
+ hereinlass ab 17:00 Uhr - Ende: 21:00 Uhr\nEintritt: 3 EUR\nKlosterberghal
+ le\nSchloßstraße\n63505 Langenselbold
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/1NFM
+ _LANGENSELBOLD_klein.webp
+CATEGORIES:Flohmarkt
+LOCATION:Klosterberghalle Langenselbold\, Schlossstraße\, Langenselbold\, 
+ Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Schlossstraße\, Langenselb
+ old\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Klosterberghalle Langenselbol
+ d:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2206@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261122T093000
+DTEND;TZID=Europe/Berlin:20261122T103000
+DTSTAMP:20261029T110905Z
+URL:https://langenselbold.de/veranstaltungskalender/selbolder-lauftreff/
+SUMMARY:Selbolder Lauftreff
+DESCRIPTION:Offener Selbolder Lauftreff!\n\nSchnapp dir das richtige Schuhw
+ erk und komm sonntags um 9:30 Uhr zum Start an die Gründauhalle (Brühlwe
+ g 6). Eine Mitgliedschaft im TVL ist nicht erforderlich\, unterstützt na
+ türlich aber den Verein und das Angebot. Als Einstiegskriterium solltest 
+ du in der Lage sein\, ungefähr 60 Minuten in deinem Tempo zu joggen. Die 
+ Geschwindigkeit richtet sich nach den Teilnehmenden\, gegebenenfalls wird 
+ in unterschiedlichen Geschwindigkeitsgruppen gelaufen.\n\nVerantwortlich i
+ st Ahmed Bulih. Eine vorherige Anmeldung ist nicht nötig\, Rückfragen od
+ er sonstige Informationen sind unter lauftreff@tv1886.de zu erhalten.
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/selb
+ older-lauftreff.webp
+CATEGORIES:Sport,Tourismus/Freizeit
+LOCATION:Gründauhalle\, Brühlweg 6\, Langenselbold\, 63505\, Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Brühlweg 6\, Langenselbold
+ \, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Gründauhalle:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2273@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261123T090000
+DTEND;TZID=Europe/Berlin:20261123T120000
+DTSTAMP:20260626T092124Z
+URL:https://langenselbold.de/veranstaltungskalender/beratung-information-r
+ und-um-kindertagespflege-und-kinderbetreuung-2026-06-01-2026-06-08-2026-06
+ -15-2026-06-22-2026-06-29-2026-07-06-2026-07-13-2026-07-20-2026-07-27-2026
+ -08-03-2026-08-1-16-2026-11-23/
+SUMMARY:Beratung & Information rund um Kindertagespflege und Kinderbetreuun
+ g
+DESCRIPTION:Jeden Montag findet im DRK-Familienzentrum in Langenselbold im 
+ FZ Büro (Erdgeschoss) eine Beratung rund um Kindertagespflege und Kinderb
+ etreuung von 9:00 Uhr bis 12:00 Uhr statt.\n\nAnsprechpartnerIn: Frau Fati
+ ma Gad\n\nAnmeldungen unter tagespflege@drk-kita.de oder telefonisch unter
+  der 06184 940 99 75.\n\nWeitere Infos zu den Angeboten des DRK-Familienze
+ ntrums finden sie unter:https://www.drk-kita.de/start/aktuelles/aktuelles/
+ termine-/-veranstaltungen.html
+CATEGORIES:Beratungsangebote,Kinder/Jugend
+LOCATION:DRK Familienzentrum\, Am Bürgerplatz 1\, Langenselbold\, 63505\, 
+ Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Am Bürgerplatz 1\, Langens
+ elbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=DRK Familienzentru
+ m:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2316@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261124T141500
+DTEND;TZID=Europe/Berlin:20261124T151500
+DTSTAMP:20260626T152702Z
+URL:https://langenselbold.de/veranstaltungskalender/englisch-iii-fuer-seni
+ oren-2026-06-30-2026-07-07-2026-07-14-2026-07-21-2026-07-28-2026-08-04-202
+ 6-08-11-2026-08-18-2026-08-25-2026-09-01-2026-09-08-2026-09-15-2026-09-22-
+ 2026-09-29-2026-17-2026-11-24/
+SUMMARY:Englisch III für Senioren
+DESCRIPTION:Wöchentlich findet dienstags von 14:15 bis 15:15 Uhr das Angeb
+ ot "Englisch III für Senioren" im DRK-Familienzentrum in Langenselbold (F
+ Z2 im Obergeschoss) statt.\n\nKursleitung: Karin Schwarz-Kögel\n\nEine An
+ meldung erfolgt über die Stadt Langenselbold per Mail über c.stuttmann@l
+ angenselbold.de oder telefonisch über die 06184 80 24 03.\n\nEine Veranst
+ altung in Zusammenarbeit mit dem DRK-Familienzentrum und der Stadt Langens
+ elbold.\nWeitere Angebote des Familienzentrums finden Sie unter: https://w
+ ww.drk-kita.de/start/aktuelles/aktuelles/termine-/-veranstaltungen.html
+CATEGORIES:Senioren
+LOCATION:DRK Familienzentrum\, Am Bürgerplatz 1\, Langenselbold\, 63505\, 
+ Deutschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Am Bürgerplatz 1\, Langens
+ elbold\, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=DRK Familienzentru
+ m:geo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:2398@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261125T083000
+DTEND;TZID=Europe/Berlin:20261125T093000
+DTSTAMP:20260910T105530Z
+URL:https://langenselbold.de/veranstaltungskalender/handytreff-3/
+SUMMARY:Handytreff
+DESCRIPTION:Schülerinnen und Schülern erklären das Handy.\nohne Anmeldun
+ g\nTreffpunkt ist am Haupteingang der Käthe-Kollwitz Schule
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/IMG_
+ 8399-3.webp
+LOCATION:Käthe-Kollwitz-Schule\, Ringstr. 55\, Langenselbold\, 63505\, Deu
+ tschland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Ringstr. 55\, Langenselbold
+ \, 63505\, Deutschland;X-APPLE-RADIUS=100;X-TITLE=Käthe-Kollwitz-Schule:g
+ eo:0,0
+END:VEVENT
+BEGIN:VEVENT
+UID:1390@langenselbold.de
+DTSTART;TZID=Europe/Berlin:20261126T080000
+DTEND;TZID=Europe/Berlin:20261126T130000
+DTSTAMP:20251016T112520Z
+URL:https://langenselbold.de/veranstaltungskalender/langenselbolder-wochen
+ markt-2026-11-26/
+SUMMARY:Langenselbolder Wochenmarkt
+DESCRIPTION:Es ist wieder Markttag in Langenselbold! Jeden Donnerstag im Br
+ ühlweg auf dem Parkplatz an der Gründauhalle von 8 bis 13 Uhr könnt ihr
+  unsere vielfältige Auswahl an frischen Produkten direkt von Händlerinne
+ n und Händler sowie Erzeugerinnen und Erzeuger aus der Region entdecken.\
+ n\nBei unserem Wochenmarkt findet ihr alles für euren heimischen Einkauf!
+  Von herzhaften Fleisch- und Wurstwaren über frisches Geflügel und Fisch
+  bis hin zu Meeresfrüchten\, herrlich duftenden Backwaren und besonderer 
+ Feinkost!\n\nKommt vorbei\, unterstützt lokale Produzentinnen und Produze
+ nten und genießt frische\, hochwertige Produkte! Wir freuen uns auf euch!
+ \n\nAnfahrt:\nBrühlweg\, 63505 Langenselbold
+ATTACH;FMTTYPE=image/jpeg:https://langenselbold.de/wp-content/uploads/FB_I
+ MG_1706979067839-e1707120931153.jpg
+CATEGORIES:Wochenmarkt
+LOCATION:Parkplatz an der Gründauhalle\, Brühlweg\, Langenselbold\, Deuts
+ chland
+X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-ADDRESS=Brühlweg\, Langenselbold\,
+  Deutschland;X-APPLE-RADIUS=100;X-TITLE=Parkplatz an der Gründauhalle:geo
+ :0,0
+END:VEVENT
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+X-LIC-LOCATION:Europe/Berlin
+BEGIN:STANDARD
+DTSTART:20261025T020000
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+END:STANDARD
+END:VTIMEZONE
+END:VCALENDAR

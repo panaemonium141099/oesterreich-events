@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/steaming-satellites-posthof-21024842/?affiliate=J70",
   "publishDate": "2026-09-19",
   "updatedDate": "2026-09-19",
+  "factSources": {
+    "checkedAt": "2026-09-19",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/steaming-satellites-posthof-21024842/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Steaming Satellites spielen am 23. Oktober 2026 im Mittleren Saal des Posthof Linz. Als Support kommen Like Elephants, ein Mitschnitt des Abends läuft danach auf ORF Radio Oberösterreich.",
   "category": "Musik & Festival",

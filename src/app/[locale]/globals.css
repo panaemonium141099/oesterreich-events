@@ -307,8 +307,15 @@ body {
   from { transform: translate3d(0, 0, 0); }
   to   { transform: translate3d(0, 100%, 0); }
 }
+/* Füllmodus `backwards`, nicht `both`: mit `both` bliebe nach der
+   Einblendung dauerhaft `transform: translate3d(0,0,0)` am Sheet stehen,
+   und ein transformiertes Element wird zum Bezugsrahmen für
+   `position: fixed`-Nachfahren. Die Ticketleiste des Event-Sheets
+   (V4MobileStickyBar) klebte so nicht mehr am Viewport, sondern scrollte
+   im Sheet mit nach oben (Mobile-Audit 2026-10-22). Der Endzustand ist
+   ohnehin „kein Transform“. */
 [data-sheet-state='open'] {
-  animation: sheet-slide-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: sheet-slide-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 [data-sheet-state='closed'] {
   animation: sheet-slide-out 0.22s cubic-bezier(0.7, 0, 0.84, 0) both;
@@ -323,7 +330,7 @@ body {
      pair below. */
   [data-sheet-state='open'] {
     animation: none;
-    transform: translate3d(0, 0, 0);
+    transform: none;
   }
   [data-sheet-state='closed'] {
     animation: none;
@@ -1090,4 +1097,26 @@ button:active, a:active, [role="button"]:active {
   --v4-match:            #f5b942;
   --v4-go:               #7bb794;
   --v4-alert:            #c67079;
+}
+
+/* /entdecken Poster-Raster (Variante „Regale", 2026-10-22) */
+.v4-poster-grid {
+  display: grid;
+  gap: 18px 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 720px) { .v4-poster-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .v4-poster-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+/* Regal-Spur (Shelf, shelf-ui.tsx; fn-30.8): endet an der Inhaltskante, kein
+   Überhang. Der Fokusring liegt innen, weil der Scroll-Container ihn am
+   linken und rechten Rand sonst abschneidet. Auf dem Handy zeigt ein Verlauf
+   am rechten Rand, dass rechts noch Karten liegen (data-more setzt die
+   Komponente, solange die Spur weiter scrollt); der Desktop hat die Pfeile. */
+.v4-shelf-track > :focus-visible { outline-offset: -3px; }
+@media (max-width: 767px) {
+  .v4-shelf-track[data-more] {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent);
+  }
 }

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- generator="Joomla! - Open Source Content Management - Version 6.2.0" -->
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>RSS Feed für Schönwalde a.B.</title>
+		<description><![CDATA[Feeds aus der Website Schoenwalde-am-Bungsberg.com]]></description>
+		<link>https://www.schoenwalde-am-bungsberg.com</link>
+		<lastBuildDate>Thu, 29 Oct 2026 19:56:51 +0100</lastBuildDate>
+		<generator>Joomla! - Open Source Content Management - Version 6.2.0</generator>
+		<atom:link rel="self" type="application/rss+xml" href="https://www.schoenwalde-am-bungsberg.com/index.php/termine/modlatest_rss/rss/372?format=feed"/>
+		<image>
+			<url>https://www.schoenwalde-am-bungsberg.com/components/com_jevents/assets/images/JeventsTransparent.png</url>
+			<title>RSS Feed für Schönwalde a.B.</title>
+			<link>https://www.schoenwalde-am-bungsberg.com/</link>
+			<description><![CDATA[Feeds aus der Website Schoenwalde-am-Bungsberg.com]]></description>
+		</image>
+		<language>de-de</language>
+		<item>
+			<title>02.11.2026 09:30 Uhr : Bewegung im Alter</title>
+			<link>https://www.schoenwalde-am-bungsberg.com/index.php/termine/eventdetail/944/31/bewegung-im-alter</link>
+			<guid isPermaLink="true">https://www.schoenwalde-am-bungsberg.com/index.php/termine/eventdetail/944/31/bewegung-im-alter</guid>
+			<description><![CDATA[]]></description>
+			<category>Veranstaltungen</category>
+			<pubDate>Sat, 29 Nov 2025 12:31:38 +0100</pubDate>
+		</item>
+		<item>
+			<title>02.11.2026 10:30 Uhr : Seniorengymnastik</title>
+			<link>https://www.schoenwalde-am-bungsberg.com/index.php/termine/eventdetail/896/31/seniorengymnastik</link>
+			<guid isPermaLink="true">https://www.schoenwalde-am-bungsberg.com/index.php/termine/eventdetail/896/31/seniorengymnastik</guid>
+			<description><![CDATA[]]></description>
+			<category>Veranstaltungen</category>
+			<pubDate>Sat, 29 Nov 2025 12:28:00 +0100</pubDate>
+		</item>
+		<item>
+			<title>05.11.2026 14:00 Uhr : Seniorenkaffee</title>
+			<link>https://www.schoenwalde-am-bungsberg.com/index.php/termine/eventdetail/817/31/seniorenkaffee</link>
+			<guid isPermaLink="true">https://www.schoenwalde-am-bungsberg.com/index.php/termine/eventdetail/817/31/seniorenkaffee</guid>
+			<description><![CDATA[]]></description>
+			<category>Veranstaltungen</category>
+			<pubDate>Fri, 28 Nov 2025 22:03:13 +0100</pubDate>
+		</item>
+	</channel>
+</rss>

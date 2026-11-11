@@ -96,6 +96,14 @@ function buildFestivalInsert(entry: SeedRegistryEntry): FestivalInsert {
     lineup_hash: null,
     lineup_last_checked_at: null,
     parent_event_id: null, // set by parent-event linking below
+    // Kuratierte Felder kommen aus data/festivals-upcoming.json
+    // (import-upcoming-festivals.ts), nicht aus der mica-Registry.
+    ticket_url: null,
+    price_text: null,
+    description: null,
+    image_url: null,
+    date_status: 'confirmed',
+    seed_updated_at: null,
   };
 }
 

@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/robert-stadlober-rosentalroz-festival-wallfahrtskirche-maria-rain-22034136/?affiliate=J70",
   "publishDate": "2026-09-20",
   "updatedDate": "2026-09-20",
+  "factSources": {
+    "checkedAt": "2026-09-20",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/robert-stadlober-rosentalroz-festival-wallfahrtskirche-maria-rain-22034136/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 1. November 2026 eröffnet Robert Stadlober das Rosental/Rož Festival: ein Tucholsky-Abend mit Akkordeonist Daniel Moheit in der barocken Wallfahrtskirche Maria Rain. Tickets ab 33 Euro.",
   "category": "Kultur & Bühne",

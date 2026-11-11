@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/winter-festival-2026-magic-world-vienna-22102279/?affiliate=J70",
   "publishDate": "2026-10-17",
   "updatedDate": "2026-10-17",
+  "factSources": {
+    "checkedAt": "2026-10-17",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/winter-festival-2026-magic-world-vienna-22102279/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Zwischen Weihnachten und Silvester wird der Prater magisch: Beim Winter Festival der Magic World Vienna zeigen Stars aus Frankreich, Japan und Österreich Mentalismus, Close-up und Comedy-Magie.",
   "category": "Kultur & Bühne",

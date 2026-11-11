@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/wiener-mozart-konzert-im-musikverein-wiener-mozart-konzert-musikverein-musikverein-wien-20939827/?affiliate=J70",
   "publishDate": "2026-09-05",
   "updatedDate": "2026-09-05",
+  "factSources": {
+    "checkedAt": "2026-09-05",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/wiener-mozart-konzert-im-musikverein-wiener-mozart-konzert-musikverein-musikverein-wien-20939827/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Erleben Sie am 23. September 2026 einen unvergesslichen Abend im prächtigen Goldenen Saal des Musikvereins. Das Wiener Mozart Orchester entführt Sie in die Welt Mozarts – komplett mit historischen Kostümen und Perücken.",
   "category": "Kultur & Bühne",

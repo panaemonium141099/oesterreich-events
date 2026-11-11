@@ -1,0 +1,6 @@
+[Unit]
+Description=Traffic-Audit: Bot-Signaturen in analytics_events, Cloudflare-auto-Regel, Bericht per Mail
+After=docker.service
+[Service]
+Type=oneshot
+ExecStart=/opt/app/traffic-audit.py --mail

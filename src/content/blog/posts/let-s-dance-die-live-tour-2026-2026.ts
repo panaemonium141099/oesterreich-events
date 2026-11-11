@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/lets-dance-lets-dance-die-live-tour-2026-wiener-stadthalle-halle-d-21419134/?affiliate=J70",
   "publishDate": "2026-10-01",
   "updatedDate": "2026-10-01",
+  "factSources": {
+    "checkedAt": "2026-10-01",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/lets-dance-lets-dance-die-live-tour-2026-wiener-stadthalle-halle-d-21419134/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Die Live-Tour zur RTL-Tanzshow beendet ihre Reise in Wien: Am 7. und 8. Dezember 2026 tanzen Promis und Profis in der Wiener Stadthalle. Alle Infos zu Lineup, Tickets und Anreise.",
   "category": "Kultur & Bühne",

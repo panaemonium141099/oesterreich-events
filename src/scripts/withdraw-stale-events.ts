@@ -16,6 +16,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { fetchAllRows, forEachPage } from '../lib/db/fetch-all';
 import { planWithdrawals, probeGone, WITHDRAWABLE_STATUSES, type SightingRow } from '../lib/quality/withdrawal';
+import { forCountry, pipelineCountry } from '../lib/pipeline/pipeline-country';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -37,12 +38,14 @@ async function main() {
   // heute laufendes Event noch als Sichtung zählt.
   const since = new Date(now.getTime() - 86_400_000).toISOString();
   const rows: SightingRow[] = [];
+  // Im getrennten Lauf nur das eigene Land (pipeline-country.ts).
+  const country = pipelineCountry();
   await forEachPage<SightingRow>(
     (from, to) =>
-      supabase
+      forCountry(supabase
         .from('events')
-        .select('id, source_name, source_url, title, start_date, created_at, last_seen_at, publish_status, duplicate_of')
-        .gte('start_date', since)
+        .select('id, source_name, source_url, title, start_date, created_at, last_seen_at, publish_status, duplicate_of, country')
+        .gte('start_date', since), country)
         .order('id')
         .range(from, to),
     (page) => { rows.push(...page); },
@@ -68,7 +71,16 @@ async function main() {
   const lastSeen = new Map(rows.map((r) => [r.id, r.last_seen_at ?? '']));
   const candidates = [...plan.probe].sort((a, b) => (lastSeen.get(a.id)! < lastSeen.get(b.id)! ? -1 : 1));
   const checked = candidates.slice(0, PROBE_BUDGET);
-  const gone = await probeGone(checked.map((c) => c.url), { budget: PROBE_BUDGET });
+  // Österreich wie bisher; andere Länder (DE-Gemeinde-Adapter, fn-29.18) nur
+  // mit robots.txt, Crawl-delay und höchstens 30 Abrufen je Website.
+  const countryOf = new Map(rows.map((r) => [r.id, r.country ?? 'AT']));
+  const atUrls = checked.filter((c) => countryOf.get(c.id) === 'AT').map((c) => c.url);
+  const otherUrls = checked.filter((c) => countryOf.get(c.id) !== 'AT').map((c) => c.url);
+  const [goneAt, goneOther] = await Promise.all([
+    probeGone(atUrls, { budget: PROBE_BUDGET }),
+    probeGone(otherUrls, { budget: PROBE_BUDGET, respectRobots: true, maxPerHost: 30, hostDelayMs: 1000 }),
+  ]);
+  const gone = new Set([...goneAt, ...goneOther]);
   const confirmed = checked.filter((c) => gone.has(c.url));
   const withdraw = [...plan.withdraw, ...confirmed];
 

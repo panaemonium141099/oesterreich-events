@@ -8,6 +8,7 @@ import { BlogTicketBox } from '@/components/Blog/BlogTicketBox';
 import { TourBox } from '@/components/Affiliate/TourBox';
 import { BlogStayBox } from '@/components/Blog/BlogStayBox';
 import { BlogStayList } from '@/components/Blog/BlogStayList';
+import BlogProse from '@/components/Blog/BlogProse';
 import { RelatedEvents } from '@/components/Blog/RelatedEvents';
 import { AdSlot } from '@/components/Ads/AdSlot';
 // AdSlot removed in fn-15.4 — Google AdSense was pulled completely (property
@@ -378,6 +379,19 @@ export default async function BlogPostPage({
             </div>
           )}
 
+          {/* Bildnachweis (Pflicht bei CC-Lizenzen und Pressebildern): klein
+              unten rechts im Hero, unter der Navigation und unter dem
+              Textblock. Stand bis 2026-10-26 in 143 Posts, wurde aber
+              nirgends gerendert. */}
+          {post.heroImageCredit && (
+            <p
+              className="absolute bottom-2 right-4 z-10 max-w-[70%] text-right text-[10px] leading-snug text-white/60 [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]"
+              data-blog-hero-credit
+            >
+              {post.heroImageCredit}
+            </p>
+          )}
+
           {/* Back nav */}
           <div className="absolute top-8 left-8 z-10">
             <Link
@@ -426,7 +440,7 @@ export default async function BlogPostPage({
               </p>
               <div className="flex items-center gap-3 mt-5 text-white/40 text-xs uppercase tracking-wider">
                 <span>{post.keyFacts.dates}</span>
-                <span>—</span>
+                <span aria-hidden="true">·</span>
                 <span>{post.keyFacts.location}</span>
               </div>
             </div>
@@ -506,8 +520,30 @@ export default async function BlogPostPage({
             <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-5">
               {post.historyTitle}
             </h2>
-            <p className="text-gray-600 leading-relaxed text-lg">{post.history}</p>
+            <BlogProse text={post.history} />
           </section>
+
+          {/* Fun Facts — belegte Kuriositäten, nur wenn der Post welche hat */}
+          {post.funFacts && post.funFacts.length > 0 && (
+            <section className="mb-14" data-blog-section="fun-facts">
+              <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-5">
+                Fun Facts
+              </h2>
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {post.funFacts.map((fact, i) => (
+                  <li
+                    key={i}
+                    className="rounded-xl border border-gray-100 bg-gray-50 px-5 py-4 text-gray-700 leading-relaxed"
+                  >
+                    <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-1.5">
+                      Wusstest du?
+                    </span>
+                    {fact}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {/* Lineup */}
           {post.lineup && post.lineup.length > 0 && (
@@ -588,7 +624,7 @@ export default async function BlogPostPage({
             <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-5">
               {post.whatToExpectTitle}
             </h2>
-            <p className="text-gray-600 leading-relaxed text-lg mb-6">{post.whatToExpect}</p>
+            <BlogProse text={post.whatToExpect} className="mb-6" />
             <ul className="space-y-3">
               {post.whatToExpectList.map((item, i) => (
                 <li key={i} className="flex items-start gap-4 text-gray-700">

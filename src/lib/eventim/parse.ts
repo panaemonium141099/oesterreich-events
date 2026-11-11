@@ -1,6 +1,6 @@
 import type { ScrapedEvent } from '@/types/events';
 import { demotePlaceholderCoords } from '@/lib/scrapers/source-coords-policy';
-import type { EventimSeries, EventimEvent } from './types';
+import type { EventimSeries, EventimEvent, EventimArtist } from './types';
 import { mapEventimCategory } from './category-map';
 import { isBookable, isCancelled, notBookableReason, priceText } from './availability';
 import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
@@ -41,16 +41,50 @@ export interface NotBookableEntry {
 
 export type NotBookableStats = Record<string, NotBookableEntry>;
 
+/**
+ * Serien-Künstler je Event (fn-30), Schlüssel = `source_id` (Feed-eventId).
+ * Nebenergebnis des Parsers: `ScrapedEvent` und damit `rawContentHash`
+ * (raw-persist.ts) bleiben unverändert; der Import schreibt die Künstler
+ * getrennt in `event_artists`.
+ */
+export type EventimArtistsByEvent = Map<string, EventimArtist[]>;
+
+/**
+ * Künstler einer Serie, wie der Import sie speichert: ohne leere Namen,
+ * ohne leere IDs (Primärschlüssel), je ID einmal.
+ */
+export function seriesArtists(s: EventimSeries): EventimArtist[] {
+  const out: EventimArtist[] = [];
+  const seen = new Set<string>();
+  for (const a of s.artists ?? []) {
+    const artistId = typeof a.artistId === 'string' ? a.artistId.trim() : '';
+    const artistName = typeof a.artistName === 'string' ? a.artistName.trim() : '';
+    if (!artistId || !artistName || seen.has(artistId)) continue;
+    seen.add(artistId);
+    out.push({
+      artistId,
+      artistName,
+      artistImage: a.artistImage?.trim() || undefined,
+      evoLink: a.evoLink?.trim() || undefined,
+    });
+  }
+  return out;
+}
+
 export function parseEventimFeed(
   series: EventimSeries[],
   nowIso: string,
   /** Wird, wenn uebergeben, mit der Ursachen-Zaehlung befuellt. */
   notBookable?: NotBookableStats,
+  /** Wird, wenn uebergeben, je uebernommenem Event mit den Serien-Kuenstlern
+   *  befuellt (Serien ohne Kuenstler liefern keinen Eintrag). */
+  artists?: EventimArtistsByEvent,
 ): ScrapedEvent[] {
   const out: ScrapedEvent[] = [];
   for (const s of series) {
     const { category, tags } = mapEventimCategory((s.esCategories ?? []).map((c) => c.category));
     const description = stripHtml(s.esText);
+    const lineup = artists ? seriesArtists(s) : [];
     for (const e of s.events ?? []) {
       if (String(e.eventType) !== '1') continue; // ticket events only
       if (isCancelled(e)) continue;
@@ -66,6 +100,7 @@ export function parseEventimFeed(
         }
       }
       out.push(mapEvent(s, e, category, tags, description));
+      if (artists && lineup.length > 0) artists.set(e.eventId, lineup);
     }
   }
   // fn-25: Stadtmittelpunkte, die der Feed als Venue-Koordinate vieler

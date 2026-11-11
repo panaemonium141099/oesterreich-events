@@ -3,10 +3,10 @@ import { render, screen } from '@testing-library/react';
 import { V4EntdeckenHero } from '@/components/Discover/v4/V4EntdeckenHero';
 
 describe('V4EntdeckenHero', () => {
-  it('renders eyebrow + headline + sub', () => {
+  it('renders headline + date line', () => {
     render(<V4EntdeckenHero mode="list" onModeChange={vi.fn()}/>);
-    expect(screen.getByText(/entdecken/i)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/entdecken/i);
+    expect(screen.getByText(/ganz Österreich/)).toBeInTheDocument();
   });
 
   it('mounts V4EntdeckenTabs', () => {

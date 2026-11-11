@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-30-startseite-als-tagesausgabe-tipp-des",
+  "created_at": "2026-10-29T19:24:25.792503Z",
+  "depends_on_epics": [],
+  "id": "fn-30-startseite-als-tagesausgabe-tipp-des",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-30-startseite-als-tagesausgabe-tipp-des.md",
+  "status": "open",
+  "title": "Startseite als Tagesausgabe (Tipp des Tages, Saison, Karte, K\u00fcnstler live)",
+  "updated_at": "2026-10-29T19:48:26.896483Z"
+}

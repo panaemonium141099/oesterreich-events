@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/viktor-frankl-und-der-tod-viktor-frankl-museum-21717524/?affiliate=J70",
   "publishDate": "2026-10-10",
   "updatedDate": "2026-10-10",
+  "factSources": {
+    "checkedAt": "2026-10-10",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/viktor-frankl-und-der-tod-viktor-frankl-museum-21717524/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Wie blickte Viktor Frankl auf Tod und Endlichkeit? Eine Schwerpunktführung im Viktor Frankl Museum Wien sucht am 12. Dezember Antworten, dort, wo der Begründer der Logotherapie bis 1997 lebte.",
   "category": "Kultur & Tradition",

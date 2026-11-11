@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/imperial-gala-concert-palais-auersperg-21760965/?affiliate=J70",
   "publishDate": "2026-08-29",
   "updatedDate": "2026-08-29",
+  "factSources": {
+    "checkedAt": "2026-08-29",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/imperial-gala-concert-palais-auersperg-21760965/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Erleben Sie das Imperial Gala Concert im prunkvollen Palais Auersperg in Wien. Tauchen Sie ein in eine Welt aus klassischer Musik, beeindruckendem Gesang und elegantem Ballett, umgeben von imperialer Eleganz und historischem Flair.",
   "category": "Kultur & Bühne",

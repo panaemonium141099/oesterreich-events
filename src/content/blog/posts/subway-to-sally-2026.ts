@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/subway-to-sally-simm-city-festsaal-zentrum-simmering-21038938/?affiliate=J70",
   "publishDate": "2026-09-02",
   "updatedDate": "2026-09-02",
+  "factSources": {
+    "checkedAt": "2026-09-02",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/subway-to-sally-simm-city-festsaal-zentrum-simmering-21038938/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Tauchen Sie ein in die faszinierende Welt von Subway To Sally! Die deutsche Mittelalter-Metal-Band präsentiert in Wien ihr neues Album 'Post Mortem' sowie ihre größten Hits. Ein unvergesslicher Abend voller Energie erwartet Sie.",
   "category": "Musik & Festival",

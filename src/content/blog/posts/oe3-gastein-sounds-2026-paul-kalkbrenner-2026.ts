@@ -14,6 +14,13 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/event/oe3-gastein-sounds-2026-schlossalmbahn-bad-hofgastein-22031469/?affiliate=J70",
   "publishDate": "2026-09-29",
   "updatedDate": "2026-09-29",
+  "factSources": {
+    "checkedAt": "2026-09-29",
+    "urls": [
+      "https://www.gastein.com/erlebnisse-events/veranstaltungen/top-events/gastein-sounds/",
+      "https://www.oeticket.com/event/oe3-gastein-sounds-2026-schlossalmbahn-bad-hofgastein-22031469/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Am 12. Dezember 2026 bringt Paul Kalkbrenner seinen Live-Techno nach Bad Hofgastein. Mit Möwe und Anna Ullrich wird Ö3 Gastein Sounds zur großen Party zum Ski-Opening der Region Gastein.",
   "category": "Musik & Festival",

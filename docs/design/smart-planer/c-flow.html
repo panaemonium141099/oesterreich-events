@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Planer – Variante C: Chat bleibt, Antworten sind Regale</title>
+<link rel="stylesheet" href="base.css">
+<style>
+.chat{max-width:900px;margin:0 auto;padding-bottom:150px}
+.turn{margin:22px 0 0;display:flex;flex-direction:column}
+.turn.user{align-items:flex-end}
+.bubble{max-width:85%;padding:11px 16px;border-radius:18px 18px 4px 18px;background:var(--elev2);border:1px solid var(--h2);font-size:15px;line-height:1.45}
+.bubble.chip-origin{font-size:13px;color:var(--ink70)}
+.chat,.turn{min-width:0}
+.ans .skel{overflow:hidden}
+.ans{width:100%;max-width:100%;min-width:0;border-radius:18px;border:1px solid rgba(245,185,66,.22);background:rgba(245,185,66,.04);padding:14px 16px 16px}
+.ans .who{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ans .who .av{width:24px;height:24px;border-radius:50%;background:var(--amber);color:#0a0a0c;display:grid;place-items:center;font-weight:800;font-size:11px}
+.ans .who span{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--amber)}
+.ans .who .meta{margin-left:auto;font-size:11.5px;color:var(--ink30);letter-spacing:0;text-transform:none;font-weight:500}
+.ans p{margin:0;font-size:14.5px;line-height:1.5}
+.ans p b{color:var(--amber)}
+.ans .understood{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0}
+.ans .understood .chip{padding:4px 9px;font-size:11.5px;background:var(--elev2);border-color:transparent;color:var(--ink70)}
+.ans .shelf{margin:16px 0 0}
+.ans .shelf h2{font-size:15px}
+.ans .track{margin:0;padding:4px 0 6px;scroll-padding-left:0}
+.ans .ev{flex-basis:168px}
+.ans .ev h3{font-size:13px}
+.ans .ev .why{font-size:11px}
+.ans .follow{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid rgba(245,185,66,.14)}
+.ans .follow .lbl{width:100%;margin-bottom:2px}
+.ans .follow .chip{padding:6px 11px;font-size:12.5px}
+/* Streaming-Zustand: Karten kommen vor dem Text */
+.ans.loading .skel{display:flex;gap:10px;margin-top:12px}
+.ans.loading .skel i{flex:0 0 168px;aspect-ratio:1;border-radius:12px;background:linear-gradient(90deg,var(--elev2),var(--elev),var(--elev2));background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.ans.loading .state{font-size:12.5px;color:var(--ink50);display:flex;gap:8px;align-items:center;margin-top:6px}
+.ans.loading .state b{width:8px;height:8px;border-radius:50%;background:var(--amber);animation:pu 1s infinite}
+@keyframes pu{50%{opacity:.3}}
+/* Composer unten, Timeline-Leiste darüber */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:30;background:linear-gradient(180deg,rgba(10,10,12,0),rgba(10,10,12,.96) 30%);padding:28px 0 14px}
+.dock .in{max-width:900px;margin:0 auto;padding:0 56px}
+@media(max-width:720px){.dock .in{padding:0 12px}}
+.plan{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 12px;border-radius:14px;background:var(--elev);border:1px solid var(--h3);margin-bottom:8px}
+.plan .av{display:flex}.plan .av img{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--elev);margin-left:-9px}.plan .av img:first-child{margin:0}
+.plan b{font-size:13px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plan b span{color:var(--ink50);font-weight:500}
+.composer{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 16px;border-radius:999px;background:var(--elev);border:1px solid var(--h3)}
+.composer input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--ink);font:500 15px Inter,system-ui,sans-serif}
+.composer .mic{color:var(--ink50);padding:0 4px}
+</style></head><body>
+<div class="nav wrap"><span class="logo">lass<b>treffen</b>.at</span><div class="links"><span class="on">Entdecken</span><span>Freizeit</span><span>Künstler</span><span>Karte</span><span>Meine Pläne</span></div><div class="search">⌕ Künstler, Event oder Ort</div><span class="cta">Anmelden</span></div>
+
+<div class="wrap">
+  <div class="head"><div><h1>Was hast du vor?</h1><p>Schreib es wie einem Freund. Jede Antwort kommt aus unserer Datenbank.</p></div><div class="tabs"><span>Liste</span><span class="on">Smart-Suche</span></div></div>
+  <div class="chat" id="chat"></div>
+</div>
+
+<div class="dock"><div class="in"><div class="plan" id="plan"></div><div class="composer"><input placeholder="Antworte oder frag was Neues …" value="eher was mit Livemusik, und wir sind zu sechst"><span class="mic">🎤</span><span class="btn sm amber">Senden</span></div></div></div>
+
+<script src="data.js"></script>
+<script>
+const sel=new Set(['e1','e5']);
+const ev=e=>`<a class="ev ${sel.has(e.id)?'sel':''}" data-id="${e.id}"><div class="ph"><img src="${e.img}" alt=""><span class="tm">${e.time}</span><span class="add">${sel.has(e.id)?'✓':'+'}</span><span class="pr ${/Gratis|Spende/.test(e.price)?'free':''}">${e.price}</span></div><h3>${e.t}</h3><p>${e.venue} · ${e.bez}</p><p class="why">${e.why}</p></a>`;
+const shelf=(h,sub,ids)=>`<section class="shelf"><div class="hd"><h2>${h}</h2><span>${sub}</span></div><div class="track">${ids.map(id=>ev(byId(id))).join('')}</div></section>`;
+function render(){
+  document.getElementById('chat').innerHTML=`
+  <div class="turn user"><div class="bubble">${QUERY}</div></div>
+  <div class="turn"><div class="ans"><div class="who"><span class="av">C</span><span>Concierge</span><span class="meta">12 Treffer · 1,4 s</span></div>
+    <p>Alles klar, <b>heute in Wien, möglichst billig</b>. Zum Vorglühen gibt es drei Lokale <b>ohne Eintritt</b> ab 20 Uhr, danach Partys <b>unter 15 €</b>. Die am Gürtel liegen zwei Minuten auseinander, da kannst du wandern.</p>
+    <div class="understood"><span class="lbl" style="width:100%">Verstanden</span>${UNDERSTOOD.map(c=>`<span class="chip">${c} ✕</span>`).join('')}<span class="chip ghost">ändern</span></div>
+    ${shelf('Vorglühen ab 20 Uhr','gratis oder Spende',['e1','e2','e3'])}
+    ${shelf('Partys heute unter 15 €','Einlass ab 22 Uhr',['e4','e5','e6','e7','e8','e9'])}
+    <div class="follow"><span class="lbl">Dazu nachfragen</span>${FOLLOWUPS.map(f=>`<span class="chip">${f}</span>`).join('')}</div>
+  </div></div>
+  <div class="turn user"><div class="bubble chip-origin">Nur gratis</div></div>
+  <div class="turn"><div class="ans"><div class="who"><span class="av">C</span><span>Concierge</span><span class="meta">4 Treffer · 0,9 s</span></div>
+    <p>Ganz ohne Eintritt bleiben heute <b>vier</b>: die drei Vorglüh-Lokale und früher am Abend 18&below im Flucc. Partys ab 22 Uhr kosten heute mindestens 5 €, der Weberknecht ist der billigste.</p>
+    ${shelf('Heute gratis','4 Treffer',['e1','e2','e3','e12'])}
+    <div class="follow"><span class="lbl">Dazu nachfragen</span><span class="chip">Okay, bis 10 € ist auch fein</span><span class="chip">Nur am Gürtel</span><span class="chip">Mach mir einen Abendplan draus</span></div>
+  </div></div>
+  <div class="turn user"><div class="bubble">eher was mit Livemusik, und wir sind zu sechst</div></div>
+  <div class="turn"><div class="ans loading"><div class="who"><span class="av">C</span><span>Concierge</span></div>
+    <div class="state"><b></b>Suche Livemusik heute in Wien, günstig, für Gruppen …</div>
+    <div class="skel"><i></i><i></i><i></i><i></i></div>
+  </div></div>`;
+  const picked=[...sel].map(byId).sort((a,b)=>a.time.localeCompare(b.time));
+  document.getElementById('plan').innerHTML=picked.length?`<div class="av">${picked.map(e=>`<img src="${e.img}" alt="">`).join('')}</div><b>Dein Abend: ${picked.map(e=>e.time+' '+e.venue).join(' → ')} <span>· 8 €</span></b><span class="btn sm">Speichern</span>`:`<b><span>Noch nichts ausgewählt. Tippe + auf einer Karte.</span></b>`;
+}
+render();
+document.addEventListener('click',e=>{const c=e.target.closest('.ev');if(c){e.preventDefault();const id=c.dataset.id;sel.has(id)?sel.delete(id):sel.add(id);render();}});
+</script>
+</body></html>

@@ -31,6 +31,19 @@ interface V4EventDetailHeroProps {
   imageUrl?: string | null;
   /** Mehrere Bilder → Hero wird zur Diashow. */
   images?: string[] | null;
+  /** Bildnachweis, nur wenn das gezeigte Bild von der Quelle stammt:
+   *  Urheber bzw. Website und der Link auf die Seite des Termins. */
+  imageCredit?: { credit: string; sourceUrl?: string | null } | null;
+}
+
+/** Quellpfad zum Anzeigen: Host und Pfad ohne Protokoll, „www." und Query. */
+function sourcePath(url: string): string | null {
+  try {
+    const u = new URL(url);
+    return `${u.host.replace(/^www\./, '')}${decodeURI(u.pathname).replace(/\/$/, '')}`;
+  } catch {
+    return null;
+  }
 }
 
 // Europe/Vienna. Ohne timeZone rendert der Server in UTC (ein 19:00-Event
@@ -42,13 +55,15 @@ function formatDate(iso: string, fmt: string): string {
   }).label;
 }
 
-export function V4EventDetailHero({ title, startDate, locationName, city, imageUrl, images }: V4EventDetailHeroProps) {
+export function V4EventDetailHero({ title, startDate, locationName, city, imageUrl, images, imageCredit }: V4EventDetailHeroProps) {
   const locale = useLocale();
   const dateLabel = formatDate(startDate, locale === 'de' ? 'de-AT' : 'en-GB');
   const placeLabel = [locationName, city].filter(Boolean).join(' · ');
   const slides = (images ?? []).filter(
     (s): s is string => typeof s === 'string' && s.trim().length > 0,
   );
+  const hasImage = slides.length > 1 || Boolean(imageUrl);
+  const creditPath = imageCredit?.sourceUrl ? sourcePath(imageCredit.sourceUrl) : null;
 
   return (
     <section className="relative h-[320px] md:h-[480px] overflow-hidden">
@@ -100,6 +115,28 @@ export function V4EventDetailHero({ title, startDate, locationName, city, imageU
           background: 'linear-gradient(180deg, rgba(10,10,12,0.40) 0%, rgba(10,10,12,0.00) 35%, rgba(10,10,12,0.92) 100%)',
         }}
       />
+
+      {hasImage && imageCredit && (
+        <p
+          data-testid="hero-image-credit"
+          className="absolute top-4 right-4 md:top-5 md:right-5 z-10 m-0 max-w-[calc(100%-96px)] md:max-w-[560px] truncate rounded-full bg-black/55 px-3 py-1 text-[11.5px] leading-[1.5] text-white/85 backdrop-blur-sm"
+        >
+          {locale === 'de' ? 'Bild' : 'Image'}: {imageCredit.credit}
+          {creditPath && (
+            <>
+              {' · '}
+              <a
+                href={imageCredit.sourceUrl!}
+                target="_blank"
+                rel="noopener nofollow"
+                className="underline underline-offset-2 text-white hover:text-white"
+              >
+                {creditPath}
+              </a>
+            </>
+          )}
+        </p>
+      )}
 
       <div className="absolute left-0 right-0 bottom-0">
         <div className="max-w-[1180px] mx-auto px-5 md:px-14 py-5 md:py-9 flex flex-col items-start gap-2.5">

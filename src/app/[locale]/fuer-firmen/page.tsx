@@ -393,8 +393,8 @@ export default function FuerFirmenPage() {
         {/* Footer-Hinweis */}
         <p className="text-white/30 text-sm mt-12 text-center">
           Fragen vorab? Schreib uns an{' '}
-          <a href="mailto:dev@glatzdev.com" className="text-white/60 underline underline-offset-2 hover:text-white transition-colors">
-            dev@glatzdev.com
+          <a href="mailto:office@lasstreffen.at" className="text-white/60 underline underline-offset-2 hover:text-white transition-colors">
+            office@lasstreffen.at
           </a>
         </p>
       </div>

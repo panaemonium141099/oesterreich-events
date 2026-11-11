@@ -29,6 +29,14 @@ describe('municipalServiceKind', () => {
       'Erdaushubdeponie geöffnet', 'Wertstoffhof geöffnet', 'Recyclinghof ist am 25.12.2026 und 26.12.2026 geschlossen',
       '02.12.2026 (Mittwoch) Gelber Sack - Abholungen 2026', '23 Dez. Restmüllabfuhr 23.12.2026 Mehr Infos',
       'Autowrackentsorgung', 'Grün- und Strauchschnitt', 'Abgabemöglichkeit Grünmüll', 'Landwirtschaftsfoliensammlung',
+      // DE (fn-29.8): communice Wacken 07.11.2026
+      'Laubannahme',
+      // DE-Prüfstand fn-29.16 (Bergfeld 2026-10-29)
+      'Laubannahme der Gemeinde auf der Masche', 'Annahme Gartenabfälle',
+      // DE (fn-29.15): DigiPublica Feldkirchen 30.10.2026
+      'Gartenabfall-Abfuhr',
+      // DE (fn-29.15): Open2C Jesenwang 03.11.2026
+      'Problemmüllsamlung',
     ]) {
       expect(municipalServiceKind(t), t).toBe('waste');
     }
@@ -58,6 +66,8 @@ describe('municipalServiceKind', () => {
       // Gemeinschafts-Aktionen
       'Flurreinigung', 'Müllsammelaktion für Kinder', 'Müllsammelaktion', 'Plogging - Bewegung und Müll sammeln',
       'Repair Café', 'Gesunde Gemeinde: Yoga für Anfänger', 'Gesunde Gemeinde',
+      'Im Jugendzentrum Flechtingen legen wir mit unserem Herbstlaub-Druck los', 'Silvester-Schießen der Eichenlaubschützen',
+      'Vortrag: Kompostieren von Gartenabfällen',
       // Stücke und Vorträge mit Müll-Wörtern
       'Topolina rettet den Müll', 'Kasperl und der Müll', 'Klumpat der Mülltroll',
       'Recycling Reloaded – Was du über Müll wissen musst!', 'More than Recycling. Die Ausstellung zur Kreislaufwirtschaft',

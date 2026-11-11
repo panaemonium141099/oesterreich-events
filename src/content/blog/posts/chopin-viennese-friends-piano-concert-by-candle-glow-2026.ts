@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/chopin-viennese-friends-royal-vienna-hall-22067226/?affiliate=J70",
   "publishDate": "2026-10-14",
   "updatedDate": "2026-10-14",
+  "factSources": {
+    "checkedAt": "2026-10-14",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/chopin-viennese-friends-royal-vienna-hall-22067226/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Kerzenlicht, ein Flügel und die großen Namen der Klavierliteratur: Bei „Chopin & Viennese Friends“ erklingen Werke von Chopin, Mozart, Beethoven, Schubert und Strauss mitten in Wien-Mariahilf.",
   "category": "Kultur & Bühne",

@@ -1,0 +1,171 @@
+ars9,art,name,url,status,cms_merkmale,generator,tvm_json,tvm_termine,tvm_ab_2026_10_28,tvm_eigene_ab_2026_10_28,tvm_deskline_ab_2026_10_28
+071110000,verbandsfrei,"Koblenz, Stadt",https://www.koblenz.de/,200,ionas4 kalender-json,,https://www.koblenz.de/kalender/interne-und-externe-termine/events.json?weekends=false,9900,3448,1,3447
+071310007,verbandsfrei,"Bad Neuenahr-Ahrweiler, Stadt",https://www.bad-neuenahr-ahrweiler.de/,200,ionas4 wittich,,,,,,
+071310070,verbandsfrei,"Remagen, Stadt",https://www.remagen.de/,200,ionas4 kalender-json,,https://www.remagen.de/kalender/va-kalender/events.json?weekends=false,1258,457,2,455
+071310077,verbandsfrei,"Sinzig, Stadt",https://www.sinzig.de/,200,ionas4,,,,,,
+071310090,verbandsfrei,Grafschaft,https://www.gemeinde-grafschaft.de,200,ionas4 wittich,,,,,,
+071315001,VG,Adenau,http://www.adenau.de/,200,ionas4 wittich,,,,,,
+071315002,VG,Altenahr,http://www.altenahr.de/,200,cross7 typo3,TYPO3 CMS,,,,,
+071315003,VG,Bad Breisig,https://www.bad-breisig.de/,200,wordpress,WordPress 7.1.3,,,,,
+071315004,VG,Brohltal,http://www.brohltal.de/,200,ionas4 wittich,,,,,,
+071325003,VG,Daaden-Herdorf,http://www.daaden.de/,200,ionas4 wittich,,,,,,
+071325006,VG,Hamm (Sieg),http://www.hamm-sieg.de/,200,ionas4 wittich,,,,,,
+071325007,VG,Kirchen (Sieg),http://www.kirchen-sieg.de/,200,typo3,TYPO3 CMS,,,,,
+071325008,VG,Wissen,http://www.wissen.eu/,200,ikiss,,,,,,
+071325009,VG,Betzdorf-Gebhardshain,http://www.vg-bg.de/,200,ionas4 wittich,,,,,,
+071325010,VG,Altenkirchen-Flammersfeld,https://www.vg-altenkirchen-flammersfeld.de/,200,typo3,TYPO3 CMS,,,,,
+071330006,verbandsfrei,"Bad Kreuznach, Stadt",https://www.bad-kreuznach.de/,200,ionas4,,,,,,
+071335001,VG,Bad Kreuznach,http://www.vg-badkreuznach.de/,200,ionas3 wittich,,,,,,
+071335006,VG,Rüdesheim,https://www.vg-ruedesheim.de/,200,ionas4 wittich meinort,,,,,,
+071335009,VG,Kirner Land,https://www.kirner-land.de/,200,typo3,TYPO3 CMS,,,,,
+071335010,VG,Nahe-Glan,https://vg-nahe-glan.de/,200,ionas4 wittich,,,,,,
+071335011,VG,Langenlonsheim-Stromberg,https://www.langenlonsheim-stromberg.de/,200,ionas4 wittich,,,,,,
+071340045,verbandsfrei,"Idar-Oberstein, Stadt",https://www.idar-oberstein.de/,200,ionas4 wittich kalender-json,,https://www.idar-oberstein.de/kalender/veranstaltungen/events.json?weekends=false,136,86,86,0
+071345001,VG,Baumholder,http://www.vgv-baumholder.de/,200,ionas4 wittich,,,,,,
+071345002,VG,Birkenfeld,http://www.vg-birkenfeld.de/,200,nolis orts.app,,,,,,
+071345005,VG,Herrstein-Rhaunen,https://www.vg-hr.de/,200,ionas4 kalender-json,,https://www.vg-hr.de/kalender/events.json?weekends=false,83,54,54,0
+071355001,VG,Cochem,https://www.vgcochem.de/,200,ionas3 wittich,,,,,,
+071355002,VG,Kaisersesch,http://www.kaisersesch.de/,200,ionas4 wittich meinort,,,,,,
+071355003,VG,Ulmen,http://www.ulmen.de/,200,ionas4 wittich meinort,,,,,,
+071355005,VG,Zell (Mosel),http://www.zell-mosel.de/,200,ionas4 wittich meinort,,,,,,
+071370003,verbandsfrei,"Andernach, Stadt",https://www.andernach.de/,200,ionas4 kalender-json,,https://www.andernach.de/kalender/kombikalender-andernach-und-kultur/events.json?weekends=false&tagMode=ALL,74,14,14,0
+071370068,verbandsfrei,"Mayen, Stadt",https://www.mayen.de/,200,ionas4 kalender-json,,https://www.mayen.de/kalender/kombinierte-terminquelle/events.json?weekends=false,673,208,208,0
+071370203,verbandsfrei,"Bendorf, Stadt",https://www.bendorf.de/,200,ionas4 wittich,,,,,,
+071375001,VG,Pellenz,https://www.pellenz.de/,200,ionas4 wittich meinort,,,,,,
+071375002,VG,Maifeld,https://www.maifeld.de/,200,ionas4 wittich,,,,,,
+071375003,VG,Vordereifel,http://www.vordereifel.de/,200,ionas4 wittich kalender-json,,https://www.vordereifel.de/kalender/veranstaltungen-deskline/events.json?weekends=false,3386,1523,0,1523
+071375004,VG,Mendig,http://www.mendig.de/,200,ionas4 kalender-json,,https://www.mendig.de/kalender/veranstaltungen/events.json?weekends=false,12,10,10,0
+071375007,VG,Vallendar,http://www.vallendar.eu/,200,ionas4,,,,,,
+071375008,VG,Weißenthurm,http://www.vgwthurm.de,200,ionas4,,,,,,
+071375009,VG,Rhein-Mosel,http://www.vg-rhein-mosel.de,200,ionas3,,,,,,
+071380045,verbandsfrei,"Neuwied, Stadt",https://www.neuwied.de/,200,typo3,TYPO3 CMS,,,,,
+071385001,VG,Asbach,https://vg-asbach.de/,200,ionas4 wittich meinort,,,,,,
+071385002,VG,Bad Hönningen,http://www.bad-hoenningen-vg.de/,200,ionas4,,,,,,
+071385003,VG,Dierdorf,http://www.vg-dierdorf.de/,200,ionas4 wittich kalender-json,,https://www.vg-dierdorf.de/kalender/veranstaltungen/events.json?weekends=false&tagMode=ALL,39,5,5,0
+071385004,VG,Linz am Rhein,https://www.linz-vg.de/,err URLError <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unabl,,,,,,,
+071385005,VG,Puderbach,https://www.puderbach.de/,200,ionas4 wittich,,,,,,
+071385007,VG,Unkel,http://www.vgvunkel.de/,200,ionas3 wittich,,,,,,
+071385009,VG,Rengsdorf-Waldbreitbach,https://www.rengsdorf-waldbreitbach.de/,200,ionas4 wittich,,,,,,
+071400501,verbandsfrei,"Boppard, Stadt",https://www.boppard.de/,200,ionas4,,,,,,
+071405003,VG,Kastellaun,https://www.kastellaun.de/,200,deskline typo3,TYPO3 CMS,,,,,
+071405004,VG,Kirchberg (Hunsrück),https://www.kirchberg-hunsrueck.de/,200,ionas4 wittich meinort,,,,,,
+071405008,VG,Simmern-Rheinböllen,https://www.sim-rhb.de/,200,ionas4 wittich,,,,,,
+071405009,VG,Hunsrück-Mittelrhein,http://www.emmelshausen.de/,200,ionas4 wittich,,,,,,
+071410075,verbandsfrei,"Lahnstein, Stadt",https://www.lahnstein.de/,200,ionas4 wittich,,,,,,
+071415003,VG,Diez,http://www.vgdiez.de/,200,ionas3 wittich,,,,,,
+071415007,VG,Nastätten,https://www.vgnastaetten.de/,200,ionas4,,,,,,
+071415009,VG,Loreley,http://www.loreley.info/,err URLError <urlopen error [Errno 11001] getaddrinfo failed>,,,,,,,
+071415010,VG,Bad Ems-Nassau,https://www.vgben.de,200,ionas4 wittich,,,,,,
+071415011,VG,Aar-Einrich,https://www.vg-aar-einrich.de/,200,ionas4 wittich,,,,,,
+071435001,VG,Bad Marienberg (Westerwald),http://www.bad-marienberg.de/,200,ionas4 wittich meinort kalender-json,,https://www.bad-marienberg.de/kalender/events.json?weekends=false&tagMode=ALL,225,32,32,0
+071435002,VG,Hachenburg,http://www.hachenburg-vg.de/,200,ionas4 wittich,,,,,,
+071435003,VG,Höhr-Grenzhausen,http://www.hoehr-grenzhausen.de/,200,ionas4 wittich meinort kalender-json,,https://www.hoehr-grenzhausen.de/kalender/events.json?weekends=false,55,6,6,0
+071435004,VG,Montabaur,http://www.vg-montabaur.de/,200,ionas4 wittich,,,,,,
+071435005,VG,Ransbach-Baumbach,http://www.ransbach-baumbach.de/,200,ikiss,,,,,,
+071435006,VG,Rennerod,https://www.rennerod.de/,200,ionas4 wittich,,,,,,
+071435007,VG,Selters (Westerwald),https://www.vg-selters.de/,200,ionas4 wittich,,,,,,
+071435008,VG,Wallmerod,https://www.wallmerod.de/,200,ionas4 wittich,,,,,,
+071435009,VG,Westerburg,http://www.westerburger-land.de/,200,ionas4 wittich,,,,,,
+071435010,VG,Wirges,https://www.wirges.de/,200,ionas4 wittich meinort,,,,,,
+072110000,verbandsfrei,"Trier, Stadt",https://www.trier.de/,200,,recon CMS - regiogate GmbH,,,,,
+072310134,verbandsfrei,"Wittlich, Stadt",http://www.wittlich.de,200,ionas4 wittich kalender-json,,https://www.wittlich.de/de/kalender/2026/events.json?weekends=false,40,15,15,0
+072310502,verbandsfrei,Morbach,https://www.morbach.de/,200,deskline wittich meinort wordpress,WordPress 7.1.3,,,,,
+072315001,VG,Bernkastel-Kues,https://www.bernkastel-kues.de,200,ionas4 wittich,,,,,,
+072315006,VG,Thalfang am Erbeskopf,http://www.vg-thalfang.de/,200,,,,,,,
+072315008,VG,Wittlich-Land,http://www.vg-wittlich-land.de,200,ionas3 wittich meinort,,,,,,
+072315009,VG,Traben-Trarbach,http://www.vgtt.de,200,ionas4 deskline wittich,,,,,,
+072320018,verbandsfrei,"Bitburg, Stadt",https://www.bitburg.de/,200,ionas4 wittich kalender-json,,https://www.bitburg.de/kalender/alle-termine/events.json?weekends=false&tagMode=ALL,137,51,51,0
+072325001,VG,Arzfeld,http://www.vg-arzfeld.de/,200,deskline typo3,,,,,,
+072325005,VG,Südeifel,https://www.vg-suedeifel.de,200,ionas4 wittich,,,,,,
+072325006,VG,Prüm,https://www.pruem.de,200,ionas4 wittich,,,,,,
+072325007,VG,Speicher,http://www.vg-speicher.de/,200,ionas4 wittich,,,,,,
+072325008,VG,Bitburger Land,https://www.bitburgerland.de/,200,ionas4 wittich,,,,,,
+072335001,VG,Daun,https://www.daun.de/,"err URLError <urlopen error [WinError 10061] Es konnte keine Verbindung hergestellt werden, d",,,,,,,
+072335004,VG,Kelberg,http://www.vgv-kelberg.de/,200,ionas4 wittich,,,,,,
+072335006,VG,Gerolstein,https://www.gerolstein.de,200,ionas4 wittich,,,,,,
+072355001,VG,Hermeskeil,http://www.hermeskeil.de/,200,ionas4 wittich,,,,,,
+072355003,VG,Konz,https://www.konz.eu/,200,ionas4 wittich,,,,,,
+072355004,VG,Ruwer,http://www.ruwer.de/,200,ionas4 wittich,,,,,,
+072355006,VG,Schweich an der Römischen Weinstraße,http://www.schweich.de/,200,ionas4 wittich,,,,,,
+072355007,VG,Trier-Land,http://www.trier-land.de/,200,ionas4 wittich,,,,,,
+072355008,VG,Saarburg-Kell,http://www.saarburg-kell.de/,200,ionas4,,,,,,
+073110000,verbandsfrei,"Frankenthal (Pfalz), Stadt",http://www.frankenthal.de,200,ionas4 kalender-json,,https://www.frankenthal.de/kijub/de/kalender/events.json?weekends=false,39,1,1,0
+073120000,verbandsfrei,"Kaiserslautern, Stadt",https://www.kaiserslautern.de/,200,,IMPERIA 11.2.2,,,,,
+073130000,verbandsfrei,"Landau in der Pfalz, Stadt",https://www.landau.de/,200,ikiss,,,,,,
+073140000,verbandsfrei,"Ludwigshafen am Rhein, Stadt",https://ludwigshafen.de,200,typo3,TYPO3 CMS,,,,,
+073150000,verbandsfrei,"Mainz, Stadt",https://www.mainz.de/,200,,Information Enterprise Server – Sitepark GmbH,,,,,
+073160000,verbandsfrei,"Neustadt an der Weinstraße, Stadt",https://www.neustadt.eu/,200,ikiss,,,,,,
+073170000,verbandsfrei,"Pirmasens, Stadt",https://www.pirmasens.de/,200,ionas4 kalender-json,,https://www.pirmasens.de/kalender/events.json?weekends=false&categoryId=128&categoryId=127&categoryId=126&categoryId=124&tagMode=ALL,457,117,117,0
+073180000,verbandsfrei,"Speyer, Stadt",https://www.speyer.de/,200,ionas4 kalender-json,,https://www.speyer.de/de/kalender/events.json?weekends=false&tagId=141223,201,136,136,0
+073190000,verbandsfrei,"Worms, Stadt",https://www.worms.de/neu-de/index.php,200,weblication,Weblication® CMS,,,,,
+073200000,verbandsfrei,"Zweibrücken, Stadt",https://www.zweibruecken.de/,200,ionas4 wittich kalender-json,,https://www.zweibruecken.de/de/kalender/veranstaltungen/events.json?weekends=false&tagMode=ALL,364,74,74,0
+073310003,verbandsfrei,"Alzey, Stadt",https://www.alzey.de/,200,ionas4 kalender-json,,https://www.alzey.de/kalender/events.json?weekends=false,1693,429,429,0
+073315001,VG,Alzey-Land,https://www.alzey-land.de/,200,weblication orts.app,Weblication® CMS,,,,,
+073315002,VG,Eich,https://www.vg-eich.de/,200,ionas4 wittich kalender-json,,https://www.vg-eich.de/kalender/events.json?weekends=false,50,14,14,0
+073315003,VG,Monsheim,http://www.vg-monsheim.de/,200,ionas4,,,,,,
+073315005,VG,Wöllstein,http://www.woellstein.de/,200,ionas4 wittich,,,,,,
+073315006,VG,Wörrstadt,http://www.vgwoerrstadt.de/,200,ikiss,,,,,,
+073315007,VG,Wonnegau,https://www.vg-wonnegau.de/,200,ikiss,,,,,,
+073320002,verbandsfrei,"Bad Dürkheim, Stadt",https://www.bad-duerkheim.de/,200,ionas4 wittich,,,,,,
+073320024,verbandsfrei,"Grünstadt, Stadt",http://www.stadt-gruenstadt.de,200,ionas4 wittich kalender-json,,https://www.gruenstadt.de/kalender/veranstaltungen/events.json?weekends=false,151,40,40,0
+073320025,verbandsfrei,Haßloch,http://www.hassloch.de,200,ionas3,,,,,,
+073325001,VG,Deidesheim,http://www.vg-deidesheim.rlp.de/,403,,,,,,,
+073325002,VG,Freinsheim,http://www.freinsheim.de/,200,ionas4,,,,,,
+073325005,VG,Lambrecht (Pfalz),http://www.vg-lambrecht.de/,200,ionas3 wittich,,,,,,
+073325006,VG,Wachenheim an der Weinstraße,http://www.vg-wachenheim.de/,200,ionas4,,,,,,
+073325007,VG,Leiningerland,https://www.vg-l.de/,200,ionas4 wittich,,,,,,
+073335002,VG,Eisenberg (Pfalz),http://www.eisenberg.de/,200,ionas4 wittich,,,,,,
+073335003,VG,Göllheim,http://www.goellheim.de/,"err URLError <urlopen error [WinError 10060] Ein Verbindungsversuch ist fehlgeschlagen, da di",,,,,,,
+073335004,VG,Kirchheimbolanden,http://www.kirchheimbolanden.de/,200,geocms orts.app,GeoCMS Version:5.52.00 brain-SCC GmbH (c) 2026,,,,,
+073335006,VG,Winnweiler,http://www.winnweiler-vg.de/,200,ionas4 wittich meinort,,,,,,
+073335007,VG,Nordpfälzer Land,https://www.nordpfälzerland.de/,400,,,,,,,
+073340007,verbandsfrei,"Germersheim, Stadt",https://www.germersheim.eu/,200,ionas4 wittich meinort kalender-json,,https://www.germersheim.eu/kalender/events.json?weekends=false,76,20,20,0
+073340501,verbandsfrei,"Wörth am Rhein, Stadt",https://www.woerth.de/,200,ionas3,,,,,,
+073345001,VG,Bellheim,http://www.bellheim.de/,200,ionas4 wittich,,,,,,
+073345002,VG,Hagenbach,http://www.vg-hagenbach.de/,200,ionas4 wittich meinort,,,,,,
+073345003,VG,Jockgrim,https://www.vg-jockgrim.de/,200,ikiss,,,,,,
+073345004,VG,Kandel,https://www.vg-kandel.de/,200,ionas3 wittich meinort,,,,,,
+073345005,VG,Lingenfeld,http://www.vg-lingenfeld.de/,200,ionas4 wittich kalender-json,,https://www.vg-lingenfeld.de/kalender/events.json?weekends=false,182,19,19,0
+073345006,VG,Rülzheim,http://www.ruelzheim.de/,200,ionas3 wittich,,,,,,
+073355001,VG,Bruchmühlbach-Miesau,http://www.bruchmuehlbach-miesau.de/,200,ionas4 wittich,,,,,,
+073355002,VG,Enkenbach-Alsenborn,http://www.enkenbach-alsenborn.de,200,ionas4 wittich meinort,,,,,,
+073355008,VG,Ramstein-Miesenbach,http://www.ramstein-miesenbach.de/,200,ionas4 wittich meinort,,,,,,
+073355009,VG,Weilerbach,http://www.weilerbach.de/,200,ionas4 wittich kalender-json,,https://www.weilerbach.de/kalender/events.json?weekends=false&tagMode=ALL,152,28,28,0
+073355010,VG,Otterbach-Otterberg,http://www.otterbach-otterberg.de,200,ionas4 wittich,,,,,,
+073355011,VG,Landstuhl,https://www.landstuhl.de/,200,ionas4 wittich meinort,,,,,,
+073365008,VG,Lauterecken-Wolfstein,https://www.vg-lw.de/,200,ionas4 wittich kalender-json,,https://www.vg-lw.de/kalender/events.json?weekends=false&tagMode=ALL,876,54,54,0
+073365009,VG,Oberes Glantal,http://www.vgog.de/,200,ionas3,,,,,,
+073365010,VG,Kusel-Altenglan,https://www.vgka.de/,200,ionas4 kalender-json,,https://www.vgka.de/de/kalender/events.json?weekends=false&tagMode=ALL,20,5,5,0
+073375001,VG,Annweiler am Trifels,https://www.vg-annweiler.de/,200,ionas4,,,,,,
+073375002,VG,Bad Bergzabern,http://www.bad-bergzabern.de/,200,ionas4 wittich kalender-json,,https://www.bad-bergzabern.de/kalender/kombinierter-kalender/events.json?weekends=false&tagMode=ALL,849,202,0,202
+073375003,VG,Edenkoben,http://www.vg-edenkoben.de/,200,ionas4 wittich meinort,,,,,,
+073375004,VG,Herxheim,http://www.herxheim.de/,200,ionas4 wittich kalender-json,,https://www.herxheim.de/kalender/events.json?weekends=false&tagMode=ALL,52,13,13,0
+073375005,VG,Landau-Land,https://www.landau-land.de/,200,ionas4 wittich,,,,,,
+073375006,VG,Maikammer,http://www.maikammer.de/,200,deskline contao,Contao Open Source CMS,,,,,
+073375007,VG,Offenbach an der Queich,http://www.offenbach-queich.de/,200,ionas4 wittich meinort kalender-json,,https://www.offenbach-queich.de/kalender/events.json?weekends=false&tagId=15155&tagMode=ALL,0,0,0,0
+073380004,verbandsfrei,Bobenheim-Roxheim,https://www.bobenheim-roxheim.de/,200,ionas3,,,,,,
+073380005,verbandsfrei,Böhl-Iggelheim,https://www.boehl-iggelheim.de/,200,ionas4,,,,,,
+073380017,verbandsfrei,Limburgerhof,https://www.limburgerhof.de/,200,ionas4 wittich meinort kalender-json,,https://www.limburgerhof.de/kalender/events.json?weekends=false&tagMode=ALL,316,131,131,0
+073380019,verbandsfrei,Mutterstadt,https://www.mutterstadt.de/,200,ionas4 kalender-json,,https://www.mutterstadt.de/kalender/veranstaltungen/events.json?weekends=false,14,14,14,0
+073380025,verbandsfrei,"Schifferstadt, Stadt",https://www.schifferstadt.de/,200,ionas4 kalender-json,,https://www.schifferstadt.de/kalender/events.json?weekends=false&tagMode=ALL,670,122,122,0
+073385001,VG,Dannstadt-Schauernheim,https://www.vg-dannstadt-schauernheim.de/,200,ionas4 wittich kalender-json,,https://www.vg-dannstadt-schauernheim.de/kalender/events.json?weekends=false,258,106,106,0
+073385004,VG,Maxdorf,http://www.vg-maxdorf.de/,200,ionas4 kalender-json,,https://www.vg-maxdorf.de/kalender/events.json?weekends=false&tagMode=ALL,65,4,4,0
+073385006,VG,Lambsheim-Heßheim,http://www.lambsheim-hessheim.de,200,ionas4 kalender-json,,https://www.lambsheim-hessheim.de/kalender/veranstaltungen/events.json?weekends=false,365,54,54,0
+073385007,VG,Römerberg-Dudenhofen,http://www.vgrd.de/,200,ionas4 kalender-json,,https://www.vgrd.de/kalender/veranstaltungskalender/events.json?weekends=false&tagMode=ALL,9,9,9,0
+073385008,VG,Rheinauen,http://www.waldsee.de/,200,ionas4 kalender-json,,https://www.vg-rheinauen.de/kalender/og-waldsee/events.json?weekends=false&tagMode=ALL,46,0,0,0
+073390005,verbandsfrei,"Bingen am Rhein, Stadt",https://www.bingen.de/,200,wittich,,,,,,
+073390009,verbandsfrei,Budenheim,https://www.budenheim.de/,200,ionas4,,,,,,
+073390030,verbandsfrei,"Ingelheim am Rhein, Stadt",https://www.ingelheim.de/,200,ionas4 meinort kalender-json,,https://www.ingelheim.de/kalender/deskline-ionas-veranstaltungen/events.json?weekends=false,2211,1920,56,1864
+073395001,VG,Rhein-Nahe,https://www.vgrn.de/,200,ionas4 wittich,,,,,,
+073395002,VG,Bodenheim,http://www.vg-bodenheim.de/,200,ionas4 wittich,,,,,,
+073395003,VG,Gau-Algesheim,http://www.gau-algesheimvg.de/,200,ionas3 wittich,,,,,,
+073395006,VG,Nieder-Olm,https://www.vg-nieder-olm.de/,200,ionas4 kalender-json,,https://www.vg-nieder-olm.de/kalender/events.json?weekends=false&tagMode=ALL,31,2,2,0
+073395007,VG,Rhein-Selz,https://www.vg-rhein-selz.de/,200,ionas4,,,,,,
+073395008,VG,Sprendlingen-Gensingen,https://www.sprendlingen-gensingen.de/,200,ionas4 wittich,,,,,,
+073405001,VG,Dahner Felsenland,https://www.dahner-felsenland.net/vg_dahner_felsenland/,200,ionas3 deskline,,,,,,
+073405002,VG,Hauenstein,http://www.hauenstein-pfalz.de/,200,ionas4 wittich,,,,,,
+073405003,VG,Pirmasens-Land,https://www.pirmasens-land.de/,200,ionas4 wittich,,,,,,
+073405004,VG,Rodalben,http://www.rodalben.de/,200,ionas3 wittich,,,,,,
+073405006,VG,Waldfischbach-Burgalben,http://www.vgwaldfischbach-burgalben.de/,200,ionas4,,,,,,
+073405008,VG,Zweibrücken-Land,http://www.vgzwland.de/,200,ionas4 wittich kalender-json,,https://www.vgzwland.de/kalender/2022/events.json?weekends=false&tagMode=ALL,1,0,0,0
+073405009,VG,Thaleischweiler-Wallhalben,http://www.vgtw.de,200,ionas4 meinort,,,,,,

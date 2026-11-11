@@ -1,42 +1,55 @@
 import { describe, it, expect } from 'vitest';
 import { pickFestivals, arrangeBySharpness } from '@/lib/v4/get-landing-data';
 
-const fest = (id: string, starts_at: string, ends_at: string, lineup_status = 'fetched') =>
-  ({ id, starts_at, ends_at, lineup_status });
+const fest = (
+  id: string,
+  starts_at: string,
+  ends_at: string,
+  over: Partial<{ date_status: string; state: string | null; parent_event: { country: string | null } | null }> = {},
+) => ({ id, slug: id, canonical_name: id, starts_at, ends_at, date_status: 'confirmed', state: 'Wien', parent_event: null, ...over });
 
-describe('pickFestivals', () => {
-  const now = new Date('2026-09-24T10:00:00Z');
+describe('pickFestivals (Tagesausgabe)', () => {
+  const today = '2026-09-24';
   const pool = [
+    fest('vorbei', '2026-09-10', '2026-09-20'),
     fest('laeuft', '2026-09-16', '2026-09-26'),
-    fest('serie', '2026-01-28', '2026-12-17'),
     fest('heute', '2026-09-24', '2026-10-18'),
     fest('a', '2026-10-01', '2026-10-03'),
     fest('b', '2026-10-15', '2026-10-18'),
     fest('c', '2026-10-21', '2026-11-08'),
     fest('d', '2026-10-22', '2026-11-03'),
-    fest('e', '2026-11-25', '2027-01-06'),
-    fest('f', '2027-02-08', '2027-02-19'),
   ];
 
-  it('zeigt nur Festivals, die heute oder später beginnen', () => {
-    const ids = pickFestivals(pool, 10, now).map(f => f.id);
-    expect(ids).not.toContain('laeuft');
-    expect(ids).not.toContain('serie');
+  it('zeigt Festivals, die noch nicht vorbei sind (ends_at >= Wiener Tag), auch laufende', () => {
+    const ids = pickFestivals(pool, today, 10).map(f => f.id);
+    expect(ids).not.toContain('vorbei');
+    expect(ids).toContain('laeuft');
     expect(ids).toContain('heute');
   });
 
-  it('sortiert die Auswahl chronologisch', () => {
-    const starts = pickFestivals(pool, 4, now).map(f => f.starts_at);
-    expect(starts).toEqual([...starts].sort());
+  it('liefert chronologisch die ersten vier', () => {
+    expect(pickFestivals(pool, today).map(f => f.id)).toEqual(['laeuft', 'heute', 'a', 'b']);
   });
 
-  it('rotiert stündlich', () => {
-    const selections = new Set<string>();
-    for (let h = 0; h < 24; h++) {
-      const at = new Date(now.getTime() + h * 3_600_000);
-      selections.add(pickFestivals(pool, 4, at).map(f => f.id).join(','));
-    }
-    expect(selections.size).toBeGreaterThan(1);
+  it('lässt nur bestätigte Termine zu', () => {
+    const ids = pickFestivals([...pool, fest('vage', '2026-09-25', '2026-09-27', { date_status: 'expected' })], today, 10).map(f => f.id);
+    expect(ids).not.toContain('vage');
+  });
+
+  it('Land über das Elternevent, sonst über state in den neun Bundesländern', () => {
+    const rows = [
+      fest('parent-at', '2026-09-25', '2026-09-27', { state: 'Bayern', parent_event: { country: 'AT' } }),
+      fest('parent-de', '2026-09-25', '2026-09-27', { state: 'Bayern', parent_event: { country: 'DE' } }),
+      fest('state-noe', '2026-09-25', '2026-09-27', { state: 'niederösterreich' }),
+      fest('state-de', '2026-09-25', '2026-09-27', { state: 'Bayern' }),
+      fest('ohne', '2026-09-25', '2026-09-27', { state: null }),
+    ];
+    expect(pickFestivals(rows, today, 10).map(f => f.id).sort()).toEqual(['parent-at', 'state-noe']);
+  });
+
+  it('kommt mit null-Terminen zurecht', () => {
+    const rows = [fest('tba', '2026-10-01', '2026-10-02'), { ...fest('x', '2026-10-01', '2026-10-02'), ends_at: null }];
+    expect(pickFestivals(rows, today).map(f => f.id)).toEqual(['tba']);
   });
 });
 

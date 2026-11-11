@@ -17,10 +17,10 @@ export function InternalLinks({ groups }: InternalLinksProps) {
   if (groups.length === 0) return null;
 
   return (
-    <nav className="mt-10 pt-8 border-t border-white/10 space-y-6">
+    <nav className="mt-12 pt-8 border-t border-[var(--v4-hairline-2)] space-y-6">
       {groups.map((group) => (
         <div key={group.title}>
-          <h3 className="text-sm font-medium text-white/60 mb-2">
+          <h3 className="text-[13px] font-bold text-[var(--v4-ink-70)] mb-2.5">
             {group.title}
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -28,7 +28,7 @@ export function InternalLinks({ groups }: InternalLinksProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-xs text-white/40 hover:text-white/70 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full border border-white/10 transition-colors"
+                className="text-[12.5px] font-medium text-[var(--v4-ink-50)] hover:text-[var(--v4-ink)] px-3 py-1.5 rounded-full border border-[var(--v4-hairline-2)] hover:border-[var(--v4-hairline-4)] transition-colors"
               >
                 {link.label}
               </Link>

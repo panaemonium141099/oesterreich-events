@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Künstler B: Plakatwand</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* Plakatwand: Gesichter zuerst. Regale wie auf /entdecken, aber mit Porträts statt Postern;
+   der Name steht groß auf dem Bild. Unten ein Verzeichnis aller Künstler mit Termin. */
+.shelf{margin-top:34px}
+.pw{flex:0 0 200px;scroll-snap-align:start;cursor:pointer}
+.pw .ph{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;background:var(--inset)}
+.pw .ph img{width:100%;height:100%;object-fit:cover}
+.pw .ph .ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(5,5,6,.92) 100%)}
+.pw .ph .n{position:absolute;left:12px;right:12px;bottom:10px;font-size:19px;font-weight:800;letter-spacing:-.03em;line-height:1.05;color:#fff;text-wrap:balance}
+.pw .ph .n i{display:block;font-style:normal;font-size:12px;font-weight:600;color:rgba(255,255,255,.72);margin-top:5px;letter-spacing:0}
+.pw .ph .cnt{position:absolute;left:10px;top:10px;background:#fff;color:#0a0a0c;padding:4px 7px;border-radius:6px;font-size:11.5px;font-weight:800}
+.pw .ph .cnt.fav{background:var(--amber)}
+.pw .ft{display:grid;grid-template-columns:minmax(0,1fr) 88px;align-items:center;gap:8px;margin-top:10px}
+.pw .ft small{font-size:12.5px;color:var(--ink50);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pw .ft small em{font-style:normal;color:var(--ink);font-weight:700}
+@media(max-width:720px){.pw{flex-basis:156px}.pw .ph .n{font-size:16px}.pw .ft{grid-template-columns:1fr;gap:8px}}
+
+/* Verzeichnis */
+.dir{margin-top:40px;padding-top:22px;border-top:1px solid var(--h2)}
+.dir .hd{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
+.dir h2{margin:0;font-size:21px;font-weight:800;letter-spacing:-.03em}
+.dir .hd span{font-size:13.5px;color:var(--ink50)}
+.dir .abc{display:flex;flex-wrap:wrap;gap:2px;margin-bottom:14px}
+.dir .abc span{width:28px;height:28px;display:grid;place-items:center;border-radius:6px;font-size:12.5px;font-weight:700;color:var(--ink70)}
+.dir .abc span.on{background:#fff;color:#0a0a0c}
+.dir .abc span.off{color:var(--ink30)}
+.dir .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 40px}
+.dir .a{display:grid;grid-template-columns:40px 1fr 88px;gap:12px;align-items:center;padding:8px 0;border-top:1px solid var(--h1);cursor:pointer}
+.dir .a .av{width:40px;height:40px}
+.dir .a .min{min-width:0}
+.dir .a b{display:block;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dir .a small{display:block;font-size:12px;color:var(--ink50);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dir .a.fav b{color:var(--amber)}
+@media(max-width:1000px){.dir .grid{grid-template-columns:1fr 1fr}}
+@media(max-width:720px){.dir .grid{grid-template-columns:1fr}.dir .hd span{display:none}}
+</style></head><body>
+<script src="data.js"></script><script src="shared.js"></script>
+<script>document.write('<style>'+CHROME_CSS+'</style>');document.write(NAV)</script>
+
+<main class="wrap">
+  <header class="head">
+    <div><h1>Künstler</h1><p id="sub"></p></div>
+    <div class="searchbar">⌕ Künstler suchen oder Spotify-Link einfügen</div>
+  </header>
+
+  <div id="mine"></div>
+  <div id="shelves"></div>
+  <section class="dir" id="dir"></section>
+</main>
+<div id="toast" role="status"></div>
+
+<script>
+const all = ARTISTS.filter(a => nextEvent(a));
+document.getElementById('sub').textContent = `${all.length} Künstler mit Terminen in Österreich, Stand heute`;
+document.getElementById('mine').innerHTML = mineHtml();
+
+const card = a => {
+  const e = nextEvent(a), n = upcoming(a).length, fav = isFollowed(a.id);
+  return `<div class="pw" data-open="${a.id}"><div class="ph">${a.img ? `<img src="${a.img}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}<div class="ov"></div>${n > 1 ? `<span class="cnt ${fav ? 'fav' : ''}">${n} Termine</span>` : ''}<div class="n">${a.name}<i>${a.kind}</i></div></div><div class="ft"><small><em>${e.day}</em>, ${e.city}</small>${followBtn(a.id)}</div></div>`;
+};
+const shelf = (title, sub, items) => `<section class="shelf"><div class="hd"><h2>${title}</h2><span>${sub}</span><a href="#">Alle anzeigen</a><div class="arr"><b>‹</b><b>›</b></div></div><div class="track">${items.map(card).join('')}</div></section>`;
+
+const week = all.filter(a => weekOf(nextEvent(a).iso) === 'w1').sort((x, y) => nextEvent(x).iso < nextEvent(y).iso ? -1 : 1);
+const big = ['bob-dylan', 'placebo', 'korn', 'tokio-hotel', 'andreas-gabalier', 'andr-rieu', 'pizzera-jaus', 'nico-santos', 'wolfgang-ambros', 'mireille-mathieu', 'beatrice-egli', 'jungle'].map(artist).filter(Boolean);
+const kab = all.filter(a => GROUP(a) === 'Kabarett').sort((x, y) => upcoming(y).length - upcoming(x).length);
+const konz = all.filter(a => GROUP(a) === 'Konzerte' && !big.includes(a)).sort((x, y) => nextEvent(x).iso < nextEvent(y).iso ? -1 : 1);
+document.getElementById('shelves').innerHTML =
+  shelf('Diese Woche live', '2. bis 8. November', week) +
+  shelf('Große Hallen', 'Stadthalle, Festspielhaus, Gasometer', big) +
+  shelf('Kabarett', 'die meisten Termine zuerst', kab) +
+  shelf('Konzerte', 'Clubs und Säle, nach Datum', konz.slice(0, 16));
+
+const sorted = [...all].sort((x, y) => x.name.localeCompare(y.name, 'de'));
+const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const has = new Set(sorted.map(a => a.name[0].toUpperCase()));
+document.getElementById('dir').innerHTML = `<div class="hd"><h2>Alle Künstler von A bis Z</h2><span>mit Termin in Österreich</span></div>
+<div class="abc"><span class="on">Alle</span>${letters.map(l => `<span class="${has.has(l) ? '' : 'off'}">${l}</span>`).join('')}</div>
+<div class="grid">${sorted.map(a => `<div class="a ${isFollowed(a.id) ? 'fav' : ''}" data-open="${a.id}">${avatar(a, 40)}<span class="min"><b>${a.name}</b><small>${nextEvent(a).day}, ${nextEvent(a).city}${upcoming(a).length > 1 ? `, +${upcoming(a).length - 1}` : ''}</small></span>${followBtn(a.id)}</div>`).join('')}</div>`;
+document.write(TABBAR);
+</script>
+</body></html>

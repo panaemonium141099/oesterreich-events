@@ -26,6 +26,7 @@ export interface LegacyRow {
   start_date: string;
   source_url?: string | null;
   title?: string | null;
+  publish_status?: string | null;
 }
 
 export interface SourceIdMove {
@@ -112,15 +113,26 @@ export function planSourceIdMigrations(
     moves.push({ id: row.id, source_name: row.source_name, from: row.source_id, to: target.source_id });
   };
 
-  const unmatched: LegacyRow[] = [];
+  // 0 Titel und Uhrzeit, 1 Titel, 2 Uhrzeit, 3 nur der Tag (stabil sortiert).
+  const rank = (row: LegacyRow, e: MigrationInput) =>
+    (sameTitle(row, e) ? 0 : 2) + (new Date(e.start_date).getTime() === new Date(row.start_date).getTime() ? 0 : 1);
+  const bestSameDay = (row: LegacyRow) =>
+    free(row)
+      .filter((e) => viennaDay(e.start_date) === viennaDay(row.start_date))
+      .sort((a, b) => rank(row, a) - rank(row, b))[0];
+
+  // Erst die genauen Treffer: melden zwei Lesarten desselben Termins beide
+  // alten IDs (withoutStartTime im Registry-Scraper), bleibt die Zeile der
+  // aktuellen Lesart, die der anderen ist abgelöst (planSupersededRows).
+  const rest: LegacyRow[] = [];
   for (const row of legacyRows) {
-    const day = viennaDay(row.start_date);
-    const at = new Date(row.start_date).getTime();
-    // 0 Titel und Uhrzeit, 1 Titel, 2 Uhrzeit, 3 nur der Tag (stabil sortiert).
-    const rank = (e: MigrationInput) => (sameTitle(row, e) ? 0 : 2) + (new Date(e.start_date).getTime() === at ? 0 : 1);
-    const target = free(row)
-      .filter((e) => viennaDay(e.start_date) === day)
-      .sort((a, b) => rank(a) - rank(b))[0];
+    const target = bestSameDay(row);
+    if (target && rank(row, target) === 0) take(row, target);
+    else rest.push(row);
+  }
+  const unmatched: LegacyRow[] = [];
+  for (const row of rest) {
+    const target = bestSameDay(row);
     if (target) take(row, target);
     else unmatched.push(row);
   }
@@ -138,6 +150,41 @@ export function planSourceIdMigrations(
   return moves;
 }
 
+/**
+ * Rein: alte Zeilen, die abgelöst sind. Ein Termin meldet die alte ID, hat
+ * aber schon eine Zeile (oder bekam eine andere alte Zeile), am selben
+ * Wiener Tag, auf derselben Website und mit demselben Titel: die alte Zeile
+ * ist dann eine zweite Lesart desselben Termins. Ihre ID liefert die Quelle
+ * nie wieder, ohne Rückzug bliebe sie bis zum Termin sichtbar (Prod
+ * 2026-11-03: innsbrucktermine.at, 27 Seiten-Tage mit zwei Lesarten, der
+ * Dedup ließ deshalb die Feratel-Zeile mit keiner zusammen).
+ *
+ * Nur künftige Zeilen; heutige und vergangene bleiben, wie bei der Übernahme.
+ * `events` sind alle Termine des Laufs: eine Zeile, deren ID ein Termin
+ * selbst trägt, ist nie abgelöst.
+ */
+export function planSupersededRows(
+  events: readonly MigrationInput[],
+  legacyRows: readonly LegacyRow[],
+  moves: readonly SourceIdMove[],
+  now: Date = new Date(),
+): LegacyRow[] {
+  const moved = new Set(moves.map((m) => m.id));
+  const delivered = new Set(events.map((e) => key(e.source_name, e.source_id)));
+  const today = viennaToday(now);
+  return legacyRows.filter((row) => {
+    const day = viennaDay(row.start_date);
+    if (moved.has(row.id) || delivered.has(key(row.source_name, row.source_id)) || day <= today) return false;
+    const rowSite = site(row.source_url);
+    return withPrevious(events).some((e) =>
+      e.source_name === row.source_name &&
+      previousSourceIds(e).includes(row.source_id) &&
+      viennaDay(e.start_date) === day &&
+      sameTitle(row, e) &&
+      (!rowSite || !site(e.source_url) || rowSite === site(e.source_url)));
+  });
+}
+
 // .in() steht im Query-String: Listen klein halten (CLAUDE.md).
 const CHUNK = 200;
 
@@ -147,7 +194,7 @@ async function loadRows(supabase: SupabaseClient, sourceName: string, ids: strin
   for (let i = 0; i < unique.length; i += CHUNK) {
     const { data, error } = await supabase
       .from('events')
-      .select('id, source_name, source_id, start_date, source_url, title')
+      .select('id, source_name, source_id, start_date, source_url, title, publish_status')
       .eq('source_name', sourceName)
       .in('source_id', unique.slice(i, i + CHUNK));
     if (error) throw new Error(`source-id-migration: ${error.message}`);
@@ -156,15 +203,38 @@ async function loadRows(supabase: SupabaseClient, sourceName: string, ids: strin
   return rows;
 }
 
+/** Zeilen, die Primary eines verborgenen Duplikats sind. */
+async function primariesOfDuplicates(supabase: SupabaseClient, ids: string[]): Promise<Set<string>> {
+  const out = new Set<string>();
+  for (let i = 0; i < ids.length; i += CHUNK) {
+    const { data, error } = await supabase
+      .from('events')
+      .select('duplicate_of')
+      .eq('publish_status', 'duplicate')
+      .in('duplicate_of', ids.slice(i, i + CHUNK));
+    if (error) throw new Error(`source-id-migration: ${error.message}`);
+    for (const r of (data ?? []) as Array<{ duplicate_of: string | null }>) if (r.duplicate_of) out.add(r.duplicate_of);
+  }
+  return out;
+}
+
 /**
- * Schlüsselt alte Zeilen der übergebenen Events um. Muss vor dem Upsert
+ * Schlüsselt alte Zeilen der übergebenen Events um und zieht abgelöste
+ * zurück (planSupersededRows), wie der Rückzug: `suppressed` + `withdrawn_at`.
+ * Ein Primary mit verborgenem Duplikat bleibt stehen, sonst wäre das Event
+ * bis zum nächsten Dedup ganz weg (withdrawal.ts). Muss vor dem Upsert
  * laufen, damit der Upsert die umgeschlüsselte Zeile aktualisiert.
  */
 export async function migrateSourceIds(
   supabase: SupabaseClient,
   events: readonly ScrapedEvent[],
-): Promise<{ moved: number; failed: number; errors: string[] }> {
-  const result = { moved: 0, failed: 0, errors: [] as string[] };
+  now: Date = new Date(),
+): Promise<{ moved: number; withdrawn: number; failed: number; errors: string[] }> {
+  const result = { moved: 0, withdrawn: 0, failed: 0, errors: [] as string[] };
+  const fail = (message: string) => {
+    result.failed++;
+    if (!result.errors.includes(message)) result.errors.push(message);
+  };
   const candidates = withPrevious(events);
   for (const sourceName of new Set(candidates.map((e) => e.source_name))) {
     const own = candidates.filter((e) => e.source_name === sourceName);
@@ -172,7 +242,8 @@ export async function migrateSourceIds(
     if (legacy.length === 0) continue;
     const existing = await loadRows(supabase, sourceName, own.map((e) => e.source_id));
     const existingKeys = new Set(existing.map((r) => key(r.source_name, r.source_id)));
-    for (const move of planSourceIdMigrations(own, legacy, existingKeys)) {
+    const moves = planSourceIdMigrations(own, legacy, existingKeys, now);
+    for (const move of moves) {
       // supabase-js wirft bei Schreibfehlern nicht: error selbst prüfen.
       const { error } = await supabase
         .from('events')
@@ -180,12 +251,24 @@ export async function migrateSourceIds(
         .eq('id', move.id)
         .eq('source_name', move.source_name)
         .eq('source_id', move.from);
-      if (error) {
-        result.failed++;
-        if (!result.errors.includes(error.message)) result.errors.push(error.message);
-      } else {
-        result.moved++;
-      }
+      if (error) fail(error.message);
+      else result.moved++;
+    }
+
+    const all = events.filter((e) => e.source_name === sourceName);
+    const superseded = planSupersededRows(all, legacy, moves, now).filter((r) => r.publish_status !== 'suppressed');
+    if (superseded.length === 0) continue;
+    const kept = await primariesOfDuplicates(supabase, superseded.map((r) => r.id));
+    const ids = superseded.map((r) => r.id).filter((id) => !kept.has(id));
+    for (let i = 0; i < ids.length; i += CHUNK) {
+      const chunk = ids.slice(i, i + CHUNK);
+      const { error } = await supabase
+        .from('events')
+        .update({ publish_status: 'suppressed', withdrawn_at: now.toISOString() })
+        .eq('source_name', sourceName)
+        .in('id', chunk);
+      if (error) fail(error.message);
+      else result.withdrawn += chunk.length;
     }
   }
   return result;

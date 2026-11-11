@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/adventkonzerte-in-der-kapuzinerkirche-kapuzinerkirche-21428818/?affiliate=J70",
   "publishDate": "2026-09-21",
   "updatedDate": "2026-09-21",
+  "factSources": {
+    "checkedAt": "2026-09-21",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/adventkonzerte-in-der-kapuzinerkirche-kapuzinerkirche-21428818/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Das Wiener Kaiserquartett spielt in der Kapuzinerkirche am Neuen Markt: 65 Minuten Bach, Mozart, Schubert und die schönsten Weihnachtslieder, direkt über der Kaisergruft der Habsburger.",
   "category": "Kultur & Tradition",

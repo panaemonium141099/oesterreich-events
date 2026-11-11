@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+:root{
+  --surface:#0a0a0c; --elev:#141416; --inset:#050506;
+  --ink:#fff; --ink70:rgba(255,255,255,.7); --ink50:rgba(255,255,255,.5); --ink30:rgba(255,255,255,.3);
+  --h2:rgba(255,255,255,.06); --h3:rgba(255,255,255,.1); --h4:rgba(255,255,255,.15);
+  --amber:#f5b942; --go:#7bb794;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--surface);color:var(--ink);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+img{display:block}
+.wrap{max-width:1180px;margin:0 auto;padding:0 56px}
+@media(max-width:720px){.wrap{padding:0 16px}}
+
+/* Globale TopNav (Platzhalter, bleibt unverändert) */
+.nav{height:56px;display:flex;align-items:center;gap:28px;border-bottom:1px solid var(--h2);position:sticky;top:0;background:rgba(10,10,12,.92);backdrop-filter:blur(10px);z-index:20}
+.nav .logo{font-weight:800;letter-spacing:-.03em;font-size:17px}.nav .logo b{color:var(--amber)}
+.nav .links{display:flex;gap:4px;font-size:13.5px;font-weight:600;color:var(--ink70)}
+.nav .links span{padding:8px 12px;border-radius:999px}.nav .links .on{background:#1c1c20;color:#fff}
+.nav .search{margin-left:auto;width:260px;height:34px;border:1px solid var(--h3);border-radius:999px;display:flex;align-items:center;padding:0 12px;gap:8px;font-size:12.5px;color:var(--ink50)}
+.nav .cta{background:#fff;color:#0a0a0c;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px}
+@media(max-width:720px){.nav .links,.nav .search{display:none}}
+
+/* Chips */
+.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;border:1px solid var(--h3);font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;background:transparent}
+.chip.on{background:#fff;color:#0a0a0c;border-color:#fff}
+.chip.amber{background:rgba(245,185,66,.14);border-color:rgba(245,185,66,.4);color:var(--amber)}
+.row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}.row::-webkit-scrollbar{display:none}
+
+.muted{color:var(--ink50)}
+.free{color:var(--go)}

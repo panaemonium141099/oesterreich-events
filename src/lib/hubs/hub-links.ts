@@ -9,6 +9,7 @@
  *   bl   → bundesland id(s)   (EventFilters.bundeslands)
  *   plz  → placePostalCode    (EventFilters.placePostalCode)
  *   ort  → placeName          (EventFilters.placeName)
+ *   category → category        (EventFilters.category)
  */
 export interface EntdeckenScope {
   /** Bundesland id, e.g. 'oberoesterreich'. */
@@ -21,6 +22,8 @@ export interface EntdeckenScope {
   region?: string;
   /** Bezirk name — exact value of the events' `district` field (real filter). */
   district?: string;
+  /** Kategorie (DB-Name), z. B. für „Alle anzeigen" eines Kategorie-Regals. */
+  category?: string;
 }
 
 export function buildEntdeckenHref(scope: EntdeckenScope): string {
@@ -30,6 +33,7 @@ export function buildEntdeckenHref(scope: EntdeckenScope): string {
   if (scope.placeName) p.set('ort', scope.placeName);
   if (scope.region) p.set('region', scope.region);
   if (scope.district) p.set('district', scope.district);
+  if (scope.category) p.set('category', scope.category);
   const qs = p.toString();
   return qs ? `/entdecken?${qs}` : '/entdecken';
 }

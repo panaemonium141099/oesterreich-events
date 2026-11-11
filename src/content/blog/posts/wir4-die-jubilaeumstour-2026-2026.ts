@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/wir4-baer-lux-h-fendrich-stampfer-wir4-die-jubilaeumstour-arena365-20528984/?affiliate=J70",
   "publishDate": "2026-09-21",
   "updatedDate": "2026-09-21",
+  "factSources": {
+    "checkedAt": "2026-09-21",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/wir4-baer-lux-h-fendrich-stampfer-wir4-die-jubilaeumstour-arena365-20528984/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 7. November 2026 bringt WIR4 die Jubiläumstour nach Kirchberg in Tirol: Songs von Ambros, Fendrich und Danzer, gespielt von den Musikern, die damals selbst auf der Austria-3-Bühne standen.",
   "category": "Musik & Festival",

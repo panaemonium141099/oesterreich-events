@@ -23,12 +23,15 @@ import {
   getAvailableScrapers,
   getScrapersForShard,
 } from '../lib/scrapers';
+import { getDeScrapersForShard } from '../lib/scrapers/de/nachtlauf';
+import { schreibeKalenderBericht } from '../lib/scrapers/de/kalender-stand';
 import { triggerLineupPipeline, triggerMatchArtists } from '../lib/post-scrape-hook';
 
 async function main() {
   const args = process.argv.slice(2);
   const sourceIndex = args.indexOf('--source');
   const shardIndex = args.indexOf('--shard');
+  const deShardIndex = args.indexOf('--de-shard');
 
   if (sourceIndex !== -1 && args[sourceIndex + 1]) {
     const sourceName = args[sourceIndex + 1];
@@ -41,6 +44,24 @@ async function main() {
     }
 
     await runScraper(scraper);
+  } else if (deShardIndex !== -1 && args[deShardIndex + 1]) {
+    // --de-shard i/N: DE-Gemeinde-Adapter (fn-29.18, src/lib/scrapers/de/nachtlauf.ts).
+    // Adapter mit gemeinsamer Website laufen im selben Shard; die Hooks
+    // laufen auch hier nicht (Post-Processing des Workflows).
+    const m = /^(\d+)\/(\d+)$/.exec(args[deShardIndex + 1]);
+    if (!m) {
+      console.error(`Ungültiges --de-shard Format (erwartet i/N): ${args[deShardIndex + 1]}`);
+      process.exit(1);
+    }
+    const subset = getDeScrapersForShard(parseInt(m[1], 10), parseInt(m[2], 10));
+    console.log(`DE-Shard ${m[1]}/${m[2]}: ${subset.map(s => s.name).join(', ')}`);
+    try {
+      await runAllScrapers(subset);
+    } finally {
+      // Stand je Kalender für den Abdeckungsbericht (Artefakt des Shards, kalender-stand.ts).
+      schreibeKalenderBericht(subset);
+    }
+    return;
   } else if (shardIndex !== -1 && args[shardIndex + 1]) {
     // --shard i/N: deterministische Teilmenge für parallele CI-Jobs
     // (MASTERPLAN §5 — der 6h-Monolith wird in Shards zerlegt). Die

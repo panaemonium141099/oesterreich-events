@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/against-the-current-till-death-and-back-tour-raiffeisen-halle-im-gasometer-21891421/?affiliate=J70",
   "publishDate": "2026-09-18",
   "updatedDate": "2026-09-18",
+  "factSources": {
+    "checkedAt": "2026-09-18",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/against-the-current-till-death-and-back-tour-raiffeisen-halle-im-gasometer-21891421/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 16. November 2026 macht die Till Death & Back Tour in Wien Station: Against The Current spielen ihr erstes Studioalbum seit 2018 live. Alles zu Tickets, Anreise und Programm im Überblick.",
   "category": "Musik & Festival",

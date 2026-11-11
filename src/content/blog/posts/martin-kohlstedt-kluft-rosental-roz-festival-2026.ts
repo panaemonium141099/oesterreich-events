@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/martin-kohlstedt-kluft-wallfahrtskirche-maria-rain-22034174/?affiliate=J70",
   "publishDate": "2026-10-12",
   "updatedDate": "2026-10-12",
+  "factSources": {
+    "checkedAt": "2026-10-12",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/martin-kohlstedt-kluft-wallfahrtskirche-maria-rain-22034174/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 2. November 2026 bringt Martin Kohlstedt sein Programm „Kluft“ in die Kirche Maria Rain. Modulare Klavierstücke, Electronica und viel Improvisation: Kein Abend klingt wie der andere.",
   "category": "Musik & Festival",

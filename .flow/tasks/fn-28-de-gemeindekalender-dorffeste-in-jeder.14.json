@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-27T16:05:30.357542Z",
+  "depends_on": [],
+  "epic": "fn-28-de-gemeindekalender-dorffeste-in-jeder",
+  "id": "fn-28-de-gemeindekalender-dorffeste-in-jeder.14",
+  "priority": 14,
+  "spec_path": ".flow/tasks/fn-28-de-gemeindekalender-dorffeste-in-jeder.14.md",
+  "status": "todo",
+  "title": "Gemeindekalender Saarland",
+  "updated_at": "2026-10-27T16:05:30.712311Z"
+}

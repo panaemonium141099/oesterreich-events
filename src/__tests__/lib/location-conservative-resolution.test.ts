@@ -233,7 +233,26 @@ describe('Gemeinde-Auflösung ohne Raten', () => {
     expect(d.status).toBe('region_only');
   });
 
-  it('Ausland: keine österreichische PLZ-Ableitung, Quellkoordinate bleibt', () => {
+  it('Land ohne Ortsdaten: keine PLZ-Ableitung, Quellkoordinate bleibt', () => {
+    const d = resolve({
+      location_name: 'Volkshaus Zürich',
+      address: 'Stauffacherstrasse 60',
+      postal_code: '8004',
+      country: 'CH',
+      latitude: 47.3769,
+      longitude: 8.5244,
+      coords_precision: 'venue',
+      source_venue_id: 'eventfrog:99',
+    });
+    expect(d.country).toBe('CH');
+    expect(d.postal_code).toBeNull();
+    expect(d.gemeinde).toBeNull();
+    expect(d.latitude).toBe(47.3769);
+    expect(d.location_name).toBe('Volkshaus Zürich');
+    expect(d.rejected).toContain('postal_code:8004:foreign_country_CH');
+  });
+
+  it('Deutschland (fn-29.2): PLZ, Gemeinde und Land aus den DE-Stammdaten, Quellkoordinate bleibt', () => {
     const d = resolve({
       location_name: 'Haus Leipzig',
       address: 'Elsterstraße 22 - 24',
@@ -245,10 +264,30 @@ describe('Gemeinde-Auflösung ohne Raten', () => {
       source_venue_id: 'eventim:99',
     });
     expect(d.country).toBe('DE');
-    expect(d.postal_code).toBeNull();
-    expect(d.gemeinde).toBeNull();
+    expect(d.postal_code).toBe('04109');
+    expect(d.gemeinde).toMatchObject({ name: 'Leipzig', bundesland: 'sachsen' });
     expect(d.latitude).toBe(51.34);
     expect(d.location_name).toBe('Haus Leipzig');
+  });
+
+  it('Deutschland: Gemeinde-Mittelpunkt nur aus genannter PLZ bzw. genanntem Ort', () => {
+    const plz = resolve({ location_name: 'Feuerwehr Plaidt', postal_code: '56637', country: 'DE' });
+    expect(plz.status).toBe('municipality_only');
+    expect(plz.gemeinde).toMatchObject({ name: 'Plaidt', bundesland: 'rheinland-pfalz', bezirk: 'Mayen-Koblenz' });
+    expect(plz.latitude).not.toBeNull();
+    const ort = resolve({ location_name: 'Dorfplatz', address: 'Hauptstraße 5, 63688 Gedern', country: 'DE' });
+    expect(ort.postal_code).toBe('63688');
+    expect(ort.gemeinde?.name).toBe('Gedern');
+    // Mehrdeutiger Name ohne PLZ: kein Raten.
+    const hausen = resolve({ location_name: 'Festzelt', city: 'Hausen', bundesland: 'Bayern', country: 'DE' });
+    expect(hausen.gemeinde).toBeNull();
+    expect(hausen.reasons).toContain('city_name_ambiguous');
+  });
+
+  it('Deutschland: Koordinate außerhalb Deutschlands wird verworfen', () => {
+    const d = resolve({ location_name: 'Wiener Stadthalle', city: 'Wien', country: 'DE', latitude: 48.2024, longitude: 16.3329, coords_precision: 'venue' });
+    expect(d.latitude).toBeNull();
+    expect(d.rejected.some(r => r.endsWith(':outside_de_box'))).toBe(true);
   });
 
   it('Online-Events bekommen keinen physischen Ersatzort', () => {

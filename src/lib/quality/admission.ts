@@ -35,6 +35,7 @@
  */
 
 import { isMunicipalService } from '@/lib/category-classifier/municipal-service';
+import { isBlockedPerformer } from '@/lib/quality/blocked-performers';
 
 /** `reject` = gar nicht schreiben. `quarantine` = schreiben, aber nie publik. */
 export type AdmissionDecision = 'admit' | 'quarantine' | 'reject';
@@ -47,8 +48,12 @@ export type AdmissionReason =
   | 'invalid_end_date'
   | 'start_in_past'
   | 'end_before_start'
+  /** Gesperrte Person im Titel (`blocked-performers.ts`): nie schreiben, im Bestand halten. */
+  | 'blocked_performer'
   // ── quarantine ──────────────────────────────────────────────────
   | 'no_location_evidence'
+  /** DE ohne Position (fn-29.5): Ort nicht belegt, auf Karte und Listen ohnehin unsichtbar. */
+  | 'no_position'
   | 'placeholder_location'
   | 'region_contradicts_coords'
   | 'coords_outside_declared_country'
@@ -62,7 +67,11 @@ export type AdmissionReason =
  * (`applyAdmissionToPosition`) lässt Status und Position dafür unberührt;
  * zurückgehalten wird die Zeile trotzdem (Quarantäne → needs_review).
  */
-export const NON_LOCATION_REASONS: ReadonlySet<AdmissionReason> = new Set<AdmissionReason>(['start_too_far_ahead', 'municipal_service']);
+export const NON_LOCATION_REASONS: ReadonlySet<AdmissionReason> = new Set<AdmissionReason>([
+  'start_too_far_ahead',
+  'municipal_service',
+  'blocked_performer',
+]);
 
 /**
  * Freigabehorizont in Jahren ab heute (Wiener Kalendertag).
@@ -123,18 +132,18 @@ export interface AdmissionVerdict {
 
 export interface AdmissionOptions {
   /**
-   * Punkt-in-Polygon-Auflösung Koordinate → Bundesland-ID. In Produktion
-   * `bundeslandFromPolygon` aus `@/lib/eventim/bundesland-from-geo`;
-   * im Test ein Stub. Fehlt sie, entfällt die Gegenprobe still.
+   * Punkt-in-Polygon-Auflösung Koordinate → Bundesland-ID des deklarierten
+   * Landes (AT: `bundeslandFromPolygon`, DE: `deLandFromPolygon`, beide über
+   * `ortsdatenFor`); im Test ein Stub. Fehlt sie, entfällt die Gegenprobe still.
    */
-  regionOf?: (lat: number, lng: number) => string | null;
+  regionOf?: (lat: number, lng: number, country: string) => string | null;
   /**
    * PLZ → Bundesland-ID. Dritte, von Koordinate UND Label unabhängige
    * Stimme: sie entscheidet, welche der beiden widersprüchlichen Angaben
    * der Ausreisser ist. In Produktion `getBundeslandFromPLZ` aus
    * `@/lib/location/plz-bundesland`.
    */
-  plzRegionOf?: (plz: string) => string | null;
+  plzRegionOf?: (plz: string, country: string) => string | null;
   /** Referenzzeitpunkt (Tests). Default: jetzt. */
   now?: Date;
 }
@@ -144,6 +153,11 @@ const AT_LAT_MIN = 46.3;
 const AT_LAT_MAX = 49.1;
 const AT_LNG_MIN = 9.5;
 const AT_LNG_MAX = 17.2;
+// Deutschland-Rahmen — identisch zu src/lib/location/ortsdaten.ts (fn-29.2).
+const DE_LAT_MIN = 47.2;
+const DE_LAT_MAX = 55.1;
+const DE_LNG_MIN = 5.8;
+const DE_LNG_MAX = 15.1;
 
 /**
  * Ortsnamen, die keinen Ort benennen. Ein Scraper, der hier landet, hat
@@ -162,6 +176,12 @@ const PLACEHOLDER_LOCATIONS = new Set([
   'wird bekanntgegeben', 'siehe beschreibung', 'k a', 'keine angabe',
   '-', '--', '?',
 ]);
+
+/** Platzhalter-Orte aus Vorlagen: Musterort, Musterstadt, Musterstraße, test-ort (Willingshausen 2026-11), … */
+const SAMPLE_PLACE = /\b(?:muster|test-?)(?:ort|stadt|dorf|gemeinde|stra(?:ß|ss)e|str\.|platz|weg|park)\b/i;
+
+/** Ortsname eines Online-Termins (auch der Resolver, Status `online`). */
+export const ONLINE_LOCATION_PATTERN = /^(online|onlineevent|online-event|online event|virtuell|virtual|webinar|livestream|zoom)\b/i;
 
 /** US-/CA-Bundesstaatskürzel — nur als Endsegment einer Adresse ausgewertet. */
 const FOREIGN_STATE_CODES = new Set([
@@ -266,6 +286,15 @@ function isOutsideAtBox(lat: number, lng: number): boolean {
   return lat < AT_LAT_MIN || lat > AT_LAT_MAX || lng < AT_LNG_MIN || lng > AT_LNG_MAX;
 }
 
+function isOutsideDeBox(lat: number, lng: number): boolean {
+  return lat < DE_LAT_MIN || lat > DE_LAT_MAX || lng < DE_LNG_MIN || lng > DE_LNG_MAX;
+}
+
+/** Länder mit Ortsdaten (fn-29.2): eigener Rahmen und eigene Gegenprobe. */
+function isOutsideCountryBox(country: string, lat: number, lng: number): boolean {
+  return country === 'DE' ? isOutsideDeBox(lat, lng) : isOutsideAtBox(lat, lng);
+}
+
 /**
  * Unzweideutiges Auslands-Signal in einem Orts-/Adressfeld eines Events,
  * das als AT deklariert ist.
@@ -303,7 +332,12 @@ export function hasForeignPlaceSignal(value: string | null | undefined): boolean
  * Primary freigegeben werden (`underlyingStatus` in dedup-cluster.ts).
  */
 export function contentQuarantineReasons(input: { title?: string | null }): AdmissionReason[] {
-  return isMunicipalService(input.title) ? ['municipal_service'] : [];
+  const reasons: AdmissionReason[] = [];
+  if (isMunicipalService(input.title)) reasons.push('municipal_service');
+  // Im Vertrag ein Verwerfungsgrund (Zeile wird nie geschrieben); hier
+  // zusätzlich, damit Nachprüfung und Dedup eine vorhandene Zeile halten.
+  if (isBlockedPerformer(input.title)) reasons.push('blocked_performer');
+  return reasons;
 }
 
 /**
@@ -351,6 +385,7 @@ export function evaluateAdmission(
 
   // ── 1. Identität & Zeit — ohne die gibt es kein Event ──────────────
   if (!hasText(input.title)) rejects.push('missing_title');
+  else if (isBlockedPerformer(input.title)) rejects.push('blocked_performer');
 
   if (!hasText(input.start_date)) {
     rejects.push('missing_start_date');
@@ -392,6 +427,18 @@ export function evaluateAdmission(
     quarantines.push('no_location_evidence');
   }
 
+  // Deutschland (fn-29.5, Entscheidung 2026-10-28): ohne Position nicht
+  // veröffentlichen. Ein Ortsname ohne Gemeinde („Vereinsheim des HKC" im
+  // Amtskalender) ist kein Ort; was nicht sicher ist, wird nicht
+  // veröffentlicht. Online-Termine brauchen keine Position. Österreich
+  // bleibt unverändert.
+  if (
+    (input.country ?? '').toUpperCase() === 'DE' && !hasCoords && hasPlaceText &&
+    !ONLINE_LOCATION_PATTERN.test(input.location_name?.trim() ?? '')
+  ) {
+    quarantines.push('no_position');
+  }
+
   // Platzhalter-Ortsname ohne jede weitere Ortsangabe: der Scraper hat den
   // Ort nicht gefunden. Koordinaten zählen hier NICHT als Rettung — sie
   // stammen in genau diesen Fällen aus dem Platzhalter selbst
@@ -402,6 +449,16 @@ export function evaluateAdmission(
       quarantines.push('placeholder_location');
     }
   }
+  // Mustertext einer Vorlage („Musterstraße 1, 12345 Musterort"): kein Ort,
+  // auch nicht mit PLZ. Dreis-Brück zeigte 2026-10 208 Demo-Termine der
+  // Kalendervorlage („Prost, Musterstadt!"), die der Kalender-Kontext sonst
+  // der Gemeinde zuordnete (fn-29.5).
+  if (
+    !quarantines.includes('placeholder_location') &&
+    (SAMPLE_PLACE.test(input.location_name ?? '') || SAMPLE_PLACE.test(input.address ?? ''))
+  ) {
+    quarantines.push('placeholder_location');
+  }
 
   // ── 3. Widersprüche zwischen Ortsangaben ──────────────────────────
   if (hasCoords) {
@@ -409,7 +466,7 @@ export function evaluateAdmission(
     const lng = input.longitude!;
     const declaredCountry = (input.country ?? 'AT').toUpperCase();
 
-    if (declaredCountry === 'AT' && isOutsideAtBox(lat, lng)) {
+    if ((declaredCountry === 'AT' || declaredCountry === 'DE') && isOutsideCountryBox(declaredCountry, lat, lng)) {
       quarantines.push('coords_outside_declared_country');
     }
 
@@ -417,9 +474,9 @@ export function evaluateAdmission(
     // ein Ergebnis liefert UND ein Bundesland deklariert ist — ein
     // grenznaher Punkt ohne Polygon-Treffer bleibt unbewertet statt geraten.
     const regionOf = options.regionOf;
-    if (regionOf && hasText(input.bundesland) && !isOutsideAtBox(lat, lng)) {
+    if (regionOf && hasText(input.bundesland) && !isOutsideCountryBox(declaredCountry, lat, lng)) {
       const declared = input.bundesland!.trim().toLowerCase();
-      const actual = regionOf(lat, lng);
+      const actual = regionOf(lat, lng, declaredCountry);
 
       if (actual && actual !== declared) {
         // Zwei Angaben widersprechen sich; eine davon ist falsch. Statt zu
@@ -435,7 +492,7 @@ export function evaluateAdmission(
         // Nur 9 Fälle bleiben unauflösbar.
         const plzRegion =
           options.plzRegionOf && hasText(input.postal_code)
-            ? options.plzRegionOf(input.postal_code!.trim())
+            ? options.plzRegionOf(input.postal_code!.trim(), declaredCountry)
             : null;
 
         //
@@ -461,7 +518,7 @@ export function evaluateAdmission(
   }
 
   if (
-    (input.country ?? 'AT').toUpperCase() === 'AT' &&
+    ['AT', 'DE'].includes((input.country ?? 'AT').toUpperCase()) &&
     (hasForeignPlaceSignal(input.address) || hasForeignPlaceSignal(input.location_name))
   ) {
     quarantines.push('foreign_place_signal');

@@ -20,6 +20,7 @@ import { planAdmissionRecheck, protocolWith, type RecheckChange, type RecheckRow
 import { viennaDayBoundsUtc } from '../lib/pipeline/dedup-evidence';
 import { viennaToday } from '../lib/utils/event-time';
 import { reportStepReason } from '../lib/pipeline/step-reason';
+import { forCountry, pipelineCountry } from '../lib/pipeline/pipeline-country';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -53,19 +54,21 @@ const LIMITS = {
 const CHUNK = 200;
 const CONCURRENCY = 8;
 
-type ScanRow = RecheckRow & { source_name: string | null; last_seen_at: string | null };
+type ScanRow = RecheckRow & { source_name: string | null; last_seen_at: string | null; country: string | null };
 
 async function main() {
   const now = new Date();
   const fromIso = viennaDayBoundsUtc(viennaToday(now))[0];
   const rows: ScanRow[] = [];
+  // Im getrennten Lauf nur das eigene Land (pipeline-country.ts).
+  const country = pipelineCountry();
   await forEachPage<ScanRow>(
     (from, to) =>
-      supabase
+      forCountry(supabase
         .from('events')
-        .select('id,title,start_date,publish_status,quality_score,location_status,source_name,last_seen_at,reasons:location_resolution->reasons')
+        .select('id,title,start_date,publish_status,quality_score,location_status,source_name,last_seen_at,country,reasons:location_resolution->reasons')
         .gte('start_date', fromIso)
-        .in('publish_status', ['published', 'published_low_confidence', 'needs_review'])
+        .in('publish_status', ['published', 'published_low_confidence', 'needs_review']), country)
         .order('id')
         .range(from, to) as unknown as PromiseLike<{ data: ScanRow[] | null; error: { message: string } | null }>,
     (page) => { rows.push(...page); },
@@ -108,24 +111,35 @@ async function main() {
     console.log(`  Bericht: ${REPORT_PATH}`);
   }
 
-  const over: string[] = [];
-  if (holds > LIMITS.maxHolds) over.push(`${holds} Haltungen > ${LIMITS.maxHolds}`);
-  if (releases > LIMITS.maxReleases) over.push(`${releases} Freigaben > ${LIMITS.maxReleases}`);
-  if (over.length > 0) {
-    const why = over.join(', ');
-    console.error(`[admission-recheck] Sicherheitsventil, nichts geschrieben: ${why}`);
-    reportStepReason(`Sicherheitsventil, nichts geschrieben: ${why}`);
-    process.exit(1);
+  // Ventil je Land (fn-29.18): ein Stopp für die deutschen Zeilen hält die
+  // österreichischen nicht auf, und umgekehrt.
+  const countryOf = (id: string) => byId.get(id)!.country ?? 'AT';
+  const stopped = new Map<string, string>();
+  for (const country of new Set(changes.map(c => countryOf(c.id)))) {
+    const mine = changes.filter(c => countryOf(c.id) === country);
+    const h = mine.filter(c => c.action === 'hold').length;
+    const r = mine.filter(c => c.action === 'release').length;
+    const over: string[] = [];
+    if (h > LIMITS.maxHolds) over.push(`${h} Haltungen > ${LIMITS.maxHolds}`);
+    if (r > LIMITS.maxReleases) over.push(`${r} Freigaben > ${LIMITS.maxReleases}`);
+    if (over.length > 0) stopped.set(country, over.join(', '));
   }
-  if (DRY_RUN || changes.length === 0) {
-    console.log(DRY_RUN ? '[admission-recheck] Dry-Run, nichts geschrieben.' : '[admission-recheck] Nichts zu tun.');
+  const stopReason = [...stopped].map(([c, why]) => `${c}: ${why}`).join('; ');
+  if (stopped.size > 0) console.error(`[admission-recheck] Sicherheitsventil, nicht geschrieben: ${stopReason}`);
+  const toWrite = changes.filter(c => !stopped.has(countryOf(c.id)));
+  if (DRY_RUN || toWrite.length === 0) {
+    console.log(DRY_RUN ? '[admission-recheck] Dry-Run, nichts geschrieben.' : '[admission-recheck] Nichts zu schreiben.');
+    if (!DRY_RUN && stopped.size > 0) {
+      reportStepReason(`Sicherheitsventil, nicht geschrieben: ${stopReason}`);
+      process.exit(1);
+    }
     return;
   }
 
   // Volles Protokoll erst für die Zeilen, die sich ändern: der Scan liest
   // nur die Gründe. updated_at sichert gegen einen parallelen Schreiber.
   const full = new Map<string, { location_resolution: Record<string, unknown> | null; updated_at: string | null; publish_status: string | null }>();
-  const ids = changes.map(c => c.id);
+  const ids = toWrite.map(c => c.id);
   for (let i = 0; i < ids.length; i += CHUNK) {
     const { data, error } = await supabase
       .from('events')
@@ -141,7 +155,7 @@ async function main() {
   let written = 0;
   let skipped = 0;
   const errors: string[] = [];
-  const queue = [...changes];
+  const queue = [...toWrite];
   async function worker() {
     for (let c = queue.shift(); c; c = queue.shift()) {
       const row = full.get(c.id);
@@ -159,9 +173,14 @@ async function main() {
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
   console.log(`[admission-recheck] geschrieben ${written}, übersprungen ${skipped} (parallel geändert), Fehler ${errors.length}`);
+  const failures: string[] = [];
+  if (stopped.size > 0) failures.push(`Sicherheitsventil, nicht geschrieben: ${stopReason}`);
   if (errors.length > 0) {
     console.error(errors.slice(0, 10).join('\n'));
-    reportStepReason(`${errors.length} Schreibfehler, z. B. ${errors[0]}`);
+    failures.push(`${errors.length} Schreibfehler, z. B. ${errors[0]}`);
+  }
+  if (failures.length > 0) {
+    reportStepReason(failures.join('; '));
     process.exit(1);
   }
 }

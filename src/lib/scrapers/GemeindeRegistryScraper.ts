@@ -51,8 +51,6 @@ export function registryEventId(
   start: string,
   legacy?: { title: string; form?: string; start?: string },
 ): Pick<ScrapedEvent, 'source_id' | 'previous_source_id'> {
-  const hashId = (f: string, t: string, s: string) =>
-    `registry-${f}-${createHash('sha256').update(t + s).digest('hex').slice(0, 16)}-${s.slice(0, 10)}`;
   const shortId = (f: string, t: string, s: string) =>
     `registry-${f}-${Buffer.from(t + s).toString('base64').substring(0, 24)}`;
   const old = { form: legacy?.form ?? form, title: legacy?.title || title, start: legacy?.start ?? start };
@@ -63,6 +61,59 @@ export function registryEventId(
     source_id: hashId(form, title, start),
     previous_source_id: [hashId(old.form, old.title, old.start), shortId(old.form, old.title, old.start)],
   };
+}
+
+const hashId = (form: string, title: string, start: string) =>
+  `registry-${form}-${createHash('sha256').update(title + start).digest('hex').slice(0, 16)}-${start.slice(0, 10)}`;
+
+/** Wandzeit `YYYY-MM-DDTHH:MM:SS` um ganze Stunden verschoben. */
+const shiftWallTime = (start: string, hours: number) =>
+  new Date(Date.parse(`${start}Z`) + hours * 3_600_000).toISOString().slice(0, 19);
+
+/**
+ * source_id ohne Uhrzeit, für Kalender, deren Uhrzeiten von Import zu Import
+ * wechseln (Registry-Eintrag `unstableTimes`).
+ *
+ * innsbrucktermine.at zeigt je Termin mal die richtige Uhrzeit, mal eine
+ * Stunde früher, in Liste, Detailseite und `?date=` gleich (03.11.2026
+ * gegen den Spielplan des Landestheaters: bei allen 22 Terminen mit zwei
+ * Lesarten war die abweichende eine Stunde zu früh, „Jazz & Apéro" 18.11.
+ * stand an dem Tag mit 17:30 statt 18:30 auf der Seite). Es kippt mit den
+ * eigenen Importen der Seite (`dateModified`), in beide Richtungen und vor
+ * wie nach dem Ende der Sommerzeit. Mit Titel + Beginn als ID bekam jede
+ * Lesart eine eigene Zeile; die alte blieb neben der neuen stehen (Prod
+ * 2026-11-03: 27 Seiten-Tage mit zwei bis acht Zeilen), und der Dedup ließ
+ * die Feratel-Zeile wegen der Mehrdeutigkeit mit keiner zusammen.
+ *
+ * Die ID ist hier Titel, Wiener Tag und der Rang des Beginns unter den
+ * Terminen des Titels an diesem Tag: zwei Vorstellungen am Vormittag
+ * bleiben zwei Zeilen, eine Lesart verschiebt den Beginn nur, nicht die
+ * Reihenfolge. Die bisherigen IDs beider Lesarten (Beginn und Beginn ± 1 h)
+ * gehen als previous_source_id mit; die Übernahme behält die Zeile der
+ * aktuellen Lesart und zieht die der anderen zurück (source-id-migration.ts).
+ *
+ * Nur Termine, deren ID sich aus Titel und Beginn nachrechnen lässt.
+ */
+export function withoutStartTime(events: ScrapedEvent[]): void {
+  const keyed = events.flatMap(e => {
+    const form = e.source_id.match(/^registry-([a-z0-9]+)-/)?.[1];
+    return form && e.source_id === hashId(form, e.title, e.start_date) ? [{ e, form }] : [];
+  });
+  const starts = new Map<string, string[]>();
+  for (const { e, form } of keyed) {
+    const group = `${form}|${e.title}|${e.start_date.slice(0, 10)}`;
+    starts.set(group, [...new Set([...(starts.get(group) ?? []), e.start_date])].sort());
+  }
+  for (const { e, form } of keyed) {
+    const day = e.start_date.slice(0, 10);
+    const rank = starts.get(`${form}|${e.title}|${day}`)!.indexOf(e.start_date);
+    const readings = e.start_date.includes('T')
+      ? [-1, 1].map(h => hashId(form, e.title, shiftWallTime(e.start_date, h)))
+      : [];
+    const previous = Array.isArray(e.previous_source_id) ? e.previous_source_id : [e.previous_source_id];
+    e.previous_source_id = [e.source_id, ...readings, ...previous].filter((id): id is string => !!id);
+    e.source_id = hashId(form, e.title, `${day}#${rank}`);
+  }
 }
 
 /** Alle Registry-Einträge; Dateiname = Bundesland, Ortsdaten nur aus der Stammdatei. */
@@ -135,12 +186,16 @@ export class GemeindeRegistryScraper extends BaseScraper {
   async scrape(): Promise<ScrapedEvent[]> {
     const registry = this.loadRegistry();
     const bundeslandFilter = process.env.REGISTRY_BUNDESLAND?.toLowerCase();
+    // Eine Gemeinde nach Namen (Prüfstand, Handbetrieb), wie der Bundesland-Filter ohne Cursor.
+    const gemeindeFilter = process.env.REGISTRY_GEMEINDE?.toLowerCase();
+    const filter = bundeslandFilter || gemeindeFilter;
     const scrapeable = registry.filter(e =>
       isScrapeableEntry(e) &&
-      (!bundeslandFilter || e.bundesland.toLowerCase().includes(bundeslandFilter))
+      (!bundeslandFilter || e.bundesland.toLowerCase().includes(bundeslandFilter)) &&
+      (!gemeindeFilter || e.name.toLowerCase() === gemeindeFilter)
     );
 
-    this.log(`Starte Registry-Scraping: ${scrapeable.length} scrapbare Gemeinden von ${registry.length} total${bundeslandFilter ? ` (Filter: ${bundeslandFilter})` : ''}`);
+    this.log(`Starte Registry-Scraping: ${scrapeable.length} scrapbare Gemeinden von ${registry.length} total${filter ? ` (Filter: ${filter})` : ''}`);
 
     const allEvents: ScrapedEvent[] = [];
     const paginationLog: PaginationLogEntry[] = [];
@@ -154,10 +209,10 @@ export class GemeindeRegistryScraper extends BaseScraper {
     // 800 (Prod 2026-10). Beim Abbruch geht das Teilergebnis in den Sync,
     // und der nächste Lauf setzt nach der zuletzt bearbeiteten Gemeinde
     // fort: volle Abdeckung in drei Nächten (BaseScraper.resumeAfterCursor).
-    // Ein auf ein Bundesland gefilterter Lauf (Handbetrieb) liest und
+    // Ein gefilterter Lauf (Handbetrieb) liest und
     // schreibt keinen Cursor, sonst verschöbe er die Nachtläufe.
     const deadline = this.softDeadline();
-    const rotated = bundeslandFilter ? scrapeable : this.resumeAfterCursor(scrapeable, registryCursorKey);
+    const rotated = filter ? scrapeable : this.resumeAfterCursor(scrapeable, registryCursorKey);
 
     for (let i = 0; i < rotated.length; i++) {
       if (Date.now() > deadline) {
@@ -186,7 +241,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         failed++;
         this.log(`  [${i + 1}/${scrapeable.length}] ${entry.name}: FEHLER - ${err instanceof Error ? err.message : err}`);
       }
-      if (!bundeslandFilter) this.markReached(registryCursorKey(entry));
+      if (!filter) this.markReached(registryCursorKey(entry));
       await this.sleep(this.gemeindeDelayMs);
     }
 
@@ -279,6 +334,8 @@ export class GemeindeRegistryScraper extends BaseScraper {
       eventsPage1,
       eventsTotal: events.length,
     });
+
+    if (entry.unstableTimes) withoutStartTime(events);
 
     // Detail-fetch enrichment — same pattern as Gem2GoScraper. Universal
     // extractor handles JSON-LD/og-meta/regex layers regardless of CMS.
@@ -1468,6 +1525,8 @@ interface GemeindeRegistryConfig {
   verifiedAt: string;
   /** Gemeinsame Seite mehrerer Gemeinden (siehe gemeinde-context.ts). */
   region?: boolean;
+  /** Uhrzeiten wechseln von Import zu Import der Seite: ID ohne Uhrzeit (withoutStartTime). */
+  unstableTimes?: boolean;
 }
 
 type GemeindeRegistryEntry = GemeindeRegistryConfig & GemeindeStammdaten & { listName: string };

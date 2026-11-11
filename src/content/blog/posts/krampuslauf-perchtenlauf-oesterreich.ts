@@ -7,34 +7,76 @@ export const post: FestivalPost = {
   "subtitle": "Termine, Regionen und der Unterschied zwischen Krampus und Percht",
   "heroImage": "/images/categories/fest-1.jpg",
   "publishDate": "2026-10-07",
-  "updatedDate": "2026-10-07",
+  "updatedDate": "2026-11-05",
+  "factSources": {
+    "checkedAt": "2026-09-10",
+    "urls": [
+      "https://www.gasteinertal.com/gasteiner-perchtenlauf/",
+      "https://www.oeticket.com/noapp/event/nikolausfahrt-mit-dem-waelderbaehnle-2026-waelderbaehnlefahrt-22243983/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/voodoo-juergens-die-ansa-panier-das-krampuskraenzchen-orpheum-graz-21716964/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/drei-haselnuesse-fuer-aschenbroedel-das-musical-museumsquartier-wien-21179310/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/stiegl-brauwelt-krampuskraenzchen-stiegl-brauwelt-22235183/?affiliate=J70",
+      "https://gmundnerberghaus.at/",
+      "https://eventfrog.at/de/p/konzerte/pop-rock/ostwaerts-krampusgig-wiener-neustadt-7499799133131117606.html",
+      "https://www.woerthersee.com/advent/velden",
+      "https://www.jerzens.gv.at/system/web/veranstaltung.aspx?detailonr=226738625-2511&menuonr=218657507&sprache=1",
+      "https://www.pinkafeld.gv.at/event/krampuslauf-2/",
+      "http://www.linztermine.at/event/722834",
+      "https://www.oeticket.com/noapp/event/nikolausfahrt-mit-dem-waelderbaehnle-2026-waelderbaehnlefahrt-22244046/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/kasperl-und-der-nikolaus-marktgemeinde-vasoldsberg-sitzungssaal-21483792/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/brennholz-rocks-nikolaus-sause-das-gegenteil-von-sommer-kabarett-niedermair-21617379/?affiliate=J70",
+      "https://www.gemeindegrossarl.at/Krampusschiessen_Gewehr_und_Pistole_2",
+      "https://www.eberschwang.at/2026_-_Nikolausauffahrt_mit_Adventmarkt",
+      "https://www.korneuburg.gv.at/Nikolausfeier_9",
+      "https://www.klein-st-paul.gv.at/system/web/veranstaltung.aspx?detailonr=225328777-459&gnr_search=459&menuonr=220451548&typ=0",
+      "http://www.krampusgruppe-haiming.at",
+      "http://www.loipersbach.info",
+      "https://kupfticket.com/events/konzert-zum-nikolaustag",
+      "https://www.oeticket.com/noapp/event/nikolausfahrt-mit-dem-waelderbaehnle-2026-waelderbaehnlefahrt-22241256/?affiliate=J70",
+      "https://www.steiermark.com/de/Oststeiermark",
+      "https://www.oeticket.com/noapp/event/nikolaus-habjan-friends-puppe-pfiff-und-poesie-wiener-konzerthaus-22064380/?affiliate=J70",
+      "https://www.grossarltal.info",
+      "https://www.altmuenster.at/Nikolaushausbesuche_1",
+      "https://www.langenlois.gv.at/NIKOLAUS-BUFFET_IM_RESTAURANT_SCHLOSS_HAINDORF",
+      "http://www.pyramidenkogel.info",
+      "http://www.feuerwehr-tarrenz.at/",
+      "https://www.hotel-wende.at/kulinarik",
+      "https://kupfticket.com/events/nikolaus-slaughterhouse-26",
+      "https://www.oeticket.com/noapp/event/nikolausfahrt-mit-dem-waelderbaehnle-2026-waelderbaehnlefahrt-22243867/?affiliate=J70",
+      "https://www.bauernhofer.at/",
+      "https://www.oeticket.com/noapp/event/whats-my-age-again-krampus-special-flex-22364037/?affiliate=J70",
+      "https://www.salzkammergut.at/veranstaltungen",
+      "https://www.bergethermestadt.at/oesterreich-veranstaltung/detail/430299753/perch",
+      "https://www.gaweinstal.at/system/web/veranstaltung.aspx?detailonr=228063152-715&gnr_search=715&menuonr=218494665&typ=0"
+    ]
+  },
   "readingTime": 7,
-  "excerpt": "Zwischen Mitte November und dem 6. Jänner ziehen Krampusse und Perchten durch Österreichs Orte, und viele wissen nicht genau, wer da eigentlich vor ihnen steht. Hier findest du für alle neun Bundesländer Läufe, Kulturtipps für die Abende dazwischen, den Unterschied zwischen Krampus und Percht und Tipps fürs Zuschauen mit Kindern.",
+  "excerpt": "Von der Kinder-Krampusgruppe in Velden bis zur Perchtenraunacht in Steinbach an der Steyr: Hier findest du Krampus- und Perchtentermine aus allen neun Bundesländern. Dazu erfährst du, warum der Krampus zum Nikolaus gehört und die Percht zu den Rauhnächten.",
   "category": "Kultur & Tradition",
   "categoryColor": "bg-amber-900 text-white",
   "keyFacts": {
-    "dates": "Krampus-Saison: Mitte November bis 20. Dezember 2026, Krampusnacht am Samstag, 5. Dezember 2026. Perchten-Saison: 21. Dezember 2026 bis 6. Jänner 2027 (Rauhnächte)",
-    "location": "Ganz Österreich, alle neun Bundesländer",
-    "address": "Verschiedene Orte, je nach Lauf und Veranstaltung",
-    "genre": "Brauchtum: Krampusläufe, Perchtenläufe, dazu Kabarett und Bühne in der Saison",
-    "price": "Je nach Veranstaltung; die Kulturtipps im Guide liegen zwischen 20,50 € und 115,70 €",
+    "dates": "Krampus-Saison: Mitte November bis 20. Dezember 2026 (Krampusnacht: Samstag, 5. Dezember 2026). Perchten-Saison: 21. Dezember 2026 bis 6. Jänner 2027 (Rauhnächte)",
+    "location": "Ganz Österreich, Tipps aus allen neun Bundesländern",
+    "address": "Je nach Veranstaltung, siehe Tipps pro Bundesland",
+    "genre": "Brauchtum: Krampusläufe, Perchtenläufe, Nikolausfeiern",
+    "price": "Viele Läufe bei freiem Eintritt; Veranstaltungen im Guide z. B. ab 8,00 € (Kasperl und der Nikolaus, Vasoldsberg)",
     "website": "lasstreffen.at"
   },
-  "intro": "Es ist früh dunkel, die Luft riecht nach Punsch und kaltem Rauch, und irgendwo hinter der Absperrung fängt es an zu scheppern. Erst hörst du die Glocken, dann siehst du die Hörner im Fackellicht. Wenn du schon einmal am Straßenrand gestanden bist, während ein Krampuslauf vorbeizieht, kennst du dieses Kribbeln zwischen Gänsehaut und Lachen. Heuer fällt die Krampusnacht auf Samstag, den 5. Dezember 2026, der Nikolaus kommt am Sonntag, den 6. Dezember, der zugleich der zweite Adventsonntag ist. Die Krampus-Saison läuft von Mitte November bis zum 20. Dezember, danach übernehmen ab dem 21. Dezember bis zum 6. Jänner die Perchten in den Rauhnächten. In diesem Guide findest du, was du in diesen Wochen in jedem Bundesland unternehmen kannst, vom Lauf im Ort bis zum Kabarettabend danach.",
-  "historyTitle": "Krampus oder Percht? Der Unterschied, kurz erklärt",
-  "history": "Auch wenn beide zottelig sind, Hörner tragen und Lärm machen: Krampus und Percht gehören zu unterschiedlichen Bräuchen und zu unterschiedlichen Zeiten. Der Krampus ist christlich geprägt und der Begleiter des Nikolaus. Während der Heilige die braven Kinder beschenkt, ist der Krampus mit Rute, schwarzem Fell, herausgestreckter Zunge und tiefen Glocken für die Ermahnung zuständig. Seine Zeit reicht von Mitte November bis zum 20. Dezember, mit dem Höhepunkt in der Krampusnacht am 5. Dezember. Regional hat er andere Namen: In Teilen Tirols und Salzburgs heißt er Klaubauf, vielerorts sagt man Tuifl oder Teifl, also Teufel. Das hörst du auch in Namen wie dem Paternioner Teiflstreibn in Kärnten oder den Seldar Gletschertuifl in Sölden. Die Percht dagegen geht auf vorchristliche alpenländische Winterbräuche zurück und hat ihre Zeit in den Rauhnächten zwischen dem 21. Dezember und dem 6. Jänner. Ihre Masken wirken archaischer, sind oft schwerer und kunstvoll geschnitzt, mit mehreren Hörnern, Pferdeschweif und lauten Schellen. Bei den Perchten gibt es zwei Seiten: Die Schiachperchten sind die wilden, hässlichen Gestalten, die mit Lärm den Winter und böse Geister vertreiben sollen. Die Schönperchten sind hell und prächtig geschmückt und stehen für Segen, Fruchtbarkeit und die Rückkehr des Lichts. Merken kannst du es dir so: Kommt die Gestalt mit dem Nikolaus und vor Weihnachten, ist es ein Krampus. Zieht sie zwischen Wintersonnenwende und Dreikönig durch den Ort, ist es eine Percht. Dass viele Veranstalter ihre Krampusläufe trotzdem Perchtenlauf nennen, sorgt jedes Jahr für Verwechslungen.",
-  "whatToExpectTitle": "Was du unternehmen kannst: Tipps für alle neun Bundesländer",
-  "whatToExpect": "Ein ehrlicher Hinweis vorweg: Die Termine der einzelnen Krampus- und Perchtenläufe für 2026 haben wir noch nicht an Primärquellen verifiziert. Wir nennen dir deshalb bekannte Läufe und Orte ohne Datum. Schau vor der Anreise beim jeweiligen Veranstalter oder Tourismusverband nach. Fix sind dagegen die Kulturtermine aus unserer Datenbank, die sich gut mit einem Lauf kombinieren lassen.\n\nWien: Für 2026 sind uns noch keine Wiener Krampus- oder Perchtenläufe angekündigt. In früheren Jahren gab es Perchtenumzüge im Prater, ob sie heuer wieder stattfinden, ist offen. Fix ist dafür Kabarett: Andreas Ferner spielt „Bro-Fessor, checkst du!?“ am 3. Dezember 2026 in der Kulisse (33,00 €), am Vorabend der Krampusnacht.\n\nNiederösterreich: Hier ist die Dichte an Läufen hoch, bekannt sind etwa der Krampuslauf in Kematen an der Ybbs, der Krampuslauf in Wilhelmsburg und der Korneuburger Teifllauf. Termine bitte beim Veranstalter prüfen. Für einen Abend dazwischen: „Kugel &amp; Keks“ mit den Kernölamazonen am 3. Dezember 2026 im Stadtsaal Krems (31,00 bis 42,00 €) oder maschek mit „Das war 2026“ am 10. Dezember 2026 auf der Bühne im Hof (38,90 €).\n\nBurgenland: Ein bestätigter Lauf für 2026 ist uns noch nicht bekannt, ein Perchtenlauf auf Burg Forchtenstein ist im Gespräch, aber noch ohne Datum. Als Ausklang der Rauhnächte und darüber hinaus: „Schwanensee“ mit der International Ballet Company Italia am 30. Jänner 2027 in Eisenstadt (65,90 bis 77,30 €).\n\nSteiermark: In Graz gibt es den Grazer Krampuslauf am Freiheitsplatz mit Kinderprogramm, dazu Läufe etwa in Klöch und Schladming. Den genauen Termin 2026 schau bitte bei Graz Tourismus nach. Auf der Bühne: Andreas Ortner und Markus Perner mit „Therapie Deluxe“ am 20. November 2026 in der Stadthalle Fürstenfeld (24,50 €) und Omar Sarsam mit „STIMMT“ am 9. Jänner 2027 im Orpheum Graz (39,50 bis 44,50 €).\n\nKärnten: In Klagenfurt laufen die Klagenfurter Spitzbuam heuer ihren ersten eigenen Krampuslauf, dazu kommen das Krampustreiben der Seenteufel in Keutschach, der Krampuslauf in Bad Kleinkirchheim und das Paternioner Teiflstreibn. Termine bitte beim Veranstalter prüfen. Mitten in den Rauhnächten: maschek mit „Das war 2026“ am 29. Dezember 2026 im Konzerthaus Klagenfurt, Großer Saal (26,40 bis 40,40 €). Schon früher in der Saison liest Martina Parker „Miss Vergnügen“ am 12. November 2026 in der Buchhandlung HEYN (20,50 €).\n\nOberösterreich: Bekannt sind unter anderem der Krampuslauf in Lenzing mit Kinderzone und der Lauf der Linzer Krampusse. Termine für 2026 bitte vorab prüfen. Im Kubinsaal am Schlosspark gibt es in der Krampuszeit dichtes Kabarett: Bernhard Viktorin am 25. November (37,50 €), Stockenreitner und Tare am 27. November (32,90 €), Nadja Maleh am 28. November (32,90 bis 35,20 €) und Christian Bumeder am 19. Dezember 2026 (23,50 bis 26,50 €).\n\nSalzburg: Der Krampusrummel in Saalfelden gehört zu den großen Treffen, in Niedernsill gibt es ein eigenes Kinder-Krampusevent. Termine bitte beim Veranstalter prüfen. Wichtig: Der berühmte Gasteiner Perchtenlauf findet nur alle vier Jahre statt. Nach Jänner 2026 ist der nächste erst im Jänner 2030. Für ruhigere Abende: Fritz Karl und das Streichquartett Sonare mit „Ausgerechnet Weihnachten“ am 12. Dezember 2026 im K.U.L.T. (32,50 €) oder „Weihnachten mit Friedrich von Thun“ am 18. Dezember 2026 im Großen Saal der Stiftung Mozarteum (36,80 bis 76,10 €).\n\nTirol: Die Seldar Gletschertuifl in Sölden feiern Jubiläum, dazu gibt es Läufe etwa in Prutz, Igls, Seefeld, Kundl und Rattenberg. Termine bitte vor Ort prüfen. Gleich zu Beginn der Rauhnächte läuft „Drei Haselnüsse für Aschenbrödel“ auf Rosalie-Tour am 22. Dezember 2026 im CONGRESS, Saal Tirol (41,75 bis 90,49 €).\n\nVorarlberg: In Fußach gibt es eine Krampusshow und einen Krampustag. Termine bitte beim Veranstalter prüfen. Zum Ende der Perchtenzeit: maschek mit „Das war 2026“ am 7. Jänner 2027 im Spielboden Dornbirn (39,70 €), und „Drei Haselnüsse für Aschenbrödel“ am 19. Jänner 2027 im Kulturhaus Dornbirn (41,75 bis 90,49 €).",
+  "intro": "Es wird früh dunkel, auf dem Dorfplatz riecht es nach Glühwein, und dann hörst du sie, bevor du sie siehst: ein tiefes, rhythmisches Scheppern von Glocken, das immer näher kommt. Wenn die ersten Gestalten mit Fell, Hörnern und geschnitzten Larven aus dem Nebel treten, rücken die Kinder ein Stück näher an Mama und Papa heran. Krampus- und Perchtenläufe gehören zu den lautesten und eindrucksvollsten Bräuchen im österreichischen Winter. Die Krampusnacht fällt heuer auf Samstag, den 5. Dezember 2026, der Nikolaus kommt am Sonntag, 6. Dezember, und das ist zugleich der zweite Adventsonntag. Damit du nicht lange suchen musst, haben wir dir konkrete Termine aus allen neun Bundesländern zusammengestellt: vom Krampuslauf in Pinkafeld über das Krampuskränzchen im Grazer Orpheum bis zur nostalgischen Bahnfahrt zur Perchtenraunacht nach Steinbach an der Steyr.",
+  "historyTitle": "Krampus oder Percht? Der Unterschied einfach erklärt",
+  "history": "Auf den ersten Blick sehen sich Krampus und Percht zum Verwechseln ähnlich: Fell, Hörner, Glocken, furchteinflößende Holzmasken. Ihre Wurzeln und ihre Saison sind aber verschieden. Der Krampus ist christlich eingebunden. Er ist der Begleiter des Nikolaus, kommt mit Kette und Rute und nimmt sich die Kinder vor, die übers Jahr nicht ganz brav waren. Seine Zeit beginnt Mitte November und dauert bis 20. Dezember, Höhepunkt ist die Krampusnacht am 5. Dezember. Die Percht ist älter. Sie geht auf vorchristliche Winterrituale im bayerisch-österreichischen Alpenraum zurück und gehört in die Rauhnächte, also in die Zeit vom 21. Dezember bis 6. Jänner. Bei den Perchten gibt es zwei Seiten: Die Schiachperchten sind die „wilden“, mit handgeschnitzten Larven, Fangzähnen und Pferdeschweifen, die Dämonen und Geister vertreiben sollen. Die Schönperchten tragen helle Gewänder und prächtige Kopfbedeckungen und stehen für Segen, Fruchtbarkeit und das wiederkehrende Licht. Beide tragen Glocken, mit denen der Winter ausgetrieben wird. Im 20. Jahrhundert ist die Grenze zwischen beiden Figuren unschärfer geworden: Es entstanden Krampusperchten, und viele Gruppen nennen sich heute „Pass“. Darum siehst du auch im November Läufe, die „Perchtenlauf“ heißen. Und regional hat der Krampus viele Namen: Klaubauf ist eine alte Bezeichnung, die in Bayern und Teilen Österreichs gebräuchlich ist. Tuifl, also Teufel im Dialekt, hörst du vor allem im Westen, etwa in Tirol, und in Vorarlberg nennen sich Gruppen oft „Tüfl“.",
+  "whatToExpectTitle": "Krampus- und Perchtentermine 2026 in allen Bundesländern",
+  "whatToExpect": "**Wien:** In der Hauptstadt geht es heuer vor allem auf Bühnen zur Sache. Am Samstag, 5. Dezember, feiert das Flex die Krampusnacht mit „What's My Age Again: Krampus Special“ (13,00 €), eine Partynacht für Erwachsene. Für Familien gibt es am Sonntag, 6. Dezember, im Kabarett Niedermair „Brennholz.Rocks: Nikolaus Sause! Das Gegenteil von Sommer!“, ein Programm für Kinder ab 3 Jahren um 17,50 €.\n\n**Niederösterreich:** Am Freitag, 4. Dezember, lädt der Hauptplatz Korneuburg zur Nikolausfeier, der Eintritt ist frei. Am selben Abend spielt im Zentralkino der „Ostwärts Krampusgig“ (ab 23,00 €). In der Krampusnacht am 5. Dezember steigt in Purgstall (Schulgasse 3) das „Nikolaus Slaughterhouse“. Wer den Nikolaustag gemütlich angehen will, hat zwei Möglichkeiten: das Nikolaus-Frühstück im Weingut Zickl (22,90 €) oder das Nikolaus-Buffet im Restaurant von Hotel Schloss Haindorf (45,– €), beide am 6. Dezember.\n\n**Burgenland:** Hier beginnt die Saison früh. Schon am Freitag, 20. November, läuft der Krampuslauf in der Autohaus Frieszl Arena in Pinkafeld. In der Krampusnacht am Samstag, 5. Dezember, zieht der 17. Krampuslauf in Loipersbach über die Hauptstraße. Am Sonntag, 6. Dezember, kannst du den Nikolaustag beim Nikolausbrunch im Hotel Wende ausklingen lassen.\n\n**Steiermark:** Am Samstag, 21. November, hast du die Wahl zwischen dem Perchtenlauf auf der Brandlucken beim Brandluckner Huab'n Theater und dem Krampus-Kränzchen beim GH Jagawirt der Familie Schweiger in Gasen. Für die Kleinen gibt es am Freitag, 27. November, „Kasperl und der Nikolaus“ im Sitzungssaal der Marktgemeinde Vasoldsberg (8,00 €). In Graz selbst spielen am Sonntag, 6. Dezember, Voodoo Jürgens & Die Ansa Panier im Orpheum ihr „Krampuskränzchen“ (42,50 €).\n\n**Kärnten:** Rund um den Wörthersee ist im November einiges los. Am Sonntag, 22. November, heißt es am Pyramidenkogel „Der Nikolaus kommt!“ mit dem Pyramidenkogellauf der Pyramidenkogel Pass. Am Samstag, 28. November, besucht die Kinder-Krampusgruppe Lind-Rajach den Gemonaplatz in Velden, ein guter Einstieg für Familien. Am Sonntag, 29. November, kommt der Nikolaus zur Feuerwehr nach Klein St. Paul, um eine Spende wird gebeten.\n\n**Oberösterreich:** Am Freitag, 4. Dezember, gibt es eine Nikolausauffahrt mit Adventmarkt bei Pfarrkirche und Kirchenplatz (Eintritt frei), außerdem sind an diesem Tag Nikolaushausbesuche bei den Kindern im Gemeindegebiet angesetzt (Spende erbeten). Am Nikolaussonntag, 6. Dezember, lädt das Gmundnerberghaus zum Table Brunch (79,– € für Eintritt und Speisen, exkl. Getränke). Das Perchten-Highlight kommt in den Rauhnächten: Am Dienstag, 5. Jänner 2027, fährt die Steyrtal Museumsbahn zur Perchtenraunacht nach Steinbach an der Steyr. Erwachsene zahlen 21,– € einfach oder 28,– € hin und retour, Kinder von 6 bis 15 Jahren 10,50 € einfach oder 14,– € hin und retour.\n\n**Salzburg:** Am Samstag, 21. November, startet der Krampuslauf Stegmühle in Faistenau-Tiefbrunnau bei freiem Eintritt. Großarl im Pongau widmet dem Krampus gleich zwei Termine: das Krampusschießen mit Gewehr und Pistole im Sportschützenstüberl am Donnerstag, 26. November (15,– €), und den Jugend Krampuslauf am Marktplatz am Freitag, 27. November. Am Samstag, 28. November, feiert die Stiegl Brauwelt ihr Krampuskränzchen (17,93 €). Ein Hinweis für Perchtenfans: Der berühmte Gasteiner Perchtenlauf findet nur alle vier Jahre statt. Nach Jänner 2026 ist der nächste erst im Jänner 2030.\n\n**Tirol:** Am Samstag, 28. November, zieht der Krampuslauf Dorfrunde über den Gemeindeplatz. Tags darauf, am Sonntag, 29. November, gibt es einen Nikolauseinzug mit Krampeler und Markt am Dorfplatz. Am Freitag, 4. Dezember, lädt die Schützengilde Arzl zum „1. Nikolaus schiaße“.\n\n**Vorarlberg:** Hier kommt der Nikolaus mit dem Zug. Das Wälderbähnle bietet Nikolausfahrten am Freitag, 27. November, Samstag, 28. November, Sonntag, 29. November, und Donnerstag, 3. Dezember, an. Eine Fahrt kostet jeweils 25,30 €. Das ist eine ruhige, kindgerechte Alternative zu den lauten Abendläufen.",
   "whatToExpectList": [
-    "Krampusnacht am Samstag, 5. Dezember 2026: der Abend, an dem in vielen Orten die Krampusse unterwegs sind",
-    "Andreas Ferner, „Bro-Fessor, checkst du!?“, 3. Dezember 2026, Kulisse Wien, 33,00 €",
-    "Kernölamazonen, „Kugel & Keks“, 3. Dezember 2026, Stadtsaal Krems, 31,00 bis 42,00 €",
-    "Fritz Karl & Streichquartett Sonare, „Ausgerechnet Weihnachten“, 12. Dezember 2026, K.U.L.T. Salzburg, 32,50 €",
-    "„Drei Haselnüsse für Aschenbrödel“ / Rosalie-Tour, 22. Dezember 2026, CONGRESS Saal Tirol, 41,75 bis 90,49 €",
-    "maschek, „Das war 2026“, 29. Dezember 2026, Konzerthaus Klagenfurt, 26,40 bis 40,40 €",
-    "Omar Sarsam, „STIMMT“, 9. Jänner 2027, Orpheum Graz, 39,50 bis 44,50 €"
+    "Krampuslauf in der Autohaus Frieszl Arena Pinkafeld, Freitag 20. November (Burgenland)",
+    "Kinder-Krampusgruppe Lind-Rajach am Gemonaplatz Velden, Samstag 28. November (Kärnten)",
+    "17. Krampuslauf in Loipersbach in der Krampusnacht, Samstag 5. Dezember (Burgenland)",
+    "Voodoo Jürgens & Die Ansa Panier: Das Krampuskränzchen im Orpheum Graz, Sonntag 6. Dezember, 42,50 €",
+    "Jugend Krampuslauf am Marktplatz Großarl, Freitag 27. November (Salzburg)",
+    "Nikolausfahrten mit dem Wälderbähnle, 27. bis 29. November und 3. Dezember, je 25,30 € (Vorarlberg)",
+    "Perchtenraunacht in Steinbach an der Steyr mit Anreise per Steyrtal Museumsbahn, Dienstag 5. Jänner 2027 (Oberösterreich)"
   ],
-  "practicalInfoTitle": "Praktisch planen: Termine, Anreise und Zuschauen mit Kindern",
+  "practicalInfoTitle": "Gut vorbereitet zum Krampuslauf",
   "practicalInfo": [
     {
       "icon": "check",
@@ -64,35 +106,35 @@ export const post: FestivalPost = {
     {
       "icon": "📅",
       "label": "Wann ist was?",
-      "text": "Krampusse von Mitte November bis 20. Dezember, Höhepunkt in der Krampusnacht am Samstag, 5. Dezember 2026. Nikolaus ist am Sonntag, 6. Dezember, zugleich zweiter Adventsonntag. Perchten ziehen vom 21. Dezember bis 6. Jänner in den Rauhnächten. Einzelne Lauftermine bitte immer beim Veranstalter prüfen, viele werden erst kurzfristig fixiert."
+      "text": "Krampusläufe gibt es von Mitte November bis 20. Dezember, die Krampusnacht ist am Samstag, 5. Dezember 2026. Perchtenläufe gehören in die Rauhnächte vom 21. Dezember bis 6. Jänner. Uhrzeiten stehen nicht bei allen Terminen fest, schau vorher beim Veranstalter nach."
+    },
+    {
+      "icon": "👧",
+      "label": "Mit Kindern zuschauen",
+      "text": "Für den Einstieg eignen sich Kinder-Krampusgruppen wie in Velden, Nikolausfeiern oder die Wälderbähnle-Fahrt besser als große Abendläufe. Stell dich nicht in die erste Reihe, sondern mit etwas Abstand zur Absperrung, nimm kleine Kinder auf den Arm und besprich vorher, dass unter den Masken Menschen aus dem Ort stecken. Bei lauten Glocken hilft ein Gehörschutz für Kinder."
     },
     {
       "icon": "🚆",
       "label": "Anreise",
-      "text": "Rund um Läufe sind Ortszentren oft gesperrt und Parkplätze knapp. Wenn es geht, fahr öffentlich an, plane Wartezeiten ein und sei früh da, um noch einen Platz an der Absperrung zu bekommen."
+      "text": "Rund um Läufe sind Ortszentren oft gesperrt und Parkplätze knapp. Plane öffentliche Anreise oder einen kurzen Fußweg ein. Zur Perchtenraunacht in Steinbach an der Steyr fährst du stilvoll mit der Steyrtal Museumsbahn (Erwachsene 28,– € hin und retour, Kinder 6 bis 15 Jahre 14,– €)."
     },
     {
-      "icon": "👨‍👩‍👧",
-      "label": "Mit Kindern zuschauen",
-      "text": "Erklär deinem Kind vorher, dass unter jeder Maske ein Mensch steckt. Für Kleine ist ein Platz etwas weiter hinten oder auf den Schultern besser als die erste Reihe, wo Ruten und Gedränge am nächsten sind. Gehörschutz hilft gegen die lauten Glocken. Viele Orte haben eigene Kinderläufe oder Kinderprogramme, die meist früher am Nachmittag stattfinden und sanfter sind."
+      "icon": "💶",
+      "label": "Preise",
+      "text": "Viele Läufe und Nikolausfeiern sind gratis, etwa in Korneuburg oder Faistenau-Tiefbrunnau. Bei Feuerwehr- und Hausbesuchsaktionen wird um eine Spende gebeten. Kränzchen und Konzerte kosten Eintritt, zum Beispiel 17,93 € in der Stiegl Brauwelt oder 42,50 € im Orpheum Graz."
     },
     {
       "icon": "🧥",
-      "label": "Ausrüstung",
-      "text": "Warme Schuhe, Schichten und Handschuhe, weil du lange stehst. Trag Kleidung, bei der ein Rußfleck nicht stört, und lass empfindliche Taschen daheim. Halte Abstand zu Fackeln und Feuershows."
-    },
-    {
-      "icon": "🎟️",
-      "label": "Abende kombinieren",
-      "text": "Viele Kabarett- und Bühnenabende in der Saison sind schnell ausverkauft. Wenn du einen Lauf mit einem Theaterbesuch verbinden willst, sichere dir die Tickets früh, etwa für die maschek-Jahresrückblicke in Klagenfurt, Dornbirn oder Graz."
+      "label": "Kleidung und Verhalten",
+      "text": "Zieh dich warm und dunkel an, Ruß und Asche färben ab. Reize die Läufer nicht, halte dich an die Absperrungen und vereinbare mit Kindern einen fixen Treffpunkt, falls ihr euch im Gedränge verliert."
     }
   ],
   "lineup": [],
   "gallery": [],
-  "ctaText": "Events in der Krampus- und Perchtenzeit in ganz Österreich entdecken",
+  "ctaText": "Krampus- und Perchtenläufe in ganz Österreich entdecken",
   "ctaLink": "/entdecken",
-  "seoTitle": "Krampuslauf & Perchtenlauf 2026: Termine & Unterschied",
-  "seoDescription": "Krampus oder Percht? Krampusläufe und Perchtenläufe 2026, Tipps für alle neun Bundesländer und was du mit Kindern beim Zuschauen beachten solltest.",
+  "seoTitle": "Krampuslauf & Perchtenlauf 2026: Termine in Österreich",
+  "seoDescription": "Krampuslauf Termine 2026 in allen neun Bundesländern, von Graz bis Klagenfurt, plus der Unterschied zwischen Krampus und Percht und Tipps für Kinder.",
   "keywords": [
     "krampuslauf termine",
     "perchtenlauf",
@@ -102,20 +144,20 @@ export const post: FestivalPost = {
   ],
   "faqs": [
     {
-      "question": "Wann finden die Krampusläufe 2026 statt?",
-      "answer": "Die Krampus-Saison läuft von Mitte November bis zum 20. Dezember. Der wichtigste Abend ist die Krampusnacht am Samstag, 5. Dezember 2026, am Sonntag, 6. Dezember, kommt der Nikolaus. Die genauen Termine der einzelnen Läufe veröffentlichen die Veranstalter selbst, wir haben sie für 2026 noch nicht verifiziert. Schau deshalb vor der Anreise auf der Seite des jeweiligen Vereins oder Tourismusverbands nach."
+      "question": "Wann sind die Krampuslauf-Termine 2026?",
+      "answer": "Die Krampus-Saison läuft von Mitte November bis 20. Dezember. Die Krampusnacht ist am Samstag, 5. Dezember 2026, an dem Abend laufen zum Beispiel die Krampusse in Loipersbach im Burgenland. Frühe Termine sind etwa der Krampuslauf in Pinkafeld am 20. November und der Krampuslauf Stegmühle in Faistenau-Tiefbrunnau am 21. November."
     },
     {
       "question": "Was ist der Unterschied zwischen Krampus und Percht?",
-      "answer": "Der Krampus ist christlich geprägt, begleitet den Nikolaus und ist von Mitte November bis 20. Dezember unterwegs. Die Percht geht auf vorchristliche Winterbräuche zurück und zieht in den Rauhnächten vom 21. Dezember bis 6. Jänner. Bei den Perchten unterscheidet man die wilden Schiachperchten, die den Winter vertreiben sollen, und die prächtigen Schönperchten, die für Segen und Licht stehen. Regional heißt der Krampus auch Klaubauf oder Tuifl."
+      "answer": "Der Krampus ist christlich geprägt und begleitet den Nikolaus, seine Zeit reicht von Mitte November bis 20. Dezember. Die Percht stammt aus vorchristlichen Winterbräuchen und gehört zu den Rauhnächten vom 21. Dezember bis 6. Jänner. Bei den Perchten unterscheidet man die wilden Schiachperchten und die hell gekleideten Schönperchten. Regional heißt der Krampus auch Klaubauf oder Tuifl."
     },
     {
       "question": "Gibt es einen Krampuslauf in Graz?",
-      "answer": "Ja, der Grazer Krampuslauf findet am Freiheitsplatz statt und hat ein eigenes Kinderprogramm. Den genauen Termin für 2026 haben wir noch nicht verifiziert, bitte prüf ihn bei Graz Tourismus. Wer in Graz einen Abend in der Perchtenzeit verbringen will, kann Omar Sarsam mit „STIMMT“ am 9. Jänner 2027 im Orpheum Graz sehen (39,50 bis 44,50 €)."
+      "answer": "In Graz kannst du am Sonntag, 6. Dezember, das Krampuskränzchen von Voodoo Jürgens & Die Ansa Panier im Orpheum besuchen (42,50 €). Im steirischen Umland gibt es am 21. November den Perchtenlauf auf der Brandlucken und das Krampus-Kränzchen beim GH Jagawirt in Gasen. Für den großen Innenstadtlauf prüf den aktuellen Termin direkt beim Veranstalter."
     },
     {
-      "question": "Wo gibt es einen Krampuslauf in Klagenfurt?",
-      "answer": "Heuer laufen die Klagenfurter Spitzbuam ihren ersten eigenen Krampuslauf, in der Umgebung gibt es außerdem das Krampustreiben der Seenteufel in Keutschach. Den Termin bitte direkt beim Verein prüfen, wir haben ihn noch nicht verifiziert. In den Rauhnächten gibt es in Klagenfurt maschek mit „Das war 2026“ am 29. Dezember 2026 im Konzerthaus, Großer Saal (26,40 bis 40,40 €)."
+      "question": "Wann ist der Krampuslauf in Klagenfurt?",
+      "answer": "Einen bestätigten Termin für den Klagenfurter Krampuslauf haben wir für diesen Guide nicht, bitte schau dafür beim Veranstalter nach. Ganz in der Nähe kannst du am 22. November den Pyramidenkogellauf der Pyramidenkogel Pass erleben und am 28. November die Kinder-Krampusgruppe Lind-Rajach am Gemonaplatz in Velden."
     }
   ]
 };

@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/melanie-baker-club-lucia-21724023/?affiliate=J70",
   "publishDate": "2026-09-22",
   "updatedDate": "2026-09-22",
+  "factSources": {
+    "checkedAt": "2026-09-22",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/melanie-baker-club-lucia-21724023/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Melanie Baker sollte am 2. November 2026 im Club LUCIA in Wien spielen. Der Veranstalter Barracuda Music hat die FM4-Indiekiste-Show abgesagt. Alle Fakten, Hintergründe und Infos für Ticketkäufer.",
   "category": "Musik & Festival",

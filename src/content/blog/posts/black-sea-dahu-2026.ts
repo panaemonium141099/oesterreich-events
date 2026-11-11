@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/black-sea-dahu-everything-tour-2026-ppc-21324754/?affiliate=J70",
   "publishDate": "2026-09-06",
   "updatedDate": "2026-09-06",
+  "factSources": {
+    "checkedAt": "2026-09-06",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/black-sea-dahu-everything-tour-2026-ppc-21324754/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Tauchen Sie ein in die emotionale Welt von Black Sea Dahu, wenn die Band um Janine Cathrein ihr neues Album „Everything“ im ppc Graz präsentiert. Ein Abend voller tiefgründiger Musik und unvergesslicher Momente erwartet Sie.",
   "category": "Musik & Festival",

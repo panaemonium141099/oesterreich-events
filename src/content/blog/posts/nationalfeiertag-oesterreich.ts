@@ -16,6 +16,13 @@ export const post: FestivalPost = {
   heroImageCredit: 'Foto: Gerd Eichmann, CC BY-SA 4.0, Wikimedia Commons',
   publishDate: '2026-09-10',
   updatedDate: '2026-09-10',
+  factSources: {
+    checkedAt: '2026-09-10',
+    urls: [
+      'https://www.bmb.gv.at/Themen/schule/schulpraxis/termine/ferientermine_26_27.html',
+      'https://www.ris.bka.gv.at/Dokumente/BgblPdf/1965_298_0/1965_298_0.pdf',
+    ],
+  },
   readingTime: 8,
   excerpt:
     'Der Nationalfeiertag 2026 fällt auf einen Montag und startet zehn schulfreie Tage. Was in jedem Bundesland läuft, was am Feiertag offen hat und wie du mit vier Urlaubstagen auf neun freie kommst.',

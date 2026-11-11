@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/benefizkonzert-fuer-oswald-kiechle-altes-kino-rankweil-22156774/?affiliate=J70",
   "publishDate": "2026-10-02",
   "updatedDate": "2026-10-02",
+  "factSources": {
+    "checkedAt": "2026-10-02",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/benefizkonzert-fuer-oswald-kiechle-altes-kino-rankweil-22156774/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Am 6. November 2026 spielt die Band Austropopsch im Alten Kino Rankweil große Austropop-Hits. Die Spenden helfen Oswald Kiechle, ein behindertengerechtes Fahrzeug zu finanzieren.",
   "category": "Musik & Festival",

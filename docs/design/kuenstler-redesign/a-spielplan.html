@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Künstler A: Spielplan</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* Spielplan: der Tab ist ein Tourkalender für Österreich. Zeit zuerst: Tage als linke Spalte,
+   daneben wer an dem Tag spielt. Folgen ist eine Nebenhandlung in jeder Zeile. */
+.filters{display:flex;align-items:center;gap:8px;margin:16px 0 0;flex-wrap:wrap}
+.filters .chips{margin:0;flex:1;min-width:0}
+.filters .sel{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--h3);font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap}
+.filters .sel i{font-style:normal;color:var(--ink50);font-size:11px}
+
+.week{margin-top:34px}
+.week .hd{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+.week h2{margin:0;font-size:21px;font-weight:800;letter-spacing:-.03em}
+.week .hd span{font-size:13.5px;color:var(--ink50)}
+.week .hd em{margin-left:auto;font-style:normal;font-size:13px;color:var(--ink50)}
+.day{display:grid;grid-template-columns:110px 1fr;gap:0 28px;border-top:1px solid var(--h2);padding:14px 0 6px}
+.day .dt{position:sticky;top:76px;align-self:start;padding-top:4px}
+.day .dt b{display:block;font-size:30px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.day .dt small{display:block;font-size:13px;color:var(--ink50);margin-top:4px}
+.day .dt.today b{color:var(--amber)}
+.day .list{display:grid;grid-template-columns:1fr 1fr;gap:0 40px}
+.a{display:grid;grid-template-columns:46px 1fr 88px;gap:12px;align-items:center;padding:8px 0;border-top:1px solid var(--h1);cursor:pointer}
+.a:nth-child(1),.a:nth-child(2){border-top:0}
+.a .min{min-width:0}
+.a b{display:block;font-size:14.5px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a b i{font-style:normal;font-weight:600;color:var(--ink50);font-size:12.5px;margin-left:6px}
+.a small{display:block;font-size:12.5px;color:var(--ink50);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.a small em{font-style:normal;color:var(--ink70)}
+.a.fav b{color:var(--amber)}
+.more-week{margin:10px 0 0 138px;font-size:13px;font-weight:700;color:var(--ink70)}
+.later{margin-top:34px;padding-top:20px;border-top:1px solid var(--h2);display:grid;grid-template-columns:1fr 1fr;gap:0 40px}
+.later .hd{grid-column:1/-1;display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+.later h2{margin:0;font-size:21px;font-weight:800;letter-spacing:-.03em}
+.later .hd span{font-size:13.5px;color:var(--ink50)}
+.later .a{grid-template-columns:46px 1fr 88px}
+.later .a .d{font-size:12.5px;color:var(--ink70);font-weight:700;white-space:nowrap}
+@media(max-width:1000px){.day .list{grid-template-columns:1fr}.a:nth-child(2){border-top:1px solid var(--h1)}.later{grid-template-columns:1fr}}
+@media(max-width:720px){
+  .day{grid-template-columns:1fr;gap:0;padding-top:10px}
+  .day .dt{position:static;display:flex;align-items:baseline;gap:8px;margin-bottom:2px}
+  .day .dt b{font-size:17px}.day .dt small{margin:0}
+  .more-week{margin-left:0}
+  .week .hd em{display:none}
+  .filters .sel{height:34px}
+  .filters .chips{flex:1 1 100%}
+  .a b i{display:none}
+}
+</style></head><body>
+<script src="data.js"></script><script src="shared.js"></script>
+<script>document.write('<style>'+CHROME_CSS+'</style>');document.write(NAV)</script>
+
+<main class="wrap">
+  <header class="head">
+    <div><h1>Künstler</h1><p id="sub"></p></div>
+    <div class="searchbar">⌕ Künstler suchen oder Spotify-Link einfügen</div>
+  </header>
+
+  <div id="mine"></div>
+
+  <div class="filters">
+    <div class="chips"><span class="chip on">Alle</span><span class="chip">Konzerte</span><span class="chip">Kabarett</span><span class="chip">Bühne</span><span class="chip">Klassik &amp; Jazz</span></div>
+    <span class="sel">Ganz Österreich <i>▾</i></span>
+  </div>
+
+  <div id="plan"></div>
+</main>
+<div id="toast" role="status"></div>
+
+<script>
+const all = ARTISTS.filter(a => nextEvent(a));
+document.getElementById('sub').textContent = `${all.length} Künstler mit Terminen in Österreich, Stand heute`;
+document.getElementById('mine').innerHTML = mineHtml();
+
+// Spielplan: je Tag die Künstler, die an diesem Tag spielen; ein Künstler erscheint an jedem Tag
+// nur einmal. Diese und nächste Woche voll, danach nur der nächste Termin je Künstler.
+const byDay = new Map();
+for (const a of ARTISTS) for (const e of upcoming(a)) {
+  if (weekOf(e.iso) === 'later') continue;
+  if (!byDay.has(e.iso)) byDay.set(e.iso, new Map());
+  if (!byDay.get(e.iso).has(a.id)) byDay.get(e.iso).set(a.id, e);
+}
+const row = (a, e, withDate) => {
+  const rest = upcoming(a).length - 1;
+  return `<div class="a ${isFollowed(a.id) ? 'fav' : ''}" data-open="${a.id}">${avatar(a)}<span class="min"><b>${a.name}<i>${a.kind}</i></b><small>${withDate ? `<em>${e.day}</em>, ` : e.time ? `<em>${e.time}</em>, ` : ''}${cityLine(e)}${rest > 0 ? `, +${rest} weitere` : ''}</small></span>${followBtn(a.id)}</div>`;
+};
+let html = '';
+for (const wk of ['w1', 'w2']) {
+  const days = [...byDay.keys()].filter(d => weekOf(d) === wk).sort();
+  const count = new Set(days.flatMap(d => [...byDay.get(d).keys()])).size;
+  html += `<section class="week"><div class="hd"><h2>${WEEKS[wk][0]}</h2><span>${WEEKS[wk][1]}</span><em>${count} Künstler</em></div>`;
+  for (const d of days) {
+    const [wd, dd, mm] = (() => { const e = [...byDay.get(d).values()][0]; return [e.wd, e.d, e.m]; })();
+    const rows = [...byDay.get(d).entries()].sort((x, y) => (isFollowed(y[0]) - isFollowed(x[0])) || x[1].time.localeCompare(y[1].time));
+    html += `<div class="day"><div class="dt ${d === TODAY_ISO ? 'today' : ''}"><b>${d === TODAY_ISO ? 'Heute' : `${wd} ${dd}.`}</b><small>${d === TODAY_ISO ? `${wd} ${dd}. ${mm}` : mm}</small></div><div class="list">${rows.map(([id, e]) => row(artist(id), e)).join('')}</div></div>`;
+  }
+  html += `</section>`;
+}
+const later = ARTISTS.filter(a => nextEvent(a) && weekOf(nextEvent(a).iso) === 'later').sort((x, y) => nextEvent(x).iso < nextEvent(y).iso ? -1 : 1);
+html += `<section class="later"><div class="hd"><h2>Später angekündigt</h2><span>nächster Termin je Künstler</span></div>${later.map(a => row(a, nextEvent(a), true)).join('')}</section>`;
+document.getElementById('plan').innerHTML = html;
+document.write(TABBAR);
+</script>
+</body></html>

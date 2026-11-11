@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-27T16:05:21.982724Z",
+  "depends_on": [],
+  "epic": "fn-28-de-gemeindekalender-dorffeste-in-jeder",
+  "id": "fn-28-de-gemeindekalender-dorffeste-in-jeder.2",
+  "priority": 2,
+  "spec_path": ".flow/tasks/fn-28-de-gemeindekalender-dorffeste-in-jeder.2.md",
+  "status": "todo",
+  "title": "Gemeindekalender Rheinland-Pfalz",
+  "updated_at": "2026-10-27T16:05:22.356312Z"
+}

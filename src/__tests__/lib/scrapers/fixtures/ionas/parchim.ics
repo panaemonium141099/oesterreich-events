@@ -1,0 +1,3690 @@
+BEGIN:VCALENDAR
+PRODID:-//IONAS//TVM//DE
+VERSION:2.0
+CALSCALE:GREGORIAN
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+LAST-MODIFIED:20201010T011803Z
+TZURL:http://tzurl.org/zoneinfo/Europe/Berlin
+X-LIC-LOCATION:Europe/Berlin
+X-PROLEPTIC-TZNAME:LMT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+005328
+TZOFFSETTO:+0100
+DTSTART:18930401T000000
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19160430T230000
+RDATE:19400401T020000
+RDATE:19430329T020000
+RDATE:19460414T020000
+RDATE:19470406T030000
+RDATE:19480418T020000
+RDATE:19490410T020000
+RDATE:19800406T020000
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19161001T010000
+RDATE:19421102T030000
+RDATE:19431004T030000
+RDATE:19441002T030000
+RDATE:19451118T030000
+RDATE:19461007T030000
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19170416T020000
+RRULE:FREQ=YEARLY;UNTIL=19180415T010000Z;BYMONTH=4;BYDAY=3MO
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19170917T030000
+RRULE:FREQ=YEARLY;UNTIL=19180916T010000Z;BYMONTH=9;BYDAY=3MO
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19440403T020000
+RRULE:FREQ=YEARLY;UNTIL=19450402T010000Z;BYMONTH=4;BYDAY=1MO
+END:DAYLIGHT
+BEGIN:DAYLIGHT
+TZNAME:CEMT
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0300
+DTSTART:19450524T020000
+RDATE:19470511T030000
+END:DAYLIGHT
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0300
+TZOFFSETTO:+0200
+DTSTART:19450924T030000
+RDATE:19470629T030000
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0100
+DTSTART:19460101T000000
+RDATE:19800101T000000
+END:STANDARD
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19471005T030000
+RRULE:FREQ=YEARLY;UNTIL=19491002T010000Z;BYMONTH=10;BYDAY=1SU
+END:STANDARD
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19800928T030000
+RRULE:FREQ=YEARLY;UNTIL=19950924T010000Z;BYMONTH=9;BYDAY=-1SU
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+DTSTART:19810329T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZNAME:CET
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+DTSTART:19961027T030000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261028T093000
+DTEND;TZID=Europe/Berlin:20261028T113000
+SUMMARY:kostenfreie Angehörigenschulung für Menschen mit Demenz
+CREATED:20261012T085418Z
+LAST-MODIFIED:20261012T085418Z
+DESCRIPTION:Die nächste Schulung hier bei uns im Bildungswerk Parchim e.V
+ . findet ab dem 28.10.2026 statt.\n\nDie kostenfreie Angehörigenschulung
+  ist für pflegende und betreuende An- und Zugehörige konzipiert und\nzur
+  Unterstützung besonders wertvoll. Durch den Dozent werden unter anderem
+  Kenntnisse zum\nKrankheitsbild\, zur Kommunikation und zum Umgang\, zu 
+ Leistungen der Pflege- und\nKrankenversicherungen und zu rechtlichen Fra
+ gestellungen vermittelt sowie Möglichkeiten zur\nWohnraumanpassung und z
+ ur Entlastung von An- und Zugehörigen besprochen.\n\nBitte melden Sie si
+ ch hier an:\n\nBildungswerk Parchim e.V.\nAlte Mauerstr. 25\n19370 Parch
+ im\nTelefon: 03871 - 21 25 59\nMail: info@bildungswerk-parchim.de
+LOCATION:Bildungswerk Parchim e.V.
+X-LOCATION-NAME:Bildungswerk Parchim e.V.
+X-STREET-ADDRESS:Alte Mauerstr. 25
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-10-28-kostenfreie-angehoerigenschulung-fuer-menschen-mit-demenz/
+ ags-pch-plakat-102026-1.jpg?cid=15bg.8yty
+UID:6531d517-e74d-47fc-bcfe-5a6da3292d41:2026-10-28
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261030T170000
+DTEND;TZID=Europe/Berlin:20261030T210000
+SUMMARY:Halloween Party im Buchladen Rein(ge)lesen in Parchim
+CREATED:20261012T085445Z
+LAST-MODIFIED:20261012T085445Z
+DESCRIPTION:🎃 Manche Traditionen dürfen einfach bleiben.\n\nZum fünften 
+ Mal in Folge wird es bei uns an Halloween ein bisschen dunkler\, ein bis
+ schen nebliger – und vor allem ziemlich gemütlich-gruselig.\n\nAm 30. Ok
+ tober von 17 bis 21 Uhr öffnen wir die Türen für unsere kleine Halloween
+ -Party im Buchladen Reingelesen. Zwischen Spinnweben\, Nebelmaschine und
+  jeder Menge schauriger Dekoration wird vorgelesen\, geschnattert\, gest
+ öbert und natürlich auch das ein oder andere Stückchen Süßes verteilt.\n
+ \nFür die Kinder gibt es wieder unsere gruseligen Vorlesestunden – genau
+  richtig zum Fürchten\, ohne dass es wirklich zu gruselig wird. 😉 Das g
+ emeinsame Lesen und Vorlesen gehört für uns einfach zu einem solchen Abe
+ nd dazu und ist gleichzeitig Teil unserer kostenlosen Leseförderangebote
+ .\n\nWer verkleidet kommt\, darf sich außerdem über Süßigkeiten freuen. 
+ Ganz egal\, ob sechs oder sechzig Jahre alt. 👻\n\nUnd überhaupt: Hallow
+ een bei Reingelesen ist ausdrücklich nicht nur etwas für Kinder.\nKommt 
+ mit euren Kindern\, mit Freunden\, allein oder einfach auf einen kurzen 
+ Plausch vorbei. Trinkt einen Punsch oder Glühwein\, wärmt euch auf\, stö
+ bert ein bisschen durch den Laden und schaut\, was sich zwischen all dem
+  Nebel so entdecken lässt.\n\nWir freuen uns jedenfalls schon sehr darau
+ f\, selbst wieder in unsere Kostüme zu schlüpfen und unseren Buchladen f
+ ür einen Abend in eine kleine Gruselwelt zu verwandeln.\n\n30. Oktober |
+  17–21 Uhr | Buchladen Reingelesen in Parchim | Eintritt frei\n\nUnd jet
+ zt wollen wir natürlich etwas wissen:\nWas wäre Halloween ohne Verkleidu
+ ng? Als was kommt ihr dieses Jahr zu uns? 🎃\nWir sind gespannt\, wem wi
+ r am 30. Oktober begegnen. 👻
+LOCATION:Der Buchladen Rein(ge)lesen
+X-LOCATION-NAME:Der Buchladen Rein(ge)lesen
+X-STREET-ADDRESS:Blutstraße 33
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+ORGANIZER;CN=Der Buchladen Rein(ge)lesen:mailto:info@der-buchladen-reinge
+ lesen.de
+X-ORGANIZER-NAME:Der Buchladen Rein(ge)lesen
+X-ORGANIZER-EMAIL:info@der-buchladen-reingelesen.de
+X-ORGANIZER-TELEPHONE:03871451500
+X-ORGANIZER-WEBSITE:https://www.der-buchladen-reingelesen.de/startseite/v
+ eranstaltungen/
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Blutstraße 33
+CONTACT:Tilo Tambach\,info@der-buchladen-reingelesen.de\,03871451500
+X-CONTACT-GIVEN-NAME:Tilo
+X-CONTACT-FAMILY-NAME:Tambach
+X-CONTACT-EMAIL:info@der-buchladen-reingelesen.de
+X-CONTACT-TELEPHONE:03871451500
+X-CONTACT-ADDRESS-POSTALCODE:19370
+X-CONTACT-ADDRESS-LOCALITY:Parchim
+X-CONTACT-ADDRESS-STREET:Blutstraße 33
+URL:https://www.der-buchladen-reingelesen.de/startseite/veranstaltungen/
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-10-30-halloween-party-im-buchladen-rein-ge-lesen-in-parchim/hall
+ oween-neu.jpg?cid=15bj.8yua
+UID:a0f3e5c9-5edd-462f-87c9-02dcb052d3d3:2026-10-30
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261030T170000
+DTEND;TZID=Europe/Berlin:20261030T190000
+SUMMARY:Wein und Buch
+CREATED:20260508T124001Z
+LAST-MODIFIED:20260508T124001Z
+DESCRIPTION:Am 30.10.2026 findet eine Veranstaltung aus der Reihe \"Wein 
+ und Buch\" in der Stadtbibliothek Parchim statt.
+LOCATION:Stadtbibliothek Parchim
+X-LOCATION-NAME:Stadtbibliothek Parchim
+X-STREET-ADDRESS:Putlitzer Str. 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/png:https://www.parchim.de/de/kalender/termine-exter
+ n/2026-10-30-wein-und-buch/stempel-ohne-hintergrund-schwarz-1.png?cid=13
+ qg.8n21
+UID:b7563377-e7dd-4b0b-9bce-5df13b6bb6b7:2026-10-30
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261031T100000
+DTEND;TZID=Europe/Berlin:20261031T150000
+SUMMARY:Pütter Mütter- Kinder Flohmarkt
+CREATED:20260508T124645Z
+LAST-MODIFIED:20260508T124645Z
+DESCRIPTION:Der große Flohmarkt des Pütter Mütter 2009 e. V. öffnet am 31
+ . Oktober 2026\, von 10:00 bis 15:00 Uhr in der Stadthalle Parchim.\n\nF
+ reuen Sie sich auf Kinderkleidung und Spielsachen.\n\nEintritt frei.
+LOCATION:Stadthalle Parchim 
+X-LOCATION-NAME:Stadthalle Parchim 
+X-STREET-ADDRESS:Putlitzer Straße 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/png:https://www.parchim.de/de/kalender/termine-exter
+ n/2026-10-31-puetter-muetter-kinder-flohmarkt/puetter-muetter.png?cid=13
+ qj.8n2d
+UID:804c585e-c60a-436d-998f-f601cc26d08b:2026-10-31
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261101T100000
+DTEND;TZID=Europe/Berlin:20261101T170000
+SUMMARY:Kreativtag
+CREATED:20261007T095452Z
+LAST-MODIFIED:20261026T090908Z
+DESCRIPTION:43. Kreativtag im Haus der Jugend
+LOCATION:Haus der Jugend
+X-LOCATION-NAME:Haus der Jugend
+X-STREET-ADDRESS:Dragonerstraße 1
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-11-01-kreativtag/kreativtag-bunt-a4-november.jpg?cid=15b4.8yqv
+UID:9d27fb98-1740-4e5a-8e68-48913ba5c199:2026-11-01
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261101T100000
+DTEND;TZID=Europe/Berlin:20261130T170000
+SUMMARY:Medien Flohmarkt
+CREATED:20260508T124850Z
+LAST-MODIFIED:20260508T124850Z
+DESCRIPTION:Der Medien Flohmarkt in der Stadtbibliothek findet wieder sta
+ tt. Stöbern sie durch diverse Medien und entdecken sie neue Schätze für 
+ ihr Bücherregal.
+LOCATION:Stadtbibliothek Parchim
+X-LOCATION-NAME:Stadtbibliothek Parchim
+X-STREET-ADDRESS:Putlitzer Str. 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/png:https://www.parchim.de/de/kalender/termine-exter
+ n/2026-11-01-medien-flohmarkt/stempel-ohne-hintergrund-schwarz-1.png?cid
+ =13qg.8n2p
+UID:694c9759-1bcf-4b04-880b-5de57b291cb8:2026-11-01
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261101T160000
+DTEND;TZID=Europe/Berlin:20261101T235959
+SUMMARY:Die Asche meines Vaters oder Plötzlich reich und unsympathisch
+CREATED:20260819T083656Z
+LAST-MODIFIED:20260819T083656Z
+DESCRIPTION:„Diese Art von Leute beißt immer das größte Stück vom Kuchen 
+ ab!“\nTante Vroni in Die Asche meines Vaters oder Plötzlich reich und un
+ sympatisch\n\nSasha erbt Geld. Nicht nur viel. Unfassbar viel. Nachdem S
+ asha eine ominöse Einladung zu einer Beerdigung bekommen hat\, erfährt s
+ ie von ihren Müttern\, dass ihr bis dahin nicht existenter Vater der Ver
+ storbene ist und überdies noch Multimillionär war. So steht sie plötzlic
+ h in einer völlig neuen Welt: schicke Villa auf Sylt\, eine ‒ zunächst ‒
+  herzliche Verwandtschaft und ein Testament\, das alles verändert.\nDenn
+  mit der Verkündung stellt sich ihr die Frage: Wie gerecht ist Reichtum 
+ und was macht man mit der damit einhergehenden Verantwortung? Privatjet\
+ , Luxusvilla\, eine eigene Insel? Oder lieber etwas Sinnvolles? Aber was
+ ? Geld für Klimaschutz? Für soziale Gerechtigkeit? Und damit die Welt re
+ tten? Zwischen schrägen Verwandten\, überraschenden Allianzen und tiefen
+  Abgründen sucht Sasha Antworten ‒ denn mit der „Asche“ steigt eben nich
+ t nur der Kontostand.\n\nSoeren Voima gelingt mit dieser schnellen\, klu
+ gen und von Humor strotzenden Komödie ein Stück über aktuelle Fragestell
+ ungen unserer Gesellschaft.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+CONTACT:kasse-parchim@mecklenburgisches-staatstheater.de\,038716291141
+X-CONTACT-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-CONTACT-TELEPHONE:038716291141
+X-CONTACT-ADDRESS-POSTALCODE:19370
+X-CONTACT-ADDRESS-LOCALITY:Parchim
+X-CONTACT-ADDRESS-STREET:Fischerdamm 2
+URL:https://mecklenburgisches-staatstheater.de/programm/die-asche-meines-
+ vaters/am/08-Oktober-2026-um-10-00.html
+UID:2f17d11b-2167-4480-8972-1c45df9920f2:2026-11-01
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261103T143000
+DTEND;TZID=Europe/Berlin:20261103T170000
+SUMMARY:Parchim plaudert in der Wallallee neben den Steinkugeln Parchim G
+ eschichten & Legenden
+CREATED:20260707T141552Z
+LAST-MODIFIED:20260707T142122Z
+DESCRIPTION:Herzlich Willkommen auf der Parchimer Plauderbank. Wer hier P
+ latz nimmt\, möchte in Gespräch kommen. Unter dem Motto Parchim plaudert
+  entsteht in Parchim ein neues Angebot\, das Begegnungen und den Austaus
+ ch zwischen Menschen jeden Alters fördern soll. Die Idee der Plauderbank
+  ist nicht neu auch in unserer Region gibt es bereits positive Erfahrung
+ en\, wie in Rostock und Schwerin.\nDie Plauderbank ist ein Ort\, an dem 
+ Menschen bewusst miteinander ins Gespräch kommen können. Wer dort Platz 
+ nimmt\, signalisiert: Ich freue mich über ein Gespräch. An der Plauderba
+ nk wird ein regelmäßiges\, offenes und niedrigschwelliges Angebot zum Mi
+ tmachen stattfinden. Wir starten mit zwei Bänken eine in der Wallallee a
+ n den runden Steinen und eine am Verkehrsgarten in der Weststadt. Falls 
+ Sie ebenfalls einen Nachmittag als Patin bzw. Paten gestalten möchten me
+ lden Sie sich gerne unter Tel: 03871/71198 oder unter gleichstellung@par
+ chim.de Ich freue mich auf Ihre Unterstützung und Engagement!
+LOCATION:Wallallee neben den Steinkugeln
+X-LOCATION-NAME:Wallallee neben den Steinkugeln
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-11-03-parchim-plaudert-in-der-wallallee-neben-den-steinkugeln-pa
+ rchim-geschichten-legenden/plauderbank-1.jpg?cid=14o1.8s27
+UID:2c9ee398-5f9e-4a93-b2e4-a671635ed47e:2026-11-03
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261103T150000
+DTEND;TZID=Europe/Berlin:20261103T160000
+SUMMARY:VogelsangGeschichten
+CREATED:20261012T114323Z
+LAST-MODIFIED:20261012T114323Z
+DESCRIPTION:Es gibt einige Fragen zu klären: Wer rief denn bloß die Feuer
+ wehr? Und noch rätselhafter ist\, wie kommen Dinosaurier in Omas Garten?
+ \n\nmit freundlicher Unterstützung vom Buchladen rein(ge)lesen\n\nBuchfi
+ nkbeitrag: 1\,00 €\n\nWeitere Termine: jeden ersten Dienstag im Monat bi
+ s März 2027
+LOCATION:Kita St. Josef
+X-LOCATION-NAME:Kita St. Josef
+X-STREET-ADDRESS:Vogelsang 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-11-03-vogelsangg
+ eschichten/parchim-liest-2026-sm-grafik.jpg?cid=15cd.8yyd
+UID:06bee2fe-2dcc-4a83-8d46-ee2c37f09667:2026-11-03
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261105T093000
+DTEND;TZID=Europe/Berlin:20261105T103000
+SUMMARY:Kita- und Grundschul-Lesung: Einfach lesen mit kurzen Wörtern - E
+ ine Lesereise von Inge Bosse
+CREATED:20261012T114612Z
+LAST-MODIFIED:20261012T114612Z
+DESCRIPTION:Die Kinder erwartet eine lustige Lesereise mit kurzen Wörtern
+  und einem unterhaltsamen Buchkino\, bei der alle mitmachen und vor alle
+ m: mitlesen dürfen! Die Geschichten führen Schritt für Schritt von Wörte
+ rn mit 2 Buchstaben über 3 und 4 bis hin zu 5 Buchstaben. So können auch
+  Leseanfängerinnen und Leseanfänger schnell eigene Leseerfolge erleben u
+ nd entdecken: „Ich kann mitlesen!“ \n\nfür Vorschulkinder und Grundschül
+ er von 5-11 Jahre (nur mit Anmeldung der Kita oder Schule)\n\nEintritt: 
+ 2\,00 €\, BegleiterInnen frei
+LOCATION:Stadthalle Parchim 
+X-LOCATION-NAME:Stadthalle Parchim 
+X-STREET-ADDRESS:Putlitzer Straße 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-11-05-kita-und-g
+ rundschul-lesung-einfach-lesen-mit-kurzen-woertern-eine-lesereise-von-in
+ ge-bosse/parchim-liest-2026-sm-grafik.jpg?cid=15cd.8yyp
+UID:1012030e-2a4f-4189-a1d1-2cf0c041bcc4:2026-11-05
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261105T170000
+DTEND;TZID=Europe/Berlin:20261105T235959
+SUMMARY:Galettes und Gegenwind – Eine Radtour durch die Bretagne 
+CREATED:20261012T115213Z
+LAST-MODIFIED:20261012T115213Z
+DESCRIPTION:Reisebericht mit Bildern aus Frankreich von Katrin Neumann\nK
+ arin Neumann nimmt Sie mit auf eine abwechslungsreiche Radtour durch Fra
+ nkreichs Wilden Westen. Zwischen Küstenlandschaften\, charmanten Orten\,
+  bretonischen Spezialitäten und so manchem Gegenwind erzählt sie von ihr
+ en Erlebnissen und Eindrücken – begleitet von stimmungsvollen Bildern. E
+ in unterhaltsamer Reisebericht für alle\, die Frankreich und das Abenteu
+ er auf zwei Rädern lieben.\n\nEintritt: 3\,00 €
+LOCATION:Kulturmühle Parchim\, Museum 2. OG
+X-LOCATION-NAME:Kulturmühle Parchim\, Museum 2. OG
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-11-05-galettes-u
+ nd-gegenwind-eine-radtour-durch-die-bretagne/parchim-liest-2026-sm-grafi
+ k.jpg?cid=15cd.8yz1
+UID:4331285f-134b-445d-a6a7-d931fd615cab:2026-11-05
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261106T090000
+DTEND;TZID=Europe/Berlin:20261106T100000
+SUMMARY:Nestgezwitscher am Vogelsang - Familienlotse - Ernährung\, Schlaf
+ \, Erholung
+CREATED:20260831T131825Z
+LAST-MODIFIED:20260831T131825Z
+DESCRIPTION:Jeden 1. Freitag im Monat gibt es ein thematisches Angebot fü
+ r die Eltern und Babys. Dann gibt es Infos oder Aktion und Austausch.\nE
+ s findet in den Räumlichkeiten unserer Kita statt\, ist aber ausdrücklic
+ h für alle Eltern offen.\nVon der Krippe ist jemand dabei um zu unterstü
+ tzen und jemand weiteres leitet den Vormittag thematisch entsprechend de
+ s Plans.
+LOCATION:Kita St. Josef
+X-LOCATION-NAME:Kita St. Josef
+X-STREET-ADDRESS:Vogelsang 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-11-06-nestgezwitscher-am-vogelsang-familienlotse-ernaehrung-schl
+ af-erholung/nestgezwitscher-am-vogelsang-flyer-vorderseite.jpg?cid=150p.
+ 8vvp
+UID:7e9062eb-1a34-4d31-900e-0c7ac05f8a22:2026-11-06
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261106T140000
+DTEND;TZID=Europe/Berlin:20261109T210000
+SUMMARY:Martinimarkt
+CREATED:20261013T075452Z
+LAST-MODIFIED:20261013T075452Z
+DESCRIPTION:Der Parchimer Martinimarkt gehört zu den größten Jahrmärkten 
+ in Mecklenburg. So ist dieses 4-tägige Spektakel nicht nur ein großes Ev
+ ent für die Einheimischen\, sondern auch für viele Besucher aus der Umge
+ bung. Dank dem Festplatzgelände mit rund 19.000 m² ist viel Platz für ei
+ ne attraktive Mischung aus Action\, Spaß\, Unterhaltung und Kulinarische
+ m. Traditionell endet der Martinimarkt immer an einem Montag mit einem s
+ pektakulären und farbenfrohen Höhenfeuerwerk um 19:00 Uhr.
+LOCATION:Festplatz Parchim 
+X-LOCATION-NAME:Festplatz Parchim 
+X-STREET-ADDRESS:Bergstraße
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-11-06-martinimarkt/pxl-20251031-153927529.portrait.original-2.jp
+ g?cid=15cv.8zav
+UID:20494acc-31d9-4675-83ec-c64b34c6a7d4:2026-11-06
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261107T180000
+DTEND;TZID=Europe/Berlin:20261107T200000
+SUMMARY:Ein Abend mit Johannes Kirchberg: „So groß wie heute war die Zeit
+  noch nie“
+CREATED:20261012T095154Z
+LAST-MODIFIED:20261012T095154Z
+DESCRIPTION:Erich Kästner einmal anders: Am 7. November 2026 lädt der Ver
+ ein zur Bewahrung von Künstlernachlässen Westmecklenburg e. V. zu einem 
+ besonderen Abend mit Johannes Kirchberg ins Zinnhaus Parchim ein.\n\nUnt
+ er dem Titel „Erich Kästner – So groß wie heute war die Zeit noch nie“ v
+ erbindet Johannes Kirchberg Musik\, Gesang und Worte und nimmt das Publi
+ kum mit in die Welt und Zeit des großen deutschen Schriftstellers.\n\n🗓
+  Samstag\, 7. November 2026\n⏰ 18:00 Uhr\n📍 Zinnhaus Parchim\, Lange St
+ raße 24\n🎟️ Eintritt: 24 €\n\nKarten gibt es über Eventim\, bei der Tou
+ ristinformation Parchim und bei uns im Buchladen „reingelesen“.\n\nUnd a
+ uch bei dieser Veranstaltung sind wir wieder mit dabei – allerdings nich
+ t als Veranstalter: Wir übernehmen den Büchertisch und bringen eine pass
+ ende Auswahl rund um Erich Kästner und seine Werke mit. 📖\n\nEine schön
+ e Gelegenheit also\, nicht nur einen besonderen literarisch-musikalische
+ n Abend zu erleben\, sondern anschließend auch noch ein bisschen in Käst
+ ners Büchern zu stöbern.\n\nWir freuen uns auf euch und auf einen Abend 
+ ganz im Zeichen von Erich Kästner\, Literatur\, Musik und Geschichte. 💙
+ 
+LOCATION:Zinnhaus
+X-LOCATION-NAME:Zinnhaus
+X-STREET-ADDRESS:Lange Straße 24
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+ORGANIZER;CN=Der Buchladen Rein(ge)lesen:mailto:info@der-buchladen-reinge
+ lesen.de
+X-ORGANIZER-NAME:Der Buchladen Rein(ge)lesen
+X-ORGANIZER-EMAIL:info@der-buchladen-reingelesen.de
+X-ORGANIZER-TELEPHONE:03871451500
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Blutstraße 33
+CONTACT:Tilo Tambach\,info@der-buchladen-reingelesen.de\,03871451500
+X-CONTACT-GIVEN-NAME:Tilo
+X-CONTACT-FAMILY-NAME:Tambach
+X-CONTACT-EMAIL:info@der-buchladen-reingelesen.de
+X-CONTACT-TELEPHONE:03871451500
+X-CONTACT-ADDRESS-POSTALCODE:19370
+X-CONTACT-ADDRESS-LOCALITY:Parchim
+X-CONTACT-ADDRESS-STREET:Blutstraße 33
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-11-07-ein-abend-mit-johannes-kirchberg-so-gross-wie-heute-war-di
+ e-zeit-noch-nie/johannes-kb-26-j.jpg?cid=15c4.8ywy
+UID:0592230e-dd29-451e-97c1-e076167b3793:2026-11-07
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261108T150000
+DTEND;TZID=Europe/Berlin:20261108T235959
+SUMMARY:Wnuk denkt laut und liest was vor - Leseshow von Oliver Wnuk
+CREATED:20261012T120014Z
+LAST-MODIFIED:20261012T120014Z
+DESCRIPTION:Persönlich\, humorvoll und überraschend: Schauspieler und Aut
+ or Oliver Wnuk liest aus eigenen Texten\, erzählt aus seinem Leben und n
+ immt sein Publikum mit auf eine unterhaltsame Reise zwischen feiner Beob
+ achtung\, absurdem Alltag und den großen Fragen des Lebens. \n\nmit freu
+ ndlicher Unterstützung vom Buchhaus Fette \n\nEintritt: ab 29\,00 € (Vor
+ verkauf im Buchhaus Fette & online auf eventim.de)
+LOCATION:Solitär
+X-LOCATION-NAME:Solitär
+X-STREET-ADDRESS:Putlitzer Str. 25
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-11-08-wnuk-denkt
+ -laut-und-liest-was-vor-leseshow-von-oliver-wnuk/parchim-liest-2026-sm-g
+ rafik.jpg?cid=15cd.8yzp
+UID:a00b3f51-0b12-4e01-ad8c-293cf971eaa8:2026-11-08
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261111T190000
+DTEND;TZID=Europe/Berlin:20261111T213000
+SUMMARY:Parchim liest: Lesung mit Lutz van der Horst
+CREATED:20260506T120237Z
+LAST-MODIFIED:20260506T120237Z
+DESCRIPTION:Erleben Sie Lutz van der Horst live mit seinem Debütroman “Ko
+ nfetti-Blues” – Lesung & Gespräch mit Thilo Gosejohann am 11.11.26 in de
+ r Stadthalle Parchim!\n\nTickets erhalten Sie in der Touristinformation 
+ der Stadt Parchim.
+LOCATION:Stadthalle Parchim 
+X-LOCATION-NAME:Stadthalle Parchim 
+X-STREET-ADDRESS:Putlitzer Straße 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+X-ORGANIZER-NAME:
+ATTACH:https://www.parchim.de/de/kalender/termine-extern/2026-11-11-parch
+ im-liest-lesung-mit-lutz-van-der-horst/vanderhorst-neutral-ig-1080x1350.
+ jpeg?cid=13ny.8mn4
+UID:dabe4348-20d9-4e1d-abd9-797ac22a6e00:2026-11-11
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261112T160000
+DTEND;TZID=Europe/Berlin:20261112T235959
+SUMMARY:Forum für Schreibende
+CREATED:20261012T121107Z
+LAST-MODIFIED:20261012T121107Z
+DESCRIPTION:Eigene Texte vorlesen\, zuhören und miteinander ins Gespräch 
+ kommen\n\nDie Stadtbibliothek Parchim lädt auch in diesem Jahr alle Bürg
+ erinnen und Bürger herzlich zum „Forum für Schreibende“ ein.\n\nOb Lyrik
+ \, Prosa oder andere literarische Texte – im Lesesaal der Bibliothek gib
+ t es Raum für alle\, die ihre eigenen Werke präsentieren und mit anderen
+  Literaturbegeisterten teilen möchten. Freuen Sie sich auf einen abwechs
+ lungsreichen Nachmittag voller persönlicher Geschichten\, Gedanken und k
+ reativer Wortkunst.\n\nDas Forum bietet zugleich Gelegenheit\, neue Schr
+ eibende kennenzulernen\, sich inspirieren zu lassen und miteinander über
+  das Schreiben und die vorgestellten Texte ins Gespräch zu kommen.\n\nEi
+ ntritt frei\, um Anmeldung wird gebeten unter 03871 60 67 20 oder biblio
+ thek@parchim.de
+LOCATION:Stadtbibliothek Parchim
+X-LOCATION-NAME:Stadtbibliothek Parchim
+X-STREET-ADDRESS:Putlitzer Str. 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-11-12-forum-fuer
+ -schreibende/parchim-liest-2026-sm-grafik.jpg?cid=15cd.8z0d
+UID:37d40b46-5941-4cdc-822d-80fe750cc840:2026-11-12
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261113T180000
+DTEND;TZID=Europe/Berlin:20261113T235959
+SUMMARY:Mascha Kaléko – Ein Abend mit Worten und Musik
+CREATED:20260904T083006Z
+LAST-MODIFIED:20260904T083006Z
+DESCRIPTION:Wenn wir heute die Verse von Mascha Kaléko lesen\, dann lesen
+  wir nicht nur kluge\, tiefgründige und auch humorvolle Reime über den A
+ lltag oder die Liebe. Wir hören das Echo eines Lebens\, das von den groß
+ en Brüchen des 20. Jahrhunderts gezeichnet war.\nMan blickt auf ihr Lebe
+ n und empfindet erst einmal so etwas wie Ehrfurcht\, Ehrfurcht darüber\,
+  was Mascha Kaléko erlebt und erlitten hat und was sie trotzdem nie vers
+ tummen ließ. All die Stationen ihres Lebens sind mit Gedichten\, Reimen 
+ und Versen verknüpft\, die uns auf ihre ganz eigene Weise gefangen und m
+ it auf die Reise nehmen.\nMascha Kaléko führte ein bewegtes Leben voller
+  Hochs und Tiefs und voller Verbindungen und Beziehungen\, die sie durch
+  die Zeiten trugen. Auf die Spuren ihres Lebens begeben sich Sandra Schü
+ mann und Gabriele Knües und laden alle Kaléko – Liebhaberinnen\, Liebhab
+ er und solche\, die es noch werden möchten\, am Freitag\, den 13.11.2026
+   in den wunderbaren Parchimer Rathauskeller ein. Beim „Zauber am Abend“
+   wird es um das Leben dieser großartigen Poetin gehen und natürlich um 
+ ihre Gedichte\, die eng mit ihrer Vita verbunden sind. Die musikalische 
+ Umrahmung übernehmen Heike Kemsies an der Querflöte und Gottfried Voß am
+  Klavier. Die Lesung findet mit freundlicher Unterstützung der Stadt Par
+ chim statt und beginnt um 19 Uhr\, Einlass ist ab 18 Uhr. Es wird einen 
+ kleinen Getränkeausschank geben\, außerdem können sich die Gäste auf ein
+ e Buchverlosung freuen. Der Eintritt ist frei\, um eine kleine Spende zu
+ m Ausgleich der Kosten wird jedoch gebeten. \n„Kein Morgen bringt das He
+ ute uns zurück\, wir haben keine andere Zeit als diese.“\, sagte Mascha 
+ einmal und vielleicht ist es eine schöne Möglichkeit\, miteinander einen
+  Abend voller Zauber und Poesie im Jetzt und Hier\, in unserer Zeit zu v
+ erbringen.
+LOCATION:Rathauskeller
+X-LOCATION-NAME:Rathauskeller
+X-STREET-ADDRESS:Schuhmarkt 1
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-11-13-mascha-kaleko-ein-abend-mit-worten-und-musik/20260810-1504
+ 26.jpg?cid=1531.8wbd
+UID:d93625c6-d3cb-45d5-820d-de751009b9a8:2026-11-13
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261113T183000
+DTEND;TZID=Europe/Berlin:20261113T203000
+SUMMARY:KADDATZ live im MAHLWERK
+CREATED:20261028T081635Z
+LAST-MODIFIED:20261028T084810Z
+DESCRIPTION:KADDATZ live im MAHLWERK!\n\nAm 13. November 2026 ab 18:30 Uh
+ r wird es musikalisch\, eigenwillig und ein bisschen melancholisch.\n\nK
+ addatz ist das Alter Ego des Wismarer Songwriters Matthias Güthner. Mit 
+ seiner alten Gitarre klingt er ein wenig wie knackendes Vinyl auf einem 
+ Plattenspieler aus einer anderen Zeit – und irgendwie passt genau das zu
+  seinen Songs.\n\nSeine Texte blicken mit einer guten Portion Zynismus a
+ uf unsere hektische Welt. Musikalisch bewegt sich Kaddatz irgendwo zwisc
+ hen Nick Drake\, Bluegrass und Pop Country. Mal nachdenklich\, mal trock
+ en\, mal überraschend – aber immer mit einer ganz eigenen Note.\n\nKeine
+  großen Lösungen\, keine großen Versprechen. Nur ein Sänger\, eine Gitar
+ re und Geschichten aus dem ganz normalen Wahnsinn.\n\nFreier Eintritt!\n
+ Getränke und Snacks gibt es vor Ort!\n\nWir freuen uns auf euch!
+LOCATION:MAHLWERK
+X-LOCATION-NAME:MAHLWERK
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:	Parchim
+ORGANIZER;CN=Lewitz-Dienstleistungen gGmbH:mailto:buchung@restaurant-mahl
+ werk.de
+X-ORGANIZER-NAME:Lewitz-Dienstleistungen gGmbH 
+X-ORGANIZER-EMAIL:buchung@restaurant-mahlwerk.de
+X-ORGANIZER-TELEPHONE:03871 7299449
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Heide-Feld 9
+X-ORGANIZER-GEO:53.4406346\;11.8408926
+CONTACT:Beatrice Brose\,bbrose@lewitz-dienstleistungen.de
+X-CONTACT-GIVEN-NAME:Beatrice
+X-CONTACT-FAMILY-NAME:Brose
+X-CONTACT-EMAIL:bbrose@lewitz-dienstleistungen.de
+X-CONTACT-MOBILE:0151 16053372
+X-CONTACT-JOBTITLE:Projekt- und Eventorganisation
+X-CONTACT-ADDRESS-POSTALCODE:19370
+X-CONTACT-ADDRESS-LOCALITY:Parchim
+X-CONTACT-ADDRESS-STREET:Flörkestraße 22
+URL:https://restaurant-mahlwerk.de/termine/
+ATTACH;FMTTYPE=image/png:https://www.parchim.de/de/kalender/termine-exter
+ n/2026-11-13-kaddatz-live-im-mahlwerk/kaddatz.png?cid=15gg.903s
+UID:15ca2af8-316f-41bc-94f1-2d51dbaf402a:2026-11-13
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261115T160000
+DTEND;TZID=Europe/Berlin:20261115T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T091831Z
+LAST-MODIFIED:20260819T091831Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+CONTACT:kasse-parchim@mecklenburgisches-staatstheater.de\,038716291141
+X-CONTACT-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-CONTACT-TELEPHONE:038716291141
+X-CONTACT-ADDRESS-POSTALCODE:19370
+X-CONTACT-ADDRESS-LOCALITY:Parchim
+X-CONTACT-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:fb4a0e57-9b16-453f-a492-8a4a9e1fd8a8:2026-11-15
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261117T110000
+DTEND;TZID=Europe/Berlin:20261117T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T102506Z
+LAST-MODIFIED:20260819T102506Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:91b16325-ad27-4f1a-a386-60f4f87a3090:2026-11-17
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261117T183000
+DTEND;TZID=Europe/Berlin:20261117T235959
+SUMMARY:Kultur auf Reisen Winterlich(t) Szenische Lesung mit Gesang Mira 
+ Fajfer
+CREATED:20261012T121926Z
+LAST-MODIFIED:20261012T121926Z
+DESCRIPTION:Wenn die Tage kürzer werden\, die Dunkelheit früher hereinbri
+ cht und draußen die Winterkälte Einzug hält\, beginnt die Zeit für Gesch
+ ichten\, Gedichte und besondere Momente. Mit „Winterlich(t)“ lädt die Sc
+ hauspielerin und Sängerin Mira Fajfer zu einer stimmungsvollen Reise dur
+ ch die dunkle Jahreszeit ein. In ihrer szenischen Lesung verbinden sich 
+ Literatur\, Gesang und Musik zu einem abwechslungsreichen Programm volle
+ r Atmosphäre und überraschender Zwischentöne.\n\nMal heiter und augenzwi
+ nkernd\, mal still und nachdenklich begegnen uns Geschichten und Gedicht
+ e über Winter\, Dunkelheit\, Licht und die kleinen Eigenheiten des Leben
+ s. Dabei darf natürlich auch die Literatur aus Mecklenburg nicht fehlen.
+ \n\nEintritt frei
+LOCATION:Remise am Landratsamt
+X-LOCATION-NAME:Remise am Landratsamt
+X-STREET-ADDRESS:Putlitzer Str. 25
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-11-17-kultur-auf
+ -reisen-winterlich-t-szenische-lesung-mit-gesang-mira-fajfer/parchim-lie
+ st-2026-sm-grafik.jpg?cid=15cd.8z1d
+UID:4fd3be75-1360-4be2-8350-d953d05e23db:2026-11-17
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261117T190000
+DTEND;TZID=Europe/Berlin:20261117T235959
+SUMMARY:Lachen ist die beste Medizin - Lesung von Schauspieler Lutz Leyh
+CREATED:20261012T122139Z
+LAST-MODIFIED:20261012T122139Z
+DESCRIPTION:Schauspieler Lutz Leyh lädt zu einer unterhaltsamen literaris
+ chen Reise ins Reich der Medizin ein. Mit viel Spielfreude präsentiert e
+ r skurrile\, überraschende und herrlich vergnügliche Kurzgeschichten run
+ d um Ärzte\, Patienten\, Diagnosen und die kleinen und großen Absurdität
+ en des medizinischen Alltags.\n\nDabei darf herzhaft gelacht\, augenzwin
+ kernd gestaunt und vielleicht auch die eine oder andere eigene Erfahrung
+  wiedererkannt werden. Denn zwischen Wartezimmer und Krankenbett gibt es
+  erstaunlich viel Stoff für gute Geschichten – und manchmal ist eben tat
+ sächlich Lachen die beste Medizin.\n\nEintritt: 8\,00 € (Vorverkauf im B
+ uchhaus Fette)
+LOCATION:Buchhaus Fette
+X-LOCATION-NAME:Buchhaus Fette
+X-STREET-ADDRESS:Lindenstraße 45
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-11-17-lachen-ist
+ -die-beste-medizin-lesung-von-schauspieler-lutz-leyh/parchim-liest-2026-
+ sm-grafik.jpg?cid=15cd.8z2j
+UID:03448757-252b-42bf-9677-3ed48c5945f9:2026-11-17
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261119T180000
+DTEND;TZID=Europe/Berlin:20261119T235900
+SUMMARY:open lounge - Lieder und Lyrik
+CREATED:20260721T094427Z
+LAST-MODIFIED:20260721T094455Z
+DESCRIPTION:
+LOCATION:Stadthalle Parchim 
+X-LOCATION-NAME:Stadthalle Parchim 
+X-STREET-ADDRESS:Putlitzer Straße 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-11-19-open-lounge-lieder-und-lyrik/2026-11-19-open-lounge-din-la
+ ng-210x105-hoch.jpg?cid=14sd.8suv
+UID:c42182e2-730d-47ac-9306-93c1377f7ebf:2026-11-19
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261120T160000
+DTEND;TZID=Europe/Berlin:20261120T235959
+SUMMARY:Das Junge Staatstheater Parchim präsentiert: Jana & Jan lesen 
+CREATED:20261012T122709Z
+LAST-MODIFIED:20261012T122709Z
+DESCRIPTION:Eintritt frei: (Reservierungen im Theater 03871 6291-141 oder
+  an der Tourist-Information Parchim)\nKulturmühle Parchim\, Probebühne 2
+ \, Fischerdamm 2
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-11-20-das-junge-
+ staatstheater-parchim-praesentiert-jana-jan-lesen/parchim-liest-2026-sm-
+ grafik.jpg?cid=15cd.8z37
+UID:9aa0c24c-dcc9-40c3-a727-a008dd7aa15c:2026-11-20
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261120T180000
+DTEND;TZID=Europe/Berlin:20261120T200000
+SUMMARY:Friedhofsgeflüster Teil 4 - mit der Schwarzen Witwe
+CREATED:20260701T124027Z
+LAST-MODIFIED:20260701T124027Z
+DESCRIPTION:Als Schwarze Witwe aus dem späten 19. Jahrhundert berichtet A
+ nja Kretchmer von vergessenen Sitten und Bräuchen\, dem Aberglauben\, To
+ desauffassungen und der Totenkultur unserer Vorfahren.    \n\nAnmeldung 
+ unter info@anja-kretschmer.de    \nKosten: 17\,00 € p.P.
+LOCATION:Neuer Friedhof
+X-LOCATION-NAME:Neuer Friedhof
+X-STREET-ADDRESS:Lübzer Chaussee 1
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-11-20-friedhofsgefluester-teil-4-mit-der-schwarzen-witwe/dscn571
+ 7-1.jpg?cid=14jy.8r1s
+UID:0a88555a-35c2-4cf2-9e4f-e9c638394ac6:2026-11-20
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261121T130000
+DTEND;TZID=Europe/Berlin:20270130T170000
+SUMMARY:13. Parchim Kunstschau 
+CREATED:20261026T131444Z
+LAST-MODIFIED:20261026T133955Z
+DESCRIPTION:DAS BLEIBT - Künstlernachlässe aus dem Norden\nAusstellung un
+ d Auktion von Kunstwerken im Rahmen von 800 Jahre Parchim\nDienstag – Fr
+ eitag 10.00 – 17.00 Uhr\nSamstag\, Sonntag 13.00 – 17.00 Uhr
+LOCATION:Museum in der Kulturmühle Parchim 
+X-LOCATION-NAME:Museum in der Kulturmühle Parchim 
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-11-21-13.-parchim-kunstschau/sm-post.jpg?cid=15gd.901d
+UID:e726604d-defc-4e56-8831-ba9f25c52c03:2026-11-21
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261121T193000
+DTEND;TZID=Europe/Berlin:20261121T235959
+SUMMARY:Müttertage – Geschichten von den Heldinnen des Alltags - Leseshow
+  von und mit Wladimir Kaminer
+CREATED:20261012T122946Z
+LAST-MODIFIED:20261012T122946Z
+DESCRIPTION:Wer sorgt dafür\, dass die Welt sich weiterdreht\, wenn alles
+  aus dem Ruder zu laufen droht? Mütter natürlich!\n\nIn seinem neuen Buc
+ h erzählt Wladimir Kaminer warmherzig und humorvoll von seiner über 90-j
+ ährigen Mutter\, von ihren Lebensweisheiten\, Weltrettungsplänen und der
+  Kunst\, sich um Familie und Katze zu kümmern. Auch potenzielle Schwiege
+ rmütter und die erstaunlichen Verwandlungen\, die sie auslösen können\, 
+ kommen nicht zu kurz. Freuen Sie sich auf einen unterhaltsamen Abend vol
+ ler familiärer Geschichten\, lakonischem Humor und direktem Austausch mi
+ t dem Publikum. \n\nEintritt: ab 21\,40 € (Vorverkauf in der Tourist-Inf
+ o & online)
+LOCATION:Stadthalle Parchim 
+X-LOCATION-NAME:Stadthalle Parchim 
+X-STREET-ADDRESS:Putlitzer Straße 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-11-21-muettertag
+ e-geschichten-von-den-heldinnen-des-alltags-leseshow-von-und-mit-wladimi
+ r-kaminer/parchim-liest-2026-sm-grafik.jpg?cid=15cd.8z3j
+UID:df0b4a6e-1671-44bc-bc19-89ca9988db74:2026-11-21
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261123T090000
+DTEND;TZID=Europe/Berlin:20261123T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T093656Z
+LAST-MODIFIED:20260819T093656Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert. Ein Kaufmann bricht wie jedes Jahr in fremde Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke - wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer\, protzig. Doch die jün
+ gste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen oder 
+ Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat.\
+ nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen Sc
+ hloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch beim 
+ Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer und 
+ plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihren
+  Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt sic
+ h dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre Hil
+ fe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die Su
+ che nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ Sc
+ hönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhunde
+ rt von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den russ
+ ischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjähri
+ ge Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Schön
+ e und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie. S
+ ie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu schau
+ en ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes v
+ erborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater PArchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater PArchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:2
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:82c7506b-4605-4ad0-9602-e3a33bfb185c:2026-11-23
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261123T110000
+DTEND;TZID=Europe/Berlin:20261123T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T095034Z
+LAST-MODIFIED:20260819T095034Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:40363018-e629-41e5-b2c9-2b284f818d9f:2026-11-23
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261124T090000
+DTEND;TZID=Europe/Berlin:20261124T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T095309Z
+LAST-MODIFIED:20260819T095309Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716191141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:c0b121da-bee7-46e4-b21c-73a77e106501:2026-11-24
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261124T110000
+DTEND;TZID=Europe/Berlin:20261124T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T100824Z
+LAST-MODIFIED:20260819T100824Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:b15267d3-ab7a-4a62-b3ca-8b624c44daa7:2026-11-24
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261125T090000
+DTEND;TZID=Europe/Berlin:20261125T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T101332Z
+LAST-MODIFIED:20260819T101332Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:2e08fa38-b57e-41b8-8b5c-e08ccbc504e8:2026-11-25
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261125T110000
+DTEND;TZID=Europe/Berlin:20261125T235959
+SUMMARY:Die Feuerrote Blume
+CREATED:20260819T101532Z
+LAST-MODIFIED:20260819T101532Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:0847023e-3ebf-4cc8-90fc-9e4204b1d361:2026-11-25
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261125T183000
+DTEND;TZID=Europe/Berlin:20261125T235959
+SUMMARY:JULIANTA & JUH Das andere Programm!
+CREATED:20261012T123204Z
+LAST-MODIFIED:20261012T123204Z
+DESCRIPTION:Eine besondere musikalische Lesung\, bei der Musik und Litera
+ tur aufeinandertreffen und für einen stimmungsvollen Abend voller Geschi
+ chten\, Kultur und Genuss sorgen. \n\nEintritt frei\, Einlass ab 17:30 U
+ hr (Reservierung unter 03871 7299449 oder buchung@restaurant-mahlwerk.de
+ )
+LOCATION:Mahlwerk\, Kulturmühle
+X-LOCATION-NAME:Mahlwerk\, Kulturmühle
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-11-25-julianta-j
+ uh-das-andere-programm/parchim-liest-2026-sm-grafik.jpg?cid=15cd.8z3v
+UID:3791d5eb-f14b-4064-b69c-605e150b8dfb:2026-11-25
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261126T090000
+DTEND;TZID=Europe/Berlin:20261126T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T101824Z
+LAST-MODIFIED:20260819T101824Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:03876291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:PArchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:462a4828-13a5-47ac-a6ad-4ecda0a588aa:2026-11-26
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261126T110000
+DTEND;TZID=Europe/Berlin:20261126T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T102058Z
+LAST-MODIFIED:20260819T102058Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:983836e5-9a19-48ba-b390-b8d164f14262:2026-11-26
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261126T190000
+DTEND;TZID=Europe/Berlin:20261126T235959
+SUMMARY:Aus uns ist auch was geworden: Mecklenburger Landfrauen erzählen 
+ ihr Leben Lesung von Barbara Warning 
+CREATED:20261012T123443Z
+LAST-MODIFIED:20261012T123443Z
+DESCRIPTION:In ihrem Buch „Aus uns ist auch was geworden“ lässt Barbara W
+ arning Mecklenburger Landfrauen zu Wort kommen. Sie erzählen von ihrem L
+ eben auf dem Land\, von Herausforderungen\, Veränderungen\, Familie\, Ar
+ beit und ihren ganz persönlichen Wegen. Authentisch\, lebensnah und berü
+ hrend gibt die Autorin Einblicke in bewegte Biografien und eine Lebenswe
+ lt\, die Mecklenburg geprägt hat und bis heute prägt. \n\nin Kooperation
+  mit dem Buchladen rein(ge)lesen \n\nEintritt: 10\,00 € (Vorverkauf im B
+ uchladen rein(ge)lesen & in der Tourist-Info)
+LOCATION:Kulturmühle Parchim\, Museum 2. OG\,
+X-LOCATION-NAME:Kulturmühle Parchim\, Museum 2. OG\,
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-11-26-aus-uns-is
+ t-auch-was-geworden-mecklenburger-landfrauen-erzaehlen-ihr-leben-lesung-
+ von-barbara-warning/parchim-liest-2026-sm-grafik.jpg?cid=15cd.8z47
+UID:9d315ae8-c413-42be-9e51-8f402376edcd:2026-11-26
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261127T090000
+DTEND;TZID=Europe/Berlin:20261127T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T102300Z
+LAST-MODIFIED:20260819T102300Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:bdf7b826-6392-4c6b-b8d1-890e10af1c0f:2026-11-27
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261127T173000
+DTEND;TZID=Europe/Berlin:20261127T235959
+SUMMARY:Wein & Buch: Das ANDERE Mecklenburg-Vorpommern. Enthüllungsgeschi
+ chten
+CREATED:20261012T123834Z
+LAST-MODIFIED:20261012T123834Z
+DESCRIPTION:Lesung von Dr. Wolf Schmidt \n\nHumorvoll enthüllt Wolf Schmi
+ dt in seinem zweiten Band zum ANDEREN MV wieder dessen verborgene Seiten
+ . Wahre Begebenheiten zum Staunen\, Schmunzeln und Wiedererkennen – eine
+  Heimatkunde mit Augenzwinkern. Entdecken Sie Mecklenburg-Vorpommern von
+  einer ganz anderen Seite! Dr. Wolf Schmidt nimmt Sie bei einem Glas Wei
+ n mit auf eine spannende Lesung voller überraschender Geschichten\, beso
+ nderer Einblicke und bislang wenig bekannter Facetten des Landes - ein g
+ enussvoller Abend für alle\, die Literatur und regionale Geschichten lie
+ ben. \n\nEintritt frei\, um Anmeldung wird gebeten unter 03871 60 67 20 
+ oder bibliothek@parchim.de
+LOCATION:Stadtbibliothek Parchim
+X-LOCATION-NAME:Stadtbibliothek Parchim
+X-STREET-ADDRESS:Putlitzer Str. 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-11-27-wein-buch-
+ das-andere-mecklenburg-vorpommern.-enthuellungsgeschichten/parchim-liest
+ -2026-sm-grafik.jpg?cid=15cd.8z4j
+UID:fc0c4b02-ea4d-4a51-97fe-2f4663482b36:2026-11-27
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261128T143000
+DTEND;TZID=Europe/Berlin:20261128T160000
+SUMMARY:Multimediashow Norwegen
+CREATED:20260211T095752Z
+LAST-MODIFIED:20260211T095752Z
+DESCRIPTION:Multimediashow Norwegen    \nKartenvorverkauf: Touristinforma
+ tion und Abendkasse    \n\nDer studierte Opern- und Chansonsänger Thomas
+  W. Mücke und seine Frau Nina stellen mit ihren in brillantester 6 x 6 B
+ ildqualität und einzigartiger Synthese von Wort\, Gesang und Musik insze
+ nierten Mittelformat-Multimediashows seit über 30 Jahren deutschlandweit
+  eine Institution dar. \nSind Sie schon einmal in einem Land gewesen\, w
+ o man noch so richtig die Natur atmen hört?\nWo man nicht nur berauscht 
+ ist vom Rauschen der riesigen Wasserfälle\, sondern auch von den längste
+ n und tiefsten Fjorden der Welt\, von einer Gletschertour über das Blaue
+ is\, von einer Schiffsreise mit der Hurtigroute über den Polarkreis\, au
+ f die Lofoten (diese soll übrigens die schönste Schiffsreise der Welt se
+ in)\, von einer Klettertour mit einer Seilschaft auf den höchsten Berg N
+ orwegens\, dem Galdhöppigen oder etwa von einem Flug mit dem Hubschraube
+ r\, bei offener Tür über das ewige Eis.\nAber natürlich wird man auch un
+ ten quasi mit Schönheit und Kultur überschüttet. Ob in Oslo mit den viel
+ en Parks und noch mehr Museen\, ob in Bergen\, dem ehemaligen nördlichen
+  Zentrum der Hanse oder etwa Trondheim mit der imposanten Krönungskirche
+  Nidaros.\nUnd wenn Ihnen all' das zu aufregend war\, dann wird Ihr Puls
+  in der Weite und Stille Lapplands wieder den richtigen Rhythmus finden 
+ oder spätestens bei der Führung durch eine nahezu Tausend Jahre alte Sta
+ bkirche.\nSollten Sie schon einmal in Norwegen gewesen sein\, ist es doc
+ h ein Grund mehr Ihre Erinnerungen mittels einer außergewöhnlichen Dia-T
+ on-Show mit phantastischen analogen Dias im 6 x 6 Format und traumhafter
+  Musik wieder aufzufrischen.
+LOCATION:Museum in der Kulturmühle Parchim 
+X-LOCATION-NAME:Museum in der Kulturmühle Parchim 
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-11-28-multimediashow-norwegen/norwegen02.jpg?cid=12td.8gem
+UID:e7277e85-b4da-4196-8924-6a2cf5baf30e:2026-11-28
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261128T150000
+DTEND;TZID=Europe/Berlin:20261128T190000
+SUMMARY:DRK Weihnachtszauber 2026 – Zusammen feiern\, Wünsche teilen
+CREATED:20261020T062512Z
+LAST-MODIFIED:20261020T070459Z
+DESCRIPTION:Es wird wieder festlich in Parchim!\nAm 28. November 2026 sin
+ d alle Familien\, Freunde und Nachbarn zu einem gemütlichen Beisammensei
+ n in weihnachtlicher Atmosphäre eingeladen.\n\nWenn der Duft von gebrann
+ ten Mandeln in der Luft liegt\, Lichterketten funkeln und Kinderlachen d
+ urch den Hof klingt\, dann ist wieder Weihnachtszeit beim DRK Parchim!\n
+ \n\nWANN:\nSamstag\, 28. November 2026\n\nZEIT:\n15:00 – 19:00 Uhr\n\nOR
+ T:\nHof der DRK-Geschäftsstelle\nMoltkeplatz 3\n19370 Parchim\n\nMÄRCHEN
+ SPIEL:\nBeginn um 16:00 Uhr\n\n\nFreut Euch auf Kleine Mitbringsel\, Mit
+ machaktionen\, viele Angebote für Kinder und Familien\, Speis & Trank\, 
+ Süßes & Leckereien!\n\nKreatives & Selbstgemachtes\, Traktorfahrten für 
+ Kinder\, Puppentheater\, Bastelstraße\, Weihnachtsgestecke\, Windlichter
+  und vieles mehr\n\nStockbrot\, Stollen & Waffeln\, Schokofrüchte\, Gebr
+ annte Mandeln\, Glühwein & Kinderpunch\, Grillstation\, Bratapfel und na
+ türlich Naschereien aller Art...\n\nDAS HIGHLIGHT IN DIESEM JAHR\nDer DR
+ K Wunschbaum\nEin besonderes Glanzstück in diesem Jahr ist unser DRK-Wun
+ schbaum – ein Baum\, der Wünsche wachsen lässt und Herzen verbindet.\n\n
+ Alle Parchimer Kinder im Alter von 3 bis 13 Jahren dürfen ihren Herzensw
+ unsch (bis max. 10 Euro) an den Wunschbaum hängen. So entsteht ein liebe
+ voll geschmückter Baum voller kleiner Träume – ein Symbol für Hoffnung\,
+  Freude und Zusammenhalt.\n\n\nKommt vorbei\, genießt die festliche Atmo
+ sphäre und stimmt Euch auf eine schöne Adventszeit ein!\nMit Leckereien\
+ , warmen Getränken\, kleinen Mitbringseln und vielen Aktionen für Kinder
+  und Familien ist für alle etwas dabei!
+LOCATION:DRK-Geschäftsstelle
+X-LOCATION-NAME:DRK-Geschäftsstelle
+X-STREET-ADDRESS:Moltkeplatz 3
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+ORGANIZER;CN=DRK Parchim:mailto:info@drk-parchim.de
+X-ORGANIZER-NAME:DRK Parchim
+X-ORGANIZER-EMAIL:info@drk-parchim.de
+X-ORGANIZER-WEBSITE:https://www.drk-parchim.de/startseite-kv.html
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Moltkeplatz 3
+X-ORGANIZER-GEO:53.4246433\;11.846097
+CONTACT:info@drk-parchim.de
+X-CONTACT-EMAIL:info@drk-parchim.de
+URL:https://www.drk-parchim.de/kurse-news/aktuelle-meldungen-drk-parchim/
+ meldung/drk-weihnachtsmarkt-2026-zusammen-feiern-wuensche-teilen.html
+ATTACH;FMTTYPE=image/png:https://www.parchim.de/de/kalender/termine-exter
+ n/2026-11-28-drk-weihnachtszauber-2026-zusammen-feiern-wuensche-teilen/d
+ rk-parchim-termin-weihnachtszauber-2026-1024x682-3.png?cid=15fs.8zud
+UID:2b1b8cf2-91b2-498d-953b-aa54592d19a6:2026-11-28
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261128T193000
+DTEND;TZID=Europe/Berlin:20261128T235959
+SUMMARY:Premiere: Charles Dickens – A Christmas Carol  Adventsgeschichten
+  2026
+CREATED:20261012T124357Z
+LAST-MODIFIED:20261012T124357Z
+DESCRIPTION:Das Junge Staatstheater Parchim präsentiert:\nEin Klassiker d
+ er Weihnachtsliteratur nach Charles Dickens\, Fassung von Astrid Griesba
+ ch\n\nDie Nachkommen von Ebenezer Scrooge treffen sich zur Weihnachtszei
+ t\, um an den Tag zu erinnern\, an dem sich der Geizhals und Menschenhas
+ ser grundlegend veränderte. Geister\, Geiz\, Moral und der Traum von ein
+ er seligen Weihnacht: Charles Dickens’ berühmte Geschichte über Scrooges
+  wundersame Wandlung ist ein zeitloser Klassiker – voller Humor\, Fantas
+ ie und weihnachtlicher Magie.\n\nDie Adventsgeschichten auf den kleinen 
+ Brettern der Kulturmühle setzen ihre Tradition mit diesem großen Weihnac
+ htsklassiker fort. \n\nEintritt: 28\,50 € (Vorverkauf an der Theaterkass
+ e\, in der Tourist-Info & online)\n\nWeitere Termine sind online veröffe
+ ntlicht.
+LOCATION:Kulturmühle Parchim\, Probebühne 1
+X-LOCATION-NAME:Kulturmühle Parchim\, Probebühne 1
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-11-28-premiere-c
+ harles-dickens-a-christmas-carol-adventsgeschichten-2026/parchim-liest-2
+ 026-sm-grafik.jpg?cid=15cd.8z57
+UID:7effe459-476e-4f86-bf21-f08c0ade4a86:2026-11-28
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261129T160000
+DTEND;TZID=Europe/Berlin:20261129T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T102729Z
+LAST-MODIFIED:20260819T102729Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:c94eeaf2-2152-49cd-96e0-73ad0768f815:2026-11-29
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261201T090000
+DTEND;TZID=Europe/Berlin:20261201T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T102844Z
+LAST-MODIFIED:20260819T102844Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:baca435f-231a-45de-a849-49ba4c14256f:2026-12-01
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261201T150000
+DTEND;TZID=Europe/Berlin:20261201T160000
+SUMMARY:VogelsangGeschichten
+CREATED:20261012T124633Z
+LAST-MODIFIED:20261012T124633Z
+DESCRIPTION:Erst zieht die Goldene Gans jeden mit sich und dann schlägt d
+ ie mutige Maus den Grüffelo in die Flucht.\n\nmit freundlicher Unterstüt
+ zung vom Buchladen rein(ge)lesen\n\nBuchfinkbeitrag: 1\,00 €\n\nWeitere 
+ Termine: jeden ersten Dienstag im Monat bis März 2027
+LOCATION:Kita St. Josef
+X-LOCATION-NAME:Kita St. Josef
+X-STREET-ADDRESS:Vogelsang 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-12-01-vogelsangg
+ eschichten/parchim-liest-2026-sm-grafik.jpg?cid=15cd.8z5j
+UID:a7b692e1-08cc-4e28-99ef-585e1961edd4:2026-12-01
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261202T090000
+DTEND;TZID=Europe/Berlin:20261202T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T103235Z
+LAST-MODIFIED:20260819T103235Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:1a665c61-2b0e-4913-8fa2-740d9b62edf4:2026-12-02
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261202T110000
+DTEND;TZID=Europe/Berlin:20261202T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T103341Z
+LAST-MODIFIED:20260819T103341Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:77aa607d-3d2a-4909-9709-4e21b74e8ddf:2026-12-02
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261203T090000
+DTEND;TZID=Europe/Berlin:20261203T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T103500Z
+LAST-MODIFIED:20260819T103500Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:176f0646-e2ab-4dda-875f-d4bcc4a6dc90:2026-12-03
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261203T110000
+DTEND;TZID=Europe/Berlin:20261203T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T103605Z
+LAST-MODIFIED:20260819T103605Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:72adae3b-ffae-45f0-9b6c-078b4e13a2f1:2026-12-03
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;VALUE=DATE:20261204
+DTEND;VALUE=DATE:20261207
+SUMMARY:Adventsmarkt trifft Mühlenweihnacht
+CREATED:20261022T110323Z
+LAST-MODIFIED:20261022T110323Z
+DESCRIPTION:2026 erstreckt sich der Parchimer Adventsmarkt von der Marien
+ kirche bis zum Fischerdamm. Zwischen St. Marien\, den Hafenterrassen und
+  der Kulturmühle bieten zahlreiche Stände ein buntes Kulturprogramm und 
+ weihnachtliche Stimmung vom 4. bis 6. Dezember 2026.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-12-04-adventsmarkt-trifft-muehlenweihnacht/von-der-st.-marienkir
+ che-bis-zur-kulturmuehle-1920-x-1080-px.jpg?cid=15dj.8zwy
+UID:28024fc9-cb4f-4084-bcc7-a7d4562eb4b3:2026-12-04
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261204T090000
+DTEND;TZID=Europe/Berlin:20261204T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T103807Z
+LAST-MODIFIED:20260819T103807Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:4e66ef9e-e2a7-4532-8f46-7317a737c8e4:2026-12-04
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261204T090000
+DTEND;TZID=Europe/Berlin:20261204T100000
+SUMMARY:Nestgezwitscher am Vogelsang - Physiotherapie für Babys
+CREATED:20260831T131943Z
+LAST-MODIFIED:20260831T131943Z
+DESCRIPTION:Jeden 1. Freitag im Monat gibt es ein thematisches Angebot fü
+ r die Eltern und Babys. Dann gibt es Infos oder Aktion und Austausch.\nE
+ s findet in den Räumlichkeiten unserer Kita statt\, ist aber ausdrücklic
+ h für alle Eltern offen.\nVon der Krippe ist jemand dabei um zu unterstü
+ tzen und jemand weiteres leitet den Vormittag thematisch entsprechend de
+ s Plans.
+LOCATION:Kita St. Josef
+X-LOCATION-NAME:Kita St. Josef
+X-STREET-ADDRESS:Vogelsang 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-12-04-nestgezwitscher-am-vogelsang-physiotherapie-fuer-babys/nes
+ tgezwitscher-am-vogelsang-flyer-vorderseite.jpg?cid=150p.8vw1
+UID:61b357ff-0116-481b-a2f5-e89e4025e326:2026-12-04
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261204T190000
+DTEND;TZID=Europe/Berlin:20261204T235959
+SUMMARY:Miss Merkel – Mord unterm Weihnachtsbaum
+CREATED:20261012T124956Z
+LAST-MODIFIED:20261012T124956Z
+DESCRIPTION:Der Buchladen rein(ge)lesen präsentiert: Lesung mit Katharina
+  Thalbach\nWeihnachtsstimmung in Kleinfreudenstadt – bis plötzlich ein M
+ ord geschieht. Natürlich kann sich Miss Merkel nicht aus den Ermittlunge
+ n heraushalten. Zwischen Weihnachtsgans\, Dorftratsch und festlicher Idy
+ lle stößt sie auf Geheimnisse\, die besser verborgen geblieben wären.\n\
+ nDavid Safiers humorvoller Weihnachtskrimi verbindet Spannung\, skurrile
+  Figuren und pointierte Dialoge. Katharina Thalbach verleiht der Geschic
+ hte mit ihrer unverwechselbaren Stimme und ihrem schauspielerischen Tale
+ nt besonderen Witz und Lebendigkeit. \n\nEintritt: 40\,00 € (Vorverkauf 
+ im Buchladen rein(ge)lesen und online auf eventim.de)
+LOCATION:Solitär
+X-LOCATION-NAME:Solitär
+X-STREET-ADDRESS:Putlitzer Str. 25
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-12-04-miss-merke
+ l-mord-unterm-weihnachtsbaum/parchim-liest-2026-sm-grafik.jpg?cid=15cd.8
+ z5v
+UID:5d12f5de-6560-4030-aab0-369607b17e10:2026-12-04
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261205T193000
+DTEND;TZID=Europe/Berlin:20261205T213000
+SUMMARY:Weihnachtsklänge mit Mara
+CREATED:20261028T081950Z
+LAST-MODIFIED:20261028T081950Z
+DESCRIPTION:Wenn Musik die Weihnachtszeit verzaubert …\n\nFreut euch am 0
+ 5. Dezember um 19:30 Uhr auf Mara im MAHLWERK! \nMit ihrer einzigartigen
+  Stimme und gefühlvollen Songs sorgt sie für musikalische Gänsehautmomen
+ te und eine stimmungsvolle Atmosphäre\, die perfekt in die gemütliche We
+ ihnachtszeit passt. Genießt einen besonderen Abend voller Musik und Weih
+ nachtszauber in der Kulturmühle Parchim. \nDer Eintritt ist frei – kommt
+  vorbei\, wir freuen uns auf euch!
+LOCATION:MAHLWERK
+X-LOCATION-NAME:MAHLWERK
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:	Parchim
+ORGANIZER;CN=Lewitz-Dienstleistungen gGmbH:mailto:buchung@restaurant-mahl
+ werk.de
+X-ORGANIZER-NAME:Lewitz-Dienstleistungen gGmbH 
+X-ORGANIZER-EMAIL:buchung@restaurant-mahlwerk.de
+X-ORGANIZER-TELEPHONE:03871 7299449
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Heide-Feld 9
+CONTACT:Beatrice Brose\,bbrose@lewitz-dienstleistungen.de
+X-CONTACT-GIVEN-NAME:Beatrice
+X-CONTACT-FAMILY-NAME:Brose
+X-CONTACT-EMAIL:bbrose@lewitz-dienstleistungen.de
+X-CONTACT-MOBILE:0151 16053372
+X-CONTACT-ADDRESS-POSTALCODE:19370
+X-CONTACT-ADDRESS-LOCALITY:Parchim
+X-CONTACT-ADDRESS-STREET:Flörkestraße 22
+URL:https://restaurant-mahlwerk.de/termine/
+ATTACH;FMTTYPE=image/png:https://www.parchim.de/de/kalender/termine-exter
+ n/2026-12-05-weihnachtsklaenge-mit-mara/2026-12-05-mara-1.png?cid=15gj.9
+ 03v
+UID:92a4595d-4029-491f-b6e9-48c27415023a:2026-12-05
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261205T200000
+DTEND;TZID=Europe/Berlin:20261205T220000
+SUMMARY:Comedy Spass Mix-Show
+CREATED:20260313T130542Z
+LAST-MODIFIED:20260313T130542Z
+DESCRIPTION:ComedySpass Deluxe: Lachen auf höchstem Niveau.\n\nWillkommen
+  bei ComedySpass Deluxe\, der Show\, in der Humor zur Kunstform wird!\nH
+ ier treffen sich die Besten ihres Fachs – verschiedene etablierte Comedi
+ ans Deutschlands mit Bühnenerfahrung\, Charme und einer geballten Ladung
+  Witz.\n\nErlebt einen Abend voller Energie\, Tempo und überraschender M
+ omente. Ob spitze Beobachtungen aus dem Alltag\, schräger Situationshumo
+ r oder pointierte Gesellschaftssatire – das handverlesene Line-up deckt 
+ die ganze Bandbreite ab\, die Comedy so vielseitig macht.\n\nComedySpass
+  Deluxe steht für exzellente Unterhaltung\, brillantes Timing und eine A
+ tmosphäre\, die sofort ansteckt. Hier wird gelacht\, gestaunt und zwisch
+ endurch vielleicht sogar ein bisschen nachgedacht (ganz kurz\, versproch
+ en).\n\nEin Abend voller Abwechslung\, der den Alltag vergessen lässt\, 
+ gute Laune garantiert und noch lange nachhallt.\nPerfekt für alle\, die 
+ einfach mal wieder richtig Spaß haben wollen.\n\nSichert euch jetzt eure
+  Tickets und erlebt ComedySpass „Deluxe“ live – energiegeladen\, charman
+ t und einfach unvergesslich!\n\nHINWEIS: Ticket-VVK nur bis zum Vortag u
+ m 23:59 Uhr.\n\nPS: Welche Comedians auf der Bühne stehen\, wird auf Ins
+ tagram und Facebook bekanntgegeben.\nFolgen unter: www.instagram.com/com
+ edyspass und www.facebook.com/ComedySpass.LachMix
+LOCATION:Stadthalle Parchim 
+X-LOCATION-NAME:Stadthalle Parchim 
+X-STREET-ADDRESS:Putlitzer Straße 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+ORGANIZER;CN=IKOVERA UG:mailto:planung@ikovera.de
+X-ORGANIZER-NAME:IKOVERA UG 
+X-ORGANIZER-EMAIL:planung@ikovera.de
+X-ORGANIZER-TELEPHONE:0152 09409413
+X-ORGANIZER-WEBSITE:https://www.lachmix.de/parchim
+X-ORGANIZER-ADDRESS-POSTALCODE:18069
+X-ORGANIZER-ADDRESS-LOCALITY:Rostock
+X-ORGANIZER-ADDRESS-STREET:An der Jägerbäk 1
+CONTACT:Tiemo  Lenk\,planung@ikovera.de\,015209409413
+X-CONTACT-GIVEN-NAME:Tiemo 
+X-CONTACT-FAMILY-NAME:Lenk
+X-CONTACT-EMAIL:planung@ikovera.de
+X-CONTACT-TELEPHONE:015209409413
+X-CONTACT-ADDRESS-POSTALCODE:18069
+X-CONTACT-ADDRESS-LOCALITY:Rostock
+X-CONTACT-ADDRESS-STREET:An der Jägerbäk 1
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-12-05-comedy-spass-mix-show/grafik-comey-mix-show.jpg?cid=1344.8
+ ilg
+UID:bb2af412-b774-4feb-8803-ee2e36da5389:2026-12-05
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261206T160000
+DTEND;TZID=Europe/Berlin:20261206T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T104139Z
+LAST-MODIFIED:20260819T104139Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:e79a29e6-e438-4278-9294-adeddb7d859e:2026-12-06
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261208T090000
+DTEND;TZID=Europe/Berlin:20261208T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T104428Z
+LAST-MODIFIED:20260819T104428Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatheater Parchim:mailto:kasse-parchim@mecklenburgi
+ sches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:40fedf57-5951-4867-98cf-920de1a5f82c:2026-12-08
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261208T110000
+DTEND;TZID=Europe/Berlin:20261208T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T105110Z
+LAST-MODIFIED:20260819T105110Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:1888a980-06c2-458f-bd3b-8c4585b42d08:2026-12-08
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261209T090000
+DTEND;TZID=Europe/Berlin:20261209T135100
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T105253Z
+LAST-MODIFIED:20260819T105253Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:b8900acf-e008-4e7e-94b6-ddf7b8d7edcc:2026-12-09
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261209T110000
+DTEND;TZID=Europe/Berlin:20261209T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T105447Z
+LAST-MODIFIED:20260819T105447Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume/am/15-November-2026-um-16-00.html
+UID:db699023-e739-442f-a5c4-23e2308ddff1:2026-12-09
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261209T200000
+DTEND;TZID=Europe/Berlin:20261209T220000
+SUMMARY:Weihnachten mit Salut Salon
+CREATED:20260424T113349Z
+LAST-MODIFIED:20260424T113349Z
+DESCRIPTION:Singende Sägen\, brennende Bögen und musikalische Parforcerit
+ te in irrwitziger\nPerfektion: Still wird die Nacht ganz sicher nicht\, 
+ wenn Salut Salon zum\nWeihnachtskonzert bitten!\nSeit mittlerweile 20 Ja
+ hren zieht das Quartett aus Hamburg eine stetig\nwachsende Fan-Gemeinde 
+ rund um den Globus in seinen Bann\, darunter Klassik-\nBegeisterte genau
+ so wie solche Menschen\, die normalerweise keinen Fuß in\neinen Konzerts
+ aal setzen würden. Virtuosität\, Witz und Poesie - mit dieser ureigenen\
+ nMischung zaubern die vier Musikerinnen nun auch in ihrem\nWeihnachtspro
+ gramm einen ganzen Schlitten voll klingender Preziosen auf die\nBühne: W
+ eihnachtliches aus allen Winkeln der Welt trifft auf Klassik\, Chanson\n
+ und Filmmusik\, auf Werke von Vivaldi\, Dvořák oder Piazzolla - und vor 
+ allem: auf\nunbändige\, ja\, heilige Spielfreude. Halleluja - was für ei
+ ne Bescherung!
+LOCATION:Stadthalle Parchim 
+X-LOCATION-NAME:Stadthalle Parchim 
+X-STREET-ADDRESS:Putlitzer Straße 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+ORGANIZER;CN="Känguruh Production Konzertagentur Gmbh":mailto:info@kaengu
+ ruh.de
+X-ORGANIZER-NAME:Känguruh Production Konzertagentur Gmbh
+X-ORGANIZER-EMAIL:info@kaenguruh.de
+X-ORGANIZER-TELEPHONE:+493452093443
+X-ORGANIZER-WEBSITE:https://www.kaenguruh.de
+URL:https://www.eventim.de/event/salut-salon-weihnachten-mit-salut-salon-
+ stadthalle-parchim-21537596/
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-12-09-weihnachten-mit-salut-salon-1/salutsalon-weihnachten-credi
+ t-soulkitchen-quartett-baum-1.jpg?cid=13hy.8lcj
+UID:df9f9512-3ef3-40a8-84e8-a9b82330420e:2026-12-09
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261210T110000
+DTEND;TZID=Europe/Berlin:20261210T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T110241Z
+LAST-MODIFIED:20260819T110241Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-WEBSITE:https://www.mecklenburgisches-staatstheater.de/start.
+ html
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+CONTACT:kasse-parchim@mecklenburgisches-staatstheater.de\,038716291141
+X-CONTACT-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-CONTACT-TELEPHONE:038716291141
+X-CONTACT-ADDRESS-POSTALCODE:19370
+X-CONTACT-ADDRESS-LOCALITY:Parchim
+X-CONTACT-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume.html
+UID:a0dfba36-5de0-4f44-9082-8244453c511b:2026-12-10
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261210T180000
+DTEND;TZID=Europe/Berlin:20261210T235959
+SUMMARY:open Lounge - vorweihnachtlicher Abend mit Hendrik Zwar Solo
+CREATED:20261006T092632Z
+LAST-MODIFIED:20261006T092632Z
+DESCRIPTION:Musikalisch\, stimmungsvoll und mit einer guten Portion Weihn
+ achtsgefühl verabschiedet sich die open LOUNGE damit in das neue Jahr.\n
+ \nTickets sind online bei Eventim und Reservix sowie in der Tourist-Info
+  Parchim erhältlich. Der Vorverkauf über die Touristinformation Parchim 
+ in der Kulturmühle ist auch im aktuellen Veranstaltungsprogramm der Stad
+ thalle als Vorverkaufsstelle ausgewiesen.
+LOCATION:Stadthalle Parchim 
+X-LOCATION-NAME:Stadthalle Parchim 
+X-STREET-ADDRESS:Putlitzer Straße 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-12-10-open-lounge-vorweihnachtlicher-abend-mit-hendrik-zwar-solo
+ /2026-12-10-open-lounge-hendrik-zwar-din-lang-210x105-hoch.jpg?cid=159d.
+ 8yfp
+UID:93845f12-2cf6-4fc2-a63d-78575cdebf73:2026-12-10
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261211T180000
+DTEND;TZID=Europe/Berlin:20261211T200000
+SUMMARY:Autorenlesung mit Helga Schubert
+CREATED:20261012T094342Z
+LAST-MODIFIED:20261012T094342Z
+DESCRIPTION:📚 Helga Schubert liest in Parchim\n\nEine besondere literari
+ sche Begegnung erwartet euch am 11. Dezember 2026 im Zinnhaus Parchim: D
+ ie vielfach ausgezeichnete Autorin Helga Schubert kommt nach Parchim und
+  liest aus ihrem neuen Buch „die woche danach – ein stundenbuch der hoff
+ nung“.\n\n🗓 Freitag\, 11. Dezember 2026\n⏰ 18:00 Uhr\n📍 Zinnhaus Parch
+ im\, Lange Straße 24\n🎟 Eintritt: 30 €\n\nIm Rahmen der Veranstaltung z
+ eigt Helga Schubert außerdem eine kleine Ausstellung mit Werken ihres Ma
+ nnes Johannes Helm.\n\nUnd wir sind ebenfalls dabei: Wir übernehmen den 
+ Büchertisch zur Lesung und bringen natürlich auch Helga Schuberts Bücher
+  zum Stöbern und Kaufen mit. 📖\n\nWichtig: Veranstalter dieser Lesung s
+ ind nicht wir\, sondern der Verein zur Bewahrung von Künstlernachlässen 
+ Westmecklenburg e. V. Wir sind ausschließlich mit unserem Büchertisch vo
+ r Ort.\n\n🎟️ Karten gibt es über Eventim\, bei der Touristinformation P
+ archim und bei uns im Buchladen „reingelesen“ bei Tilo Tambach.\n\nReser
+ vierungen über uns sind für diese Veranstaltung nicht möglich. Da die Pl
+ atzanzahl im Zinnhaus begrenzt ist\, empfehlen wir euch ausdrücklich\, e
+ uch rechtzeitig um Karten zu kümmern – bevor es am Ende heißt: ausverkau
+ ft.\n\nEine Lesung mit einer großen deutschen Autorin\, ein besonderer V
+ eranstaltungsort und dazu die Möglichkeit\, Helga Schuberts neues Buch d
+ irekt vor Ort zu entdecken. Wir freuen uns auf diesen Abend! 🤎📚
+LOCATION:Zinnhaus
+X-LOCATION-NAME:Zinnhaus
+X-STREET-ADDRESS:Lange Straße 24
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+ORGANIZER;CN=Der Buchladen Rein(ge)lesen:mailto:info@der-buchladen-reinge
+ lesen.de
+X-ORGANIZER-NAME:Der Buchladen Rein(ge)lesen
+X-ORGANIZER-EMAIL:info@der-buchladen-reingelesen.de
+X-ORGANIZER-TELEPHONE:03871451500
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Blutstraße 33
+CONTACT:Tilo Tambach\,info@der-buchladen-reingelesen.de\,03871451500
+X-CONTACT-GIVEN-NAME:Tilo
+X-CONTACT-FAMILY-NAME:Tambach
+X-CONTACT-EMAIL:info@der-buchladen-reingelesen.de
+X-CONTACT-TELEPHONE:03871451500
+X-CONTACT-ADDRESS-POSTALCODE:19370
+X-CONTACT-ADDRESS-LOCALITY:Parchim
+X-CONTACT-ADDRESS-STREET:Blutstraße 33
+ATTACH;FMTTYPE=image/png:https://www.parchim.de/de/kalender/termine-exter
+ n/2026-12-11-autorenlesung-mit-helga-schubert/helga-schubert.png?cid=15c
+ 1.8ywm
+UID:7145c664-4950-4cc8-b597-0031386fe4b3:2026-12-11
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261211T180000
+DTEND;TZID=Europe/Berlin:20261211T235959
+SUMMARY:Die Woche danach – Ein Stundenbuch der Hoffnung
+CREATED:20261012T125452Z
+LAST-MODIFIED:20261012T125452Z
+DESCRIPTION:Der Verein “Bewahrung von Künstlernachlässen Westmecklenburg 
+ e.V.“ präsentiert: Lesung von Spiegel Bestseller-Autorin Helga Schubert 
+ mit Ausstellung von Werken ihres Mannes Johannes Helm\n\nIn ihrem neuen 
+ Roman „Die Woche danach“ erzählt Ingeborg-Bachmann-Preisträgerin Helga S
+ chubert von der ersten Zeit nach dem Tod ihres Mannes\, den sie über 60 
+ Jahre liebte und mehr als zehn Jahre pflegte. Feinsinnig\, präzise und v
+ oller Menschlichkeit schreibt sie über Trauer\, Abschied\, Sehnsucht und
+  die vorsichtige Rückkehr ins Leben. Ein besonderer Abend\, der Literatu
+ r und Kunst verbindet.\n\nEine Benefizveranstaltung des Vereins BKNW e.V
+ . mit freundlicher Unterstützung vom Buchladen rein(ge)lesen\n\nEintritt
+ : 30\,00 € (Vorverkauf im Buchladen rein(ge)lesen & online auf eventim.d
+ e)
+LOCATION:Zinnhaus Parchim
+X-LOCATION-NAME:Zinnhaus Parchim
+X-STREET-ADDRESS:Lange Straße 24
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg;X-COPYRIGHT=pixel-shot.com (Leonid Yastremskiy)
+ :https://www.parchim.de/de/kalender/termine-extern/2026-12-11-die-woche-
+ danach-ein-stundenbuch-der-hoffnung/parchim-liest-2026-sm-grafik.jpg?cid
+ =15cd.8z6g
+UID:bb57d81f-61c0-4cae-8df4-c2456cef791e:2026-12-11
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261214T090000
+DTEND;TZID=Europe/Berlin:20261214T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T120653Z
+LAST-MODIFIED:20260819T120653Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:0387162911741
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume.html
+UID:372bcb5b-c11e-4c6a-9425-9f506ed2d5e2:2026-12-14
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261214T110000
+DTEND;TZID=Europe/Berlin:20261214T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T120929Z
+LAST-MODIFIED:20260819T120929Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume.html
+UID:61a18642-5ebe-472e-a7fc-94be4bfa64da:2026-12-14
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261214T180000
+DTEND;TZID=Europe/Berlin:20261214T235959
+SUMMARY:JUH macht sich einen Reim - Lesung im KiFaZ
+CREATED:20260826T130840Z
+LAST-MODIFIED:20260826T130840Z
+DESCRIPTION:Gedanken\, Gedichte und Gedöns mit Jörg Ulrich Helgert.
+LOCATION:DRK KiFaZ „Parchimer Stadtmusikanten“
+X-LOCATION-NAME:DRK KiFaZ „Parchimer Stadtmusikanten“
+X-STREET-ADDRESS:Karl-Liebknecht-Straße 27
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-12-14-juh-macht-sich-einen-reim-lesung-im-kifaz/kifaz-lesung-wei
+ hnachten-2026.jpg?cid=14zd.8vmy
+UID:5c421907-00c9-4967-9ebe-72f31055c31c:2026-12-14
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261215T090000
+DTEND;TZID=Europe/Berlin:20261215T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T121025Z
+LAST-MODIFIED:20260819T121025Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume.html
+UID:d39fd815-b9b7-4f0f-8d45-d9126028aa3e:2026-12-15
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261215T110000
+DTEND;TZID=Europe/Berlin:20261215T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T121213Z
+LAST-MODIFIED:20260819T121213Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume.html
+UID:4db0e43f-9347-45e0-b130-ada9bf36da07:2026-12-15
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261216T090000
+DTEND;TZID=Europe/Berlin:20261219T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T121434Z
+LAST-MODIFIED:20260819T121434Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume.html
+UID:437d2cdf-3086-4713-95a4-d4d14cddccbe:2026-12-16
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261216T110000
+DTEND;TZID=Europe/Berlin:20261216T151400
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T121529Z
+LAST-MODIFIED:20260819T121529Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume.html
+UID:7f43351b-37a4-4889-8e87-085620159f86:2026-12-16
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261217T090000
+DTEND;TZID=Europe/Berlin:20261217T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T121619Z
+LAST-MODIFIED:20260819T121619Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume.html
+UID:3a76602a-3cb6-4073-a520-b2285ccec839:2026-12-17
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261217T110000
+DTEND;TZID=Europe/Berlin:20261217T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T121709Z
+LAST-MODIFIED:20260819T121709Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume.html
+UID:1afe6034-26ab-497d-aa4d-f35a4bc9c69f:2026-12-17
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261217T200000
+DTEND;TZID=Europe/Berlin:20261217T235900
+SUMMARY:Moving Shadows 
+CREATED:20260519T141656Z
+LAST-MODIFIED:20260519T143856Z
+DESCRIPTION:Moving Shadows – Christmas Special\n\nLassen Sie sich verzaub
+ ern von Europas Schattentheater Nr. 1! Mit ihrem mehrfach preisgekrönten
+  Schattentheater entführen die Moving Shadows ihre Zuschauer diesmal in 
+ eine Weihnachtswelt voll Wunder und Träume. Freuen Sie sich auf die neue
+  Weihnachtsshow\, die verzaubert\, begeistert und rührt. Europas führend
+ es Schattentheater hat die Poesie der Weihnacht eingefangen und den Zusc
+ hauern unter den Weihnachtsbaum gelegt. Eine wunderbare Bescherung für J
+ ung und Alt.\n\nCopyright Foto: Mobilé Business Event Theater
+LOCATION:Stadthalle Parchim 
+X-LOCATION-NAME:Stadthalle Parchim 
+X-STREET-ADDRESS:Putlitzer Straße 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+URL:https://www.reservix.de/tickets-moving-shadows-christmas-special-in-p
+ archim-stadthalle-parchim-am-17-12-2026/e2552066
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-12-17-moving-shadows/3-mov-shadows-christmas-special-1200x1200.j
+ pg?cid=13vg.8nly
+UID:3fe1518f-e684-4feb-9123-2536f06a973a:2026-12-17
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261218T090000
+DTEND;TZID=Europe/Berlin:20261218T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T121816Z
+LAST-MODIFIED:20260819T121816Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume.html
+UID:5d5cb5c8-ce54-4b5e-9bc2-cb255ca2bd74:2026-12-18
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261218T110000
+DTEND;TZID=Europe/Berlin:20261218T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T121909Z
+LAST-MODIFIED:20260819T121909Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume.html
+UID:6b67ddef-671e-41a3-bbf0-8e6b700611b3:2026-12-18
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261220T160000
+DTEND;TZID=Europe/Berlin:20261220T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T122001Z
+LAST-MODIFIED:20260819T122001Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume.html
+UID:31a47093-be12-47d1-a657-674ec2100507:2026-12-20
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261220T190000
+DTEND;TZID=Europe/Berlin:20261220T210000
+SUMMARY:Claudia Michelsen \"Ein Weihnachtsabend voller Erzählungen mit Mu
+ sik\"
+CREATED:20260424T114805Z
+LAST-MODIFIED:20260424T114805Z
+DESCRIPTION:Im Dezember 2026 erwarten das Publikum die schönsten Momente 
+ der\nWeihnachtszeit\, wenn die zweifache Grimme-Preis-Trägerin Claudia M
+ ichelsen\nzu festlichen Weihnachtslesungen einlädt. An ihrer Seite: der 
+ gefeierte Jazz-\nTrompeter und junge Ausnahmekünstler Jakob Bänsch\, der
+  mit nur 20 Jahren\nden deutschen Jazz Preis gewann und mit seinem einzi
+ gartigen Sound für\nmagische Klangmomente sorgt.\nWeihnachten – das ist 
+ Liebe und Lichterglanz\, Familie und Freude. Aber es gibt\nauch Missvers
+ tändnisse\, große Gefühle und die legendären „falschen\nGeschenke“. Dies
+ e ganze Bandbreite macht den Zauber dieses Abends aus. Mit\nihrer warmen
+ \, unverwechselbaren Stimme erweckt Claudia Michelsen\nbesinnliche\, hei
+ tere und nachdenkliche Geschichten zum Leben. Geschichten\nvon Sehnsucht
+ \, Erinnerungen\, Aufbruch\, Familie und Winterwundern verweben\nsich mi
+ t der einmaligen Musik von Jakob Bänsch zu einem Abend\, der Herz und\nK
+ opf gleichermaßen berührt. Text und Klang treten in einen lebendigen Dia
+ log –\nmal zart\, mal kraftvoll. Bänsch schafft mit seiner Musik Klangrä
+ ume\, die die\nWorte\, Gedanken und Stimmungen tragen\, vertiefen und ma
+ nchmal\nüberraschend brechen.\nClaudia Michelsen und Jakob Bänsch verbin
+ den Literatur und Musik zu einem\natmosphärischen Bühnenerlebnis zwische
+ n Humor\, Melancholie und\nwinterlicher Magie.\n„Ein Weihnachtsabend vol
+ ler Erzählungen“ ist kein klassischer Leseabend\, kein\nKonzert\, sonder
+ n ein fein komponiertes Bühnenerlebnis.
+LOCATION:Stadthalle Parchim 
+X-LOCATION-NAME:Stadthalle Parchim 
+X-STREET-ADDRESS:Putlitzer Straße 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+ORGANIZER;CN="Känguruh Production Konzertagentur Gmbh":mailto:info@kaengu
+ ruh.de
+X-ORGANIZER-NAME:Känguruh Production Konzertagentur Gmbh
+X-ORGANIZER-EMAIL:info@kaenguruh.de
+X-ORGANIZER-TELEPHONE:+493452093443
+URL:https://www.eventim.de/event/claudia-michelsen-ein-weihnachtsabend-vo
+ ller-erzaehlungen-mit-musik-stadthalle-parchim-21357657/
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-12-20-claudia-michelsen-ein-weihnachtsabend-voller-erzaehlungen-
+ mit-musik/michelsen-baensch-1-c-mathias-bothor.jpg?cid=13i1.8ld4
+UID:c7f27dc1-28fb-4240-b2d1-35216761625f:2026-12-20
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261223T150000
+DTEND;TZID=Europe/Berlin:20261223T170000
+SUMMARY:Berufsberatung im Erwerbsleben
+CREATED:20261006T093117Z
+LAST-MODIFIED:20261006T093117Z
+DESCRIPTION:Beratungsangebot der Bundesagentur für Arbeit in der Parchime
+ r Stadtbibliothek
+LOCATION:Stadtbibliothek Parchim
+X-LOCATION-NAME:Stadtbibliothek Parchim
+X-STREET-ADDRESS:Putlitzer Str. 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2026-12-23-berufsberatung-im-erwerbsleben/berufsberatung-im-erwerbsle
+ ben.jpg?cid=159j.8ygd
+UID:de6800ee-c43a-4594-a9e0-3f16696eb559:2026-12-23
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261226T140000
+DTEND;TZID=Europe/Berlin:20261226T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T122109Z
+LAST-MODIFIED:20260819T122109Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume.html
+UID:89cc5e50-1eaf-4db1-846e-788d6632fbd3:2026-12-26
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20261226T160000
+DTEND;TZID=Europe/Berlin:20261226T235959
+SUMMARY:Die feuerrote Blume
+CREATED:20260819T122209Z
+LAST-MODIFIED:20260819T122209Z
+DESCRIPTION:Ein kleiner Wunsch. Eine unheimliche Reise. Eine Freundschaft
+ \, die alles verändert.\nEin Kaufmann bricht wie jedes Jahr in ferne Län
+ der auf. Seinen drei Töchtern verspricht er Geschenke ‒ wie immer. Die b
+ eiden Älteren wissen genau\, was sie wollen: ein prachtvolles Kleid\, ei
+ ne funkelnde Halskette. Hauptsache schön\, teuer und protzig. Doch die j
+ üngste Tochter Aljona wünscht sich etwas ganz anderes. Keine Juwelen ode
+ r Seide. Nur eine Blume. Eine feuerrote Blume\, von der sie geträumt hat
+ .\nDer Vater findet diese Blume tief im Wald\, nahe einem verwunschenen 
+ Schloss\, in dem eine sonderbare Königin und ihr Diener hausen. Doch bei
+ m Pflücken geschieht das Unfassbare: Die Blume gehört einem Ungeheuer un
+ d plötzlich steht das Schicksal der ganzen Familie auf dem Spiel. Um ihr
+ en Vater zu retten\, fasst Aljona einen mutigen Entschluss. Sie stellt s
+ ich dem Unbekannten und begegnet einem Wesen und einer Welt\, die ihre H
+ ilfe braucht.\n\nEine zauberhafte Geschichte über Mut\, Mitgefühl\, die 
+ Suche nach einem Weg\, verzeihen zu können\, und über das\, was „wahre“ 
+ Schönheit ausmacht. Das Märchen Die scharlachrote Blume\, im 19. Jahrhun
+ dert von Sergei T. Aksakow niedergeschrieben\, wurde Vielen durch den ru
+ ssischen Filmklassiker Die feuerrote Blume unvergesslich.\n\nDie diesjäh
+ rige Familienproduktion zur Weihnachtszeit erzählt den bekannten Die Sch
+ öne und das Biest-Stoff in einer Fassung voller Herz\, Magie und Poesie.
+  Sie erinnert uns daran\, dass es sich lohnt\, hinter die Fassade zu sch
+ auen ‒ denn im scheinbar Hässlichen und Unbekannten kann so viel Schönes
+  verborgen liegen.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/die-feuerrote
+ -blume.html
+UID:8b05e940-95d8-4a86-bda4-64638c64496a:2026-12-26
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20270108T193000
+DTEND;TZID=Europe/Berlin:20270108T220000
+SUMMARY:The Best of Black Gospel- Joy to the World Tour
+CREATED:20260519T132649Z
+LAST-MODIFIED:20260519T132649Z
+DESCRIPTION:The Best of Black Gospel gibt im Rahmen ihrer seit 1999 alljä
+ hrlichen Europa-Tour \nein Konzert in ihrer Stadt und wird somit sicher 
+ DAS Gospel - Konzert - Ereignis ! \nDer Chor gastierte schon erfolgreich
+  in über 2.000 Städten sicher auch in der Stadt !\n\nDieser Chor vereint
+  eine Auswahl der besten Gospelsänger und Sängerinnen aus den USA. \nDie
+  Ausnahme-Künstler singen die bekanntesten und schönsten Gospelsongs in 
+ einem \nzweistündigen Programm\, instrumental begleitet.
+LOCATION:Stadthalle Parchim 
+X-LOCATION-NAME:Stadthalle Parchim 
+X-STREET-ADDRESS:Putlitzer Straße 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2027-01-08-the-best-of-black-gospel-joy-to-the-world-tour/bg-foto-202
+ 6-chor-von-jan.jpg?cid=13vd.8nlm
+UID:74503442-1b38-496b-90b9-c4e15dcd0d6f:2027-01-08
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20270116T193000
+DTEND;TZID=Europe/Berlin:20270116T235959
+SUMMARY:Eine halbe Ewigkeit - Ein Wiedersehen mit Cora Hübsch
+CREATED:20260819T085601Z
+LAST-MODIFIED:20260819T085601Z
+DESCRIPTION:Ich bin auf der Flucht vor meinen Erinnerungen. Schon seit ei
+ ner halben Ewigkeit. Bis mir mein altes Tagebuch in die Hände fällt. Mon
+ dscheintarif. Es hatte ein Happy End. Doch das Leben ging weiter. Ich he
+ iße Cora Hübsch\, meine Kinder sind groß\, und meine Ehe ist gebrechlich
+ . Zu viel Alltag\, zu wenig Abenteuer. Heute Abend spielt mein Leben ver
+ rückt. Die alte Schuld\, die schemenhafte Gestalt auf dem Foto. Ist das 
+ Zufall? Oder eine letzte Chance?
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-WEBSITE:https://www.mecklenburgisches-staatstheater.de/start.
+ html
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+CONTACT:kasse-parchim@mecklenburgisches-staatstheater.de\,038716291141
+X-CONTACT-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-CONTACT-TELEPHONE:038716291141
+X-CONTACT-ADDRESS-POSTALCODE:19370
+X-CONTACT-ADDRESS-LOCALITY:Parchim
+X-CONTACT-ADDRESS-STREET:Fischerdamm 2
+URL:https://www.mecklenburgisches-staatstheater.de/programm/eine-halbe-ew
+ igkeit-ein-wiedersehen-mit-cora-h%C3%BCbsch-2026002617.html
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2027-01-16-eine-halbe-ewigkeit-ein-wiedersehen-mit-cora-huebsch/ewigk
+ eit-bild.jpg?cid=14xj.8us1
+UID:ea7dffdc-7bcd-4c42-9d3e-2f6df2e808ec:2027-01-16
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20270120T193000
+DTEND;TZID=Europe/Berlin:22000120T235959
+SUMMARY:Wahre Verbrechen und absurde Fälle - Rechtsmediziner Philipp Möll
+ er live
+CREATED:20260928T062437Z
+LAST-MODIFIED:20260928T062437Z
+DESCRIPTION:Der Berliner Rechtsmediziner Philipp Möller kommt mit True-Cr
+ ime-Talker Dr. Tino Grosche zu Ihnen. Tauchen Sie ein in die faszinieren
+ de Welt der Rechtsmedizin und erfahren Sie Hintergründe zu wahren Verbre
+ chen und absurden Fällen der Kriminalgeschichte.\n\nOb der erweiterte Su
+ izid\, Mord aus Rache\, sadistische Taten oder der gewaltsame Tod des Eh
+ epartners. Immer wieder rekonstruiert die Rechtsmedizin den Tathergang u
+ nd liefert Erklärungen zur Todesursache. Welche Methoden dafür eingesetz
+ t werden\, erklärt Philipp Möller live. Wie erkennt man Gewalt\, wenn es
+  keine sichtbaren Spuren gibt? Wann entscheiden medizinische Fakten über
+  Schuld oder Unschuld vor Gericht? Der Forensiker liefert spannende fach
+ liche Einsichten und Geschichten aus dem Alltag der Rechtsmedizin - der 
+ Schnittstelle von Medizin\, Recht und Polizeiarbeit.\n\nPhilipp Möller a
+ rbeitet seit zehn Jahren in der Berliner Rechtsmedizin. Er untersuchte d
+ en Fall der Kudamm-Raser oder das Gewaltverbrechen eines Politikers. Der
+  Facharzt liefert Einblicke in wahre Verbrechen und absurde Fälle.\nTrue
+ -Crime-Talker Dr. Tino Grosche blickte mit zahlreichen Ermittlern\, Staa
+ tsanwälten\, Rechtsmedizinern\, Gefängnisärzten und Anstaltsleitern hint
+ er die Kulissen brutaler Verbrechen.\n\nFür True-Crime-Fans ist dieses E
+ vent ein absolutes Muss. Denn die Realität ist spannender als jeder Krim
+ i. Lassen Sie sich dieses True-Crime-Duo nicht entgehen. Sichern Sie sic
+ h jetzt ihre Tickets.
+LOCATION:Stadthalle Parchim 
+X-LOCATION-NAME:Stadthalle Parchim 
+X-STREET-ADDRESS:Putlitzer Straße 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/png:https://www.parchim.de/de/kalender/termine-exter
+ n/2027-01-20-wahre-verbrechen-und-absurde-faelle-rechtsmediziner-philipp
+ -moeller-live/true-crime.png?cid=156m.8xs7
+UID:f9a18ae9-ded3-4c8c-8bc2-dcf9346ce60d:2027-01-20
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20270123T193000
+DTEND;TZID=Europe/Berlin:20270123T235959
+SUMMARY:Die Asche meines Vaters oder Plötzlich reich und unsympathisch
+CREATED:20260819T083902Z
+LAST-MODIFIED:20260819T083902Z
+DESCRIPTION:„Diese Art von Leute beißt immer das größte Stück vom Kuchen 
+ ab!“\nTante Vroni in Die Asche meines Vaters oder Plötzlich reich und un
+ sympatisch\n\nSasha erbt Geld. Nicht nur viel. Unfassbar viel. Nachdem S
+ asha eine ominöse Einladung zu einer Beerdigung bekommen hat\, erfährt s
+ ie von ihren Müttern\, dass ihr bis dahin nicht existenter Vater der Ver
+ storbene ist und überdies noch Multimillionär war. So steht sie plötzlic
+ h in einer völlig neuen Welt: schicke Villa auf Sylt\, eine ‒ zunächst ‒
+  herzliche Verwandtschaft und ein Testament\, das alles verändert.\nDenn
+  mit der Verkündung stellt sich ihr die Frage: Wie gerecht ist Reichtum 
+ und was macht man mit der damit einhergehenden Verantwortung? Privatjet\
+ , Luxusvilla\, eine eigene Insel? Oder lieber etwas Sinnvolles? Aber was
+ ? Geld für Klimaschutz? Für soziale Gerechtigkeit? Und damit die Welt re
+ tten? Zwischen schrägen Verwandten\, überraschenden Allianzen und tiefen
+  Abgründen sucht Sasha Antworten ‒ denn mit der „Asche“ steigt eben nich
+ t nur der Kontostand.\n\nSoeren Voima gelingt mit dieser schnellen\, klu
+ gen und von Humor strotzenden Komödie ein Stück über aktuelle Fragestell
+ ungen unserer Gesellschaft.
+LOCATION:Kulturmühle Parchim
+X-LOCATION-NAME:Kulturmühle Parchim
+X-STREET-ADDRESS:Fischerdamm 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+GEO:53.42625;11.8438
+ORGANIZER;CN=Junges Staatstheater Parchim:mailto:kasse-parchim@mecklenbur
+ gisches-staatstheater.de
+X-ORGANIZER-NAME:Junges Staatstheater Parchim
+X-ORGANIZER-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-ORGANIZER-TELEPHONE:038716291141
+X-ORGANIZER-ADDRESS-POSTALCODE:19370
+X-ORGANIZER-ADDRESS-LOCALITY:Parchim
+X-ORGANIZER-ADDRESS-STREET:Fischerdamm 2
+CONTACT:kasse-parchim@mecklenburgisches-staatstheater.de
+X-CONTACT-EMAIL:kasse-parchim@mecklenburgisches-staatstheater.de
+X-CONTACT-ADDRESS-POSTALCODE:19370
+X-CONTACT-ADDRESS-LOCALITY:Parchim
+X-CONTACT-ADDRESS-STREET:Fischerdamm 2
+URL:https://mecklenburgisches-staatstheater.de/programm/die-asche-meines-
+ vaters/am/08-Oktober-2026-um-10-00.html
+UID:d2c35844-f644-43de-9013-857925ebba0d:2027-01-23
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20270205T090000
+DTEND;TZID=Europe/Berlin:20270205T100000
+SUMMARY:Nestgezwitscher am Vogelsang - Waldpädagogik
+CREATED:20260831T133755Z
+LAST-MODIFIED:20260831T133755Z
+DESCRIPTION:Jeden 1. Freitag im Monat gibt es ein thematisches Angebot fü
+ r die Eltern und Babys. Dann gibt es Infos oder Aktion und Austausch.\nE
+ s findet in den Räumlichkeiten unserer Kita statt\, ist aber ausdrücklic
+ h für alle Eltern offen.\nVon der Krippe ist jemand dabei um zu unterstü
+ tzen und jemand weiteres leitet den Vormittag thematisch entsprechend de
+ s Plans.
+LOCATION:Kita St. Josef
+X-LOCATION-NAME:Kita St. Josef
+X-STREET-ADDRESS:Vogelsang 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2027-02-05-nestgezwitscher-am-vogelsang-waldpaedagogik/nestgezwitsche
+ r-am-vogelsang-flyer-vorderseite.jpg?cid=150p.8vx1
+UID:fa2888c2-aaf2-4084-9faf-fdc62c78a5a4:2027-02-05
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20270220T190000
+DTEND;TZID=Europe/Berlin:20270220T210000
+SUMMARY:Daniela Alfinito
+CREATED:20260818T105452Z
+LAST-MODIFIED:20261014T070841Z
+DESCRIPTION:Daniela Alfinito\nWer liebt gewinnt\n\nStadthalle Parchim\nKa
+ rtenvorverkauf nur über eventim.de
+LOCATION:Stadthalle Parchim 
+X-LOCATION-NAME:Stadthalle Parchim 
+X-STREET-ADDRESS:Putlitzer Straße 56
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim 
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2027-02-20-daniela-alfinito/screenshot-2026-08-18-125040.jpg?cid=14wv
+ .8um4
+UID:da6de48c-070c-4be3-9223-422a9597adce:2027-02-20
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20270305T090000
+DTEND;TZID=Europe/Berlin:20270305T100000
+SUMMARY:Nestgezwitscher am Vogelsang - Mama Auszeit
+CREATED:20260831T133845Z
+LAST-MODIFIED:20260831T133845Z
+DESCRIPTION:Jeden 1. Freitag im Monat gibt es ein thematisches Angebot fü
+ r die Eltern und Babys. Dann gibt es Infos oder Aktion und Austausch.\nE
+ s findet in den Räumlichkeiten unserer Kita statt\, ist aber ausdrücklic
+ h für alle Eltern offen.\nVon der Krippe ist jemand dabei um zu unterstü
+ tzen und jemand weiteres leitet den Vormittag thematisch entsprechend de
+ s Plans.
+LOCATION:Kita St. Josef
+X-LOCATION-NAME:Kita St. Josef
+X-STREET-ADDRESS:Vogelsang 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2027-03-05-nestgezwitscher-am-vogelsang-mama-auszeit/nestgezwitscher-
+ am-vogelsang-flyer-vorderseite.jpg?cid=150p.8vxd
+UID:23152e17-965a-449d-a538-ba3bd0ca6bd9:2027-03-05
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20270402T090000
+DTEND;TZID=Europe/Berlin:20270402T100000
+SUMMARY:Nestgezwitscher am Vogelsang - Klangbad
+CREATED:20260831T133954Z
+LAST-MODIFIED:20260831T133954Z
+DESCRIPTION:Jeden 1. Freitag im Monat gibt es ein thematisches Angebot fü
+ r die Eltern und Babys. Dann gibt es Infos oder Aktion und Austausch.\nE
+ s findet in den Räumlichkeiten unserer Kita statt\, ist aber ausdrücklic
+ h für alle Eltern offen.\nVon der Krippe ist jemand dabei um zu unterstü
+ tzen und jemand weiteres leitet den Vormittag thematisch entsprechend de
+ s Plans.
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2027-04-02-nestgezwitscher-am-vogelsang-klangbad/nestgezwitscher-am-v
+ ogelsang-flyer-vorderseite.jpg?cid=150p.8vxp
+UID:f2e1d0ee-8c0f-4711-9fd3-e292dd837ed9:2027-04-02
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20270521T090000
+DTEND;TZID=Europe/Berlin:20270521T100000
+SUMMARY:Nestgezwitscher am Vogelsang - Musikmäuse
+CREATED:20260831T134037Z
+LAST-MODIFIED:20260831T134037Z
+DESCRIPTION:Jeden 1. Freitag im Monat gibt es ein thematisches Angebot fü
+ r die Eltern und Babys. Dann gibt es Infos oder Aktion und Austausch.\nE
+ s findet in den Räumlichkeiten unserer Kita statt\, ist aber ausdrücklic
+ h für alle Eltern offen.\nVon der Krippe ist jemand dabei um zu unterstü
+ tzen und jemand weiteres leitet den Vormittag thematisch entsprechend de
+ s Plans.
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2027-05-21-nestgezwitscher-am-vogelsang-musikmaeuse/nestgezwitscher-a
+ m-vogelsang-flyer-vorderseite.jpg?cid=150p.8vy1
+UID:42a96cb2-1470-491e-8edf-69d6c877459b:2027-05-21
+X-PRICE:Keine Angabe
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20261028T203544Z
+DTSTART;TZID=Europe/Berlin:20270604T090000
+DTEND;TZID=Europe/Berlin:20270604T100000
+SUMMARY:Nestgezwitscher am Vogelsang - Logopädie
+CREATED:20260831T134123Z
+LAST-MODIFIED:20260831T134123Z
+DESCRIPTION:Jeden 1. Freitag im Monat gibt es ein thematisches Angebot fü
+ r die Eltern und Babys. Dann gibt es Infos oder Aktion und Austausch.\nE
+ s findet in den Räumlichkeiten unserer Kita statt\, ist aber ausdrücklic
+ h für alle Eltern offen.\nVon der Krippe ist jemand dabei um zu unterstü
+ tzen und jemand weiteres leitet den Vormittag thematisch entsprechend de
+ s Plans.
+LOCATION:Kita St. Josef
+X-LOCATION-NAME:Kita St. Josef
+X-STREET-ADDRESS:Vogelsang 2
+X-POSTAL-CODE:19370
+X-LOCALITY:Parchim
+X-ORGANIZER-NAME:
+ATTACH;FMTTYPE=image/jpeg:https://www.parchim.de/de/kalender/termine-exte
+ rn/2027-06-04-nestgezwitscher-am-vogelsang-logopaedie/nestgezwitscher-am
+ -vogelsang-flyer-vorderseite.jpg?cid=150p.8vyd
+UID:6f66e13c-359c-47ff-ae07-669e2a931a70:2027-06-04
+X-PRICE:Keine Angabe
+END:VEVENT
+END:VCALENDAR

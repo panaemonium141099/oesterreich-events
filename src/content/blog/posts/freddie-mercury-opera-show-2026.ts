@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/freddie-mercury-opera-show-royal-vienna-hall-22071398/?affiliate=J70",
   "publishDate": "2026-09-07",
   "updatedDate": "2026-09-07",
+  "factSources": {
+    "checkedAt": "2026-09-07",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/freddie-mercury-opera-show-royal-vienna-hall-22071398/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Tauchen Sie ein in eine einzigartige musikalische Fusion: Die Freddie Mercury Opera Show in Wien verwandelt legendäre Rock-Hymnen in kraftvolle Opernwerke. Genießen Sie dieses außergewöhnliche Konzerterlebnis in intimer, von Kerzenlicht erfüllter Atmosphäre.",
   "category": "Musik & Festival",

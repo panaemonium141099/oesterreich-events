@@ -1,0 +1,324 @@
+BEGIN:VCALENDAR
+PRODID:-//NOLIS GmbH//NOLIS-Manager Kalender V3.5//DE
+VERSION:2.0
+METHOD:PUBLISH
+LAST-MODIFIED:20261028T223754Z
+NAME:Kalender
+X-WR-CALNAME:Kalender
+X-WR-TIMEZONE:UTC
+TZID:UTC
+X-VCALENDAR-VERSION:3.5
+BEGIN:VEVENT
+DTSTART:20261030T170000Z
+SUMMARY:Ottos Halloweenhaus präsentiert: "Ottos Kult"
+PRIORITY:0
+DTEND:20261030T200000Z
+LOCATION:Ottos Halloweenhaus, Deepenstegen 25A, 22952 Lütjensee
+X-LOCATION-ID:900000435
+X-LOCATION-OWNER:27160
+UID:b6e39fb00d8ac9817ba42a67567109a8
+X-ID:27160_900006111
+DTSTAMP:20261008T095252Z
+CATEGORIES:Theater / Tanz,Tipps für Kinder und Jugendliche,Sonstiges
+X-CATEGORIES:616,618,613
+DESCRIPTION:Vom 30. Oktober bis 01. November 2026 öffnet Ottos Halloweenhaus zum 14. Mal seine Tore für alle unerschrockenen Gäste. Das interaktive Theater, welches zuvor als Halloweenhaus Schmalenbeck bekannt war, findet mit dem altbekannten und beliebten Showkonzept in Lütjensee (Deepenstegen 25A) statt.\n\nDie Gäste erwartet eine Geschichte, in der Realität, Legenden und übernatürliche Ereignisse zunehmend miteinander verschwimmen. Eine unscheinbar wirkende Gemeinschaft ist auf der Suche nach neuen Mitgliedern. Doch schon bald zeigt sich, dass hinter ihren Absichten weit mehr steckt, als zunächst erkennbar ist – und dass ihre Ziele nicht überall auf Zustimmung stoßen. Auf welcher Seite von Glauben, Macht und Wahrheit werden die Gäste stehen?\n\nDie interaktive 25-minütige Aufführung ist kostenlos und familienfreundlich für alle Gäste ab ca. 6 Jahren gestaltet. In Zusammenarbeit mit dem Creative Lighthouse Collective (bestehend u.a. aus Music and Light Ahrensburg und MuchowMedia) wird eine einzigartige Szenerie mit diversen eigenen Licht-, Spezial- und Soundeffekten bespielt. Dafür gestalten die jungen Künstler neben eigens komponierter Musik auch selber Dekorationen sowie Kostüme und freuen sich über eine Spende im sprechenden Spendenschädel.\n\n- Eintritt frei, um eine Spende wird gebeten.\n- Einlass am 30. und 31.10. sowie 01.11. jeweils ca. 18 Uhr - 21 Uhr in Gruppen. Wartezeiten sind möglich.\n- Eine Show dauert jeweils ca. 25 Minuten.\n- Das Halloweenhaus befindet sich an der Adresse Deepenstegen 25A, 22952 Lütjensee\n- Ein Punsch-Stand wird warme Getränke anbieten\n- Vorkenntnisse für die Show sind nicht nötig. Es wird allerdings empfohlen, den Trailer auf YouTube zu sehen.\n- Veranstaltet vom Creative Lighthouse e.V.
+CLASS:PUBLIC
+URL;VALUE=URI:https://ottos-halloweenhaus.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04102 2189231\nHomepage: https://ottos-halloweenhaus.de
+CREATED:20260922T194111Z
+LAST-MODIFIED:20261008T095252Z
+X-KOMMUNE:Amt Trittau
+X-KOMMUNE-ID:27160
+X-ORT:Lütjensee
+X-ORT-ID:27167
+X-RESSORT:Lütjensee
+X-RESSORT-ID:900000008
+X-KURZBESCHREIBUNG:Ottos Halloweenhaus ist ein jährliches Event von Künstlerinnen und Künstlern aus Stormarn. Hier fließen Dekorationen, Musik, Lichtdesign, Informatik, Schauspiel, Robotik, Film und viele weitere Fähigkeiten zusammen in eine etwa 25-minütige familienfreundliche Show, welche das Highlight auf jeder Halloween-Route ist.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Creative Lighthouse e.V.\nOhlendamm 2\n22926 Ahrensburg
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261031T170000Z
+SUMMARY:Ottos Halloweenhaus präsentiert: "Ottos Kult"
+PRIORITY:0
+DTEND:20261031T200000Z
+X-SERIENCONTAINER:900006111
+LOCATION:Ottos Halloweenhaus, Deepenstegen 25A, 22952 Lütjensee
+X-LOCATION-ID:900000435
+X-LOCATION-OWNER:27160
+UID:8e49940c7699c7fe4f234ad8179f9da2
+X-ID:27160_900006112
+DTSTAMP:20260924T062705Z
+CATEGORIES:Theater / Tanz,Tipps für Kinder und Jugendliche,Sonstiges
+X-CATEGORIES:616,618,613
+DESCRIPTION:Vom 30. Oktober bis 01. November 2026 öffnet Ottos Halloweenhaus zum 14. Mal seine Tore für alle unerschrockenen Gäste. Das interaktive Theater, welches zuvor als Halloweenhaus Schmalenbeck bekannt war, findet mit dem altbekannten und beliebten Showkonzept in Lütjensee (Deepenstegen 25A) statt.\n\nDie Gäste erwartet eine Geschichte, in der Realität, Legenden und übernatürliche Ereignisse zunehmend miteinander verschwimmen. Eine unscheinbar wirkende Gemeinschaft ist auf der Suche nach neuen Mitgliedern. Doch schon bald zeigt sich, dass hinter ihren Absichten weit mehr steckt, als zunächst erkennbar ist – und dass ihre Ziele nicht überall auf Zustimmung stoßen. Auf welcher Seite von Glauben, Macht und Wahrheit werden die Gäste stehen?\n\nDie interaktive 25-minütige Aufführung ist kostenlos und familienfreundlich für alle Gäste ab ca. 6 Jahren gestaltet. In Zusammenarbeit mit dem Creative Lighthouse Collective (bestehend u.a. aus Music and Light Ahrensburg und MuchowMedia) wird eine einzigartige Szenerie mit diversen eigenen Licht-, Spezial- und Soundeffekten bespielt. Dafür gestalten die jungen Künstler neben eigens komponierter Musik auch selber Dekorationen sowie Kostüme und freuen sich über eine Spende im sprechenden Spendenschädel.\n\n- Eintritt frei, um eine Spende wird gebeten.\n- Einlass am 30. und 31.10. sowie 01.11. jeweils ca. 18 Uhr - 21 Uhr in Gruppen. Wartezeiten sind möglich.\n- Eine Show dauert jeweils ca. 25 Minuten.\n- Das Halloweenhaus befindet sich an der Adresse Deepenstegen 25A, 22952 Lütjensee\n- Ein Punsch-Stand wird warme Getränke anbieten\n- Vorkenntnisse für die Show sind nicht nötig. Es wird allerdings empfohlen, den Trailer auf YouTube zu sehen.\n- Veranstaltet vom Creative Lighthouse e.V.
+CLASS:PUBLIC
+URL;VALUE=URI:https://ottos-halloweenhaus.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04102 2189231\nHomepage: https://ottos-halloweenhaus.de
+CREATED:20260923T070652Z
+LAST-MODIFIED:20260924T062705Z
+X-KOMMUNE:Amt Trittau
+X-KOMMUNE-ID:27160
+X-ORT:Lütjensee
+X-ORT-ID:27167
+X-RESSORT:Lütjensee
+X-RESSORT-ID:900000008
+X-KURZBESCHREIBUNG:Ottos Halloweenhaus ist ein jährliches Event von Künstlerinnen und Künstlern aus Stormarn. Hier fließen Dekorationen, Musik, Lichtdesign, Informatik, Schauspiel, Robotik, Film und viele weitere Fähigkeiten zusammen in eine etwa 25-minütige familienfreundliche Show, welche das Highlight auf jeder Halloween-Route ist.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Creative Lighthouse e.V.\nOhlendamm 2\n22926 Ahrensburg
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261101T170000Z
+SUMMARY:Ottos Halloweenhaus präsentiert: "Ottos Kult"
+PRIORITY:0
+DTEND:20261101T200000Z
+X-SERIENCONTAINER:900006111
+LOCATION:Ottos Halloweenhaus, Deepenstegen 25A, 22952 Lütjensee
+X-LOCATION-ID:900000435
+X-LOCATION-OWNER:27160
+UID:f21ad0c6e683069731befcd6224358d9
+X-ID:27160_900006113
+DTSTAMP:20260924T062705Z
+CATEGORIES:Theater / Tanz,Tipps für Kinder und Jugendliche,Sonstiges
+X-CATEGORIES:616,618,613
+DESCRIPTION:Vom 30. Oktober bis 01. November 2026 öffnet Ottos Halloweenhaus zum 14. Mal seine Tore für alle unerschrockenen Gäste. Das interaktive Theater, welches zuvor als Halloweenhaus Schmalenbeck bekannt war, findet mit dem altbekannten und beliebten Showkonzept in Lütjensee (Deepenstegen 25A) statt.\n\nDie Gäste erwartet eine Geschichte, in der Realität, Legenden und übernatürliche Ereignisse zunehmend miteinander verschwimmen. Eine unscheinbar wirkende Gemeinschaft ist auf der Suche nach neuen Mitgliedern. Doch schon bald zeigt sich, dass hinter ihren Absichten weit mehr steckt, als zunächst erkennbar ist – und dass ihre Ziele nicht überall auf Zustimmung stoßen. Auf welcher Seite von Glauben, Macht und Wahrheit werden die Gäste stehen?\n\nDie interaktive 25-minütige Aufführung ist kostenlos und familienfreundlich für alle Gäste ab ca. 6 Jahren gestaltet. In Zusammenarbeit mit dem Creative Lighthouse Collective (bestehend u.a. aus Music and Light Ahrensburg und MuchowMedia) wird eine einzigartige Szenerie mit diversen eigenen Licht-, Spezial- und Soundeffekten bespielt. Dafür gestalten die jungen Künstler neben eigens komponierter Musik auch selber Dekorationen sowie Kostüme und freuen sich über eine Spende im sprechenden Spendenschädel.\n\n- Eintritt frei, um eine Spende wird gebeten.\n- Einlass am 30. und 31.10. sowie 01.11. jeweils ca. 18 Uhr - 21 Uhr in Gruppen. Wartezeiten sind möglich.\n- Eine Show dauert jeweils ca. 25 Minuten.\n- Das Halloweenhaus befindet sich an der Adresse Deepenstegen 25A, 22952 Lütjensee\n- Ein Punsch-Stand wird warme Getränke anbieten\n- Vorkenntnisse für die Show sind nicht nötig. Es wird allerdings empfohlen, den Trailer auf YouTube zu sehen.\n- Veranstaltet vom Creative Lighthouse e.V.
+CLASS:PUBLIC
+URL;VALUE=URI:https://ottos-halloweenhaus.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04102 2189231\nHomepage: https://ottos-halloweenhaus.de
+CREATED:20260923T070652Z
+LAST-MODIFIED:20260924T062705Z
+X-KOMMUNE:Amt Trittau
+X-KOMMUNE-ID:27160
+X-ORT:Lütjensee
+X-ORT-ID:27167
+X-RESSORT:Lütjensee
+X-RESSORT-ID:900000008
+X-KURZBESCHREIBUNG:Ottos Halloweenhaus ist ein jährliches Event von Künstlerinnen und Künstlern aus Stormarn. Hier fließen Dekorationen, Musik, Lichtdesign, Informatik, Schauspiel, Robotik, Film und viele weitere Fähigkeiten zusammen in eine etwa 25-minütige familienfreundliche Show, welche das Highlight auf jeder Halloween-Route ist.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Creative Lighthouse e.V.\nOhlendamm 2\n22926 Ahrensburg
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261103T183000Z
+SUMMARY:Sitzung des Bau- und Wegeausschusses
+PRIORITY:0
+LOCATION:Dorfgemeinschaftshaus Lütjensee, Großenseer Straße 20, 22952 Lütjensee
+X-LOCATION-ID:900000009
+X-LOCATION-OWNER:27160
+UID:1434c849d5dd89540e720d3e0e6a0f89
+X-ID:27160_900006107
+DTSTAMP:20261026T173807Z
+CATEGORIES:Politik / Kommunalpolitik
+X-CATEGORIES:607
+DESCRIPTION:Herzliche Einladung zur öffentlichen Sitzung des Bau- und Wegeausschusses der Gemeinde Lütjensee am Dienstag, den 03. November 2026 um 19:30 Uhr in den Sitzungssaal des Dorfgemeinschaftshauses, Großenseer Str. 20.\n\nEinladung und Tagesordnung (Link mit Weiterleitung zum Bürgerinformationssystem Allris des Amt Trittau)
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CREATED:20260918T075857Z
+LAST-MODIFIED:20261026T173807Z
+X-KOMMUNE:Amt Trittau
+X-KOMMUNE-ID:27160
+X-RESSORT:Lütjensee
+X-RESSORT-ID:900000008
+X-SCHLAGWORTE:Sitzung, bau, Wege, Ausschuss
+X-ORGANIZER:Gemeinde Lütjensee\nGroßenseer Str. 20\n22952 Lütjensee
+X-ORGANIZER-ID:900000349
+X-ORGANIZER-OWNER:27160
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261110T183000Z
+SUMMARY:Sitzung des Umwelt- und Planungsausschusses
+PRIORITY:0
+X-SERIENCONTAINER:900005815
+LOCATION:Dorfgemeinschaftshaus Lütjensee, Großenseer Straße 20, 22952 Lütjensee
+X-LOCATION-ID:900000009
+X-LOCATION-OWNER:27160
+UID:ded2a3607d963b135b98b33cdf12c165
+X-ID:27160_900005817
+DTSTAMP:20260121T071517Z
+CATEGORIES:Politik / Kommunalpolitik
+X-CATEGORIES:607
+DESCRIPTION:Herzliche Einladung zur öffentlichen Sitzung des Umwelt- und Planungsausschusses am Dienstag, den 02.06.2026 um 19:30 Uhr in den Sitzungssaal des Dorfgemeinschaftshauses, Großenseer Str. 20.\n\nEinladung und Tagesordnung (Link zum Bürgerinformationssystem Allris des Amt Trittau)
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CREATED:20260121T065822Z
+LAST-MODIFIED:20260121T071517Z
+X-KOMMUNE:Amt Trittau
+X-KOMMUNE-ID:27160
+X-ORT:Lütjensee
+X-ORT-ID:27167
+X-RESSORT:Lütjensee
+X-RESSORT-ID:900000008
+X-SCHLAGWORTE:Umwelt, Planung, UPA, Lütjensee, Sitzung
+X-ORGANIZER:Gemeinde Lütjensee\nGroßenseer Str. 20\n22952 Lütjensee
+X-ORGANIZER-ID:900000349
+X-ORGANIZER-OWNER:27160
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261116T183000Z
+SUMMARY:Sitzung der Schulverbandsversammlung
+PRIORITY:0
+X-SERIENCONTAINER:900005832
+LOCATION:Dorfgemeinschaftshaus Lütjensee, Großenseer Straße 20, 22952 Lütjensee
+X-LOCATION-ID:900000009
+X-LOCATION-OWNER:27160
+UID:f4f5aff174de8880394dfb0725dae166
+X-ID:27160_900005834
+DTSTAMP:20260121T073742Z
+CATEGORIES:Politik / Kommunalpolitik
+X-CATEGORIES:607
+DESCRIPTION:Herzliche Einladung zur öffentlichen Sitzung Schulverbandsversammlung am Montag, den 16.11.2026 um 19:30 Uhr in den Konferenzraum (1.OG) des Altbaus der Grundschule, Hamburger Str. 11.\n\nEinladung und Tagesordnung (Link zum Bürgerinformationssystem Allris des Amt Trittau)
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CREATED:20260121T073640Z
+LAST-MODIFIED:20260121T073742Z
+X-KOMMUNE:Amt Trittau
+X-KOMMUNE-ID:27160
+X-ORT:Lütjensee
+X-ORT-ID:27167
+X-RESSORT:Lütjensee
+X-RESSORT-ID:900000008
+X-ORGANIZER:Gemeinde Lütjensee\nGroßenseer Str. 20\n22952 Lütjensee
+X-ORGANIZER-ID:900000349
+X-ORGANIZER-OWNER:27160
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261117T183000Z
+SUMMARY:Sitzung des Sozial- und Kulturausschusses
+PRIORITY:0
+LOCATION:Dorfgemeinschaftshaus Lütjensee, Großenseer Straße 20, 22952 Lütjensee
+X-LOCATION-ID:900000009
+X-LOCATION-OWNER:27160
+UID:0dd8626af6f232dee92e3c2474be5e1a
+X-ID:27160_900006108
+DTSTAMP:20260918T080213Z
+CATEGORIES:Politik / Kommunalpolitik
+X-CATEGORIES:607
+DESCRIPTION:Herzliche Einladung zur öffentlichen Sitzung des Sozial- und Kulturausschusses der Gemeinde Lütjensee am Dienstag, den 17.11.2026 um 19:30 Uhr in den Sitzungssaal des Dorfgemeinschaftshauses, Großenseer Str. 20.\n\nEinladung und Tagesordnung (Link mit Weiterleitung zum Bürgerinformationssystem Allris des Amt Trittau)
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CREATED:20260918T080148Z
+LAST-MODIFIED:20260918T080213Z
+X-KOMMUNE:Amt Trittau
+X-KOMMUNE-ID:27160
+X-RESSORT:Lütjensee
+X-RESSORT-ID:900000008
+X-SCHLAGWORTE:Sitzung, Kultur, Sozial
+X-ORGANIZER:Gemeinde Lütjensee\nGroßenseer Str. 20\n22952 Lütjensee
+X-ORGANIZER-ID:900000349
+X-ORGANIZER-OWNER:27160
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261201T183000Z
+SUMMARY:Sitzung des Finanz- und Grundstücksausschusses
+PRIORITY:0
+X-SERIENCONTAINER:900005826
+LOCATION:Dorfgemeinschaftshaus Lütjensee, Großenseer Straße 20, 22952 Lütjensee
+X-LOCATION-ID:900000009
+X-LOCATION-OWNER:27160
+UID:f1666eb6726c158de353a4a9f9e75116
+X-ID:27160_900005828
+DTSTAMP:20260831T071713Z
+CATEGORIES:Politik / Kommunalpolitik
+X-CATEGORIES:607
+DESCRIPTION:Herzliche Einladung zur öffentlichen Sitzung des Finanz- und Grundstücksausschusses am Dienstag, den 29.09.2026 um 19:30 Uhr in den Sitzungssaal des Dorfgemeinschaftshauses, Großenseer Str. 20.\n\nEinladung und Tagesordnung \n👉Zum Bürgerinformationssystem Allris des Amt Trittau
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CREATED:20260121T071305Z
+LAST-MODIFIED:20260831T071713Z
+X-KOMMUNE:Amt Trittau
+X-KOMMUNE-ID:27160
+X-ORT:Lütjensee
+X-ORT-ID:27167
+X-RESSORT:Lütjensee
+X-RESSORT-ID:900000008
+X-ORGANIZER:Gemeinde Lütjensee\nGroßenseer Str. 20\n22952 Lütjensee
+X-ORGANIZER-ID:900000349
+X-ORGANIZER-OWNER:27160
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261203T140000Z
+SUMMARY:Seniorenweihnachtsfeier
+PRIORITY:0
+DTEND:20261203T160000Z
+LOCATION:Dorfgemeinschaftshaus Lütjensee, Großenseer Straße 20, 22952 Lütjensee
+X-LOCATION-ID:900000009
+X-LOCATION-OWNER:27160
+UID:2f2e774cd107bcd2232f08ec76ded4fd
+X-ID:27160_900006435
+DTSTAMP:20261016T150251Z
+CATEGORIES:Senioren
+X-CATEGORIES:620
+DESCRIPTION:Die Gemeinde Lütjensee lädt Sie, alle Lütjenseer Senior*innen ab 60 Jahren,  zum gemütlichen, vorweihnachtlichen Zusammensein bei Kaffee, Stollen und Kuchen ein.\n\nBitte melden Sie sich bis zum 1.12.2026 telefonisch unter 04154-80790 oder per Mail an ska@luetjensee.de an!\n\nWir freuen uns auf Sie.
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CREATED:20261016T150217Z
+LAST-MODIFIED:20261016T150251Z
+X-KOMMUNE:Amt Trittau
+X-KOMMUNE-ID:27160
+X-RESSORT:Lütjensee
+X-RESSORT-ID:900000008
+X-ORGANIZER:Gemeinde Lütjensee\nGroßenseer Str. 20\n22952 Lütjensee
+X-ORGANIZER-ID:900000349
+X-ORGANIZER-OWNER:27160
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261208T183000Z
+SUMMARY:Sitzung der Gemeindevertretung
+PRIORITY:0
+X-SERIENCONTAINER:900005829
+LOCATION:Dorfgemeinschaftshaus Lütjensee, Großenseer Straße 20, 22952 Lütjensee
+X-LOCATION-ID:900000009
+X-LOCATION-OWNER:27160
+UID:256fae7b7fc0634e5c62c11b005d63e1
+X-ID:27160_900005831
+DTSTAMP:20260121T073341Z
+CATEGORIES:Politik / Kommunalpolitik
+X-CATEGORIES:607
+DESCRIPTION:Herzliche Einladung zur öffentlichen Sitzung der Gemeindevertretung am Dienstag, den 08.12.2026 um 19:30 Uhr in den Sitzungssaal des Dorfgemeinschaftshauses, Großenseer Str. 20.\n\nEinladung und Tagesordnung (Link zum Bürgerinformationssystem Allris des Amt Trittau)
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CREATED:20260121T072128Z
+LAST-MODIFIED:20260121T073341Z
+X-KOMMUNE:Amt Trittau
+X-KOMMUNE-ID:27160
+X-ORT:Lütjensee
+X-ORT-ID:27167
+X-RESSORT:Lütjensee
+X-RESSORT-ID:900000008
+X-ORGANIZER:Gemeinde Lütjensee\nGroßenseer Str. 20\n22952 Lütjensee
+X-ORGANIZER-ID:900000349
+X-ORGANIZER-OWNER:27160
+X-NOLISEXPORT:1
+END:VEVENT
+END:VCALENDAR

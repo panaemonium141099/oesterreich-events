@@ -21,6 +21,8 @@ export interface FetchHtmlOptions {
   timeoutMs: number;
   headers?: Record<string, string>;
   maxBytes?: number;
+  /** Zeichensatz aus Content-Type bzw. `<meta charset>` beachten (siehe ReadHtmlOptions). */
+  charset?: boolean;
 }
 
 export interface FetchHtmlResult {
@@ -42,7 +44,7 @@ export async function fetchHtml(url: string, opts: FetchHtmlOptions): Promise<Fe
       controller.abort();
       return { html: null, error: `HTTP ${response.status}`, permanent: response.status < 500 && response.status !== 429 };
     }
-    const result = await readHtml(response, { maxBytes: opts.maxBytes });
+    const result = await readHtml(response, { maxBytes: opts.maxBytes, charset: opts.charset });
     if (result.html === null) controller.abort();
     return result;
   } catch (err) {
@@ -58,6 +60,12 @@ export interface ReadHtmlOptions {
   maxBytes?: number;
   /** Auch text/xml bzw. application/xml annehmen (sitemap.xml) */
   xml?: boolean;
+  /**
+   * Zeichensatz aus Content-Type bzw. `<meta charset>` beachten statt immer
+   * UTF-8 (Advantic-iKISS-Websites liefern ISO-8859-15, fn-29.13). Nur auf
+   * Wunsch: bei bestehenden Scrapern änderte ein anderer Titel die source_id.
+   */
+  charset?: boolean;
 }
 
 /**
@@ -82,8 +90,20 @@ export async function readHtml(response: Response, opts: ReadHtmlOptions = {}): 
   const body = await readCapped(response, maxBytes);
   if (!body) return { html: null, error: `zu groß (über ${maxBytes} Bytes)`, permanent: true };
   if (!type && looksBinary(body)) return { html: null, error: 'kein HTML (binär)', permanent: true };
+  if (opts.charset) return { html: decodeHtml(body, type) };
   // Wie response.text(): UTF-8, BOM entfernt
   return { html: new TextDecoder().decode(body) };
+}
+
+/** Body im angegebenen Zeichensatz (Content-Type, sonst `<meta charset>`), unbekannt oder fehlend: UTF-8. */
+export function decodeHtml(body: Uint8Array, contentType: string | null): string {
+  const head = Buffer.from(body.subarray(0, 2048)).toString('latin1');
+  const label = /charset=["']?([\w.:-]+)/i.exec(contentType ?? '')?.[1] ?? /<meta[^>]+charset=["']?([\w.:-]+)/i.exec(head)?.[1];
+  try {
+    return new TextDecoder(label ?? 'utf-8').decode(body);
+  } catch {
+    return new TextDecoder().decode(body);
+  }
 }
 
 /** Body lesen, Abbruch sobald mehr als `maxBytes` ankommen (fehlende oder falsche Content-Length). */

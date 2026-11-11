@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/cafe-del-mundo-guitarize-the-world-tour-2026-raiffeisen-halle-im-gasometer-21082864/?affiliate=J70",
   "publishDate": "2026-10-09",
   "updatedDate": "2026-10-09",
+  "factSources": {
+    "checkedAt": "2026-10-09",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/cafe-del-mundo-guitarize-the-world-tour-2026-raiffeisen-halle-im-gasometer-21082864/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 24. Oktober 2026 spielen Jan Pascal und Alexander Kilian als Café del Mundo in der Raiffeisen Halle im Gasometer. Zwei Gitarren, Flamenco-Feuer und Pop-Hymnen: Hier finden Sie alle Infos zu Tickets und Anreise.",
   "category": "Musik & Festival",

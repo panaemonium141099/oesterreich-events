@@ -74,6 +74,15 @@ export interface FestivalPost {
   thumbnailImage?: string;
   publishDate: string;
   updatedDate: string;
+  /**
+   * Belege für die harten Fakten (Termine, Öffnungszeiten, Ort, Preise):
+   * Primärquellen und der Tag, an dem sie dort geprüft wurden. Pflicht für
+   * jeden Post mit Termin (Wächter `src/__tests__/blog/fact-sources.test.ts`).
+   * Was an keiner Quelle steht, kommt nicht in den Post ("Termin folgt").
+   * Anlass: der handgeschriebene April-Batch 2026 hatte geschätzte Termine
+   * und sogar erfundene Events (PR #338).
+   */
+  factSources?: { checkedAt: string; urls: string[] };
   readingTime: number;
   excerpt: string;
   category: string;
@@ -89,6 +98,12 @@ export interface FestivalPost {
   whatToExpectTitle: string;
   whatToExpect: string;
   whatToExpectList: string[];
+  /**
+   * Belegte Kuriositäten und Zahlen rund um das Event (3-6 kurze Absätze),
+   * gerendert als eigene Sektion "Fun Facts" nach der Geschichte. Optional:
+   * ältere Posts haben keine.
+   */
+  funFacts?: string[];
   practicalInfoTitle: string;
   practicalInfo: { icon: string; label: string; text: string }[];
   gallery: GalleryImage[];

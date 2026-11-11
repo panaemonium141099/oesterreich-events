@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/buehne-baden-disneys-arielle-die-meerjungfrau-stadttheater-baden-stadttheater-buehne-baden-21012682/?affiliate=J70",
   "publishDate": "2026-08-30",
   "updatedDate": "2026-08-30",
+  "factSources": {
+    "checkedAt": "2026-08-30",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/buehne-baden-disneys-arielle-die-meerjungfrau-stadttheater-baden-stadttheater-buehne-baden-21012682/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Erleben Sie Disney's Arielle, die Meerjungfrau als deutschsprachige Erstaufführung in Österreich! Ein farbenprächtiges Musical für die ganze Familie mit weltberühmten Songs erwartet Sie in Baden.",
   "category": "Kultur & Bühne",

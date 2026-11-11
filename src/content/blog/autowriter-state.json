@@ -295,12 +295,6 @@
       "writtenAt": "2026-09-24T23:57:46.014Z"
     },
     {
-      "eventId": "a2998b88-c459-4bba-8eec-0a8df567038e",
-      "slug": "gunkl-apropos-uebrigens-2026",
-      "title": "Gunkl - Apropos übrigens",
-      "writtenAt": "2026-09-25T08:13:07.229Z"
-    },
-    {
       "eventId": "34f488cf-1ecd-470c-a553-6238c5b90dd2",
       "slug": "4-gaenge-gourmet-dinner-2026",
       "title": "4-Gänge Gourmet Dinner",
@@ -569,6 +563,306 @@
       "slug": "palais-of-lights-a-candlelit-journey-2026",
       "title": "Palais of Lights – A Candlelit Journey",
       "writtenAt": "2026-10-17T07:15:17.180Z"
+    },
+    {
+      "eventId": "6b75481e-8d52-45db-b5fb-75a62e7f3951",
+      "slug": "nand-es-waere-schoen-tour-2026",
+      "title": "nand - Es wäre schön-Tour",
+      "writtenAt": "2026-10-18T07:26:51.397Z"
+    },
+    {
+      "eventId": "f151d2e1-2fdf-41a2-b4cd-7879e8b6fffa",
+      "slug": "andreas-ferner-bro-fessor-checkst-du-2026",
+      "title": "Andreas Ferner - Bro-Fessor, checkst du?",
+      "writtenAt": "2026-10-18T07:29:30.165Z"
+    },
+    {
+      "eventId": "0e88883a-7ef1-48fb-a55a-43cdab07f4cd",
+      "slug": "weihnachtskonzert-bozini-koncert-lichterglanz-der-stimmen-si-2026",
+      "title": "Weihnachtskonzert - Božini Koncert - Lichterglanz der Stimmen - Sijaj Glasov",
+      "writtenAt": "2026-10-19T08:07:05.237Z"
+    },
+    {
+      "eventId": "32421779-b90b-4fd7-abea-758709e7df49",
+      "slug": "erotik-und-fetisch-messe-2026",
+      "title": "Erotik- und Fetisch Messe",
+      "writtenAt": "2026-10-19T08:08:21.363Z"
+    },
+    {
+      "eventId": "9ed080a9-1974-496f-8a11-8acbf4f6ec8a",
+      "slug": "weihnachtskonzert-klangquadrat-2026",
+      "title": "Weihnachtskonzert Klangquadrat",
+      "writtenAt": "2026-10-20T00:16:07.687Z"
+    },
+    {
+      "eventId": "2fa79cf6-f461-4748-97e7-c8bcb7d2557d",
+      "slug": "vivaldi-4-seasons-crossover-konzert-2026",
+      "title": "Vivaldi 4 Seasons - Crossover Konzert",
+      "writtenAt": "2026-10-20T00:17:43.337Z"
+    },
+    {
+      "eventId": "5ca5f484-b962-4b30-a63b-b234944e99d1",
+      "slug": "falco-villa-fuehrung-jaenner-2027",
+      "title": "Falco Villa Führung Jänner",
+      "writtenAt": "2026-10-21T08:01:31.887Z"
+    },
+    {
+      "eventId": "548f5168-41cb-4e2e-8df5-d405b30bb797",
+      "slug": "impulso-tenors-total-christmas-2026",
+      "title": "Impulso Tenors - Total Christmas",
+      "writtenAt": "2026-10-21T08:02:59.694Z"
+    },
+    {
+      "eventId": "d78ceabc-9e93-4458-a318-55278c56e156",
+      "slug": "jazz-wine-more-music-festival-eintagesticket-fuer-samstag-2026",
+      "title": "Jazz, Wine & More Music Festival - Eintagesticket für Samstag",
+      "writtenAt": "2026-10-22T08:00:02.559Z"
+    },
+    {
+      "eventId": "bbd51577-0b60-4bb9-8332-67e35c25a70b",
+      "slug": "the-magic-forest-2026",
+      "title": "The Magic Forest",
+      "writtenAt": "2026-10-22T08:02:39.937Z"
+    },
+    {
+      "eventId": "eebe7b1b-cc0d-4dd7-8eb2-f10cd5db4d91",
+      "slug": "konzert-voice-passion-songs-from-outlander-vikings-the-last-2026",
+      "title": "Konzert: Voice Passion – Songs from Outlander, Vikings & The Last Kingdom",
+      "writtenAt": "2026-10-23T07:57:55.947Z"
+    },
+    {
+      "eventId": "13b4c837-c803-481f-b17a-0743d1e8b094",
+      "slug": "konzert-old-school-basterds-vintage-christmas-music-show-2026",
+      "title": "Konzert: Old School Basterds - Vintage Christmas Music Show",
+      "writtenAt": "2026-10-23T07:59:13.292Z"
+    },
+    {
+      "eventId": "e35e596d-d438-498d-a13f-fff5d49d1850",
+      "slug": "29-guinness-irish-christmas-festival-2026",
+      "title": "29. Guinness Irish Christmas Festival",
+      "writtenAt": "2026-10-24T07:37:52.660Z"
+    },
+    {
+      "eventId": "05b6cabe-512f-4dfa-95e8-e0ad3d436c78",
+      "slug": "jodokcello-world-tour-2026",
+      "title": "Jodokcello World Tour",
+      "writtenAt": "2026-10-24T07:39:12.686Z"
+    },
+    {
+      "eventId": "088fbaef-9673-4ec3-b853-8f3669d24b79",
+      "slug": "benefizkonzert-krebshilfe-2026-darkness-confidence-2026",
+      "title": "Benefizkonzert Krebshilfe 2026 - Darkness & Confidence",
+      "writtenAt": "2026-10-25T07:50:58.769Z"
+    },
+    {
+      "eventId": "1fdafa1e-1cb4-4e17-80f7-d64e5dfb3453",
+      "slug": "weihnachtliche-lesung-friedrich-von-thun-2026",
+      "title": "Weihnachtliche Lesung: Friedrich von Thun",
+      "writtenAt": "2026-10-25T07:52:44.222Z"
+    },
+    {
+      "eventId": "c4bff4d0-c644-4163-b0da-7e7688191c58",
+      "slug": "konzerte-in-der-minoritenkirche-trio-caruso-die-drei-tenoere-2026",
+      "title": "Konzerte in der Minoritenkirche - Trio Caruso – Die drei Tenöre aus Neapel",
+      "writtenAt": "2026-10-26T08:08:34.911Z"
+    },
+    {
+      "eventId": "5b5a1d61-ea6e-4f7f-b78f-c33e72b05e69",
+      "slug": "karaoke-night-2026",
+      "title": "Karaoke-Night",
+      "writtenAt": "2026-10-26T08:09:41.986Z"
+    },
+    {
+      "eventId": "1352f54c-2cf9-4fbc-ac20-690ee34a4d96",
+      "slug": "genesis-lightshow-orgelkonzert-2027",
+      "title": "GENESIS - Lightshow + Orgelkonzert",
+      "writtenAt": "2026-10-27T00:23:59.564Z"
+    },
+    {
+      "eventId": "47d47475-337e-4aca-9932-3e86653612e9",
+      "slug": "toni-moerwald-palazzo-2026",
+      "title": "Toni Mörwald PALAZZO",
+      "writtenAt": "2026-10-27T00:25:21.968Z"
+    },
+    {
+      "eventId": "db803bd3-127d-44da-be51-84ce94610ac6",
+      "slug": "black-valley-big-band-christmas-2026",
+      "title": "Black Valley Big Band - Christmas",
+      "writtenAt": "2026-10-28T00:28:03.204Z"
+    },
+    {
+      "eventId": "20a6d21f-d535-4261-8c42-e11e3b74f5f1",
+      "slug": "hitparade-1600-vol-2-2026",
+      "title": "Hitparade 1600 Vol.2",
+      "writtenAt": "2026-10-28T00:29:32.213Z"
+    },
+    {
+      "eventId": "9a99195c-129f-453b-8010-4a8f70b58648",
+      "slug": "konzert-zum-jahresausklang-philharmonic-ensemble-2026",
+      "title": "Konzert zum Jahresausklang - Philharmonic Ensemble",
+      "writtenAt": "2026-10-29T00:49:42.649Z"
+    },
+    {
+      "eventId": "0c4fbf9e-3f81-4eff-883d-26643c6eac3f",
+      "slug": "konzerte-in-der-minoritenkirche-italienische-barock-gala-2026",
+      "title": "Konzerte in der Minoritenkirche - Italienische Barock-Gala",
+      "writtenAt": "2026-10-29T00:51:06.300Z"
+    },
+    {
+      "eventId": "9eb30302-03e9-41b6-a898-cbe189f3db8b",
+      "slug": "pumuckl-das-weihnachtsfest-2026",
+      "title": "Pumuckl - Das Weihnachtsfest",
+      "writtenAt": "2026-10-30T00:51:28.918Z"
+    },
+    {
+      "eventId": "33f7094f-de13-45f2-88b1-c34fe48e813c",
+      "slug": "bach-bei-nacht-klavierkonzert-stefan-donner-2026",
+      "title": "Bach bei Nacht - Klavierkonzert - Stefan Donner",
+      "writtenAt": "2026-10-30T00:52:38.033Z"
+    },
+    {
+      "eventId": "703c41b4-030f-4843-803e-516261f64fb6",
+      "slug": "theaterverand-tirol-s-kasermandl-ontour-2026",
+      "title": "Theaterverand Tirol s'Kasermandl onTour",
+      "writtenAt": "2026-10-31T00:43:13.794Z"
+    },
+    {
+      "eventId": "9ab6befd-a10f-45ab-a4a5-f55e49bd055c",
+      "slug": "drei-haselnuesse-fuer-aschenbroedel-nikolaus-tour-2027",
+      "title": "Drei Haselnüsse für Aschenbrödel / Nikolaus-Tour",
+      "writtenAt": "2026-10-31T00:45:30.877Z"
+    },
+    {
+      "eventId": "c2ab7534-8165-4924-80d4-6019f272273d",
+      "slug": "king-no-one-the-burden-of-empathy-tour-2026-2026",
+      "title": "King No-One - The Burden of Empathy Tour 2026",
+      "writtenAt": "2026-11-01T00:03:34.625Z"
+    },
+    {
+      "eventId": "8eabf5e3-039f-4ca7-a578-f56028cf97f8",
+      "slug": "riesen-orgel-konzert-2026",
+      "title": "Riesen-Orgel-Konzert",
+      "writtenAt": "2026-11-01T00:05:04.340Z"
+    },
+    {
+      "eventId": "c9198e45-10aa-43cf-b0e0-8cc1f39c1f6e",
+      "slug": "festkonzert-mit-66-jahren-2026",
+      "title": "Festkonzert „Mit 66 Jahren“",
+      "writtenAt": "2026-11-02T00:37:09.231Z"
+    },
+    {
+      "eventId": "74f1d2d6-13d2-4952-91d1-1a8f7214c915",
+      "slug": "weihnachtskonzert-fingerlos-tschejefem-freunde-2026",
+      "title": "Weihnachtskonzert - Fingerlos, Tschejefem & Freunde",
+      "writtenAt": "2026-11-02T00:38:18.504Z"
+    },
+    {
+      "eventId": "8cde0371-7706-4ac7-a811-f8c3440ee6df",
+      "slug": "jazz-groove-festival-prinz-grizzley-mit-band-2026",
+      "title": "Jazz & Groove Festival: Prinz Grizzley mit Band",
+      "writtenAt": "2026-11-03T02:54:14.424Z"
+    },
+    {
+      "eventId": "884ddf5e-4198-459e-bb19-eb795311deca",
+      "slug": "maria-ma-terzett-ft-ulli-baeer-hommage-an-georg-danzer-das-a-2026",
+      "title": "Maria Ma Terzett ft. Ulli Bäer - Hommage an Georg Danzer - das Abschiedskonzert",
+      "writtenAt": "2026-11-03T02:55:29.432Z"
+    },
+    {
+      "eventId": "d6918d0a-5f73-4272-a4dc-6b1b06fc1641",
+      "slug": "monti-betons-elvis-night-gedenkkonzert-zum-50-todestag-des-k-2027",
+      "title": "Monti Betons Elvis Night - Gedenkkonzert zum 50. Todestag des King",
+      "writtenAt": "2026-11-04T01:16:43.978Z"
+    },
+    {
+      "eventId": "dbb60782-74b0-4924-8a02-9f7ade720fd5",
+      "slug": "vorchdorfer-neujahrskonzert-2027-2027",
+      "title": "Vorchdorfer Neujahrskonzert 2027",
+      "writtenAt": "2026-11-04T01:17:53.883Z"
+    },
+    {
+      "eventId": "03673925-d4da-4ca0-b9d1-ca556afac09f",
+      "slug": "bolschoi-don-kosaken-chor-adventskonzert-2026",
+      "title": "Bolschoi Don Kosaken Chor - Adventskonzert",
+      "writtenAt": "2026-11-05T01:27:29.147Z"
+    },
+    {
+      "eventId": "9ae73edc-fe64-442b-8175-b97d56ec6165",
+      "slug": "yoga-drinks-weihnachtsfeiern-innsbruck-2026",
+      "title": "Yoga & Drinks Weihnachtsfeiern Innsbruck",
+      "writtenAt": "2026-11-05T01:29:04.901Z"
+    },
+    {
+      "eventId": "61c5b861-b95b-4245-bbe7-8e1641c10559",
+      "slug": "theater-ausser-kontrolle-2026",
+      "title": "Theater: Außer Kontrolle",
+      "writtenAt": "2026-11-06T01:31:06.255Z"
+    },
+    {
+      "eventId": "1846415c-1887-4c7a-adc2-665edcf5467d",
+      "slug": "die-zauberfloete-kinderoper-in-der-krypta-2026",
+      "title": "Die Zauberflöte - Kinderoper in der Krypta",
+      "writtenAt": "2026-11-06T01:32:24.481Z"
+    },
+    {
+      "eventId": "1bd6b87d-395b-4733-8a26-b6fadd6a6838",
+      "slug": "kernoelamazonen-kugel-keks-kabarett-comedy-festival-2026-2026",
+      "title": "Kernölamazonen - Kugel & Keks - Kabarett & Comedy Festival 2026",
+      "writtenAt": "2026-11-07T00:53:59.530Z"
+    },
+    {
+      "eventId": "55903fa6-7323-420e-b2c1-578d80fb3d79",
+      "slug": "52-galakonzert-original-tiroler-kaiserjaegermusik-2026",
+      "title": "52. Galakonzert - Original Tiroler Kaiserjägermusik",
+      "writtenAt": "2026-11-07T00:56:13.101Z"
+    },
+    {
+      "eventId": "65acce18-7bfe-43b7-a617-cb4648e050d4",
+      "slug": "neujahrskonzert-2027-erwin-steinhauer-ooe-concert-schrammeln-2027",
+      "title": "Neujahrskonzert 2027 - Erwin Steinhauer & OÖ. Concert-Schrammeln",
+      "writtenAt": "2026-11-08T00:28:22.405Z"
+    },
+    {
+      "eventId": "75cdf209-29d9-4d0a-a2c0-2150f51ce4f1",
+      "slug": "xzibit-kingmaker-european-tour-pt-2-2026",
+      "title": "Xzibit - Kingmaker European Tour PT.2",
+      "writtenAt": "2026-11-08T00:30:35.694Z"
+    },
+    {
+      "eventId": "3131f3de-ee92-49a7-bcf7-781a61a36147",
+      "slug": "benefizkonzert-im-advent-2026",
+      "title": "Benefizkonzert im Advent",
+      "writtenAt": "2026-11-09T00:47:10.023Z"
+    },
+    {
+      "eventId": "201659e3-9598-4e38-8099-2b093cf5a666",
+      "slug": "konzert-winterwonderland-bigband-koeflach-2026",
+      "title": "Konzert Winterwonderland - Bigband Köflach",
+      "writtenAt": "2026-11-09T00:48:26.955Z"
+    },
+    {
+      "eventId": "4e364437-63c3-4196-b3dc-0106ce8e6e38",
+      "slug": "luis-aus-suedtirol-pfiati-die-abschiedstour-2026",
+      "title": "Luis aus Südtirol - Pfiati - Die Abschiedstour",
+      "writtenAt": "2026-11-10T03:28:02.061Z"
+    },
+    {
+      "eventId": "a5df9dcc-c1f5-4375-81cd-9404b65e4c7e",
+      "slug": "linz-mamma-mia-party-konzert-2026",
+      "title": "Linz - Mamma Mia Party / Konzert",
+      "writtenAt": "2026-11-10T03:31:33.375Z"
+    },
+    {
+      "eventId": "fa2b5746-14fb-4ab3-94d7-a1722ed01de9",
+      "slug": "vorweihnachtliches-klavierkonzert-mit-mario-eritreo-2026",
+      "title": "Vorweihnachtliches Klavierkonzert - Mit Mario Eritreo",
+      "writtenAt": "2026-11-11T01:13:50.948Z"
+    },
+    {
+      "eventId": "17baa346-8a36-4827-b283-40015e6edd4b",
+      "slug": "zuendstoff-live-2026",
+      "title": "Zündstoff LIVE",
+      "writtenAt": "2026-11-11T01:15:03.353Z"
     }
   ],
   "stayGuides": [
@@ -577,6 +871,37 @@
     "salzburg-festspielzeit",
     "neusiedler-see-festivalsommer",
     "innsbruck-berge",
-    "woerthersee-eventsommer"
+    "woerthersee-eventsommer",
+    "linz-staedtetrip"
+  ],
+  "festivals": [
+    "3-tage-jazz:2027-01-22",
+    "artacts:2027-03-11",
+    "classic-esterhazy:2027-01-17",
+    "elevate-festival:2027-03-04",
+    "folk-art-festival:2026-10-21",
+    "imago-dei:2027-03-12",
+    "impuls-impuls-festival:2027-02-08",
+    "internationaler-musiksommer-bad-schallerbach:2027-01-10",
+    "internationales-akkordeonfestival:2027-02-20",
+    "interpenetration:2026-11-05",
+    "jazzwerkstatt-graz:2026-11-26",
+    "klassik-im-burghof:2026-12-08",
+    "liszt-festival-raiding:2027-03-12",
+    "mozarteum-mozartwoche:2027-01-21",
+    "musica-sacra:2026-11-09",
+    "on-the-couch:2026-12-17",
+    "resonanzen-festival:2027-01-16",
+    "tiroler-festspiele-erl-frühling:2026-12-06",
+    "tricky-women:2027-03-10",
+    "wien-modern:2026-10-30",
+    "winterfest:2026-11-25",
+    "psalm-festival-graz:2027-03-19",
+    "winter-woodstock-der-blasmusik:2027-03-19",
+    "osterfestspiele-salzburg:2027-03-20",
+    "guitar-festival-rust:2027-03-21",
+    "full-metal-mountain:2027-03-29",
+    "diagonale:2027-04-07",
+    "salam-music:2027-04-09"
   ]
 }

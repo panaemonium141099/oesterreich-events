@@ -61,6 +61,14 @@ node / next.js
   Pflicht: `.github/workflows/tests.yml` läuft bei jedem PR und vor jedem
   Deploy (deploy.yml wartet darauf). Ein roter Test heißt Fehler beheben
   oder bewusst geänderte Erwartung nachziehen, nie „war schon rot".
+  Die Suite läuft auf einer festen Testuhr (`src/test/clock.ts`, `TEST_NOW`
+  = 2026-11-05, aus `setup.ts`): kein Test liest die echte Uhr, ein Ergebnis
+  ändert sich nie ohne Codeänderung. Nur `Date` steht, Timer laufen echt.
+  Anderer Tag: die Datei stellt ihre Uhr selbst (`vi.useFakeTimers({ toFake:
+  ['Date'], now })`); `vi.useRealTimers()` fällt auf den Testtag zurück;
+  Tests, die Dauern über `Date.now()` messen, rufen `useRealClock()`.
+  Wächter `test-clock.test.ts`. Vorher stoppten Fixture-Termine, die
+  vergangen waren, am 03.11. und 05.11.2026 jedes Deploy.
 
 ## Betrieb / Automatisierung (Stand 2026-07)
 - **GitHub Actions `scrape-events.yml`** (täglich 03:17): 10 lastbalancierte
@@ -79,9 +87,10 @@ node / next.js
   scrape.ts endet mit explizitem `process.exit(0)` — sonst halten
   verwaiste Sockets getimeouteter Scraper den Job stundenlang am Leben.
   Dazu Venues-Job + EIN Post-Processing-Job (`scrape-pipeline.ts
-  --skip-scrapers --skip-venues`: normalize → categorize → geocode →
+  --skip-scrapers --skip-venues --country AT`, keine DE-Zeilen: normalize → categorize → geocode →
   master_coords → score → withdrawal → admission_recheck → dedup →
-  dedup_audit → security_audit → artist_matching → indexing → report) mit
+  dedup_audit → security_audit → artist_matching → indexing → coverage →
+  report) mit
   `if: always()`, nie zwei
   gleichzeitig (`concurrency`). Ein roter Schritt nennt seinen Grund in der
   Alarm-Mail (`reportStepReason`, `src/lib/pipeline/step-reason.ts`).
@@ -98,14 +107,101 @@ node / next.js
   der Upsert hebt beides auf. `admission_recheck`
   (`admission-recheck.ts`, Regeln in `src/lib/quality/admission-recheck.ts`)
   wendet die Titel- und Zeitregeln des Freigabevertrags
-  (`titleTimeQuarantineReasons`: Gemeinde-Dienst, Horizont) auf
+  (`titleTimeQuarantineReasons`: Gemeinde-Dienst, Horizont, gesperrte
+  Personen aus `src/lib/quality/blocked-performers.ts` — der Vertrag
+  verwirft sie schon im Sync, Nachprüfung und Dedup halten Bestand) auf
   gespeicherte Zeilen an, auch auf solche, die keine Quelle mehr liefert:
   sichtbar → `needs_review` mit `admission:<Grund>` im Protokoll, entfällt
   der Grund, gilt wieder der Score. Ventil 500 Haltungen / 300 Freigaben,
   Freigabe per workflow_dispatch. `security_audit` wird rot, sobald eine
   schreibende SECURITY-DEFINER-Funktion für anon ausführbar ist.
+- **DE-Nachtlauf (fn-29.18, 2026-11):** eigenes System neben AT: Workflow
+  `scrape-events-de.yml` (täglich 22:17 Wien, concurrency `scrape-events-de`),
+  3 Shards (`scrape.ts --de-shard i/3`) und eigene Nachbearbeitung
+  (`scrape-pipeline.ts --country DE`). Gleicher Code, gleiche DB, aber jeder
+  Lauf fasst nur die Zeilen seines Landes an (`src/lib/pipeline/
+  pipeline-country.ts`: `PIPELINE_COUNTRY`, `forCountry`; AT-Lauf = alles
+  außer DE, also auch Eventim CH). Ein roter DE-Lauf hält AT nicht auf und
+  umgekehrt. Nur im AT-Lauf (`AT_ONLY_STEPS`): venues, festival_lineups,
+  image_probe, address_geocoding, security_audit, artist_matching, indexing,
+  location_metrics, report. Die DE-Nachbearbeitung wartet (höchstens 180 min),
+  solange eine AT-Nachbearbeitung läuft; AT wartet nie. Alarm-Mail
+  `scrape-pipeline-de`, Artefakt `scrape-reports-de`. Wächter
+  `pipeline-country.test.ts` (jeder Landesschritt filtert). Welche Adapter
+  laufen, steht an EINER Stelle: `DE_NACHTLAUF` in
+  `src/lib/scrapers/de/nachtlauf.ts` (Adapter → Prüfstand-Bericht; neuer
+  Adapter = eine Zeile, Wächter `de-nachtlauf.test.ts` prüft Bericht und
+  Workflow). Nicht dabei: nolis (Lizenz) und de-amt-vg
+  (nur Prüfstand). Shards: Adapter mit gemeinsamer Website (laut Registry,
+  `adapterHosts`) im selben Shard, sonst LPT nach `DE_SCRAPER_WEIGHTS`.
+  Jeder Abruf eines DE-Adapters geht durch die Sperre je Website
+  (`host-gate.ts`): ein Abruf zur Zeit, Pause = Crawl-delay, auch über
+  Adapter hinweg; robots.txt je Prozess einmal. Zeitbudget je Adapter
+  180 min (`SCRAPER_SOFT_BUDGET_MIN` im Job, danach keine Abrufe mehr,
+  Teilergebnis), harte Grenze 210 min. iKISS (225 Kalender, braucht das
+  ganze Budget, 02.11.: 218) setzt per Cursor je Website fort (`resumeGroups`/`groupDone` in `feed-scraper.ts`; nie
+  mitten in einer Website, Amts- und Gemeindekalender teilen Termine).
+  verwaltungsportal (752 Websites auf einem Server, 4 s Pause) liest
+  rund 75 je Nacht (02.11.: 74) und setzt nach der letzten fertigen Website fort.
+  `workflow_dispatch` von `scrape-events-de.yml` (`skip_scrapers` für nur
+  die Nachbearbeitung, Dedup-Grenzen gelten dann für DE). Ventile rechnen je Land: der Dedup schreibt je Land eine
+  Zeile in `dedup_runs` (`country`, Migration `20261102120000`), Anker und
+  Grenzen gelten je Land, ein Stopp für DE hält AT nicht auf (und
+  umgekehrt); Freigabe nur für ein Land per Input `dedup_limits_country`
+  (`--limits-country`). `admission_recheck` schreibt die Länder unter der
+  Grenze. `dedup_audit` je Land: AT Grenze 100, jedes andere Land je
+  sichtbarem Event nicht mehr als AT (`auditByCountry`, im DE-Lauf zählt die
+  DB die sichtbaren AT-Events). Rückzug prüft
+  Detailseiten außerhalb AT mit robots.txt, Crawl-delay und höchstens 30
+  Abrufen je Website. Schritt `coverage` (`coverage-report.ts`, Regeln
+  `src/lib/pipeline/coverage.ts`): Gemeinden mit mindestens einem
+  kommenden Termin je Land, Bundesland und DE-Integration (nur Termine
+  des Adapters) in `reports/abdeckung.json` und der Run-Zusammenfassung.
+  Die Website zeigt DE weiter nicht (`SITE_COUNTRY`).
+- **Festivals (2026-10):** Die Festivalseite zeigt nur `ends_at >= heute`;
+  die kommenden Ausgaben (Termin, Ticketlink, Preis, Beschreibung, Bild,
+  Lineup) kommen aus der kuratierten `data/festivals-upcoming.json`
+  (`npm run import:festivals`, Regeln in `src/lib/festivals/upcoming.ts`),
+  nicht aus der mica-Registry (nur ein Jahrgang). Neue Jahrgänge dort
+  nachrecherchieren. `blog-autowriter.yml` schreibt täglich 04:10 UTC
+  (`--festivals`) je Festival einen Vorschau-Post 138 bis 152 Tage vor
+  Beginn, mit Fun Facts, ohne Striche (`src/lib/blog/dashes.ts`); jede
+  Ausgabe einmal (State-Key `slug:starts_at`). Lineup im Blog nur über
+  `toBlogLineup`: Acts ohne Rolle rendert die Blogseite nicht.
 - **GitHub Actions `import-eventim.yml`** (alle 6 h): PFT-Feed-Import mit
   Affiliate-Links. Secrets: `EVENTIM_FEED_USER`/`EVENTIM_FEED_PASS`.
+  Seit fn-30 (2026-10-29) füllt der Import auch `event_artists`: die
+  Serien-Künstler des Feeds (`EventimArtistsByEvent`, Nebenergebnis von
+  `parseEventimFeed`, alle Feed-Länder) schreibt `syncEventArtists`
+  (`src/lib/db/event-artists-sync.ts`) NACH dem Event-Upsert je Event als
+  Ersatz: Upsert auf `(event_id, artist_id)` in Batches ≤ 500, Lookup
+  `.in('source_id', …)` ≤ 200, Löschen der Zeilen, die der Feed nicht mehr
+  nennt. Schlägt der Künstler-Schritt fehl, bleibt der Event-Import gültig,
+  aber `import-eventim.ts` endet mit Exit 1 und `/api/cron/eventim`
+  antwortet 500. Voraussetzung in Prod: `20261029200000_event_artists.sql`
+  plus `NOTIFY pgrst, 'reload schema'`; bis dahin ist jeder Lauf rot und die
+  Kachel „Diese Woche live“ bleibt leer.
+- **GitHub Actions `import-eventfrog.yml`** (täglich 02:35 UTC): Eventfrog
+  Public API (`src/lib/eventfrog/`), Vollabruf je Land (AT ~9 von 2.000
+  Anfragen/Tag, 30/min je Konto). Secret `EVENTFROG_API_KEY` (Key-Typ
+  Public, ein Organizer-Key bekommt 403). Dauerangebote (gleicher
+  Veranstalter + Titel an ≥ 30 Tagen, mindestens jeden zweiten Tag: Rätsel-
+  Touren, Stadtspiele, Öffnungszeiten) verwirft der Parser, 2026-10-27 waren
+  das 2.414 von 3.455 AT-Zeilen. Bilder nie hotlinken (API-Bedingung):
+  Spiegel im Storage-Bucket `event-images/eventfrog/`, sonst kein Bild.
+  Das Land einer Zeile ist das abgefragte, nicht das der Location (die
+  Wiener Stadthalle steht dort als „DE“). Für rund jede zwölfte Location-ID
+  liefert `/locations` nichts, auch einzeln abgefragt; diese Events
+  entfallen (05.11.2026: AT 298, DE 2.423 nach Dauerangeboten).
+  Schreibfehler machen den Lauf rot (Exit 1).
+  **DE** (seit 2026-11-05): Job `eventfrog-de` in `scrape-events-de.yml`
+  neben den Shards (`needs` der Nachbearbeitung, weil GitHub geplante Läufe
+  Stunden später startet), `EVENTFROG_COUNTRIES: DE`, eigener Bericht
+  `import-eventfrog-de`; 84.289 Events von der API, 21.731 nach
+  Dauerangeboten, Prüfstand bestanden (21.429 öffentlich). Ohne Bilder
+  (`EVENTFROG_IMAGES: 'off'`): rund 11.200 Bilder wären 0,9 GB auf einer
+  Platte mit 87 % Belegung, und keine Seite zeigt DE; einschalten holt sie
+  im nächsten Lauf nach. CH in keinem Cron.
 - **GitHub Actions `ingest-activities.yml`** (wöchentlich): Deskline-
   Infrastruktur-POIs → `poi_activities` (Run-Bookkeeping, Dedup, Prune).
   Der OSM-Bestand (`osm_pois`) läuft NICHT im Cron — `npm run import-osm-pois`
@@ -115,10 +211,50 @@ node / next.js
   `poi_activities.affiliate_product`. Secrets: `VIATOR_API_KEY` (+ optional
   `VIATOR_PARTNER_ID`/`VIATOR_DEEPLINK_*`). Ohne Key endet der Job mit
   Hinweis und Exit 0.
-- **Vercel-Crons** (vercel.json): send-reminders, seo-daily-snapshot
-  (GSC/CrUX-Snapshot — Collector hart deadline-begrenzt, `count: 'planned'`
-  statt exact!), warm-cache, sync-feratel (stündlich), lifecycle-emails,
-  outreach-* (Kaltakquise-Funnel), expire-boosts.
+- **systemd-Timer `lt-cron@<name>.timer` auf Hetzner** (`vercel.json` hat
+  seit fn-20 keine Crons mehr; die Routen liegen unter `src/app/api/cron/`):
+  send-reminders, warm-cache, sync-feratel (stündlich), lifecycle-emails,
+  newsletter-weekly, outreach-* (Kaltakquise-Funnel), seo-* (seo-daily-snapshot:
+  GSC/CrUX-Snapshot, Collector hart deadline-begrenzt, `count: 'planned'`
+  statt exact!), expire-boosts, workflow-reports. Dazu seit fn-30
+  `revalidate-landing`: `GET /api/cron/revalidate-landing` (Bearer
+  `CRON_SECRET` Pflicht, ohne Secret 401) baut `/` und `/en` über
+  `revalidateLanding()` (`src/lib/landing/revalidate-landing.ts`) neu, damit
+  die Tagesausgabe nach Mitternacht den neuen Wiener Tag zeigt; geplant
+  `OnCalendar=*-*-* 00:05:00 Europe/Vienna` (die übrigen Timer laufen in
+  UTC). Timer seit 2026-10-30 aktiv (MASTERPLAN §10.2 Punkt 5). Dieselbe
+  Route ruft `deploy.yml` nach jedem Deploy auf und holt `/` und `/en` einmal
+  ab: der Build rendert eine Sektion still leer, wenn ihre Abfrage unter
+  Build-Last in den statement timeout läuft (2026-11-04 Saison-Karte, nur
+  /de), und die leere Seite läge sonst eine Stunde im ISR-Cache. Dieser
+  Vorrender liegt im Image und kommt nach JEDEM Container-Neustart (ISR-Guard,
+  Reboot) wieder hervor (06./07.11.2026 Saison-Karte leer trotz Deploy-Warm).
+  Deshalb seit 2026-11-07 zweierlei: im Build wiederholt jede Abfrage
+  geduldig (`LANDING_RETRY_DELAYS_MS.build`, rund 90 s, Budget 150 s), und
+  `src/instrumentation.ts` rendert bei jedem Serverstart neu
+  (`src/lib/landing/warm-on-start.ts`: wartet auf /api/health, ruft die
+  Route mit `CRON_SECRET`, holt `/` und `/en` je zweimal, bis zu drei Runden;
+  aus mit `LANDING_WARM_ON_START=off`, Log-Präfix `[landing-warm]`).
+- **Cloudflare (seit 2026-10-21) vor lasstreffen.at + www** (Free: Bot Fight
+  Mode, WAF-Regeln, Cache nur statische Pfade); `api.lasstreffen.at` bleibt
+  DNS-only. Caddy liest die Client-IP aus `CF-Connecting-IP` nur von
+  Cloudflare-Netzen (`cf-trusted-proxies.caddy`, `lt-cf-ranges.timer`),
+  Sperrlisten und Rate-Limits laufen auf `client_ip`. Cloudflare-Änderungen
+  per API mit `/root/.cloudflare-token` (IP-gefiltert, `curl -4`), Skript
+  `docs/ops/cloudflare/cf-setup.py`; Plan/Rückwege
+  `docs/ops/cloudflare-proxy-2026-10.md`, Betrieb MASTERPLAN §3.14.
+- **Postfächer office@ und support@lasstreffen.at (seit 2026-11-06):** eigener
+  Mailserver auf dem Hetzner-Server, nativ per apt: Postfix (25 Empfang,
+  465/587 Submission) und Dovecot 2.4 (IMAPS 993), virtuelle Postfächer mit
+  je 2 GB Quota (Liste `BOXES` im Setup-Skript). Versand über das
+  Brevo-SMTP-Relay (Hetzner sperrt ausgehend Port 25), zählt ins
+  Brevo-Tageskontingent der Website. Zertifikat für `mail.lasstreffen.at` holt
+  Caddy (Site-Block), `lt-mail-cert.timer` übergibt es. Setup idempotent:
+  `docs/ops/mail/setup-mail.sh`; Zugangsdaten nur auf dem Server
+  (`/root/<name>-mail-zugang.txt`); Betrieb MASTERPLAN §3.16. Die Website
+  nennt `office@` als Kontakt und `support@` im Entwicklungs-Hinweis der
+  Startseite (`DevNotice`); Formular-Benachrichtigungen gehen weiter an
+  `BUSINESS_LEADS_EMAIL`.
 - **pg_cron in Supabase:** MV-Refreshes (event_stats_cache 30 min,
   event_map_points stündlich), match-artists stündlich.
 
@@ -150,22 +286,111 @@ node / next.js
   Resolver verwirft eine PLZ gegen Ort UND Bundesland
   (`plz_contradicts_city`), ein PLZ-Mittelpunkt bestätigt seine PLZ nicht
   (`coords_from_plz`). MASTERPLAN §3.12.
+  Deutschland (fn-29.1) hat sein eigenes Ein-System: `data/gemeinden-de.json`
+  (Destatis, AGS/ARS, Kreis, Verband, Mittelpunkt), `data/plz-de.json`
+  (GeoNames CC BY 4.0 + Amts-PLZ, je PLZ Mengen, Großkunden markiert) und
+  `data/stammdaten-de/laender-de.geojson` (BKG VG250, dl-de/by-2-0); Zugriff
+  nur über `src/lib/gemeinden/de.ts`, `src/lib/location/plz-reference-de.ts`,
+  `land-de-from-geo.ts`; Build `npm run build:stammdaten:de [-- --fetch]`.
+  OpenPLZ (ODbL) nicht verwenden. Wächter `stammdaten-de.test.ts`.
+  Resolver und Freigabevertrag wählen die Ortsdaten je Land über
+  `src/lib/location/ortsdaten.ts` (fn-29.2, gleiche Regeln für AT und DE,
+  andere Länder ohne Ableitungen). Die Spalten `bundesland` (CHECK) und
+  `district` (FK) führen nur AT-Werte, für DE bleiben sie leer, das Land
+  steht in `location_resolution.gemeinde.bundesland`; ein DE-Wert dort würde
+  ganze Schreib-Batches abweisen.
+- **DE-Gemeinde-Registry (fn-29.4):** `data/de-gemeinde-registry.json`, je
+  Gemeinde ein Eintrag (AGS, Stufe, Integration, Kalender-URL, Feed nur nach
+  bestätigtem Abruf, Ausweichweg Amt/VG bzw. meinOrt), gebaut von
+  `npm run build:registry:de [-- --feeds]` aus der Vollerhebungs-CSV
+  (`docs/research/de-gemeinden/data/`). Terminbuchung und Abfallkalender sind
+  nie Kalender-URL (`NON_EVENT_HOSTS`). Wächter `registry-de.test.ts`.
+- **DE-Prüfstand (fn-29.3):** jeder DE-Adapter vor dem Nachtlauf über
+  `npm run pruefstand:de -- --adapter <name> [--offline] [--mit-belegen]`
+  (Cache in `.pruefstand/`, derselbe Schreibweg wie der Sync ohne Schreiben,
+  Bericht mit Schwellen und 30er-Stichprobe in den PR). Schwellen in
+  `src/lib/pruefstand/schwellen.ts`, AT-Referenz `data/pruefstand/at-referenz.json`
+  (`npm run pruefstand:at-referenz`, nur lesend gegen Prod). Amts-/VG-Kalender
+  (fn-29.17) lesen die Adapter selbst mit (`viaVerband`, `pickFeedGroups`: gleicher
+  Kalender einmal, Gemeinde vor Amt); `de-amt-vg` ist nur Prüfstand-Sicht, nie Nachtlauf.
+  Abdeckung: `npx tsx src/scripts/amt-vg-abdeckung.ts`, Bericht
+  `docs/research/de-gemeinden/adapter-amt-vg.md`.
+- **Zähler je Kalender im DE-Nachtlauf:** Adapter lesen jeden Kalender in
+  `DeFeedScraper.inCalendar` und melden Termine mit `noteTermine`
+  (`src/lib/scrapers/de/kalender-stand.ts`, Wächter `de-kalender-stand.test.ts`).
+  Shards schreiben `reports/kalender/<adapter>.json` (Artefakt), die
+  Nachbearbeitung vereint sie mit dem Stand der letzten Nacht (Artefakt
+  `de-kalender-stand`; Cursor-Adapter behalten bei „nicht dran" ihr letztes
+  Ergebnis) und teilt die Gemeinden ohne Termin nach Ursache auf
+  (`coverage-causes.ts`, `reports/abdeckung.json`, `gemeinden-ohne-termin.json`).
+  Feeds bestätigt `registry-de-feeds.yml` (workflow_dispatch, je Server
+  nacheinander, Artefakt statt Repo), von dort, wo auch der Nachtlauf liest.
 - **Nur Österreich (2026-10-08):** lasstreffen.at spielt ausschließlich
   Events mit `country = SITE_COUNTRY` (`src/lib/site-country.ts`, 'AT') aus.
   DE/CH-Events (Eventim) bleiben in der DB und im Import für spätere
   .de/.ch-Seiten. Jede öffentliche events-Abfrage filtert das Land selbst;
   Bundesland/Bezirk/Umkreis reichen nicht. Wächter:
   `src/__tests__/lib/site-country-guard.test.ts` (Ausnahmen mit Begründung).
-- `src/app/page.tsx` — Landing: statische ISR-Shell (KEIN cookies()/auth im
-  RSC-Pfad — Personalisierung client-seitig via `/api/me/landing` +
-  `PersonalizedMatches`); Datenqueries über cookie-freien Anon-Client
+  DE-Zeilen ohne Position hält der Freigabevertrag zurück (`no_position`,
+  außer online; fn-29.5, auch Eventim-DE). DE-Ortsteile („Mahlow“ unter
+  15831) löst der Resolver über `orteGemeinde` in `data/plz-de.json` auf
+  (GeoNames-Ort in der VG250-Gemeindefläche). Gemeinde-Adapter für DE stehen
+  in `src/lib/scrapers/de/` (nicht im Nachtlauf vor bestandenem Prüfstand,
+  `npm run pruefstand:de`, Befunde `docs/research/de-gemeinden/adapter-*.md`).
+- `src/app/[locale]/page.tsx` — Landing als Tagesausgabe (fn-30, Mockup D in
+  `docs/design/landing-redesign/`): statische ISR-Shell (`revalidate = 3600`,
+  KEIN cookies()/auth im RSC-Pfad, Datenqueries über den cookie-freien
+  Anon-Client in `src/lib/v4/get-landing-data.ts`). Kopf `Masthead` mit
+  `DateLine` (Client-Insel: Wetter heute in Wien aus `loadTodayWeather()` in
+  `src/lib/landing/weekend-weather.ts`, Wiener Tag über
+  `src/lib/landing/vienna-day.ts`); Bühne `TipOfDay` (Tipp des Tages:
+  `landing_features.kind = 'sponsored'` für den Wiener Tag mit Pflicht-Label
+  „Anzeige“ plus `sponsor_name`, sonst Score-Fallback ohne Label; Buchungslink
+  auf `/fuer-firmen`), `SeasonCard` (Pins `kind = 'editorial'`), `MapTile`
+  (Mapbox-Static-Bild mit Pins der heutigen Events,
+  `src/lib/v4/map-static-url.ts`, Attributionszeile), `ArtistsLive` (drei
+  Eventim-Künstler aus `event_artists`, stündliche Rotation; einziger Leser
+  von `/api/me/landing`, nur mit sb-Cookie; Folgen über `/api/artists/follow`);
+  darunter in fester Reihenfolge `ProgramList` (Heute Abend), `WeekendShelf`,
+  `RegionShelf`, `FestivalsBlog`, `ActivitiesShelf`, `NewsletterRow`,
+  `OrganizerRow`, Footer mit `DevNotice` (alle in `src/components/Landing/v4/`,
+  Regale über `shelf-ui.tsx` von /entdecken). Auswahl pur und getestet in
+  `src/lib/v4/landing-picks.ts` (Reihenfolge Tipp → Saison → Programm →
+  Wochenende, kein Event doppelt, Wiener Tage). Mitternacht: `DateLine`
+  rechnet den Tag client-seitig nach, der Cron `revalidate-landing` baut die
+  Seite um 00:05 Wien neu (siehe Betrieb). `data-track`: `landing_tip_click`
+  (mit `data-track-kind` → `data.kind`), `landing_tip_book`,
+  `landing_map_open`, `landing_artist_follow`.
+- `src/app/[locale]/artists/page.tsx` — Künstler-Tab als Plakatwand (2026-11,
+  Mockup B in `docs/design/kuenstler-redesign/`): offen für alle, ISR-Shell
+  wie die Startseite. Verzeichnis aus `event_artists` (Eventim, Termine in
+  Österreich der nächsten 90 Tage, seitenweise über den Anon-Client,
+  `src/lib/artists/get-artists-directory.ts`); Auswahl pur in
+  `src/lib/artists/directory.ts`: Häuser, Reihen und Festivals bleiben
+  draußen (Name = Veranstaltungsort, Hauswort bei höchstens drei Orten,
+  zehn Termine am selben Ort, keine Auftritts-Tags), Spielart aus den
+  Event-Tags, Regale Diese Woche live, Auf Tour, je Spielart, dazu A bis Z.
+  Client-Insel `ArtistsWall` (`src/components/Artists/v4/`): Suche zuerst im
+  Verzeichnis, dann Spotify; „Deine Künstler“ nur mit sb-Cookie über
+  `/api/artists/following`; Folgen optimistisch über `/api/artists/follow`;
+  Künstlerblatt als Sheet mit Terminen, Event-Links und Ticketlinks
+  (`ticket_url` bzw. `evo_link`, `data-track="ticket_click"`). Dasselbe
+  Blatt als Seite: `src/app/[locale]/kuenstler/[slug]/page.tsx` (ISR,
+  Slug aus dem Namen über `artistSlug`, mehrere Feed-IDs eines Namens
+  vereint `artistBySlug`, JSON-LD Person/MusicGroup mit Terminen, in der
+  Core-Sitemap). Alle Leser teilen `getArtistsDirectoryCached`
+  (unstable_cache, 1 h, rund 1,2 MB).
 - `src/app/api/events/route.ts` — Events-API (Cursor-Pagination, bbox, Filter)
 - `src/app/api/events/map-points/route.ts` — columnar Karten-Snapshot aus MV (fn-16)
 - `src/app/api/search/semantic/route.ts` — Smart-Suche (Gemini-Intent →
   Taxonomie-Whitelist → parallele indexierte Queries; Sortier-Kommentar
   beachten — NICHT ohne EXPLAIN "optimieren")
 - `src/app/api/search/concierge/route.ts` — Concierge-Tipp (Gemini + Grounding, SSE)
-- `src/app/api/me/landing/route.ts` — Client-Personalisierung der Landing
+- `src/app/api/me/landing/route.ts` — Client-Personalisierung der Landing:
+  `followedLive` (gefolgte Künstler mit Eventim-Termin in 7 Tagen aus
+  `event_artists`, Helfer `src/lib/v4/followed-live.ts`, Abgleich in JS) und
+  `followedNames` (normalisiert über `src/lib/artists/normalize-name.ts`);
+  `matches` und die ID-Sets liefert die Route weiter, seit fn-30 ohne Leser
 - `src/app/entdecken/page.tsx` — Liste + Smart-Suche (Tabs)
 - **Freizeitaktivitäten (fn-18, zweite Inhaltssäule neben Events):**
   `src/app/[locale]/aktivitaeten/page.tsx` (Übersicht),
@@ -194,9 +419,22 @@ node / next.js
 - `src/app/[bundesland]/…`, `src/app/gemeinde/[slug]`, `src/app/thema/[slug]`,
   `src/app/studenten/…` — SEO-Hub-Seiten (~2 000 Gemeinden)
 - `src/app/fuer-firmen/page.tsx` — Veranstalter-Pakete (Boost 29 €, Abo 49 €/M,
-  Live-Anbindung); Leads → `/api/business/lead`; Admin-Boost: `/api/admin/boost`
+  Live-Anbindung); Leads → `/api/business/lead`; Admin-Boost: `/api/admin/boost`;
+  Tipp des Tages (ein Platz je Wiener Kalendertag) über
+  `/api/admin/landing-feature` mit `kind='sponsored'` + `sponsor_name`
+  (Pflicht), Überschneidung → 409, UI `/admin/boost`, danach `revalidateLanding()`
 - `src/app/blog/…` + `src/content/blog/posts/` — 64 Posts;
-  `src/components/Blog/BlogTicketBox.tsx` = Affiliate-Ticket-Box (Eventim)
+  `src/components/Blog/BlogTicketBox.tsx` = Affiliate-Ticket-Box (Eventim).
+  Saison-Guides (`saison-guide.yml`, `generate-saison-guide.ts`, Kalender
+  `src/content/blog/saison-kalender.ts`): jeder Eintrag trägt ein `topic`
+  (Titel-Suchwörter im festen Saison-Fenster, `src/lib/blog/saison-events.ts`),
+  diese Events tragen den Guide, Kategorie-Events füllen nur auf. „Noch nicht
+  angekündigt" nur bei leerer Themenabfrage (Gate `deniesProgramme`); Websuche
+  für jeden Guide (was jedes Jahr wiederkehrt, mit Quelle), Termine und Preise
+  weiter nur aus `facts` und DB-Events. Nachziehen: ohne fälligen neuen Guide
+  schreibt das Script einen bestehenden neu, sobald die Themenabfrage deutlich
+  mehr liefert als in `saison-state.json` (Silvester 2026-11-03: „kein
+  Programm" bei über 300 Silvester-Events in der DB).
 - `src/components/Events/v4/V4TicketBox.tsx` — Ticket-CTA Event-Detail
   (Eventim-exklusiv, data-track="ticket_click")
 - `src/components/Analytics/` — PageviewTracker + ClickTracker (global im Layout)
@@ -211,7 +449,13 @@ node / next.js
   anderen Tag nur ab morgen und bei gleichem Titel; mehrere alte IDs als
   Array, Registry: Hash und gekürzte ID der alten Lesart). IDs nie aus gekürzten Strings
   bilden: gemeinde-registry kürzte Base64 auf 18 Byte, das Datum fiel weg
-  (`registryEventId`, 2026-10-11). Ausgezeichnete Namen (`eventNameNodes`:
+  (`registryEventId`, 2026-10-11). Meldet ein Termin eine alte ID, die
+  schon eine Zeile neben seiner eigenen hat (gleicher Tag, Titel, Website),
+  zieht die Übernahme die alte zurück (`planSupersededRows`). Kalender,
+  deren Uhrzeiten von Import zu Import kippen (innsbrucktermine.at: mal
+  richtig, mal eine Stunde früher, 2026-11-03), tragen in der Registry
+  `unstableTimes`: source_id aus Titel, Tag und Rang am Tag
+  (`withoutStartTime`). Ausgezeichnete Namen (`eventNameNodes`:
   Schema.org-Name des Events, `.title`, `.bemHeader`, `.va_list_bez`,
   EventON) gehen Überschriften und Links vor, Text für Screenreader
   (`visibleText`: `.sr-only`, `.visually-hidden`) ist nie Teil des Titels;
@@ -282,7 +526,7 @@ node / next.js
   `festivals.state` nur als Bundesland-Rückfall. Jeder Lauf zieht auch den
   Bestand nach und setzt `last_seen_at`; ohne diese Sichtung zöge der Rückzug
   sie nach 30 Tagen als „Quelle tot" ein (2026-10-17).
-- `.github/workflows/` — scrape-events.yml (Shards+post), import-eventim.yml, tests.yml, deploy.yml
+- `.github/workflows/` — scrape-events.yml (Shards+post), import-eventim.yml, import-eventfrog.yml, tests.yml, deploy.yml
 - `docs/MASTERPLAN.md` — Strategie & Betriebszustand; `docs/TAXONOMY.md` — Taxonomie
 
 ## Build & Test
@@ -292,6 +536,7 @@ npm test                     # Vitest, muss grün sein (CI + Deploy-Gate)
 npm run scrape               # alle Scraper | --source <name> | --shard i/N
 npm run scrape:pipeline      # scrape + post-processing (CI nutzt --skip-scrapers im post-Job)
 npm run import:eventim       # Eventim-PFT-Feed (braucht EVENTIM_FEED_USER/PASS)
+npm run import:eventfrog     # Eventfrog Public API (braucht EVENTFROG_API_KEY; --dry-run, --country AT,DE)
 npm run score | dedup        # Scoring / Cross-Source-Dedup (--dry-run --report r.json;
                              # Sicherheitsventil: --max-new-duplicates / --max-releases)
 npm run dedup:audit          # sichtbare Restdubletten zählen (Exit 1 über --max, Std. 100)
@@ -306,6 +551,8 @@ npm run import-osm-pois      # OSM-Freizeit-POIs → osm_pois (Overpass, Disk-Ca
                              # --fetch-only | --skip-fetch | --region X | --dry-run)
 npm run build:stammdaten     # data/gemeinden-at.json + URL-Ortsslugs neu bauen
 npm run scrape:festival-lineups | match-artists
+npm run import:festivals     # data/festivals-upcoming.json → festivals + festival_artists
+                             # (--dry-run | --fetch-images | --slug X); validiert vorab komplett
 ```
 
 ## Deployment
@@ -318,13 +565,16 @@ npm run scrape:festival-lineups | match-artists
 - Supabase Micro: `count(*) exact`/breite Scans auf `events` (~280k rows)
   laufen in Statement-Timeouts — `count: 'planned'`, MVs oder indexierte
   Pfade nutzen (MASTERPLAN §10.1/§10.4).
-- Personalisierte Karten-Badges (inplan/match/lineup) auf der Landing sind
-  seit dem Statik-Umbau nicht mehr im Server-HTML (ID-Sets liegen in
-  /api/me/landing für spätere Client-Hydration bereit).
 - Eventim-Feed-Passwort stand bis 2026-07-08 in der öffentlichen Repo-History
   — Rotation bei Eventim angeraten (MASTERPLAN P0-Merker).
 - Dev-Umgebung Windows/Node 24: Browser-Streaming von RSC-Seiten kann lokal
   hängen (undici-TypeError) — Prod/Vercel nicht betroffen; HTML via fetch prüfen.
+- Ein halbes Emoji kostet einen ganzen Schreib-Batch: kürzt ein Scraper
+  einen Text mitten im Zeichen (`slice(0, 500)`, über hundert Stellen),
+  lehnt Postgres alle 100 Zeilen ab („invalid input syntax for type json“).
+  Der Sync entfernt halbe Zeichen deshalb vor dem Schreiben
+  (`src/lib/db/well-formed.ts`). So verlor der Eventfrog-Import bis
+  2026-11-05 täglich 100 AT-Events bei grünem Lauf.
 - PostgREST transportiert `.in()`-Filter im QUERY-STRING (auch bei PATCH):
   Listen IMMER auf ≤200 Elemente chunken, sonst bricht die Verbindung mit
   „TypeError: fetch failed" (im fn-18-Vollimport zweimal reproduziert).
@@ -334,6 +584,16 @@ npm run scrape:festival-lineups | match-artists
   Ende. Mehr als 1000 Zeilen nur über `fetchAllRows`/`forEachPage`
   (`src/lib/db/fetch-all.ts`); Wächter `postgrest-row-cap.test.ts`. So lief
   der Dedup bis 2026-09-24 nur über vergangene Tage.
+- Ganze Tabellen nach id blättern, nicht mit Offset (`forEachPageById` in
+  `src/lib/db/fetch-all.ts`): eine Offset-Seite liest alle Zeilen davor mit
+  (Bericht über 430.811 Events gegen Prod: 3 min 46 s mit Offset, 32 s nach
+  id, gleiches Ergebnis). Baut ein Deploy das App-Image auf dem Datenbank-Server,
+  reicht das für den Statement-Timeout: Bericht des AT-Nachtlaufs am
+  05.11.2026 bei Offset 186.000, Abdeckung am 03.11. Lesefehler durch
+  Überlast (`statement timeout`, `fetch failed`) wiederholt `readWithRetry`
+  knapp fünf Minuten lang, andere werfen sofort. Ein Lesefehler ist nie
+  „nichts zu tun“: der Kategorieschritt meldete so am 05.11. Erfolg. Wächter
+  `fetch-all-keyset.test.ts`, Befund MASTERPLAN §3.15.
 - Funktionen in public sind seit 2026-10-08 standardmäßig NICHT öffentlich
   (Default-Privileges von supabase_admin und postgres, Migration
   `20261008130000_funktionen_execute_rechte.sql`): neue oder per DROP neu
@@ -361,6 +621,11 @@ npm run scrape:festival-lineups | match-artists
   liefert sie still nichts. Views laufen mit Owner-Rechten an der RLS vorbei:
   nie Schreibrechte für anon/authenticated vergeben.
   Migrationen: `20261008120000_api_rollen_rechte_zurueckschneiden.sql`, `20261008120100_api_rollen_neue_objekte.sql`.
+  `event_artists` (fn-30, `20261029200000_event_artists.sql`): RLS an,
+  Select-Policy `event_artists_public_read` für anon/authenticated, Schreiben
+  nur service_role (Import); nach dem Ausführen `NOTIFY pgrst, 'reload
+  schema'`, sonst kennt PostgREST weder die Tabelle noch den FK für
+  `events!inner`.
 - Viator-Monetarisierung (fn-18.5) ist gebaut, aber erst scharf, wenn das
   Partner-Konto steht: `VIATOR_API_KEY` muss in BEIDE Stores (GitHub-Actions
   UND Vercel-Env). Ohne Key liefert `/api/activities/[id]/booking` nichts und

@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/gospel-project-weihnachtskonzert-emmanuel-expedithalle-22267823/?affiliate=J70",
   "publishDate": "2026-10-11",
   "updatedDate": "2026-10-11",
+  "factSources": {
+    "checkedAt": "2026-10-11",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/gospel-project-weihnachtskonzert-emmanuel-expedithalle-22267823/?affiliate=J70"
+    ]
+  },
   "readingTime": 4,
   "excerpt": "Am 12. Dezember singt der Wiener Chor GOSPEL project sein Weihnachtskonzert „Emmanuel“ in der Expedithalle. Auf dem Programm stehen Gospel, Balladen und Weihnachtsmusik. Als Gast ist Chanda Rule angekündigt.",
   "category": "Musik & Festival",

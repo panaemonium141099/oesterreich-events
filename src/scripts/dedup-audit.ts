@@ -14,11 +14,12 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 import { fetchAllRows } from '@/lib/db/fetch-all';
-import { findResidualDuplicates } from '@/lib/pipeline/dedup-audit';
+import { auditByCountry, findResidualDuplicates } from '@/lib/pipeline/dedup-audit';
 import { pairKey } from '@/lib/pipeline/dedup-engine';
 import { toViennaIso } from '@/lib/utils/event-time';
 import { reportStepReason } from '@/lib/pipeline/step-reason';
 import type { EventRow } from '@/lib/pipeline/types';
+import { forCountry, pipelineCountry } from '@/lib/pipeline/pipeline-country';
 
 try {
   const envContent = readFileSync(join(process.cwd(), '.env.local'), 'utf8');
@@ -39,10 +40,12 @@ function numArg(name: string, fallback: number): number {
 // Normalstand nach dem Umbau (2026-10-07): ~20 echte Unklarheiten (zwei
 // Christmetten im Ort, dieselbe Show zu zwei Zeiten). Ein ausgefallener Dedup
 // bringt schon in einer Nacht deutlich mehr (Ausgangswert vorher: 837).
+// Grenze für Österreich; andere Länder je sichtbarem Event nicht mehr
+// (auditByCountry, fn-29.18).
 const MAX_RESIDUAL = numArg('--max', 100);
 const SAMPLES = numArg('--samples', 20);
 
-const SELECT = 'id,title,start_date,is_all_day,location_name,postal_code,district,latitude,longitude,location_precision,source_name,source_id,venue_id,publish_status';
+const SELECT = 'id,title,start_date,is_all_day,location_name,postal_code,district,latitude,longitude,location_precision,source_name,source_id,venue_id,publish_status,country';
 
 async function main(): Promise<void> {
   const supabase = createClient(
@@ -53,12 +56,14 @@ async function main(): Promise<void> {
 
   // Ab Wiener Tagesbeginn heute: auch heutige Events zählen.
   const since = new Date(Date.now() - 24 * 3_600_000).toISOString();
+  // Im getrennten Lauf nur das eigene Land (pipeline-country.ts).
+  const country = pipelineCountry();
   const events = await fetchAllRows<EventRow>(
-    (from, to) => supabase
+    (from, to) => forCountry(supabase
       .from('events')
       .select(SELECT)
       .gte('start_date', since)
-      .in('publish_status', ['published', 'published_low_confidence'])
+      .in('publish_status', ['published', 'published_low_confidence']), country)
       .order('id')
       .range(from, to) as unknown as PromiseLike<{ data: EventRow[] | null; error: { message: string } | null }>,
     { label: 'dedup-audit: Events' },
@@ -83,9 +88,26 @@ async function main(): Promise<void> {
     bySource.set(k, (bySource.get(k) ?? 0) + 1);
   }
 
+  // Die Grenze eines anderen Landes rechnet je sichtbarem AT-Event; ohne
+  // AT-Zeilen im Lauf zählt die Datenbank sie.
+  let atVisible: number | undefined;
+  if (country && country !== 'AT') {
+    const { count, error } = await supabase
+      .from('events')
+      .select('id', { count: 'exact', head: true })
+      .eq('country', 'AT')
+      .gte('start_date', since)
+      .in('publish_status', ['published', 'published_low_confidence']);
+    if (error || count == null) throw new Error(`dedup-audit: sichtbare AT-Events nicht zählbar: ${error?.message ?? 'ohne Zahl'}`);
+    atVisible = count;
+  }
+  const byCountry = auditByCountry(events, residual, MAX_RESIDUAL, atVisible);
   console.log(`=== Dedup-Audit ===`);
   console.log(`  Sichtbare Events ab heute: ${events.length}`);
-  console.log(`  Offensichtliche Restdubletten: ${residual.length} (Grenze ${MAX_RESIDUAL})`);
+  console.log(`  Offensichtliche Restdubletten: ${residual.length}`);
+  for (const c of byCountry) {
+    console.log(`    ${c.country}: ${c.residual} bei ${c.visible} sichtbaren (${c.rate} je 10.000), Grenze ${c.limit}`);
+  }
   for (const [k, n] of [...bySource.entries()].sort((x, y) => y[1] - x[1]).slice(0, 10)) {
     console.log(`    ${String(n).padStart(5)}  ${k}`);
   }
@@ -93,9 +115,11 @@ async function main(): Promise<void> {
     console.log(`    ${toViennaIso(new Date(a.start_date)).slice(0, 16)}  [${a.source_name}] ${a.title.slice(0, 50)}  |  [${b.source_name}] ${b.title.slice(0, 50)}  (${a.id.slice(0, 8)} / ${b.id.slice(0, 8)})`);
   }
 
-  if (residual.length > MAX_RESIDUAL) {
-    console.log(`\n!!! ALARM: ${residual.length} Restdubletten > ${MAX_RESIDUAL}. Lief der Dedup? Neue Quelle oder Statusvariante?`);
-    reportStepReason(`${residual.length} sichtbare Restdubletten > Grenze ${MAX_RESIDUAL}`);
+  const over = byCountry.filter(c => c.residual > c.limit);
+  if (over.length > 0) {
+    const why = over.map(c => `${c.country}: ${c.residual} sichtbare Restdubletten > Grenze ${c.limit}`).join('; ');
+    console.log(`\n!!! ALARM: ${why}. Lief der Dedup? Neue Quelle oder Statusvariante?`);
+    reportStepReason(why);
     process.exit(1);
   }
 }

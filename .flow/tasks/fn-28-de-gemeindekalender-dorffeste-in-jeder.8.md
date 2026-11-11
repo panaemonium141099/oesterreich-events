@@ -1,0 +1,45 @@
+# fn-28-de-gemeindekalender-dorffeste-in-jeder.8 Gemeindekalender Thüringen
+
+## Description
+Bundesland: Thüringen. Ziel: jede Gemeinde mit ihren lokalen Festen
+(Dorffeste, Feuerwehrfeste, Kirchweih/Kerwe/Kirmes, Schützen-, Mai-, Wein-
+feste, Weihnachtsmärkte) über möglichst wenige Integrationen abdecken.
+
+Belegte Ausgangszahlen:
+- Gemeinden: 601 (Destatis GV-ISys, 30.09.2026)
+- Gemeindeverbände: 79 Verwaltungsgemeinschaften
+- destination.one `open-data` (alle Termine, 27.10.2026): 386 Events mit `area` Thüringen
+
+Kandidaten (Hypothesen, nicht belegt, zu prüfen):
+- ThüCAT: liefern Gemeinden Events ein, wie kommt man an den Sync-Kanal?
+- Verwaltungsgemeinschaften und Amtsblätter (Verlage)
+- Kirmes, Feuerwehrfeste
+
+Vorgehen und Ergebnisformat stehen verbindlich im Epic-Spec
+(`.flow/bin/flowctl cat fn-28-de-gemeindekalender-dorffeste-in-jeder`), Ausgangslage in
+`docs/research/deutschland-event-quellen-2026-10.md`. Vor dem Start
+`git fetch` und `docs/research/de-gemeinden/` auf origin/master lesen
+(parallel laufende Tickets), bekannte Anbieter verlinken statt neu
+recherchieren. Ergebnis als eigener Branch mit PR auf master.
+
+Ergebnisdatei: `docs/research/de-gemeinden/07-thueringen.md`.
+## Acceptance
+- [x] `docs/research/de-gemeinden/07-thueringen.md` nach dem Format im Epic-Spec
+- [x] Stichprobe: 30 Gemeinden unter 10.000 Einwohnern, reproduzierbar gezogen, je Eintrag Fundort der Veranstaltungen mit Link, Plattform/CMS und destination.one-Treffer
+- [x] Jeder Generic (mehrfach in der Stichprobe oder laut Betreiber viele Gemeinden): Zugriffsweg, echte Felder aus Probe, Lizenz/AGB/robots, Zahl der Gemeinden belegt oder als Stichprobenanteil
+- [x] Dorffest-Test mit belegtem Beispiel je Quelle
+- [x] Priorisierte Integrationsliste für Thüringen mit nächstem Schritt, Lücken benannt
+- [x] Keine Konten/Formulare/Mails, wenige GETs je Host, ohne Gedankenstriche, PR auf master (Abweichungen offen benannt in 07-thueringen.md Abschnitt 7: ThüCAT-Widget-POSTs, zwei Hosts mit 7 Abrufen, zwei robots-widrige Kreis-Startseiten)
+
+
+## Done summary
+Thüringen-Recherche in docs/research/de-gemeinden/07-thueringen.md (PR #345, gemergt).
+Stichprobe 30 von 566 Gemeinden unter 10.000 EW (Destatis 30.09.2026, Seed 280816).
+verwaltungsportal.de ("Thüringen vernetzt") ist der Generic: 18/30 Gemeinden, JSON-LD Event, Kalender oft dünn, Zahl der TH-Seiten nicht belegt.
+ThüCAT: 4.514 Termine ab 27.10.2026, 4 Dorfkirmessen, 0 Maibaum/Erntefest; API-Key auf Anfrage bei der TTG, CC-Lizenzen; 3/30 Gemeinden.
+destination.one open-data 0/30. WITTICH-Amtsblatt 4/30. Dorffest online belegt 10/30.
+Priorisierung: 1 verwaltungsportal-Parser + Teilnehmerliste, 2 ThüCAT-Key, 3 WITTICH bundesweit.
+## Evidence
+- Commits: 895d65c0, 25e7c3e42ec71a9aa073032c01f02b0a4ae5eeb1
+- Tests:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/345

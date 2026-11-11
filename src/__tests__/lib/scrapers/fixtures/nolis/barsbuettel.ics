@@ -1,0 +1,2630 @@
+BEGIN:VCALENDAR
+PRODID:-//NOLIS GmbH//NOLIS-Manager Kalender V3.5//DE
+VERSION:2.0
+METHOD:PUBLISH
+LAST-MODIFIED:20261028T223722Z
+NAME:Kalender
+X-WR-CALNAME:Kalender
+X-WR-TIMEZONE:UTC
+TZID:UTC
+X-VCALENDAR-VERSION:3.5
+BEGIN:VEVENT
+DTSTART:20261028T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die kleinen Spatzen"
+PRIORITY:0
+DTEND:20261028T150000Z
+X-SERIENCONTAINER:900007764
+LOCATION:Kindergarten Falkennest, Falkenstraße 9L,\n22885 Barsbüttel
+UID:205eefc40432237aeb23cb2aef830d64
+X-ID:22800_900007877
+DTSTAMP:20260401T094820Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen.\n\nAuch ein erstes Eingewöhnen an die Krippe/ Kita wird hier automatisch geübt.\n\nBegleitet wird die Gruppe von der Erzieherin und Elternbegleiterin Johanna Hennerici. Sie sammelt bei jedem Treffen eine Aufwandsbeteiligung von 3,- Euro pro Kind ein.\n\nBitte melden Sie sich bei anfallenden Fragen oder Interesse verbindlich im Familienzentrum an!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260401T094623Z
+LAST-MODIFIED:20260401T094820Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Mittwoch im Monat treffen sich, im Kindergarten Falkennest, Falkenstraße 9L in Barsbüttel "Die kleinen Spatzen"!\n\nIn der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen von 0-2 Jahren die Möglichkeit, spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261028T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die Mini-Piraten in Bewegung"
+PRIORITY:0
+DTEND:20261028T150000Z
+X-SERIENCONTAINER:900007897
+LOCATION:Kindertagesstätte Piratenschiff, Am Sportplatz 18, 22885 Barsbüttel-Willinghusen
+X-LOCATION-ID:900000007
+X-LOCATION-OWNER:22800
+UID:ab6d1b89f503322b3bb9d2178dd27e3c
+X-ID:22800_900007907
+DTSTAMP:20260901T072834Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Für Kinder im Alter von 0-4 Jahren in Begleitung eines Erwachsenen.\n\nAufwandsbeteiligung: 3,- Euro pro Familie werden von der Kursleitung eingesammelt.\n\nAnmeldung im Familienzentrum\n\nE-Mail: familienzentrumfasiba@t-online.de\n\nTelefon: 0152 34365176
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:10.208733368;53.561771084
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260901T072834Z
+LAST-MODIFIED:20260901T072834Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Willinghusen
+X-ORT-ID:22804
+X-KURZBESCHREIBUNG:Eltern–Kind–Gruppe „Die Mini–Piraten in Bewegung“ in der Kindertagesstätte „Piratenschiff“ in Willinghusen.\n\nMittwochs in der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen die Möglichkeit spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung. Kurze gemeinsame Bewegungseinheiten runden den Nachmittag ab.  Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen. Die erfahrene Mütterpflegerin Marina Friedrich steht hier begleitend zur Seite.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261029T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261029T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:488898b9d3d305c47a32f4558c88ce00
+X-ID:22800_900007693
+DTSTAMP:20251119T081511Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081511Z
+LAST-MODIFIED:20251119T081511Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261029T150000Z
+SUMMARY:NADEL & FADEN Handarbeiten in Gemeinschaft
+PRIORITY:0
+DTEND:20261029T173000Z
+X-SERIENCONTAINER:900006396
+LOCATION:Waldenburger Weg 2, DRK Ortsverein Barsbüttel, ,\n22885 Barsbüttel
+UID:90b113e3af37921594ad1bace0878801
+X-ID:22800_900007026
+DTSTAMP:20250108T102717Z
+CATEGORIES:Frauenveranstaltungen,Veranstaltungen aus Vereinen und Gruppen,Bildung / Kurse / Seminare
+X-CATEGORIES:619,601,656
+DESCRIPTION:NADEL & FADEN Handarbeiten in Gemeinschaft \nImmer am Donnerstag in der geraden Kalenderwoche um 16 Uhr trifft sich der Handarbeitskreis „Nadel & Faden“ in den Räumen des DRK Ortsverbandes Barsbüttel Waldenburger Weg 2. Der Seniorenbeirat lädt Teilnehmerinnen jeglichen Alters ein, die gerne in Gemeinschaft handarbeiten und sich austauschen möchten. Die Räumlichkeiten sind gut zu erreichen, der Bus Linie 263 hält direkt an der Haltestelle Rathaus. Es handelt sich nicht um einen Handarbeitskurs mit Anleitung, jeder handarbeitet das, was er möchte und erhält bei Bedarf Unterstützung von den anderen Gruppenteilnehmerinnen.\nAn- und Abmeldungen sind nicht erforderlich, an Fest- und Feiertagen findet kein Treffen statt. Bei Fragen gerne anrufen 040 670 16 70 oder 670 07 92
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 6700792
+CREATED:20250108T102717Z
+LAST-MODIFIED:20250108T102717Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Offenes Treffen um in Gemeinschaft zu handarbeiten
+X-KURZ-DETAIL:0
+X-ORGANIZER:Seniorenbeirat der Gemeinde Barsbüttel\nStiefenhoferplatz 1
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261029T170000Z
+SUMMARY:Sitzung der Einwohnerversammlung
+PRIORITY:6
+DTEND:20261029T210000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:291ccd540d84d5b2eedac121fa190f4a
+X-ID:22800_900007222
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+DESCRIPTION:Zur Tagesordnung
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-114\nE-Mail: jessica.meyer-bruene@barsbuettel.landsh.de
+CREATED:20251016T024705Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-KURZBESCHREIBUNG:Zur Tagesordnung
+X-KURZ-DETAIL:1
+X-ORGANIZER:Einwohnerversammlung der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261030T113000Z
+SUMMARY:Cafe offline - eine generationsübergreifende Mitmachveranstaltung
+PRIORITY:0
+DTEND:20261030T133000Z
+X-SERIENCONTAINER:900007900
+LOCATION:Jugendzentrum AKKU, Am AKKU 1, 22885 Barsbüttel
+X-LOCATION-ID:900000192
+X-LOCATION-OWNER:22800
+UID:6980700382e11bf65049fc614c202f6b
+X-ID:22800_900007902
+DTSTAMP:20260901T072819Z
+CATEGORIES:Kunst / Kunstausstellungen,Tipps für Kinder und Jugendliche,Beratungsangebote
+X-CATEGORIES:602,618,898
+DESCRIPTION:Besucherinnen und Besucher werden nicht nur als Publikum, sondern als\naktive Mitgestaltende angesprochen. Ein besonderer Fokus liegt auf der\ngenerationsübergreifenden Ansprache: Kinder, Jugendliche, Erwachsene und\nältere Menschen werden durch unterschiedliche Zugänge eingeladen, ihre\nPerspektiven einzubringen und voneinander zu lernen. So entstehen Räume\nfür Dialog, gegenseitiges Verständnis und gemeinsames Gestalten.\n\nDie Schaffung eines „dritten Ortes“ wird gezielt durch demokratische\nEntscheidungsprozesse unterstützt: Inhalte, Formate und\nWeiterentwicklungen des Projekts werden gemeinsam mit den Teilnehmenden,\nentwickelt.\nDurch offene Abstimmungen, Feedbackformate und co-kreative\nPlanungsprozesse wird Mitbestimmung konkret erfahrbar und nachhaltig\nverankert.\n+++ Seid neugierig und kommt einfach vorbei! +++\nS a l o n R e s o n a n z Familienzentrum FaSiBa\nKulturlandschaften aus Rümpel & www.familienzentrum-fasiba.de\nsalonresonanz@posteo.de familienzentrumfasiba@t-online.de
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260901T072819Z
+LAST-MODIFIED:20260901T072819Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Am 18.09.2026 von 12.30 -14.30 Uhr, links vom Jugendzentrum Akku in Barsbüttel \nWir möchten einen generationsübergreifenden Dialog fördern, demokratische\nKompetenzen wie beispielsweise Selbstwirksamkeit im Alltag erfahrbar \nmachen und in der Nähe vom Markt langfristig und dauerhaft einen „dritten Ort“                                                                      etablieren – also einen offenen, gemeinschaftlich gestalteten Raum\njenseits von Zuhause und Arbeit.\n\nIm Zentrum stehen offene Mitmach-Aktionen,\nkünstlerische Interventionen, mobile Erzählstationen, Musik- und\nTanzimpulse sowie interaktive Gesprächsangebote. Wir greifen\nThemen des Marktes auf – etwa Ernährung, Nachhaltigkeit, Regionalität\noder Arbeit – und verbinden sie mit Fragen des gesellschaftlichen\nZusammenlebens, der Mitbestimmung und der Diversität.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261101T100000Z
+SUMMARY:BOULEN am SONNTAG
+PRIORITY:0
+X-SERIENCONTAINER:900007030
+LOCATION:Familienspielplatz Buchenstraße
+X-LOCATION-ID:900000354
+X-LOCATION-OWNER:22800
+UID:0621424a7853002ca9f529c084066349
+X-ID:22800_900007294
+DTSTAMP:20251119T075453Z
+CATEGORIES:Veranstaltungen aus Vereinen und Gruppen,Sportveranstaltungen,Seniorenveranstaltungen
+X-CATEGORIES:601,614,620
+DESCRIPTION:An der im September 2023 eröffneten Boule-Bahn auf dem Familienspielplatz in der Buchenstraße treffen sich regelmäßig am Sonntag die Freunde des Kugelsportes Boule. Die Termine sind immer gut besucht und weil eine Bahn für die Anzahl Spieler nicht reichte, wurde kurzerhand auch die 2. Boule-Bahn im November 2024 fertiggestellt. Der harte Kern hat sich vorgenommen: „Es wird durchgespielt“ und trifft sich weiterhin regelmäßig bei trockenem Wetter sonntags um 11 Uhr. Wer nur zuschauen möchte oder das Spiel ausprobieren möchte, ist herzlich willkommen. Wer lieber in der Woche spielen möchte, kann auch am Dienstag um 12 Uhr oder am nachmittags (Sommer- oder Winterzeit beachten) spielen. Sollte ein Spieltag auf einen Fest- oder Feiertag fallen, bitte auf der Website https://boule-barsbuettel.de nachsehen. Weitere Informationen sind auch unter info@boule-barsbuettel.de oder Tel. 040 506 99 145 zu bekommen. Spieler, die gerne allein auf der Bahn üben möchten, können mit eigenen Kugeln jederzeit die Bahnen benutzen.\nDer Wunsch des Seniorenbeirates einen Treffpunkt für alle Altersgruppen mit Bewegung an frischer Luft, ohne Mitgliedsbeitrag, Sportkleidung und Vereinszugehörigkeit in netter Gesellschaft zu schaffen wurde voll erfüllt. Wir freuen uns auf neue Spieler.
+CLASS:PUBLIC
+URL;VALUE=URI:https://boule-barsbuettel.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 50699145\nHomepage: https://boule-barsbuettel.de\nE-Mail: info@boule-barsbuettel.de
+CREATED:20251119T075453Z
+LAST-MODIFIED:20251119T075453Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Boulen in netter Gesellschaft
+X-KURZ-DETAIL:0
+X-ORGANIZER:Gemeinde Barsbüttel mit dem Seniorenbeirat\nStiefenhoferplatz 1  22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261103T080000Z
+SUMMARY:Gedichte für Wichte in Barsbüttel am Vormittag (außerhalb der Schulferien SH)
+PRIORITY:0
+DTEND:20261103T084500Z
+X-SERIENCONTAINER:900006439
+LOCATION:Ev.-luth. Kirchengemeinderaum, Stiefenhofer Platz 3,\n22885 Barsbüttel
+UID:3374d325cffd7185721b921c1c525284
+X-ID:22800_900007593
+DTSTAMP:20251119T081405Z
+CATEGORIES:Beratungsangebote,Kinderveranstaltungen
+X-CATEGORIES:898,901
+DESCRIPTION:Zu Hause singen, Fingerspiele spielen und Bilderbücher gucken macht Spaß – aber in der Gruppe, gemeinsam mit anderen Kindern und ihren Eltern, ist es noch netter. Deshalb bietet Buchstart in Kooperation mit dem Familienzentrum FaSiBa die wöchentlichen Gedichte-für-Wichte-Gruppen seit mehreren Jahren erfolgreich in Barsbüttel an. \n\nBei Fragen bitte: 0176/21176118 oder familienzentrumfasiba@t-online.de\n\nEin Angebot des Familienzentrum FaSiBa & Buchstart in den Räumlichkeiten der Ev.-luth. Kirchengemeinde, Stiefenhoferplatz 3
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081405Z
+LAST-MODIFIED:20251119T081405Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Dienstag  von 9.00 Uhr bis 9.45 Uhr (außerhalb der Schulferien in Schleswig-Holstein)\n\n  +++ kostenlos+++\n\nDie tollste Stunde der Woche für alle kleinen Leute von 0 bis 3 Jahren, die Spaß an Sprache, Reimen und ersten Liedern habe
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261103T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261103T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:98977af12f0a71a6d24728862de06689
+X-ID:22800_900007694
+DTSTAMP:20251119T081511Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081511Z
+LAST-MODIFIED:20251119T081511Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261103T143000Z
+SUMMARY:Gedichte für Wichte in Barsbüttel am Nachmittag (außerhalb der Schulferien in S-H)
+PRIORITY:0
+DTEND:20261103T160000Z
+X-SERIENCONTAINER:900006440
+LOCATION:Ev.-luth. Kirchengemeinderaum, Stiefenhofer Platz 3,\n22885 Barsbüttel
+UID:6936118f5cf38fceea0a40a2a1d73b35
+X-ID:22800_900007755
+DTSTAMP:20251119T081553Z
+CATEGORIES:Beratungsangebote,Kinderveranstaltungen
+X-CATEGORIES:898,901
+DESCRIPTION:.Zu Hause singen, Fingerspiele spielen und Bilderbücher gucken macht Spaß – aber in der Gruppe, gemeinsam mit anderen Kindern und ihren Eltern, ist es noch netter. Deshalb bietet Buchstart in Kooperation mit dem Familienzentrum FaSiBa die wöchentlichen Gedichte-für-Wichte-Gruppen seit mehreren Jahren erfolgreich in Barsbüttel an. \n\nBei Fragen bitte: 0176/21176118 oder familienzentrumfasiba@t-online.de\n\nEin Angebot des Familienzentrum FaSiBa & Buchstart in den Räumlichkeiten der Ev.-luth. Kirchengemeinde, Stiefenhoferplatz 3
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081553Z
+LAST-MODIFIED:20251119T081553Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Dienstag von 15.30 Uhr bis 17.00 Uhr   (außerhalb der Schulferien in Schleswig-Holstein) \n\n  +++ kostenlos+++\n\nDie tollste Stunde der Woche für alle kleinen Leute von 0 bis 3 Jahren, die Spaß an Sprache, Reimen und ersten Liedern haben.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261103T180000Z
+SUMMARY:Sitzung des Finanzausschusses
+PRIORITY:6
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:06ed0c2de2f26cda87a7e801379960f1
+X-ID:22800_900007227
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+DESCRIPTION:Zur Tagesordnung
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-201\nE-Mail: juergen.erdmann@barsbuettel.landsh.de
+CREATED:20251018T024839Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-KURZBESCHREIBUNG:Zur Tagesordnung
+X-KURZ-DETAIL:1
+X-ORGANIZER:Finanzausschuss der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261104T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die kleinen Spatzen"
+PRIORITY:0
+DTEND:20261104T150000Z
+X-SERIENCONTAINER:900007764
+LOCATION:Kindergarten Falkennest, Falkenstraße 9L,\n22885 Barsbüttel
+UID:1f0bf25e83e86aa00a5cb1d0f1cf5d51
+X-ID:22800_900007878
+DTSTAMP:20260401T094820Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen.\n\nAuch ein erstes Eingewöhnen an die Krippe/ Kita wird hier automatisch geübt.\n\nBegleitet wird die Gruppe von der Erzieherin und Elternbegleiterin Johanna Hennerici. Sie sammelt bei jedem Treffen eine Aufwandsbeteiligung von 3,- Euro pro Kind ein.\n\nBitte melden Sie sich bei anfallenden Fragen oder Interesse verbindlich im Familienzentrum an!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260401T094623Z
+LAST-MODIFIED:20260401T094820Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Mittwoch im Monat treffen sich, im Kindergarten Falkennest, Falkenstraße 9L in Barsbüttel "Die kleinen Spatzen"!\n\nIn der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen von 0-2 Jahren die Möglichkeit, spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261104T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die Mini-Piraten in Bewegung"
+PRIORITY:0
+DTEND:20261104T150000Z
+X-SERIENCONTAINER:900007897
+LOCATION:Kindertagesstätte Piratenschiff, Am Sportplatz 18, 22885 Barsbüttel-Willinghusen
+X-LOCATION-ID:900000007
+X-LOCATION-OWNER:22800
+UID:1db47b3e9750072f3503b159075ac943
+X-ID:22800_900007908
+DTSTAMP:20260901T072834Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Für Kinder im Alter von 0-4 Jahren in Begleitung eines Erwachsenen.\n\nAufwandsbeteiligung: 3,- Euro pro Familie werden von der Kursleitung eingesammelt.\n\nAnmeldung im Familienzentrum\n\nE-Mail: familienzentrumfasiba@t-online.de\n\nTelefon: 0152 34365176
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:10.208733368;53.561771084
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260901T072834Z
+LAST-MODIFIED:20260901T072834Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Willinghusen
+X-ORT-ID:22804
+X-KURZBESCHREIBUNG:Eltern–Kind–Gruppe „Die Mini–Piraten in Bewegung“ in der Kindertagesstätte „Piratenschiff“ in Willinghusen.\n\nMittwochs in der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen die Möglichkeit spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung. Kurze gemeinsame Bewegungseinheiten runden den Nachmittag ab.  Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen. Die erfahrene Mütterpflegerin Marina Friedrich steht hier begleitend zur Seite.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261104T170000Z
+SUMMARY:Patchwork-Treff
+PRIORITY:0
+DTEND:20261104T200000Z
+X-SERIENCONTAINER:900006362
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000125
+X-LOCATION-OWNER:22800
+UID:fb2a796d1ee85f42e874e16ce0fb3962
+X-ID:22800_900006387
+DTSTAMP:20241119T071944Z
+CATEGORIES:Veranstaltungen aus Vereinen und Gruppen
+X-CATEGORIES:601
+DESCRIPTION:Jeden ersten Mittwoch im Monat trifft sich die Gruppe unter der Leitung von Annelie Pagenkopp, Tel.: 040/6700647\nNeue Teilnehmer:innen sind herzlich willkommen.
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:10.163386412;53.573075700
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 6700647
+CREATED:20241119T071944Z
+LAST-MODIFIED:20241119T071944Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-KURZBESCHREIBUNG:Patchwork-Treff im Bürgerhaus
+X-KURZ-DETAIL:0
+X-ORGANIZER:Annelie Pagenkopp in Kooperation mit der vhs Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261105T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261105T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:a309a6831aa48742635168de4cbc50ff
+X-ID:22800_900007695
+DTSTAMP:20251119T081511Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081511Z
+LAST-MODIFIED:20251119T081511Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261105T180000Z
+SUMMARY:Sitzung des Planungsausschusses
+PRIORITY:6
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:e2b34ad01b39b5c345f45d0ac7a47648
+X-ID:22800_900007197
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+DESCRIPTION:Zur Tagesordnung
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-412\nE-Mail: maike.eichmann@barsbuettel.landsh.de
+CREATED:20251008T024347Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-KURZBESCHREIBUNG:Zur Tagesordnung
+X-KURZ-DETAIL:1
+X-ORGANIZER:Planungsausschuss der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261107T160000Z
+SUMMARY:Feuerfest
+PRIORITY:0
+DTEND:20261107T200000Z
+LOCATION:Jugendzentrum AKKU, Am AKKU 1,\n22885 Barsbüttel
+UID:bd6626cec9160f7d11c0e05722d3317e
+X-ID:22800_900007930
+DTSTAMP:20261020T061441Z
+CATEGORIES:Tipps für Kinder und Jugendliche,Musik / Konzerte / Kabarett,Stadtfeste / Jahrmärkte
+X-CATEGORIES:618,611,615
+DESCRIPTION:• Feuershows und stimmungsvoller Feuerschein von Feuerkörben und Schwedenfackeln\n• Live-Musik und ein abwechslungsreiches Musikprogramm\n• Kulinarische Angebote wie Stockbrot, Grillwürste, Crêpes, Waffeln und (Kinder-)Punsch
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.akku-babue.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0151 17707349\nHomepage: http://www.akku-babue.de\nE-Mail: m.lenzmeier@akku-babue.de
+CREATED:20261009T172844Z
+LAST-MODIFIED:20261020T061441Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Feuer, Flamme, Schall+Rauch - Das Highlight zu Beginn der dunklen Jahreszeit
+X-KURZ-DETAIL:0
+X-ORGANIZER:Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261108T100000Z
+SUMMARY:BOULEN am SONNTAG
+PRIORITY:0
+X-SERIENCONTAINER:900007030
+LOCATION:Familienspielplatz Buchenstraße
+X-LOCATION-ID:900000354
+X-LOCATION-OWNER:22800
+UID:7308f491fccbae4632b4cf5b5a88dc99
+X-ID:22800_900007295
+DTSTAMP:20251119T075453Z
+CATEGORIES:Veranstaltungen aus Vereinen und Gruppen,Sportveranstaltungen,Seniorenveranstaltungen
+X-CATEGORIES:601,614,620
+DESCRIPTION:An der im September 2023 eröffneten Boule-Bahn auf dem Familienspielplatz in der Buchenstraße treffen sich regelmäßig am Sonntag die Freunde des Kugelsportes Boule. Die Termine sind immer gut besucht und weil eine Bahn für die Anzahl Spieler nicht reichte, wurde kurzerhand auch die 2. Boule-Bahn im November 2024 fertiggestellt. Der harte Kern hat sich vorgenommen: „Es wird durchgespielt“ und trifft sich weiterhin regelmäßig bei trockenem Wetter sonntags um 11 Uhr. Wer nur zuschauen möchte oder das Spiel ausprobieren möchte, ist herzlich willkommen. Wer lieber in der Woche spielen möchte, kann auch am Dienstag um 12 Uhr oder am nachmittags (Sommer- oder Winterzeit beachten) spielen. Sollte ein Spieltag auf einen Fest- oder Feiertag fallen, bitte auf der Website https://boule-barsbuettel.de nachsehen. Weitere Informationen sind auch unter info@boule-barsbuettel.de oder Tel. 040 506 99 145 zu bekommen. Spieler, die gerne allein auf der Bahn üben möchten, können mit eigenen Kugeln jederzeit die Bahnen benutzen.\nDer Wunsch des Seniorenbeirates einen Treffpunkt für alle Altersgruppen mit Bewegung an frischer Luft, ohne Mitgliedsbeitrag, Sportkleidung und Vereinszugehörigkeit in netter Gesellschaft zu schaffen wurde voll erfüllt. Wir freuen uns auf neue Spieler.
+CLASS:PUBLIC
+URL;VALUE=URI:https://boule-barsbuettel.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 50699145\nHomepage: https://boule-barsbuettel.de\nE-Mail: info@boule-barsbuettel.de
+CREATED:20251119T075453Z
+LAST-MODIFIED:20251119T075453Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Boulen in netter Gesellschaft
+X-KURZ-DETAIL:0
+X-ORGANIZER:Gemeinde Barsbüttel mit dem Seniorenbeirat\nStiefenhoferplatz 1  22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261110T080000Z
+SUMMARY:Gedichte für Wichte in Barsbüttel am Vormittag (außerhalb der Schulferien SH)
+PRIORITY:0
+DTEND:20261110T084500Z
+X-SERIENCONTAINER:900006439
+LOCATION:Ev.-luth. Kirchengemeinderaum, Stiefenhofer Platz 3,\n22885 Barsbüttel
+UID:142008a4b363e1f7ac57a94f59da3b44
+X-ID:22800_900007594
+DTSTAMP:20251119T081405Z
+CATEGORIES:Beratungsangebote,Kinderveranstaltungen
+X-CATEGORIES:898,901
+DESCRIPTION:Zu Hause singen, Fingerspiele spielen und Bilderbücher gucken macht Spaß – aber in der Gruppe, gemeinsam mit anderen Kindern und ihren Eltern, ist es noch netter. Deshalb bietet Buchstart in Kooperation mit dem Familienzentrum FaSiBa die wöchentlichen Gedichte-für-Wichte-Gruppen seit mehreren Jahren erfolgreich in Barsbüttel an. \n\nBei Fragen bitte: 0176/21176118 oder familienzentrumfasiba@t-online.de\n\nEin Angebot des Familienzentrum FaSiBa & Buchstart in den Räumlichkeiten der Ev.-luth. Kirchengemeinde, Stiefenhoferplatz 3
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081405Z
+LAST-MODIFIED:20251119T081405Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Dienstag  von 9.00 Uhr bis 9.45 Uhr (außerhalb der Schulferien in Schleswig-Holstein)\n\n  +++ kostenlos+++\n\nDie tollste Stunde der Woche für alle kleinen Leute von 0 bis 3 Jahren, die Spaß an Sprache, Reimen und ersten Liedern habe
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261110T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261110T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:96530e036fdfaacd1e0e2540cf43acb0
+X-ID:22800_900007696
+DTSTAMP:20251119T081511Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081511Z
+LAST-MODIFIED:20251119T081511Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261110T143000Z
+SUMMARY:Gedichte für Wichte in Barsbüttel am Nachmittag (außerhalb der Schulferien in S-H)
+PRIORITY:0
+DTEND:20261110T160000Z
+X-SERIENCONTAINER:900006440
+LOCATION:Ev.-luth. Kirchengemeinderaum, Stiefenhofer Platz 3,\n22885 Barsbüttel
+UID:f240444641dc32914d873e8dd4bd7946
+X-ID:22800_900007756
+DTSTAMP:20251119T081553Z
+CATEGORIES:Beratungsangebote,Kinderveranstaltungen
+X-CATEGORIES:898,901
+DESCRIPTION:.Zu Hause singen, Fingerspiele spielen und Bilderbücher gucken macht Spaß – aber in der Gruppe, gemeinsam mit anderen Kindern und ihren Eltern, ist es noch netter. Deshalb bietet Buchstart in Kooperation mit dem Familienzentrum FaSiBa die wöchentlichen Gedichte-für-Wichte-Gruppen seit mehreren Jahren erfolgreich in Barsbüttel an. \n\nBei Fragen bitte: 0176/21176118 oder familienzentrumfasiba@t-online.de\n\nEin Angebot des Familienzentrum FaSiBa & Buchstart in den Räumlichkeiten der Ev.-luth. Kirchengemeinde, Stiefenhoferplatz 3
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081553Z
+LAST-MODIFIED:20251119T081553Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Dienstag von 15.30 Uhr bis 17.00 Uhr   (außerhalb der Schulferien in Schleswig-Holstein) \n\n  +++ kostenlos+++\n\nDie tollste Stunde der Woche für alle kleinen Leute von 0 bis 3 Jahren, die Spaß an Sprache, Reimen und ersten Liedern haben.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261110T150000Z
+SUMMARY:Sitzung des Seniorenbeirates
+PRIORITY:6
+DTEND:20261110T170000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:3d24ad4be32947e052f53f65a15c1fc1
+X-ID:22800_900007228
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-323\nE-Mail: jenny.diehn@barsbuettel.landsh.de
+CREATED:20251020T024515Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:Seniorenbeirat der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261111T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die kleinen Spatzen"
+PRIORITY:0
+DTEND:20261111T150000Z
+X-SERIENCONTAINER:900007764
+LOCATION:Kindergarten Falkennest, Falkenstraße 9L,\n22885 Barsbüttel
+UID:2e956c2492395783ad1fd996c7fc1c38
+X-ID:22800_900007879
+DTSTAMP:20260401T094820Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen.\n\nAuch ein erstes Eingewöhnen an die Krippe/ Kita wird hier automatisch geübt.\n\nBegleitet wird die Gruppe von der Erzieherin und Elternbegleiterin Johanna Hennerici. Sie sammelt bei jedem Treffen eine Aufwandsbeteiligung von 3,- Euro pro Kind ein.\n\nBitte melden Sie sich bei anfallenden Fragen oder Interesse verbindlich im Familienzentrum an!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260401T094623Z
+LAST-MODIFIED:20260401T094820Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Mittwoch im Monat treffen sich, im Kindergarten Falkennest, Falkenstraße 9L in Barsbüttel "Die kleinen Spatzen"!\n\nIn der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen von 0-2 Jahren die Möglichkeit, spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261111T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die Mini-Piraten in Bewegung"
+PRIORITY:0
+DTEND:20261111T150000Z
+X-SERIENCONTAINER:900007897
+LOCATION:Kindertagesstätte Piratenschiff, Am Sportplatz 18, 22885 Barsbüttel-Willinghusen
+X-LOCATION-ID:900000007
+X-LOCATION-OWNER:22800
+UID:9d978bf506ca70eb81fcdd3743af4a88
+X-ID:22800_900007909
+DTSTAMP:20260901T072834Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Für Kinder im Alter von 0-4 Jahren in Begleitung eines Erwachsenen.\n\nAufwandsbeteiligung: 3,- Euro pro Familie werden von der Kursleitung eingesammelt.\n\nAnmeldung im Familienzentrum\n\nE-Mail: familienzentrumfasiba@t-online.de\n\nTelefon: 0152 34365176
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:10.208733368;53.561771084
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260901T072834Z
+LAST-MODIFIED:20260901T072834Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Willinghusen
+X-ORT-ID:22804
+X-KURZBESCHREIBUNG:Eltern–Kind–Gruppe „Die Mini–Piraten in Bewegung“ in der Kindertagesstätte „Piratenschiff“ in Willinghusen.\n\nMittwochs in der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen die Möglichkeit spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung. Kurze gemeinsame Bewegungseinheiten runden den Nachmittag ab.  Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen. Die erfahrene Mütterpflegerin Marina Friedrich steht hier begleitend zur Seite.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261112T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261112T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:410f857cdea3cd80d11b9a605d4c19b8
+X-ID:22800_900007697
+DTSTAMP:20251119T081511Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081511Z
+LAST-MODIFIED:20251119T081511Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261112T150000Z
+SUMMARY:NADEL & FADEN Handarbeiten in Gemeinschaft
+PRIORITY:0
+DTEND:20261112T173000Z
+X-SERIENCONTAINER:900006396
+LOCATION:Waldenburger Weg 2, DRK Ortsverein Barsbüttel, ,\n22885 Barsbüttel
+UID:a00b2b981e5611610d7e985f2889ed7b
+X-ID:22800_900007027
+DTSTAMP:20250108T102717Z
+CATEGORIES:Frauenveranstaltungen,Veranstaltungen aus Vereinen und Gruppen,Bildung / Kurse / Seminare
+X-CATEGORIES:619,601,656
+DESCRIPTION:NADEL & FADEN Handarbeiten in Gemeinschaft \nImmer am Donnerstag in der geraden Kalenderwoche um 16 Uhr trifft sich der Handarbeitskreis „Nadel & Faden“ in den Räumen des DRK Ortsverbandes Barsbüttel Waldenburger Weg 2. Der Seniorenbeirat lädt Teilnehmerinnen jeglichen Alters ein, die gerne in Gemeinschaft handarbeiten und sich austauschen möchten. Die Räumlichkeiten sind gut zu erreichen, der Bus Linie 263 hält direkt an der Haltestelle Rathaus. Es handelt sich nicht um einen Handarbeitskurs mit Anleitung, jeder handarbeitet das, was er möchte und erhält bei Bedarf Unterstützung von den anderen Gruppenteilnehmerinnen.\nAn- und Abmeldungen sind nicht erforderlich, an Fest- und Feiertagen findet kein Treffen statt. Bei Fragen gerne anrufen 040 670 16 70 oder 670 07 92
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 6700792
+CREATED:20250108T102717Z
+LAST-MODIFIED:20250108T102717Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Offenes Treffen um in Gemeinschaft zu handarbeiten
+X-KURZ-DETAIL:0
+X-ORGANIZER:Seniorenbeirat der Gemeinde Barsbüttel\nStiefenhoferplatz 1
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261112T180000Z
+SUMMARY:Sitzung des Ortsbeirats Willinghusen
+PRIORITY:6
+LOCATION:Lohe 5, 22885 Barsbüttel, Rhabarberkate, Lohe 5
+UID:1e9dd3c0123ac2b7f62ef55c9eaf90e2
+X-ID:22800_900007218
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-114\nE-Mail: jessica.meyer-bruene@barsbuettel.landsh.de
+CREATED:20251014T024654Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Willinghusen
+X-ORT-ID:22804
+X-ORGANIZER:Ortsbeirat Willinghusen der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261114T090000Z
+SUMMARY:Nordlese - Buchmesse Barsbüttel -
+PRIORITY:0
+DTEND:20261114T170000Z
+LOCATION:Erich Kästner Gemeinschaftsschule (EKG), Soltausredder 28, 22885 Barsbüttel
+X-LOCATION-ID:900000084
+X-LOCATION-OWNER:22800
+UID:06ec038174dbd71c45000c51688a201c
+X-ID:22800_900007917
+DTSTAMP:20261003T051925Z
+CATEGORIES:Bildung / Kurse / Seminare,Ausstellungen,Vorträge / Lesungen / Diskussionen
+X-CATEGORIES:656,605,621
+DESCRIPTION:Bücher, Begegnungen und ganz viel Lesefreude: Die nordlese.buchmesse kommt nach Barsbüttel!\nAm Samstag, 14. November 2026, wird die Sporthalle der Erich Kästner Gemeinschaftsschule in Barsbüttel zum Treffpunkt für alle, die Bücher lieben und gerne in neuen Geschichten stöbern.\nVon 10 bis 18 Uhr lädt die nordlese.buchmesse dazu ein, in die Welt der Bücher einzutauchen, mit Ausstellenden ins Gespräch zu kommen, Neues zu entdecken und vielleicht schon das eine oder andere Weihnachtsgeschenk zu finden. Unterschiedliche Anbieterinnen und Anbieter präsentieren ihre Bücher und Angebote und machen die Messe zu einem bunten Erlebnis für kleine und große Leseratten.\nFür das leibliche Wohl ist ebenfalls gesorgt: Im BuchCafé des Schulvereins warten Kaffee, Getränke und selbst gebackene Leckereien, ergänzt durch ein herzhaftes Angebot unseres regionalen Caterers „YouVa“.\nDer Eintritt beträgt 5 EUR. Aufgrund der begrenzten Kapazität der Sporthalle kann der Zutritt nur im Rahmen der jeweils zulässigen Besucherzahl erfolgen. Wir bitten daher um Verständnis, dass es bei größerem Andrang gegebenenfalls zu kurzen Wartezeiten kommen kann.\nWir freuen uns auf einen fröhlichen Büchertag, viele interessante Begegnungen und natürlich jede Menge Lesefreude!\nnordlese.buchmesse – sehen, stöbern, entdecken!
+CLASS:PUBLIC
+URL;VALUE=URI:https://www.schulverein-kbs@mail.de
+STATUS:CONFIRMED
+GEO:10.163557092;53.574553239
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 570187340\nHomepage: https://www.schulverein-kbs@mail.de\nE-Mail: info@vhs-barsbuettel.de
+CREATED:20260917T074244Z
+LAST-MODIFIED:20261003T051925Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Bücher, Begegnungen und ganz viel Lesefreude: Die nordlese.buchmesse kommt nach Barsbüttel!
+X-KURZ-DETAIL:0
+X-ORGANIZER:Schulverein Kirsten Boie Schule / Volkshochschule Barsbüttel\nSoltausredder 20
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261115T100000Z
+SUMMARY:BOULEN am SONNTAG
+PRIORITY:0
+X-SERIENCONTAINER:900007030
+LOCATION:Familienspielplatz Buchenstraße
+X-LOCATION-ID:900000354
+X-LOCATION-OWNER:22800
+UID:22edffea6212ef8f7345c32ca28009db
+X-ID:22800_900007296
+DTSTAMP:20251119T075454Z
+CATEGORIES:Veranstaltungen aus Vereinen und Gruppen,Sportveranstaltungen,Seniorenveranstaltungen
+X-CATEGORIES:601,614,620
+DESCRIPTION:An der im September 2023 eröffneten Boule-Bahn auf dem Familienspielplatz in der Buchenstraße treffen sich regelmäßig am Sonntag die Freunde des Kugelsportes Boule. Die Termine sind immer gut besucht und weil eine Bahn für die Anzahl Spieler nicht reichte, wurde kurzerhand auch die 2. Boule-Bahn im November 2024 fertiggestellt. Der harte Kern hat sich vorgenommen: „Es wird durchgespielt“ und trifft sich weiterhin regelmäßig bei trockenem Wetter sonntags um 11 Uhr. Wer nur zuschauen möchte oder das Spiel ausprobieren möchte, ist herzlich willkommen. Wer lieber in der Woche spielen möchte, kann auch am Dienstag um 12 Uhr oder am nachmittags (Sommer- oder Winterzeit beachten) spielen. Sollte ein Spieltag auf einen Fest- oder Feiertag fallen, bitte auf der Website https://boule-barsbuettel.de nachsehen. Weitere Informationen sind auch unter info@boule-barsbuettel.de oder Tel. 040 506 99 145 zu bekommen. Spieler, die gerne allein auf der Bahn üben möchten, können mit eigenen Kugeln jederzeit die Bahnen benutzen.\nDer Wunsch des Seniorenbeirates einen Treffpunkt für alle Altersgruppen mit Bewegung an frischer Luft, ohne Mitgliedsbeitrag, Sportkleidung und Vereinszugehörigkeit in netter Gesellschaft zu schaffen wurde voll erfüllt. Wir freuen uns auf neue Spieler.
+CLASS:PUBLIC
+URL;VALUE=URI:https://boule-barsbuettel.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 50699145\nHomepage: https://boule-barsbuettel.de\nE-Mail: info@boule-barsbuettel.de
+CREATED:20251119T075454Z
+LAST-MODIFIED:20251119T075454Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Boulen in netter Gesellschaft
+X-KURZ-DETAIL:0
+X-ORGANIZER:Gemeinde Barsbüttel mit dem Seniorenbeirat\nStiefenhoferplatz 1  22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261117T080000Z
+SUMMARY:Gedichte für Wichte in Barsbüttel am Vormittag (außerhalb der Schulferien SH)
+PRIORITY:0
+DTEND:20261117T084500Z
+X-SERIENCONTAINER:900006439
+LOCATION:Ev.-luth. Kirchengemeinderaum, Stiefenhofer Platz 3,\n22885 Barsbüttel
+UID:4146d9f6c53f9cf962b7992c0500770d
+X-ID:22800_900007595
+DTSTAMP:20251119T081405Z
+CATEGORIES:Beratungsangebote,Kinderveranstaltungen
+X-CATEGORIES:898,901
+DESCRIPTION:Zu Hause singen, Fingerspiele spielen und Bilderbücher gucken macht Spaß – aber in der Gruppe, gemeinsam mit anderen Kindern und ihren Eltern, ist es noch netter. Deshalb bietet Buchstart in Kooperation mit dem Familienzentrum FaSiBa die wöchentlichen Gedichte-für-Wichte-Gruppen seit mehreren Jahren erfolgreich in Barsbüttel an. \n\nBei Fragen bitte: 0176/21176118 oder familienzentrumfasiba@t-online.de\n\nEin Angebot des Familienzentrum FaSiBa & Buchstart in den Räumlichkeiten der Ev.-luth. Kirchengemeinde, Stiefenhoferplatz 3
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081405Z
+LAST-MODIFIED:20251119T081405Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Dienstag  von 9.00 Uhr bis 9.45 Uhr (außerhalb der Schulferien in Schleswig-Holstein)\n\n  +++ kostenlos+++\n\nDie tollste Stunde der Woche für alle kleinen Leute von 0 bis 3 Jahren, die Spaß an Sprache, Reimen und ersten Liedern habe
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261117T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261117T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:f3e6cfa505d32c6c9c18a25d4c916f47
+X-ID:22800_900007698
+DTSTAMP:20251119T081511Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081511Z
+LAST-MODIFIED:20251119T081511Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261117T133000Z
+SUMMARY:Bildung bei Kaffee und Kuchen
+PRIORITY:0
+DTEND:20261117T160000Z
+LOCATION:„Café tohus" im Bürgerhaus, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000323
+X-LOCATION-OWNER:22800
+UID:c5ce40be8acdb6d3b7a7387f7848a115
+X-ID:22800_900007891
+DTSTAMP:20260506T081617Z
+CATEGORIES:Vorträge / Lesungen / Diskussionen,Bildung / Kurse / Seminare,Veranstaltungen aus Vereinen und Gruppen
+X-CATEGORIES:621,656,601
+DESCRIPTION:Minimalinvasive Operationsverfahren haben auch in der Neurochirurgie zunehmende Bedeutung\nerlangt. Der Einsatz von Computern zur Operationsplanung und -Durchführung wird anhand von\nDias und, wenn möglich, Operationsvideos von Hirntumoroperationen demonstriert. Verbesserung\nder Zielgenauigkeit und Radikalität einer Tumoroperation werden teilweise zusätzlich unterstützt\ndurch Operationsverfahren in örtlicher Betäubung, bei denen der wache Patient dem Operateur die\nGrenzen der Radikalität aufzeigt.
+CLASS:PUBLIC
+URL;VALUE=URI:https://vhs-barsbuettel.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 570187340\nHomepage: https://vhs-barsbuettel.de\nE-Mail: info@vhs-barsbuettel.de
+CREATED:20260505T062237Z
+LAST-MODIFIED:20260506T081617Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Computergestützte Operationen\nReferent: Prof. Dr. H. Maximilian Mehdorn\nehem. Direktor der Klinik für Neurochirurgie bei Universitätsklinikum Schleswig-Holstein
+X-KURZ-DETAIL:0
+X-ORGANIZER:Volkshochschule Barsbüttel\nSoltausredder 20
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261117T143000Z
+SUMMARY:Gedichte für Wichte in Barsbüttel am Nachmittag (außerhalb der Schulferien in S-H)
+PRIORITY:0
+DTEND:20261117T160000Z
+X-SERIENCONTAINER:900006440
+LOCATION:Ev.-luth. Kirchengemeinderaum, Stiefenhofer Platz 3,\n22885 Barsbüttel
+UID:2e62dbba8a6e176b10ed2a9f8d91e4be
+X-ID:22800_900007757
+DTSTAMP:20251119T081553Z
+CATEGORIES:Beratungsangebote,Kinderveranstaltungen
+X-CATEGORIES:898,901
+DESCRIPTION:.Zu Hause singen, Fingerspiele spielen und Bilderbücher gucken macht Spaß – aber in der Gruppe, gemeinsam mit anderen Kindern und ihren Eltern, ist es noch netter. Deshalb bietet Buchstart in Kooperation mit dem Familienzentrum FaSiBa die wöchentlichen Gedichte-für-Wichte-Gruppen seit mehreren Jahren erfolgreich in Barsbüttel an. \n\nBei Fragen bitte: 0176/21176118 oder familienzentrumfasiba@t-online.de\n\nEin Angebot des Familienzentrum FaSiBa & Buchstart in den Räumlichkeiten der Ev.-luth. Kirchengemeinde, Stiefenhoferplatz 3
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081553Z
+LAST-MODIFIED:20251119T081553Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Dienstag von 15.30 Uhr bis 17.00 Uhr   (außerhalb der Schulferien in Schleswig-Holstein) \n\n  +++ kostenlos+++\n\nDie tollste Stunde der Woche für alle kleinen Leute von 0 bis 3 Jahren, die Spaß an Sprache, Reimen und ersten Liedern haben.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261117T180000Z
+SUMMARY:Sitzung des OB Stellau
+PRIORITY:6
+LOCATION:Am Spritzenhaus 2, 22885 22885 Barsbüttel, FwGerätehaus
+UID:7c31f5d271ec9c3546f138ae9a0f376b
+X-ID:22800_900007219
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-114\nE-Mail: jessica.meyer-bruene@barsbuettel.landsh.de
+CREATED:20251014T024654Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Stellau
+X-ORT-ID:22802
+X-ORGANIZER:Ortsbeirat Stellau der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261118T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die kleinen Spatzen"
+PRIORITY:0
+DTEND:20261118T150000Z
+X-SERIENCONTAINER:900007764
+LOCATION:Kindergarten Falkennest, Falkenstraße 9L,\n22885 Barsbüttel
+UID:6802c30f601a47816d563a9d0ce26ce4
+X-ID:22800_900007880
+DTSTAMP:20260401T094820Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen.\n\nAuch ein erstes Eingewöhnen an die Krippe/ Kita wird hier automatisch geübt.\n\nBegleitet wird die Gruppe von der Erzieherin und Elternbegleiterin Johanna Hennerici. Sie sammelt bei jedem Treffen eine Aufwandsbeteiligung von 3,- Euro pro Kind ein.\n\nBitte melden Sie sich bei anfallenden Fragen oder Interesse verbindlich im Familienzentrum an!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260401T094623Z
+LAST-MODIFIED:20260401T094820Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Mittwoch im Monat treffen sich, im Kindergarten Falkennest, Falkenstraße 9L in Barsbüttel "Die kleinen Spatzen"!\n\nIn der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen von 0-2 Jahren die Möglichkeit, spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261118T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die Mini-Piraten in Bewegung"
+PRIORITY:0
+DTEND:20261118T150000Z
+X-SERIENCONTAINER:900007897
+LOCATION:Kindertagesstätte Piratenschiff, Am Sportplatz 18, 22885 Barsbüttel-Willinghusen
+X-LOCATION-ID:900000007
+X-LOCATION-OWNER:22800
+UID:1d5659f0a6a3fa7fed2bfe6df221728b
+X-ID:22800_900007910
+DTSTAMP:20260901T072834Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Für Kinder im Alter von 0-4 Jahren in Begleitung eines Erwachsenen.\n\nAufwandsbeteiligung: 3,- Euro pro Familie werden von der Kursleitung eingesammelt.\n\nAnmeldung im Familienzentrum\n\nE-Mail: familienzentrumfasiba@t-online.de\n\nTelefon: 0152 34365176
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:10.208733368;53.561771084
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260901T072834Z
+LAST-MODIFIED:20260901T072834Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Willinghusen
+X-ORT-ID:22804
+X-KURZBESCHREIBUNG:Eltern–Kind–Gruppe „Die Mini–Piraten in Bewegung“ in der Kindertagesstätte „Piratenschiff“ in Willinghusen.\n\nMittwochs in der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen die Möglichkeit spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung. Kurze gemeinsame Bewegungseinheiten runden den Nachmittag ab.  Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen. Die erfahrene Mütterpflegerin Marina Friedrich steht hier begleitend zur Seite.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261119T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261119T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:e9b16dd00302691dbada6022c060f65d
+X-ID:22800_900007699
+DTSTAMP:20251119T081512Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081512Z
+LAST-MODIFIED:20251119T081512Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261119T083000Z
+SUMMARY:FRÜHSTÜCK FÜR SENIOREN
+PRIORITY:0
+X-SERIENCONTAINER:900007829
+LOCATION:Waldenburger Weg 2, DRK Ortsverein Barsbüttel, Waldenburger Weg 2, 22885 Barsbüttel
+X-LOCATION-ID:900000390
+X-LOCATION-OWNER:22800
+UID:e27c290cc1b755aadf78fb7bdca5a719
+X-ID:22800_900007838
+DTSTAMP:20260108T071000Z
+CATEGORIES:Seniorenveranstaltungen
+X-CATEGORIES:620
+DESCRIPTION:Frühstück für Senioren \nDas DRK Ortsverband Barsbüttel und der Seniorenbeirat bieten einmal im Monat in den Räumen des DRK; Waldenburger Weg 2 ein Frühstücksbuffet für Senioren an. Gäste können sich für 9 Euro am Donnerstag in der zweiten ungeraden Woche eines Monats um 9:30 Uhr auf ein Frühstück in Gemeinschaft freuen. Eine verbindliche Anmeldung dazu ist unbedingt bis eine Woche vorher erforderlich, entweder telefonisch unter Tel. (040) 670 72 - 0, persönlich im Bürgerbüro des Rathauses oder per E-Mail: zentrale@barsbuettel.landsh.de. Die Termine finden Sie in der Gemeindezeitung, im Veranstaltungskalender, auf der Gemeindewebsite oder in den Informationskästen des Seniorenbeirates und des DRK.
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.barsbuettel.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 670720-0\nHomepage: http://www.barsbuettel.de\nE-Mail: Zentrale@barsbuettel.landsh.de
+CREATED:20260108T071000Z
+LAST-MODIFIED:20260108T071000Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Gemeinsam in netter Gesellschaft frühstücken und klönen
+X-KURZ-DETAIL:0
+X-ORGANIZER:Seniorenbeirat und DRK Barsbüttel\nStiefenhoferplatz 1 \n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261119T180000Z
+SUMMARY:Sitzung des OB Stemwarde
+PRIORITY:6
+LOCATION:Kronshorster Weg 7, 22885 Barsbüttel, Dorfgemeinschaftshaus Stemwarde
+UID:b5bb24ff57b1fe223dccf7e97c5dd1aa
+X-ID:22800_900007220
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-114\nE-Mail: jessica.meyer-bruene@barsbuettel.landsh.de
+CREATED:20251015T024926Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Stemwarde
+X-ORT-ID:22803
+X-ORGANIZER:Ortsbeirat Stemwarde der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261122T100000Z
+SUMMARY:BOULEN am SONNTAG
+PRIORITY:0
+X-SERIENCONTAINER:900007030
+LOCATION:Familienspielplatz Buchenstraße
+X-LOCATION-ID:900000354
+X-LOCATION-OWNER:22800
+UID:6635ad9d2e05ec6706de7c8813e30c1e
+X-ID:22800_900007297
+DTSTAMP:20251119T075454Z
+CATEGORIES:Veranstaltungen aus Vereinen und Gruppen,Sportveranstaltungen,Seniorenveranstaltungen
+X-CATEGORIES:601,614,620
+DESCRIPTION:An der im September 2023 eröffneten Boule-Bahn auf dem Familienspielplatz in der Buchenstraße treffen sich regelmäßig am Sonntag die Freunde des Kugelsportes Boule. Die Termine sind immer gut besucht und weil eine Bahn für die Anzahl Spieler nicht reichte, wurde kurzerhand auch die 2. Boule-Bahn im November 2024 fertiggestellt. Der harte Kern hat sich vorgenommen: „Es wird durchgespielt“ und trifft sich weiterhin regelmäßig bei trockenem Wetter sonntags um 11 Uhr. Wer nur zuschauen möchte oder das Spiel ausprobieren möchte, ist herzlich willkommen. Wer lieber in der Woche spielen möchte, kann auch am Dienstag um 12 Uhr oder am nachmittags (Sommer- oder Winterzeit beachten) spielen. Sollte ein Spieltag auf einen Fest- oder Feiertag fallen, bitte auf der Website https://boule-barsbuettel.de nachsehen. Weitere Informationen sind auch unter info@boule-barsbuettel.de oder Tel. 040 506 99 145 zu bekommen. Spieler, die gerne allein auf der Bahn üben möchten, können mit eigenen Kugeln jederzeit die Bahnen benutzen.\nDer Wunsch des Seniorenbeirates einen Treffpunkt für alle Altersgruppen mit Bewegung an frischer Luft, ohne Mitgliedsbeitrag, Sportkleidung und Vereinszugehörigkeit in netter Gesellschaft zu schaffen wurde voll erfüllt. Wir freuen uns auf neue Spieler.
+CLASS:PUBLIC
+URL;VALUE=URI:https://boule-barsbuettel.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 50699145\nHomepage: https://boule-barsbuettel.de\nE-Mail: info@boule-barsbuettel.de
+CREATED:20251119T075454Z
+LAST-MODIFIED:20251119T075454Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Boulen in netter Gesellschaft
+X-KURZ-DETAIL:0
+X-ORGANIZER:Gemeinde Barsbüttel mit dem Seniorenbeirat\nStiefenhoferplatz 1  22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261123T163000Z
+SUMMARY:Sitzung des Jugendbeirates
+PRIORITY:6
+DTEND:20261123T180000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:496cbca75b88481b9915b3fff29e36d6
+X-ID:22800_900007238
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072320\nE-Mail: celina.nadarevic@barsbuettel.landsh.de
+CREATED:20251029T035536Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:Jugendbeirat der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261124T080000Z
+SUMMARY:Gedichte für Wichte in Barsbüttel am Vormittag (außerhalb der Schulferien SH)
+PRIORITY:0
+DTEND:20261124T084500Z
+X-SERIENCONTAINER:900006439
+LOCATION:Ev.-luth. Kirchengemeinderaum, Stiefenhofer Platz 3,\n22885 Barsbüttel
+UID:5e5730fa948ae3eae78a9888a7a3d38b
+X-ID:22800_900007596
+DTSTAMP:20251119T081405Z
+CATEGORIES:Beratungsangebote,Kinderveranstaltungen
+X-CATEGORIES:898,901
+DESCRIPTION:Zu Hause singen, Fingerspiele spielen und Bilderbücher gucken macht Spaß – aber in der Gruppe, gemeinsam mit anderen Kindern und ihren Eltern, ist es noch netter. Deshalb bietet Buchstart in Kooperation mit dem Familienzentrum FaSiBa die wöchentlichen Gedichte-für-Wichte-Gruppen seit mehreren Jahren erfolgreich in Barsbüttel an. \n\nBei Fragen bitte: 0176/21176118 oder familienzentrumfasiba@t-online.de\n\nEin Angebot des Familienzentrum FaSiBa & Buchstart in den Räumlichkeiten der Ev.-luth. Kirchengemeinde, Stiefenhoferplatz 3
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081405Z
+LAST-MODIFIED:20251119T081405Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Dienstag  von 9.00 Uhr bis 9.45 Uhr (außerhalb der Schulferien in Schleswig-Holstein)\n\n  +++ kostenlos+++\n\nDie tollste Stunde der Woche für alle kleinen Leute von 0 bis 3 Jahren, die Spaß an Sprache, Reimen und ersten Liedern habe
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261124T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261124T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:bdceefe1279f34fa4eaf6a2c44ea1fd4
+X-ID:22800_900007700
+DTSTAMP:20251119T081512Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081512Z
+LAST-MODIFIED:20251119T081512Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261124T143000Z
+SUMMARY:Gedichte für Wichte in Barsbüttel am Nachmittag (außerhalb der Schulferien in S-H)
+PRIORITY:0
+DTEND:20261124T160000Z
+X-SERIENCONTAINER:900006440
+LOCATION:Ev.-luth. Kirchengemeinderaum, Stiefenhofer Platz 3,\n22885 Barsbüttel
+UID:bc2de7ebcfe840ad0ab38d512f4997e1
+X-ID:22800_900007758
+DTSTAMP:20251119T081553Z
+CATEGORIES:Beratungsangebote,Kinderveranstaltungen
+X-CATEGORIES:898,901
+DESCRIPTION:.Zu Hause singen, Fingerspiele spielen und Bilderbücher gucken macht Spaß – aber in der Gruppe, gemeinsam mit anderen Kindern und ihren Eltern, ist es noch netter. Deshalb bietet Buchstart in Kooperation mit dem Familienzentrum FaSiBa die wöchentlichen Gedichte-für-Wichte-Gruppen seit mehreren Jahren erfolgreich in Barsbüttel an. \n\nBei Fragen bitte: 0176/21176118 oder familienzentrumfasiba@t-online.de\n\nEin Angebot des Familienzentrum FaSiBa & Buchstart in den Räumlichkeiten der Ev.-luth. Kirchengemeinde, Stiefenhoferplatz 3
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081553Z
+LAST-MODIFIED:20251119T081553Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Dienstag von 15.30 Uhr bis 17.00 Uhr   (außerhalb der Schulferien in Schleswig-Holstein) \n\n  +++ kostenlos+++\n\nDie tollste Stunde der Woche für alle kleinen Leute von 0 bis 3 Jahren, die Spaß an Sprache, Reimen und ersten Liedern haben.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261124T180000Z
+SUMMARY:Sitzung des SKS - Ausschusses
+PRIORITY:6
+DTEND:20261124T200000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:792c81842c2d9c75729be5d7dcefc46c
+X-ID:22800_900007229
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-321\nE-Mail: christina.degen@barsbuettel.landsh.de
+CREATED:20251020T024515Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:SKS - Ausschuss der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261125T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die kleinen Spatzen"
+PRIORITY:0
+DTEND:20261125T150000Z
+X-SERIENCONTAINER:900007764
+LOCATION:Kindergarten Falkennest, Falkenstraße 9L,\n22885 Barsbüttel
+UID:9528379970725ee721c38d572edb2c4d
+X-ID:22800_900007881
+DTSTAMP:20260401T094820Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen.\n\nAuch ein erstes Eingewöhnen an die Krippe/ Kita wird hier automatisch geübt.\n\nBegleitet wird die Gruppe von der Erzieherin und Elternbegleiterin Johanna Hennerici. Sie sammelt bei jedem Treffen eine Aufwandsbeteiligung von 3,- Euro pro Kind ein.\n\nBitte melden Sie sich bei anfallenden Fragen oder Interesse verbindlich im Familienzentrum an!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260401T094624Z
+LAST-MODIFIED:20260401T094820Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Mittwoch im Monat treffen sich, im Kindergarten Falkennest, Falkenstraße 9L in Barsbüttel "Die kleinen Spatzen"!\n\nIn der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen von 0-2 Jahren die Möglichkeit, spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261125T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die Mini-Piraten in Bewegung"
+PRIORITY:0
+DTEND:20261125T150000Z
+X-SERIENCONTAINER:900007897
+LOCATION:Kindertagesstätte Piratenschiff, Am Sportplatz 18, 22885 Barsbüttel-Willinghusen
+X-LOCATION-ID:900000007
+X-LOCATION-OWNER:22800
+UID:f355610b5471215054098b4599acf252
+X-ID:22800_900007911
+DTSTAMP:20260901T072834Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Für Kinder im Alter von 0-4 Jahren in Begleitung eines Erwachsenen.\n\nAufwandsbeteiligung: 3,- Euro pro Familie werden von der Kursleitung eingesammelt.\n\nAnmeldung im Familienzentrum\n\nE-Mail: familienzentrumfasiba@t-online.de\n\nTelefon: 0152 34365176
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:10.208733368;53.561771084
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260901T072834Z
+LAST-MODIFIED:20260901T072834Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Willinghusen
+X-ORT-ID:22804
+X-KURZBESCHREIBUNG:Eltern–Kind–Gruppe „Die Mini–Piraten in Bewegung“ in der Kindertagesstätte „Piratenschiff“ in Willinghusen.\n\nMittwochs in der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen die Möglichkeit spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung. Kurze gemeinsame Bewegungseinheiten runden den Nachmittag ab.  Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen. Die erfahrene Mütterpflegerin Marina Friedrich steht hier begleitend zur Seite.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261126T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261126T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:85c2337548816bb3be5072d6e456b1da
+X-ID:22800_900007701
+DTSTAMP:20251119T081512Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081512Z
+LAST-MODIFIED:20251119T081512Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261126T150000Z
+SUMMARY:NADEL & FADEN Handarbeiten in Gemeinschaft
+PRIORITY:0
+DTEND:20261126T173000Z
+X-SERIENCONTAINER:900006396
+LOCATION:Waldenburger Weg 2, DRK Ortsverein Barsbüttel, ,\n22885 Barsbüttel
+UID:f75719375b3494dc35920c9aaedf5546
+X-ID:22800_900007028
+DTSTAMP:20250108T102717Z
+CATEGORIES:Frauenveranstaltungen,Veranstaltungen aus Vereinen und Gruppen,Bildung / Kurse / Seminare
+X-CATEGORIES:619,601,656
+DESCRIPTION:NADEL & FADEN Handarbeiten in Gemeinschaft \nImmer am Donnerstag in der geraden Kalenderwoche um 16 Uhr trifft sich der Handarbeitskreis „Nadel & Faden“ in den Räumen des DRK Ortsverbandes Barsbüttel Waldenburger Weg 2. Der Seniorenbeirat lädt Teilnehmerinnen jeglichen Alters ein, die gerne in Gemeinschaft handarbeiten und sich austauschen möchten. Die Räumlichkeiten sind gut zu erreichen, der Bus Linie 263 hält direkt an der Haltestelle Rathaus. Es handelt sich nicht um einen Handarbeitskurs mit Anleitung, jeder handarbeitet das, was er möchte und erhält bei Bedarf Unterstützung von den anderen Gruppenteilnehmerinnen.\nAn- und Abmeldungen sind nicht erforderlich, an Fest- und Feiertagen findet kein Treffen statt. Bei Fragen gerne anrufen 040 670 16 70 oder 670 07 92
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 6700792
+CREATED:20250108T102717Z
+LAST-MODIFIED:20250108T102717Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Offenes Treffen um in Gemeinschaft zu handarbeiten
+X-KURZ-DETAIL:0
+X-ORGANIZER:Seniorenbeirat der Gemeinde Barsbüttel\nStiefenhoferplatz 1
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261126T180000Z
+SUMMARY:Sitzung des Planungsausschusses
+PRIORITY:6
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:d95795e95a2f7949a0b664bc6e4f1aab
+X-ID:22800_900007241
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-412\nE-Mail: maike.eichmann@barsbuettel.landsh.de
+CREATED:20251113T035218Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:Planungsausschuss der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261129T100000Z
+SUMMARY:BOULEN am SONNTAG
+PRIORITY:0
+X-SERIENCONTAINER:900007030
+LOCATION:Familienspielplatz Buchenstraße
+X-LOCATION-ID:900000354
+X-LOCATION-OWNER:22800
+UID:91b9a9d4f7bd57eac089ab9f70a126e2
+X-ID:22800_900007298
+DTSTAMP:20251119T075454Z
+CATEGORIES:Veranstaltungen aus Vereinen und Gruppen,Sportveranstaltungen,Seniorenveranstaltungen
+X-CATEGORIES:601,614,620
+DESCRIPTION:An der im September 2023 eröffneten Boule-Bahn auf dem Familienspielplatz in der Buchenstraße treffen sich regelmäßig am Sonntag die Freunde des Kugelsportes Boule. Die Termine sind immer gut besucht und weil eine Bahn für die Anzahl Spieler nicht reichte, wurde kurzerhand auch die 2. Boule-Bahn im November 2024 fertiggestellt. Der harte Kern hat sich vorgenommen: „Es wird durchgespielt“ und trifft sich weiterhin regelmäßig bei trockenem Wetter sonntags um 11 Uhr. Wer nur zuschauen möchte oder das Spiel ausprobieren möchte, ist herzlich willkommen. Wer lieber in der Woche spielen möchte, kann auch am Dienstag um 12 Uhr oder am nachmittags (Sommer- oder Winterzeit beachten) spielen. Sollte ein Spieltag auf einen Fest- oder Feiertag fallen, bitte auf der Website https://boule-barsbuettel.de nachsehen. Weitere Informationen sind auch unter info@boule-barsbuettel.de oder Tel. 040 506 99 145 zu bekommen. Spieler, die gerne allein auf der Bahn üben möchten, können mit eigenen Kugeln jederzeit die Bahnen benutzen.\nDer Wunsch des Seniorenbeirates einen Treffpunkt für alle Altersgruppen mit Bewegung an frischer Luft, ohne Mitgliedsbeitrag, Sportkleidung und Vereinszugehörigkeit in netter Gesellschaft zu schaffen wurde voll erfüllt. Wir freuen uns auf neue Spieler.
+CLASS:PUBLIC
+URL;VALUE=URI:https://boule-barsbuettel.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 50699145\nHomepage: https://boule-barsbuettel.de\nE-Mail: info@boule-barsbuettel.de
+CREATED:20251119T075454Z
+LAST-MODIFIED:20251119T075454Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Boulen in netter Gesellschaft
+X-KURZ-DETAIL:0
+X-ORGANIZER:Gemeinde Barsbüttel mit dem Seniorenbeirat\nStiefenhoferplatz 1  22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261201T080000Z
+SUMMARY:Gedichte für Wichte in Barsbüttel am Vormittag (außerhalb der Schulferien SH)
+PRIORITY:0
+DTEND:20261201T084500Z
+X-SERIENCONTAINER:900006439
+LOCATION:Ev.-luth. Kirchengemeinderaum, Stiefenhofer Platz 3,\n22885 Barsbüttel
+UID:74a16c6ab4d0da796ae65b4d2401a431
+X-ID:22800_900007597
+DTSTAMP:20251119T081405Z
+CATEGORIES:Beratungsangebote,Kinderveranstaltungen
+X-CATEGORIES:898,901
+DESCRIPTION:Zu Hause singen, Fingerspiele spielen und Bilderbücher gucken macht Spaß – aber in der Gruppe, gemeinsam mit anderen Kindern und ihren Eltern, ist es noch netter. Deshalb bietet Buchstart in Kooperation mit dem Familienzentrum FaSiBa die wöchentlichen Gedichte-für-Wichte-Gruppen seit mehreren Jahren erfolgreich in Barsbüttel an. \n\nBei Fragen bitte: 0176/21176118 oder familienzentrumfasiba@t-online.de\n\nEin Angebot des Familienzentrum FaSiBa & Buchstart in den Räumlichkeiten der Ev.-luth. Kirchengemeinde, Stiefenhoferplatz 3
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081405Z
+LAST-MODIFIED:20251119T081405Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Dienstag  von 9.00 Uhr bis 9.45 Uhr (außerhalb der Schulferien in Schleswig-Holstein)\n\n  +++ kostenlos+++\n\nDie tollste Stunde der Woche für alle kleinen Leute von 0 bis 3 Jahren, die Spaß an Sprache, Reimen und ersten Liedern habe
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261201T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261201T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:d437d1a0a9c1f18705fb266f633f8f51
+X-ID:22800_900007702
+DTSTAMP:20251119T081512Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081512Z
+LAST-MODIFIED:20251119T081512Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261201T143000Z
+SUMMARY:Gedichte für Wichte in Barsbüttel am Nachmittag (außerhalb der Schulferien in S-H)
+PRIORITY:0
+DTEND:20261201T160000Z
+X-SERIENCONTAINER:900006440
+LOCATION:Ev.-luth. Kirchengemeinderaum, Stiefenhofer Platz 3,\n22885 Barsbüttel
+UID:0538465ee956746b46f922baa8160da6
+X-ID:22800_900007759
+DTSTAMP:20251119T081553Z
+CATEGORIES:Beratungsangebote,Kinderveranstaltungen
+X-CATEGORIES:898,901
+DESCRIPTION:.Zu Hause singen, Fingerspiele spielen und Bilderbücher gucken macht Spaß – aber in der Gruppe, gemeinsam mit anderen Kindern und ihren Eltern, ist es noch netter. Deshalb bietet Buchstart in Kooperation mit dem Familienzentrum FaSiBa die wöchentlichen Gedichte-für-Wichte-Gruppen seit mehreren Jahren erfolgreich in Barsbüttel an. \n\nBei Fragen bitte: 0176/21176118 oder familienzentrumfasiba@t-online.de\n\nEin Angebot des Familienzentrum FaSiBa & Buchstart in den Räumlichkeiten der Ev.-luth. Kirchengemeinde, Stiefenhoferplatz 3
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081553Z
+LAST-MODIFIED:20251119T081553Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Dienstag von 15.30 Uhr bis 17.00 Uhr   (außerhalb der Schulferien in Schleswig-Holstein) \n\n  +++ kostenlos+++\n\nDie tollste Stunde der Woche für alle kleinen Leute von 0 bis 3 Jahren, die Spaß an Sprache, Reimen und ersten Liedern haben.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261201T180000Z
+SUMMARY:Sitzung des Hauptausschusses
+PRIORITY:6
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:cc99b9f0dcf9f831781b7d7476f4b3c4
+X-ID:22800_900007233
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-111\nE-Mail: florian.bittner@barsbuettel.landsh.de
+CREATED:20251027T035045Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:Hauptausschuss der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261202T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die kleinen Spatzen"
+PRIORITY:0
+DTEND:20261202T150000Z
+X-SERIENCONTAINER:900007764
+LOCATION:Kindergarten Falkennest, Falkenstraße 9L,\n22885 Barsbüttel
+UID:f98f280cd5ea3a449af79c0507361167
+X-ID:22800_900007882
+DTSTAMP:20260401T094820Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen.\n\nAuch ein erstes Eingewöhnen an die Krippe/ Kita wird hier automatisch geübt.\n\nBegleitet wird die Gruppe von der Erzieherin und Elternbegleiterin Johanna Hennerici. Sie sammelt bei jedem Treffen eine Aufwandsbeteiligung von 3,- Euro pro Kind ein.\n\nBitte melden Sie sich bei anfallenden Fragen oder Interesse verbindlich im Familienzentrum an!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260401T094624Z
+LAST-MODIFIED:20260401T094820Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Mittwoch im Monat treffen sich, im Kindergarten Falkennest, Falkenstraße 9L in Barsbüttel "Die kleinen Spatzen"!\n\nIn der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen von 0-2 Jahren die Möglichkeit, spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261202T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die Mini-Piraten in Bewegung"
+PRIORITY:0
+DTEND:20261202T150000Z
+X-SERIENCONTAINER:900007897
+LOCATION:Kindertagesstätte Piratenschiff, Am Sportplatz 18, 22885 Barsbüttel-Willinghusen
+X-LOCATION-ID:900000007
+X-LOCATION-OWNER:22800
+UID:aa58f585dc20503c5060375f35cb032b
+X-ID:22800_900007912
+DTSTAMP:20260901T072834Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Für Kinder im Alter von 0-4 Jahren in Begleitung eines Erwachsenen.\n\nAufwandsbeteiligung: 3,- Euro pro Familie werden von der Kursleitung eingesammelt.\n\nAnmeldung im Familienzentrum\n\nE-Mail: familienzentrumfasiba@t-online.de\n\nTelefon: 0152 34365176
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:10.208733368;53.561771084
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260901T072834Z
+LAST-MODIFIED:20260901T072834Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Willinghusen
+X-ORT-ID:22804
+X-KURZBESCHREIBUNG:Eltern–Kind–Gruppe „Die Mini–Piraten in Bewegung“ in der Kindertagesstätte „Piratenschiff“ in Willinghusen.\n\nMittwochs in der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen die Möglichkeit spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung. Kurze gemeinsame Bewegungseinheiten runden den Nachmittag ab.  Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen. Die erfahrene Mütterpflegerin Marina Friedrich steht hier begleitend zur Seite.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261202T170000Z
+SUMMARY:Patchwork-Treff
+PRIORITY:0
+DTEND:20261202T200000Z
+X-SERIENCONTAINER:900006362
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000125
+X-LOCATION-OWNER:22800
+UID:7da9371810815cfcc6666854117f708d
+X-ID:22800_900006388
+DTSTAMP:20241119T071944Z
+CATEGORIES:Veranstaltungen aus Vereinen und Gruppen
+X-CATEGORIES:601
+DESCRIPTION:Jeden ersten Mittwoch im Monat trifft sich die Gruppe unter der Leitung von Annelie Pagenkopp, Tel.: 040/6700647\nNeue Teilnehmer:innen sind herzlich willkommen.
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:10.163386412;53.573075700
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 6700647
+CREATED:20241119T071944Z
+LAST-MODIFIED:20241119T071944Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-KURZBESCHREIBUNG:Patchwork-Treff im Bürgerhaus
+X-KURZ-DETAIL:0
+X-ORGANIZER:Annelie Pagenkopp in Kooperation mit der vhs Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261203T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261203T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:ce56dec87e30b4564201695cd8d47158
+X-ID:22800_900007703
+DTSTAMP:20251119T081512Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081512Z
+LAST-MODIFIED:20251119T081512Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261203T180000Z
+SUMMARY:Sitzung des Finanzausschusses
+PRIORITY:6
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:139c34736a5029791fa80cfb64427bde
+X-ID:22800_900007239
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-201\nE-Mail: juergen.erdmann@barsbuettel.landsh.de
+CREATED:20251029T035536Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:Finanzausschuss der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261206T100000Z
+SUMMARY:BOULEN am SONNTAG
+PRIORITY:0
+X-SERIENCONTAINER:900007030
+LOCATION:Familienspielplatz Buchenstraße
+X-LOCATION-ID:900000354
+X-LOCATION-OWNER:22800
+UID:893d0da25a102bae785c77c19b65347d
+X-ID:22800_900007299
+DTSTAMP:20251119T075454Z
+CATEGORIES:Veranstaltungen aus Vereinen und Gruppen,Sportveranstaltungen,Seniorenveranstaltungen
+X-CATEGORIES:601,614,620
+DESCRIPTION:An der im September 2023 eröffneten Boule-Bahn auf dem Familienspielplatz in der Buchenstraße treffen sich regelmäßig am Sonntag die Freunde des Kugelsportes Boule. Die Termine sind immer gut besucht und weil eine Bahn für die Anzahl Spieler nicht reichte, wurde kurzerhand auch die 2. Boule-Bahn im November 2024 fertiggestellt. Der harte Kern hat sich vorgenommen: „Es wird durchgespielt“ und trifft sich weiterhin regelmäßig bei trockenem Wetter sonntags um 11 Uhr. Wer nur zuschauen möchte oder das Spiel ausprobieren möchte, ist herzlich willkommen. Wer lieber in der Woche spielen möchte, kann auch am Dienstag um 12 Uhr oder am nachmittags (Sommer- oder Winterzeit beachten) spielen. Sollte ein Spieltag auf einen Fest- oder Feiertag fallen, bitte auf der Website https://boule-barsbuettel.de nachsehen. Weitere Informationen sind auch unter info@boule-barsbuettel.de oder Tel. 040 506 99 145 zu bekommen. Spieler, die gerne allein auf der Bahn üben möchten, können mit eigenen Kugeln jederzeit die Bahnen benutzen.\nDer Wunsch des Seniorenbeirates einen Treffpunkt für alle Altersgruppen mit Bewegung an frischer Luft, ohne Mitgliedsbeitrag, Sportkleidung und Vereinszugehörigkeit in netter Gesellschaft zu schaffen wurde voll erfüllt. Wir freuen uns auf neue Spieler.
+CLASS:PUBLIC
+URL;VALUE=URI:https://boule-barsbuettel.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 50699145\nHomepage: https://boule-barsbuettel.de\nE-Mail: info@boule-barsbuettel.de
+CREATED:20251119T075454Z
+LAST-MODIFIED:20251119T075454Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Boulen in netter Gesellschaft
+X-KURZ-DETAIL:0
+X-ORGANIZER:Gemeinde Barsbüttel mit dem Seniorenbeirat\nStiefenhoferplatz 1  22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261208T080000Z
+SUMMARY:Gedichte für Wichte in Barsbüttel am Vormittag (außerhalb der Schulferien SH)
+PRIORITY:0
+DTEND:20261208T084500Z
+X-SERIENCONTAINER:900006439
+LOCATION:Ev.-luth. Kirchengemeinderaum, Stiefenhofer Platz 3,\n22885 Barsbüttel
+UID:41004044063ee6838abb7eef2d6a1739
+X-ID:22800_900007598
+DTSTAMP:20251119T081405Z
+CATEGORIES:Beratungsangebote,Kinderveranstaltungen
+X-CATEGORIES:898,901
+DESCRIPTION:Zu Hause singen, Fingerspiele spielen und Bilderbücher gucken macht Spaß – aber in der Gruppe, gemeinsam mit anderen Kindern und ihren Eltern, ist es noch netter. Deshalb bietet Buchstart in Kooperation mit dem Familienzentrum FaSiBa die wöchentlichen Gedichte-für-Wichte-Gruppen seit mehreren Jahren erfolgreich in Barsbüttel an. \n\nBei Fragen bitte: 0176/21176118 oder familienzentrumfasiba@t-online.de\n\nEin Angebot des Familienzentrum FaSiBa & Buchstart in den Räumlichkeiten der Ev.-luth. Kirchengemeinde, Stiefenhoferplatz 3
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081405Z
+LAST-MODIFIED:20251119T081405Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Dienstag  von 9.00 Uhr bis 9.45 Uhr (außerhalb der Schulferien in Schleswig-Holstein)\n\n  +++ kostenlos+++\n\nDie tollste Stunde der Woche für alle kleinen Leute von 0 bis 3 Jahren, die Spaß an Sprache, Reimen und ersten Liedern habe
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261208T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261208T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:f02f14acc13ced1e01b06477ca0ba3d2
+X-ID:22800_900007704
+DTSTAMP:20251119T081512Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081512Z
+LAST-MODIFIED:20251119T081512Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261208T143000Z
+SUMMARY:Gedichte für Wichte in Barsbüttel am Nachmittag (außerhalb der Schulferien in S-H)
+PRIORITY:0
+DTEND:20261208T160000Z
+X-SERIENCONTAINER:900006440
+LOCATION:Ev.-luth. Kirchengemeinderaum, Stiefenhofer Platz 3,\n22885 Barsbüttel
+UID:fa14cf2551c0de81cceacc568daeac37
+X-ID:22800_900007760
+DTSTAMP:20251119T081553Z
+CATEGORIES:Beratungsangebote,Kinderveranstaltungen
+X-CATEGORIES:898,901
+DESCRIPTION:.Zu Hause singen, Fingerspiele spielen und Bilderbücher gucken macht Spaß – aber in der Gruppe, gemeinsam mit anderen Kindern und ihren Eltern, ist es noch netter. Deshalb bietet Buchstart in Kooperation mit dem Familienzentrum FaSiBa die wöchentlichen Gedichte-für-Wichte-Gruppen seit mehreren Jahren erfolgreich in Barsbüttel an. \n\nBei Fragen bitte: 0176/21176118 oder familienzentrumfasiba@t-online.de\n\nEin Angebot des Familienzentrum FaSiBa & Buchstart in den Räumlichkeiten der Ev.-luth. Kirchengemeinde, Stiefenhoferplatz 3
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081553Z
+LAST-MODIFIED:20251119T081553Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Dienstag von 15.30 Uhr bis 17.00 Uhr   (außerhalb der Schulferien in Schleswig-Holstein) \n\n  +++ kostenlos+++\n\nDie tollste Stunde der Woche für alle kleinen Leute von 0 bis 3 Jahren, die Spaß an Sprache, Reimen und ersten Liedern haben.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261209T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die kleinen Spatzen"
+PRIORITY:0
+DTEND:20261209T150000Z
+X-SERIENCONTAINER:900007764
+LOCATION:Kindergarten Falkennest, Falkenstraße 9L,\n22885 Barsbüttel
+UID:d7bba28f12f9dfaa4466ba81a2d1d57f
+X-ID:22800_900007883
+DTSTAMP:20260401T094820Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen.\n\nAuch ein erstes Eingewöhnen an die Krippe/ Kita wird hier automatisch geübt.\n\nBegleitet wird die Gruppe von der Erzieherin und Elternbegleiterin Johanna Hennerici. Sie sammelt bei jedem Treffen eine Aufwandsbeteiligung von 3,- Euro pro Kind ein.\n\nBitte melden Sie sich bei anfallenden Fragen oder Interesse verbindlich im Familienzentrum an!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260401T094624Z
+LAST-MODIFIED:20260401T094820Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Mittwoch im Monat treffen sich, im Kindergarten Falkennest, Falkenstraße 9L in Barsbüttel "Die kleinen Spatzen"!\n\nIn der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen von 0-2 Jahren die Möglichkeit, spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261209T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die Mini-Piraten in Bewegung"
+PRIORITY:0
+DTEND:20261209T150000Z
+X-SERIENCONTAINER:900007897
+LOCATION:Kindertagesstätte Piratenschiff, Am Sportplatz 18, 22885 Barsbüttel-Willinghusen
+X-LOCATION-ID:900000007
+X-LOCATION-OWNER:22800
+UID:0c6d30d79f4570d039603598b635fc2b
+X-ID:22800_900007913
+DTSTAMP:20260901T072834Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Für Kinder im Alter von 0-4 Jahren in Begleitung eines Erwachsenen.\n\nAufwandsbeteiligung: 3,- Euro pro Familie werden von der Kursleitung eingesammelt.\n\nAnmeldung im Familienzentrum\n\nE-Mail: familienzentrumfasiba@t-online.de\n\nTelefon: 0152 34365176
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:10.208733368;53.561771084
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260901T072834Z
+LAST-MODIFIED:20260901T072834Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Willinghusen
+X-ORT-ID:22804
+X-KURZBESCHREIBUNG:Eltern–Kind–Gruppe „Die Mini–Piraten in Bewegung“ in der Kindertagesstätte „Piratenschiff“ in Willinghusen.\n\nMittwochs in der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen die Möglichkeit spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung. Kurze gemeinsame Bewegungseinheiten runden den Nachmittag ab.  Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen. Die erfahrene Mütterpflegerin Marina Friedrich steht hier begleitend zur Seite.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261210T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261210T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:54346f14883e83d404781d063db110cb
+X-ID:22800_900007705
+DTSTAMP:20251119T081512Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081512Z
+LAST-MODIFIED:20251119T081512Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261210T150000Z
+SUMMARY:NADEL & FADEN Handarbeiten in Gemeinschaft
+PRIORITY:0
+DTEND:20261210T173000Z
+X-SERIENCONTAINER:900006396
+LOCATION:Waldenburger Weg 2, DRK Ortsverein Barsbüttel, ,\n22885 Barsbüttel
+UID:08c18df036ca734c03e77b8637786b0c
+X-ID:22800_900007029
+DTSTAMP:20250108T102717Z
+CATEGORIES:Frauenveranstaltungen,Veranstaltungen aus Vereinen und Gruppen,Bildung / Kurse / Seminare
+X-CATEGORIES:619,601,656
+DESCRIPTION:NADEL & FADEN Handarbeiten in Gemeinschaft \nImmer am Donnerstag in der geraden Kalenderwoche um 16 Uhr trifft sich der Handarbeitskreis „Nadel & Faden“ in den Räumen des DRK Ortsverbandes Barsbüttel Waldenburger Weg 2. Der Seniorenbeirat lädt Teilnehmerinnen jeglichen Alters ein, die gerne in Gemeinschaft handarbeiten und sich austauschen möchten. Die Räumlichkeiten sind gut zu erreichen, der Bus Linie 263 hält direkt an der Haltestelle Rathaus. Es handelt sich nicht um einen Handarbeitskurs mit Anleitung, jeder handarbeitet das, was er möchte und erhält bei Bedarf Unterstützung von den anderen Gruppenteilnehmerinnen.\nAn- und Abmeldungen sind nicht erforderlich, an Fest- und Feiertagen findet kein Treffen statt. Bei Fragen gerne anrufen 040 670 16 70 oder 670 07 92
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 6700792
+CREATED:20250108T102717Z
+LAST-MODIFIED:20250108T102717Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Offenes Treffen um in Gemeinschaft zu handarbeiten
+X-KURZ-DETAIL:0
+X-ORGANIZER:Seniorenbeirat der Gemeinde Barsbüttel\nStiefenhoferplatz 1
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261213T100000Z
+SUMMARY:BOULEN am SONNTAG
+PRIORITY:0
+X-SERIENCONTAINER:900007030
+LOCATION:Familienspielplatz Buchenstraße
+X-LOCATION-ID:900000354
+X-LOCATION-OWNER:22800
+UID:b2255b1dd5dd630c3837d09e065a99ce
+X-ID:22800_900007300
+DTSTAMP:20251119T075454Z
+CATEGORIES:Veranstaltungen aus Vereinen und Gruppen,Sportveranstaltungen,Seniorenveranstaltungen
+X-CATEGORIES:601,614,620
+DESCRIPTION:An der im September 2023 eröffneten Boule-Bahn auf dem Familienspielplatz in der Buchenstraße treffen sich regelmäßig am Sonntag die Freunde des Kugelsportes Boule. Die Termine sind immer gut besucht und weil eine Bahn für die Anzahl Spieler nicht reichte, wurde kurzerhand auch die 2. Boule-Bahn im November 2024 fertiggestellt. Der harte Kern hat sich vorgenommen: „Es wird durchgespielt“ und trifft sich weiterhin regelmäßig bei trockenem Wetter sonntags um 11 Uhr. Wer nur zuschauen möchte oder das Spiel ausprobieren möchte, ist herzlich willkommen. Wer lieber in der Woche spielen möchte, kann auch am Dienstag um 12 Uhr oder am nachmittags (Sommer- oder Winterzeit beachten) spielen. Sollte ein Spieltag auf einen Fest- oder Feiertag fallen, bitte auf der Website https://boule-barsbuettel.de nachsehen. Weitere Informationen sind auch unter info@boule-barsbuettel.de oder Tel. 040 506 99 145 zu bekommen. Spieler, die gerne allein auf der Bahn üben möchten, können mit eigenen Kugeln jederzeit die Bahnen benutzen.\nDer Wunsch des Seniorenbeirates einen Treffpunkt für alle Altersgruppen mit Bewegung an frischer Luft, ohne Mitgliedsbeitrag, Sportkleidung und Vereinszugehörigkeit in netter Gesellschaft zu schaffen wurde voll erfüllt. Wir freuen uns auf neue Spieler.
+CLASS:PUBLIC
+URL;VALUE=URI:https://boule-barsbuettel.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 50699145\nHomepage: https://boule-barsbuettel.de\nE-Mail: info@boule-barsbuettel.de
+CREATED:20251119T075454Z
+LAST-MODIFIED:20251119T075454Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Boulen in netter Gesellschaft
+X-KURZ-DETAIL:0
+X-ORGANIZER:Gemeinde Barsbüttel mit dem Seniorenbeirat\nStiefenhoferplatz 1  22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261215T080000Z
+SUMMARY:Gedichte für Wichte in Barsbüttel am Vormittag (außerhalb der Schulferien SH)
+PRIORITY:0
+DTEND:20261215T084500Z
+X-SERIENCONTAINER:900006439
+LOCATION:Ev.-luth. Kirchengemeinderaum, Stiefenhofer Platz 3,\n22885 Barsbüttel
+UID:8c1972be42a28430e5a4c697ba44a7d4
+X-ID:22800_900007599
+DTSTAMP:20251119T081405Z
+CATEGORIES:Beratungsangebote,Kinderveranstaltungen
+X-CATEGORIES:898,901
+DESCRIPTION:Zu Hause singen, Fingerspiele spielen und Bilderbücher gucken macht Spaß – aber in der Gruppe, gemeinsam mit anderen Kindern und ihren Eltern, ist es noch netter. Deshalb bietet Buchstart in Kooperation mit dem Familienzentrum FaSiBa die wöchentlichen Gedichte-für-Wichte-Gruppen seit mehreren Jahren erfolgreich in Barsbüttel an. \n\nBei Fragen bitte: 0176/21176118 oder familienzentrumfasiba@t-online.de\n\nEin Angebot des Familienzentrum FaSiBa & Buchstart in den Räumlichkeiten der Ev.-luth. Kirchengemeinde, Stiefenhoferplatz 3
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081405Z
+LAST-MODIFIED:20251119T081405Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Dienstag  von 9.00 Uhr bis 9.45 Uhr (außerhalb der Schulferien in Schleswig-Holstein)\n\n  +++ kostenlos+++\n\nDie tollste Stunde der Woche für alle kleinen Leute von 0 bis 3 Jahren, die Spaß an Sprache, Reimen und ersten Liedern habe
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261215T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261215T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:730ede7b31fdeee9a165106d4e3d9546
+X-ID:22800_900007706
+DTSTAMP:20251119T081512Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081512Z
+LAST-MODIFIED:20251119T081512Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261215T143000Z
+SUMMARY:Gedichte für Wichte in Barsbüttel am Nachmittag (außerhalb der Schulferien in S-H)
+PRIORITY:0
+DTEND:20261215T160000Z
+X-SERIENCONTAINER:900006440
+LOCATION:Ev.-luth. Kirchengemeinderaum, Stiefenhofer Platz 3,\n22885 Barsbüttel
+UID:23203f93c2698f0ab971633953b6ef86
+X-ID:22800_900007761
+DTSTAMP:20251119T081553Z
+CATEGORIES:Beratungsangebote,Kinderveranstaltungen
+X-CATEGORIES:898,901
+DESCRIPTION:.Zu Hause singen, Fingerspiele spielen und Bilderbücher gucken macht Spaß – aber in der Gruppe, gemeinsam mit anderen Kindern und ihren Eltern, ist es noch netter. Deshalb bietet Buchstart in Kooperation mit dem Familienzentrum FaSiBa die wöchentlichen Gedichte-für-Wichte-Gruppen seit mehreren Jahren erfolgreich in Barsbüttel an. \n\nBei Fragen bitte: 0176/21176118 oder familienzentrumfasiba@t-online.de\n\nEin Angebot des Familienzentrum FaSiBa & Buchstart in den Räumlichkeiten der Ev.-luth. Kirchengemeinde, Stiefenhoferplatz 3
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081553Z
+LAST-MODIFIED:20251119T081553Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Jeden Dienstag von 15.30 Uhr bis 17.00 Uhr   (außerhalb der Schulferien in Schleswig-Holstein) \n\n  +++ kostenlos+++\n\nDie tollste Stunde der Woche für alle kleinen Leute von 0 bis 3 Jahren, die Spaß an Sprache, Reimen und ersten Liedern haben.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261216T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die Mini-Piraten in Bewegung"
+PRIORITY:0
+DTEND:20261216T150000Z
+X-SERIENCONTAINER:900007897
+LOCATION:Kindertagesstätte Piratenschiff, Am Sportplatz 18, 22885 Barsbüttel-Willinghusen
+X-LOCATION-ID:900000007
+X-LOCATION-OWNER:22800
+UID:1d3487d00241633bc6d770ee42dd2f96
+X-ID:22800_900007914
+DTSTAMP:20260901T072834Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Für Kinder im Alter von 0-4 Jahren in Begleitung eines Erwachsenen.\n\nAufwandsbeteiligung: 3,- Euro pro Familie werden von der Kursleitung eingesammelt.\n\nAnmeldung im Familienzentrum\n\nE-Mail: familienzentrumfasiba@t-online.de\n\nTelefon: 0152 34365176
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:10.208733368;53.561771084
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260901T072834Z
+LAST-MODIFIED:20260901T072834Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Willinghusen
+X-ORT-ID:22804
+X-KURZBESCHREIBUNG:Eltern–Kind–Gruppe „Die Mini–Piraten in Bewegung“ in der Kindertagesstätte „Piratenschiff“ in Willinghusen.\n\nMittwochs in der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen die Möglichkeit spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung. Kurze gemeinsame Bewegungseinheiten runden den Nachmittag ab.  Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen. Die erfahrene Mütterpflegerin Marina Friedrich steht hier begleitend zur Seite.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261217T080000Z
+SUMMARY:Rechtliche Informationen im Familienzentrum
+PRIORITY:0
+DTEND:20261217T100000Z
+X-SERIENCONTAINER:900006438
+LOCATION:Bürgerhaus Barsbüttel, Soltausredder 20, 22885 Barsbüttel
+X-LOCATION-ID:900000126
+X-LOCATION-OWNER:22800
+UID:546338cf6c5a77e226dabe805d9d897e
+X-ID:22800_900007707
+DTSTAMP:20251119T081512Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Die Beratungen durch die Rechtsanwältinnen Isabel Vieth und Ilona Uebach sind selbstverständlich vertraulich und unterliegen der Schweigepflicht.\n\nTermine werden jeweils dienstags zwischen 9 und 11 Uhr sowie donnerstags zwischen 16 und 18 Uhr angeboten (außer in den Schulferien). Melden Sie sich bei Bedarf im Familienzentrum!
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20251119T081512Z
+LAST-MODIFIED:20251119T081512Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Für alle rechtlichen Fragen zum Thema Trennung und Scheidung, Unterhalt, Umgangsrecht, Sorgerecht, Vaterschaft u.v.m. gibt es jetzt die Möglichkeit einer kostenlosen Kurzberatung im Büro des Familienzentrums im Bürgerhaus Barsbüttel.\n\nFragen zum Arbeits- und Mietrecht können hier ebenfalls beantwortet werden.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261217T083000Z
+SUMMARY:FRÜHSTÜCK FÜR SENIOREN
+PRIORITY:0
+X-SERIENCONTAINER:900007829
+LOCATION:Waldenburger Weg 2, DRK Ortsverein Barsbüttel, Waldenburger Weg 2, 22885 Barsbüttel
+X-LOCATION-ID:900000390
+X-LOCATION-OWNER:22800
+UID:61259b6921d6d4f4c39780aafa961a72
+X-ID:22800_900007839
+DTSTAMP:20260108T071000Z
+CATEGORIES:Seniorenveranstaltungen
+X-CATEGORIES:620
+DESCRIPTION:Frühstück für Senioren \nDas DRK Ortsverband Barsbüttel und der Seniorenbeirat bieten einmal im Monat in den Räumen des DRK; Waldenburger Weg 2 ein Frühstücksbuffet für Senioren an. Gäste können sich für 9 Euro am Donnerstag in der zweiten ungeraden Woche eines Monats um 9:30 Uhr auf ein Frühstück in Gemeinschaft freuen. Eine verbindliche Anmeldung dazu ist unbedingt bis eine Woche vorher erforderlich, entweder telefonisch unter Tel. (040) 670 72 - 0, persönlich im Bürgerbüro des Rathauses oder per E-Mail: zentrale@barsbuettel.landsh.de. Die Termine finden Sie in der Gemeindezeitung, im Veranstaltungskalender, auf der Gemeindewebsite oder in den Informationskästen des Seniorenbeirates und des DRK.
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.barsbuettel.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 670720-0\nHomepage: http://www.barsbuettel.de\nE-Mail: Zentrale@barsbuettel.landsh.de
+CREATED:20260108T071000Z
+LAST-MODIFIED:20260108T071000Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Gemeinsam in netter Gesellschaft frühstücken und klönen
+X-KURZ-DETAIL:0
+X-ORGANIZER:Seniorenbeirat und DRK Barsbüttel\nStiefenhoferplatz 1 \n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261217T180000Z
+SUMMARY:Sitzung der Gemeindevertretung der Gemeinde Barsbüttel
+PRIORITY:6
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:02452f5c74bd967be71d71785609e881
+X-ID:22800_900007240
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-114\nE-Mail: jessica.meyer-bruene@barsbuettel.landsh.de
+CREATED:20251112T035321Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-ORGANIZER:Gemeindevertretung der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261220T100000Z
+SUMMARY:BOULEN am SONNTAG
+PRIORITY:0
+X-SERIENCONTAINER:900007030
+LOCATION:Familienspielplatz Buchenstraße
+X-LOCATION-ID:900000354
+X-LOCATION-OWNER:22800
+UID:1607dc65ab1e381cb3ffc314c5be971a
+X-ID:22800_900007301
+DTSTAMP:20251119T075454Z
+CATEGORIES:Veranstaltungen aus Vereinen und Gruppen,Sportveranstaltungen,Seniorenveranstaltungen
+X-CATEGORIES:601,614,620
+DESCRIPTION:An der im September 2023 eröffneten Boule-Bahn auf dem Familienspielplatz in der Buchenstraße treffen sich regelmäßig am Sonntag die Freunde des Kugelsportes Boule. Die Termine sind immer gut besucht und weil eine Bahn für die Anzahl Spieler nicht reichte, wurde kurzerhand auch die 2. Boule-Bahn im November 2024 fertiggestellt. Der harte Kern hat sich vorgenommen: „Es wird durchgespielt“ und trifft sich weiterhin regelmäßig bei trockenem Wetter sonntags um 11 Uhr. Wer nur zuschauen möchte oder das Spiel ausprobieren möchte, ist herzlich willkommen. Wer lieber in der Woche spielen möchte, kann auch am Dienstag um 12 Uhr oder am nachmittags (Sommer- oder Winterzeit beachten) spielen. Sollte ein Spieltag auf einen Fest- oder Feiertag fallen, bitte auf der Website https://boule-barsbuettel.de nachsehen. Weitere Informationen sind auch unter info@boule-barsbuettel.de oder Tel. 040 506 99 145 zu bekommen. Spieler, die gerne allein auf der Bahn üben möchten, können mit eigenen Kugeln jederzeit die Bahnen benutzen.\nDer Wunsch des Seniorenbeirates einen Treffpunkt für alle Altersgruppen mit Bewegung an frischer Luft, ohne Mitgliedsbeitrag, Sportkleidung und Vereinszugehörigkeit in netter Gesellschaft zu schaffen wurde voll erfüllt. Wir freuen uns auf neue Spieler.
+CLASS:PUBLIC
+URL;VALUE=URI:https://boule-barsbuettel.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 50699145\nHomepage: https://boule-barsbuettel.de\nE-Mail: info@boule-barsbuettel.de
+CREATED:20251119T075454Z
+LAST-MODIFIED:20251119T075454Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Boulen in netter Gesellschaft
+X-KURZ-DETAIL:0
+X-ORGANIZER:Gemeinde Barsbüttel mit dem Seniorenbeirat\nStiefenhoferplatz 1  22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261223T140000Z
+SUMMARY:Eltern-Kind-Gruppe "Die Mini-Piraten in Bewegung"
+PRIORITY:0
+DTEND:20261223T150000Z
+X-SERIENCONTAINER:900007897
+LOCATION:Kindertagesstätte Piratenschiff, Am Sportplatz 18, 22885 Barsbüttel-Willinghusen
+X-LOCATION-ID:900000007
+X-LOCATION-OWNER:22800
+UID:6a99957de9862510bdbce1caf4667e52
+X-ID:22800_900007915
+DTSTAMP:20260901T072834Z
+CATEGORIES:Beratungsangebote
+X-CATEGORIES:898
+DESCRIPTION:Für Kinder im Alter von 0-4 Jahren in Begleitung eines Erwachsenen.\n\nAufwandsbeteiligung: 3,- Euro pro Familie werden von der Kursleitung eingesammelt.\n\nAnmeldung im Familienzentrum\n\nE-Mail: familienzentrumfasiba@t-online.de\n\nTelefon: 0152 34365176
+CLASS:PUBLIC
+URL;VALUE=URI:http://www.familienzentrum-fasiba.de
+STATUS:CONFIRMED
+GEO:10.208733368;53.561771084
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 0152 34365176\nHomepage: http://www.familienzentrum-fasiba.de\nE-Mail: familienzentrumfasiba@t-online.de
+CREATED:20260901T072834Z
+LAST-MODIFIED:20260901T072834Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Willinghusen
+X-ORT-ID:22804
+X-KURZBESCHREIBUNG:Eltern–Kind–Gruppe „Die Mini–Piraten in Bewegung“ in der Kindertagesstätte „Piratenschiff“ in Willinghusen.\n\nMittwochs in der Zeit von 15.00 bis 16.00 Uhr haben die Kleinen die Möglichkeit spielerisch Kontakt zu Gleichaltrigen aufzunehmen, erste Erfahrungen zu sammeln, soziales Verhalten zu erlernen und sie bekommen vielfältige Anregungen für ihre emotionale, soziale und motorische Entwicklung. Kurze gemeinsame Bewegungseinheiten runden den Nachmittag ab.  Die Eltern haben die Chance dieses zu begleiten, sich auszutauschen, sich Tipps und Anregungen für ihren Alltag zu holen und neue Kontakte zu knüpfen. Die erfahrene Mütterpflegerin Marina Friedrich steht hier begleitend zur Seite.
+X-KURZ-DETAIL:0
+X-ORGANIZER:Familienzentrum FaSiBa\nSoltausredder 20\n22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261227T100000Z
+SUMMARY:BOULEN am SONNTAG
+PRIORITY:0
+X-SERIENCONTAINER:900007030
+LOCATION:Familienspielplatz Buchenstraße
+X-LOCATION-ID:900000354
+X-LOCATION-OWNER:22800
+UID:fad3a6dc339100e3ae77ccea2a4fd483
+X-ID:22800_900007302
+DTSTAMP:20251119T075454Z
+CATEGORIES:Veranstaltungen aus Vereinen und Gruppen,Sportveranstaltungen,Seniorenveranstaltungen
+X-CATEGORIES:601,614,620
+DESCRIPTION:An der im September 2023 eröffneten Boule-Bahn auf dem Familienspielplatz in der Buchenstraße treffen sich regelmäßig am Sonntag die Freunde des Kugelsportes Boule. Die Termine sind immer gut besucht und weil eine Bahn für die Anzahl Spieler nicht reichte, wurde kurzerhand auch die 2. Boule-Bahn im November 2024 fertiggestellt. Der harte Kern hat sich vorgenommen: „Es wird durchgespielt“ und trifft sich weiterhin regelmäßig bei trockenem Wetter sonntags um 11 Uhr. Wer nur zuschauen möchte oder das Spiel ausprobieren möchte, ist herzlich willkommen. Wer lieber in der Woche spielen möchte, kann auch am Dienstag um 12 Uhr oder am nachmittags (Sommer- oder Winterzeit beachten) spielen. Sollte ein Spieltag auf einen Fest- oder Feiertag fallen, bitte auf der Website https://boule-barsbuettel.de nachsehen. Weitere Informationen sind auch unter info@boule-barsbuettel.de oder Tel. 040 506 99 145 zu bekommen. Spieler, die gerne allein auf der Bahn üben möchten, können mit eigenen Kugeln jederzeit die Bahnen benutzen.\nDer Wunsch des Seniorenbeirates einen Treffpunkt für alle Altersgruppen mit Bewegung an frischer Luft, ohne Mitgliedsbeitrag, Sportkleidung und Vereinszugehörigkeit in netter Gesellschaft zu schaffen wurde voll erfüllt. Wir freuen uns auf neue Spieler.
+CLASS:PUBLIC
+URL;VALUE=URI:https://boule-barsbuettel.de
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 040 50699145\nHomepage: https://boule-barsbuettel.de\nE-Mail: info@boule-barsbuettel.de
+CREATED:20251119T075454Z
+LAST-MODIFIED:20251119T075454Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORT:Barsbüttel
+X-ORT-ID:22801
+X-KURZBESCHREIBUNG:Boulen in netter Gesellschaft
+X-KURZ-DETAIL:0
+X-ORGANIZER:Gemeinde Barsbüttel mit dem Seniorenbeirat\nStiefenhoferplatz 1  22885 Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20270201T163000Z
+SUMMARY:Sitzung des Jugendbeirates
+PRIORITY:6
+DTEND:20270201T180000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:2f4a7a3a31abe384637a4996347caac6
+X-ID:22800_900007918
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-320\nE-Mail: celina.buksmann@barsbuettel.landsh..de
+CREATED:20261007T025908Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:Jugendbeirat der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20270202T150000Z
+SUMMARY:Sitzung des Seniorenbeirates
+PRIORITY:6
+DTEND:20270202T170000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:66c646f397d75f9b738426566c6b70ae
+X-ID:22800_900007919
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-323\nE-Mail: jenny.diehn@barsbuettel.landsh.de
+CREATED:20261007T025908Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:Seniorenbeirat der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20270202T180000Z
+SUMMARY:Sitzung des SKS - Ausschusses
+PRIORITY:6
+DTEND:20270202T200000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:bc0c9831cc7984fa22ab2973e8eef0c8
+X-ID:22800_900007920
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-321\nE-Mail: christina.degen@barsbuettel.landsh.de
+CREATED:20261007T025908Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:SKS - Ausschuss der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20270412T153000Z
+SUMMARY:Sitzung des Jugendbeirates
+PRIORITY:6
+DTEND:20270412T170000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:67897fd4e0d60e8bc2d844ec43384dc9
+X-ID:22800_900007921
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-320\nE-Mail: celina.buksmann@barsbuettel.landsh..de
+CREATED:20261007T025908Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:Jugendbeirat der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20270413T140000Z
+SUMMARY:Sitzung des Seniorenbeirates
+PRIORITY:6
+DTEND:20270413T160000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:4157772f4ad2746abe53f7a1d2822845
+X-ID:22800_900007922
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-323\nE-Mail: jenny.diehn@barsbuettel.landsh.de
+CREATED:20261007T025908Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:Seniorenbeirat der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20270413T170000Z
+SUMMARY:Sitzung des SKS - Ausschusses
+PRIORITY:6
+DTEND:20270413T190000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:990609eda20401c230373a7b736f7e69
+X-ID:22800_900007923
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-321\nE-Mail: christina.degen@barsbuettel.landsh.de
+CREATED:20261007T025908Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:SKS - Ausschuss der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20270614T153000Z
+SUMMARY:Sitzung des Jugendbeirates
+PRIORITY:6
+DTEND:20270614T170000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:c26b72b866262e77138cd78d7bb6e335
+X-ID:22800_900007924
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-320\nE-Mail: celina.buksmann@barsbuettel.landsh..de
+CREATED:20261007T025908Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:Jugendbeirat der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20270615T140000Z
+SUMMARY:Sitzung des Seniorenbeirates
+PRIORITY:6
+DTEND:20270615T160000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:c1ffd5a4ca8a21e79cb55567c5eaadde
+X-ID:22800_900007925
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-323\nE-Mail: jenny.diehn@barsbuettel.landsh.de
+CREATED:20261007T025909Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:Seniorenbeirat der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20270615T170000Z
+SUMMARY:Sitzung des SKS - Ausschusses
+PRIORITY:6
+DTEND:20270615T190000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:168f72d9015380828c38d498c44ad9d9
+X-ID:22800_900007926
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-321\nE-Mail: christina.degen@barsbuettel.landsh.de
+CREATED:20261007T025909Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:SKS - Ausschuss der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20270913T153000Z
+SUMMARY:Sitzung des Jugendbeirates
+PRIORITY:6
+DTEND:20270913T170000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:9f0609bc65763532bde3c8e760020b08
+X-ID:22800_900007927
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-320\nE-Mail: celina.buksmann@barsbuettel.landsh..de
+CREATED:20261007T025909Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:Jugendbeirat der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20270914T140000Z
+SUMMARY:Sitzung des Seniorenbeirates
+PRIORITY:6
+DTEND:20270914T160000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:c8269e1fc8e95b0cbdeb0393b61e5cb1
+X-ID:22800_900007928
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-323\nE-Mail: jenny.diehn@barsbuettel.landsh.de
+CREATED:20261007T025909Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:Seniorenbeirat der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20270914T170000Z
+SUMMARY:Sitzung des SKS - Ausschusses
+PRIORITY:6
+DTEND:20270914T190000Z
+LOCATION:Stiefenhoferplatz 1, 22885 Barsbüttel, Rathaussaal
+UID:6aea48e2f138321de9537adf60b56572
+X-ID:22800_900007929
+DTSTAMP:20261028T035520Z
+CATEGORIES:Politische Sitzungen,Politik / Kommunalpolitik
+X-CATEGORIES:884,607
+CLASS:PUBLIC
+STATUS:CONFIRMED
+GEO:0.000000000;0.000000000
+X-GEO-PROJECTION:EPSG:4326
+CONTACT:Telefon: 04067072-321\nE-Mail: christina.degen@barsbuettel.landsh.de
+CREATED:20261007T025909Z
+LAST-MODIFIED:20261028T035520Z
+X-KOMMUNE:Gemeinde Barsbüttel
+X-KOMMUNE-ID:22800
+X-ORGANIZER:SKS - Ausschuss der Gemeinde Barsbüttel
+X-NOLISEXPORT:1
+END:VEVENT
+END:VCALENDAR

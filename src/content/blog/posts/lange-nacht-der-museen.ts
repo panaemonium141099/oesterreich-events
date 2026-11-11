@@ -12,6 +12,13 @@ export const post: FestivalPost = {
   heroImageCredit: 'Foto: AnonymousGuyFawkes, CC BY-SA 4.0, Wikimedia Commons',
   publishDate: '2026-09-10',
   updatedDate: '2026-09-10',
+  factSources: {
+    checkedAt: '2026-09-10',
+    urls: [
+      'https://langenacht.orf.at/info',
+      'https://langenacht.orf.at/state/bl/wien',
+    ],
+  },
   readingTime: 7,
   excerpt:
     'Am Samstag, 3. Oktober 2026, sperren Österreichs Museen von 18 bis 24 Uhr auf. Ein Ticket für 19 Euro gilt in allen teilnehmenden Häusern, Kinder bis 12 zahlen nichts. Alle Infos zu Preisen, Vorverkauf und Öffis.',

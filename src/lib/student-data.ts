@@ -23,6 +23,7 @@ import type { LinkGroup } from '@/components/Landing/InternalLinks';
 import { CATEGORY_MESSAGE_KEYS } from './i18n/category-labels';
 import type { AppLocale } from '@/i18n/routing';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import type { LandingShelves } from './hubs/shelf-pool';
 
 /**
  * fn-17: Übersetzer-Handle wie von `getTranslations()` geliefert. Die
@@ -54,6 +55,8 @@ export interface StudentPageData {
   paginationParams: Record<string, string>;
   metaTitle: string;
   metaDescription: string;
+  /** Regale der Stadtseite ohne Filter; Filterseiten zeigen nur die Liste. */
+  shelves: LandingShelves | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -100,7 +103,7 @@ export async function loadStudentIndex(): Promise<StudentIndexData> {
     // Today's top student events across all student bundesländer.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase.from('events') as any)
-      .select('id, title, start_date, end_date, location_name, image_url, category, price_min, price_text, event_score, quality_score, bundesland, address')
+      .select('id, title, slug, start_date, end_date, location_name, image_url, category, price_min, price_max, price_text, event_score, quality_score, bundesland, district, address, postal_code')
       .in('publish_status', ['published', 'published_low_confidence'])
       .eq('country', SITE_COUNTRY)
       .gte('start_date', todayRange.fromIso)
@@ -199,6 +202,25 @@ export async function loadStudentPage(
   const metaExtra = filterLabel ? ` — ${filterLabel}` : '';
   const metaDescription = t('metaDescriptionCity', { count: totalCount, city: city.name, extra: metaExtra });
 
+  // Die Regale rechnen auf allen bewerteten Kandidaten (bis 500), ohne
+  // weitere Abfrage. Studenten-Filter sind einstufig (/studenten/wien/musik),
+  // deshalb zeigen nur die Stadtseiten selbst Regale.
+  const shelves: LandingShelves | null = filter
+    ? null
+    : {
+        events: scored.map((s) => s.event),
+        links: {
+          tonight: `${basePath}/heute`,
+          weekend: `${basePath}/wochenende`,
+          free: `${basePath}/gratis`,
+          category: (c) => {
+            const slug = getCategorySlug(c);
+            return slug ? `${basePath}/${slug}` : undefined;
+          },
+        },
+        hide: { chips: true },
+      };
+
   return {
     events,
     totalCount,
@@ -211,6 +233,7 @@ export async function loadStudentPage(
     paginationParams,
     metaTitle,
     metaDescription,
+    shelves,
   };
 }
 
@@ -235,7 +258,7 @@ async function loadCandidates(
   let query = supabase
     .from('events')
     .select(
-      'id, title, description, start_date, end_date, location_name, address, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, event_score, quality_score, venue_id',
+      'id, title, slug, description, start_date, end_date, location_name, address, postal_code, bundesland, district, latitude, longitude, category, image_url, price_text, price_min, price_max, event_score, quality_score, venue_id',
     )
     .in('publish_status', ['published', 'published_low_confidence'])
     .eq('country', SITE_COUNTRY)

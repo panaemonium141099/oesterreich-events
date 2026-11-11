@@ -45,8 +45,8 @@ export default function DatenschutzPage() {
             </p>
             <p className="mt-2">
               E-Mail:{' '}
-              <a href="mailto:dev@glatzdev.com" className="text-white/90 underline underline-offset-2 hover:text-white transition-colors">
-                dev@glatzdev.com
+              <a href="mailto:office@lasstreffen.at" className="text-white/90 underline underline-offset-2 hover:text-white transition-colors">
+                office@lasstreffen.at
               </a>
             </p>
           </section>
@@ -329,8 +329,8 @@ export default function DatenschutzPage() {
             <p className="mt-2">
               Jonathan Glatz<br />
               E-Mail:{' '}
-              <a href="mailto:dev@glatzdev.com" className="text-white/90 underline underline-offset-2 hover:text-white transition-colors">
-                dev@glatzdev.com
+              <a href="mailto:office@lasstreffen.at" className="text-white/90 underline underline-offset-2 hover:text-white transition-colors">
+                office@lasstreffen.at
               </a>
             </p>
             <p className="mt-2">

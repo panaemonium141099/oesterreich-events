@@ -14,6 +14,12 @@ export const post: FestivalPost = {
   "ticketUrl": "https://www.oeticket.com/noapp/event/schwarzautaler-wiesn-oktoberfest-2026-schwarzautaler-wiesn-21967187/?affiliate=J70",
   "publishDate": "2026-09-30",
   "updatedDate": "2026-09-30",
+  "factSources": {
+    "checkedAt": "2026-09-30",
+    "urls": [
+      "https://www.oeticket.com/noapp/event/schwarzautaler-wiesn-oktoberfest-2026-schwarzautaler-wiesn-21967187/?affiliate=J70"
+    ]
+  },
   "readingTime": 5,
   "excerpt": "Am 10. Oktober 2026 lädt der Verein „Zukunft Schwarzautal\" zur Schwarzautaler Wies'n: Ballermannstar Carolina, K's Live, Die Gasgeber, Trachtenkapelle und ein eigenes Discozelt in der Südsteiermark.",
   "category": "Musik & Festival",

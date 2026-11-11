@@ -85,7 +85,7 @@ export function NotificationsPageClient() {
   if (loading || !user) {
     return (
       <div className="bg-surface-elevated min-h-screen text-white">
-        <header className="sticky top-0 z-30 bg-surface-elevated/80 backdrop-blur-xl border-b border-white/[0.06]">
+        <header className="sticky top-16 z-20 bg-surface-elevated/80 backdrop-blur-xl border-b border-white/[0.06]">
           <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
             <div className="h-5 w-40 rounded bg-white/[0.06] animate-pulse motion-reduce:animate-none" />
             <div className="h-9 w-9 rounded-lg bg-white/[0.06] animate-pulse motion-reduce:animate-none" />
@@ -117,7 +117,7 @@ export function NotificationsPageClient() {
   return (
     <div className="bg-surface-elevated min-h-screen text-white pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-surface-elevated/80 backdrop-blur-xl border-b border-white/[0.06]">
+      <header className="sticky top-16 z-20 bg-surface-elevated/80 backdrop-blur-xl border-b border-white/[0.06]">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-lg font-bold">Benachrichtigungen</h1>
           <div className="flex items-center gap-3">
