@@ -8,6 +8,20 @@
 import { loadRegistryDe, singleGemeinde, type FeedGroup } from '@/lib/registry-de/load';
 import type { RegistryEntryDe } from '@/lib/registry-de/build';
 
+/**
+ * Seite einer destination.one-Experience (`pages.et4.de`, `pages.destination.one`).
+ * Die Vollerhebung ordnete fünf Gemeinden mit dem Saale-Unstrut-Kalender auf
+ * pages.et4.de der Integration ihrer eigenen Website zu (GeoCMS); lesen kann
+ * diese Seite nur `de-destinationone` (2026-11-11).
+ */
+export function isEt4Page(url: string | null | undefined): boolean {
+  try {
+    return !!url && /^pages\.(et4\.de|destination\.one)$/i.test(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
 export function seitenGruppen(integration: string, entries: RegistryEntryDe[] = loadRegistryDe()): FeedGroup[] {
   const groups = new Map<string, FeedGroup>();
   const group = (raw: string) => {

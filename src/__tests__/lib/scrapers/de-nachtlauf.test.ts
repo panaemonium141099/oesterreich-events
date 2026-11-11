@@ -11,6 +11,7 @@ import { DeFeedScraper } from '@/lib/scrapers/de/feed-scraper';
 import { hostKey, resetHostGate, throughHostGate } from '@/lib/scrapers/de/host-gate';
 import {
   adapterHosts,
+  DE_MAX_ADAPTERS_PER_SHARD,
   DE_NACHTLAUF,
   DE_SHARD_COUNT,
   DE_SOFT_BUDGET_MIN,
@@ -104,6 +105,21 @@ describe('Shard-Aufteilung', () => {
     expect(new Set(shards.flat()).size).toBe(5);
   });
 
+  it('nur gelesene Seiten verbinden: destination.one-Seiten unter GeoCMS gehören zu de-destinationone', () => {
+    const entries = [
+      entry('1', 'geocms', 'https://www.koethen-anhalt.de/de/veranstaltungen.html'),
+      entry('2', 'geocms', 'https://pages.et4.de/de/saale-unstrut-tourismus/wlan/search/Event'),
+      entry('3', 'destinationone', 'https://pages.et4.de/de/wiesau/default/search/Event'),
+    ];
+    const notEt4 = (u: string | null | undefined) => !/pages\.et4\.de/.test(u ?? '');
+    expect([...adapterHosts(['geocms'], entries, notEt4)]).toEqual(['koethen-anhalt.de']);
+    const shards = deShardPlan([
+      { name: 'de-geocms', integrations: ['geocms'], readsPage: notEt4 },
+      { name: 'de-destinationone', integrations: ['destinationone'] },
+    ], 2, entries, () => 10);
+    expect(shards.every(s => s.length === 1)).toBe(true);
+  });
+
   it('echte Registry: jeder Adapter in genau einem Shard, keine Website in zwei Shards', () => {
     const scrapers = deNachtlaufScrapers();
     const shards = Array.from({ length: DE_SHARD_COUNT }, (_, i) => getDeScrapersForShard(i, DE_SHARD_COUNT));
@@ -111,14 +127,14 @@ describe('Shard-Aufteilung', () => {
     const owner = new Map<string, number>();
     shards.forEach((list, i) => {
       for (const s of list) {
-        for (const h of adapterHosts(s.integrations)) {
+        for (const h of adapterHosts(s.integrations, undefined, s.readsPage.bind(s))) {
           if (owner.has(h)) expect(owner.get(h), `${h} (${s.name})`).toBe(i);
           owner.set(h, i);
         }
       }
     });
     // Höchstens so viele Adapter je Shard, wie runAllScrapers gleichzeitig startet.
-    for (const list of shards) expect(list.length).toBeLessThanOrEqual(10);
+    for (const list of shards) expect(list.length).toBeLessThanOrEqual(DE_MAX_ADAPTERS_PER_SHARD);
   });
 });
 

@@ -31,6 +31,13 @@ export abstract class DeFeedScraper extends BaseScraper {
    * Shard-Aufteilung und die Abdeckung je Integration im Bericht.
    */
   abstract readonly integrations: readonly string[];
+  /**
+   * Liest der Adapter diese Kalenderseite seiner Integrationen? Standard ja;
+   * für die Shard-Aufteilung (`adapterHosts`) zählen nur gelesene Seiten.
+   */
+  readsPage(_url: string | null | undefined): boolean {
+    return true;
+  }
   private budgetEnd: number | null = null;
   private budgetLogged = false;
   private cursorOrder: string[] = [];

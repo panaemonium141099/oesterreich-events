@@ -18,7 +18,7 @@ import { DeFeedScraper } from './feed-scraper';
 import { imageUrl, withoutPlaceholderImages } from './bild';
 import { collapseSourceDuplicates, terminContext } from './kontext';
 import { ownTown } from './DesklineDeScraper';
-import { seitenGruppen } from './seiten-gruppen';
+import { isEt4Page, seitenGruppen } from './seiten-gruppen';
 import { et4DetailUrl, et4Embeds, et4SearchUrl, ET4_PAGE_SIZE, parseEt4Page, type Et4Embed, type Et4Termin } from './destinationone';
 
 /** Höchstens so viele Seiten à 500 je Experience (bersenbrueck: 3.850 Datensätze im Jahr, 07.11.2026). */
@@ -61,7 +61,9 @@ export class DestinationOneDeScraper extends DeFeedScraper {
   }
 
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = this.pickGroups(seitenGruppen('destinationone'));
+    // Dazu die Experience-Seiten, die die Registry unter GeoCMS führt (Saale-Unstrut,
+    // fünf Gemeinden); deren Website pages.et4.de liest dieser Adapter ohnehin.
+    const groups = this.pickGroups([...seitenGruppen('destinationone'), ...seitenGruppen('geocms').filter(g => isEt4Page(g.pageUrl))]);
     const today = new Date();
     const from = today.toISOString().slice(0, 10);
     const to = new Date(today.getTime() + 365 * 86_400_000).toISOString().slice(0, 10);

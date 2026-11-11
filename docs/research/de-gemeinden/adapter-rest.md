@@ -10,7 +10,7 @@ Lizenzschlüssel fremder Seiten). Zahlen der Gemeinden aus
 |---|---:|---|---|---|
 | Deskline | 115 + 23 | DW5-Widget, Linkkey aus `tagcontext.js`, WebAPI-JSON | `de-deskline` | bestanden, [adapter-deskline.md](adapter-deskline.md) |
 | destination.one | 119 + 14 | Experience der Seite, `meta.et4.de` JSON | `de-destinationone` | bestanden, [adapter-destinationone.md](adapter-destinationone.md) |
-| GeoCMS | 63 + 3 | HTML-Liste (20 je Seite, `gcevent[pager]`), Detailseite | `de-geocms` | siehe [adapter-geocms.md](adapter-geocms.md) |
+| GeoCMS | 63 + 3 | HTML-Liste in vier Vorlagen, Pager der Seite, Detailseite | `de-geocms` | bestanden, [adapter-geocms.md](adapter-geocms.md) |
 | regiogate (recon CMS) | 38 | HTML-Karten `card--event`, Detailseite | `de-regiogate` | bestanden, [adapter-regiogate.md](adapter-regiogate.md) |
 | ILE/lkrg | 17 | sqronline-JSON je Modul-UUID | `de-lkrg` | bestanden, [adapter-lkrg.md](adapter-lkrg.md) |
 | contentXXL | 24 + 9 | kein eigener Kalender: infomax-Widget (`hamburgwhl.infomaxnet.de/action/widget`, 11 Gemeinden), et4-Experience (`erlebnis-elbe`, `niedersachsen-contenthub`, 4), Detailansicht ohne Termine (Soltau, Bevensen-Ebstorf: 0 Datumsangaben im HTML) | keiner | |

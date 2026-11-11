@@ -42,9 +42,17 @@ export const DE_NACHTLAUF: Readonly<Record<string, string>> = {
   'de-destinationone': 'adapter-destinationone.md',
   'de-lkrg': 'adapter-lkrg.md',
   'de-regiogate': 'adapter-regiogate.md',
+  'de-geocms': 'adapter-geocms.md',
 };
 
 export const DE_SHARD_COUNT = 3;
+
+/**
+ * Höchstens so viele Adapter je Shard: so viele startet `runAllScrapers`
+ * gleichzeitig (`SCRAPER_CONCURRENCY`); ein weiterer wartete, bis einer der
+ * ersten fertig ist, bei 180 min Budget über die Job-Grenze hinaus.
+ */
+export const DE_MAX_ADAPTERS_PER_SHARD = 10;
 
 /**
  * Zeitbudget je Adapter in Minuten (BaseScraper.softDeadline, im Workflow
@@ -89,6 +97,8 @@ const DE_SCRAPER_WEIGHTS: Readonly<Record<string, number>> = {
   'de-destinationone': 10,
   'de-lkrg': 5,
   'de-regiogate': 10,
+  // Prüfstand 11.11.2026: rund 385 Abrufe, gedrosselte Hoster, gut zwei Stunden.
+  'de-geocms': 130,
 };
 const DEFAULT_WEIGHT = 10;
 
@@ -115,7 +125,11 @@ function bareHost(raw: string | null | undefined): string | null {
 }
 
 /** Websites, die ein Adapter laut Registry liest (eigene Kalender und Ausweichwege über Amt/VG). */
-export function adapterHosts(integrations: readonly string[], entries: readonly RegistryEntryDe[] = loadRegistryDe()): Set<string> {
+export function adapterHosts(
+  integrations: readonly string[],
+  entries: readonly RegistryEntryDe[] = loadRegistryDe(),
+  readsPage: (url: string | null | undefined) => boolean = () => true,
+): Set<string> {
   const out = new Set<string>();
   const add = (...raws: (string | null | undefined)[]) => {
     for (const r of raws) {
@@ -124,9 +138,9 @@ export function adapterHosts(integrations: readonly string[], entries: readonly 
     }
   };
   for (const e of entries) {
-    if (integrations.includes(e.integration)) add(e.url, e.feed_url, e.host);
+    if (integrations.includes(e.integration) && readsPage(e.url)) add(e.url, e.feed_url, e.host);
     const f = e.fallback;
-    if (f?.kind === 'verband' && integrations.includes(f.integration)) add(f.url, f.feed_url, f.host);
+    if (f?.kind === 'verband' && integrations.includes(f.integration) && readsPage(f.url)) add(f.url, f.feed_url, f.host);
   }
   return out;
 }
@@ -138,7 +152,7 @@ export function adapterHosts(integrations: readonly string[], entries: readonly 
  * Shard, alle Jobs eines Laufs rechnen dieselbe Zuteilung.
  */
 export function deShardPlan(
-  adapters: readonly { name: string; integrations: readonly string[] }[],
+  adapters: readonly { name: string; integrations: readonly string[]; readsPage?: (url: string | null | undefined) => boolean }[],
   shardCount: number,
   entries: readonly RegistryEntryDe[] = loadRegistryDe(),
   weightOf: (name: string) => number = n => DE_SCRAPER_WEIGHTS[n] ?? DEFAULT_WEIGHT,
@@ -148,7 +162,7 @@ export function deShardPlan(
   const find = (i: number): number => (parent[i] === i ? i : (parent[i] = find(parent[i])));
   const ownerOf = new Map<string, number>();
   adapters.forEach((a, i) => {
-    for (const h of adapterHosts(a.integrations, entries)) {
+    for (const h of adapterHosts(a.integrations, entries, a.readsPage?.bind(a))) {
       const o = ownerOf.get(h);
       if (o === undefined) ownerOf.set(h, i);
       else parent[find(i)] = find(o);
@@ -162,8 +176,14 @@ export function deShardPlan(
   const loads = new Array<number>(shardCount).fill(0);
   const shards: string[][] = Array.from({ length: shardCount }, () => []);
   for (const g of weighted) {
-    let lightest = 0;
-    for (let i = 1; i < shardCount; i++) if (loads[i] < loads[lightest]) lightest = i;
+    // Leichtester Shard, in den die Gruppe noch passt (sonst wartet ein Adapter, bis ein anderer fertig ist).
+    const fits = (i: number) => shards[i].length + g.names.length <= DE_MAX_ADAPTERS_PER_SHARD;
+    let lightest = -1;
+    for (let i = 0; i < shardCount; i++) if (fits(i) && (lightest < 0 || loads[i] < loads[lightest])) lightest = i;
+    if (lightest < 0) {
+      lightest = 0;
+      for (let i = 1; i < shardCount; i++) if (loads[i] < loads[lightest]) lightest = i;
+    }
     shards[lightest].push(...g.names);
     loads[lightest] += g.weight;
   }

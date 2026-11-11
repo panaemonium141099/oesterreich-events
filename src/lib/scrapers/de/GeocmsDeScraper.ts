@@ -12,7 +12,7 @@ import type { ScrapedEvent } from '@/types/events';
 import { DeFeedScraper } from './feed-scraper';
 import { imageCredit, imageUrl, withoutPlaceholderImages } from './bild';
 import { collapseSourceDuplicates, terminContext } from './kontext';
-import { seitenGruppen } from './seiten-gruppen';
+import { isEt4Page, seitenGruppen } from './seiten-gruppen';
 import { ownTown } from './DesklineDeScraper';
 import { geocmsListUrl, geocmsPagerUrls, isGeocmsPage, parseGeocmsDetail, parseGeocmsList, toGeocmsTermin, type GeocmsDetail, type GeocmsRow, type GeocmsTermin } from './geocms';
 
@@ -31,8 +31,13 @@ export class GeocmsDeScraper extends DeFeedScraper {
   readonly integrations = ['geocms'];
   private details = new Map<string, GeocmsDetail | null>();
 
+  /** destination.one-Seiten unter GeoCMS (Saale-Unstrut) liest `de-destinationone`. */
+  readsPage(url: string | null | undefined): boolean {
+    return !isEt4Page(url);
+  }
+
   async scrape(): Promise<ScrapedEvent[]> {
-    const groups = this.pickGroups(seitenGruppen('geocms'));
+    const groups = this.pickGroups(seitenGruppen('geocms').filter(g => this.readsPage(g.pageUrl)));
     const today = new Date();
     const from = today.toISOString().slice(0, 10);
     const to = new Date(today.getTime() + 365 * 86_400_000).toISOString().slice(0, 10);
