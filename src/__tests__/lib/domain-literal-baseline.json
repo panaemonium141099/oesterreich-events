@@ -76,6 +76,9 @@
   "src/app/api/admin/event-submissions/[id]/route.ts": [
     "domain"
   ],
+  "src/app/api/business/lead/route.ts": [
+    "domain"
+  ],
   "src/app/api/checkout/boost/route.ts": [
     "domain"
   ],
