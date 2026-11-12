@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-11-12T15:59:51.840607Z",
+  "depends_on": [],
+  "epic": "fn-31-start-von-lasstreffende-eine-codebasis",
+  "id": "fn-31-start-von-lasstreffende-eine-codebasis.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-31-start-von-lasstreffende-eine-codebasis.1.md",
+  "status": "todo",
+  "title": "Bestandsaufnahme Prod: DE-Zahlen, Index-Stand, Kapazit\u00e4t",
+  "updated_at": "2026-11-12T15:59:52.396441Z"
+}

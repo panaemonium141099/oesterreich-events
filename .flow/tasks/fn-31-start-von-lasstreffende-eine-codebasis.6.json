@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-11-12T15:59:57.565174Z",
+  "depends_on": [
+    "fn-31-start-von-lasstreffende-eine-codebasis.1"
+  ],
+  "epic": "fn-31-start-von-lasstreffende-eine-codebasis",
+  "id": "fn-31-start-von-lasstreffende-eine-codebasis.6",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-31-start-von-lasstreffende-eine-codebasis.6.md",
+  "status": "todo",
+  "title": "Regionsspalten: Migration, Ortsentscheidung mit Schl\u00fcssel, Schreibweg",
+  "updated_at": "2026-11-12T15:59:58.103846Z"
+}

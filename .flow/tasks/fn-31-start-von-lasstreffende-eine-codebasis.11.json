@@ -1,0 +1,18 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-11-12T16:00:03.125421Z",
+  "depends_on": [
+    "fn-31-start-von-lasstreffende-eine-codebasis.5",
+    "fn-31-start-von-lasstreffende-eine-codebasis.7",
+    "fn-31-start-von-lasstreffende-eine-codebasis.9"
+  ],
+  "epic": "fn-31-start-von-lasstreffende-eine-codebasis",
+  "id": "fn-31-start-von-lasstreffende-eine-codebasis.11",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-31-start-von-lasstreffende-eine-codebasis.11.md",
+  "status": "todo",
+  "title": "Hubs f\u00fcr DE: L\u00e4nder und Gemeinden \u00fcber eine Ortsschnittstelle",
+  "updated_at": "2026-11-12T16:00:03.665010Z"
+}

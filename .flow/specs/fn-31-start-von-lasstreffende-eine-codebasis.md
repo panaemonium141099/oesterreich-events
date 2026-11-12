@@ -55,7 +55,7 @@ Leitlinien (verbindlich für jeden Task):
 4. **Keine Multi-Domain-Logik.** `src/middleware.ts`, `next.config.ts` und
    `src/i18n/routing.ts` haben keine Host-Weiche. „lasstreffen.at“ steht 248-mal
    in 100 Dateien unter `src` ohne Tests und Blog-Inhalte (mit beiden 471 in 294).
-   Zentrale Stellen: `SITE_URL` in `src/lib/seo/canonical.ts:22`,
+   Zentrale Stellen: `SITE_ORIGIN` in `src/lib/site-url.ts:3`, `SITE_URL` in `src/lib/seo/canonical.ts:22`,
    `SITEMAP_BASE_URL` in `src/lib/seo/sitemap-xml.ts:12`, `src/app/robots.ts`,
    `src/app/[locale]/layout.tsx` (metadataBase, OpenGraph `de_AT`, JSON-LD
    `inLanguage: 'de-AT'`, Organization). hreflang fest `de-AT`
@@ -165,9 +165,9 @@ entfallen, sie bleiben nicht leer stehen.
 
 ### D. Ortsmodell auf der Seite (DE)
 - **Hubs:** `/[land]` (16 Länder, IDs aus `laender-de.ts`) und
-  `/gemeinde/[slug]` aus `gemeinden-de.json`. Slugs werden wie die AT-Ortsslugs
-  gebaut und eingecheckt (`npm run build:stammdaten:de`): Name, bei Namensgleichheit
-  im Bund mit Kreis-Zusatz, eindeutig und stabil; Wächter-Test auf Eindeutigkeit.
+  `/gemeinde/[slug]` aus `gemeinden-de.json`. Slugs wie bei AT zur Laufzeit als
+  `{plz}-{name}` (`src/lib/gemeinden/data.ts`), für DE mit der Amts-PLZ; Wächter-Test
+  auf Eindeutigkeit über alle Gemeinden.
   `landing-slugs.ts` und die Hub-Loader lesen Länder und Gemeinden über eine
   Schnittstelle je Land (Erweiterung von `ortsdatenFor`), nicht über
   AT-Konstanten.
