@@ -3,6 +3,10 @@ import { NextResponse, type NextRequest } from 'next/server';
 import createIntlMiddleware from 'next-intl/middleware';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { routing } from '@/i18n/routing';
+import { everythingEnabled, isPathEnabled } from '@/lib/site/features';
+
+/** lasstreffen.at spielt alles aus: dort wird kein Pfad geprüft. */
+const SITE_GATED = !everythingEnabled();
 
 /**
  * Supabase session refresh middleware — with a critical SEO bypass.
@@ -136,6 +140,19 @@ function readSessionExpiry(request: NextRequest): number | null {
 const REFRESH_MARGIN_S = 120;
 
 export async function middleware(request: NextRequest) {
+  // fn-31: Säulen, die diese Seite nicht ausspielt (Feature-Matrix in
+  // src/lib/site/), antworten 404: API als JSON, Seiten über die
+  // Nicht-gefunden-Seite. Auch /en, wenn die Seite kein Englisch führt.
+  if (SITE_GATED && !isPathEnabled(request.nextUrl.pathname)) {
+    if (request.nextUrl.pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Not Found' }, { status: 404 });
+    }
+    const target = request.nextUrl.clone();
+    target.pathname = '/__nicht-auf-dieser-seite';
+    target.search = '';
+    return NextResponse.rewrite(target, { status: 404 });
+  }
+
   // ─── Rate-Limiting für /api/* ────────────────────────────────────
   // Schutz gegen einfache Scraper-Bots + bug-induzierte Loops + Bill-Spike.
   // Per-Function-Instance (Map<ip, bucket>) — gut genug als erstes Level,

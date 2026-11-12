@@ -6,6 +6,7 @@ import { V4Logo } from './V4Logo';
 import { V4TopNavAuth } from './V4TopNavAuth';
 import { V4SearchInput } from './V4SearchInput';
 import { V4LocaleSwitcher } from './V4LocaleSwitcher';
+import { isPathEnabled } from '@/lib/site/features';
 
 /**
  * V4TopNav — global sticky top navigation introduced in v4 redesign Phase 1.
@@ -72,7 +73,7 @@ export function V4TopNav() {
         </Link>
 
         <nav className="hidden md:flex gap-0.5 ml-3.5" aria-label={t('mainNav')}>
-          {NAV_ITEMS.map(item => {
+          {NAV_ITEMS.filter(entry => isPathEnabled(entry.href)).map(item => {
             const active = isActive(pathname, item.matches);
             return (
               <Link

@@ -30,6 +30,7 @@ import {
   SITEMAP_EVENTS_SHARD_COUNT,
   sitemapEventsShardPath,
 } from '@/lib/seo/sitemap-events-shard';
+import { isPathEnabled } from '@/lib/site/features';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 300;
@@ -44,7 +45,8 @@ export async function GET(): Promise<NextResponse> {
     })),
     { loc: `${SITEMAP_BASE_URL}/sitemap-activities.xml`, lastmod },
   ];
-  const body = renderSitemapIndex(sitemaps);
+  const enabled = sitemaps.filter(s => isPathEnabled(s.loc.slice(SITEMAP_BASE_URL.length)));
+  const body = renderSitemapIndex(enabled);
 
-  return new NextResponse(body, { headers: sitemapResponseHeaders(sitemaps.length) });
+  return new NextResponse(body, { headers: sitemapResponseHeaders(enabled.length) });
 }
