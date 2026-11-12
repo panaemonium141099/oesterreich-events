@@ -22,9 +22,8 @@
 - [ ] Ausnahmeliste des Domain-Wächters enthält nur noch Rechtstexte, Blog-Inhalte, Tests, User-Agents
 - [ ] Überlagerungs-Wächter grün
 ## Done summary
-TBD
-
+Nachrichten-Ueberlagerung je Seite (messages/de.DE.json, 23 Texte, Marke automatisch), DE_LOCALE statt festem de-AT in 97 Dateien, Domain/Marke/Kontakt im Kern aus getSite(). Domain-Waechter mit begruendeten Ausnahmen statt Liste. Offen: Hub-Einleitungen je Bundesland (AT-Schluessel, fuer DE in fn-31.11), Rechts- und Ueber-uns-Texte (fn-31.13), Mails und Crons bleiben AT.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 6f08a186
+- Tests: npx vitest run (4636 gruen, lokal nur die drei Windows-Faelle rot), SITE_COUNTRY=DE: 41 gruen
 - PRs:
