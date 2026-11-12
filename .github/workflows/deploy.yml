@@ -1,17 +1,41 @@
 name: deploy
 
-# fn-20: Push auf master -> Hetzner-Server baut und startet die App neu.
-# Ersetzt das Vercel-Auto-Deploy. deploy.sh liegt auf dem Server
-# (/opt/app/deploy.sh): git reset auf origin/master, docker compose build/up.
+# fn-20: Push auf master -> die App wird gebaut und auf dem Hetzner-Server neu
+# gestartet. Ersetzt das Vercel-Auto-Deploy.
+#
+# Zwei Wege, gewählt über die Repository-Variable DEPLOY_BUILD:
+#   (leer)   Der Server baut selbst: /opt/app/deploy.sh (git reset auf
+#            origin/master, docker compose build/up). Stand bis fn-31.14.
+#   runner   Der Runner baut das Image (scripts/deploy/build-image.sh) und
+#            schickt es dem Server, der es nur lädt und startet
+#            (/opt/app/deploy-image.sh, Vorlage in docs/ops/server/). Auf dem
+#            Server baut dann nichts mehr neben der Datenbank (MASTERPLAN §3.15).
+# Umstellen erst, wenn deploy-image.sh auf dem Server liegt (docs/ops/server/README.md).
+#
+# Von Hand (workflow_dispatch): `build_only` baut das Image im Runner, ohne zu
+# deployen (Probe vor der Umstellung, auch für `site: DE`).
 
 on:
   push:
     branches: [master]
   workflow_dispatch:
+    inputs:
+      build_only:
+        description: 'Nur im Runner bauen, nichts deployen'
+        type: boolean
+        default: false
+      site:
+        description: 'Land der Seite (nur mit build_only)'
+        type: choice
+        options: [AT, DE]
+        default: AT
 
 concurrency:
   group: deploy
   cancel-in-progress: false
+
+env:
+  SERVER: root@157.180.42.4
 
 jobs:
   # Kein Deploy mit roten Tests (Wächter für Ortsdaten, Taxonomie, Kodierung …).
@@ -23,14 +47,42 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Deploy via SSH
+      - name: SSH-Schlüssel
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh -o StrictHostKeyChecking=accept-new root@157.180.42.4 '/opt/app/deploy.sh'
+          ssh -o StrictHostKeyChecking=accept-new "$SERVER" true
+
+      # ── Weg 1: der Server baut selbst (Standard) ─────────────────────────
+      - name: Deploy via SSH (Server baut)
+        if: ${{ vars.DEPLOY_BUILD != 'runner' && !inputs.build_only }}
+        run: ssh "$SERVER" '/opt/app/deploy.sh'
+
+      # ── Weg 2: der Runner baut, der Server lädt nur ──────────────────────
+      - uses: actions/checkout@v4
+        if: ${{ vars.DEPLOY_BUILD == 'runner' || inputs.build_only }}
+
+      # Die Laufzeit-Env des Servers liefert die NEXT_PUBLIC_*-Werte und die
+      # Schlüssel für das Vorrendern. Sie liegt nur für diesen Job auf dem
+      # Runner, außerhalb des Build-Kontexts, und wird am Ende gelöscht.
+      - name: Image im Runner bauen
+        if: ${{ vars.DEPLOY_BUILD == 'runner' || inputs.build_only }}
+        env:
+          SITE_COUNTRY: ${{ inputs.site || 'AT' }}
+        run: |
+          umask 077
+          scp -q "$SERVER:/opt/app/.env.master" "$RUNNER_TEMP/buildenv"
+          bash scripts/deploy/build-image.sh "$RUNNER_TEMP/buildenv" lasstreffen-app:latest
+          rm -f "$RUNNER_TEMP/buildenv"
+
+      - name: Image an den Server schicken und starten
+        if: ${{ vars.DEPLOY_BUILD == 'runner' && !inputs.build_only }}
+        run: |
+          docker save lasstreffen-app:latest | gzip -1 \
+            | ssh "$SERVER" "gunzip -c | /opt/app/deploy-image.sh '${GITHUB_SHA::7}'"
 
       # Die Startseite wird beim Build vorgerendert; scheitert dort eine
       # Abfrage am statement_timeout (Build rendert hunderte Seiten
@@ -46,8 +98,9 @@ jobs:
       # auch nach ISR-Guard und Reboot); dieser Schritt bleibt als Beleg im
       # Deploy-Log.
       - name: Startseite nach dem Build neu rendern
+        if: ${{ !inputs.build_only }}
         run: |
-          ssh -o StrictHostKeyChecking=accept-new root@157.180.42.4 '
+          ssh "$SERVER" '
             set -eu
             secret=$(sed -n "s/^CRON_SECRET=//p" /opt/app/.env.master | tr -d "\r\"\047")
             curl -fsS -H "Authorization: Bearer $secret" http://127.0.0.1:3000/api/cron/revalidate-landing
