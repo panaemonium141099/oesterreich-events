@@ -47,6 +47,13 @@ import { startWorkflowRun, finishWorkflowRun, type WorkflowItem } from '../lib/r
 import { inputFromStoredRow, repeatabilityOf, STORED_LOCATION_COLUMNS, type StoredEventLocationRow } from '../lib/location/re-resolve';
 import { resolveEventLocation } from '../lib/location/resolver';
 import { loadLocationEvidence } from '../lib/location/evidence';
+import { forCountry, pipelineCountry } from '../lib/pipeline/pipeline-country';
+
+/**
+ * Land des Laufs: der Audit zählt nur dessen Zeilen. Ohne den Filter
+ * machten 1.021 neue DE-Konflikte den AT-Audit rot (2026-11-12, AT selbst: 6).
+ */
+const COUNTRY = pipelineCountry();
 
 const NEW_CONFLICTS_ALARM = 500;
 const DRIFT_ALARM = 200;
@@ -54,7 +61,7 @@ const DRIFT_ALARM = 200;
 const COMPARABLE_MIN_SHARE = 0.5;
 
 async function countWhere(sb: SupabaseClient, apply: (q: ReturnType<SupabaseClient['from']>['select'] extends never ? never : any) => any): Promise<number> {
-  const base = sb.from('events').select('id', { count: 'exact', head: true }).gte('start_date', new Date().toISOString()).in('publish_status', ['published', 'published_low_confidence', 'needs_review']);
+  const base = forCountry(sb.from('events').select('id', { count: 'exact', head: true }), COUNTRY).gte('start_date', new Date().toISOString()).in('publish_status', ['published', 'published_low_confidence', 'needs_review']);
   const { count, error } = await apply(base);
   if (error) throw new Error(error.message);
   return count ?? 0;
@@ -84,15 +91,15 @@ async function main() {
     // AUF conflict gewechselt ist (location_status_changed_at). Nicht
     // updated_at: das fasst der Score-Lauf jede Nacht an.
     const since = new Date(Date.now() - 86400000).toISOString();
-    const { count: newConflicts, error: e1 } = await sb
-      .from('events').select('id', { count: 'exact', head: true })
+    const { count: newConflicts, error: e1 } = await forCountry(sb
+      .from('events').select('id', { count: 'exact', head: true }), COUNTRY)
       .gte('start_date', new Date().toISOString()).eq('location_status', 'conflict').gte('location_status_changed_at', since);
     if (e1) errors.push(`neue Konflikte: ${e1.message}`);
     metrics['Konflikte neu (24 h)'] = newConflicts ?? 0;
 
     // Verbreitung: häufigste Konflikt-Gruppen (Quelle + Rohname)
-    const { data: conflictRows } = await sb
-      .from('events').select('source_name, location_name_raw, location_name, start_date')
+    const { data: conflictRows } = await forCountry(sb
+      .from('events').select('source_name, location_name_raw, location_name, start_date'), COUNTRY)
       .gte('start_date', new Date().toISOString()).eq('location_status', 'conflict').order('start_date', { ascending: true }).limit(1000);
     const groups = new Map<string, { n: number; next: string }>();
     for (const r of (conflictRows ?? []) as Array<{ source_name: string; location_name_raw: string | null; location_name: string | null; start_date: string }>) {
@@ -110,8 +117,8 @@ async function main() {
     metrics['Altbestand mit Pin ohne Entscheidung'] = await countWhere(sb, q => q.is('location_status', null).not('latitude', 'is', null));
 
     // Wiederholbarkeit: Stichprobe erneut entscheiden
-    const { data: sample } = await sb
-      .from('events').select(STORED_LOCATION_COLUMNS)
+    const { data: sample } = await forCountry(sb
+      .from('events').select(STORED_LOCATION_COLUMNS), COUNTRY)
       .gte('start_date', new Date().toISOString()).not('raw_event_id', 'is', null).not('location_status', 'is', null)
       .order('updated_at', { ascending: false }).limit(300);
     const rows = (sample ?? []) as unknown as StoredEventLocationRow[];
@@ -130,8 +137,8 @@ async function main() {
     metrics['Wiederholbarkeit %'] = comparable ? Math.round((1000 * (comparable - drift)) / comparable) / 10 : 100;
 
     // Drift im Bestand: geänderte Entscheidung in 24 h (Näherung über updated_at + Status)
-    const { count: changed24, error: e2 } = await sb
-      .from('events').select('id', { count: 'exact', head: true })
+    const { count: changed24, error: e2 } = await forCountry(sb
+      .from('events').select('id', { count: 'exact', head: true }), COUNTRY)
       .gte('start_date', new Date().toISOString()).gte('updated_at', since).not('location_status', 'is', null);
     if (e2) errors.push(`Drift: ${e2.message}`);
     metrics['Entscheidungen geschrieben (24 h)'] = changed24 ?? 0;

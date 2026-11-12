@@ -73,4 +73,14 @@ describe('Wächter: jeder Landesschritt filtert sein Land', () => {
     expect(src).toMatch(/pipelineCountry\(/);
     expect(src).toMatch(/forCountry\(/);
   });
+
+  // Der Ortsaudit läuft nur im AT-Lauf, liest aber events: ohne Filter
+  // machten 1.021 neue DE-Konflikte den AT-Audit rot (2026-11-12, AT: 6).
+  it('location-metrics zählt nur das Land des Laufs, keine events-Abfrage ohne Filter', () => {
+    const src = readFileSync(join(process.cwd(), 'src/scripts/location-metrics.ts'), 'utf8');
+    const queries = src.match(/\.from\('events'\)/g) ?? [];
+    const scoped = src.match(/forCountry\(sb\s*\.from\('events'\)/g) ?? [];
+    expect(queries.length).toBeGreaterThan(0);
+    expect(scoped.length).toBe(queries.length);
+  });
 });
