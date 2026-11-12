@@ -27,7 +27,7 @@ import { escapeHtml } from '@/lib/utils/escape-html';
 
 export const dynamic = 'force-dynamic';
 
-const NOTIFY_TO = process.env.BUSINESS_LEADS_EMAIL || 'dev@glatzdev.com';
+const NOTIFY_TO = process.env.BUSINESS_LEADS_EMAIL || 'office@lasstreffen.at';
 
 /** 5 Inserate pro Stunde und IP. Genug für einen Veranstalter, der eine
  *  Reihe von Terminen einträgt; zu wenig für eine Spam-Welle. */

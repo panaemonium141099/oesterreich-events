@@ -733,10 +733,12 @@ Liste `BOXES` im Setup-Skript, jedes sendet nur unter der eigenen Adresse,
 Beleg: support-Login mit Absender `office@` 553). Die Website nennt seither
 `office@lasstreffen.at` als Kontakt (Footer, Impressum, Datenschutz, AGB,
 Über uns, Quellen, Für Firmen, Boost-Erfolgsseite) und `support@lasstreffen.at`
-im Entwicklungs-Hinweis der Startseite (`DevNotice`). Unverändert an
-`dev@glatzdev.com`: die Benachrichtigungen der Formulare
-(`BUSINESS_LEADS_EMAIL` in `/api/business/lead` und `/api/events/inserat`)
-und der VAPID-Kontakt der Push-Nachrichten.
+im Entwicklungs-Hinweis der Startseite (`DevNotice`). Seit 12.11. gehen auch
+die Benachrichtigungen der Formulare (`/api/business/lead` und
+`/api/events/inserat`) an `office@lasstreffen.at`: das ist der Standard im
+Code, `BUSINESS_LEADS_EMAIL` überschreibt ihn und ist auf dem Server nicht
+gesetzt. Unverändert an `dev@glatzdev.com`: der VAPID-Kontakt der
+Push-Nachrichten und die Alarm-Mails des Wächters (`ALERT_EMAIL`).
 
 **Offen:** kein Spamfilter; `/var/vmail` ist in keinem Backup; der Wächter
 (`lt-watchdog`) prüft die Maildienste nicht.
