@@ -25,9 +25,8 @@ Land und Domain an genau einer Stelle. Neues Modul `src/lib/site/` mit `getSite(
 - [ ] AT-Verhalten unverändert: Typprüfung und volle Suite ohne angepasste Erwartungen außer dem Wächter
 - [ ] CI führt den DE-Lauf aus
 ## Done summary
-TBD
-
+Site-Modul src/lib/site/ mit getSite(); SITE_COUNTRY, SITE_ORIGIN, SITE_URL lesen daraus. SITE_COUNTRY zur Build-Zeit (next.config env, Dockerfile-ARG), Standard AT. Waechter und CI-Lauf mit SITE_COUNTRY=DE. Features der Site folgen in Task 5.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 077e8b2b
+- Tests: npx vitest run (4605 gruen; 3 Dateien lokal rot, auch ohne die Aenderung), SITE_COUNTRY=DE npx vitest run site.test.ts site-country-guard.test.ts (15 gruen)
 - PRs:
