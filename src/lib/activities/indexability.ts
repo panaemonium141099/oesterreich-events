@@ -22,7 +22,7 @@ import { getSite } from '@/lib/site';
 
 export const MIN_INDEXABLE_DESCRIPTION_LENGTH = 200;
 
-const ACTIVITY_BASE_URL = 'https://lasstreffen.at';
+const ACTIVITY_BASE_URL = getSite().url;
 
 /** Eingabe-Sicht des Gates (Teilmenge einer poi_activities-Row). */
 export interface ActivityIndexabilityInput {

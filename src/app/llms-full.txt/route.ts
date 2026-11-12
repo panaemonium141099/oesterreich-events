@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { ALL_GEMEINDEN } from '@/lib/gemeinden/data';
 import { ALL_THEMES } from '@/lib/themes/data';
 import { ALL_POSTS } from '@/content/blog';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 /**
  * /llms-full.txt — extended AI-agent-readable site map.
@@ -103,7 +104,7 @@ function buildBody(): string {
   );
 
   for (const bl of orderedBundeslaender) {
-    const list = (byBundesland.get(bl) ?? []).slice().sort((a, b) => a.name.localeCompare(b.name, 'de-AT'));
+    const list = (byBundesland.get(bl) ?? []).slice().sort((a, b) => a.name.localeCompare(b.name, DE_LOCALE));
     if (list.length === 0) continue;
     parts.push(`### ${bl} (${list.length})\n`);
     for (const g of list) {
@@ -117,7 +118,7 @@ function buildBody(): string {
   // ─── Blog posts ───
   parts.push(`## Editorial blog (${ALL_POSTS.length} festival + event guides)\n`);
   const sortedPosts = ALL_POSTS.slice().sort((a, b) =>
-    (a.title ?? '').localeCompare(b.title ?? '', 'de-AT'),
+    (a.title ?? '').localeCompare(b.title ?? '', DE_LOCALE),
   );
   for (const post of sortedPosts) {
     const subtitle = post.subtitle?.trim() ?? '';

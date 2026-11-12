@@ -1,9 +1,10 @@
 import { ImageResponse } from 'next/og';
 import { loadGoogleFont } from '@/lib/og-fonts';
+import { getSite } from '@/lib/site';
 
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
-export const alt = 'LassTreffen.at — Entdecke was los ist in Österreich';
+export const alt = `${getSite().brand} — Entdecke was los ist in ${getSite().countryName.de}`;
 
 /**
  * Open Graph / social preview card. What people see when they share a
@@ -19,11 +20,11 @@ export default async function Image() {
   // Every glyph that appears on the rendered card — merged superset so
   // Google returns a single TTF subset we can hand to Satori. Keep this
   // in sync with the text literals in the JSX below.
-  const frauncesText = 'LassTreffen.· Österreich0123456789seit';
+  const site = getSite();
+  const frauncesText = `LassTreffen.· ${site.countryName.de}0123456789seit`;
   const geistText =
-    'LASS TREFFEN · ÖSTERREICH lasstreffen.at ' +
-    'Events in Wien, Graz, Salzburg und ganz Österreich — ' +
-    '85 000 Events & Ausflugsziele auf einer Karte. ' +
+    `LASS TREFFEN · ${site.countryName.de.toUpperCase()} ${site.domain} ` +
+    `${site.tagline} ` +
     'Gemeinsam hingehen gemeinsam planen';
 
   const [frauncesRegular, frauncesItalic, geist, geistMedium] = await Promise.all([
@@ -76,9 +77,9 @@ export default async function Image() {
             >
               L
             </span>
-            <span>Lass Treffen · Österreich</span>
+            <span>Lass Treffen · {site.countryName.de}</span>
           </div>
-          <div>lasstreffen.at</div>
+          <div>{site.domain}</div>
         </div>
 
         {/* Hero wordmark — Fraunces display */}
@@ -118,8 +119,7 @@ export default async function Image() {
               lineHeight: 1.45,
             }}
           >
-            Events in Wien, Graz, Salzburg und ganz Österreich —
-            85&thinsp;000 Events & Ausflugsziele auf einer Karte.
+            {site.tagline}
           </div>
         </div>
 

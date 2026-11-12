@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/supabase/auth-context';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { toast } from 'sonner';
 import { EVENT_TZ, viennaDayStart, viennaToday } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface SavedEvent {
   id: string;
@@ -420,7 +421,7 @@ function EmptyState({ tab, hasAnyInTab }: { tab: Tab; hasAnyInTab: boolean }) {
 
 function formatDateDE(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString('de-AT', {
+    return new Date(iso).toLocaleDateString(DE_LOCALE, {
       weekday: 'short',
       day: 'numeric',
       month: 'long',

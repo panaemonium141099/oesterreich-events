@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { getSite } from '@/lib/site';
 
 export const revalidate = 86400;
 
@@ -8,14 +9,14 @@ export const metadata: Metadata = {
   description:
     'LassTreffen.at ist die unabhängige Event-Discovery-Plattform für Österreich. Wer wir sind, wie wir Veranstaltungen sammeln und kuratieren, und warum wir diese Plattform gebaut haben.',
   alternates: {
-    canonical: 'https://lasstreffen.at/ueber-uns',
+    canonical: `${getSite().url}/ueber-uns`,
   },
   openGraph: {
     title: 'Über LassTreffen.at',
     description:
       'Eine unabhängige, von einem Studenten entwickelte Plattform, die österreichische Veranstaltungen auf einer interaktiven Karte bündelt.',
     type: 'website',
-    url: 'https://lasstreffen.at/ueber-uns',
+    url: `${getSite().url}/ueber-uns`,
   },
 };
 

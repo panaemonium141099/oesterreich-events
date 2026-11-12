@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { AvatarStack } from './primitives';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { formatTime } from '@/lib/utils/date';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 // fn-15.5: motion-lib `motion.div + variants={riseItem}` replaced by
 // the global `animate-fade-in-up` CSS class. The arrow hover-shift is
@@ -41,8 +42,8 @@ interface PlanCardProps {
 function formatDateLine(dateStr: string | null): { day: string; month: string; time: string | null } | null {
   if (!dateStr) return null;
   const d = new Date(dateStr);
-  const day = d.toLocaleDateString('de-AT', { day: '2-digit', timeZone: EVENT_TZ });
-  const month = d.toLocaleDateString('de-AT', { month: 'short', timeZone: EVENT_TZ }).replace('.', '').toUpperCase();
+  const day = d.toLocaleDateString(DE_LOCALE, { day: '2-digit', timeZone: EVENT_TZ });
+  const month = d.toLocaleDateString(DE_LOCALE, { month: 'short', timeZone: EVENT_TZ }).replace('.', '').toUpperCase();
   const time = formatTime(dateStr);
   return { day, month, time };
 }

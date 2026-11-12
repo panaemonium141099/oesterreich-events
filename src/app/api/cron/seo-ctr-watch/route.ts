@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { collectCtrFindings, type CtrFindings } from '@/lib/seo/ctr-findings';
 import { sendGenericEmail } from '@/lib/email';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 /**
  * Täglicher CTR-Wächter (2026-09-01).
@@ -34,7 +35,7 @@ function pct(n: number): string {
 }
 
 function num(n: number): string {
-  return Math.round(n).toLocaleString('de-AT');
+  return Math.round(n).toLocaleString(DE_LOCALE);
 }
 
 const TYPE_LABELS: Record<string, string> = {

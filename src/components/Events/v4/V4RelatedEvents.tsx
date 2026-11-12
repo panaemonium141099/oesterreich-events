@@ -30,6 +30,7 @@ import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
 import type { Event } from '@/types/events';
 import { formatEventDate } from '@/lib/utils/event-time';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 /**
  * Effektives Bundesland: DB-Wert, sonst deterministisch aus der PLZ.
@@ -242,7 +243,7 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
     getTranslations('EventDetail'),
     getLocale(),
   ]);
-  const dateFmt = locale === 'de' ? 'de-AT' : 'en-GB';
+  const dateFmt = locale === 'de' ? DE_LOCALE : 'en-GB';
   const hubs = hubLinksFor(event);
   const bl = effectiveBundesland(event);
 

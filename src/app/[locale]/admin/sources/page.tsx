@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { useRouter } from 'next/navigation';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface SourceMetrics {
   source_name: string;
@@ -55,7 +56,7 @@ export default function AdminSourcesPage() {
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '-';
-    return new Date(dateStr).toLocaleDateString('de-AT', {
+    return new Date(dateStr).toLocaleDateString(DE_LOCALE, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -200,7 +201,7 @@ export default function AdminSourcesPage() {
                         {s.source_name}
                       </td>
                       <td className="px-4 py-3 text-right text-white/60 tabular-nums">
-                        {s.event_count.toLocaleString('de-AT')}
+                        {s.event_count.toLocaleString(DE_LOCALE)}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <span
@@ -216,7 +217,7 @@ export default function AdminSourcesPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right text-white/40 tabular-nums hidden sm:table-cell">
-                        {s.venue_match_count.toLocaleString('de-AT')}
+                        {s.venue_match_count.toLocaleString(DE_LOCALE)}
                       </td>
                       <td className="px-4 py-3 text-right text-white/30 text-xs hidden md:table-cell">
                         {formatDate(s.earliest_event)}

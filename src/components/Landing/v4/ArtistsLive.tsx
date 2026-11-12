@@ -32,6 +32,7 @@ import { EVENT_TZ, addViennaDays, formatEventDate, parseEventDate, toViennaDate,
 import { ARTISTS_LIVE_ROWS, mergeArtistsLive } from '@/lib/v4/followed-live';
 import type { LandingArtistLive } from '@/lib/v4/landing-picks';
 import type { Event } from '@/types/events';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface MeLandingLive {
   signedIn: boolean;
@@ -45,7 +46,7 @@ type Translate = (key: string, values?: Record<string, string | number>) => stri
 export function artistWhenLabel(event: Event, locale: string, t: Translate, now: Date = new Date()): string {
   const d = parseEventDate(event.start_date);
   if (!d) return event.location_name ?? '';
-  const intl = locale === 'de' ? 'de-AT' : 'en-GB';
+  const intl = locale === 'de' ? DE_LOCALE : 'en-GB';
   const day = toViennaDate(d);
   const today = viennaToday(now);
   const dayLabel = day === today

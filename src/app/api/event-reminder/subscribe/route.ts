@@ -13,6 +13,7 @@ import { sendGenericEmail } from '@/lib/email';
 import { isPlausibleEmail, reminderToken, reminderConfirmMailHtml } from '@/lib/event-reminder';
 import { publicOrigin } from '@/lib/site-url';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,7 +83,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Eintragen fehlgeschlagen — bitte später erneut versuchen.' }, { status: 503 });
   }
 
-  const dateLabel = new Intl.DateTimeFormat('de-AT', {
+  const dateLabel = new Intl.DateTimeFormat(DE_LOCALE, {
     weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Vienna',
   }).format(new Date(event.start_date));
   // Ohne Signier-Secret koennen wir keinen gueltigen Bestaetigungslink

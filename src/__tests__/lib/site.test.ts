@@ -43,7 +43,8 @@ describe('SITES', () => {
   });
 
   it('Österreich bleibt, wie es war', () => {
-    const { features, ...rest } = SITES.AT;
+    const { features, tagline, ...rest } = SITES.AT;
+    expect(tagline).toContain('Österreich');
     expect(Object.values(features).every(Boolean)).toBe(true);
     expect(rest).toEqual({
       country: 'AT',
@@ -55,6 +56,7 @@ describe('SITES', () => {
       ogLocale: 'de_AT',
       locales: ['de', 'en'],
       timeZone: 'Europe/Vienna',
+      contact: { office: 'office@lasstreffen.at', support: 'support@lasstreffen.at' },
     });
   });
 });

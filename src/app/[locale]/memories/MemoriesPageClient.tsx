@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface Memory {
   id: string;
@@ -293,7 +294,7 @@ export function MemoriesPageClient() {
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('de-AT', {
+    return new Date(dateStr).toLocaleDateString(DE_LOCALE, {
       day: 'numeric', month: 'long', year: 'numeric',
       timeZone: EVENT_TZ,
     });

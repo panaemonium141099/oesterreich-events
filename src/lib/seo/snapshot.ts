@@ -17,11 +17,12 @@ import { createClient } from '@supabase/supabase-js';
 import { searchAnalytics, listSitemaps } from './gsc';
 import { fetchVitalsSummary, type VitalsSummary } from './crux';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { getSite } from '@/lib/site';
 
-export const SITE_URL = 'https://lasstreffen.at';
+export const SITE_URL: string = getSite().url;
 /** GSC siteUrl property form — sc-domain for domain-level verification,
  *  otherwise the protocol+host. Domain-level gives us www + apex in one. */
-export const GSC_SITE_URL = 'sc-domain:lasstreffen.at';
+export const GSC_SITE_URL = `sc-domain:${getSite().domain}`;
 
 export interface SeoSnapshotMetrics {
   // ── Search Console, last-28-day window ending on the snapshot date ──

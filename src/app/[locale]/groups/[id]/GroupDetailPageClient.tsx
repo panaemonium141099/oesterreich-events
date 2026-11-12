@@ -43,6 +43,7 @@ import { PlanSettingsDrawer } from '@/components/Planer/detail/PlanSettingsDrawe
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { formatTime as formatStartTime } from '@/lib/utils/date';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 // fn-15.5: motion-lib staggerContainer/riseItem/EASE_OUT_EXPO replaced
 // with the global `.stagger-children` CSS helper and plain divs. The
@@ -612,19 +613,19 @@ export function GroupDetailPageClient() {
   const formatDateTime = (dateStr: string | null) => {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    const weekday = d.toLocaleDateString('de-AT', { weekday: 'long', timeZone: EVENT_TZ });
-    const date = d.toLocaleDateString('de-AT', { day: 'numeric', month: 'long', timeZone: EVENT_TZ });
+    const weekday = d.toLocaleDateString(DE_LOCALE, { weekday: 'long', timeZone: EVENT_TZ });
+    const date = d.toLocaleDateString(DE_LOCALE, { day: 'numeric', month: 'long', timeZone: EVENT_TZ });
     const time = formatStartTime(dateStr);
     return time ? `${weekday}, ${date} · ${time}` : `${weekday}, ${date}`;
   };
-  const formatTime = (dateStr: string) => new Date(dateStr).toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ });
+  const formatTime = (dateStr: string) => new Date(dateStr).toLocaleTimeString(DE_LOCALE, { hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ });
   const formatRelativeTime = (dateStr: string) => {
     const d = new Date(dateStr);
     const diff = Date.now() - d.getTime();
     if (diff < 60000) return 'gerade';
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h`;
-    return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', timeZone: EVENT_TZ });
+    return d.toLocaleDateString(DE_LOCALE, { day: 'numeric', month: 'short', timeZone: EVENT_TZ });
   };
 
   // ─── Derived ───

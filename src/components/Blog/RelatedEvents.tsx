@@ -37,6 +37,7 @@ import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import type { RelatedEventsSpec } from '@/content/blog/types';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 const MAX_EVENTS = 6;
 /** Sonst zeigt die Sektion sechsmal Wien. */
@@ -83,7 +84,7 @@ function anonClient() {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('de-AT', {
+  return new Date(iso).toLocaleDateString(DE_LOCALE, {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
@@ -94,7 +95,7 @@ function formatDate(iso: string): string {
 
 function formatPrice(e: RelatedEvent): string | null {
   if (e.price_min != null && e.price_min > 0) {
-    return `ab ${e.price_min.toLocaleString('de-AT', { maximumFractionDigits: 0 })} €`;
+    return `ab ${e.price_min.toLocaleString(DE_LOCALE, { maximumFractionDigits: 0 })} €`;
   }
   const t = e.price_text?.trim();
   if (!t) return null;

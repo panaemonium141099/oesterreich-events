@@ -16,11 +16,12 @@ import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { formatEventDate } from '@/lib/utils/event-time';
 import type { LandingSeason } from '@/lib/v4/get-landing-data';
 import { SeasonWeather } from './SeasonWeather';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export function SeasonCard({ season, className }: { season: LandingSeason; className?: string }) {
   const t = useTranslations('Landing.Season');
   const locale = useLocale();
-  const intl = locale === 'de' ? 'de-AT' : 'en-GB';
+  const intl = locale === 'de' ? DE_LOCALE : 'en-GB';
 
   return (
     <aside

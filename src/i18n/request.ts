@@ -1,6 +1,8 @@
 import { getRequestConfig } from 'next-intl/server';
 import { hasLocale } from 'next-intl';
 import { routing } from './routing';
+import { loadMessages } from './messages';
+import { getSite } from '@/lib/site';
 
 /**
  * Server-seitige Message-Auflösung pro Request. Der `locale`-Wert kommt
@@ -15,6 +17,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   return {
     locale,
-    messages: (await import(`../../messages/${locale}.json`)).default,
+    // fn-31: Basis plus Überlagerung der Seite (für lasstreffen.at die Basis).
+    messages: await loadMessages(locale, getSite()),
   };
 });

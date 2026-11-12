@@ -15,6 +15,7 @@ import type { ReactNode } from 'react';
 import type { Event } from '@/types/events';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { formatTime } from '@/lib/utils/date';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 // ─────────────────────────────────────────────────────────────
 // Event-Summary — kompakt, oben in jedem Wizard-Step
@@ -30,7 +31,7 @@ function formatEventDate(iso: string): string {
   try {
     const d = new Date(iso);
     if (isNaN(d.getTime())) return '';
-    return d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'long', timeZone: EVENT_TZ });
+    return d.toLocaleDateString(DE_LOCALE, { weekday: 'short', day: 'numeric', month: 'long', timeZone: EVENT_TZ });
   } catch { return ''; }
 }
 

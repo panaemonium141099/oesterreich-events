@@ -10,6 +10,7 @@ import { EventImage } from '@/components/Events/EventImage';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface Photo {
   id: string;
@@ -198,14 +199,14 @@ export function MemoryDetailPageClient() {
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('de-AT', {
+    return new Date(dateStr).toLocaleDateString(DE_LOCALE, {
       day: 'numeric', month: 'long', year: 'numeric',
       timeZone: EVENT_TZ,
     });
   };
 
   const formatDateTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('de-AT', {
+    return new Date(dateStr).toLocaleDateString(DE_LOCALE, {
       day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
       timeZone: EVENT_TZ,
     });

@@ -25,6 +25,7 @@ import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { formatTime } from '@/lib/utils/date';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface TicketEvent {
   id: string;
@@ -58,14 +59,14 @@ export function deriveSearchTerms(postTitle: string): string[] {
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
-  const date = d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: EVENT_TZ });
+  const date = d.toLocaleDateString(DE_LOCALE, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: EVENT_TZ });
   const time = formatTime(iso);
   return time ? `${date}, ${time}` : date;
 }
 
 function formatPrice(e: TicketEvent): string | null {
   if (e.price_min != null && e.price_min > 0) {
-    return `ab ${e.price_min.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+    return `ab ${e.price_min.toLocaleString(DE_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
   }
   return e.price_text ?? null;
 }

@@ -1,0 +1,49 @@
+{
+  "Landing": {
+    "Masthead": {
+      "eventsCount": "Events in Deutschland"
+    },
+    "Season": {
+      "herbst": {
+        "kicker": "Herbst in Deutschland"
+      }
+    },
+    "Activities": {
+      "sub": "Freizeit in ganz Deutschland"
+    },
+    "Newsletter": {
+      "regionAll": "Ganz Deutschland"
+    }
+  },
+  "MetaMap": {
+    "title": "Event-Karte Deutschland: alle Veranstaltungen auf einer Karte",
+    "description": "Interaktive Karte mit Veranstaltungen in Deutschland. Finde Konzerte, Feste, Märkte, Sport und Kultur in deiner Nähe, filterbar nach Kategorie, Region und Datum.",
+    "ogTitle": "Event-Karte Deutschland: alle Veranstaltungen auf einer Karte",
+    "ogDescription": "Interaktive Karte mit Veranstaltungen in Deutschland. Konzerte, Feste, Märkte und mehr."
+  },
+  "MetaDiscover": {
+    "title": "Events entdecken: Konzerte, Feste und mehr in Deutschland",
+    "description": "Durchsuche Veranstaltungen in ganz Deutschland. Filter nach Datum, Region und Kategorie und finde dein nächstes Event.",
+    "ogTitle": "Events entdecken in Deutschland"
+  },
+  "Meta": {
+    "title": "LassTreffen.de: Events in deiner Stadt und in ganz Deutschland",
+    "description": "Finde Veranstaltungen in ganz Deutschland: Konzerte, Dorffeste, Märkte und Kultur aus Gemeindekalendern und von Ticketanbietern, auf einer interaktiven Karte. Kostenlos.",
+    "ogAlt": "LassTreffen.de: Entdecke, was in Deutschland los ist"
+  },
+  "Discover": {
+    "scopeAll": "ganz Deutschland"
+  },
+  "MapPage": {
+    "srTitle": "Event-Karte Deutschland: Konzerte, Feste, Märkte und Veranstaltungen auf der Karte",
+    "searchPlaceholderAll": "Suche · Deutschland",
+    "austria": "Deutschland"
+  },
+  "HubFAQ": {
+    "thQ1": "Wie viele {heroNoun} gibt es aktuell in Deutschland?",
+    "thA1": "LassTreffen.de listet derzeit {nice} Veranstaltungen in der Kategorie {category} für ganz Deutschland. Die Daten kommen täglich aus Gemeindekalendern und von Ticketanbietern."
+  },
+  "GemeindeHub": {
+    "seoLocation": " liegt{bezirkPart} in {bundesland}, Deutschland."
+  }
+}

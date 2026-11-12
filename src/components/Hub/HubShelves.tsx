@@ -20,6 +20,7 @@ import { categoryLabel } from '@/lib/i18n/category-labels';
 import { EVENT_TZ, toViennaDate, viennaDayStart, viennaToday } from '@/lib/utils/event-time';
 import { planShelves } from '@/components/Discover/v4/shelves-select';
 import { PICKS_GRID_CLASS, PickTile, Shelf, ShelfCard, ShelfChip } from '@/components/Discover/v4/shelf-ui';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export const MIN_SHELF = 3;
 const PICKS = 5;
@@ -48,7 +49,7 @@ export function HubShelves({ events, links = {}, hide = {}, extra, today = vienn
   const t = useTranslations('Discover');
   const tCat = useTranslations('Categories');
   const locale = useLocale();
-  const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
+  const fmt = locale === 'de' ? DE_LOCALE : 'en-GB';
   const plan = planShelves(events, today);
 
   // Top-Picks: zuerst heute/morgen, dann der Rest nach Score, nur mit Bild.

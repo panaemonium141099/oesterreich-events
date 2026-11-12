@@ -14,6 +14,7 @@
 import { useRouter } from 'next/navigation';
 import type { PlanWithEvents } from '@/types/plans';
 import { EVENT_TZ, viennaDayDiff, viennaToday } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface Props {
   plan: PlanWithEvents;
@@ -46,7 +47,7 @@ function formatLongDate(iso: string): string {
   try {
     const d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString('de-AT', {
+    return d.toLocaleDateString(DE_LOCALE, {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
       timeZone: EVENT_TZ,
     });

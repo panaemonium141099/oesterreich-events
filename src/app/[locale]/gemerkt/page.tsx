@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { requireUserOrRedirect } from '@/lib/supabase/require-user';
 import { GemerktPageClient } from './GemerktPageClient';
+import { getSite } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'Gemerkte Events — lasstreffen.at',
+  title: `Gemerkte Events — ${getSite().domain}`,
   description: 'Alle Events, die du dir gemerkt hast — an einem Ort.',
   robots: { index: false, follow: false }, // private user area
 };

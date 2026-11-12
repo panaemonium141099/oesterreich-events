@@ -16,6 +16,7 @@ import { getStripe, parseEventRef, BOOST_PRICE_CENTS } from '@/lib/payments/stri
 import { publicOrigin } from '@/lib/site-url';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,7 +83,7 @@ export async function POST(req: NextRequest) {
   }
   if (event.is_boosted && event.boost_until && new Date(event.boost_until) > new Date()) {
     return NextResponse.json(
-      { error: `„${event.title}" ist bereits geboostet (bis ${new Date(event.boost_until).toLocaleDateString('de-AT', { timeZone: EVENT_TZ })}).` },
+      { error: `„${event.title}" ist bereits geboostet (bis ${new Date(event.boost_until).toLocaleDateString(DE_LOCALE, { timeZone: EVENT_TZ })}).` },
       { status: 409 },
     );
   }

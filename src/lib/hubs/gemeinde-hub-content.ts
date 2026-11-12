@@ -34,6 +34,7 @@ import {
 } from '@/lib/seo/faq';
 import { activityCanonicalUrl } from '@/lib/activities/indexability';
 import type { AustrianGemeinde } from '@/lib/gemeinden/data';
+import { getSite } from '@/lib/site';
 
 export type HubContentMode = 'events' | 'activities' | 'mixed' | 'empty';
 
@@ -254,7 +255,7 @@ export function buildGemeindeHubJsonLd(
   // Canonical bleibt die DE-URL, auch im JSON-LD der /en-Seite: das
   // @id-Graph beschreibt dieselbe Entitaet, und die Seiten verweisen per
   // hreflang aufeinander.
-  const canonicalUrl = `https://lasstreffen.at/gemeinde/${g.slug}`;
+  const canonicalUrl = `${getSite().url}/gemeinde/${g.slug}`;
   const mode = hubContentMode(events.length, activities.length);
 
   const place = {
@@ -266,7 +267,7 @@ export function buildGemeindeHubJsonLd(
       postalCode: g.plz,
       addressLocality: g.name,
       addressRegion: g.bundesland,
-      addressCountry: 'AT',
+      addressCountry: getSite().country,
     },
     geo: { '@type': 'GeoCoordinates', latitude: g.lat, longitude: g.lng },
     url: canonicalUrl,
@@ -280,7 +281,7 @@ export function buildGemeindeHubJsonLd(
         itemListElement: events.slice(0, 10).map((e, idx) => ({
           '@type': 'ListItem',
           position: idx + 1,
-          url: `https://lasstreffen.at${buildEventUrlV2(e)}`,
+          url: `${getSite().url}${buildEventUrlV2(e)}`,
           name: e.title,
         })),
       }
@@ -304,8 +305,8 @@ export function buildGemeindeHubJsonLd(
     '@type': 'BreadcrumbList',
     '@id': `${canonicalUrl}#breadcrumbs`,
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://lasstreffen.at' },
-      { '@type': 'ListItem', position: 2, name: g.bundesland, item: `https://lasstreffen.at/${slugifyBundesland(g.bundesland)}` },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: getSite().url },
+      { '@type': 'ListItem', position: 2, name: g.bundesland, item: `${getSite().url}/${slugifyBundesland(g.bundesland)}` },
       { '@type': 'ListItem', position: 3, name: g.name, item: canonicalUrl },
     ],
   };

@@ -37,6 +37,8 @@ import { GoogleGenAI } from '@google/genai';
 import OpenAI from 'openai';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
+import { getSite } from '@/lib/site';
 
 /** fn-19: Der Concierge ist der teuerste Call der Plattform (~0,7 Cent
  *  pro grounded Antwort) — deshalb ein eigenes, strengeres Limit
@@ -107,7 +109,7 @@ interface ConciergeBody {
   scopeLabel?: string;
 }
 
-const SYSTEM_PROMPT = `Du bist ein lokaler Concierge für Veranstaltungen in Österreich auf der Plattform LassTreffen.at.
+const SYSTEM_PROMPT = `Du bist ein lokaler Concierge für Veranstaltungen in ${getSite().countryName.de} auf der Plattform ${getSite().brand}.
 
 Format (STRIKT):
 - PLAIN TEXT, KEIN Markdown. Keine ##-Überschriften, KEINE [text](url)-Syntax, keine Aufzählungssternchen.
@@ -148,7 +150,7 @@ function buildUserPrompt(body: ConciergeBody): string {
     parts.push('');
     parts.push('Top-Treffer (sortiert nach Relevanz):');
     matches.slice(0, 5).forEach((m, i) => {
-      const date = new Date(m.start_date).toLocaleDateString('de-AT', {
+      const date = new Date(m.start_date).toLocaleDateString(DE_LOCALE, {
         weekday: 'short', day: 'numeric', month: 'short',
         timeZone: EVENT_TZ,
       });

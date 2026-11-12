@@ -22,6 +22,7 @@ import { useLocale } from 'next-intl';
 import { V4BackButton } from './V4BackButton';
 import { V4HeroSlideshow } from './V4HeroSlideshow';
 import { formatEventDate } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface V4EventDetailHeroProps {
   title: string;
@@ -57,7 +58,7 @@ function formatDate(iso: string, fmt: string): string {
 
 export function V4EventDetailHero({ title, startDate, locationName, city, imageUrl, images, imageCredit }: V4EventDetailHeroProps) {
   const locale = useLocale();
-  const dateLabel = formatDate(startDate, locale === 'de' ? 'de-AT' : 'en-GB');
+  const dateLabel = formatDate(startDate, locale === 'de' ? DE_LOCALE : 'en-GB');
   const placeLabel = [locationName, city].filter(Boolean).join(' · ');
   const slides = (images ?? []).filter(
     (s): s is string => typeof s === 'string' && s.trim().length > 0,

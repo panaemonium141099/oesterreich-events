@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { StatusBadge } from '@/components/Admin/StatusBadge';
 import { ScoreBar } from '@/components/Admin/ScoreBar';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface EventRow {
   id: string;
@@ -96,7 +97,7 @@ export default function EventsPage() {
   };
 
   const formatDate = (dateStr: string) =>
-    new Date(dateStr).toLocaleDateString('de-AT', {
+    new Date(dateStr).toLocaleDateString(DE_LOCALE, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',

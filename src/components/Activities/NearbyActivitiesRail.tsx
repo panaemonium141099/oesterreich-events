@@ -27,6 +27,7 @@ import {
   requestGeolocation,
   storeLocation,
 } from '@/lib/geolocation';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface NearbyActivity {
   id: string;
@@ -127,7 +128,7 @@ export function NearbyActivitiesRail() {
               <div className="p-3">
                 <div className="font-semibold leading-snug line-clamp-2 mb-1">{a.name}</div>
                 <div className="text-xs text-white/50">
-                  {a.distance_km.toLocaleString('de-AT')} km
+                  {a.distance_km.toLocaleString(DE_LOCALE)} km
                   {a.town ? ` · ${a.town}` : ''}
                 </div>
               </div>

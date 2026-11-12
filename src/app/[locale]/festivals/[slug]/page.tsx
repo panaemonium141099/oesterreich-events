@@ -10,6 +10,7 @@ import type { Festival, FestivalArtist } from '@/types/festivals';
 import { V4FestivalActions } from '@/components/Festivals/V4FestivalActions';
 import { EVENT_TZ, toViennaDate } from '@/lib/utils/event-time';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 // Dynamic — slug params with non-ASCII (umlauts) were getting served
 // stale 404 responses under Next's default revalidation. Forcing the
@@ -31,13 +32,13 @@ function formatDateRange(startIso: string | null, endIso: string | null): string
   if (!startIso) return 'Termin offen';
   const start = new Date(startIso);
   const end = endIso ? new Date(endIso) : null;
-  const startStr = start.toLocaleDateString('de-AT', { day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
+  const startStr = start.toLocaleDateString(DE_LOCALE, { day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
   if (!end || toViennaDate(end) === toViennaDate(start)) return startStr;
   const sameYear = toViennaDate(start).slice(0, 4) === toViennaDate(end).slice(0, 4);
-  const startShort = start.toLocaleDateString('de-AT', sameYear
+  const startShort = start.toLocaleDateString(DE_LOCALE, sameYear
     ? { day: 'numeric', month: 'long', timeZone: EVENT_TZ }
     : { day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
-  const endStr = end.toLocaleDateString('de-AT', { day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
+  const endStr = end.toLocaleDateString(DE_LOCALE, { day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
   return `${startShort} – ${endStr}`;
 }
 

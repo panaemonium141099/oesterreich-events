@@ -8,6 +8,8 @@
  * in die KI-Suche auf. Reine Funktion, damit sie testbar ist.
  */
 
+import { DE_LOCALE } from '@/lib/site/intl';
+
 export interface ParsedSummary {
   signals?: string[];
   max_price_tier?: string | null;
@@ -71,7 +73,7 @@ export function buildUnderstoodChips(parsed: ParsedSummary | undefined): Underst
       const iso = s.slice('date:'.length);
       const d = new Date(`${iso}T12:00:00Z`);
       if (!Number.isNaN(d.getTime())) {
-        chips.push({ key: s, label: d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }) });
+        chips.push({ key: s, label: d.toLocaleDateString(DE_LOCALE, { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }) });
         break;
       }
     }
@@ -79,7 +81,7 @@ export function buildUnderstoodChips(parsed: ParsedSummary | undefined): Underst
       const [y, m] = s.slice('month:'.length).split('-').map(Number);
       const d = new Date(Date.UTC(y, (m || 1) - 1, 1));
       if (!Number.isNaN(d.getTime())) {
-        chips.push({ key: s, label: d.toLocaleDateString('de-AT', { month: 'long', timeZone: 'UTC' }) });
+        chips.push({ key: s, label: d.toLocaleDateString(DE_LOCALE, { month: 'long', timeZone: 'UTC' }) });
         break;
       }
     }

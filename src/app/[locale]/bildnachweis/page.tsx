@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import credits from '@/content/image-credits.json';
+import { getSite } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'Bildnachweis',
   description:
-    'Quellen und Lizenzen der Bundesland- und Regionsbilder auf LassTreffen.at.',
+    `Quellen und Lizenzen der Bundesland- und Regionsbilder auf ${getSite().brand}.`,
   robots: { index: false, follow: true },
 };
 

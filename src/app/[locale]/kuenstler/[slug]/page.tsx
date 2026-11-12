@@ -24,6 +24,7 @@ import { getArtistsDirectoryCached } from '@/lib/artists/get-artists-directory';
 import { SITE_URL, bilingualAlternates } from '@/lib/seo/canonical';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -41,7 +42,7 @@ async function loadArtist(slug: string): Promise<{ artist: DirectoryArtist; all:
 function firstDate(artist: DirectoryArtist, locale: string): string {
   const e = artist.events[0];
   if (!e) return '';
-  return new Date(e.start_date).toLocaleDateString(locale === 'de' ? 'de-AT' : 'en-GB', { day: 'numeric', month: 'long', timeZone: EVENT_TZ });
+  return new Date(e.start_date).toLocaleDateString(locale === 'de' ? DE_LOCALE : 'en-GB', { day: 'numeric', month: 'long', timeZone: EVENT_TZ });
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
@@ -111,7 +112,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ locale:
   if (!result) notFound();
   const { artist, all, today } = result;
   const related = relatedArtists(all, artist, 6);
-  const updated = new Date(`${today}T12:00:00Z`).toLocaleDateString(locale === 'de' ? 'de-AT' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
+  const updated = new Date(`${today}T12:00:00Z`).toLocaleDateString(locale === 'de' ? DE_LOCALE : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
 
   return (
     <main className="min-h-screen bg-[var(--v4-surface)] text-[var(--v4-ink)]">

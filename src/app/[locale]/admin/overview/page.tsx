@@ -12,6 +12,7 @@ import {
   UserPlus,
   MapPin,
 } from 'lucide-react';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface Stats {
   totalUsers: number;
@@ -204,7 +205,7 @@ export default function AdminOverviewPage() {
                 label="Venue Match Rate"
                 value={`${stats.venueMatchRate}%`}
                 icon={MapPin}
-                sub={`${stats.venueMatchCount.toLocaleString('de-AT')} / ${stats.totalEvents.toLocaleString('de-AT')} Events`}
+                sub={`${stats.venueMatchCount.toLocaleString(DE_LOCALE)} / ${stats.totalEvents.toLocaleString(DE_LOCALE)} Events`}
               />
             </div>
 

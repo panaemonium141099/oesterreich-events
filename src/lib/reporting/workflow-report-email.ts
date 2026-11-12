@@ -15,6 +15,7 @@
 
 import type { WorkflowItem, WorkflowStatus } from './workflow-run';
 import { workflowInfo, workflowName } from './workflow-catalog';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export interface WorkflowReportData {
   workflow: string;
@@ -71,7 +72,7 @@ export function renderWorkflowReport(d: WorkflowReportData): string {
   const tone = TONE[d.stalled ? 'running' : d.status];
   const info = workflowInfo(d.workflow);
   const name = workflowName(d.workflow);
-  const when = new Date(d.startedAt).toLocaleString('de-AT', {
+  const when = new Date(d.startedAt).toLocaleString(DE_LOCALE, {
     weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Vienna',
   });
@@ -88,7 +89,7 @@ export function renderWorkflowReport(d: WorkflowReportData): string {
       <tr>
         <td style="padding:9px 16px 9px 0;color:#4b5563;border-bottom:1px solid #f3f4f6;font-size:14px;">${esc(k)}</td>
         <td style="padding:9px 0;color:#111827;font-weight:700;text-align:right;border-bottom:1px solid #f3f4f6;font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums;">
-          ${esc(typeof v === 'number' ? v.toLocaleString('de-AT') : String(v))}
+          ${esc(typeof v === 'number' ? v.toLocaleString(DE_LOCALE) : String(v))}
         </td>
       </tr>`,
     )

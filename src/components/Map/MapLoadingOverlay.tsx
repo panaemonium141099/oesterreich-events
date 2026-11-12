@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface MapLoadingOverlayProps {
   loading: boolean;
@@ -52,7 +53,7 @@ export function MapLoadingOverlay({ loading, eventCount }: MapLoadingOverlayProp
           </p>
           {eventCount > 0 && (
             <p className="text-white/40 text-xs mt-1.5 tabular-nums">
-              {eventCount.toLocaleString('de-AT')} Events gefunden
+              {eventCount.toLocaleString(DE_LOCALE)} Events gefunden
             </p>
           )}
         </div>

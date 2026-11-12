@@ -23,6 +23,7 @@ import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { EVENT_TZ, addViennaDays, viennaDayRange, viennaToday, viennaWeekday } from '@/lib/utils/event-time';
 import { formatTime } from '@/lib/utils/date';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -45,7 +46,7 @@ interface DigestEvent {
 
 function fmt(iso: string): { date: string; time?: string } {
   const d = new Date(iso);
-  const date = d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', timeZone: EVENT_TZ });
+  const date = d.toLocaleDateString(DE_LOCALE, { weekday: 'long', day: 'numeric', month: 'long', timeZone: EVENT_TZ });
   const time = formatTime(iso);
   return time ? { date, time } : { date };
 }

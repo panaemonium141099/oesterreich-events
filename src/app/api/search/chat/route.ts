@@ -37,6 +37,7 @@ import { extractEntityRefs, stripEntityMarkers } from '@/lib/search/chat-entitie
 import type { CandidateEvent } from '@/lib/search/smart-query';
 import type { ActivitySearchMatch } from '@/lib/activities/public-types';
 import type { ChatEventCard, ChatActivityCard } from '@/lib/search/chat-cards';
+import { getSite } from '@/lib/site';
 
 const CHAT_MODEL = 'gemini-2.5-flash';
 
@@ -143,7 +144,7 @@ function buildSystemInstruction(locale: string): string {
   const lang = locale === 'en'
     ? 'Answer in English (the platform data itself is German — keep proper names as-is).'
     : 'Antworte auf Deutsch, freundlich-österreichisch, direkt.';
-  return `Du bist der Concierge von LassTreffen.at und planst gemeinsam mit dem User Unternehmungen in Österreich — vom einzelnen Abend bis zum ganzen Tagesplan.
+  return `Du bist der Concierge von ${getSite().brand} und planst gemeinsam mit dem User Unternehmungen in ${getSite().countryName.de} — vom einzelnen Abend bis zum ganzen Tagesplan.
 
 ARBEITSWEISE:
 - Nutze für JEDE konkrete Empfehlung die Such-Tools (search_events für Veranstaltungen mit Termin, search_activities für dauerhafte Ausflugsziele). Rufe pro Antwort maximal 3 Suchen auf, formuliere die Tool-Query präzise (Ort + was + wann).

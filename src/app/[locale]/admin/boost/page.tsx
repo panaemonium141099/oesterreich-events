@@ -8,6 +8,7 @@ import { setEventBoost, setLandingFeature, type LandingFeatureBooking } from '@/
 import { EVENT_TZ, toViennaDate, viennaToday } from '@/lib/utils/event-time';
 import { SITE_COUNTRY } from '@/lib/site-country';
 import { eventEndDay } from '@/lib/v4/landing-picks';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface EventRow {
   id: string;
@@ -64,7 +65,7 @@ const SELECT =
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '';
-  return new Date(dateStr).toLocaleDateString('de-AT', {
+  return new Date(dateStr).toLocaleDateString(DE_LOCALE, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

@@ -12,6 +12,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { loadWeekendWeather, type WeekendWeather } from '@/lib/landing/weekend-weather';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export function SeasonWeather() {
   const t = useTranslations('Landing.Season');
@@ -27,7 +28,7 @@ export function SeasonWeather() {
   if (!weather) return null;
 
   const day = new Date(weather.day + 'T12:00:00Z').toLocaleDateString(
-    locale === 'de' ? 'de-AT' : 'en-GB',
+    locale === 'de' ? DE_LOCALE : 'en-GB',
     { weekday: 'long', timeZone: EVENT_TZ },
   );
   const place = weather.usedStoredLocation ? t('weatherNearby') : t('weatherVienna');

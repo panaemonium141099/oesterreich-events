@@ -24,6 +24,7 @@ import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { sendGenericEmail } from '@/lib/email';
 import { validateSubmission } from '@/lib/inserate/submission';
 import { escapeHtml } from '@/lib/utils/escape-html';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
   // Benachrichtigung an den Betreiber — ein Fehler hier darf die
   // Einreichung nicht verwerfen, sie liegt bereits sicher in der DB.
   try {
-    const startLocal = new Date(submission.start_date).toLocaleString('de-AT', {
+    const startLocal = new Date(submission.start_date).toLocaleString(DE_LOCALE, {
       timeZone: 'Europe/Vienna',
       dateStyle: 'full',
       timeStyle: submission.is_all_day ? undefined : 'short',

@@ -10,6 +10,7 @@ import type {
   StepResult,
 } from './pipeline/scrape-pipeline-types';
 import fs from 'fs';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 function getSupabaseAdmin() {
   return createClient(
@@ -200,8 +201,8 @@ export async function sendAlertIfNeeded(results: PipelineResults): Promise<void>
   await finishWorkflowRun(runId, {
     status: status === 'success' ? 'success' : status === 'partial_failure' ? 'partial' : 'failed',
     summary:
-      `${results.total_events_scraped.toLocaleString('de-AT')} Events gefunden, `
-      + `${results.total_events_updated.toLocaleString('de-AT')} aktualisiert`
+      `${results.total_events_scraped.toLocaleString(DE_LOCALE)} Events gefunden, `
+      + `${results.total_events_updated.toLocaleString(DE_LOCALE)} aktualisiert`
       + (failedScrapers.length ? `, ${failedScrapers.length} von ${results.scraper_results.length} Scrapern gescheitert` : ''),
     metrics: {
       'Events gefunden': results.total_events_scraped,

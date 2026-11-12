@@ -18,11 +18,13 @@
  * run picks up whatever was missed.
  */
 
+import { getSite } from '@/lib/site';
+
 /** 40-char hex key. Must match the filename in `public/`. */
 export const INDEXNOW_KEY = 'b99f41aea5a92b0345f17df073e25a6ab5a9fab7' as const;
 
 /** Canonical host without protocol — IndexNow expects bare hostname. */
-const HOST = 'lasstreffen.at';
+const HOST = getSite().domain;
 
 /** Shared endpoint; Bing / Yandex syndicate automatically. */
 const INDEXNOW_ENDPOINT = 'https://api.indexnow.org/indexnow';

@@ -22,7 +22,10 @@ export const FEATURE_PATHS: Record<SiteFeature, readonly string[]> = {
   themes: ['/thema'],
   venues: ['/venues', '/api/venues'],
   heatmap: ['/wo-ist-was-los'],
-  business: ['/fuer-firmen', '/event-inserieren', '/widget', '/api/business', '/api/checkout', '/api/widget'],
+  business: [
+    '/fuer-firmen', '/event-inserieren', '/widget', '/api/business', '/api/checkout', '/api/widget',
+    '/api/events/inserat',
+  ],
   account: [
     '/auth', '/profile', '/settings', '/saved', '/gemerkt', '/notifications', '/calendar', '/join',
     '/api/auth', '/api/me', '/api/saved-events', '/api/notifications', '/api/push',
@@ -33,6 +36,8 @@ export const FEATURE_PATHS: Record<SiteFeature, readonly string[]> = {
   ],
   newsletter: ['/api/newsletter', '/api/event-reminder'],
   admin: ['/admin', '/api/admin'],
+  // Maschinenlesbare Übersicht der österreichischen Hubs und des Blogs.
+  llms: ['/llms-full.txt', '/llms.txt'],
 };
 
 /** Pfad ohne Sprachpräfix und das Präfix, falls er eines trug. */

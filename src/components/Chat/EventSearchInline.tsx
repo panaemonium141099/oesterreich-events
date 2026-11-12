@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { EventImage } from '@/components/Events/EventImage';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface EventSearchResult {
   id: string;
@@ -58,7 +59,7 @@ export function EventSearchInline({ onSelectEvent, onClose }: EventSearchInlineP
     // Use date-only safe parsing: append T12:00 to avoid UTC timezone shift
     const dateOnly = dateStr.length === 10 && !dateStr.includes('T');
     const d = dateOnly ? new Date(dateStr + 'T12:00:00') : new Date(dateStr);
-    return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', year: 'numeric', timeZone: EVENT_TZ });
+    return d.toLocaleDateString(DE_LOCALE, { day: 'numeric', month: 'short', year: 'numeric', timeZone: EVENT_TZ });
   };
 
   return (

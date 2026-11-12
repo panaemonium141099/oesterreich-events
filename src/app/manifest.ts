@@ -1,8 +1,9 @@
 import type { MetadataRoute } from 'next';
+import { getSite } from '@/lib/site';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'LassTreffen.at — Entdecke was los ist in Österreich',
+    name: `${getSite().brand} — Entdecke was los ist in ${getSite().countryName.de}`,
     short_name: 'LassTreffen',
     description: 'Über 85.000 Veranstaltungen & Ausflugsziele in ganz Österreich auf einer interaktiven Karte.',
     start_url: '/',

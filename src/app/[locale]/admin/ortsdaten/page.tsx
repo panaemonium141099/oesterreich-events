@@ -9,6 +9,7 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { MapPin } from 'lucide-react';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 /**
  * Korrekturformular je Event: Position, Genauigkeit, Grund, Beleg. Die
@@ -268,7 +269,7 @@ export default function OrtsdatenPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const fmt = (n: number | undefined) => (n ?? 0).toLocaleString('de-AT');
+  const fmt = (n: number | undefined) => (n ?? 0).toLocaleString(DE_LOCALE);
 
   return (
     <div className="p-6 space-y-6">

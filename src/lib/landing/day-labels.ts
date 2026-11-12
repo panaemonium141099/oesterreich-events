@@ -6,6 +6,7 @@
  */
 
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -17,7 +18,7 @@ export function isoDayParam(value: string | null | undefined): string | null {
   return value;
 }
 
-const intlFor = (locale: string) => (locale === 'de' ? 'de-AT' : 'en-GB');
+const intlFor = (locale: string) => (locale === 'de' ? DE_LOCALE : 'en-GB');
 const carrier = (day: string) => new Date(`${day}T12:00:00Z`);
 
 /** „Fr 30. Okt." (de) bzw. „Fri 30 Oct" (en). */

@@ -10,6 +10,7 @@
 import { useEffect, useState } from 'react';
 import type { PlanWithEvents } from '@/types/plans';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface Props {
   plan: PlanWithEvents;
@@ -44,7 +45,7 @@ function nextReminderLabel(plan: PlanWithEvents, target: Date): string | null {
   const future = candidates.filter(c => c.ms > now.getTime()).sort((a, b) => a.ms - b.ms);
   if (!future[0]) return null;
   const d = new Date(future[0].ms);
-  const dateStr = d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', timeZone: EVENT_TZ });
+  const dateStr = d.toLocaleDateString(DE_LOCALE, { weekday: 'short', day: 'numeric', month: 'short', timeZone: EVENT_TZ });
   return `${dateStr} · ${future[0].label}`;
 }
 

@@ -5,6 +5,7 @@ import { FileText, Check, X, ExternalLink, Loader2, Inbox, Eye, Save } from 'luc
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import type { Event } from '@/types/events';
 import { InseratVorschau } from '@/components/Admin/InseratVorschau';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 /**
  * /admin/inserate — Freigabe der öffentlich eingereichten Event-Inserate.
@@ -97,7 +98,7 @@ const INPUT =
   'w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white/90 focus:outline-none focus:border-white/30 transition-colors';
 
 function formatDateTime(iso: string, allDay: boolean): string {
-  return new Date(iso).toLocaleString('de-AT', {
+  return new Date(iso).toLocaleString(DE_LOCALE, {
     timeZone: 'Europe/Vienna',
     dateStyle: 'medium',
     ...(allDay ? {} : { timeStyle: 'short' }),
@@ -357,7 +358,7 @@ export default function AdminInseratePage() {
                       </p>
                     </div>
                     <span className="text-[11px] text-white/25 shrink-0">
-                      {new Date(s.created_at).toLocaleDateString('de-AT', { timeZone: EVENT_TZ })}
+                      {new Date(s.created_at).toLocaleDateString(DE_LOCALE, { timeZone: EVENT_TZ })}
                     </span>
                   </div>
                 </button>
@@ -526,7 +527,7 @@ export default function AdminInseratePage() {
                         <p className="text-white/40">
                           {s.status === 'approved' ? 'Freigegeben' : 'Abgelehnt'}
                           {s.reviewed_at
-                            ? ` am ${new Date(s.reviewed_at).toLocaleString('de-AT')}`
+                            ? ` am ${new Date(s.reviewed_at).toLocaleString(DE_LOCALE)}`
                             : ''}
                         </p>
                         {s.review_note && (

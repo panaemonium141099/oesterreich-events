@@ -22,6 +22,7 @@ import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { decodeEntities } from '@/lib/utils/decode-entities';
 import { useDetailHydration } from '@/lib/v4/use-detail-hydration';
 import { orderLoadedPages } from '@/lib/v4/approx-list';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 /** = Chunk-Größe von useDetailHydration: eine Seite, ein Request. */
 const PAGE = 24;
@@ -43,7 +44,7 @@ interface ApproxEventsListProps {
 export function ApproxEventsList({ events, onClose }: ApproxEventsListProps) {
   const t = useTranslations('MapPage');
   const locale = useLocale();
-  const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
+  const fmt = locale === 'de' ? DE_LOCALE : 'en-GB';
   const [shown, setShown] = useState(PAGE);
 
   const visibleRaw = useMemo(() => events.slice(0, shown), [events, shown]);

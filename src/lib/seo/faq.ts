@@ -23,6 +23,8 @@
  * JSON-LD object. Callers embed it in their own `@graph` array.
  */
 
+import { DE_LOCALE } from '@/lib/site/intl';
+
 export interface FAQEntry {
   question: string;
   answer: string;
@@ -87,7 +89,7 @@ export function faqForTheme(params: {
   t: FAQTranslator;
   numberLocale?: string;
 }): FAQEntry[] {
-  const { category, heroNoun, eventCount, t, numberLocale = 'de-AT' } = params;
+  const { category, heroNoun, eventCount, t, numberLocale = DE_LOCALE } = params;
   const nice = eventCount.toLocaleString(numberLocale);
 
   const theme = category.split(' & ')[0]; // "Kultur & Bühne" → "Kultur"

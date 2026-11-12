@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { viennaFields } from '@/lib/utils/event-time';
 import { isPathEnabled } from '@/lib/site/features';
+import { getSite } from '@/lib/site';
 
 /**
  * Site footer with navigation links and data attribution.
@@ -107,7 +108,7 @@ export function Footer({ notice }: { notice?: ReactNode } = {}) {
           <Link href="/quellen" className={NAV_LINK}>
             {t('sources')}
           </Link>
-          <a href="mailto:office@lasstreffen.at" className={NAV_LINK}>
+          <a href={`mailto:${getSite().contact.office}`} className={NAV_LINK}>
             {t('contact')}
           </a>
         </nav>
@@ -123,7 +124,7 @@ export function Footer({ notice }: { notice?: ReactNode } = {}) {
           )}
           <DataAttribution />
           <p className="text-xs text-white/25 text-center">
-            &copy; {viennaFields(new Date()).year} LassTreffen.at. {t('rights')}
+            &copy; {viennaFields(new Date()).year} {getSite().brand}. {t('rights')}
           </p>
         </div>
       </div>

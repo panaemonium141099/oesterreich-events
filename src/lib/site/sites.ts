@@ -11,12 +11,12 @@ export type SiteCountry = 'AT' | 'DE';
 /** Säulen neben dem Kern (Events, Karte, Suche, Hubs, Rechtsseiten). */
 export type SiteFeature =
   | 'blog' | 'festivals' | 'activities' | 'artists' | 'students' | 'themes' | 'venues'
-  | 'heatmap' | 'business' | 'account' | 'social' | 'newsletter' | 'admin';
+  | 'heatmap' | 'business' | 'account' | 'social' | 'newsletter' | 'admin' | 'llms';
 
 const ALL_ON: Record<SiteFeature, boolean> = {
   blog: true, festivals: true, activities: true, artists: true, students: true, themes: true,
   venues: true, heatmap: true, business: true, account: true, social: true, newsletter: true,
-  admin: true,
+  admin: true, llms: true,
 };
 
 export interface SiteConfig {
@@ -38,6 +38,10 @@ export interface SiteConfig {
   locales: readonly ('de' | 'en')[];
   /** Zeitzone für Anzeige und JSON-LD. Beide Zonen haben dieselben Regeln. */
   timeZone: 'Europe/Vienna' | 'Europe/Berlin';
+  /** Ein Satz unter dem Namen (Vorschaubild der Startseite). */
+  tagline: string;
+  /** Kontaktadressen in Footer und Hinweisen. */
+  contact: { office: string; support: string };
   /** Welche Säulen die Seite ausspielt (Pfade in features.ts). */
   features: Record<SiteFeature, boolean>;
 }
@@ -53,6 +57,8 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
     ogLocale: 'de_AT',
     locales: ['de', 'en'],
     timeZone: 'Europe/Vienna',
+    contact: { office: 'office@lasstreffen.at', support: 'support@lasstreffen.at' },
+    tagline: 'Events in Wien, Graz, Salzburg und ganz Österreich — 85\u2009000 Events & Ausflugsziele auf einer Karte.',
     features: ALL_ON,
   },
   DE: {
@@ -65,13 +71,16 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
     ogLocale: 'de_DE',
     locales: ['de'],
     timeZone: 'Europe/Berlin',
+    // Bis ein Postfach unter .de besteht, gelten die Adressen des Betreibers.
+    contact: { office: 'office@lasstreffen.at', support: 'support@lasstreffen.at' },
+    tagline: 'Konzerte, Dorffeste und Märkte in ganz Deutschland auf einer Karte.',
     // Start mit dem Kern. Die übrigen Säulen führen nur österreichische
     // Inhalte (Blog, Festivals, Aktivitäten, Studenten, Themen, Venues) oder
     // warten auf eine Entscheidung (Login, Veranstalter-Pakete, Künstler).
     features: {
       blog: false, festivals: false, activities: false, artists: false, students: false,
       themes: false, venues: false, heatmap: false, business: false, account: false,
-      social: false, newsletter: false, admin: false,
+      social: false, newsletter: false, admin: false, llms: false,
     },
   },
 };

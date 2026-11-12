@@ -47,6 +47,7 @@ import { getStoredLocation, storeLocation } from '@/lib/geolocation';
 import { V4MarkerLegend } from '@/components/Map/v4';
 import { useFilteredEvents } from '@/lib/v4/use-filtered-events';
 import { useBoostedIds } from '@/lib/hooks/useBoostedIds';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 /** Eigene Komponente statt Inline-JSX im dynamic()-loading-Slot, damit
  *  useTranslations greift (Hooks brauchen einen Komponenten-Kontext). */
@@ -344,7 +345,7 @@ function MapPageInner() {
                       boxShadow: '0 0 6px rgba(12,122,71,0.6)',
                     }}
                   />
-                  {t('loadingEvents')} {allEvents.length.toLocaleString('de-AT')}
+                  {t('loadingEvents')} {allEvents.length.toLocaleString(DE_LOCALE)}
                 </div>
               )}
 
@@ -379,7 +380,7 @@ function MapPageInner() {
                       boxShadow: '0 0 6px rgba(12,122,71,0.6)',
                     }}
                   />
-                  {t('eventsCount', { count: (totalMatchCount ?? finalEvents.length).toLocaleString('de-AT') })}
+                  {t('eventsCount', { count: (totalMatchCount ?? finalEvents.length).toLocaleString(DE_LOCALE) })}
                   {scopeLabel ? ` · ${scopeLabel}` : ''}
                 </div>
               )}
