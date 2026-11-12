@@ -13,7 +13,7 @@ import { sendGenericEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
-const NOTIFY_TO = process.env.BUSINESS_LEADS_EMAIL || 'dev@glatzdev.com';
+const NOTIFY_TO = process.env.BUSINESS_LEADS_EMAIL || 'office@lasstreffen.at';
 
 const VALID_PLANS = ['boost', 'abo', 'scraper', 'unsure'] as const;
 type Plan = (typeof VALID_PLANS)[number];

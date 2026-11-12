@@ -253,8 +253,8 @@ node / next.js
   `docs/ops/mail/setup-mail.sh`; Zugangsdaten nur auf dem Server
   (`/root/<name>-mail-zugang.txt`); Betrieb MASTERPLAN §3.16. Die Website
   nennt `office@` als Kontakt und `support@` im Entwicklungs-Hinweis der
-  Startseite (`DevNotice`); Formular-Benachrichtigungen gehen weiter an
-  `BUSINESS_LEADS_EMAIL`.
+  Startseite (`DevNotice`); Formular-Benachrichtigungen (Firmen-Anfrage,
+  Event-Inserat) gehen an `office@`, außer `BUSINESS_LEADS_EMAIL` ist gesetzt.
 - **pg_cron in Supabase:** MV-Refreshes (event_stats_cache 30 min,
   event_map_points stündlich), match-artists stündlich.
 
