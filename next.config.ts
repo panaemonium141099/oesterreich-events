@@ -10,6 +10,15 @@ import createNextIntlPlugin from 'next-intl/plugin';
  * the vast majority of scraper sources are Austrian websites.
  * Other TLDs are listed individually or grouped where possible.
  */
+/** `SITE_COUNTRY` für den Build: leer heißt Österreich, Unbekanntes bricht ab. */
+function siteCountry(): string {
+  const value = (process.env.SITE_COUNTRY ?? '').trim().toUpperCase() || 'AT';
+  if (value !== 'AT' && value !== 'DE') {
+    throw new Error(`SITE_COUNTRY="${process.env.SITE_COUNTRY}" ist kein bekanntes Land (AT, DE).`);
+  }
+  return value;
+}
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -433,6 +442,10 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/api/**/*': ['./node_modules/temporal-polyfill/**/*'],
   },
+  // Land der Seite (fn-31): eine Variable zur Build-Zeit, je Land ein Image.
+  // `env` setzt den Wert in Server- und Client-Code ein; gelesen wird er nur
+  // in src/lib/site/. Unbekannte Werte brechen den Build ab.
+  env: { SITE_COUNTRY: siteCountry() },
   // Standalone output for Docker deployment (Coolify)
   output: 'standalone',
   // Die Startseite wiederholt im Build gescheiterte Abfragen bis zu 150 s

@@ -1,0 +1,19 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-11-12T16:00:04.250408Z",
+  "depends_on": [
+    "fn-31-start-von-lasstreffende-eine-codebasis.5",
+    "fn-31-start-von-lasstreffende-eine-codebasis.8",
+    "fn-31-start-von-lasstreffende-eine-codebasis.9",
+    "fn-31-start-von-lasstreffende-eine-codebasis.10"
+  ],
+  "epic": "fn-31-start-von-lasstreffende-eine-codebasis",
+  "id": "fn-31-start-von-lasstreffende-eine-codebasis.12",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-31-start-von-lasstreffende-eine-codebasis.12.md",
+  "status": "todo",
+  "title": "Startseite, /entdecken und Karte auf .de",
+  "updated_at": "2026-11-12T16:00:04.793658Z"
+}

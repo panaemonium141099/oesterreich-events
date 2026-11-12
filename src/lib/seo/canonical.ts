@@ -19,7 +19,10 @@
  * plus hreflang (so macht es events/[...slug] anhand von `title_en`).
  */
 
-export const SITE_URL = 'https://lasstreffen.at';
+import { getSite } from '@/lib/site';
+
+/** Kanonische Basis-URL der Seite dieses Builds (`src/lib/site/`). */
+export const SITE_URL: string = getSite().url;
 
 /**
  * `alternates`-Block fuer eine Seite, die nur auf Deutsch existiert.

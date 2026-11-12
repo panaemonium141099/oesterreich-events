@@ -1,10 +1,12 @@
 /**
  * Das Land, dessen Events diese Seite ausspielt.
  *
- * lasstreffen.at ist rein österreichisch. Events aus Deutschland und der
- * Schweiz (Eventim-Feed) bleiben in der Datenbank, weil dafür eigene .de-
- * und .ch-Seiten geplant sind, erscheinen hier aber nirgends: nicht in
- * Listen, Karte, Suche, Detailseiten, Sitemaps, Mails oder Empfehlungen.
+ * Der Wert kommt aus der Site-Konfiguration (`src/lib/site/`, Variable
+ * `SITE_COUNTRY` zur Build-Zeit, Standard Österreich). lasstreffen.at zeigt
+ * nur österreichische Events, lasstreffen.de nur deutsche. Events eines
+ * anderen Landes (auch Eventim Schweiz) bleiben in der Datenbank, erscheinen
+ * auf dieser Seite aber nirgends: nicht in Listen, Karte, Suche,
+ * Detailseiten, Sitemaps, Mails oder Empfehlungen.
  *
  * Jede öffentliche Abfrage auf `events` filtert ausdrücklich mit
  * `.eq('country', SITE_COUNTRY)`. Bundesland-, Bezirks-, PLZ- oder
@@ -12,4 +14,6 @@
  * österreichischen Rechteck, etwa München und Lindau, und 36 CH-Events mit
  * österreichischem Bezirk). Wächter: src/__tests__/lib/site-country-guard.test.ts.
  */
-export const SITE_COUNTRY = 'AT' as const;
+import { getSite, type SiteCountry } from '@/lib/site';
+
+export const SITE_COUNTRY: SiteCountry = getSite().country;
