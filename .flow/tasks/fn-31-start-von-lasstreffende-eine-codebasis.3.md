@@ -24,9 +24,8 @@ SEO-Kern liest Domain, hreflang und Land aus der Site. Dazu ein Vergleichsskript
 - [ ] Domain-Wächter grün, Ausnahmeliste mit Begründung je Eintrag
 - [ ] Canonical-Wächter grün für beide Länder
 ## Done summary
-TBD
-
+SEO-Kern liest Domain, hreflang, Marke und Land aus getSite(). Domain-Waechter mit Altbestandsliste (99 Dateien) und Canonical-Waechter, beide auch mit SITE_COUNTRY=DE. Vergleichsskript seo-vergleich.ts; Vorher-Schnappschuss von Prod (43 Seiten, 38 mit 200) liegt vor, der Vergleich nach dem Deploy steht aus. opengraph-image und llms-full.txt bleiben fuer fn-31.4 (Texte).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 2bcc0687
+- Tests: npx vitest run (volle Suite, lokal nur die drei Windows-Faelle rot), SITE_COUNTRY=DE: site, site-country-guard, domain-literal-guard (21 gruen)
 - PRs:
