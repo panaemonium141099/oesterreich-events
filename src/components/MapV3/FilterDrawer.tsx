@@ -33,6 +33,7 @@ import { getDistrictsByBundesland, displayDistrictName } from '@/lib/districtsAT
 import type { EventFilters } from '@/types/events';
 import type { EventPreview } from '@/lib/v4/use-filtered-events';
 import { trackEvent } from '@/lib/analytics';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 /** fn-17: Anzeige-Label pro Datum-Preset-Id aus dem MapPage-Namespace;
  *  die `label`-Felder in tokens.ts bleiben deutscher Referenzwert. */
@@ -747,7 +748,7 @@ function DrawerFooter({
       >
         {count === null
           ? t('showEventsNoCount')
-          : t(approximate ? 'showEventsApprox' : 'showEvents', { count: count.toLocaleString(locale === 'de' ? 'de-AT' : 'en-GB') })}
+          : t(approximate ? 'showEventsApprox' : 'showEvents', { count: count.toLocaleString(locale === 'de' ? DE_LOCALE : 'en-GB') })}
       </button>
     </div>
   );

@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { BoostControl } from '@/components/Admin/BoostControl';
 import { setEventBoost } from '@/lib/admin/boost';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface EventRow {
   id: string;
@@ -71,7 +72,7 @@ export default function ModerationPage() {
   };
 
   const formatDate = (dateStr: string) =>
-    new Date(dateStr).toLocaleDateString('de-AT', {
+    new Date(dateStr).toLocaleDateString(DE_LOCALE, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { ScoreBar } from '@/components/Admin/ScoreBar';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -190,7 +191,7 @@ export default function DedupPage() {
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '--';
-    return new Date(dateStr).toLocaleDateString('de-AT', {
+    return new Date(dateStr).toLocaleDateString(DE_LOCALE, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',

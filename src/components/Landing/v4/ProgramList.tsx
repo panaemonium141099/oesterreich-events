@@ -20,6 +20,7 @@ import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { priceBadge } from '@/lib/v4/price-badge';
 import type { Event } from '@/types/events';
 import { ProgramListIsland } from './ProgramListIsland';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 const FREE = '\u0000free';
 
@@ -27,7 +28,7 @@ function ProgramRow({ ev }: { ev: Event }) {
   const t = useTranslations('Discover');
   const tMap = useTranslations('MapPage');
   const locale = useLocale();
-  const intl = locale === 'de' ? 'de-AT' : 'en-GB';
+  const intl = locale === 'de' ? DE_LOCALE : 'en-GB';
   const { time } = formatEventDate(ev, intl);
   const badge = priceBadge(ev, { free: FREE, from: p => tMap('priceFrom', { price: p }) }, intl);
   const free = badge === FREE;

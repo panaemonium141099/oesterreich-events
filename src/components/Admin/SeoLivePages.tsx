@@ -16,6 +16,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface Summary {
   impressions: number;
@@ -63,7 +64,7 @@ const TYPE_LABELS: Record<string, string> = {
   other: 'Andere',
 };
 
-const num = (n: number) => n.toLocaleString('de-AT');
+const num = (n: number) => n.toLocaleString(DE_LOCALE);
 const pct = (n: number) => `${(n * 100).toFixed(1)} %`;
 
 type TabKey = 'striking' | 'ctrGap' | 'top';

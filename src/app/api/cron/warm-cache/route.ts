@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { applyDatePreset } from '@/components/MapV3/datePresets';
+import { getSite } from '@/lib/site';
 
 /**
  * Cache-Warming-Cron für ~183 Top-Filter-Kombis.
@@ -170,7 +171,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const baseUrl = 'https://lasstreffen.at';
+  const baseUrl = getSite().url;
   const paths = buildPaths();
   const start = Date.now();
 

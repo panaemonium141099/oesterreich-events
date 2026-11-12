@@ -25,6 +25,7 @@ import { formatTime } from '@/lib/utils/date';
 import { EVENT_TZ, addViennaDays, toViennaDate, viennaToday } from '@/lib/utils/event-time';
 import { priceBadge } from '@/lib/v4/price-badge';
 import { gradientFor } from './category-gradient';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 /* ─── Regal mit horizontaler Spur ──────────────────────────────────────── */
 
@@ -121,7 +122,7 @@ export function RegionTile({ href, name, image, count }: {
   count?: number;
 }) {
   const locale = useLocale();
-  const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
+  const fmt = locale === 'de' ? DE_LOCALE : 'en-GB';
   return (
     <Link
       href={href}
@@ -148,7 +149,7 @@ export function ShelfChip({ label, count, href, onClick }: {
   onClick?: () => void;
 }) {
   const locale = useLocale();
-  const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
+  const fmt = locale === 'de' ? DE_LOCALE : 'en-GB';
   const className = 'press-haptic shrink-0 snap-start rounded-full bg-[var(--v4-surface-elevated)] border border-[var(--v4-hairline-2)] hover:border-[var(--v4-hairline-4)] px-4 py-2.5 text-[13px] font-semibold text-[var(--v4-ink)] transition-colors';
   const body = (
     <>
@@ -200,7 +201,7 @@ export function ShelfCard({ ev, grid = false }: { ev: Event; grid?: boolean }) {
   const [imgFailed, setImgFailed] = useState(false);
   const tCat = useTranslations('Categories');
   const locale = useLocale();
-  const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
+  const fmt = locale === 'de' ? DE_LOCALE : 'en-GB';
   const { title, time, day, price, place } = useCardFields(ev, fmt);
   const showImage = !!ev.image_url && !imgFailed;
   const [g1, g2] = gradientFor(ev.category);
@@ -260,7 +261,7 @@ export function PickTile({ ev, big }: { ev: Event; big: boolean }) {
   const t = useTranslations('Discover');
   const tMap = useTranslations('MapPage');
   const locale = useLocale();
-  const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
+  const fmt = locale === 'de' ? DE_LOCALE : 'en-GB';
   const { title, time, price, place } = useCardFields(ev, fmt);
   const [g1, g2] = gradientFor(ev.category);
   const dayLabel = formatRelativeDay(ev.start_date, fmt, tMap('groupHeute'), tMap('groupMorgen'));

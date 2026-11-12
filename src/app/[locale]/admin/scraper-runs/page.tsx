@@ -4,6 +4,7 @@ import { Fragment, useState, useEffect, useCallback } from 'react';
 import { Activity, Clock, AlertTriangle, ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import { StatusBadge } from '@/components/Admin/StatusBadge';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface PipelineStep {
   status: string;
@@ -92,7 +93,7 @@ function formatDurationMs(ms: number | undefined): string {
 }
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('de-AT', {
+  return new Date(dateStr).toLocaleDateString(DE_LOCALE, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

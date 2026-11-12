@@ -17,6 +17,7 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { viennaDayDiff, viennaToday, viennaWeekday } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
@@ -182,7 +183,7 @@ export function WeekHeatmap() {
           </button>
         ))}
         {count !== null && (
-          <span className="text-xs text-white/40 ml-2">{count.toLocaleString('de-AT')} Events</span>
+          <span className="text-xs text-white/40 ml-2">{count.toLocaleString(DE_LOCALE)} Events</span>
         )}
       </div>
       <div className="relative rounded-2xl overflow-hidden border border-white/10">

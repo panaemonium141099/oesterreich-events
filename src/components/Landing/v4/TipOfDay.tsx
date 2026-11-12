@@ -20,6 +20,7 @@ import { formatEventDate } from '@/lib/utils/event-time';
 import { priceBadge } from '@/lib/v4/price-badge';
 import type { LandingTip } from '@/lib/v4/landing-picks';
 import type { Event } from '@/types/events';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 
@@ -27,7 +28,7 @@ const FREE = '\u0000free';
 const FROM = '\u0000from:';
 
 /** Knopftext: „Tickets ab 29 €", „Tickets 29 €", „Eintritt frei", sonst „Zum Event". */
-export function tipCtaLabel(event: Event, t: Translate, fmt = 'de-AT'): string {
+export function tipCtaLabel(event: Event, t: Translate, fmt = DE_LOCALE): string {
   const badge = priceBadge(event, { free: FREE, from: p => FROM + p }, fmt);
   if (!badge) return t('toEvent');
   if (badge === FREE) return t('free');
@@ -38,7 +39,7 @@ export function tipCtaLabel(event: Event, t: Translate, fmt = 'de-AT'): string {
 export function TipOfDay({ tip, className }: { tip: LandingTip; className?: string }) {
   const t = useTranslations('Landing.Tip');
   const locale = useLocale();
-  const intl = locale === 'de' ? 'de-AT' : 'en-GB';
+  const intl = locale === 'de' ? DE_LOCALE : 'en-GB';
   const ev = tip.event;
   const sponsored = tip.kind === 'sponsored';
   const when = formatEventDate(ev, intl, { weekday: 'short', day: 'numeric', month: 'short' }).label;

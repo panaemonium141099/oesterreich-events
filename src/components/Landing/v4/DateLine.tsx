@@ -18,6 +18,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { loadTodayWeather, RAIN_MM, type TodayWeather } from '@/lib/landing/weekend-weather';
 import { announceViennaDay } from '@/lib/landing/vienna-day';
 import { EVENT_TZ, viennaDayRange, viennaToday } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 /** „über 88.000": auf volle Tausender abgerundet, unter 1.000 keine Zahl. */
 export function roundCountryTotal(n: number | null | undefined): number | null {
@@ -37,7 +38,7 @@ export function formatThousands(n: number, locale: string): string {
 /** „Freitag, 30. Oktober" für einen Wiener Kalendertag (YYYY-MM-DD). */
 export function formatViennaDay(day: string, locale: string): string {
   return new Date(`${day}T12:00:00Z`).toLocaleDateString(
-    locale === 'de' ? 'de-AT' : 'en-GB',
+    locale === 'de' ? DE_LOCALE : 'en-GB',
     { weekday: 'long', day: 'numeric', month: 'long', timeZone: EVENT_TZ },
   );
 }

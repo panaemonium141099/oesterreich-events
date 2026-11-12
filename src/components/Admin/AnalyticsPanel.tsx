@@ -17,6 +17,7 @@ import {
   GlobeIcon,
 } from '@/components/UI/Icons';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 type Period = 'today' | '7d' | '30d' | 'all';
 
@@ -89,7 +90,7 @@ interface UserDrilldownEvent {
 
 /* ─── Helpers ─────────────────────────────────────── */
 
-const fmt = (n: number) => n.toLocaleString('de-AT');
+const fmt = (n: number) => n.toLocaleString(DE_LOCALE);
 
 const formatDuration = (seconds: number): string => {
   if (seconds < 60) return `${seconds}s`;
@@ -319,14 +320,14 @@ export default function AnalyticsPanel() {
                     {/* Tooltip */}
                     <div className="absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 analytics-transition transition-opacity duration-150 pointer-events-none z-10">
                       <div className="bg-black/90 text-white text-[10px] px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
-                        {new Date(day.date + 'T12:00:00').toLocaleDateString('de-AT', { day: '2-digit', month: 'short', timeZone: EVENT_TZ })}
+                        {new Date(day.date + 'T12:00:00').toLocaleDateString(DE_LOCALE, { day: '2-digit', month: 'short', timeZone: EVENT_TZ })}
                         <span className="ml-1 font-bold tabular-nums">{fmt(day.count)}</span>
                       </div>
                     </div>
                     {/* X-axis label for first, middle, last */}
                     {(i === 0 || i === data.viewsByDay.length - 1 || i === Math.floor(data.viewsByDay.length / 2)) && (
                       <span className="text-[8px] text-white/20 absolute -bottom-4 whitespace-nowrap">
-                        {new Date(day.date + 'T12:00:00').toLocaleDateString('de-AT', { day: '2-digit', month: 'short', timeZone: EVENT_TZ })}
+                        {new Date(day.date + 'T12:00:00').toLocaleDateString(DE_LOCALE, { day: '2-digit', month: 'short', timeZone: EVENT_TZ })}
                       </span>
                     )}
                   </div>
@@ -606,7 +607,7 @@ function formatLastActive(iso: string): string {
   if (mins < 60) return `vor ${mins} Min`;
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `vor ${hrs} Std`;
-  return d.toLocaleDateString('de-AT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ });
+  return d.toLocaleDateString(DE_LOCALE, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ });
 }
 
 function UserActivitySection({ users }: { users: UserActivity[] }) {
@@ -730,7 +731,7 @@ function FragmentRow({
                 {drill.map((ev, i) => (
                   <div key={i} className="flex items-center gap-3 text-[11px]">
                     <span className="text-white/30 w-28 shrink-0 tabular-nums">
-                      {new Date(ev.created_at).toLocaleString('de-AT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ })}
+                      {new Date(ev.created_at).toLocaleString(DE_LOCALE, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ })}
                     </span>
                     <span className="px-1.5 py-0.5 rounded bg-white/[0.06] text-white/60 shrink-0">{ev.event_type}</span>
                     <span className="text-white/40 truncate">
@@ -869,7 +870,7 @@ function AnonSessionsSection({
                               {d.map((ev, i) => (
                                 <div key={i} className="flex items-center gap-3 text-[11px]">
                                   <span className="text-white/30 w-28 shrink-0 tabular-nums">
-                                    {new Date(ev.created_at).toLocaleString('de-AT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ })}
+                                    {new Date(ev.created_at).toLocaleString(DE_LOCALE, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ })}
                                   </span>
                                   <span className="px-1.5 py-0.5 rounded bg-white/[0.06] text-white/60 shrink-0">{ev.event_type}</span>
                                   <span className="text-white/40 truncate">

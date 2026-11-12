@@ -28,6 +28,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { BarChart3, RefreshCw, ExternalLink, AlertTriangle, CheckCircle2, Search, Globe, Gauge, Sparkles } from 'lucide-react';
 import { useAuth } from '@/lib/supabase/auth-context';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 // ─────────────────────────────────────────────────────────────────
 // Types — duplicated minimally from the backend, not imported, so the
@@ -349,8 +350,8 @@ function HubBreakdown() {
                   style={{ width: `${(r.clicks / maxClicks) * 100}%` }}
                 />
               </div>
-              <span className="tabular-nums text-sm text-white/80">{r.clicks.toLocaleString('de-AT')}</span>
-              <span className="tabular-nums text-xs text-white/40 w-20 text-right">{r.impressions.toLocaleString('de-AT')} imp</span>
+              <span className="tabular-nums text-sm text-white/80">{r.clicks.toLocaleString(DE_LOCALE)}</span>
+              <span className="tabular-nums text-xs text-white/40 w-20 text-right">{r.impressions.toLocaleString(DE_LOCALE)} imp</span>
             </div>
           ))}
         </div>
@@ -666,7 +667,7 @@ function SparkCard({ label, series, inverse = false }: { label: string; series: 
     <div className="rounded-xl bg-black/30 border border-white/[0.04] p-3">
       <p className="text-[10px] uppercase tracking-wider text-white/50 mb-1">{label}</p>
       <p className="text-lg font-semibold text-white tabular-nums">
-        {latest !== null ? (label.includes('Position') ? latest.toFixed(1) : Math.round(latest).toLocaleString('de-AT')) : '—'}
+        {latest !== null ? (label.includes('Position') ? latest.toFixed(1) : Math.round(latest).toLocaleString(DE_LOCALE)) : '—'}
       </p>
       {valid.length > 1 && (
         <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-8 mt-1" preserveAspectRatio="none">
@@ -700,7 +701,7 @@ function formatHubLabel(hub: string): string {
 }
 
 function KpiTile({
-  label, value, prior, hint, formatter = (v: number) => Math.round(v).toLocaleString('de-AT'), inverseDelta = false,
+  label, value, prior, hint, formatter = (v: number) => Math.round(v).toLocaleString(DE_LOCALE), inverseDelta = false,
 }: {
   label: string;
   value: number | null;
@@ -736,7 +737,7 @@ function CatalogTile({ label, value, hint }: { label: string; value: number | nu
     <div className="rounded-xl bg-white/[0.02] border border-white/[0.04] p-3">
       <p className="text-[11px] uppercase tracking-wider text-white/40">{label}</p>
       <p className="text-xl font-medium text-white/80 tabular-nums">
-        {value === null ? '—' : value.toLocaleString('de-AT')}
+        {value === null ? '—' : value.toLocaleString(DE_LOCALE)}
       </p>
       {hint && <p className="text-[11px] text-white/30 mt-0.5">{hint}</p>}
     </div>

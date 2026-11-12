@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { SeverityBadge } from '@/components/Admin/SeverityBadge';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -159,7 +160,7 @@ export default function ReviewQueuePage() {
   };
 
   const formatDate = (dateStr: string) =>
-    new Date(dateStr).toLocaleDateString('de-AT', {
+    new Date(dateStr).toLocaleDateString(DE_LOCALE, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',

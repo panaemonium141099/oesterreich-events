@@ -19,6 +19,8 @@ import { createClient } from '@supabase/supabase-js';
 import { extractShortId } from '@/lib/utils/slugify';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
+import { getSite } from '@/lib/site';
 
 export const runtime = 'nodejs';
 export const revalidate = 86400; // re-render OG image once per day per event
@@ -67,7 +69,7 @@ export async function GET(
   const title = event?.title ?? 'Event in Österreich';
   const subtitle = [
     event?.start_date
-      ? new Date(event.start_date).toLocaleDateString('de-AT', {
+      ? new Date(event.start_date).toLocaleDateString(DE_LOCALE, {
           day: 'numeric',
           month: 'long',
           year: 'numeric',
@@ -139,8 +141,8 @@ export async function GET(
             opacity: 0.75,
           }}
         >
-          <div>LassTreffen.at</div>
-          <div>lasstreffen.at</div>
+          <div>{getSite().brand}</div>
+          <div>{getSite().domain}</div>
         </div>
       </div>
     ),

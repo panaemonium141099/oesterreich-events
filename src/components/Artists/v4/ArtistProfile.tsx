@@ -18,6 +18,7 @@ import { formatEventDate } from '@/lib/utils/event-time';
 import { genreLabel } from '@/lib/artists/genre-labels';
 import { programTitle, type DirectoryArtist } from '@/lib/artists/directory';
 import { ArtistAvatar, FollowButton, dayLabel, venueLabel } from './artist-ui';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export const artistHref = (artist: Pick<DirectoryArtist, 'slug'>) => `/kuenstler/${artist.slug}`;
 
@@ -33,7 +34,7 @@ export function ArtistProfile({ artist, related, followed, signedIn, onToggle, o
 }) {
   const t = useTranslations('Artists');
   const locale = useLocale();
-  const intl = locale === 'de' ? 'de-AT' : 'en-GB';
+  const intl = locale === 'de' ? DE_LOCALE : 'en-GB';
   const count = artist.events.length;
   const Heading = page ? 'h1' : 'h2';
   const ticketHref = (eventTicket: string | null | undefined) => eventTicket || artist.evoLink || null;

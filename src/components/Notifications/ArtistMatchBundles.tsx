@@ -40,6 +40,7 @@ import {
 } from './NotificationsProvider';
 import { EVENT_TZ, toViennaDate, viennaDayDiff, viennaToday } from '@/lib/utils/event-time';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface EventJoin {
   id: string;
@@ -93,9 +94,9 @@ function fmtEventDate(iso: string): string {
   if (diffDays === 0) return 'Heute';
   if (diffDays === 1) return 'Morgen';
   if (diffDays >= 0 && diffDays < 7) {
-    return d.toLocaleDateString('de-AT', { weekday: 'long', timeZone: EVENT_TZ });
+    return d.toLocaleDateString(DE_LOCALE, { weekday: 'long', timeZone: EVENT_TZ });
   }
-  return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', year: 'numeric', timeZone: EVENT_TZ });
+  return d.toLocaleDateString(DE_LOCALE, { day: 'numeric', month: 'short', year: 'numeric', timeZone: EVENT_TZ });
 }
 
 function fmtMatchAgo(iso: string): string {
@@ -107,7 +108,7 @@ function fmtMatchAgo(iso: string): string {
   if (hours < 24) return `vor ${hours} Std.`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `vor ${days} T.`;
-  return new Date(iso).toLocaleDateString('de-AT', { day: 'numeric', month: 'short', timeZone: EVENT_TZ });
+  return new Date(iso).toLocaleDateString(DE_LOCALE, { day: 'numeric', month: 'short', timeZone: EVENT_TZ });
 }
 
 export function ArtistMatchBundles() {

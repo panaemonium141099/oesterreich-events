@@ -35,6 +35,7 @@ import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { bboxAround, haversineKm } from '@/lib/gemeinden/data';
 import { resolveWidgetScope, REGION_LABELS, type WidgetScope } from '@/lib/widget/scopes';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export const revalidate = 1800;
 
@@ -71,11 +72,11 @@ const ROW_LIMIT = 8;
 const EVENT_COLS =
   'id,slug,title,start_date,location_name,bundesland,postal_code,address,category,image_url,event_score,latitude,longitude';
 
-const dayFmt = new Intl.DateTimeFormat('de-AT', {
+const dayFmt = new Intl.DateTimeFormat(DE_LOCALE, {
   weekday: 'short',
   timeZone: 'Europe/Vienna',
 });
-const dateFmt = new Intl.DateTimeFormat('de-AT', {
+const dateFmt = new Intl.DateTimeFormat(DE_LOCALE, {
   day: '2-digit',
   month: '2-digit',
   timeZone: 'Europe/Vienna',

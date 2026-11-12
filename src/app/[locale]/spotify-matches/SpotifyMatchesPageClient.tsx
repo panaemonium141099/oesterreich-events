@@ -9,6 +9,7 @@ import { EventImage } from '@/components/Events/EventImage';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface SpotifyMatch {
   id: string;
@@ -104,7 +105,7 @@ export function SpotifyMatchesPageClient() {
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('de-AT', {
+    return new Date(dateStr).toLocaleDateString(DE_LOCALE, {
       weekday: 'short', day: 'numeric', month: 'long', year: 'numeric',
       timeZone: EVENT_TZ,
     });

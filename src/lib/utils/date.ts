@@ -14,8 +14,9 @@
  */
 
 import { EVENT_TZ, hasKnownStartTime, toViennaDate } from './event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
-const LOCALE = 'de-AT';
+const LOCALE = DE_LOCALE;
 
 /**
  * Parse a date string safely. Date-only strings (YYYY-MM-DD) become UTC noon,

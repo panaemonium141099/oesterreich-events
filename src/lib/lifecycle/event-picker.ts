@@ -18,6 +18,7 @@ import type { LifecycleEmailEvent } from '@/emails/lifecycle-weekend';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { EVENT_TZ, addViennaDays, viennaDayRange, viennaDayStart, viennaFields, viennaToday, viennaWeekday } from '@/lib/utils/event-time';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 // Real `events` table columns. There is NO `venue`, NO `start_time`, NO `slug`,
 // NO `city`. The location string the email shows is `location_name` (the venue
@@ -230,7 +231,7 @@ function toEmailEvent(r: DbEventRow): LifecycleEmailEvent {
 
 function formatDateDE(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString('de-AT', {
+    return new Date(iso).toLocaleDateString(DE_LOCALE, {
       weekday: 'short',
       day: 'numeric',
       month: 'long',

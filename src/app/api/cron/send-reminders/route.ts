@@ -24,6 +24,7 @@ import {
 import { reminderToken, reminderMailHtml } from '@/lib/event-reminder';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -40,7 +41,7 @@ function getServiceClient(): SupabaseClient<any> {
 
 function formatDateDE(dateStr: string): string {
   try {
-    return new Date(dateStr).toLocaleDateString('de-AT', {
+    return new Date(dateStr).toLocaleDateString(DE_LOCALE, {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -310,7 +311,7 @@ interface AnonStats { due: number; sent: number; errors: number }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function processAnonEmailReminders(supabase: SupabaseClient<any>, now: Date, stats: AnonStats): Promise<void> {
-  const dateFmt = new Intl.DateTimeFormat('de-AT', {
+  const dateFmt = new Intl.DateTimeFormat(DE_LOCALE, {
     weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Vienna',
   });
 

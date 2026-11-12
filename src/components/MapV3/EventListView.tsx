@@ -45,6 +45,7 @@ import { EVENT_TZ, addViennaDays, toViennaDate, viennaDayStart, viennaToday, vie
 
 import { gradientFor } from '@/components/Discover/v4/category-gradient';
 import { priceBadge } from '@/lib/v4/price-badge';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export type ListSortMode = 'date' | 'distance' | 'score';
 
@@ -75,7 +76,7 @@ export function EventListView({
   const t = useTranslations('MapPage');
   const locale = useLocale();
   // de-AT bleibt das Zahlen-/Datumsformat auf Deutsch; EN nutzt en-GB.
-  const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
+  const fmt = locale === 'de' ? DE_LOCALE : 'en-GB';
   // Default to "Top" so the list opens with the highest-scored events
   // visible regardless of where the user came from. Datum/Distanz remain
   // one click away.
@@ -368,7 +369,7 @@ function BigRow({
   const tCat = useTranslations('Categories');
   const tDisc = useTranslations('Discover');
   const locale = useLocale();
-  const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
+  const fmt = locale === 'de' ? DE_LOCALE : 'en-GB';
 
   const pending = ev.title == null;
   const time = pending ? null : formatTime(ev.start_date);

@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { resetAdsAllowed } from '@/lib/ads/ads-allowed';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface UserRow {
   id: string;
@@ -184,7 +185,7 @@ export default function UsersPage() {
   };
 
   const formatDate = (dateStr: string) =>
-    new Date(dateStr).toLocaleDateString('de-AT', {
+    new Date(dateStr).toLocaleDateString(DE_LOCALE, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',

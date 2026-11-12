@@ -40,6 +40,8 @@ import { ShelfTrack } from './shelf-ui';
 import { buildUnderstoodChips, type ParsedSummary } from './smart-chips';
 import { planSmartShelves } from './smart-shelves';
 import { buildConciergeLine, buildRefineChips } from './smart-summary';
+import { DE_LOCALE } from '@/lib/site/intl';
+import { getSite } from '@/lib/site';
 
 /* ─── Typen der API-Antwort ─────────────────────────────────────────── */
 
@@ -98,7 +100,7 @@ const RESULT_LIMIT = 40;
 function shortDay(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
-  return d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', timeZone: EVENT_TZ }).replace(/\.$/, '');
+  return d.toLocaleDateString(DE_LOCALE, { weekday: 'short', day: 'numeric', month: 'short', timeZone: EVENT_TZ }).replace(/\.$/, '');
 }
 
 function activityImage(a: ActivitySearchMatch): string | null {
@@ -377,7 +379,7 @@ export function V4SmartPlanner({ initialQuery = '' }: { initialQuery?: string })
     trackEvent('smart_save_plan', { events: selectedEvents.length, activities: selectedActivities.length });
     const note = selectedActivities.length > 0
       ? 'Flexible Stopps:\n' + selectedActivities
-          .map(a => `- ${a.name}${a.town ? ` (${a.town})` : ''} → https://lasstreffen.at/aktivitaet/${a.slug}`)
+          .map(a => `- ${a.name}${a.town ? ` (${a.town})` : ''} → ${getSite().url}/aktivitaet/${a.slug}`)
           .join('\n')
       : null;
     try {

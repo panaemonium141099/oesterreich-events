@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { V4EntdeckenTabs, type V4EntdeckenMode } from '@/components/Events/v4';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface V4EntdeckenHeroProps {
   mode: V4EntdeckenMode;
@@ -17,7 +18,7 @@ interface V4EntdeckenHeroProps {
 export function V4EntdeckenHero({ mode, onModeChange }: V4EntdeckenHeroProps) {
   const t = useTranslations('Discover');
   const locale = useLocale();
-  const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
+  const fmt = locale === 'de' ? DE_LOCALE : 'en-GB';
   const dateLine = new Date().toLocaleDateString(fmt, {
     weekday: 'long', day: 'numeric', month: 'long', timeZone: EVENT_TZ,
   });

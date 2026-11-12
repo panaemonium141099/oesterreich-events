@@ -31,7 +31,7 @@ import { SITE_COUNTRY } from '@/lib/site-country';
 import { landingShelfConfig, loadShelfPool, type LandingShelves } from './hubs/shelf-pool';
 import { getSite } from '@/lib/site';
 
-const BASE_URL = 'https://lasstreffen.at';
+const BASE_URL = getSite().url;
 
 /**
  * fn-17: Übersetzer-Handle wie von `getTranslations()` geliefert.

@@ -12,6 +12,8 @@
  * Rein und ohne I/O. Ausführung: `src/scripts/coverage-report.ts`.
  */
 
+import { DE_LOCALE } from '@/lib/site/intl';
+
 export interface CoverageGemeinde {
   /** Gemeindekennziffer (AT) bzw. AGS (DE). */
   id: string;
@@ -95,6 +97,6 @@ export function buildCoverage(
 /** Markdown-Tabelle für Konsole und GitHub-Zusammenfassung. */
 export function coverageTable(title: string, rows: readonly CoverageRow[]): string {
   const lines = [`### ${title}`, '', '| | Gemeinden | mit Termin | Anteil |', '|---|---:|---:|---:|'];
-  for (const r of rows) lines.push(`| ${r.key} | ${r.gemeinden} | ${r.mitTermin} | ${r.anteil.toLocaleString('de-AT')} % |`);
+  for (const r of rows) lines.push(`| ${r.key} | ${r.gemeinden} | ${r.mitTermin} | ${r.anteil.toLocaleString(DE_LOCALE)} % |`);
   return lines.join('\n');
 }

@@ -4,6 +4,7 @@
  * bleiben der Detailseite vorbehalten.
  */
 import type { Event } from '@/types/events';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 type PriceEvent = Pick<Event, 'price_text' | 'price_min' | 'price_max' | 'price_tier'>;
 
@@ -21,7 +22,7 @@ function fmtAmount(n: number, fmt: string): string {
 export function priceBadge(
   e: PriceEvent,
   labels: { free: string; from: (price: string) => string },
-  fmt: string = 'de-AT',
+  fmt: string = DE_LOCALE,
 ): string | null {
   const text = (e.price_text ?? '').trim();
   if (FREE_WORDS.test(text) || e.price_tier === 'gratis'

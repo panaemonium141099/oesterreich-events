@@ -1,48 +1,72 @@
 /**
- * Wächter: Domain, hreflang und Land der Seite stehen nur in src/lib/site/.
+ * Wächter: Domain, Locale und Land der Seite stehen nur in src/lib/site/.
  *
  * Aus dieser Codebasis entstehen lasstreffen.at und lasstreffen.de (fn-31).
- * Eine fest eingetragene Domain, ein festes `de-AT` als hreflang oder ein
- * festes `addressCountry: 'AT'` wäre auf der jeweils anderen Seite falsch:
- * Canonical auf die fremde Domain, Sitemap mit fremden URLs.
+ * Eine fest eingetragene Domain, ein festes `de-AT` (hreflang oder
+ * Datumsformat) oder ein festes `addressCountry: 'AT'` wäre auf der jeweils
+ * anderen Seite falsch: Canonical auf die fremde Domain, „Jänner“ auf .de.
  *
- * Der Altbestand außerhalb des SEO-Kerns steht in
- * `domain-literal-baseline.json`. Neue Fundstellen lässt der Wächter nicht
- * zu, erledigte müssen aus der Liste verschwinden (fn-31.4 baut sie ab).
- * Liste neu schreiben: `UPDATE_DOMAIN_BASELINE=1 npx vitest run <diese Datei>`.
+ * Ausnahmen brauchen einen Grund. Zwei Arten:
+ *  - Die Datei gehört zu einer Säule, die lasstreffen.de nicht ausspielt
+ *    (Feature-Matrix). Wird die Säule dort eingeschaltet, schlägt der Wächter
+ *    an und die Datei muss vorher länderfähig werden.
+ *  - Eine Regel unten mit Begründung.
  */
 import { describe, it, expect } from 'vitest';
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 import { SITES } from '@/lib/site/sites';
+import { featureOfPath } from '@/lib/site/features';
 import { bilingualAlternates, deOnlyAlternates } from '@/lib/seo/canonical';
 import { SITEMAP_BASE_URL } from '@/lib/seo/sitemap-xml';
 import { getSite } from '@/lib/site';
 import robots from '@/app/robots';
 
 const ROOTS = ['src/app', 'src/lib', 'src/components'];
-const BASELINE_FILE = 'src/__tests__/lib/domain-literal-baseline.json';
 
 /** Hier darf die Domain stehen: die Site selbst. */
 const OWN = /^src\/lib\/site\//;
 
-const PATTERNS: Array<{ name: string; re: RegExp }> = [
-  { name: 'domain', re: /lasstreffen\.(at|de)/i },
-  { name: 'hreflang', re: /hreflang:\s*['"]de-(AT|DE)['"]|['"]de-(AT|DE)['"]\s*:|inLanguage[^\n]*['"]de-(AT|DE)['"]|['"]de_(AT|DE)['"]/ },
-  { name: 'addressCountry', re: /addressCountry['"]?\s*:\s*['"](AT|DE)['"]/ },
+const PATTERNS: RegExp[] = [
+  /lasstreffen\.(at|de)/i,
+  /['"]de[-_](AT|DE)['"]/,
+  /addressCountry['"]?\s*:\s*['"](AT|DE)['"]/,
 ];
 
-/** SEO-Kern (fn-31.3): diese Dateien sind fertig und dürfen nie in die Liste. */
-const SEO_KERN = [
-  'src/lib/seo/canonical.ts',
-  'src/lib/seo/sitemap-xml.ts',
-  'src/lib/seo/sitemap-events-shard.ts',
-  'src/lib/seo/event-jsonld.ts',
-  'src/app/robots.ts',
-  'src/app/[locale]/layout.tsx',
-  'src/app/sitemap-core.xml/route.ts',
-  'src/app/sitemap-activities.xml/route.ts',
-  'src/app/[locale]/events/[...slug]/page.tsx',
+/** Ausnahmen mit Begründung. Jede Regel muss noch mindestens eine Datei treffen. */
+const ALLOW: Array<{ match: RegExp; reason: string }> = [
+  {
+    match: /^src\/app\/\[locale\]\/(agb|datenschutz|impressum|quellen|ueber-uns)\/page\.tsx$/,
+    reason: 'Rechts- und Selbstdarstellungstexte: Wortlaut je Seite liefert der Betreiber (fn-31.13)',
+  },
+  {
+    match: /^src\/app\/api\/cron\/(lifecycle-emails|newsletter-weekly|send-reminders|seo-[a-z-]+)\/route\.ts$/,
+    reason: 'Mail- und SEO-Crons laufen nur für lasstreffen.at, für .de gibt es keinen Timer',
+  },
+  {
+    match: /^src\/lib\/(email|newsletter|event-reminder)\.ts$|^src\/lib\/lifecycle\//,
+    reason: 'Mailversand: Säulen newsletter und account sind auf .de aus',
+  },
+  {
+    match: /^src\/lib\/outreach\/|^src\/lib\/reporting\//,
+    reason: 'interne Akquise und Betriebsberichte des Betreibers, keine Ausspielung',
+  },
+  {
+    match: /^src\/components\/(Blog|Business|Admin)\/|^src\/lib\/(blog|festivals|themes)\/|^src\/lib\/student-data\.ts$/,
+    reason: 'Bausteine der Säulen Blog, Veranstalter-Pakete, Admin, Festivals, Themen, Studenten: auf .de aus',
+  },
+  {
+    match: /^src\/app\/api\/img\/\[eventId\]\/route\.ts$|^src\/lib\/quality\/withdrawal\.ts$|^src\/lib\/scrapers\/|^src\/lib\/activities\/wikimedia-image\.ts$/,
+    reason: 'User-Agent der Abrufe nennt den Betreiber und seine Quellenseite, unabhängig von der Seite',
+  },
+  {
+    match: /^src\/lib\/affiliate\/viator-client\.ts$|^src\/components\/Affiliate\//,
+    reason: 'Sprachcode der Partner (Viator, GetYourGuide führen Deutsch als de-DE), nicht die Locale der Seite',
+  },
+  {
+    match: /^src\/lib\/pruefstand\/report\.ts$/,
+    reason: 'Prüfstand-Bericht der deutschen Adapter, Zeitangaben für Deutschland',
+  },
 ];
 
 function walk(dir: string, out: string[] = []): string[] {
@@ -58,49 +82,49 @@ function walk(dir: string, out: string[] = []): string[] {
 }
 
 /** Kommentarzeilen zählen nicht: sie erklären, sie spielen nichts aus. */
-function codeLines(src: string): string[] {
-  return src.split('\n').filter(line => !/^\s*(\/\/|\*|\/\*)/.test(line));
+function hasLiteral(file: string): boolean {
+  const lines = readFileSync(file, 'utf8')
+    .split('\n')
+    .filter(line => !/^\s*(\/\/|\*|\/\*)/.test(line));
+  return PATTERNS.some(re => lines.some(l => re.test(l)));
 }
 
-function scan(): Record<string, string[]> {
-  const hits: Record<string, string[]> = {};
-  for (const file of ROOTS.flatMap(r => walk(r))) {
-    if (OWN.test(file)) continue;
-    const lines = codeLines(readFileSync(file, 'utf8'));
-    const kinds = PATTERNS.filter(p => lines.some(l => p.re.test(l))).map(p => p.name);
-    if (kinds.length > 0) hits[file] = kinds;
-  }
-  return hits;
+/** Der Pfad, unter dem eine Datei aus src/app ausgespielt wird; sonst null. */
+function servedPath(file: string): string | null {
+  const page = file.match(/^src\/app\/\[locale\]\/(.+)$/);
+  if (page) return `/${page[1]}`;
+  const root = file.match(/^src\/app\/(.+)$/);
+  return root ? `/${root[1].replace(/\/route\.tsx?$/, '')}` : null;
+}
+
+/** Säule der Datei, wenn lasstreffen.de sie nicht ausspielt. */
+function pillarOffOnDe(file: string): string | null {
+  const path = servedPath(file);
+  const feature = path ? featureOfPath(path) : null;
+  return feature && !SITES.DE.features[feature] ? feature : null;
 }
 
 describe('Domain-Wächter (src/lib/site ist die einzige Stelle)', () => {
-  const found = scan();
+  const withLiteral = ROOTS.flatMap(r => walk(r)).filter(f => !OWN.test(f) && hasLiteral(f));
 
-  if (process.env.UPDATE_DOMAIN_BASELINE === '1') {
-    const sorted = Object.fromEntries(Object.entries(found).sort(([a], [b]) => a.localeCompare(b)));
-    writeFileSync(BASELINE_FILE, JSON.stringify(sorted, null, 2) + '\n');
-  }
-  const baseline = JSON.parse(readFileSync(BASELINE_FILE, 'utf8')) as Record<string, string[]>;
-
-  it('keine neue Datei nennt Domain, hreflang oder Land als Literal', () => {
-    const neu = Object.keys(found).filter(f => !(f in baseline));
-    expect(neu).toEqual([]);
+  it('kein Literal außerhalb der Site, abgeschalteter Säulen und begründeter Ausnahmen', () => {
+    const offen = withLiteral.filter(f => !pillarOffOnDe(f) && !ALLOW.some(a => a.match.test(f)));
+    expect(offen).toEqual([]);
   });
 
-  it('keine Datei der Liste bekommt eine weitere Art von Literal', () => {
-    const mehr = Object.entries(found)
-      .filter(([f, kinds]) => f in baseline && kinds.some(k => !baseline[f].includes(k)))
-      .map(([f]) => f);
-    expect(mehr).toEqual([]);
+  it('jede Ausnahme trifft noch eine Datei mit Literal', () => {
+    const verwaist = ALLOW.filter(a => !withLiteral.some(f => a.match.test(f))).map(a => a.reason);
+    expect(verwaist).toEqual([]);
   });
 
-  it('die Liste nennt nur Dateien, die noch ein Literal tragen', () => {
-    const erledigt = Object.keys(baseline).filter(f => !(f in found));
-    expect(erledigt).toEqual([]);
-  });
-
-  it('der SEO-Kern steht nicht in der Liste', () => {
-    expect(SEO_KERN.filter(f => f in baseline || f in found)).toEqual([]);
+  it('der Wächter findet, was er finden soll', () => {
+    const probe = (line: string) => PATTERNS.some(re => re.test(line));
+    expect(probe("const url = 'https://lasstreffen.at/x';")).toBe(true);
+    expect(probe("d.toLocaleDateString('de-AT')")).toBe(true);
+    expect(probe("locale: 'de_AT'")).toBe(true);
+    expect(probe("addressCountry: 'AT',")).toBe(true);
+    expect(probe('const url = `${getSite().url}/x`;')).toBe(false);
+    expect(probe('d.toLocaleDateString(DE_LOCALE)')).toBe(false);
   });
 });
 

@@ -17,6 +17,7 @@ import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { genreLabel } from '@/lib/artists/genre-labels';
 import type { DirectoryArtist, DirectoryEvent } from '@/lib/artists/directory';
 import { EVENT_TZ, addViennaDays, toViennaDate, viennaToday } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export const LOGIN_HREF = '/auth/login?redirect=/artists';
 
@@ -29,7 +30,7 @@ export function dayLabel(iso: string, locale: string, t: Translate, now: Date = 
   const today = viennaToday(now);
   if (day === today) return t('today');
   if (day === addViennaDays(today, 1)) return t('tomorrow');
-  const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
+  const fmt = locale === 'de' ? DE_LOCALE : 'en-GB';
   const parts = new Intl.DateTimeFormat(fmt, { weekday: 'short', day: 'numeric', month: 'short', timeZone: EVENT_TZ }).formatToParts(d);
   const get = (type: string) => parts.find(p => p.type === type)?.value ?? '';
   const weekday = get('weekday').replace(/\.$/, '');

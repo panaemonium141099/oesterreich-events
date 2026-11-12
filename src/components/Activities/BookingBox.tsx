@@ -26,6 +26,7 @@
 import { useEffect, useState } from 'react';
 import type { AffiliateProduct } from '@/lib/affiliate/viator-types';
 import { parseAffiliateProduct } from '@/lib/affiliate/viator-types';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 /**
  * Fertig uebersetzte Strings. Bewusst als Props statt useTranslations:
@@ -58,7 +59,7 @@ const PROVIDER = 'Viator';
 
 function formatPrice(value: number, currency: string | null): string {
   try {
-    return new Intl.NumberFormat('de-AT', {
+    return new Intl.NumberFormat(DE_LOCALE, {
       style: 'currency',
       currency: currency ?? 'EUR',
       maximumFractionDigits: 0,

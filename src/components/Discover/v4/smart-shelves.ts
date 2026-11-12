@@ -14,6 +14,7 @@
  */
 
 import { addViennaDays, toViennaDate, viennaFields, viennaToday, hasKnownStartTime } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export interface ShelfEvent {
   id: string;
@@ -54,13 +55,13 @@ export function phaseOf(hour: number): Phase {
 function dayLabel(day: string, today: string): string {
   if (day === today) return 'Heute';
   if (day === addViennaDays(today, 1)) return 'Morgen';
-  return new Date(`${day}T12:00:00Z`).toLocaleDateString('de-AT', {
+  return new Date(`${day}T12:00:00Z`).toLocaleDateString(DE_LOCALE, {
     weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC',
   });
 }
 
 function dayLong(day: string): string {
-  return new Date(`${day}T12:00:00Z`).toLocaleDateString('de-AT', {
+  return new Date(`${day}T12:00:00Z`).toLocaleDateString(DE_LOCALE, {
     weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC',
   });
 }

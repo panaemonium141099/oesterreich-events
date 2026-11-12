@@ -28,4 +28,4 @@ jobs:
       - name: Vitest (SITE_COUNTRY=DE)
         env:
           SITE_COUNTRY: DE
-        run: npx vitest run src/__tests__/lib/site.test.ts src/__tests__/lib/site-country-guard.test.ts src/__tests__/lib/domain-literal-guard.test.ts src/__tests__/lib/site-features.test.ts
+        run: npx vitest run src/__tests__/lib/site.test.ts src/__tests__/lib/site-country-guard.test.ts src/__tests__/lib/domain-literal-guard.test.ts src/__tests__/lib/site-features.test.ts src/__tests__/i18n/site-messages.test.ts

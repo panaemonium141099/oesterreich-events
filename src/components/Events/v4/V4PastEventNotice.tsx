@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import type { Event } from '@/types/events';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 /**
  * "Dieses Event ist vorbei" — Hinweis auf vergangenen Event-Detailseiten
@@ -17,7 +18,7 @@ import { EVENT_TZ } from '@/lib/utils/event-time';
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
+  return d.toLocaleDateString(DE_LOCALE, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
 }
 
 export function V4PastEventNotice({

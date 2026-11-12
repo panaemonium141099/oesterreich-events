@@ -5,8 +5,9 @@
  */
 
 import { useTranslations } from 'next-intl';
+import { getSite } from '@/lib/site';
 
-export const DEV_CONTACT = 'support@lasstreffen.at';
+export const DEV_CONTACT = getSite().contact.support;
 
 export function DevNotice() {
   const t = useTranslations('Landing');

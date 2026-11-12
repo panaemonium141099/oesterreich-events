@@ -24,6 +24,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Plus, Play, Pause, Flag, Trash2 } from 'lucide-react';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface Experiment {
   id: string;
@@ -184,7 +185,7 @@ function ExperimentCard({ exp, onChanged }: { exp: Experiment; onChanged: () => 
         <div className="flex-1 min-w-0">
           <p className="text-sm text-white/90 truncate">{exp.name}</p>
           <p className="text-xs text-white/40 mt-0.5">
-            Seit {new Date(exp.started_at).toLocaleDateString('de-AT', { timeZone: EVENT_TZ })}
+            Seit {new Date(exp.started_at).toLocaleDateString(DE_LOCALE, { timeZone: EVENT_TZ })}
             {exp.winner && <span className="ml-2 text-amber-300">· Gewinner: {exp.winner}</span>}
           </p>
         </div>
@@ -258,7 +259,7 @@ function VariantPreview({ label, payload, count }: { label: string; payload: Rec
       <div className="flex items-center justify-between mb-2">
         <p className="text-[10px] uppercase tracking-wider text-white/40">{label}</p>
         {count !== null && (
-          <span className="text-[10px] tabular-nums text-white/60">{count.toLocaleString('de-AT')} imp</span>
+          <span className="text-[10px] tabular-nums text-white/60">{count.toLocaleString(DE_LOCALE)} imp</span>
         )}
       </div>
       <pre className="text-[11px] text-white/70 font-mono whitespace-pre-wrap break-words">

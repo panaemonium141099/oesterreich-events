@@ -4,6 +4,7 @@ import { WeekHeatmap } from '@/components/Heatmap/WeekHeatmap';
 import { Footer } from '@/components/Legal/Footer';
 import { Link } from '@/i18n/navigation';
 import { viennaDayDiff, viennaToday } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 /**
  * /wo-ist-was-los — öffentliche Event-Dichte-Heatmap Österreichs (fn-19).
@@ -128,7 +129,7 @@ export default async function HeatmapPage() {
     <div className="min-h-screen bg-[var(--v4-surface)] text-[var(--v4-ink)] flex flex-col">
       <main className="flex-1 max-w-[1180px] w-full mx-auto px-4 md:px-14 py-10">
         <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[var(--v4-ink-50)] mb-2">
-          Live aus {stats ? stats.total.toLocaleString('de-AT') : 'zehntausenden'} Terminen
+          Live aus {stats ? stats.total.toLocaleString(DE_LOCALE) : 'zehntausenden'} Terminen
         </p>
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">
           Wo ist was los in Österreich?
@@ -158,7 +159,7 @@ export default async function HeatmapPage() {
                       )}
                     </span>
                     <span className="text-sm text-[var(--v4-ink-70)] tabular-nums">
-                      {d.count.toLocaleString('de-AT')} Events
+                      {d.count.toLocaleString(DE_LOCALE)} Events
                     </span>
                   </li>
                 ))}
@@ -179,7 +180,7 @@ export default async function HeatmapPage() {
                         />
                       </span>
                       <span className="text-sm text-[var(--v4-ink-70)] tabular-nums w-16 text-right">
-                        {b.count.toLocaleString('de-AT')}
+                        {b.count.toLocaleString(DE_LOCALE)}
                       </span>
                     </li>
                   );

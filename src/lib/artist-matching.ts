@@ -24,6 +24,7 @@ import {
 } from '@/lib/email';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { stripDiacritics, normalizeArtistName } from '@/lib/artists/normalize-name';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -795,7 +796,7 @@ export async function createGroupedNotifications(
  */
 function formatDateDE(dateStr: string): string {
   try {
-    return new Date(dateStr).toLocaleDateString('de-AT', {
+    return new Date(dateStr).toLocaleDateString(DE_LOCALE, {
       weekday: 'long',
       day: 'numeric',
       month: 'long',

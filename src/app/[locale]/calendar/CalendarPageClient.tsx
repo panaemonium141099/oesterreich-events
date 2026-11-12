@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { EventImage } from '@/components/Events/EventImage';
 import { EVENT_TZ, hasKnownStartTime, viennaDayRange, viennaDayStart, viennaFields } from '@/lib/utils/event-time';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface CalendarEvent {
   id: string;
@@ -146,19 +147,19 @@ function monthRangeIso(year: number, month: number) {
 
 function formatMonthYear(year: number, month: number) {
   // Monatsmitte in UTC: in keiner Zeitzone ein anderer Monat.
-  return new Date(Date.UTC(year, month, 15)).toLocaleDateString('de-AT', { month: 'long', year: 'numeric', timeZone: EVENT_TZ });
+  return new Date(Date.UTC(year, month, 15)).toLocaleDateString(DE_LOCALE, { month: 'long', year: 'numeric', timeZone: EVENT_TZ });
 }
 
 function formatEventDate(dateStr: string) {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
+  return d.toLocaleDateString(DE_LOCALE, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
 }
 
 function formatEventTime(dateStr: string): string | null {
   if (!dateStr || dateStr.length <= 10 || !dateStr.includes('T')) return null;
   if (!hasKnownStartTime({ start_date: dateStr })) return null;
   const d = new Date(dateStr);
-  return d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ });
+  return d.toLocaleTimeString(DE_LOCALE, { hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ });
 }
 
 export function CalendarPageClient() {
@@ -877,7 +878,7 @@ export function CalendarPageClient() {
         {selectedDay !== null && (
           <div className="border-t border-white/10 pt-6">
             <h3 className="text-sm font-semibold text-white/60 mb-4">
-              {new Date(Date.UTC(currentYear, currentMonth, selectedDay, 12)).toLocaleDateString('de-AT', {
+              {new Date(Date.UTC(currentYear, currentMonth, selectedDay, 12)).toLocaleDateString(DE_LOCALE, {
                 weekday: 'long',
                 day: 'numeric',
                 month: 'long',

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ShieldCheck, Check, EyeOff, Eye } from 'lucide-react';
 import { SeverityBadge } from '@/components/Admin/SeverityBadge';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 interface QualityFlag {
   id: string;
@@ -78,7 +79,7 @@ export default function QualityPage() {
   };
 
   const formatDate = (dateStr: string) =>
-    new Date(dateStr).toLocaleDateString('de-AT', {
+    new Date(dateStr).toLocaleDateString(DE_LOCALE, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',

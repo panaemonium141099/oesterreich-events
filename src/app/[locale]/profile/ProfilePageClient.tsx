@@ -9,6 +9,7 @@ import { CrownIcon, BoltIcon, BuildingIcon, CheckIcon } from '@/components/UI/Ic
 import { NotificationSettings } from '@/components/Notifications/NotificationSettings';
 import { toast } from 'sonner';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 /**
  * Profile editor UI as a named-export client component. Mounted by the
@@ -281,7 +282,7 @@ export function ProfilePageClient() {
               />
             ) : (
               <p className="px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.06] text-sm min-h-[46px]">
-                {birthDate ? <span className="text-white/70">{new Date(birthDate + 'T00:00:00').toLocaleDateString('de-AT', { timeZone: EVENT_TZ })}</span> : <span className="text-white/30 italic">Nicht angegeben</span>}
+                {birthDate ? <span className="text-white/70">{new Date(birthDate + 'T00:00:00').toLocaleDateString(DE_LOCALE, { timeZone: EVENT_TZ })}</span> : <span className="text-white/30 italic">Nicht angegeben</span>}
               </p>
             )}
           </div>

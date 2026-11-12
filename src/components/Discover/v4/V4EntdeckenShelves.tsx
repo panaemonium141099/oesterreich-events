@@ -24,6 +24,7 @@ import { EVENT_TZ, viennaDayStart } from '@/lib/utils/event-time';
 import { useDetailHydration } from '@/lib/v4/use-detail-hydration';
 import { planShelves } from './shelves-select';
 import { PICKS_GRID_CLASS, PickTile, RegionTile, Shelf, ShelfCard, ShelfChip } from './shelf-ui';
+import { DE_LOCALE } from '@/lib/site/intl';
 
 export type ShelfPreset = 'heute' | 'wochenende';
 
@@ -41,7 +42,7 @@ export function V4EntdeckenShelves({ events, loading, onPreset, onCategory, onFr
   const t = useTranslations('Discover');
   const tCat = useTranslations('Categories');
   const locale = useLocale();
-  const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
+  const fmt = locale === 'de' ? DE_LOCALE : 'en-GB';
 
   const plan = useMemo(() => planShelves(events), [events]);
 
