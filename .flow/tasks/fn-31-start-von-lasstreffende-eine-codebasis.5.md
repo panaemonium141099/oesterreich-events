@@ -22,9 +22,8 @@ Feature-Matrix der Site schaltet Routen, Navigation und Sitemap-Teile. Auf .de s
 - [ ] .de hat kein `/en`
 - [ ] Ein Feature umschalten ändert genau eine Zeile
 ## Done summary
-TBD
-
+Feature-Matrix in SiteConfig.features, Pfade in src/lib/site/features.ts. Middleware antwortet 404 fuer abgeschaltete Saeulen und fuer /en ohne Englisch; Navigation, Footer, Sitemap-Index und Kern-Sitemap filtern ueber isPathEnabled. AT hat alles an und wird nicht geprueft. Offen: /auth/callback liegt ausserhalb des Middleware-Matchers und wird nicht gesperrt; routing.locales bleibt aus Typgruenden unveraendert, /en sperrt die Middleware.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: bdac854a
+- Tests: npx vitest run (4625 gruen, lokal nur die drei Windows-Faelle rot), SITE_COUNTRY=DE: site, guards, site-features gruen
 - PRs:
