@@ -1,7 +1,8 @@
 import type { MetadataRoute } from 'next';
+import { getSite } from '@/lib/site';
 
 /**
- * robots.txt for lasstreffen.at.
+ * robots.txt der Seite dieses Builds (lasstreffen.at bzw. lasstreffen.de).
  *
  * Two concerns:
  *
@@ -103,6 +104,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: authGatedAndAdminDisallow,
       })),
     ],
-    sitemap: 'https://lasstreffen.at/sitemap.xml',
+    sitemap: `${getSite().url}/sitemap.xml`,
   };
 }

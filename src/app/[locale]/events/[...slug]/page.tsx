@@ -22,6 +22,7 @@ import {
 } from '@/lib/events/event-detail-loaders';
 import { getOrTranslateEventEn } from '@/lib/i18n/translate-event';
 import { AdSlot } from '@/components/Ads/AdSlot';
+import { getSite } from '@/lib/site';
 
 /**
  * ISR revalidation interval.
@@ -102,16 +103,16 @@ export async function generateMetadata({
   // die EN-Seite deutschen Text zeigt, kanonisiert sie auf die DE-URL
   // (kein Duplicate-Content-Signal auf 45k URLs).
   const canonicalPath = buildEventUrlV2(event);
-  const deUrl = `https://lasstreffen.at${canonicalPath}`;
-  const enUrl = `https://lasstreffen.at/en${canonicalPath}`;
+  const deUrl = `${getSite().url}${canonicalPath}`;
+  const enUrl = `${getSite().url}/en${canonicalPath}`;
   const canonicalUrl = isEn && enCached ? enUrl : deUrl;
   const languageAlternates = enCached
-    ? { 'de-AT': deUrl, en: enUrl, 'x-default': deUrl }
+    ? { [getSite().hreflang]: deUrl, en: enUrl, 'x-default': deUrl }
     : undefined;
   // OG image moved to an API route because Next.js forbids metadata files
   // (like opengraph-image.tsx) inside catch-all route segments. The image
   // is cacheable by the shortId alone — no need to include the full slug.
-  const ogImageUrl = `https://lasstreffen.at/api/og/event/${event.id.slice(0, 8)}`;
+  const ogImageUrl = `${getSite().url}/api/og/event/${event.id.slice(0, 8)}`;
 
   // Truncate overly long event titles so Bing/Google don't flag them as
   // "Title too long". Cut at 57 chars (room for " …") so the rendered
@@ -333,7 +334,7 @@ export default async function EventDetailPage({
     event.publish_status !== 'published_low_confidence'
       ? buildJsonLd(displayEvent, {
           locale: schemaIsEn ? 'en' : 'de',
-          canonicalUrl: `https://lasstreffen.at${schemaIsEn ? '/en' : ''}${canonicalPath}`,
+          canonicalUrl: `${getSite().url}${schemaIsEn ? '/en' : ''}${canonicalPath}`,
         })
       : null;
 
@@ -346,12 +347,12 @@ export default async function EventDetailPage({
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://lasstreffen.at' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: getSite().url },
       ...hubs.map((h, i) => ({
         '@type': 'ListItem',
         position: i + 2,
         name: h.label.replace(/^Events in /, ''),
-        item: `https://lasstreffen.at${h.href}`,
+        item: `${getSite().url}${h.href}`,
       })),
       { '@type': 'ListItem', position: hubs.length + 2, name: displayEvent.title },
     ],

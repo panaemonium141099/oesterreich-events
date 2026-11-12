@@ -48,6 +48,7 @@ describe('SITES', () => {
       domain: 'lasstreffen.at',
       url: 'https://lasstreffen.at',
       brand: 'LassTreffen.at',
+      countryName: { de: 'Österreich', en: 'Austria' },
       hreflang: 'de-AT',
       ogLocale: 'de_AT',
       locales: ['de', 'en'],

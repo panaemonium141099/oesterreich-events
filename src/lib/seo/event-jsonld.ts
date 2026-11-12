@@ -18,6 +18,7 @@ import type { Event } from '@/types/events';
 import { extractCity } from '@/lib/utils/city';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
+import { getSite } from '@/lib/site';
 import {
   hasKnownStartTime,
   parseEventDate,
@@ -70,7 +71,7 @@ export interface BuildJsonLdOptions {
 
 export function buildJsonLd(event: Event, opts: BuildJsonLdOptions = {}): string {
   const isEn = opts.locale === 'en';
-  const canonicalUrl = opts.canonicalUrl ?? `https://lasstreffen.at${buildEventUrlV2(event)}`;
+  const canonicalUrl = opts.canonicalUrl ?? `${getSite().url}${buildEventUrlV2(event)}`;
 
   // ─── Zeitpunkt (fn-23) ──────────────────────────────────────────────────
   // Vorher stand hier der rohe DB-String (`2026-10-01T17:00:00+00:00`).
@@ -129,7 +130,7 @@ export function buildJsonLd(event: Event, opts: BuildJsonLdOptions = {}): string
     // Fallback aus echten Row-Feldern (gleiche Quelle wie die Meta-Description) —
     // GSC warnt sonst "Feld 'description' fehlt" auf jeder Seite ohne Text.
     const datePart = (event.start_date ?? '').slice(0, 10).split('-').reverse().join('.');
-    const where = event.location_name ?? extractCity(event) ?? 'Österreich';
+    const where = event.location_name ?? extractCity(event) ?? getSite().countryName.de;
     jsonLd.description = [event.title, datePart, where].filter(Boolean).join(' — ');
   }
 
@@ -146,10 +147,10 @@ export function buildJsonLd(event: Event, opts: BuildJsonLdOptions = {}): string
   });
   jsonLd.image =
     rawImage.startsWith('//') ? `https:${rawImage}` :
-    rawImage.startsWith('/') ? `https://lasstreffen.at${rawImage}` :
+    rawImage.startsWith('/') ? `${getSite().url}${rawImage}` :
     rawImage;
 
-  const locationName = event.location_name ?? event.address ?? (isEn ? 'Austria' : 'Österreich');
+  const locationName = event.location_name ?? event.address ?? (isEn ? getSite().countryName.en : getSite().countryName.de);
   const location: Record<string, unknown> = {
     '@type': 'Place',
     name: locationName,
@@ -169,7 +170,7 @@ export function buildJsonLd(event: Event, opts: BuildJsonLdOptions = {}): string
       ...(event.address ? { streetAddress: event.address } : {}),
       ...(plzValid ? { postalCode: plz } : {}),
       ...(city ? { addressLocality: city } : {}),
-      addressCountry: 'AT',
+      addressCountry: getSite().country,
     };
   }
 
@@ -197,8 +198,8 @@ export function buildJsonLd(event: Event, opts: BuildJsonLdOptions = {}): string
   // where the source page didn't expose one.
   jsonLd.organizer = {
     '@type': 'Organization',
-    name: event.organizer || 'LassTreffen.at',
-    url: 'https://lasstreffen.at',
+    name: event.organizer || getSite().brand,
+    url: getSite().url,
   };
 
   // Performer — ALWAYS present. Google's Event schema treats `performer` as a

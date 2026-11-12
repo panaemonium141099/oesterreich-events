@@ -38,6 +38,7 @@ import {
   toISO,
   type SitemapEntry,
 } from '@/lib/seo/sitemap-xml';
+import { getSite } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 300;
@@ -62,7 +63,7 @@ export async function GET(): Promise<NextResponse> {
   // werden DE- UND EN-URL gelistet, jeweils mit hreflang-Alternates.
   // Event-/Landing-URLs bleiben DE-only, bis übersetzter Content existiert.
   const i18nAlternates = (path: string) => [
-    { hreflang: 'de-AT', href: `${BASE_URL}${path}` },
+    { hreflang: getSite().hreflang, href: `${BASE_URL}${path}` },
     { hreflang: 'en', href: `${BASE_URL}/en${path}` },
     { hreflang: 'x-default', href: `${BASE_URL}${path}` },
   ];

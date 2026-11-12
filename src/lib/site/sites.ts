@@ -17,6 +17,8 @@ export interface SiteConfig {
   url: string;
   /** Name der Seite in Texten und Metadaten. */
   brand: string;
+  /** Name des Landes, deutsch und englisch (Rückfall-Ort, JSON-LD areaServed). */
+  countryName: { de: string; en: string };
   /** hreflang der deutschen Fassung. */
   hreflang: 'de-AT' | 'de-DE';
   /** OpenGraph-Locale der deutschen Fassung. */
@@ -33,6 +35,7 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
     domain: 'lasstreffen.at',
     url: 'https://lasstreffen.at',
     brand: 'LassTreffen.at',
+    countryName: { de: 'Österreich', en: 'Austria' },
     hreflang: 'de-AT',
     ogLocale: 'de_AT',
     locales: ['de', 'en'],
@@ -43,6 +46,7 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
     domain: 'lasstreffen.de',
     url: 'https://lasstreffen.de',
     brand: 'LassTreffen.de',
+    countryName: { de: 'Deutschland', en: 'Germany' },
     hreflang: 'de-DE',
     ogLocale: 'de_DE',
     locales: ['de'],

@@ -43,7 +43,7 @@ export function bilingualAlternates(path: string, locale: string) {
   return {
     canonical: locale === 'en' ? en : de,
     languages: {
-      'de-AT': de,
+      [getSite().hreflang]: de,
       en,
       'x-default': de,
     },

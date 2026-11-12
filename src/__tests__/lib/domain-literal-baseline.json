@@ -1,0 +1,299 @@
+{
+  "src/app/[locale]/admin/seo/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/agb/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/aktivitaet/[slug]/page.tsx": [
+    "addressCountry"
+  ],
+  "src/app/[locale]/aktivitaeten/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/auth/layout.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/bildnachweis/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/blog/[slug]/opengraph-image.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/blog/[slug]/page.tsx": [
+    "domain",
+    "hreflang"
+  ],
+  "src/app/[locale]/blog/opengraph-image.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/blog/page.tsx": [
+    "domain",
+    "hreflang"
+  ],
+  "src/app/[locale]/datenschutz/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/event-inserieren/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/festivals/[slug]/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/fuer-firmen/boost/erfolg/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/fuer-firmen/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/gemerkt/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/impressum/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/kuenstler/[slug]/page.tsx": [
+    "hreflang"
+  ],
+  "src/app/[locale]/quellen/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/thema/[slug]/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/ueber-uns/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/venues/[id]/page.tsx": [
+    "addressCountry"
+  ],
+  "src/app/[locale]/widget/[region]/page.tsx": [
+    "domain"
+  ],
+  "src/app/[locale]/wo-ist-was-los/page.tsx": [
+    "domain"
+  ],
+  "src/app/api/admin/event-submissions/[id]/route.ts": [
+    "domain"
+  ],
+  "src/app/api/checkout/boost/route.ts": [
+    "domain"
+  ],
+  "src/app/api/cron/lifecycle-emails/route.ts": [
+    "domain"
+  ],
+  "src/app/api/cron/newsletter-weekly/route.ts": [
+    "domain"
+  ],
+  "src/app/api/cron/send-reminders/route.ts": [
+    "domain"
+  ],
+  "src/app/api/cron/seo-content-refresh/route.ts": [
+    "domain"
+  ],
+  "src/app/api/cron/seo-ctr-watch/route.ts": [
+    "domain"
+  ],
+  "src/app/api/cron/seo-daily-snapshot/route.ts": [
+    "domain"
+  ],
+  "src/app/api/cron/seo-traffic-alert/route.ts": [
+    "domain"
+  ],
+  "src/app/api/cron/seo-weekly-report/route.ts": [
+    "domain"
+  ],
+  "src/app/api/cron/warm-cache/route.ts": [
+    "domain"
+  ],
+  "src/app/api/event-reminder/confirm/route.ts": [
+    "domain"
+  ],
+  "src/app/api/event-reminder/unsubscribe/route.ts": [
+    "domain"
+  ],
+  "src/app/api/events/inserat/route.ts": [
+    "domain"
+  ],
+  "src/app/api/img/[eventId]/route.ts": [
+    "domain"
+  ],
+  "src/app/api/newsletter/confirm/route.ts": [
+    "domain"
+  ],
+  "src/app/api/newsletter/unsubscribe/route.ts": [
+    "domain"
+  ],
+  "src/app/api/og/event/[shortId]/route.tsx": [
+    "domain"
+  ],
+  "src/app/api/search/chat/route.ts": [
+    "domain"
+  ],
+  "src/app/api/search/concierge/route.ts": [
+    "domain"
+  ],
+  "src/app/llms-full.txt/route.ts": [
+    "domain"
+  ],
+  "src/app/manifest.ts": [
+    "domain"
+  ],
+  "src/app/opengraph-image.tsx": [
+    "domain"
+  ],
+  "src/components/Admin/QrGeneratorClient.tsx": [
+    "domain"
+  ],
+  "src/components/Artists/v4/artist-ui.tsx": [
+    "hreflang"
+  ],
+  "src/components/Artists/v4/ArtistProfile.tsx": [
+    "hreflang"
+  ],
+  "src/components/Blog/BlogStayBox.tsx": [
+    "domain"
+  ],
+  "src/components/Blog/BlogStayList.tsx": [
+    "domain"
+  ],
+  "src/components/Blog/BlogTicketBox.tsx": [
+    "domain"
+  ],
+  "src/components/Business/BoostCheckoutForm.tsx": [
+    "domain"
+  ],
+  "src/components/Business/WidgetCodeGenerator.tsx": [
+    "domain"
+  ],
+  "src/components/Discover/v4/shelf-ui.tsx": [
+    "hreflang"
+  ],
+  "src/components/Discover/v4/V4EntdeckenHero.tsx": [
+    "hreflang"
+  ],
+  "src/components/Discover/v4/V4EntdeckenShelves.tsx": [
+    "hreflang"
+  ],
+  "src/components/Discover/v4/V4SmartPlanner.tsx": [
+    "domain"
+  ],
+  "src/components/Events/v4/V4EventDetailHero.tsx": [
+    "hreflang"
+  ],
+  "src/components/Events/v4/V4RelatedEvents.tsx": [
+    "hreflang"
+  ],
+  "src/components/Hub/HubShelves.tsx": [
+    "hreflang"
+  ],
+  "src/components/Landing/v4/ArtistsLive.tsx": [
+    "hreflang"
+  ],
+  "src/components/Landing/v4/DateLine.tsx": [
+    "hreflang"
+  ],
+  "src/components/Landing/v4/DevNotice.tsx": [
+    "domain"
+  ],
+  "src/components/Landing/v4/ProgramList.tsx": [
+    "hreflang"
+  ],
+  "src/components/Landing/v4/SeasonCard.tsx": [
+    "hreflang"
+  ],
+  "src/components/Landing/v4/SeasonWeather.tsx": [
+    "hreflang"
+  ],
+  "src/components/Landing/v4/TipOfDay.tsx": [
+    "hreflang"
+  ],
+  "src/components/Legal/Footer.tsx": [
+    "domain"
+  ],
+  "src/components/Map/ApproxEventsList.tsx": [
+    "hreflang"
+  ],
+  "src/components/MapV3/EventListView.tsx": [
+    "hreflang"
+  ],
+  "src/components/MapV3/FilterDrawer.tsx": [
+    "hreflang"
+  ],
+  "src/lib/activities/indexability.ts": [
+    "domain"
+  ],
+  "src/lib/activities/wikimedia-image.ts": [
+    "domain"
+  ],
+  "src/lib/blog/hero-image.ts": [
+    "domain"
+  ],
+  "src/lib/email.ts": [
+    "domain"
+  ],
+  "src/lib/event-reminder.ts": [
+    "domain"
+  ],
+  "src/lib/festivals/enrich.ts": [
+    "domain"
+  ],
+  "src/lib/festivals/og-image.ts": [
+    "domain"
+  ],
+  "src/lib/hubs/gemeinde-hub-content.ts": [
+    "domain",
+    "addressCountry"
+  ],
+  "src/lib/indexnow.ts": [
+    "domain"
+  ],
+  "src/lib/landing-data.ts": [
+    "domain"
+  ],
+  "src/lib/landing/day-labels.ts": [
+    "hreflang"
+  ],
+  "src/lib/lifecycle/event-picker.ts": [
+    "domain"
+  ],
+  "src/lib/newsletter.ts": [
+    "domain"
+  ],
+  "src/lib/outreach/discover-cold.ts": [
+    "domain"
+  ],
+  "src/lib/outreach/draft-prompt.ts": [
+    "domain"
+  ],
+  "src/lib/outreach/enrich.ts": [
+    "domain"
+  ],
+  "src/lib/outreach/link-events.ts": [
+    "domain"
+  ],
+  "src/lib/outreach/monitor.ts": [
+    "domain"
+  ],
+  "src/lib/quality/withdrawal.ts": [
+    "domain"
+  ],
+  "src/lib/reporting/workflow-report-email.ts": [
+    "domain"
+  ],
+  "src/lib/scrapers/BoudiccaEventsScraper.ts": [
+    "domain"
+  ],
+  "src/lib/scrapers/de/feed-scraper.ts": [
+    "domain"
+  ],
+  "src/lib/seo/snapshot.ts": [
+    "domain"
+  ],
+  "src/lib/student-data.ts": [
+    "domain"
+  ],
+  "src/lib/themes/data.ts": [
+    "domain"
+  ]
+}
