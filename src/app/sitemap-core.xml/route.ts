@@ -39,6 +39,7 @@ import {
   type SitemapEntry,
 } from '@/lib/seo/sitemap-xml';
 import { getSite } from '@/lib/site';
+import { everythingEnabled, isPathEnabled } from '@/lib/site/features';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 300;
@@ -281,7 +282,15 @@ export async function GET(): Promise<NextResponse> {
     return new NextResponse('sitemap temporarily unavailable', { status: 500 });
   }
 
-  return new NextResponse(renderUrlset(entries), {
+  // fn-31: nur was diese Seite ausspielt. lasstreffen.at hat alles an, dort
+  // bleibt die Liste unverändert.
+  const visible = everythingEnabled()
+    ? entries
+    : entries
+        .filter(e => isPathEnabled(e.loc.slice(BASE_URL.length) || '/'))
+        .map(e => (getSite().locales.length > 1 ? e : { ...e, alternates: undefined }));
+
+  return new NextResponse(renderUrlset(visible), {
     headers: sitemapResponseHeaders(entries.length),
   });
 }

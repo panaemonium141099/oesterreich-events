@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { viennaFields } from '@/lib/utils/event-time';
+import { isPathEnabled } from '@/lib/site/features';
 
 /**
  * Site footer with navigation links and data attribution.
@@ -67,23 +68,33 @@ export function Footer({ notice }: { notice?: ReactNode } = {}) {
           <Link href="/ueber-uns" className={NAV_LINK}>
             {t('about')}
           </Link>
-          <Link href="/blog" className={NAV_LINK}>
-            {t('blog')}
-          </Link>
+          {isPathEnabled('/blog') && (
+            <Link href="/blog" className={NAV_LINK}>
+              {t('blog')}
+            </Link>
+          )}
           {/* fn-18 Task 8: zweiter Einstieg in den Freizeit-Bestand. */}
-          <Link href="/aktivitaeten" className={NAV_LINK}>
-            {t('activities')}
-          </Link>
-          <Link href="/wo-ist-was-los" className={NAV_LINK}>
-            Heatmap
-          </Link>
+          {isPathEnabled('/aktivitaeten') && (
+            <Link href="/aktivitaeten" className={NAV_LINK}>
+              {t('activities')}
+            </Link>
+          )}
+          {isPathEnabled('/wo-ist-was-los') && (
+            <Link href="/wo-ist-was-los" className={NAV_LINK}>
+              Heatmap
+            </Link>
+          )}
           {/* Öffentliches Inserat-Formular, Freigabe unter /admin/inserate. */}
-          <Link href="/event-inserieren" className={NAV_LINK}>
-            {t('submitEvent')}
-          </Link>
-          <Link href="/fuer-firmen" className={NAV_LINK}>
-            {t('forCompanies')}
-          </Link>
+          {isPathEnabled('/event-inserieren') && (
+            <Link href="/event-inserieren" className={NAV_LINK}>
+              {t('submitEvent')}
+            </Link>
+          )}
+          {isPathEnabled('/fuer-firmen') && (
+            <Link href="/fuer-firmen" className={NAV_LINK}>
+              {t('forCompanies')}
+            </Link>
+          )}
           <Link href="/impressum" className={NAV_LINK}>
             {t('imprint')}
           </Link>

@@ -43,7 +43,9 @@ describe('SITES', () => {
   });
 
   it('Österreich bleibt, wie es war', () => {
-    expect(SITES.AT).toEqual({
+    const { features, ...rest } = SITES.AT;
+    expect(Object.values(features).every(Boolean)).toBe(true);
+    expect(rest).toEqual({
       country: 'AT',
       domain: 'lasstreffen.at',
       url: 'https://lasstreffen.at',

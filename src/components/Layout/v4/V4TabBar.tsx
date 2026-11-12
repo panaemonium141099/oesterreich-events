@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import type { Session } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
+import { isPathEnabled } from '@/lib/site/features';
 
 /**
  * V4TabBar — fixed mobile bottom-tab-bar introduced in v4 redesign Phase 1.
@@ -151,7 +152,7 @@ export function V4TabBar() {
         aria-label={t('mobileNav')}
         className="md:hidden fixed left-0 right-0 bottom-0 z-25 pb-[26px] pt-2 border-t border-[var(--v4-hairline-2)] bg-gradient-to-t from-[rgba(10,10,12,0.96)] to-[rgba(10,10,12,0.78)] backdrop-blur-xl flex justify-around items-center"
       >
-        {TABS.map(tab => {
+        {TABS.filter(entry => isPathEnabled(entry.href)).map(tab => {
           const active = isActive(pathname, tab.matches);
           const href =
             tab.href === '/profile' && !authed ? '/auth/login' : tab.href;

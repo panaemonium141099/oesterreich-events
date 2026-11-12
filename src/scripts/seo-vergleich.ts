@@ -50,7 +50,17 @@ function stable(text: string): string {
 
 export function extractFacts(status: number, html: string, raw: boolean): PageFacts {
   if (raw) {
-    return { status, canonical: null, robots: null, ogUrl: null, ogLocale: null, hreflang: [], jsonLd: [], body: stable(html) };
+    // Sitemaps wechseln ihren Inhalt mit dem Bestand (Events kommen und
+    // gehen). Verglichen wird deshalb ihre Form: Hosts aller Adressen und die
+    // hreflang-Werte. robots.txt und der Sitemap-Index bleiben wörtlich.
+    const isUrlset = html.includes('<urlset');
+    const body = isUrlset
+      ? JSON.stringify({
+          hosts: [...new Set([...html.matchAll(/(?:<loc>|href=")(https?:\/\/[^/<"]+)/g)].map(m => m[1]))].sort(),
+          hreflang: [...new Set([...html.matchAll(/hreflang="([^"]+)"/g)].map(m => m[1]))].sort(),
+        })
+      : stable(html);
+    return { status, canonical: null, robots: null, ogUrl: null, ogLocale: null, hreflang: [], jsonLd: [], body };
   }
   const links = html.match(/<link\b[^>]*>/gi) ?? [];
   const metas = html.match(/<meta\b[^>]*>/gi) ?? [];

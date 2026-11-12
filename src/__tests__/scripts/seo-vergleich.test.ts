@@ -38,9 +38,18 @@ describe('seo-vergleich', () => {
     expect(diff.some(l => l.startsWith('/graz: nur vorher'))).toBe(true);
   });
 
-  it('Sitemaps vergleichen den Inhalt ohne lastmod', () => {
-    const x = extractFacts(200, `<url><loc>${HOST}/a</loc><lastmod>2026-11-12</lastmod></url>`, true);
-    const y = extractFacts(200, `<url><loc>${HOST}/a</loc><lastmod>2026-11-13</lastmod></url>`, true);
+  it('Sitemaps vergleichen Hosts und hreflang, nicht den wechselnden Bestand', () => {
+    const map = (path: string, host = HOST, lang = 'de-AT') =>
+      `<urlset><url><loc>${host}/${path}</loc><xhtml:link rel="alternate" hreflang="${lang}" href="${host}/${path}"/></url></urlset>`;
+    const x = extractFacts(200, map('a'), true);
+    expect(diffSnapshots({ s: x }, { s: extractFacts(200, map('b'), true) })).toEqual([]);
+    expect(diffSnapshots({ s: x }, { s: extractFacts(200, map('a', 'https://other.test'), true) })).toHaveLength(1);
+    expect(diffSnapshots({ s: x }, { s: extractFacts(200, map('a', HOST, 'de-DE'), true) })).toHaveLength(1);
+  });
+
+  it('robots.txt und der Sitemap-Index bleiben wörtlich, ohne lastmod', () => {
+    const x = extractFacts(200, `<sitemapindex><sitemap><loc>${HOST}/a.xml</loc><lastmod>2026-11-12</lastmod></sitemap></sitemapindex>`, true);
+    const y = extractFacts(200, `<sitemapindex><sitemap><loc>${HOST}/a.xml</loc><lastmod>2026-11-13</lastmod></sitemap></sitemapindex>`, true);
     expect(diffSnapshots({ s: x }, { s: y })).toEqual([]);
   });
 });
