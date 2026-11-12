@@ -249,6 +249,8 @@ import { post as luisAusSuedtirolPfiatiDieAbschiedstour2026 } from './posts/luis
 import { post as linzMammaMiaPartyKonzert2026 } from './posts/linz-mamma-mia-party-konzert-2026';
 import { post as vorweihnachtlichesKlavierkonzertMitMarioEritreo2026 } from './posts/vorweihnachtliches-klavierkonzert-mit-mario-eritreo-2026';
 import { post as zuendstoffLive2026 } from './posts/zuendstoff-live-2026';
+import { post as suliPuschbanKiriRakete2026 } from './posts/suli-puschban-kiri-rakete-2026';
+import { post as aperolYogaInSalzburg2026 } from './posts/aperol-yoga-in-salzburg-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -510,6 +512,8 @@ export const ALL_POSTS: FestivalPost[] = [
   linzMammaMiaPartyKonzert2026,
   vorweihnachtlichesKlavierkonzertMitMarioEritreo2026,
   zuendstoffLive2026,
+  suliPuschbanKiriRakete2026,
+  aperolYogaInSalzburg2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
