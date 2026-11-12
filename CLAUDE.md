@@ -124,7 +124,7 @@ node / next.js
   außer DE, also auch Eventim CH). Ein roter DE-Lauf hält AT nicht auf und
   umgekehrt. Nur im AT-Lauf (`AT_ONLY_STEPS`): venues, festival_lineups,
   image_probe, address_geocoding, security_audit, artist_matching, indexing,
-  location_metrics, report. Die DE-Nachbearbeitung wartet (höchstens 180 min),
+  location_metrics (zählt nur das Land des Laufs), report. Die DE-Nachbearbeitung wartet (höchstens 180 min),
   solange eine AT-Nachbearbeitung läuft; AT wartet nie. Alarm-Mail
   `scrape-pipeline-de`, Artefakt `scrape-reports-de`. Wächter
   `pipeline-country.test.ts` (jeder Landesschritt filtert). Welche Adapter
@@ -565,6 +565,28 @@ npm run import:festivals     # data/festivals-upcoming.json → festivals + fest
 - Supabase Micro: `count(*) exact`/breite Scans auf `events` (~280k rows)
   laufen in Statement-Timeouts — `count: 'planned'`, MVs oder indexierte
   Pfade nutzen (MASTERPLAN §10.1/§10.4).
+- Abfragen der Website auf `events` brauchen einen Index, der das Land
+  führt: kommend und veröffentlicht standen am 12.11.2026 79.102 AT-Zeilen
+  neben 173.849 DE-Zeilen. Unter RLS (Rolle anon) nutzt der Planer `ilike`
+  und `&&` nie als Index-Bedingung (nicht leakproof), der treibende Index
+  kommt aus Land, Status und Datum. Ohne ihn verwarf die Dorffeste-Abfrage
+  der Startseite 97.673 Zeilen (3,9 s) und die Saison-Titelabfrage 131.129
+  (7,4 s), bei 3 s Zeitgrenze für anon und einem PostgREST-Pool von 10:
+  rund 20 s lang bekam jede Anfrage 504 (PGRST003), seit 09.11. fünfmal.
+  Seit 12.11. `idx_events_country_start_published` und
+  `idx_events_bundesland_start_published` (Migration `20261112160000`, in
+  Prod ausgeführt): 0,44 s und 0,38 s. EXPLAIN für Website-Abfragen immer
+  mit `set role anon` messen, der Superuser bekommt andere Pläne. Skripte
+  mit vielen Einzelanfragen wiederholen einen vollen Pool über
+  `retryOnPoolTimeout` (`src/lib/db/pool-retry.ts`).
+- Server-Watchdog (`/opt/app/watchdog.sh`, Kopie `docs/ops/server/`): prüft
+  die App lokal (von außen weist die eigene Bot-Sperre den Server mit 403
+  ab) und vergleicht die Lage ohne ihre Zahlen. Vorher löste jeder
+  Prozentpunkt der Platte eine neue Mail aus, 189 in drei Tagen, die
+  Berichte der Pipelines gingen darin unter (2026-11-12).
+- `deploy.sh` bricht unter 8 GB freier Platte ab. Am 12.11.2026 waren es
+  4 GB, beide Deploys des Tages liefen nicht. Platte: containerd 33 GB,
+  Datenbank 9,6 GB (`raw_events` 4,7 GB), sieben Tages-Dumps 7,2 GB.
 - Eventim-Feed-Passwort stand bis 2026-07-08 in der öffentlichen Repo-History
   — Rotation bei Eventim angeraten (MASTERPLAN P0-Merker).
 - Dev-Umgebung Windows/Node 24: Browser-Streaming von RSC-Seiten kann lokal
