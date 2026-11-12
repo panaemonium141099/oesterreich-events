@@ -9,7 +9,9 @@
  * volle Paritaet inkl. der xhtml:link-Alternates (fn-17 hreflang).
  */
 
-export const SITEMAP_BASE_URL = 'https://lasstreffen.at';
+import { getSite } from '@/lib/site';
+
+export const SITEMAP_BASE_URL: string = getSite().url;
 
 export interface SitemapEntry {
   loc: string;

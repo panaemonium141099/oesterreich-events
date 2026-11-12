@@ -29,6 +29,7 @@ import { CATEGORY_MESSAGE_KEYS } from './i18n/category-labels';
 import type { AppLocale } from '@/i18n/routing';
 import { SITE_COUNTRY } from '@/lib/site-country';
 import { landingShelfConfig, loadShelfPool, type LandingShelves } from './hubs/shelf-pool';
+import { getSite } from '@/lib/site';
 
 const BASE_URL = 'https://lasstreffen.at';
 
@@ -639,7 +640,7 @@ function buildJsonLd(params: {
     url: pageUrl,
     name: title,
     description,
-    inLanguage: locale === 'en' ? 'en' : 'de-AT',
+    inLanguage: locale === 'en' ? 'en' : getSite().hreflang,
     isPartOf: { '@id': `${BASE_URL}${localePrefix}/#website` }, // matches root layout WebSite
     about: { '@id': `${pageUrl}#itemlist` },
   };

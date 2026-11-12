@@ -38,6 +38,7 @@ import {
   toISO,
   type SitemapEntry,
 } from '@/lib/seo/sitemap-xml';
+import { getSite } from '@/lib/site';
 
 /** Anzahl der Event-Sitemap-Dateien. 8 Achtel a ~10,3k Zeilen (Stand
  *  2026-08-26 bei 82,6k Events) lassen Headroom bis ~200k future events,
@@ -128,7 +129,7 @@ export async function buildEventsShardResponse(shard: number): Promise<NextRespo
         // Unübersetzte Events bleiben DE-only (kein Duplicate-Content).
         if (event.title_en) {
           const alternates = [
-            { hreflang: 'de-AT', href: `${BASE_URL}${path}` },
+            { hreflang: getSite().hreflang, href: `${BASE_URL}${path}` },
             { hreflang: 'en', href: `${BASE_URL}/en${path}` },
             { hreflang: 'x-default', href: `${BASE_URL}${path}` },
           ];

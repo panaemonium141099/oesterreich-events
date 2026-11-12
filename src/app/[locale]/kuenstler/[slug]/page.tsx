@@ -17,6 +17,7 @@ import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
+import { getSite } from '@/lib/site';
 import { ArtistPageClient } from '@/components/Artists/v4/ArtistPageClient';
 import { artistBySlug, relatedArtists, type DirectoryArtist } from '@/lib/artists/directory';
 import { getArtistsDirectoryCached } from '@/lib/artists/get-artists-directory';
@@ -89,7 +90,7 @@ function buildJsonLd(artist: DirectoryArtist): string {
               '@type': 'Place',
               name: e.location_name,
               ...(e.city || e.postal_code
-                ? { address: { '@type': 'PostalAddress', ...(e.city ? { addressLocality: e.city } : {}), ...(e.postal_code ? { postalCode: e.postal_code } : {}), addressCountry: 'AT' } }
+                ? { address: { '@type': 'PostalAddress', ...(e.city ? { addressLocality: e.city } : {}), ...(e.postal_code ? { postalCode: e.postal_code } : {}), addressCountry: getSite().country } }
                 : {}),
             },
           }

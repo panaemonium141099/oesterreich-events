@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { routing, type AppLocale } from '@/i18n/routing';
+import { getSite } from '@/lib/site';
 // fn-15.5 (Bundle-Architektur):
 //   - AuthProvider moved out of root → now per-route in authenticated
 //     layouts (feed, profile, saved, friends, messages, admin, groups/[id])
@@ -121,30 +122,31 @@ export async function generateMetadata({
   // fn-17: DE bleibt unpräfixiert (Rankings/QR-Links), EN unter /en.
   // NUR noch für og:url — der Canonical selbst lebt seit 2026-09 in den
   // Seiten (siehe unten beim entfernten `alternates`-Block).
-  const homeUrl = locale === 'de' ? 'https://lasstreffen.at' : 'https://lasstreffen.at/en';
+  const site = getSite();
+  const homeUrl = locale === 'de' ? site.url : `${site.url}/en`;
 
   return {
-    metadataBase: new URL('https://lasstreffen.at'),
+    metadataBase: new URL(site.url),
     title: {
       default: siteTitle,
-      template: '%s | LassTreffen.at',
+      template: `%s | ${site.brand}`,
     },
     description: siteDescription,
-    applicationName: 'LassTreffen.at',
+    applicationName: site.brand,
     keywords: KEYWORDS[locale],
-    authors: [{ name: 'LassTreffen.at' }],
-    creator: 'LassTreffen.at',
-    publisher: 'LassTreffen.at',
+    authors: [{ name: site.brand }],
+    creator: site.brand,
+    publisher: site.brand,
     openGraph: {
       type: 'website',
-      locale: locale === 'de' ? 'de_AT' : 'en_US',
+      locale: locale === 'de' ? site.ogLocale : 'en_US',
       url: homeUrl,
-      siteName: 'LassTreffen.at',
+      siteName: site.brand,
       title: siteTitle,
       description: siteDescription,
       images: [
         {
-          url: 'https://lasstreffen.at/opengraph-image',
+          url: `${site.url}/opengraph-image`,
           width: 1200,
           height: 630,
           alt: t('ogAlt'),
@@ -155,7 +157,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: siteTitle,
       description: siteDescription,
-      images: ['https://lasstreffen.at/opengraph-image'],
+      images: [`${site.url}/opengraph-image`],
     },
     // KEIN `alternates` hier. Next.js merged Layout- und Page-Metadata:
     // ein Canonical im Layout gilt automatisch für JEDE Unterseite, die
@@ -196,17 +198,18 @@ export async function generateMetadata({
  * additional schemas (Event, BlogPosting, etc.) on top of these.
  */
 function buildWebsiteJsonLd(locale: AppLocale, siteDescription: string) {
-  const base = locale === 'de' ? 'https://lasstreffen.at' : 'https://lasstreffen.at/en';
+  const site = getSite();
+  const base = locale === 'de' ? site.url : `${site.url}/en`;
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     '@id': `${base}/#website`,
-    name: 'LassTreffen.at',
+    name: site.brand,
     alternateName: 'Lass Treffen',
     url: base,
     description: siteDescription,
-    inLanguage: locale === 'de' ? 'de-AT' : 'en',
-    publisher: { '@id': 'https://lasstreffen.at/#organization' },
+    inLanguage: locale === 'de' ? site.hreflang : 'en',
+    publisher: { '@id': `${site.url}/#organization` },
     potentialAction: {
       '@type': 'SearchAction',
       target: {
@@ -219,24 +222,25 @@ function buildWebsiteJsonLd(locale: AppLocale, siteDescription: string) {
 }
 
 function buildOrganizationJsonLd(siteDescription: string) {
+  const site = getSite();
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    '@id': 'https://lasstreffen.at/#organization',
-    name: 'LassTreffen.at',
+    '@id': `${site.url}/#organization`,
+    name: site.brand,
     alternateName: 'Lass Treffen',
-    url: 'https://lasstreffen.at',
+    url: site.url,
     logo: {
       '@type': 'ImageObject',
-      url: 'https://lasstreffen.at/apple-icon',
+      url: `${site.url}/apple-icon`,
       width: 180,
       height: 180,
     },
-    image: 'https://lasstreffen.at/opengraph-image',
+    image: `${site.url}/opengraph-image`,
     description: siteDescription,
     areaServed: {
       '@type': 'Country',
-      name: 'Österreich',
+      name: site.countryName.de,
     },
   };
 }

@@ -18,6 +18,8 @@
  * aufeinander — dieselbe Regel wie bei Events ueber `title_en`.
  */
 
+import { getSite } from '@/lib/site';
+
 export const MIN_INDEXABLE_DESCRIPTION_LENGTH = 200;
 
 const ACTIVITY_BASE_URL = 'https://lasstreffen.at';
@@ -100,7 +102,7 @@ export function activityAlternates(
   const en = `${ACTIVITY_BASE_URL}/en/aktivitaet/${slug}`;
   return {
     canonical: locale === 'en' ? en : de,
-    languages: { 'de-AT': de, en, 'x-default': de },
+    languages: { [getSite().hreflang]: de, en, 'x-default': de },
   };
 }
 

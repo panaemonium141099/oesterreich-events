@@ -49,6 +49,7 @@ import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { CATEGORY_MESSAGE_KEYS } from '@/lib/i18n/category-labels';
 import { dateLocaleFor } from '@/lib/i18n/date-locale';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { getSite } from '@/lib/site';
 
 export const revalidate = 3600;
 // On-demand ISR — was build-time pre-rendered for all 12 themes,
@@ -294,7 +295,7 @@ function buildJsonLd(
     name: copy.seoTitle,
     description: copy.description,
     url: canonicalUrl,
-    inLanguage: locale === 'en' ? 'en' : 'de-AT',
+    inLanguage: locale === 'en' ? 'en' : getSite().hreflang,
     isPartOf: { '@id': `https://lasstreffen.at${localePrefix}/#website` },
     about: { '@id': `${canonicalUrl}#itemlist` },
   };
