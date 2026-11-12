@@ -14,6 +14,8 @@ import { describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join, sep } from 'node:path';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { getSite } from '@/lib/site';
+import { parseSiteCountry } from '@/lib/site/sites';
 
 const ROOTS = ['src/app', 'src/lib', 'src/components'];
 
@@ -57,8 +59,14 @@ function statementAt(src: string, index: number): string {
 }
 
 describe('Länder-Wächter (SITE_COUNTRY)', () => {
-  it('die Seite ist österreichisch', () => {
-    expect(SITE_COUNTRY).toBe('AT');
+  it('das Land kommt aus der Site-Konfiguration', () => {
+    expect(SITE_COUNTRY).toBe(getSite().country);
+    expect(SITE_COUNTRY).toBe(parseSiteCountry(process.env.SITE_COUNTRY));
+    // Nur src/lib/site/ liest die Variable; jede andere Stelle fragt die Site.
+    const readers = ROOTS.flatMap(r => walk(r)).filter(
+      f => !f.startsWith('src/lib/site/') && /process\.env\.SITE_COUNTRY/.test(readFileSync(f, 'utf8')),
+    );
+    expect(readers).toEqual([]);
   });
 
   it('jede öffentliche Lesestelle auf events filtert das Land', () => {

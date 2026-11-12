@@ -23,3 +23,9 @@ jobs:
       - run: npm ci
       - name: Vitest
         run: npx vitest run
+      # fn-31: dieselbe Codebasis baut auch lasstreffen.de. Site, Wächter und
+      # SEO-Helfer müssen mit beiden Ländern grün sein.
+      - name: Vitest (SITE_COUNTRY=DE)
+        env:
+          SITE_COUNTRY: DE
+        run: npx vitest run src/__tests__/lib/site.test.ts src/__tests__/lib/site-country-guard.test.ts

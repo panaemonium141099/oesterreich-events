@@ -16,10 +16,13 @@
  *   3. req.nextUrl.origin — letzter Ausweg, korrekt im lokalen `next dev`.
  */
 
-const CONFIGURED = (process.env.NEXT_PUBLIC_SITE_URL ?? '').trim().replace(/\/+$/, '');
+import { SITE_ORIGIN as ORIGIN, SITE_ORIGIN_CONFIGURED as CONFIGURED } from '@/lib/site';
 
-/** Basis fuer Hintergrundjobs ohne Request (Crons, Skripte). */
-export const SITE_ORIGIN = CONFIGURED || 'https://lasstreffen.at';
+/**
+ * Basis fuer Hintergrundjobs ohne Request (Crons, Skripte): die gesetzte
+ * Adresse, sonst die URL der Seite dieses Builds (`src/lib/site/`).
+ */
+export const SITE_ORIGIN = ORIGIN;
 
 export function publicOrigin(req: { nextUrl: URL; headers: Headers }): string {
   if (CONFIGURED) return CONFIGURED;
