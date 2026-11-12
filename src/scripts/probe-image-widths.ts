@@ -26,6 +26,7 @@
 import { randomUUID } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { POSTGREST_MAX_ROWS } from '../lib/db/fetch-all';
+import { retryOnPoolTimeout } from '../lib/db/pool-retry';
 import { SITE_COUNTRY } from '../lib/site-country';
 
 const CONCURRENCY = 12;
@@ -166,21 +167,21 @@ async function main() {
   const supabase = createClient(url, key, { auth: { persistSession: false } });
 
   if (requeue > 0) {
-    const { data: stale, error: sErr } = await supabase
+    const { data: stale, error: sErr } = await retryOnPoolTimeout(() => supabase
       .from('events')
       .select('id')
       .eq('image_width', IMAGE_UNKNOWN)
       .not('image_url', 'is', null)
       .eq('country', SITE_COUNTRY)
       .gte('start_date', new Date().toISOString())
-      .limit(requeue);
+      .limit(requeue));
     if (sErr) throw new Error(`Requeue-Query: ${sErr.message}`);
     const ids = (stale ?? []).map((r: { id: string }) => r.id);
     for (const id of ids) {
-      const { error: rErr } = await supabase
+      const { error: rErr } = await retryOnPoolTimeout(() => supabase
         .from('events')
         .update({ image_probed_url: null })
-        .eq('id', id);
+        .eq('id', id));
       if (rErr) throw new Error(`Requeue ${id}: ${rErr.message}`);
     }
     console.log(`[image-probe] ${ids.length} fruehere Fehlschlaege zurueck in den Backlog gestellt`);
@@ -196,18 +197,23 @@ async function main() {
       const out: string[] = [];
       let cursor = after;
       while (out.length < n) {
-        let q = supabase
-          .from('events')
-          .select('id')
-          .gt('image_width', 0)
-          .not('image_url', 'is', null)
-          .eq('country', SITE_COUNTRY)
-          .gte('start_date', nowIso);
-        if (cursor) q = q.gt('id', cursor);
-        if (before) q = q.lt('id', before);
-        const { data, error } = await q
-          .order('id', { ascending: true })
-          .limit(Math.min(POSTGREST_MAX_ROWS, n - out.length));
+        // Die Abfrage entsteht je Versuch neu: ein Builder ist nach dem
+        // Abschicken verbraucht.
+        const fetchPage = () => {
+          let q = supabase
+            .from('events')
+            .select('id')
+            .gt('image_width', 0)
+            .not('image_url', 'is', null)
+            .eq('country', SITE_COUNTRY)
+            .gte('start_date', nowIso);
+          if (cursor) q = q.gt('id', cursor);
+          if (before) q = q.lt('id', before);
+          return q
+            .order('id', { ascending: true })
+            .limit(Math.min(POSTGREST_MAX_ROWS, n - out.length));
+        };
+        const { data, error } = await retryOnPoolTimeout(fetchPage);
         if (error) throw new Error(`Recheck-Query: ${error.message}`);
         const page = (data ?? []).map((r: { id: string }) => r.id);
         if (page.length === 0) break;
@@ -223,10 +229,10 @@ async function main() {
     if (ids.length < recheck) ids.push(...(await pickMeasured(null, startId, recheck - ids.length)));
     // .in()-Listen gehen im Query-String: auf <= 200 IDs chunken (CLAUDE.md).
     for (let i = 0; i < ids.length; i += 200) {
-      const { error: rErr } = await supabase
+      const { error: rErr } = await retryOnPoolTimeout(() => supabase
         .from('events')
         .update({ image_probed_url: null })
-        .in('id', ids.slice(i, i + 200));
+        .in('id', ids.slice(i, i + 200)));
       if (rErr) throw new Error(`Recheck-Requeue: ${rErr.message}`);
     }
     console.log(`[image-probe] ${ids.length} vermessene Bilder zur Nachpruefung in den Backlog gestellt`);
@@ -243,14 +249,14 @@ async function main() {
     const pageSize = Math.min(500, limit - probed);
     // Backlog = unvermessen (image_probed_url NULL). Bildwechsel setzt den
     // Trigger trg_reset_image_probe auf NULL zurueck — landet also wieder hier.
-    const { data, error } = await supabase
+    const { data, error } = await retryOnPoolTimeout(() => supabase
       .from('events')
       .select('id, image_url')
       .not('image_url', 'is', null)
       .is('image_probed_url', null)
       .eq('country', SITE_COUNTRY)
       .gte('start_date', new Date().toISOString())
-      .limit(pageSize);
+      .limit(pageSize));
     if (error) throw new Error(`Backlog-Query: ${error.message}`);
     const rows = (data ?? []) as Row[];
     if (rows.length === 0) break;
@@ -260,10 +266,10 @@ async function main() {
       const widths = await Promise.all(chunk.map((r) => probe(r.image_url)));
       const updates = chunk.map((r, j) => ({ id: r.id, width: widths[j] }));
       for (const u of updates) {
-        const { error: uerr } = await supabase
+        const { error: uerr } = await retryOnPoolTimeout(() => supabase
           .from('events')
           .update({ image_width: u.width, image_probed_url: chunk.find(c => c.id === u.id)!.image_url })
-          .eq('id', u.id);
+          .eq('id', u.id));
         if (uerr) throw new Error(`Update ${u.id}: ${uerr.message}`);
         probed++;
         if (u.width > 0 && u.width < 600) small++;
