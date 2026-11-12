@@ -54,7 +54,10 @@ jobs:
           mkdir -p ~/.ssh
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh -o StrictHostKeyChecking=accept-new "$SERVER" true
+          # Kein eigener Verbindungsaufbau hier: der Server setzte die dritte
+          # SSH-Verbindung eines Laufs zurück (Run 43270135130). Den Host-Key
+          # nimmt die erste echte Verbindung an.
+          echo 'StrictHostKeyChecking accept-new' >> ~/.ssh/config
 
       # ── Weg 1: der Server baut selbst (Standard) ─────────────────────────
       - name: Deploy via SSH (Server baut)
