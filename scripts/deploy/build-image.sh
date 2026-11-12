@@ -31,6 +31,17 @@ done < <(sed -n 's/^ARG \(NEXT_PUBLIC_[A-Z0-9_]*\).*/\1/p' Dockerfile | sort -u)
 
 echo "Build-Args: $((${#build_args[@]} / 2)) aus dem Dockerfile, ohne Wert: ${empty[*]:-keiner}"
 
+# Land der Seite (fn-31): je Land ein Image aus demselben Commit. Die Env des
+# Servers gehört zu lasstreffen.at; für ein anderes Land entfällt deren
+# NEXT_PUBLIC_SITE_URL, dann gilt die URL aus src/lib/site/ (mit der Adresse
+# der anderen Seite bräche der Build ab).
+site_country=${SITE_COUNTRY:-AT}
+build_args+=(--build-arg "SITE_COUNTRY=${site_country}")
+if [ "$site_country" != "AT" ]; then
+  build_args+=(--build-arg "NEXT_PUBLIC_SITE_URL=")
+fi
+echo "Land der Seite: ${site_country}"
+
 # --provenance=false: die Herkunftsangabe würde die Build-Args mitschreiben,
 # und `docker save` soll ein einzelnes Image liefern, keinen Index.
 docker buildx build \
