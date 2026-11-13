@@ -251,6 +251,8 @@ import { post as vorweihnachtlichesKlavierkonzertMitMarioEritreo2026 } from './p
 import { post as zuendstoffLive2026 } from './posts/zuendstoff-live-2026';
 import { post as suliPuschbanKiriRakete2026 } from './posts/suli-puschban-kiri-rakete-2026';
 import { post as aperolYogaInSalzburg2026 } from './posts/aperol-yoga-in-salzburg-2026';
+import { post as zaubererZorresUndDieLiedersammlerinFamilienkonzert2026 } from './posts/zauberer-zorres-und-die-liedersammlerin-familienkonzert-2026';
+import { post as symphonieorchesterVorarlbergKonzert4McfallBorodinWalto2027 } from './posts/symphonieorchester-vorarlberg-konzert-4-mcfall-borodin-walto-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -514,6 +516,8 @@ export const ALL_POSTS: FestivalPost[] = [
   zuendstoffLive2026,
   suliPuschbanKiriRakete2026,
   aperolYogaInSalzburg2026,
+  zaubererZorresUndDieLiedersammlerinFamilienkonzert2026,
+  symphonieorchesterVorarlbergKonzert4McfallBorodinWalto2027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
