@@ -23,7 +23,9 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { Event, EventFilters } from '@/types/events';
 import { readCache, writeCache } from '@/components/MapV3/eventsCache';
-import { BUNDESLAENDER, bundeslandToId, type Bundesland } from '@/lib/bundeslaender';
+import { bundeslandToId, type Bundesland } from '@/lib/bundeslaender';
+import { SITE_REGIONS, SITE_OVERVIEW, isSiteRegion } from '@/lib/site/regions';
+import { getSite } from '@/lib/site';
 import { displayDistrictName } from '@/lib/districtsAT';
 import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { fetchMapPointEvents, pointsEligible } from '@/lib/v4/map-points';
@@ -139,13 +141,23 @@ export function buildEventParams(filters: EventFilters, blIds: string[]): URLSea
   return params;
 }
 
+/**
+ * Regions-ID eines Kartenpunkts. lasstreffen.at führt Schreibvarianten der
+ * neun Bundesländer zusammen; andere Seiten kennen nur die IDs ihrer Regionen
+ * (der Karten-Snapshot liefert dort `region_id`).
+ */
+function regionIdOf(raw: string | null | undefined): string | null {
+  if (getSite().country === 'AT') return bundeslandToId(raw);
+  return raw && isSiteRegion(raw) ? raw : null;
+}
+
 /** Auswahl nach Bundesländern (client-seitig, ['all'] = alle). */
 export function filterByBundesland(events: Event[], blIds: string[]): Event[] {
   const concrete = blIds.filter((b) => b !== 'all');
   if (concrete.length === 0) return events;
   const targets = new Set(concrete);
   return events.filter((e) => {
-    const id = bundeslandToId(e.bundesland);
+    const id = regionIdOf(e.bundesland);
     return id != null && targets.has(id);
   });
 }
@@ -258,7 +270,7 @@ export function useFilteredEvents(
   // ['all'] = no filter; ['wien','steiermark'] = both; etc.
   const [bundeslandIds, setBundeslandIds] = useState<string[]>(initialBundeslandIds);
   const primaryBundesland = useMemo(
-    () => BUNDESLAENDER.find((b) => b.id === bundeslandIds[0]) ?? BUNDESLAENDER[0],
+    () => SITE_REGIONS.find((b) => b.id === bundeslandIds[0]) ?? SITE_OVERVIEW,
     [bundeslandIds],
   );
 
@@ -569,7 +581,7 @@ export function useFilteredEvents(
     const concrete = bundeslandIds.filter((b) => b !== 'all');
     if (concrete.length === 0) return tScope('austria');
     if (concrete.length === 1) {
-      const name = BUNDESLAENDER.find((b) => b.id === concrete[0])?.name ?? concrete[0];
+      const name = SITE_REGIONS.find((b) => b.id === concrete[0])?.name ?? concrete[0];
       return locale === 'de' ? name : bundeslandDisplayName(concrete[0], locale);
     }
     return tScope('scopeRegions', { count: concrete.length });
