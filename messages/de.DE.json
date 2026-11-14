@@ -1,18 +1,24 @@
 {
   "Landing": {
     "Masthead": {
-      "eventsCount": "Events in Deutschland"
+      "eventsCount": "Events in Deutschland",
+      "title": "Was ist heute los?",
+      "weatherVienna": "{temp}° in Berlin"
     },
     "Season": {
       "herbst": {
         "kicker": "Herbst in Deutschland"
-      }
+      },
+      "weatherVienna": "in Berlin"
     },
     "Activities": {
       "sub": "Freizeit in ganz Deutschland"
     },
     "Newsletter": {
       "regionAll": "Ganz Deutschland"
+    },
+    "Map": {
+      "subtitle": "Alle Events von heute auf einen Blick, von Flensburg bis Garmisch."
     }
   },
   "MetaMap": {

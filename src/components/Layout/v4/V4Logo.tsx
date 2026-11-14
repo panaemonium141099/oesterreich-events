@@ -15,6 +15,8 @@
  * pin sits visually tight to the surrounding letters.
  */
 
+import { getSite } from '@/lib/site';
+
 const LT_PIN = '#c8553d';
 
 interface V4LogoProps {
@@ -62,7 +64,7 @@ export function V4Logo({ size = 'md', light = false }: V4LogoProps) {
         />
         <circle cx="12" cy="11.5" r="4" fill={dotColor} />
       </svg>
-      <span style={{ fontWeight: 400 }}>at</span>
+      <span style={{ fontWeight: 400 }}>{getSite().domain.split('.').pop()}</span>
     </span>
   );
 }

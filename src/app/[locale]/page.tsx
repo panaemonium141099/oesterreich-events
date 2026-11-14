@@ -47,6 +47,7 @@ import { AuthErrorToast } from '@/components/Landing/AuthErrorToast';
 import { Footer } from '@/components/Legal/Footer';
 import { getLandingData } from '@/lib/v4/get-landing-data';
 import { routing } from '@/i18n/routing';
+import { hasFeature } from '@/lib/site/features';
 
 export const revalidate = 3600;
 
@@ -112,10 +113,10 @@ export default async function LandingPage({
           <WeekendShelf events={data.weekend} range={data.weekendRange}/>
           <DorffesteShelf events={data.dorffeste}/>
           <RegionShelf/>
-          <FestivalsBlog festivals={data.festivals} posts={data.posts}/>
-          <ActivitiesShelf activities={data.activities}/>
-          <NewsletterRow/>
-          <OrganizerRow/>
+          {(hasFeature('blog') || hasFeature('festivals')) && <FestivalsBlog festivals={data.festivals} posts={data.posts}/>}
+          {hasFeature('activities') && <ActivitiesShelf activities={data.activities}/>}
+          {hasFeature('newsletter') && <NewsletterRow/>}
+          {hasFeature('business') && <OrganizerRow/>}
         </div>
       </main>
 

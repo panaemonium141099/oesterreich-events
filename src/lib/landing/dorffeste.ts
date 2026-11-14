@@ -1,3 +1,4 @@
+import { getSite } from '@/lib/site';
 /**
  * Dorffeste der Startseite: Kirtage, Zeltfeste, Feuerwehr- und Pfarrfeste,
  * Maibaumaufstellen, Sonnwendfeuer, Frühschoppen, Erntedank, Martiniloben,
@@ -34,7 +35,7 @@ const TAG_SET = new Set<string>(DORFFEST_TAGS);
 export const FEST_CATEGORY = 'Märkte & Feste';
 
 /** Fenster der Auswahl in Wiener Tagen ab heute. */
-export const DORFFESTE_DAYS = 30;
+export const DORFFESTE_DAYS: number = getSite().landingDorffesteDays;
 
 const pattern = (words: string[]) => new RegExp(words.map(w => w.replace(/[-\s]/g, '[-\\s]?')).join('|'));
 

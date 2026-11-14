@@ -22,7 +22,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ALL_POSTS } from '@/content/blog';
-import { BUNDESLAENDER } from '@/lib/bundeslaender';
+import { SITE_REGIONS } from '@/lib/site/regions';
 import {
   CATEGORY_SLUGS,
   STUDENT_CITIES,
@@ -142,7 +142,7 @@ export async function GET(): Promise<NextResponse> {
   // Nur die 9 echten Bundesländer, dieselbe Prüfung wie die Hub-Seite
   // (isValidBundesland). Bis 2026-10 stand hier auch die Karten-Pseudo-Region
   // Österreich, Deutschland, Schweiz mit allen Unterseiten.
-  const bundeslaender = BUNDESLAENDER.filter((b) => isValidBundesland(b.id));
+  const bundeslaender = SITE_REGIONS.filter((b) => isValidBundesland(b.id));
   const categorySlugs = [...CATEGORY_SLUGS.keys()];
   const timeFilters = ['heute', 'wochenende'];
 
@@ -205,7 +205,11 @@ export async function GET(): Promise<NextResponse> {
   try {
     const { ALL_GEMEINDEN } = await import('@/lib/gemeinden/data');
     const { isCityHub } = await import('@/lib/hubs/city-hubs');
-    for (const g of ALL_GEMEINDEN) {
+    // fn-31.11: nur lasstreffen.at listet seine Gemeinde-Seiten. Für
+    // Deutschland (rund 10.700 Gemeinden) kommen sie erst in die Sitemap,
+    // wenn feststeht, ab wie vielen Events eine Seite indexiert wird; bis
+    // dahin findet Google sie nicht über die Sitemap.
+    for (const g of getSite().country === 'AT' ? ALL_GEMEINDEN : []) {
       // The 5 major-city hubs (Linz/Graz/Salzburg/Innsbruck/Klagenfurt) carry
       // the retired /stadt URLs' priority (0.8); villages stay at 0.5.
       // fn-17: seit die Gemeinde-Hubs uebersetzt sind (Copy, Metadata, FAQ,

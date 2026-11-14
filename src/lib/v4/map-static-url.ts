@@ -15,6 +15,8 @@
  */
 
 import { locationOutputs, type GateableEvent } from '@/lib/location/gating';
+import { getSite } from '@/lib/site';
+import { SITE_OVERVIEW } from '@/lib/site/regions';
 
 export interface MapPin {
   lng: number;
@@ -26,6 +28,16 @@ export const MAX_MAP_PINS = 40;
 export const MAPBOX_STATIC_URL_LIMIT = 8192;
 /** Fester Österreich-Ausschnitt (lng, lat, zoom), auch ohne Pins. */
 export const AUSTRIA_CAMERA = { lng: 13.35, lat: 47.7, zoom: 6.2 } as const;
+
+/**
+ * Ausschnitt der Seite: Österreich wie bisher, sonst die Gesamtansicht des
+ * Landes aus den Regionen der Seite. Das Static-Bild ist kleiner als die
+ * Karte, deshalb eine Stufe weiter weg.
+ */
+function siteCamera(): { lng: number; lat: number; zoom: number } {
+  if (getSite().country === 'AT') return AUSTRIA_CAMERA;
+  return { lng: SITE_OVERVIEW.center[0], lat: SITE_OVERVIEW.center[1], zoom: Math.max(3, SITE_OVERVIEW.zoom - 1.6) };
+}
 export const DEFAULT_PIN_COLOR = 'd4b896';
 export const MAP_STYLE = 'mapbox/dark-v11';
 
@@ -76,7 +88,7 @@ export interface MapStaticOptions {
 }
 
 function buildUrl(pins: MapPin[], o: MapStaticOptions): string {
-  const camera = o.camera ?? AUSTRIA_CAMERA;
+  const camera = o.camera ?? siteCamera();
   const overlay = pins.length
     ? `${pins.map(p => `pin-s+${o.pinColor ?? DEFAULT_PIN_COLOR}(${p.lng},${p.lat})`).join(',')}/`
     : '';

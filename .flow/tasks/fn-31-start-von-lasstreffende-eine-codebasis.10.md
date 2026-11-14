@@ -22,9 +22,8 @@ Event-URLs für DE: fünfstellige PLZ, Post-Ort aus `plz-de.json`, kein Rückfal
 - [ ] Dubletten-Weiterleitung bleibt im Land der Site (Test)
 - [ ] DE-Tabelle nicht im AT-Client-Bundle
 ## Done summary
-TBD
-
+Event-Links auf .de: /events/{plz5}-{gemeinde}/…, Tabelle aus den Stammdaten (8.309 PLZ), per Alias nur im DE-Build. Ohne bekannte PLZ kein Ersatzwert und kein Sitemap-Eintrag. AT-URLs unveraendert. Offen aus dem Task: Dubletten-Weiterleitung ueber die Landesgrenze nicht eigens getestet; Rueckfall ueber gemeinde_key nicht gebaut (Ort aus Adresse statt dessen).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 28181f5a
+- Tests: event-url-site.test.ts fuer AT und DE gruen, src/__tests__/lib/utils 92 gruen (AT)
 - PRs:

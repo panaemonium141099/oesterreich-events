@@ -28,7 +28,7 @@ import { categoryLabel } from '@/lib/i18n/category-labels';
 import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { applyDatePreset, defaultDateTo, detectActivePreset } from './datePresets';
 import { CATEGORIES } from '@/lib/categories';
-import { BUNDESLAENDER } from '@/lib/bundeslaender';
+import { SITE_REGIONS } from '@/lib/site/regions';
 import { getDistrictsByBundesland, displayDistrictName } from '@/lib/districtsAT';
 import type { EventFilters } from '@/types/events';
 import type { EventPreview } from '@/lib/v4/use-filtered-events';
@@ -444,7 +444,7 @@ function Body({
 
       <FilterBlock label={t('blockRegion')}>
         <ChipGroup>
-          {BUNDESLAENDER.map((bl) => {
+          {SITE_REGIONS.map((bl) => {
             const active = bl.id === 'all'
               ? draftBlIds.length === 0 || draftBlIds.includes('all')
               : draftBlIds.includes(bl.id);

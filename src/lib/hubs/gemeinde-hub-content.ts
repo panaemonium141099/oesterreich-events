@@ -35,6 +35,7 @@ import {
 import { activityCanonicalUrl } from '@/lib/activities/indexability';
 import type { AustrianGemeinde } from '@/lib/gemeinden/data';
 import { getSite } from '@/lib/site';
+import { SITE_REGION_LIST } from '@/lib/site/regions';
 
 export type HubContentMode = 'events' | 'activities' | 'mixed' | 'empty';
 
@@ -83,7 +84,8 @@ export function slugifyBundesland(bl: string): string {
     'Vorarlberg': 'vorarlberg',
     'Wien': 'wien',
   };
-  return map[bl] ?? bl.toLowerCase();
+  // fn-31.11: andere Seiten finden die Region über ihren Namen ("Bayern" → bayern).
+  return map[bl] ?? SITE_REGION_LIST.find(r => r.name === bl)?.id ?? bl.toLowerCase();
 }
 
 /**

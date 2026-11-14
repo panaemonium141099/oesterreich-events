@@ -32,6 +32,7 @@ import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
 import { districtForLocation } from '@/lib/plz-district';
 import { resolveEventLocation } from '@/lib/location/resolver';
 import { composeEventAddress } from './geocode-query';
+import { regionKeys } from '@/lib/location/region-keys';
 
 /** Die Felder einer `event_submissions`-Zeile, die für die Freigabe zählen. */
 export interface ApprovableSubmission {
@@ -171,6 +172,7 @@ export function buildEventRow(
     location_status: decision.status,
     location_precision: decision.precision,
     location_resolution: { ...decision, phase: 'inserat-approve' },
+    ...regionKeys(decision.country, decision.gemeinde),
     location_provenance: decision.provenance,
     image_url: submission.image_url,
     price_text: submission.price_text,

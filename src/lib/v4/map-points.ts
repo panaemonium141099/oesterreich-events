@@ -18,6 +18,7 @@
  */
 import type { Event, EventFilters } from '@/types/events';
 import { MAP_FLAG_APPROXIMATE } from '@/lib/location/gating';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 interface MapPointsPayload {
   v: number;
@@ -118,13 +119,20 @@ let inflight: Promise<PointEvent[] | null> | null = null;
  * `null` bei Fehler oder leerem Snapshot → Aufrufer fällt auf die
  * Batch-Logik zurück (Spec-Edge-Case "MV leer/Refresh fehlgeschlagen").
  */
+/**
+ * Adresse des Snapshots. Für lasstreffen.at unverändert (derselbe CDN-Eintrag
+ * wie bisher); andere Seiten tragen ihr Land im Pfad, damit sich die
+ * Snapshots zweier Länder nie einen Cache-Eintrag teilen.
+ */
+const MAP_POINTS_URL = SITE_COUNTRY === 'AT' ? '/api/events/map-points' : `/api/events/map-points?land=${SITE_COUNTRY}`;
+
 export async function fetchMapPointEvents(): Promise<PointEvent[] | null> {
   if (cache && Date.now() - cache.at < TTL_MS) return cache.events;
   if (inflight) return inflight;
 
   inflight = (async () => {
     try {
-      const res = await fetch('/api/events/map-points');
+      const res = await fetch(MAP_POINTS_URL);
       if (!res.ok) return null;
       const payload = (await res.json()) as MapPointsPayload;
       // v2 = Short-IDs (12 Hex, fn-16 Slice 2). Andere Versionen ablehnen

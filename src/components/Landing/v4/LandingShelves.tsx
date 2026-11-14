@@ -7,7 +7,7 @@
 
 import { useLocale, useTranslations } from 'next-intl';
 import { RegionTile, Shelf, ShelfCard } from '@/components/Discover/v4/shelf-ui';
-import { BUNDESLAENDER } from '@/lib/bundeslaender';
+import { SITE_REGIONS, siteRegionImage } from '@/lib/site/regions';
 import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { shortViennaDay } from '@/lib/landing/day-labels';
 import { DORFFESTE_DAYS, DORFFESTE_HREF } from '@/lib/landing/dorffeste';
@@ -53,12 +53,12 @@ export function RegionShelf() {
   return (
     <div data-testid="region-shelf">
       <Shelf title={t('region')}>
-        {BUNDESLAENDER.filter(b => b.id !== 'all').map(b => (
+        {SITE_REGIONS.filter(b => b.id !== 'all').map(b => (
           <RegionTile
             key={b.id}
             href={`/${b.id}`}
             name={bundeslandDisplayName(b.id, locale)}
-            image={`/images/regions/${b.id}.jpg`}
+            image={siteRegionImage(b.id)}
           />
         ))}
       </Shelf>

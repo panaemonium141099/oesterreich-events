@@ -23,9 +23,8 @@ Bestandsaufnahme gegen Prod, nur lesend. Ersetzt die Zahlen aus dem Auftrag durc
 - [ ] Kapazitätsaussage mit Zahlen: zweiter Container plus Indizes plus MV ja oder nein
 - [ ] Keine Abfrage mit `count exact` oder breitem Scan
 ## Done summary
-TBD
-
+Prod gemessen am 14.11.2026 (psql nur lesend): DE 227.976 Events, 177.613 kommend sichtbar, 175.650 mit Gemeinde. AGS aus der gespeicherten Entscheidung fuer 98,89 % ableitbar (Probe-Skript). Indizes aus PR #467 in Prod. Kapazitaet: Platte reicht fuer Indizes, MV und Backfill; zweiter Container beim RAM nicht belastbar ohne engere Grenzen oder mehr RAM. Werte in der Epic-Spec.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: bd728bb8
+- Tests: psql nur lesend gegen Prod, 14.11.2026, npx tsx src/scripts/de-gemeinde-schluessel-probe.ts
 - PRs:

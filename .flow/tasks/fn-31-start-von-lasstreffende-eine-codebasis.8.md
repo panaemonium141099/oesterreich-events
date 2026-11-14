@@ -25,9 +25,8 @@ Datenbank-Objekte je Land: Karten-MV mit Payload, Statistik-Cache, Zählfunktion
 - [ ] Refresh-Dauer und Payload-Größe AT vorher, AT nachher, DE dokumentiert; AT nicht schlechter
 - [ ] Entscheidung Gesamtsnapshot oder Kachelung für DE mit Messwerten in der Epic-Spec
 ## Done summary
-TBD
-
+Karten-MV, Payload und Statistik-Cache je Land in Prod (Migrationen 20261114210000 und 20261114220000). AT jeweils identisch vor und nach der Migration. DE: 180.300 Kartenpunkte (11 MB roh), 176.779 kommende veroeffentlichte Events. Artist-Funktionen bleiben AT (Kuenstler-Saeule auf .de aus). Offen: Kachelung der DE-Karte, falls der Gesamtsnapshot im Browser nicht traegt.
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: cefb2768
+- Tests: AT-Payloads vor und nach den Migrationen verglichen: gleich, API-, Site- und Oesterreich-Tests gruen
+- PRs: #482

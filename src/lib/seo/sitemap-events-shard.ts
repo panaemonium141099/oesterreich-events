@@ -28,7 +28,7 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { buildEventUrlV2, resolveEventUrlPrefix } from '@/lib/utils/slugify';
 import { SITE_COUNTRY } from '@/lib/site-country';
 import {
   SITEMAP_BASE_URL as BASE_URL,
@@ -122,6 +122,10 @@ export async function buildEventsShardResponse(shard: number): Promise<NextRespo
       for (const event of data) {
         const qs = event.quality_score ?? 0;
         const priority = qs >= 80 ? 0.8 : qs >= 60 ? 0.6 : 0.4;
+        // fn-31.10: ohne PLZ der Stammdaten hat die Zeile keinen belegten Ort
+        // im Präfix. Für lasstreffen.at ist die PLZ nie leer (Rückfall auf die
+        // Landeshauptstadt wie bisher), dort entfällt nichts.
+        if (!resolveEventUrlPrefix(event).plz) continue;
         const path = buildEventUrlV2(event);
         const lastmod = event.updated_at ? toISO(event.updated_at) : toISO(now);
         // fn-17 Slice 3: Events mit gecachter EN-Übersetzung (title_en)

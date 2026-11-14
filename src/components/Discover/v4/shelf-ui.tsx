@@ -118,7 +118,8 @@ export function ShelfTrack({ trackRef, label, children }: {
 export function RegionTile({ href, name, image, count }: {
   href: string;
   name: string;
-  image: string;
+  /** Ohne Bild zeigt die Kachel nur den Namen auf dunklem Grund. */
+  image: string | null;
   count?: number;
 }) {
   const locale = useLocale();
@@ -128,7 +129,7 @@ export function RegionTile({ href, name, image, count }: {
       href={href}
       className="press-haptic relative shrink-0 snap-start w-[150px] h-[96px] rounded-xl overflow-hidden bg-[var(--v4-surface-elevated)]"
     >
-      <Image src={image} alt="" fill sizes="150px" className="object-cover opacity-75" />
+      {image && <Image src={image} alt="" fill sizes="150px" className="object-cover opacity-75" />}
       <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-[#050506]/85" />
       <b className="absolute left-3 bottom-2.5 text-[14px] font-extrabold tracking-[-0.01em] text-white">{name}</b>
       {count != null && (

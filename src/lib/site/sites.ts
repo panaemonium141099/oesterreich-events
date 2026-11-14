@@ -42,6 +42,27 @@ export interface SiteConfig {
   tagline: string;
   /** Kontaktadressen in Footer und Hinweisen. */
   contact: { office: string; support: string };
+  /**
+   * Abfragen der Startseite, die diese Seite nicht stellt (Namen aus
+   * get-landing-data.ts). Die Sektion bleibt dann leer.
+   */
+  landingSkip: readonly string[];
+  /**
+   * Ort des Wetters in Datumszeile und Saison-Karte: die Hauptstadt als Ort,
+   * der für die Seite steht (Besucher mit gespeichertem Standort sehen ihren).
+   */
+  weatherPlace: { name: string; lat: number; lng: number };
+  /**
+   * Fenster des Dorffeste-Regals in Tagen. Die Abfrage sucht in Titeln über
+   * alle kommenden Events des Landes im Fenster; sie muss unter der
+   * Zeitgrenze von 3 s für anon bleiben.
+   */
+  landingDorffesteDays: number;
+  /**
+   * Städte der Chip-Reihe auf /entdecken. `null`: die Reihe der Seite kommt
+   * aus dem Hub-Verzeichnis (lasstreffen.at: Wien und die fünf Stadt-Hubs).
+   */
+  cityChips: readonly { name: string; href: string }[] | null;
   /** Welche Säulen die Seite ausspielt (Pfade in features.ts). */
   features: Record<SiteFeature, boolean>;
 }
@@ -59,6 +80,10 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
     timeZone: 'Europe/Vienna',
     contact: { office: 'office@lasstreffen.at', support: 'support@lasstreffen.at' },
     tagline: 'Events in Wien, Graz, Salzburg und ganz Österreich — 85\u2009000 Events & Ausflugsziele auf einer Karte.',
+    landingSkip: [],
+    cityChips: null,
+    weatherPlace: { name: 'Wien', lat: 48.21, lng: 16.37 },
+    landingDorffesteDays: 30,
     features: ALL_ON,
   },
   DE: {
@@ -74,6 +99,28 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
     // Bis ein Postfach unter .de besteht, gelten die Adressen des Betreibers.
     contact: { office: 'office@lasstreffen.at', support: 'support@lasstreffen.at' },
     tagline: 'Konzerte, Dorffeste und Märkte in ganz Deutschland auf einer Karte.',
+    // Startseite wie lasstreffen.at. Nicht gestellt werden nur die Abfragen
+    // abgeschalteter Säulen: bezahlter Tipp (Veranstalter-Pakete), Künstler-
+    // Kachel, Festivals, Aktivitäten. Die Künstler-Abfrage lief für
+    // Deutschland zudem in die Zeitgrenze (3 s, 14.11.2026).
+    landingSkip: ['featured', 'artists', 'artistPrimaries', 'festivals', 'festivalActs', 'activities'],
+    weatherPlace: { name: 'Berlin', lat: 52.52, lng: 13.405 },
+    // Die acht einwohnerstärksten Gemeinden laut Stammdatei (Destatis,
+    // Gebietsstand 30.09.2026), Slug aus Amts-PLZ und Name. Wächter in
+    // site-gemeinden.test.ts.
+    cityChips: [
+      { name: 'Berlin', href: '/gemeinde/10178-berlin' },
+      { name: 'Hamburg', href: '/gemeinde/20038-hamburg' },
+      { name: 'München', href: '/gemeinde/80313-muenchen' },
+      { name: 'Köln', href: '/gemeinde/50667-koeln' },
+      { name: 'Frankfurt am Main', href: '/gemeinde/60311-frankfurt-am-main' },
+      { name: 'Düsseldorf', href: '/gemeinde/40213-duesseldorf' },
+      { name: 'Leipzig', href: '/gemeinde/04109-leipzig' },
+      { name: 'Stuttgart', href: '/gemeinde/70173-stuttgart' },
+    ],
+    // 30 Tage wie in Österreich liefen in die Zeitgrenze (3,07 s über
+    // 177.613 kommende Events, 14.11.2026).
+    landingDorffesteDays: 10,
     // Start mit dem Kern. Die übrigen Säulen führen nur österreichische
     // Inhalte (Blog, Festivals, Aktivitäten, Studenten, Themen, Venues) oder
     // warten auf eine Entscheidung (Login, Veranstalter-Pakete, Künstler).

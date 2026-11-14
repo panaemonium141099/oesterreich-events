@@ -72,6 +72,61 @@ Leitlinien (verbindlich für jeden Task):
    die Datenbank bis zum Statement-Timeout). Eventfrog-DE läuft ohne Bilder
    (`EVENTFROG_IMAGES: 'off'`, `scrape-events-de.yml:126`).
 
+### Messwerte aus Prod (fn-31.1, gemessen am 14.11.2026, psql nur lesend)
+
+Ein Durchlauf über `events` (`count(*) filter …` je Land), kommend heißt
+`start_date >= now()`, sichtbar heißt veröffentlicht und `visibility = 'public'`:
+
+| Land | gesamt | kommend | kommend sichtbar | mit Koordinaten | mit Gemeinde in der Ortsentscheidung | mit PLZ |
+|---|---|---|---|---|---|---|
+| AT | 342.088 | 125.775 | 77.903 | 76.498 | 74.020 | 75.118 |
+| DE | 227.976 | 195.970 | 177.613 | 177.536 | 175.650 | 176.387 |
+| CH | 481 | 384 | 379 | 351 | 0 | 0 |
+
+Die Zahlen des Auftrags (214.000 gesamt, 174.000 kommend) sind damit
+überholt. fn-29.9 und fn-29.15 waren zum Messzeitpunkt noch offen.
+
+**Gemeindeschlüssel aus der gespeicherten Entscheidung**
+(`src/scripts/de-gemeinde-schluessel-probe.ts`, 4.733 Gruppen aus Name, PLZ,
+Land, Kreis der 177.613 kommenden sichtbaren DE-Events, gegen
+`gemeinden-de.json`):
+
+| Ergebnis | Events | Anteil |
+|---|---|---|
+| eindeutig über Name und Land | 173.545 | 97,71 % |
+| eindeutig über den Kreis | 2.101 | 1,18 % |
+| eindeutig über die PLZ | 3 | 0,00 % |
+| ohne Gemeinde in der Entscheidung | 1.963 | 1,11 % |
+| mehrdeutig (Garding, zwei Kandidaten) | 1 | 0,00 % |
+
+Der Backfill kommt also ohne Resolver-Lauf auf 98,89 %. Reihenfolge der
+Regel: Name im Land, dann Kreis, dann PLZ, sonst NULL.
+
+**Datenbank:** `events` 2.114 MB Tabelle, 1.045 MB in 31 Indizes, Datenbank
+gesamt 9.425 MB. Die Indizes aus PR #467 sind in Prod
+(`idx_events_country_start_published` 6,6 MB,
+`idx_events_bundesland_start_published` 8,4 MB). `event_map_points` führt
+78.635 Zeilen (22 MB), der Payload hat 4,98 MB roh, der Refresh (Job 6,
+stündlich um :05) lief zuletzt 11,1 s; `event_stats_cache` (Job 1, alle
+30 min) 1,8 s.
+
+**Server** (4 Kerne, 7.746 MB RAM, 4.095 MB Swap, Platte 75 GB): 12 GB frei
+(85 % belegt), 3.433 MB RAM verfügbar, 2.552 MB Swap belegt. `nextjs-app`
+belegte wenige Minuten nach einem Neustart 722 MB (Grenze 2,5 GB), daneben
+laufen `minecraft` (1,38 GB), `supabase-db` (647 MB) und zwei weitere
+Projekte. Image `lasstreffen-app` 1,85 GB, dazu `:previous` 1,83 GB.
+
+**Kapazitätsaussage:**
+- Platte: drei Teilindizes in der Größe der vorhandenen (je unter 25 MB),
+  eine Karten-MV für DE (bei gleicher Zeilenbreite rund 50 MB plus rund
+  11 MB Payload) und der Backfill von rund 228.000 Zeilen passen in die
+  12 GB. Ein zweites Image-Paar braucht weitere 3,7 GB.
+- Arbeitsspeicher: ein zweiter Website-Container passt rechnerisch in die
+  verfügbaren 3,4 GB, der Server swappt aber schon heute (2,5 GB), und
+  `nextjs-app` wächst laut Compose-Kommentar bis an seine Grenze von 2,5 GB.
+  Ohne engere Grenze für beide Container oder mehr RAM ist das kein
+  belastbares Ja. Das ist Entscheidung 6.
+
 ## Architecture & Data Models
 
 ### A. Site-Konfiguration: eine Stelle

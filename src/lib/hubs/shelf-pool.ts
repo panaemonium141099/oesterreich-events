@@ -16,6 +16,7 @@ import { HORIZON_DAYS } from '@/components/Discover/v4/shelves-select';
 import { SITE_COUNTRY } from '@/lib/site-country';
 import { getCategorySlug } from '@/lib/landing-slugs';
 import type { HubShelfLinks, HubShelvesProps } from '@/components/Hub/HubShelves';
+import { REGION_COLUMN } from '@/lib/site/region-filter';
 
 /** Felder für Poster-Karten und kanonische Event-URLs. */
 export const SHELF_FIELDS =
@@ -48,7 +49,7 @@ export async function loadShelfPool(
       .in('publish_status', scope.statuses)
       .gte('start_date', viennaDayStart(from).toISOString())
       .lt('start_date', viennaDayStart(to).toISOString());
-    if (scope.bundesland) q = q.eq('bundesland', scope.bundesland);
+    if (scope.bundesland) q = q.eq(REGION_COLUMN, scope.bundesland);
     if (scope.category) q = q.eq('category', scope.category);
     if (scope.minQuality != null) q = q.gte('quality_score', scope.minQuality);
     const { data, error } = await q

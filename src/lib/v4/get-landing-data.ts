@@ -7,6 +7,7 @@ import { MIN_TRUSTED_EVENT_IMAGE_WIDTH } from '@/lib/event-images/resolveEventIm
 import overridesJson from '../../../data/festival-overrides.json';
 import { currentSeason, titleMatchesSeason } from '@/lib/landing/seasons';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { getSite } from '@/lib/site';
 import { ALL_POSTS } from '@/content/blog/index';
 import { addViennaDays, viennaDayRange, viennaDayStart, viennaToday } from '@/lib/utils/event-time';
 import {
@@ -224,6 +225,9 @@ async function withRetry<T = unknown[]>(
   run: () => PromiseLike<QueryResult<T>>,
   failed: string[],
 ): Promise<QueryResult<T>> {
+  // fn-31: Abfragen, die die Seite nicht stellt (SiteConfig.landingSkip),
+  // liefern leer, ohne die Datenbank zu fragen.
+  if (getSite().landingSkip.includes(label)) return { data: [] as unknown as T, error: null };
   const delays: readonly number[] = isBuildPhase() ? LANDING_RETRY_DELAYS_MS.build : LANDING_RETRY_DELAYS_MS.runtime;
   let res: QueryResult<T> = { data: null, error: { message: 'nicht ausgeführt' } };
   for (let attempt = 0; attempt <= delays.length; attempt++) {
@@ -404,7 +408,7 @@ async function getLandingDataInner(now: Date): Promise<{ data: LandingData; fail
       .order('id', { ascending: true })
       .limit(ACTIVITIES_POOL), failed),
     // Event-Zahl: country_total aus der MV (Migration 20261029200200).
-    withRetry<unknown>('stats', () => supabase.rpc('event_counts_for_stats'), failed),
+    withRetry<unknown>('stats', () => supabase.rpc('event_counts_for_stats', { p_country: SITE_COUNTRY }), failed),
   ]);
 
   // ── Bühne und Unterbau: Tipp → Saison → Programm → Wochenende ─────────

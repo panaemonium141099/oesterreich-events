@@ -151,14 +151,32 @@ function DataAttribution() {
       className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px] text-white/20"
       data-testid="data-attribution"
     >
-      <span>
-        {t('attrEvents')}: Open Data (<AttrLink href="https://creativecommons.org/licenses/by/4.0/deed.de">CC BY 4.0</AttrLink>), Austria Tourism, Wien OGD, Feratel
-      </span>
-      <span className="text-white/10">|</span>
-      <span>
-        {t('attrVenues')}: &copy; <AttrLink href="https://www.openstreetmap.org/copyright">OpenStreetMap</AttrLink>, <AttrLink href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL</AttrLink>
-      </span>
-      <span className="text-white/10">|</span>
+      {getSite().country === 'AT' ? (
+        <>
+          <span>
+            {t('attrEvents')}: Open Data (<AttrLink href="https://creativecommons.org/licenses/by/4.0/deed.de">CC BY 4.0</AttrLink>), Austria Tourism, Wien OGD, Feratel
+          </span>
+          <span className="text-white/10">|</span>
+          <span>
+            {t('attrVenues')}: &copy; <AttrLink href="https://www.openstreetmap.org/copyright">OpenStreetMap</AttrLink>, <AttrLink href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL</AttrLink>
+          </span>
+          <span className="text-white/10">|</span>
+        </>
+      ) : (
+        // fn-31: lasstreffen.de nennt seine eigenen Quellen. Lizenzangaben
+        // wörtlich aus data/stammdaten-de/meta.json; die vollständige Liste
+        // steht auf /quellen.
+        <>
+          <span>
+            {t('attrEvents')}: Kalender der Gemeinden, Eventim, Eventfrog
+          </span>
+          <span className="text-white/10">|</span>
+          <span>
+            Ortsdaten: &copy; Statistisches Bundesamt (Destatis), &copy; BKG (2026), <AttrLink href="https://www.govdata.de/dl-de/by-2-0">dl-de/by-2-0</AttrLink>; <AttrLink href="https://www.geonames.org">GeoNames</AttrLink> (<AttrLink href="https://creativecommons.org/licenses/by/4.0/deed.de">CC BY 4.0</AttrLink>)
+          </span>
+          <span className="text-white/10">|</span>
+        </>
+      )}
       <span>
         {t('attrMap')}: &copy; <AttrLink href="https://www.mapbox.com/about/maps/">Mapbox</AttrLink>
       </span>
