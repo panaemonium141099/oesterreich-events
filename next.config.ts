@@ -24,8 +24,12 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       // fn-31: lasstreffen.de zeigt Bilder aus deutschen Gemeindekalendern und
       // Tourismus-Systemen (.de, .one, .info …). Eine Liste einzelner Endungen
-      // wie für Österreich unten trägt dort nicht; nur https.
-      ...(siteCountry() === 'DE' ? [{ protocol: 'https' as const, hostname: '**' }] : []),
+      // wie für Österreich unten trägt dort nicht. Auch http: manche Portale
+      // (fotos.verwaltungsportal.de) liefern Bilder nur so aus; der Browser
+      // bekommt sie über den Bild-Optimierer der Seite per https.
+      ...(siteCountry() === 'DE'
+        ? [{ protocol: 'https' as const, hostname: '**' }, { protocol: 'http' as const, hostname: '**' }]
+        : []),
       // Unsplash (category fallback images)
       { protocol: 'https', hostname: 'images.unsplash.com' },
       // Google (user-uploaded content)

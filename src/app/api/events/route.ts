@@ -5,6 +5,7 @@ import { POSTGREST_MAX_ROWS } from '@/lib/db/fetch-all';
 import { resolveCategoryParam } from '@/lib/category-classifier/taxonomy';
 import { computeStudentScore, isFreeEvent, MIN_STUDENT_SCORE } from '@/lib/utils/student-score';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { REGION_COLUMN } from '@/lib/site/region-filter';
 
 // Edge-cached: s-maxage in der Response bestimmt die TTL pro URL.
 // Route bleibt automatisch dynamic wegen request.nextUrl.searchParams.
@@ -346,9 +347,9 @@ export async function GET(request: NextRequest) {
     // narrowed by a stale single-value param.
     if (filters.bundeslands && filters.bundeslands.length > 0) {
       const ids = filters.bundeslands.filter(b => b !== 'all');
-      if (ids.length > 0) query = query.in('bundesland', ids);
+      if (ids.length > 0) query = query.in(REGION_COLUMN, ids);
     } else if (filters.bundesland && filters.bundesland !== 'all') {
-      query = query.eq('bundesland', filters.bundesland);
+      query = query.eq(REGION_COLUMN, filters.bundesland);
     }
 
     if (filters.districts && filters.districts.length > 0) {
@@ -846,9 +847,9 @@ export async function GET(request: NextRequest) {
       // Apply same content filters (bundesland, category, search) but NOT bbox
       if (filters.bundeslands && filters.bundeslands.length > 0) {
         const ids = filters.bundeslands.filter(b => b !== 'all');
-        if (ids.length > 0) unmappedQuery = unmappedQuery.in('bundesland', ids);
+        if (ids.length > 0) unmappedQuery = unmappedQuery.in(REGION_COLUMN, ids);
       } else if (filters.bundesland && filters.bundesland !== 'all') {
-        unmappedQuery = unmappedQuery.eq('bundesland', filters.bundesland);
+        unmappedQuery = unmappedQuery.eq(REGION_COLUMN, filters.bundesland);
       }
       if (filters.categories && filters.categories.length > 0) {
         unmappedQuery = unmappedQuery.in('category', filters.categories);

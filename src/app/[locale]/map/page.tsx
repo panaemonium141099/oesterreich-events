@@ -41,7 +41,8 @@ import { FilterDrawer } from '@/components/MapV3/FilterDrawer';
 import { T } from '@/components/MapV3/tokens';
 import { MapLoadingOverlay } from '@/components/Map/MapLoadingOverlay';
 import { LocationBanner } from '@/components/Map/LocationBanner';
-import { BUNDESLAENDER, type Bundesland } from '@/lib/bundeslaender';
+import { type Bundesland } from '@/lib/bundeslaender';
+import { SITE_REGIONS } from '@/lib/site/regions';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { getStoredLocation, storeLocation } from '@/lib/geolocation';
 import { V4MarkerLegend } from '@/components/Map/v4';
@@ -204,7 +205,7 @@ function MapPageInner() {
   }, []);
 
   const handleGemeindeSelect = (g: { name: string; bundeslandId: string; lat: number; lng: number; postalCode?: string }) => {
-    const bl = BUNDESLAENDER.find((b) => b.id === g.bundeslandId);
+    const bl = SITE_REGIONS.find((b) => b.id === g.bundeslandId);
     if (bl) setBundesland(bl);
 
     // Wien stays a special case: city = Bundesland 1:1, so bundesland=wien

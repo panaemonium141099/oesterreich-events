@@ -68,6 +68,7 @@ import {
   OCCASIONS,
 } from '@/lib/category-classifier/enrichment-taxonomy';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { REGION_COLUMN } from '@/lib/site/region-filter';
 
 const INTENT_MODEL = 'gemini-2.5-flash';
 /**
@@ -335,7 +336,7 @@ function baseQuery(supabase: SupabaseClient<any>, hard: HardFilters) {
   // korrektem district aber NULL-bundesland fallen raus (~100/Stadt) —
   // behoben durch die Bundesland-Normalisierung in MASTERPLAN §10.4.
   // .in() quotet Werte mit Leerzeichen/Klammern ('graz (stadt)') sicher.
-  if (hard.bundesland) q = q.eq('bundesland', hard.bundesland);
+  if (hard.bundesland) q = q.eq(REGION_COLUMN, hard.bundesland);
   if (hard.districts) q = q.in('district', hard.districts);
   if (hard.priceTiers) q = q.in('price_tier', hard.priceTiers);
   return q;

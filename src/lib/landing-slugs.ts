@@ -5,7 +5,7 @@
  * Bundesland slugs, city slugs, category slugs, and time filters.
  */
 
-import { BUNDESLAENDER, bundeslandToId } from './bundeslaender';
+import { isSiteRegion, siteRegionById } from './site/regions';
 import { addViennaDays, viennaDayStart, viennaToday, viennaWeekday } from './utils/event-time';
 
 // ---------------------------------------------------------------------------
@@ -120,17 +120,14 @@ export function getDateRange(filter: 'heute' | 'wochenende'): {
 // heraus, auch wenn sie in BUNDESLAENDER stehen (bis 2026-10 eine Region
 // Österreich, Deutschland, Schweiz als indexierbare Hub-Seite samt Sitemap).
 // sitemap-core.xml nimmt dieselbe Prüfung, Seite und Sitemap stimmen überein.
-const VALID_BUNDESLAENDER = new Set(
-  BUNDESLAENDER.filter((b) => bundeslandToId(b.id) === b.id).map((b) => b.id),
-);
-
 export function isValidBundesland(slug: string): boolean {
-  return VALID_BUNDESLAENDER.has(slug);
+  // fn-31: die Regionen der Seite (lasstreffen.at neun Bundesländer wie
+  // bisher, lasstreffen.de die 16 Länder).
+  return isSiteRegion(slug);
 }
 
 export function getBundeslandName(slug: string): string | null {
-  const bl = BUNDESLAENDER.find((b) => b.id === slug);
-  return bl?.name ?? null;
+  return siteRegionById(slug)?.name ?? null;
 }
 
 // ---------------------------------------------------------------------------

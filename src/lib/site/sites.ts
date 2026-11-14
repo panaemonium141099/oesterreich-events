@@ -47,6 +47,10 @@ export interface SiteConfig {
    * get-landing-data.ts). Die Sektion bleibt dann leer.
    */
   landingSkip: readonly string[];
+  /** Saison-Karte der Startseite (kuratierte Pins, Wetter am Ort der Seite). */
+  landingSeason: boolean;
+  /** Wetter in der Datumszeile; nur sinnvoll mit einem Ort, der für die Seite steht. */
+  landingWeather: boolean;
   /** Welche Säulen die Seite ausspielt (Pfade in features.ts). */
   features: Record<SiteFeature, boolean>;
 }
@@ -65,6 +69,8 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
     contact: { office: 'office@lasstreffen.at', support: 'support@lasstreffen.at' },
     tagline: 'Events in Wien, Graz, Salzburg und ganz Österreich — 85\u2009000 Events & Ausflugsziele auf einer Karte.',
     landingSkip: [],
+    landingSeason: true,
+    landingWeather: true,
     features: ALL_ON,
   },
   DE: {
@@ -92,6 +98,10 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
       'featured', 'tip', 'tipSharp', 'season', 'weekendSharp', 'dorffeste', 'dorffesteSharp',
       'artists', 'artistPrimaries', 'festivals', 'festivalActs', 'activities',
     ],
+    // Kein Ort steht für ganz Deutschland, und die Saison-Karte ist für
+    // Österreich kuratiert.
+    landingSeason: false,
+    landingWeather: false,
     // Start mit dem Kern. Die übrigen Säulen führen nur österreichische
     // Inhalte (Blog, Festivals, Aktivitäten, Studenten, Themen, Venues) oder
     // warten auf eine Entscheidung (Login, Veranstalter-Pakete, Künstler).

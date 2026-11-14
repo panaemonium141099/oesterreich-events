@@ -22,7 +22,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ALL_POSTS } from '@/content/blog';
-import { BUNDESLAENDER } from '@/lib/bundeslaender';
+import { SITE_REGIONS } from '@/lib/site/regions';
 import {
   CATEGORY_SLUGS,
   STUDENT_CITIES,
@@ -142,7 +142,7 @@ export async function GET(): Promise<NextResponse> {
   // Nur die 9 echten Bundesländer, dieselbe Prüfung wie die Hub-Seite
   // (isValidBundesland). Bis 2026-10 stand hier auch die Karten-Pseudo-Region
   // Österreich, Deutschland, Schweiz mit allen Unterseiten.
-  const bundeslaender = BUNDESLAENDER.filter((b) => isValidBundesland(b.id));
+  const bundeslaender = SITE_REGIONS.filter((b) => isValidBundesland(b.id));
   const categorySlugs = [...CATEGORY_SLUGS.keys()];
   const timeFilters = ['heute', 'wochenende'];
 
