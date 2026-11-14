@@ -20,6 +20,7 @@ import { evaluateAdmission, type AdmissionVerdict } from '@/lib/quality/admissio
 import { plzRegionOfCountry, regionOfCountry, writesAustrianRegionColumns } from './ortsdaten';
 import { districtForLocation, bundeslandForLocation } from '@/lib/plz-district';
 import type { SourceCoordsPrecision } from './types';
+import { regionKeys } from '@/lib/location/region-keys';
 
 export interface StoredEventLocationRow {
   id: string;
@@ -367,6 +368,7 @@ export async function reResolveStoredEvents(
       location_status_changed_at: row.location_status === decision.status ? (row.location_status_changed_at ?? null) : new Date().toISOString(),
       location_precision: decision.precision,
       location_resolution: { ...decision, phase: opts.phase },
+      ...regionKeys(decision.country, decision.gemeinde),
       location_provenance: decision.provenance,
       ...(decision.venue_id ? { venue_id: decision.venue_id } : {}),
       ...(decision.location_name && !row.location_name ? { location_name: decision.location_name } : {}),

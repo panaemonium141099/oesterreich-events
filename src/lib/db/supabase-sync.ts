@@ -51,6 +51,7 @@ import { toUtcInstant } from '@/lib/pipeline/normalize-date';
 import { migrateSourceIds } from '@/lib/db/source-id-migration';
 import { wellFormed } from '@/lib/db/well-formed';
 import { plzRegionOfCountry, regionOfCountry, writesAustrianRegionColumns } from '@/lib/location/ortsdaten';
+import { regionKeys } from '@/lib/location/region-keys';
 import { deLandToId } from '@/lib/gemeinden/laender-de';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
 import { generateEventSlug } from '@/lib/utils/slugify';
@@ -947,6 +948,10 @@ export function toSupabaseRow(
         : new Date().toISOString(),
     location_precision: finalPrecision,
     location_resolution: locationResolution,
+    // fn-31: Land, Kreis und Gemeinde als Schlüssel aus der Gemeinde der
+    // Ortsentscheidung, für AT und DE (region-keys.ts). Immer alle drei
+    // schreiben, fehlend als NULL: die Entscheidung gilt als Ganzes.
+    ...regionKeys(decision.country, decision.gemeinde),
     location_provenance: decision.provenance,
     raw_event_id: rawRefs.ids.get(key) ?? null,
     category: canonical.category,
