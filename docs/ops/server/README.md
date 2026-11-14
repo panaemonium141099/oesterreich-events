@@ -30,22 +30,16 @@ Statement-Timeout (MASTERPLAN §3.15). Mit `deploy-image.sh` baut der
 GitHub-Runner (`scripts/deploy/build-image.sh`), der Server lädt das Image
 nur noch und startet es.
 
-`deploy-image.sh` ist eine Vorlage: der Server konnte beim Schreiben nicht
-gelesen werden. Der Ablauf von `deploy.sh` ist aus dem Deploy-Log abgeleitet
-(Image `lasstreffen-app:latest`, Container `nextjs-app`, `docker compose up`
-in `/opt/app`, Plattenprüfung mit Leeren des Build-Caches).
+`deploy-image.sh` ist mit `/opt/app/deploy.sh` abgeglichen (gelesen am
+14.11.2026) und liegt seit diesem Tag auf dem Server: dieselbe Sperre
+(`/var/lock/lt-deploy.lock`), dasselbe Aufräumen der Platte und der
+Recreate-Reste, derselbe Dienst (`nextjs`, Image `lasstreffen-app:latest`,
+Container `nextjs-app`), derselbe Health-Check mit Rückfall auf
+`lasstreffen-app:previous`. Es entfällt nur `docker compose build`; der
+Quellstand in `/opt/app/src` wird weiter nachgezogen.
 
-### Vor dem Einspielen prüfen
-
-1. `deploy.sh` lesen: startet es mit `docker compose up -d` im Verzeichnis
-   `/opt/app`, oder mit einer anderen Compose-Datei bzw. einem Dienstnamen?
-   Dann `APP_DIR` bzw. den `up`-Aufruf in `deploy-image.sh` anpassen.
-2. Trägt der Dienst in der Compose-Datei `image: lasstreffen-app:latest`?
-   Ohne `image:` vergibt Compose einen eigenen Namen, dann `IMAGE` anpassen.
-3. Hat `deploy.sh` ein eigenes Health-Gate oder weitere Schritte (Timer,
-   Cache leeren)? Diese Schritte in `deploy-image.sh` übernehmen.
-4. Passt das Image auf die Platte? Geladen werden rund 760 MB, das vorige
-   Image bleibt als `lasstreffen-app:previous` für den Rückweg.
+Geladen wird ein Image von rund 1,85 GB (entpackt), das vorige bleibt als
+`:previous`. Unter 4 GB freier Platte bricht das Skript ab.
 
 ### Probe ohne Deploy
 
