@@ -30,6 +30,7 @@ import type { AppLocale } from '@/i18n/routing';
 import { SITE_COUNTRY } from '@/lib/site-country';
 import { landingShelfConfig, loadShelfPool, type LandingShelves } from './hubs/shelf-pool';
 import { getSite } from '@/lib/site';
+import { REGION_COLUMN } from '@/lib/site/region-filter';
 
 const BASE_URL = getSite().url;
 
@@ -354,7 +355,7 @@ async function queryEvents(
 
   // Bundesland filter
   if (params.bundesland) {
-    query = query.eq('bundesland', params.bundesland);
+    query = query.eq(REGION_COLUMN, params.bundesland);
   }
 
   // City filter (venue.city + address fallback)

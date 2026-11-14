@@ -18,7 +18,8 @@
 import { useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { Event } from '@/types/events';
-import { BUNDESLAENDER, bundeslandToId } from '@/lib/bundeslaender';
+import { bundeslandToId } from '@/lib/bundeslaender';
+import { SITE_REGIONS, siteRegionImage } from '@/lib/site/regions';
 import { categoryLabel } from '@/lib/i18n/category-labels';
 import { EVENT_TZ, viennaDayStart } from '@/lib/utils/event-time';
 import { useDetailHydration } from '@/lib/v4/use-detail-hydration';
@@ -126,8 +127,8 @@ export function V4EntdeckenShelves({ events, loading, onPreset, onCategory, onFr
       </Shelf>
 
       <Shelf title={t('shelfRegion')}>
-        {BUNDESLAENDER.filter((b) => b.id !== 'all').map((b) => (
-          <RegionTile key={b.id} href={`/${b.id}`} name={b.name} image={`/images/regions/${b.id}.jpg`} count={regionCounts.get(b.id)} />
+        {SITE_REGIONS.filter((b) => b.id !== 'all').map((b) => (
+          <RegionTile key={b.id} href={`/${b.id}`} name={b.name} image={siteRegionImage(b.id)} count={regionCounts.get(b.id)} />
         ))}
       </Shelf>
 

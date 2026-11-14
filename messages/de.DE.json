@@ -1,7 +1,8 @@
 {
   "Landing": {
     "Masthead": {
-      "eventsCount": "Events in Deutschland"
+      "eventsCount": "Events in Deutschland",
+      "title": "Was ist heute los?"
     },
     "Season": {
       "herbst": {

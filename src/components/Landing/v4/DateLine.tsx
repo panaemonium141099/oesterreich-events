@@ -19,6 +19,7 @@ import { loadTodayWeather, RAIN_MM, type TodayWeather } from '@/lib/landing/week
 import { announceViennaDay } from '@/lib/landing/vienna-day';
 import { EVENT_TZ, viennaDayRange, viennaToday } from '@/lib/utils/event-time';
 import { DE_LOCALE } from '@/lib/site/intl';
+import { getSite } from '@/lib/site';
 
 /** „über 88.000": auf volle Tausender abgerundet, unter 1.000 keine Zahl. */
 export function roundCountryTotal(n: number | null | undefined): number | null {
@@ -73,7 +74,8 @@ export function DateLine({ today, countryTotal }: { today: string; countryTotal:
 
   useEffect(() => {
     let alive = true;
-    loadTodayWeather().then(w => { if (alive) setWeather(w); });
+    // fn-31: nur wo ein Ort für die Seite steht (Wien für lasstreffen.at).
+    if (getSite().landingWeather) loadTodayWeather().then(w => { if (alive) setWeather(w); });
     return () => { alive = false; };
   }, []);
 

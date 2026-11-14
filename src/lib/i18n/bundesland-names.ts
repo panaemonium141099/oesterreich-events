@@ -1,5 +1,6 @@
 import { BUNDESLAND_NAMES, type BundeslandId } from '@/lib/districtsAT';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
+import { siteRegionById } from '@/lib/site/regions';
 
 /**
  * fn-17: Englische Exonyme der Bundesländer für die /en-Ansicht.
@@ -48,7 +49,8 @@ export function bundeslandDisplayName(idOrName: string, locale: string): string 
   // 'all' ("Ganz Österreich"). Ohne diesen Fallback stünde der rohe Slug
   // im sichtbaren Text ("Events in all"). Beide Sprachen zeigen hier den
   // deutschen Namen.
-  return BUNDESLAENDER.find(b => b.id === idOrName)?.name ?? idOrName;
+  // fn-31: die Regionen der Seite (für lasstreffen.de die 16 Länder).
+  return siteRegionById(idOrName)?.name ?? BUNDESLAENDER.find(b => b.id === idOrName)?.name ?? idOrName;
 }
 
 /**
