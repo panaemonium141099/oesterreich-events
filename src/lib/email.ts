@@ -304,6 +304,40 @@ export async function sendGenericEmail(
 }
 
 /**
+ * Versand mit Ausweichweg: zuerst Brevo, schlägt das fehl (Tageskontingent,
+ * Störung), Resend. Nur für Mails, die ankommen MÜSSEN (Benachrichtigungen
+ * an den Betreiber, `src/lib/notify-operator.ts`). Massenversand bleibt bei
+ * `sendGenericEmail`, sonst liefe ein volles Brevo-Kontingent in Resend über.
+ */
+export async function sendEmailWithFallback(
+  to: string,
+  subject: string,
+  html: string,
+): Promise<{ success: boolean; id?: string; error?: string; provider?: 'brevo' | 'resend' }> {
+  const payload = { to, subject, html };
+  const errors: string[] = [];
+
+  const brevoKey = process.env.BREVO_API_KEY;
+  if (brevoKey) {
+    const result = await sendViaBrevo(payload, brevoKey);
+    if (result.success) return { ...result, provider: 'brevo' };
+    errors.push(`Brevo: ${result.error ?? 'unbekannt'}`);
+  }
+
+  const resendKey = process.env.RESEND_API_KEY;
+  if (resendKey) {
+    const result = await sendViaResend(payload, resendKey);
+    if (result.success) return { ...result, provider: 'resend' };
+    errors.push(`Resend: ${result.error ?? 'unbekannt'}`);
+  }
+
+  if (errors.length === 0) {
+    return { success: false, error: 'No email provider configured (set BREVO_API_KEY or RESEND_API_KEY)' };
+  }
+  return { success: false, error: errors.join(' | ') };
+}
+
+/**
  * Send a lifecycle email (welcome / reactivation / weekend) — single entry
  * point used by the /api/cron/lifecycle-emails route. Subject is generated
  * inside the template per cohort + city.

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { notifyOperator } from '@/lib/notify-operator';
+import { escapeHtml } from '@/lib/utils/escape-html';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,6 +58,22 @@ export async function POST(
     const notificationBody = reason
       ? `Kommentar von ${commenterName}: "${truncatedContent}"\nGrund: ${reason}`
       : `Kommentar von ${commenterName}: "${truncatedContent}"`;
+
+    // Zusätzlich per Mail an den Betreiber: die In-App-Meldung sieht nur,
+    // wer eingeloggt in die Glocke schaut. Vor der god-Abfrage, damit die
+    // Meldung auch ohne god-Nutzer ankommt.
+    await notifyOperator({
+      context: `comment-report:${commentId}`,
+      subject: 'Kommentar gemeldet',
+      html: `
+        <h2>Ein Kommentar wurde gemeldet</h2>
+        <p><strong>Gemeldet von:</strong> ${escapeHtml(reporterName)}</p>
+        <p><strong>Kommentar von:</strong> ${escapeHtml(commenterName)}</p>
+        <p><strong>Inhalt:</strong> ${escapeHtml(truncatedContent)}</p>
+        ${reason ? `<p><strong>Grund:</strong> ${escapeHtml(reason)}</p>` : ''}
+        <p><a href="https://lasstreffen.at/feed/${escapeHtml(String(comment.activity_id))}">Zum Beitrag</a></p>
+      `,
+    });
 
     // Fetch all god-role users
     const { data: godUsers } = await supabase

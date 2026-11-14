@@ -21,14 +21,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
-import { sendGenericEmail } from '@/lib/email';
+import { notifyOperator } from '@/lib/notify-operator';
 import { validateSubmission } from '@/lib/inserate/submission';
 import { escapeHtml } from '@/lib/utils/escape-html';
 import { DE_LOCALE } from '@/lib/site/intl';
 
 export const dynamic = 'force-dynamic';
-
-const NOTIFY_TO = process.env.BUSINESS_LEADS_EMAIL || 'office@lasstreffen.at';
 
 /** 5 Inserate pro Stunde und IP. Genug für einen Veranstalter, der eine
  *  Reihe von Terminen einträgt; zu wenig für eine Spam-Welle. */
@@ -126,11 +124,12 @@ export async function POST(request: NextRequest) {
       <hr>
       <p style="color:#888;font-size:12px">Inserat ${data.id}</p>
     `;
-    await sendGenericEmail(
-      NOTIFY_TO,
-      `Neues Inserat: ${submission.title}`,
-      html
-    );
+    // notifyOperator wirft nicht und loggt jeden Fehlschlag selbst.
+    await notifyOperator({
+      context: `inserat:${data.id}`,
+      subject: `Neues Inserat: ${submission.title}`,
+      html,
+    });
   } catch (err) {
     console.error('[events/inserat] notification email failed:', err);
   }
