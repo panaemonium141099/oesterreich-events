@@ -9,11 +9,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { sendGenericEmail } from '@/lib/email';
+import { notifyOperator } from '@/lib/notify-operator';
 
 export const dynamic = 'force-dynamic';
-
-const NOTIFY_TO = process.env.BUSINESS_LEADS_EMAIL || 'office@lasstreffen.at';
 
 const VALID_PLANS = ['boost', 'abo', 'scraper', 'unsure'] as const;
 type Plan = (typeof VALID_PLANS)[number];
@@ -114,7 +112,12 @@ export async function POST(request: NextRequest) {
       <hr>
       <p style="color:#888;font-size:12px">Lead-ID: ${data.id}</p>
     `;
-    await sendGenericEmail(NOTIFY_TO, `Neue Firmen-Anfrage: ${company} (${PLAN_LABEL[plan]})`, html);
+    // notifyOperator wirft nicht und loggt jeden Fehlschlag selbst.
+    await notifyOperator({
+      context: `lead:${data.id}`,
+      subject: `Neue Firmen-Anfrage: ${company} (${PLAN_LABEL[plan]})`,
+      html,
+    });
   } catch (err) {
     console.error('[business/lead] notification email failed:', err);
   }

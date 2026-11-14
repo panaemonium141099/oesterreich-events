@@ -15,6 +15,8 @@ import { createClient } from '@supabase/supabase-js';
 import { getStripe, computeBoostUntil } from '@/lib/payments/stripe-boost';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { DE_LOCALE } from '@/lib/site/intl';
+import { notifyOperator } from '@/lib/notify-operator';
+import { escapeHtml } from '@/lib/utils/escape-html';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +47,28 @@ async function activateBoost(sessionId: string): Promise<Result> {
     return { ok: false, message: 'Die Zahlung ist noch nicht abgeschlossen. Falls du bezahlt hast, lade die Seite in einer Minute neu.' };
   }
   const eventId = session.metadata?.event_id;
+  const buyer = session.customer_details?.email ?? null;
+  const amount = session.amount_total != null
+    ? `${(session.amount_total / 100).toFixed(2)} ${(session.currency ?? 'eur').toUpperCase()}`
+    : null;
+  // Bezahlt, aber nicht aktiviert: der Käufer sieht nur „bitte melde dich",
+  // der Betreiber muss von sich aus davon erfahren.
+  const notifyProblem = (problem: string) =>
+    notifyOperator({
+      context: `boost-problem:${sessionId}`,
+      subject: 'Boost bezahlt, aber NICHT aktiviert',
+      html: `
+        <h2>Boost bezahlt, aber nicht aktiviert</h2>
+        <p><strong>Problem:</strong> ${escapeHtml(problem)}</p>
+        ${eventId ? `<p><strong>Event-ID:</strong> ${escapeHtml(eventId)}</p>` : ''}
+        ${buyer ? `<p><strong>Käufer:</strong> ${escapeHtml(buyer)}</p>` : ''}
+        ${amount ? `<p><strong>Betrag:</strong> ${escapeHtml(amount)}</p>` : ''}
+        <p><strong>Stripe-Session:</strong> ${escapeHtml(sessionId)}</p>
+        <p>Bitte den Boost unter <a href="https://lasstreffen.at/admin/boost">/admin/boost</a> von Hand setzen und dem Käufer antworten.</p>
+      `,
+    });
   if (!eventId) {
+    await notifyProblem('Der Zahlung ist kein Event zugeordnet.');
     return { ok: false, message: 'Der Zahlung ist kein Event zugeordnet — bitte melde dich unter office@lasstreffen.at.' };
   }
 
@@ -57,25 +80,50 @@ async function activateBoost(sessionId: string): Promise<Result> {
   );
   const { data: event, error: readErr } = await admin
     .from('events')
-    .select('id, title, start_date')
+    .select('id, title, start_date, is_boosted, boost_until')
     .eq('id', eventId)
     .single();
   if (readErr || !event) {
     console.error('[boost/erfolg] event read failed:', readErr);
+    await notifyProblem(`Event nicht gefunden (${readErr?.message ?? 'keine Zeile'}).`);
     return { ok: false, message: 'Event nicht gefunden — bitte melde dich unter office@lasstreffen.at (Zahlung ist bei uns registriert).' };
   }
 
   const boostUntil = computeBoostUntil(event.start_date as string);
+  // Die Seite ist idempotent (Neuladen setzt dieselben Werte). Die Mail an
+  // den Betreiber geht nur beim ersten Mal raus: war der Boost schon mit
+  // genau diesem Ende gesetzt, ist es ein erneutes Laden.
+  const alreadyActive =
+    event.is_boosted === true &&
+    event.boost_until != null &&
+    new Date(event.boost_until as string).getTime() === new Date(boostUntil).getTime();
   const { error: updErr } = await admin
     .from('events')
     .update({ is_boosted: true, boost_tier: 'boost', boost_until: boostUntil })
     .eq('id', eventId);
   if (updErr) {
     console.error('[boost/erfolg] boost update failed:', updErr);
+    await notifyProblem(`Aktivierung fehlgeschlagen (${updErr.message}). Event: ${event.title as string}`);
     return { ok: false, message: 'Aktivierung fehlgeschlagen — bitte melde dich unter office@lasstreffen.at (Zahlung ist bei uns registriert).' };
   }
 
   console.log(`[boost/erfolg] boost aktiviert: event=${eventId} until=${boostUntil} session=${sessionId}`);
+  if (!alreadyActive) {
+    await notifyOperator({
+      context: `boost:${sessionId}`,
+      subject: `Boost gekauft: ${event.title as string}`,
+      html: `
+        <h2>Neuer Boost-Kauf</h2>
+        <p><strong>Event:</strong> ${escapeHtml(event.title as string)}</p>
+        <p><strong>Aktiv bis:</strong> ${escapeHtml(new Date(boostUntil).toLocaleDateString(DE_LOCALE, { dateStyle: 'full', timeZone: EVENT_TZ }))}</p>
+        ${buyer ? `<p><strong>Käufer:</strong> ${escapeHtml(buyer)}</p>` : ''}
+        ${amount ? `<p><strong>Betrag:</strong> ${escapeHtml(amount)}</p>` : ''}
+        <p>Der Boost ist bereits aktiv, es ist nichts zu tun.</p>
+        <hr>
+        <p style="color:#888;font-size:12px">Event ${escapeHtml(eventId)} · Stripe-Session ${escapeHtml(sessionId)}</p>
+      `,
+    });
+  }
   return {
     ok: true,
     message: 'Dein Event-Boost ist aktiv!',

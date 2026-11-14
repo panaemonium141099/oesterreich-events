@@ -263,7 +263,12 @@ async function notifySubmitter(
   message: { subject: string; html: string },
 ): Promise<void> {
   try {
-    await sendGenericEmail(to, message.subject, message.html);
+    // sendGenericEmail wirft nicht: ohne diese Prüfung stünde ein
+    // gescheiterter Versand in keinem Log.
+    const result = await sendGenericEmail(to, message.subject, message.html);
+    if (!result.success) {
+      console.error('[admin/event-submissions] notification email failed:', result.error);
+    }
   } catch (err) {
     console.error('[admin/event-submissions] notification email failed:', err);
   }

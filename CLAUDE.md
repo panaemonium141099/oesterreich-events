@@ -255,6 +255,12 @@ node / next.js
   nennt `office@` als Kontakt und `support@` im Entwicklungs-Hinweis der
   Startseite (`DevNotice`); Formular-Benachrichtigungen (Firmen-Anfrage,
   Event-Inserat) gehen an `office@`, außer `BUSINESS_LEADS_EMAIL` ist gesetzt.
+  Alles, was eine Handlung des Betreibers verlangt (Inserat, Firmen-Anfrage,
+  Boost-Kauf, bezahlter aber nicht aktivierter Boost, gemeldeter Kommentar),
+  geht über `notifyOperator` (`src/lib/notify-operator.ts`): Brevo, bei
+  Fehlschlag Resend, jeder Fehlschlag mit Grund im Log (`[notify-operator]`).
+  `sendGenericEmail` wirft nicht, sein Ergebnis immer prüfen. Bis 12.11.2026
+  gingen diese Mails an `dev@glatzdev.com`, Fehlschläge standen in keinem Log.
 - **pg_cron in Supabase:** MV-Refreshes (event_stats_cache 30 min,
   event_map_points stündlich), match-artists stündlich.
 
