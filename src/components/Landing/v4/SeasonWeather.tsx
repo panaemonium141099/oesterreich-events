@@ -13,6 +13,7 @@ import { Link } from '@/i18n/navigation';
 import { loadWeekendWeather, type WeekendWeather } from '@/lib/landing/weekend-weather';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { DE_LOCALE } from '@/lib/site/intl';
+import { hasFeature } from '@/lib/site/features';
 
 export function SeasonWeather() {
   const t = useTranslations('Landing.Season');
@@ -43,6 +44,8 @@ export function SeasonWeather() {
     );
   }
 
+  // fn-31: der Hinweis führt zu den Aktivitäten; ohne diese Säule entfällt er.
+  if (!hasFeature('activities')) return null;
   const href = weather.mode === 'rain' ? '/aktivitaeten?setting=indoor' : '/aktivitaeten?tag=schwimmen';
   return (
     <Link

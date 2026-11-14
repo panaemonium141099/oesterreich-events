@@ -9,11 +9,18 @@
  * dl-de/by-2-0). Geschrieben werden
  *   src/lib/regions-de.generated.ts     Liste für Karte, Filter, Hubs
  *   public/laender-de/<id>.geojson      Grenze je Land für die Karte
+ *   public/deutschland.geojson          Umriss des ganzen Landes (Vereinigung)
+ * Die Karte (EventMap.updateBundeslandOverlay) erwartet je Datei EIN Feature,
+ * wie bei den österreichischen Dateien: daraus zeichnet sie die Grenzlinie
+ * und graut alles außerhalb aus.
  * Beide Ausgaben sind eingecheckt; der Wächter regions-de.test.ts prüft, dass
  * sie zur Quelle passen.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { union } from '@turf/union';
+import { simplify } from '@turf/simplify';
+import { featureCollection } from '@turf/helpers';
 
 type Ring = number[][];
 interface Feature {
@@ -71,7 +78,7 @@ function main() {
     const id = f.properties.land;
     writeFileSync(
       join(outDir, `${id}.geojson`),
-      JSON.stringify({ type: 'FeatureCollection', features: [{ type: 'Feature', properties: { name: f.properties.name }, geometry: f.geometry }] }),
+      JSON.stringify({ type: 'Feature', properties: { name: f.properties.name }, geometry: f.geometry }),
     );
     entries.push(`  {
     id: '${id}',
@@ -88,6 +95,17 @@ function main() {
   },`);
   });
 
+  // Umriss Deutschlands: Vereinigung der 16 Länder, auf rund 100 m vereinfacht
+  // (die Datei lädt bei jedem Öffnen der Karte).
+  const merged = union(featureCollection(src.features.map(f => ({ type: 'Feature' as const, properties: {}, geometry: f.geometry as never }))));
+  if (!merged) throw new Error('Vereinigung der Länder ist leer');
+  const outline = simplify(merged, { tolerance: 0.001, highQuality: true });
+  const roundCoords = (c: unknown): unknown => (typeof c === 'number' ? Number(c.toFixed(5)) : (c as unknown[]).map(roundCoords));
+  writeFileSync(
+    join(root, 'public', 'deutschland.geojson'),
+    JSON.stringify({ type: 'Feature', properties: { name: 'Deutschland' }, geometry: { type: outline.geometry.type, coordinates: roundCoords(outline.geometry.coordinates) } }),
+  );
+
   const file = `/**
  * ERZEUGT von src/scripts/build-regions-de.ts, nicht von Hand ändern.
  * Quelle: data/stammdaten-de/laender-de.geojson (BKG VG250, dl-de/by-2-0).
@@ -103,7 +121,7 @@ export const REGIONS_DE: Bundesland[] = [
     zoom: ${zoomFor(all)},
     pitch: 30,
     bearing: 0,
-    geojsonFile: '',
+    geojsonFile: '/deutschland.geojson',
     borderColor: '#6366f1',
     districts: [],
     bounds: [${all.map(n => round(n)).join(', ')}],

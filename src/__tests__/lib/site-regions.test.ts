@@ -43,8 +43,27 @@ describe('deutsche Regionen (erzeugt)', () => {
     }
   });
 
-  it('jede Grenzdatei liegt unter public/', () => {
-    for (const r of laender) expect([r.id, existsSync(`public${r.geojsonFile}`)]).toEqual([r.id, true]);
+  it('jede Grenzdatei liegt unter public/ und ist EIN Feature, wie die Karte es liest', () => {
+    // EventMap.updateBundeslandOverlay liest `geojson.geometry`: eine
+    // FeatureCollection hätte keinen Umriss und keine Maske ergeben.
+    for (const r of REGIONS_DE) {
+      expect([r.id, existsSync(`public${r.geojsonFile}`)]).toEqual([r.id, true]);
+      const g = JSON.parse(readFileSync(`public${r.geojsonFile}`, 'utf8'));
+      expect([r.id, g.type, ['Polygon', 'MultiPolygon'].includes(g.geometry?.type)]).toEqual([r.id, 'Feature', true]);
+    }
+  });
+
+  it('die Gesamtansicht hat den Umriss des ganzen Landes', () => {
+    expect(REGIONS_DE[0].geojsonFile).toBe('/deutschland.geojson');
+    const g = JSON.parse(readFileSync('public/deutschland.geojson', 'utf8'));
+    const rings = g.geometry.type === 'MultiPolygon' ? g.geometry.coordinates.map((p: number[][][]) => p[0]) : [g.geometry.coordinates[0]];
+    const all = rings.flat() as number[][];
+    const [w, s, e, n] = REGIONS_DE[0].bounds!;
+    // Der Umriss füllt den Ausschnitt des Landes (auf 0,05 Grad genau).
+    expect(Math.min(...all.map(c => c[0]))).toBeCloseTo(w, 1);
+    expect(Math.max(...all.map(c => c[0]))).toBeCloseTo(e, 1);
+    expect(Math.min(...all.map(c => c[1]))).toBeCloseTo(s, 1);
+    expect(Math.max(...all.map(c => c[1]))).toBeCloseTo(n, 1);
   });
 
   it('Deutschland liegt, wo Deutschland liegt', () => {
