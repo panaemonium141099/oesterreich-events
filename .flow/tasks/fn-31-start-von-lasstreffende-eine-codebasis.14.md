@@ -25,9 +25,8 @@ Images entstehen in GitHub Actions statt auf dem Datenbank-Server: je Land ein I
 - [ ] Rückweg auf das vorige Image getestet
 - [ ] DE-Image baut per Schalter aus derselben Pipeline
 ## Done summary
-TBD
-
+Deploy laeuft ueber den Runner: DEPLOY_BUILD=runner gesetzt, /opt/app/deploy-image.sh mit deploy.sh abgeglichen und eingespielt. Erster Lauf 43311... am 14.11.2026: Build im Runner 2,5 min, Laden und Start auf dem Server 69 s, Health gruen, Startseite neu gerendert. Kein GHCR, kein zweiter Container (fn-31.15).
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: 3eb603b
+- Tests: Deploy-Lauf nach PR #477: alle Schritte gruen, Probe-Builds AT und DE im Runner gruen
+- PRs: #474, #475, #477

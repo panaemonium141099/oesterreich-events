@@ -22,6 +22,10 @@ function siteCountry(): string {
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
+      // fn-31: lasstreffen.de zeigt Bilder aus deutschen Gemeindekalendern und
+      // Tourismus-Systemen (.de, .one, .info …). Eine Liste einzelner Endungen
+      // wie für Österreich unten trägt dort nicht; nur https.
+      ...(siteCountry() === 'DE' ? [{ protocol: 'https' as const, hostname: '**' }] : []),
       // Unsplash (category fallback images)
       { protocol: 'https', hostname: 'images.unsplash.com' },
       // Google (user-uploaded content)

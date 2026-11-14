@@ -42,6 +42,11 @@ export interface SiteConfig {
   tagline: string;
   /** Kontaktadressen in Footer und Hinweisen. */
   contact: { office: string; support: string };
+  /**
+   * Abfragen der Startseite, die diese Seite nicht stellt (Namen aus
+   * get-landing-data.ts). Die Sektion bleibt dann leer.
+   */
+  landingSkip: readonly string[];
   /** Welche Säulen die Seite ausspielt (Pfade in features.ts). */
   features: Record<SiteFeature, boolean>;
 }
@@ -59,6 +64,7 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
     timeZone: 'Europe/Vienna',
     contact: { office: 'office@lasstreffen.at', support: 'support@lasstreffen.at' },
     tagline: 'Events in Wien, Graz, Salzburg und ganz Österreich — 85\u2009000 Events & Ausflugsziele auf einer Karte.',
+    landingSkip: [],
     features: ALL_ON,
   },
   DE: {
@@ -74,6 +80,18 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
     // Bis ein Postfach unter .de besteht, gelten die Adressen des Betreibers.
     contact: { office: 'office@lasstreffen.at', support: 'support@lasstreffen.at' },
     tagline: 'Konzerte, Dorffeste und Märkte in ganz Deutschland auf einer Karte.',
+    // Startseite: nur Programm heute, Wochenende, Karten-Pins und Event-Zahl.
+    // Die übrigen Abfragen gehören zu abgeschalteten Säulen (Buchung, Künstler,
+    // Festivals, Aktivitäten) oder suchen in Titeln bzw. sortieren nach Score
+    // über alle kommenden Events des Landes. Für Deutschland (177.613 kommende
+    // sichtbare Events am 14.11.2026) liefen sie alle in den Statement-Timeout
+    // und füllten den Verbindungspool der Datenbank, auch für lasstreffen.at
+    // (lokale Vorschau 14.11.2026, PGRST003). Erst mit passenden Indizes
+    // wieder einschalten (fn-31.7, fn-31.12).
+    landingSkip: [
+      'featured', 'tip', 'tipSharp', 'season', 'weekendSharp', 'dorffeste', 'dorffesteSharp',
+      'artists', 'artistPrimaries', 'festivals', 'festivalActs', 'activities',
+    ],
     // Start mit dem Kern. Die übrigen Säulen führen nur österreichische
     // Inhalte (Blog, Festivals, Aktivitäten, Studenten, Themen, Venues) oder
     // warten auf eine Entscheidung (Login, Veranstalter-Pakete, Künstler).
