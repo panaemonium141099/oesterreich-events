@@ -408,7 +408,7 @@ async function getLandingDataInner(now: Date): Promise<{ data: LandingData; fail
       .order('id', { ascending: true })
       .limit(ACTIVITIES_POOL), failed),
     // Event-Zahl: country_total aus der MV (Migration 20261029200200).
-    withRetry<unknown>('stats', () => supabase.rpc('event_counts_for_stats'), failed),
+    withRetry<unknown>('stats', () => supabase.rpc('event_counts_for_stats', { p_country: SITE_COUNTRY }), failed),
   ]);
 
   // ── Bühne und Unterbau: Tipp → Saison → Programm → Wochenende ─────────
