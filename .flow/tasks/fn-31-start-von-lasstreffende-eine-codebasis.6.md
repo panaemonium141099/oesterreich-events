@@ -23,9 +23,8 @@ Regionsspalten `region_id`, `kreis_key`, `gemeinde_key` auf `events`, gefüllt v
 - [ ] Kein DE-Wert in `bundesland` oder `district`; bestehende Sync-Tests unverändert grün
 - [ ] `regionKeys` ist pur, getestet und von keinem Netzabruf abhängig
 ## Done summary
-TBD
-
+Spalten region_id, kreis_key, gemeinde_key in Prod (Migration 20261114170000). region-keys.ts leitet sie aus der Gemeinde der Ortsentscheidung ab; alle vier Schreiber der Entscheidung schreiben sie. Abweichung von der Spec: kein neues Feld in LocationDecision, die Ableitung ist dieselbe wie im Backfill.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: d2fae829
+- Tests: region-keys.test.ts 12 gruen, Migration in Prod ausgefuehrt, API liefert die Spalten
 - PRs:
