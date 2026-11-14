@@ -5,6 +5,7 @@ import { Footer } from '@/components/Legal/Footer';
 import { Link } from '@/i18n/navigation';
 import { viennaDayDiff, viennaToday } from '@/lib/utils/event-time';
 import { DE_LOCALE } from '@/lib/site/intl';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 /**
  * /wo-ist-was-los — öffentliche Event-Dichte-Heatmap Österreichs (fn-19).
@@ -67,7 +68,7 @@ async function loadWeekStats(): Promise<WeekStats | null> {
     // den 60s-Static-Kill laufen — Seite rendert dann ohne Ranking und das
     // naechste Revalidate traegt es nach.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase.rpc as any)('get_event_map_points')
+    const { data, error } = await (supabase.rpc as any)('get_event_map_points', { p_country: SITE_COUNTRY })
       .abortSignal(AbortSignal.timeout(15_000));
     if (error || !data) return null;
 

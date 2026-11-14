@@ -97,6 +97,9 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
     landingSkip: [
       'featured', 'tip', 'tipSharp', 'season', 'weekendSharp', 'dorffeste', 'dorffesteSharp',
       'artists', 'artistPrimaries', 'festivals', 'festivalActs', 'activities',
+      // Die Event-Zahl im Kopf kommt aus event_stats_cache, der nur Österreich
+      // zählt: auf .de stand dort die österreichische Zahl (14.11.2026).
+      'stats',
     ],
     // Kein Ort steht für ganz Deutschland, und die Saison-Karte ist für
     // Österreich kuratiert.
