@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 /**
  * fn-16 Slice 1: kompletter Points-Snapshot aller publizierbaren Future-AT-
@@ -34,7 +35,7 @@ export async function GET() {
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase.rpc as any)('get_event_map_points');
+    const { data, error } = await (supabase.rpc as any)('get_event_map_points', { p_country: SITE_COUNTRY });
 
     if (error) {
       console.error('get_event_map_points RPC error:', error);
