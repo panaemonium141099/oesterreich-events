@@ -43,7 +43,8 @@ describe('SITES', () => {
   });
 
   it('Österreich bleibt, wie es war', () => {
-    const { features, tagline, ...rest } = SITES.AT;
+    const { features, tagline, landingSkip, ...rest } = SITES.AT;
+    expect(landingSkip).toEqual([]);
     expect(tagline).toContain('Österreich');
     expect(Object.values(features).every(Boolean)).toBe(true);
     expect(rest).toEqual({
