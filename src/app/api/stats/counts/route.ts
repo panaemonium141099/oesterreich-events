@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { SITE_COUNTRY } from '@/lib/site-country';
+import { isSiteRegion, siteRegionById } from '@/lib/site/regions';
 
 /** Lazy Supabase client — validates env vars at call time, not module load time */
 function getSupabaseClient() {
@@ -50,7 +52,7 @@ export async function GET() {
     // wo total = map-equivalent (publishable + geocoded + bbox).
     // Migration: 20260429110000_stats_counts_rpc.sql
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase.rpc as any)('event_counts_for_stats');
+    const { data, error } = await (supabase.rpc as any)('event_counts_for_stats', { p_country: SITE_COUNTRY });
 
     if (error) {
       console.error('event_counts_for_stats RPC error:', error);
@@ -65,7 +67,9 @@ export async function GET() {
     // Merge lowercase/slug-variants in display-form bundesland
     const mergedRegions: Record<string, number> = {};
     for (const [name, count] of Object.entries(payload.regions ?? {})) {
-      const display = BUNDESLAND_ALIASES[name];
+      // fn-31: lasstreffen.at führt Schreibvarianten der neun Bundesländer
+      // zusammen; andere Seiten kennen nur die IDs ihrer Regionen.
+      const display = SITE_COUNTRY === 'AT' ? BUNDESLAND_ALIASES[name] : (isSiteRegion(name) ? siteRegionById(name)?.name : undefined);
       if (!display || count <= 0) continue;
       mergedRegions[display] = (mergedRegions[display] ?? 0) + count;
     }
