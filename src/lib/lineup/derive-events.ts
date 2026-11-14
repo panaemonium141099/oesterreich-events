@@ -28,6 +28,7 @@ import { resolveEventLocation } from '@/lib/location/resolver';
 import type { LocationDecision } from '@/lib/location/types';
 import { fetchAllRows } from '@/lib/db/fetch-all';
 import { generateEventSlug } from '@/lib/utils/slugify';
+import { regionKeys, type DecisionGemeinde } from '@/lib/location/region-keys';
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -190,6 +191,7 @@ export function derivedEventLocation(
       location_status: parent.location_status ?? null,
       location_precision: parent.location_precision ?? null,
       location_resolution: { ...(parent.location_resolution ?? {}), inherited_from_event: parent.id ?? null },
+      ...regionKeys(parent.country ?? 'AT', (parent.location_resolution as { gemeinde?: DecisionGemeinde | null } | null)?.gemeinde),
       location_provenance: parent.location_provenance ?? null,
       venue_id: parent.venue_id ?? null,
     };
@@ -219,6 +221,7 @@ export function derivedEventLocation(
     location_status: decision.status,
     location_precision: decision.precision,
     location_resolution: decision as unknown as Record<string, unknown>,
+    ...regionKeys(decision.country, decision.gemeinde),
     location_provenance: decision.provenance as Record<string, string>,
     venue_id: decision.venue_id,
   };
