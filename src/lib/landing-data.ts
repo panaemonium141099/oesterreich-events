@@ -31,6 +31,7 @@ import { SITE_COUNTRY } from '@/lib/site-country';
 import { landingShelfConfig, loadShelfPool, type LandingShelves } from './hubs/shelf-pool';
 import { getSite } from '@/lib/site';
 import { REGION_COLUMN } from '@/lib/site/region-filter';
+import { SITE_REGION_LIST } from '@/lib/site/regions';
 
 const BASE_URL = getSite().url;
 
@@ -525,19 +526,23 @@ function buildBundeslandLinks(
   // Cities — link to the canonical /gemeinde city hubs. The old /stadt URLs
   // now 301-redirect there; linking direct avoids the redirect hop and keeps
   // internal link equity flowing straight to the canonical page.
-  const cityLinks = LANDING_CITIES.filter(
-    (c) => c.filterMode === 'city',
-  ).map((c) => ({
-    label: c.name,
-    href: `/gemeinde/${STADT_TO_GEMEINDE[c.slug] ?? c.slug}`,
-  }));
+  // fn-31: andere Seiten bringen ihre Städte mit (SiteConfig.cityChips).
+  const siteCities = getSite().cityChips;
+  const cityLinks = siteCities
+    ? siteCities.map((c) => ({ label: c.name, href: c.href }))
+    : LANDING_CITIES.filter(
+        (c) => c.filterMode === 'city',
+      ).map((c) => ({
+        label: c.name,
+        href: `/gemeinde/${STADT_TO_GEMEINDE[c.slug] ?? c.slug}`,
+      }));
   if (cityLinks.length > 0) {
     groups.push({ title: t('linksCities'), links: cityLinks });
   }
 
   // Other Bundeslaender
-  const otherBl = BUNDESLAENDER.filter(
-    (b) => b.id !== 'all' && b.id !== currentBundesland,
+  const otherBl = SITE_REGION_LIST.filter(
+    (b) => b.id !== currentBundesland,
   ).map((b) => ({
     label: locale === 'de' ? b.name : bundeslandDisplayName(b.id, locale),
     href: `/${b.id}${activeCategory ? `/${getCategorySlug(activeCategory)}` : ''}`,

@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { CITY_HUB_LINKS, BUNDESLAND_HUB_LINKS } from '@/lib/hubs/hub-directory';
+import { getSite } from '@/lib/site';
 
 /**
  * Chip-Reihe unter dem Kopf von /entdecken: Wien und die fünf Stadt-Hubs
@@ -10,7 +11,9 @@ import { CITY_HUB_LINKS, BUNDESLAND_HUB_LINKS } from '@/lib/hubs/hub-directory';
 export function V4RegionRail() {
   const t = useTranslations('Discover');
   const wien = BUNDESLAND_HUB_LINKS.find((h) => h.href === '/wien');
-  const hubs = wien ? [wien, ...CITY_HUB_LINKS] : CITY_HUB_LINKS;
+  // fn-31: andere Seiten bringen ihre Städte mit (lasstreffen.de die größten
+  // Gemeinden); für lasstreffen.at bleibt die Reihe aus dem Hub-Verzeichnis.
+  const hubs = getSite().cityChips ?? (wien ? [wien, ...CITY_HUB_LINKS] : CITY_HUB_LINKS);
   return (
     <nav aria-label={t('regionRailAria')} className="mb-6">
       <div className="flex items-center gap-2 overflow-x-auto pb-1 thin-scroll">
