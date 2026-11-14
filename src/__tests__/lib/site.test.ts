@@ -43,7 +43,8 @@ describe('SITES', () => {
   });
 
   it('Österreich bleibt, wie es war', () => {
-    const { features, tagline, landingSkip, weatherPlace, landingDorffesteDays, ...rest } = SITES.AT;
+    const { features, tagline, landingSkip, weatherPlace, landingDorffesteDays, cityChips, ...rest } = SITES.AT;
+    expect(cityChips).toBe(null);
     expect(weatherPlace).toEqual({ name: 'Wien', lat: 48.21, lng: 16.37 });
     expect(landingDorffesteDays).toBe(30);
     expect(landingSkip).toEqual([]);

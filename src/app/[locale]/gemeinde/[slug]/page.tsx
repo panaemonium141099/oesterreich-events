@@ -31,14 +31,17 @@ import { unstable_cache } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 
 import {
-  ALL_GEMEINDEN,
   bboxAround,
-  findNeighbourGemeinden,
-  getGemeindeBySlug,
-  currentGemeindeSlug,
   haversineKm,
   type AustrianGemeinde,
 } from '@/lib/gemeinden/data';
+// fn-31.11: die Gemeinden der Seite (Österreich bzw. Deutschland).
+import {
+  siteGemeindeBySlug as getGemeindeBySlug,
+  siteCurrentGemeindeSlug as currentGemeindeSlug,
+  siteNeighbourGemeinden as findNeighbourGemeinden,
+} from '@/lib/site/gemeinden';
+import { hasFeature } from '@/lib/site/features';
 import type { Event } from '@/types/events';
 import {
   buildGemeindeHubJsonLd,
@@ -177,6 +180,9 @@ async function loadNearbyEvents(g: AustrianGemeinde): Promise<NearbyEvent[]> {
  */
 function loadNearbyActivities(g: AustrianGemeinde) {
   const radiusKm = getCityHub(g.slug)?.radiusKm ?? 10;
+  // fn-31: poi_activities führt nur Österreich; ohne die Säule keine Abfrage
+  // (eine Grenzgemeinde bekäme sonst österreichische Ziele).
+  if (!hasFeature('activities')) return Promise.resolve([]);
   return loadNearbyActivitiesCached(g.lat, g.lng, radiusKm);
 }
 
@@ -189,6 +195,7 @@ function loadNearbyActivities(g: AustrianGemeinde) {
  */
 function loadNearbyOsmPois(g: AustrianGemeinde) {
   const radiusKm = getCityHub(g.slug)?.radiusKm ?? 10;
+  if (!hasFeature('activities')) return Promise.resolve([]);
   return loadNearbyOsmPoisCached(g.lat, g.lng, radiusKm);
 }
 
