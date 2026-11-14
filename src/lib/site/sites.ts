@@ -47,10 +47,17 @@ export interface SiteConfig {
    * get-landing-data.ts). Die Sektion bleibt dann leer.
    */
   landingSkip: readonly string[];
-  /** Saison-Karte der Startseite (kuratierte Pins, Wetter am Ort der Seite). */
-  landingSeason: boolean;
-  /** Wetter in der Datumszeile; nur sinnvoll mit einem Ort, der für die Seite steht. */
-  landingWeather: boolean;
+  /**
+   * Ort des Wetters in Datumszeile und Saison-Karte: die Hauptstadt als Ort,
+   * der für die Seite steht (Besucher mit gespeichertem Standort sehen ihren).
+   */
+  weatherPlace: { name: string; lat: number; lng: number };
+  /**
+   * Fenster des Dorffeste-Regals in Tagen. Die Abfrage sucht in Titeln über
+   * alle kommenden Events des Landes im Fenster; sie muss unter der
+   * Zeitgrenze von 3 s für anon bleiben.
+   */
+  landingDorffesteDays: number;
   /** Welche Säulen die Seite ausspielt (Pfade in features.ts). */
   features: Record<SiteFeature, boolean>;
 }
@@ -69,8 +76,8 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
     contact: { office: 'office@lasstreffen.at', support: 'support@lasstreffen.at' },
     tagline: 'Events in Wien, Graz, Salzburg und ganz Österreich — 85\u2009000 Events & Ausflugsziele auf einer Karte.',
     landingSkip: [],
-    landingSeason: true,
-    landingWeather: true,
+    weatherPlace: { name: 'Wien', lat: 48.21, lng: 16.37 },
+    landingDorffesteDays: 30,
     features: ALL_ON,
   },
   DE: {
@@ -86,22 +93,15 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
     // Bis ein Postfach unter .de besteht, gelten die Adressen des Betreibers.
     contact: { office: 'office@lasstreffen.at', support: 'support@lasstreffen.at' },
     tagline: 'Konzerte, Dorffeste und Märkte in ganz Deutschland auf einer Karte.',
-    // Startseite: nur Programm heute, Wochenende, Karten-Pins und Event-Zahl.
-    // Die übrigen Abfragen gehören zu abgeschalteten Säulen (Buchung, Künstler,
-    // Festivals, Aktivitäten) oder suchen in Titeln bzw. sortieren nach Score
-    // über alle kommenden Events des Landes. Für Deutschland (177.613 kommende
-    // sichtbare Events am 14.11.2026) liefen sie alle in den Statement-Timeout
-    // und füllten den Verbindungspool der Datenbank, auch für lasstreffen.at
-    // (lokale Vorschau 14.11.2026, PGRST003). Erst mit passenden Indizes
-    // wieder einschalten (fn-31.7, fn-31.12).
-    landingSkip: [
-      'featured', 'tip', 'tipSharp', 'season', 'weekendSharp', 'dorffeste', 'dorffesteSharp',
-      'artists', 'artistPrimaries', 'festivals', 'festivalActs', 'activities',
-    ],
-    // Kein Ort steht für ganz Deutschland, und die Saison-Karte ist für
-    // Österreich kuratiert.
-    landingSeason: false,
-    landingWeather: false,
+    // Startseite wie lasstreffen.at. Nicht gestellt werden nur die Abfragen
+    // abgeschalteter Säulen: bezahlter Tipp (Veranstalter-Pakete), Künstler-
+    // Kachel, Festivals, Aktivitäten. Die Künstler-Abfrage lief für
+    // Deutschland zudem in die Zeitgrenze (3 s, 14.11.2026).
+    landingSkip: ['featured', 'artists', 'artistPrimaries', 'festivals', 'festivalActs', 'activities'],
+    weatherPlace: { name: 'Berlin', lat: 52.52, lng: 13.405 },
+    // 30 Tage wie in Österreich liefen in die Zeitgrenze (3,07 s über
+    // 177.613 kommende Events, 14.11.2026).
+    landingDorffesteDays: 10,
     // Start mit dem Kern. Die übrigen Säulen führen nur österreichische
     // Inhalte (Blog, Festivals, Aktivitäten, Studenten, Themen, Venues) oder
     // warten auf eine Entscheidung (Login, Veranstalter-Pakete, Künstler).

@@ -47,7 +47,6 @@ import { AuthErrorToast } from '@/components/Landing/AuthErrorToast';
 import { Footer } from '@/components/Legal/Footer';
 import { getLandingData } from '@/lib/v4/get-landing-data';
 import { routing } from '@/i18n/routing';
-import { getSite } from '@/lib/site';
 import { hasFeature } from '@/lib/site/features';
 
 export const revalidate = 3600;
@@ -83,7 +82,6 @@ export default async function LandingPage({
   const data = await getLandingData();
   const hasArtists = data.artistsLive.length > 0;
 
-  const site = getSite();
   return (
     <div className="min-h-screen text-[var(--v4-ink)] bg-[var(--v4-surface)] flex flex-col">
       <AuthErrorToast/>
@@ -102,16 +100,11 @@ export default async function LandingPage({
                 className="h-[320px] md:col-span-2 md:h-[360px] lg:col-span-1 lg:row-span-2 lg:h-auto"
               />
             )}
-            {site.landingSeason && <SeasonCard season={data.season} className="md:row-span-2"/>}
+            <SeasonCard season={data.season} className="md:row-span-2"/>
             <MapTile
               pins={data.mapPins}
               tall={!hasArtists}
-              className={
-                !site.landingSeason && !data.tip
-                  // Ohne Tipp und Saison-Karte (lasstreffen.de) trägt die Karte die Bühne allein.
-                  ? 'h-[320px] md:col-span-2 md:h-[420px] lg:col-span-3 lg:row-span-2 lg:h-auto'
-                  : hasArtists ? 'h-[180px] md:h-[220px] lg:h-auto' : 'h-[180px] md:h-auto md:row-span-2'
-              }
+              className={hasArtists ? 'h-[180px] md:h-[220px] lg:h-auto' : 'h-[180px] md:h-auto md:row-span-2'}
             />
             {hasArtists && <ArtistsLive artists={data.artistsLive}/>}
           </section>

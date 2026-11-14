@@ -13,8 +13,10 @@
 
 import { getStoredLocation } from '@/lib/geolocation';
 import { viennaWeekday } from '@/lib/utils/event-time';
+import { getSite } from '@/lib/site';
 
-export const VIENNA = { lat: 48.21, lng: 16.37 };
+/** Ort der Seite (Wien für lasstreffen.at); der Name ist historisch. */
+export const VIENNA: { lat: number; lng: number } = getSite().weatherPlace;
 export const RAIN_MM = 3;
 export const HEAT_C = 27;
 

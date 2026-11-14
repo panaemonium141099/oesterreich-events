@@ -13,7 +13,7 @@ export const REGIONS_DE: Bundesland[] = [
     zoom: 6.3,
     pitch: 30,
     bearing: 0,
-    geojsonFile: '',
+    geojsonFile: '/deutschland.geojson',
     borderColor: '#6366f1',
     districts: [],
     bounds: [5.866, 47.27, 15.042, 55.059],
