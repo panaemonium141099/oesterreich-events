@@ -23,7 +23,19 @@
  *               Stadt aus Adresse/Ortsname oder die Landeshauptstadt
  */
 
-import { PLZ_ORT_SLUGS } from './plz-ort-slugs.generated';
+import { SITE_PLZ_ORT_SLUGS } from '@/lib/utils/plz-ort-slugs.site';
+import { getSite } from '@/lib/site';
+
+/**
+ * fn-31.10: PLZ-Form der Seite. Österreich vierstellig, Deutschland
+ * fünfstellig. Für lasstreffen.at bleibt jede URL, wie sie war.
+ */
+const SITE_IS_AT = getSite().country === 'AT';
+const PLZ_PATTERN = SITE_IS_AT ? /^\d{4}$/ : /^\d{5}$/;
+const ADDRESS_PLZ_PREFIX = SITE_IS_AT ? /^\d{4}\s+/ : /^\d{5}\s+/;
+const COUNTRY_WORDS = SITE_IS_AT
+  ? ['oesterreich', 'österreich', 'austria', 'at']
+  : ['deutschland', 'germany', 'de'];
 
 const MAX_SLUG_LENGTH = 60;
 
@@ -239,8 +251,8 @@ function parseCityFromAddress(address: string | null | undefined): string | null
   for (let i = parts.length - 1; i >= 1; i--) {
     const part = parts[i];
     const lower = part.toLowerCase();
-    if (lower === 'oesterreich' || lower === 'österreich' || lower === 'austria' || lower === 'at') continue;
-    const stripped = part.replace(/^\d{4}\s+/, '').trim();
+    if (COUNTRY_WORDS.includes(lower)) continue;
+    const stripped = part.replace(ADDRESS_PLZ_PREFIX, '').trim();
     if (!stripped || stripped.length < 2 || /^\d+$/.test(stripped)) continue;
     return stripped;
   }
@@ -298,7 +310,8 @@ export function buildEventUrlV2(event: EventForUrl): string {
   const shortId = event.id.slice(0, 8);
   const slug = event.slug ?? shortId;
   const { plz, ort } = resolveEventUrlPrefix(event);
-  const prefix = `${plz}-${ort}`;
+  // Ohne PLZ der Stammdaten (nur lasstreffen.de) steht der Ort allein: kein Ersatzwert.
+  const prefix = plz ? `${plz}-${ort}` : ort;
 
   const date = extractDatePart(event.start_date);
   if (date) {
@@ -351,7 +364,7 @@ export function resolveEventUrlPrefix(
   // bundesland capital when nothing else is available.
   // ─── plz resolution ──────────────────────────────────────────────────
   const plzFromRow = (event.postal_code ?? '').trim();
-  const hasPlz = /^\d{4}$/.test(plzFromRow);
+  const hasPlz = PLZ_PATTERN.test(plzFromRow);
   const plz = hasPlz ? plzFromRow : (blDefault?.plz ?? '0000');
 
   // Mit gültiger PLZ ist der Ort der Post-Ort dieser PLZ. Nur so hängt die
@@ -361,6 +374,15 @@ export function resolveEventUrlPrefix(
   // der Events mit belegter Gemeinde einen falschen Ort (Prod 2026-09-24).
   const postOrt = hasPlz ? plzOrtSlug(plzFromRow) : null;
   if (postOrt) return { plz, ort: postOrt };
+
+  // fn-31.10, lasstreffen.de: keine Landeshauptstadt und keine Platzhalter-PLZ
+  // als Ersatz. Kennt die Stammdatei die PLZ nicht (Großkunde, keine Angabe),
+  // bleibt die PLZ leer und der Ort kommt aus Adresse oder Ortsname, sonst
+  // steht das Land. Solche Zeilen stehen in keiner Sitemap.
+  if (!SITE_IS_AT) {
+    const city = parseCityFromAddress(event.address) ?? normaliseLocationName(event.location_name);
+    return { plz: '', ort: (city && slugifyPlace(city)) || slugifyPlace(getSite().countryName.de) };
+  }
 
   const addressCity = parseCityFromAddress(event.address);
   const locationCity = normaliseLocationName(event.location_name);
@@ -380,7 +402,7 @@ let plzOrtIndex: Map<string, string> | null = null;
 export function plzOrtSlug(plz: string): string | null {
   if (!plzOrtIndex) {
     plzOrtIndex = new Map();
-    for (const group of PLZ_ORT_SLUGS.split(';')) {
+    for (const group of SITE_PLZ_ORT_SLUGS.split(';')) {
       const [slug, plzs] = group.split(':');
       if (!slug || !plzs) continue;
       for (const p of plzs.split(',')) plzOrtIndex.set(p, slug);

@@ -454,6 +454,12 @@ const nextConfig: NextConfig = {
   // `env` setzt den Wert in Server- und Client-Code ein; gelesen wird er nur
   // in src/lib/site/. Unbekannte Werte brechen den Build ab.
   env: { SITE_COUNTRY: siteCountry() },
+  // fn-31.10: die PLZ-Ort-Tabelle der Seite. Ohne Alias gilt die
+  // österreichische (src/lib/utils/plz-ort-slugs.site.ts); der DE-Build
+  // bekommt die deutsche, keine Seite trägt beide im Client-Bundle.
+  ...(siteCountry() === 'DE'
+    ? { turbopack: { resolveAlias: { '@/lib/utils/plz-ort-slugs.site': './src/lib/utils/plz-ort-slugs.site.de.ts' } } }
+    : {}),
   // Standalone output for Docker deployment (Coolify)
   output: 'standalone',
   // Die Startseite wiederholt im Build gescheiterte Abfragen bis zu 150 s
