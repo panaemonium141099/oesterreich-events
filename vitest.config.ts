@@ -11,6 +11,10 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      // fn-31.10: lasstreffen.de nutzt seine eigene PLZ-Ort-Tabelle (vor '@', damit es greift).
+      ...(process.env.SITE_COUNTRY === 'DE'
+        ? { '@/lib/utils/plz-ort-slugs.site': path.resolve(__dirname, './src/lib/utils/plz-ort-slugs.site.de.ts') }
+        : {}),
       '@': path.resolve(__dirname, './src'),
     },
   },
