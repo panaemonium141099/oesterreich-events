@@ -255,6 +255,8 @@ import { post as zaubererZorresUndDieLiedersammlerinFamilienkonzert2026 } from '
 import { post as symphonieorchesterVorarlbergKonzert4McfallBorodinWalto2027 } from './posts/symphonieorchester-vorarlberg-konzert-4-mcfall-borodin-walto-2027';
 import { post as stFlorianerBrucknertageSilvesterkonzert2026 } from './posts/st-florianer-brucknertage-silvesterkonzert-2026';
 import { post as adventkonzertInAltenmarkt2026 } from './posts/adventkonzert-in-altenmarkt-2026';
+import { post as burgtheaterGuidedTourEnglish2026 } from './posts/burgtheater-guided-tour-english-2026';
+import { post as wienerJohannStraussKonzertGala2027 } from './posts/wiener-johann-strauss-konzert-gala-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -522,6 +524,8 @@ export const ALL_POSTS: FestivalPost[] = [
   symphonieorchesterVorarlbergKonzert4McfallBorodinWalto2027,
   stFlorianerBrucknertageSilvesterkonzert2026,
   adventkonzertInAltenmarkt2026,
+  burgtheaterGuidedTourEnglish2026,
+  wienerJohannStraussKonzertGala2027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
