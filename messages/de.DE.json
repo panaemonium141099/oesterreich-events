@@ -51,5 +51,21 @@
   },
   "GemeindeHub": {
     "seoLocation": " liegt{bezirkPart} in {bundesland}, Deutschland."
+  },
+  "Artists": {
+    "metaTitle": "Künstler live in Deutschland",
+    "metaDescription": "Wer spielt wann in Deutschland: Konzerte, Kabarett, Bühne und Klassik der nächsten drei Monate, mit allen Terminen und Tickets.",
+    "sub": "{count} Künstler mit Terminen in Deutschland in den nächsten drei Monaten",
+    "mineEmpty": "Noch keine Künstler. Tipp auf Folgen, und wir sagen dir Bescheid, sobald ein Termin in Deutschland auftaucht.",
+    "shelfTourSub": "mehrere Termine in Deutschland",
+    "directorySub": "mit Termin in Deutschland",
+    "sheetDates": "{count} Termine in Deutschland",
+    "sheetDateOne": "1 Termin in Deutschland",
+    "sheetNoDates": "derzeit kein Termin in Deutschland",
+    "sheetEmpty": "Sobald {name} einen Termin in Deutschland hat, steht er hier.",
+    "pageMetaTitle": "{name}: Termine in Deutschland",
+    "pageMetaDescription": "{name} live in Deutschland: {count} Termine, zuerst am {first}. Alle Termine mit Tickets.",
+    "pageMetaDescriptionOne": "{name} live in Deutschland am {first}. Termin mit Tickets.",
+    "pageDates": "Termine in Deutschland"
   }
 }

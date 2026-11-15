@@ -18,6 +18,7 @@ import { genreLabel } from '@/lib/artists/genre-labels';
 import type { DirectoryArtist, DirectoryEvent } from '@/lib/artists/directory';
 import { EVENT_TZ, addViennaDays, toViennaDate, viennaToday } from '@/lib/utils/event-time';
 import { DE_LOCALE } from '@/lib/site/intl';
+import { hasFeature } from '@/lib/site/features';
 
 export const LOGIN_HREF = '/auth/login?redirect=/artists';
 
@@ -93,6 +94,9 @@ export function FollowButton({ name, followed, signedIn, onToggle, large = false
   const t = useTranslations('Artists');
   const size = large ? 'h-[38px] w-[110px] min-w-[110px] text-[13.5px]' : '';
   if (!signedIn) {
+    // Ohne Konten auf der Seite (lasstreffen.de bis zum Login) gäbe es nur
+    // einen Link ins Leere.
+    if (!hasFeature('account')) return null;
     return (
       <Link
         href={LOGIN_HREF}

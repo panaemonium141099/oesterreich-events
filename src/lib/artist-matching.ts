@@ -25,6 +25,8 @@ import {
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { stripDiacritics, normalizeArtistName } from '@/lib/artists/normalize-name';
 import { DE_LOCALE } from '@/lib/site/intl';
+import { SITE_COUNTRY } from '@/lib/site-country';
+import { SITES } from '@/lib/site/sites';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,6 +35,8 @@ export interface FollowedArtist {
   user_id: string;
   artist_name: string;
   artist_name_normalized: string;
+  /** Land der Seite, auf der gefolgt wurde (fn-31.17); ohne Angabe Österreich. */
+  country?: string | null;
 }
 
 export interface MatchResult {
@@ -360,7 +364,7 @@ export async function fetchAllFollowedArtists(
   while (true) {
     const { data, error } = await supabase
       .from('followed_artists')
-      .select('id, user_id, artist_name, artist_name_normalized')
+      .select('id, user_id, artist_name, artist_name_normalized, country')
       .range(from, from + BATCH_SIZE - 1);
 
     if (error) {
@@ -423,7 +427,8 @@ export function groupArtistsByTier(artists: FollowedArtist[]): {
 export async function matchExactNames(
   supabase: SupabaseClient,
   names: string[],
-  sinceTimestamp: string
+  sinceTimestamp: string,
+  country: string = SITE_COUNTRY
 ): Promise<Array<{ event_id: string; event_title: string; matched_name: string; score: number }>> {
   if (names.length === 0) return [];
 
@@ -435,6 +440,7 @@ export async function matchExactNames(
     const { data, error } = await supabase.rpc('match_exact_artist_title', {
       p_regex: regex,
       p_since: sinceTimestamp,
+      p_country: country,
     });
 
     if (error) {
@@ -464,7 +470,8 @@ export async function matchExactNames(
 export async function matchFuzzyNames(
   supabase: SupabaseClient,
   names: string[],
-  sinceTimestamp: string
+  sinceTimestamp: string,
+  country: string = SITE_COUNTRY
 ): Promise<Array<{ event_id: string; event_title: string; matched_name: string; score: number }>> {
   if (names.length === 0) return [];
 
@@ -472,6 +479,7 @@ export async function matchFuzzyNames(
     p_artist_names: names,
     p_threshold: WORD_SIMILARITY_THRESHOLD,
     p_since: sinceTimestamp,
+    p_country: country,
   });
 
   if (error) {
@@ -497,7 +505,8 @@ export async function matchDescriptionNames(
   supabase: SupabaseClient,
   names: string[],
   sinceTimestamp: string,
-  excludeEventIds: Set<string>
+  excludeEventIds: Set<string>,
+  country: string = SITE_COUNTRY
 ): Promise<Array<{ event_id: string; event_title: string; matched_name: string; score: number }>> {
   if (names.length === 0) return [];
 
@@ -508,6 +517,7 @@ export async function matchDescriptionNames(
   const { data, error } = await supabase.rpc('match_artist_descriptions', {
     p_artist_names: qualifiedNames,
     p_since: sinceTimestamp,
+    p_country: country,
   });
 
   if (error) {
@@ -537,7 +547,8 @@ export async function matchDescriptionNames(
 export async function matchLineupArtists(
   supabase: SupabaseClient,
   artists: FollowedArtist[],
-  sinceTimestamp: string
+  sinceTimestamp: string,
+  country: string = SITE_COUNTRY
 ): Promise<Array<{
   derived_event_id: string;
   event_title: string;
@@ -566,6 +577,7 @@ export async function matchLineupArtists(
   const { data, error } = await supabase.rpc('match_lineup_artists', {
     p_artist_names: normalizedNames,
     p_since: sinceTimestamp,
+    p_country: country,
   });
 
   if (error) {
@@ -809,6 +821,16 @@ function formatDateDE(dateStr: string): string {
 }
 
 /**
+ * Adresse und Landesname für die Mail zu einem Termin (fn-31.17): ein
+ * Termin in Deutschland verlinkt auf lasstreffen.de. Österreich behält die
+ * bisherige Adresse (`appUrl`).
+ */
+export function alertSite(country: string | null | undefined, appUrl: string): { url: string; countryName: string } {
+  const site = country && country !== 'AT' && country in SITES ? SITES[country as keyof typeof SITES] : null;
+  return site ? { url: site.url, countryName: site.countryName.de } : { url: appUrl, countryName: 'Österreich' };
+}
+
+/**
  * Send email alerts for new artist match notifications.
  *
  * Best-effort: failures are logged but do not block the matching pipeline.
@@ -871,7 +893,7 @@ async function dispatchMatchAlertEmails(
   const eventIds = [...new Set(emailGroups.map(g => g.event_id))];
   const { data: events } = await serviceClient
     .from('events')
-    .select('id, title, start_date, location_name, ticket_url, image_url')
+    .select('id, title, start_date, location_name, ticket_url, image_url, country')
     .in('id', eventIds)
     .in('publish_status', ['published', 'published_low_confidence']);
 
@@ -882,6 +904,7 @@ async function dispatchMatchAlertEmails(
     location_name: string | null;
     ticket_url: string | null;
     image_url: string | null;
+    country?: string | null;
   };
   const eventMap = new Map<string, EventRow>();
   for (const e of (events || []) as EventRow[]) {
@@ -889,7 +912,7 @@ async function dispatchMatchAlertEmails(
   }
 
   // 4. Send emails per eligible group
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://osterreich.events';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://osterreich.events';
   const secret = process.env.UNSUBSCRIBE_SECRET ?? process.env.SUPABASE_JWT_SECRET ?? '';
   let sentCount = 0;
 
@@ -902,6 +925,7 @@ async function dispatchMatchAlertEmails(
       if (!userData?.user?.email) continue;
 
       const token = secret ? await generateUnsubscribeToken(group.user_id, secret) : '';
+      const site = alertSite(event.country, appUrl);
 
       const emailData: ArtistAlertEmailData = {
         artistName: group.artists.join(', '),
@@ -909,11 +933,11 @@ async function dispatchMatchAlertEmails(
         eventTitle: group.festival_name ?? event.title,
         eventDate: formatDateDE(event.start_date),
         venueName: null,
-        location: event.location_name || 'Österreich',
+        location: event.location_name || site.countryName,
         ticketUrl: event.ticket_url,
-        eventPageUrl: `${baseUrl}/events/${group.event_id}`,
-        unsubscribeUrl: `${baseUrl}/api/notifications/unsubscribe?user_id=${group.user_id}&token=${token}`,
-        preferencesUrl: `${baseUrl}/settings`,
+        eventPageUrl: `${site.url}/events/${group.event_id}`,
+        unsubscribeUrl: `${site.url}/api/notifications/unsubscribe?user_id=${group.user_id}&token=${token}`,
+        preferencesUrl: `${site.url}/settings`,
       };
 
       const result = await sendArtistAlertEmail(userData.user.email, emailData);
@@ -928,56 +952,37 @@ async function dispatchMatchAlertEmails(
   }
 }
 
+/** Land eines Follows; Zeilen ohne Angabe gelten als Österreich (Bestand vor fn-31.17). */
+export const DEFAULT_FOLLOW_COUNTRY = 'AT';
+
+/** Follows nach dem Land der Seite, auf der gefolgt wurde. Reihenfolge: Österreich zuerst. */
+export function groupFollowsByCountry(follows: FollowedArtist[]): Map<string, FollowedArtist[]> {
+  const out = new Map<string, FollowedArtist[]>();
+  for (const f of follows) {
+    const country = f.country || DEFAULT_FOLLOW_COUNTRY;
+    const list = out.get(country) ?? [];
+    list.push(f);
+    out.set(country, list);
+  }
+  return new Map([...out].sort(([a], [b]) =>
+    a === b ? 0 : a === DEFAULT_FOLLOW_COUNTRY ? -1 : b === DEFAULT_FOLLOW_COUNTRY ? 1 : a.localeCompare(b)));
+}
+
 /**
- * Run the full artist-event matching pipeline.
- *
- * 1. Fetch matching cursor
- * 2. Fetch all followed artists
- * 3. Group by tier (skip/exact/fuzzy)
- * 4. Run title matching (exact for 3-char, fuzzy for 4+)
- * 5. Run secondary description matching (6+ chars, events not already matched)
- * 6. Insert artist_event_notifications (per-artist dedup)
- * 7. Create grouped notifications (per user+event dedup)
- * 8. Update cursor
+ * Schritte 3 bis 6 der Pipeline für die Follows EINES Landes (fn-31.17):
+ * ein Follow meldet nur Termine im Land der Seite, auf der gefolgt wurde.
+ * Die RPCs filtern die Events auf `country`.
  */
-export async function runMatchingPipeline(
+async function matchFollowsOfCountry(
   supabase: SupabaseClient,
-  options: { dryRun?: boolean; resetCursor?: boolean } = {}
-): Promise<MatchingStats> {
-  const stats: MatchingStats = {
-    events_processed: 0,
-    matches_found: 0,
-    notifications_created: 0,
-    artists_checked: 0,
-    skipped_short_names: 0,
-    lineupMatches: 0,
-  };
-
-  // Step 0: Optionally reset cursor
-  if (options.resetCursor) {
-    console.log('Resetting matching cursor...');
-    if (!options.dryRun) {
-      await resetMatchingCursor(supabase);
-    }
-  }
-
-  // Step 1: Fetch cursor
-  const cursor = await getMatchingCursor(supabase);
-  console.log(`Matching cursor: last_processed_at = ${cursor.last_processed_at}`);
-
-  // Step 2: Fetch all followed artists
-  const allArtists = await fetchAllFollowedArtists(supabase);
-  stats.artists_checked = allArtists.length;
-  console.log(`Found ${allArtists.length} followed artists across all users`);
-
-  if (allArtists.length === 0) {
-    console.log('No followed artists found. Nothing to match.');
-    return stats;
-  }
-
+  follows: FollowedArtist[],
+  since: string,
+  country: string,
+  stats: MatchingStats
+): Promise<MatchResult[]> {
   // Step 3: Group by tier
-  const { exact, fuzzy, skipped } = groupArtistsByTier(allArtists);
-  stats.skipped_short_names = skipped.length;
+  const { exact, fuzzy, skipped } = groupArtistsByTier(follows);
+  stats.skipped_short_names += skipped.length;
   console.log(`Tiers: ${exact.size} exact (3-char), ${fuzzy.size} fuzzy (4+), ${skipped.length} skipped (<3)`);
 
   if (skipped.length > 0) {
@@ -988,18 +993,18 @@ export async function runMatchingPipeline(
   // Uses the lineup normalizer (authoritative for both sides) for equality join.
   // Lineup matching runs IN ADDITION TO fuzzy matching -- a followed artist can
   // match both a lineup entry and a separate concert event.
-  const lineupResults = await matchLineupArtists(supabase, allArtists, cursor.last_processed_at);
-  stats.lineupMatches = lineupResults.length;
+  const lineupResults = await matchLineupArtists(supabase, follows, since, country);
+  stats.lineupMatches += lineupResults.length;
   console.log(`Lineup matches (direct): ${lineupResults.length}`);
 
   // Step 4a: Exact matching (3-char names)
   const exactNames = Array.from(exact.keys());
-  const exactMatches = await matchExactNames(supabase, exactNames, cursor.last_processed_at);
+  const exactMatches = await matchExactNames(supabase, exactNames, since, country);
   console.log(`Exact matches (title): ${exactMatches.length}`);
 
   // Step 4b: Fuzzy matching (4+ char names)
   const fuzzyNames = Array.from(fuzzy.keys());
-  const fuzzyMatches = await matchFuzzyNames(supabase, fuzzyNames, cursor.last_processed_at);
+  const fuzzyMatches = await matchFuzzyNames(supabase, fuzzyNames, since, country);
   console.log(`Fuzzy matches (title): ${fuzzyMatches.length}`);
 
   // Collect all title-matched event IDs for description exclusion
@@ -1014,8 +1019,9 @@ export async function runMatchingPipeline(
   const descriptionMatches = await matchDescriptionNames(
     supabase,
     allNames,
-    cursor.last_processed_at,
-    titleMatchedEventIds
+    since,
+    titleMatchedEventIds,
+    country
   );
   console.log(`Description matches (secondary): ${descriptionMatches.length}`);
 
@@ -1105,6 +1111,78 @@ export async function runMatchingPipeline(
       festival_name: match.festival_name,
     });
   }
+
+  return allMatches;
+}
+
+/**
+ * Treffer aller Follows, je Land getrennt gesucht (fn-31.17): ein Follow
+ * von lasstreffen.de trifft nur Termine in Deutschland, einer von
+ * lasstreffen.at nur Termine in Österreich.
+ */
+export async function collectMatchesByCountry(
+  supabase: SupabaseClient,
+  follows: FollowedArtist[],
+  since: string,
+  stats: MatchingStats
+): Promise<MatchResult[]> {
+  const allMatches: MatchResult[] = [];
+  for (const [country, ofCountry] of groupFollowsByCountry(follows)) {
+    console.log(`Land ${country}: ${ofCountry.length} Follows`);
+    allMatches.push(...await matchFollowsOfCountry(supabase, ofCountry, since, country, stats));
+  }
+  return allMatches;
+}
+
+/**
+ * Run the full artist-event matching pipeline.
+ *
+ * 1. Fetch matching cursor
+ * 2. Fetch all followed artists
+ * 3. Group by tier (skip/exact/fuzzy)
+ * 4. Run title matching (exact for 3-char, fuzzy for 4+)
+ * 5. Run secondary description matching (6+ chars, events not already matched)
+ * 6. Insert artist_event_notifications (per-artist dedup)
+ * 7. Create grouped notifications (per user+event dedup)
+ * 8. Update cursor
+ */
+export async function runMatchingPipeline(
+  supabase: SupabaseClient,
+  options: { dryRun?: boolean; resetCursor?: boolean } = {}
+): Promise<MatchingStats> {
+  const stats: MatchingStats = {
+    events_processed: 0,
+    matches_found: 0,
+    notifications_created: 0,
+    artists_checked: 0,
+    skipped_short_names: 0,
+    lineupMatches: 0,
+  };
+
+  // Step 0: Optionally reset cursor
+  if (options.resetCursor) {
+    console.log('Resetting matching cursor...');
+    if (!options.dryRun) {
+      await resetMatchingCursor(supabase);
+    }
+  }
+
+  // Step 1: Fetch cursor
+  const cursor = await getMatchingCursor(supabase);
+  console.log(`Matching cursor: last_processed_at = ${cursor.last_processed_at}`);
+
+  // Step 2: Fetch all followed artists
+  const allArtists = await fetchAllFollowedArtists(supabase);
+  stats.artists_checked = allArtists.length;
+  console.log(`Found ${allArtists.length} followed artists across all users`);
+
+  if (allArtists.length === 0) {
+    console.log('No followed artists found. Nothing to match.');
+    return stats;
+  }
+
+  // Schritte 3 bis 6 je Land des Follows (fn-31.17).
+  const allMatches = await collectMatchesByCountry(supabase, allArtists, cursor.last_processed_at, stats);
 
   stats.matches_found = allMatches.length;
   console.log(`Total matches: ${allMatches.length}`);

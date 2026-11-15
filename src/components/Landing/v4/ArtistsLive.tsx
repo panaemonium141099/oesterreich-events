@@ -33,6 +33,7 @@ import { ARTISTS_LIVE_ROWS, mergeArtistsLive } from '@/lib/v4/followed-live';
 import type { LandingArtistLive } from '@/lib/v4/landing-picks';
 import type { Event } from '@/types/events';
 import { DE_LOCALE } from '@/lib/site/intl';
+import { hasFeature } from '@/lib/site/features';
 
 interface MeLandingLive {
   signedIn: boolean;
@@ -183,7 +184,7 @@ export function ArtistsLive({ artists }: { artists: LandingArtistLive[] }) {
                 >
                   {isFollowed ? t('following') : t('follow')}
                 </button>
-              ) : (
+              ) : !hasFeature('account') ? null : (
                 <LocaleLink
                   href="/auth/login?redirect=/"
                   aria-label={t('followAria', { name: artist.name })}

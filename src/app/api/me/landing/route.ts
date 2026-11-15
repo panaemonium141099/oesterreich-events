@@ -63,7 +63,8 @@ async function loadFollowedLive(db: SupabaseClient, userId: string, now: Date): 
   const { data: followedRows, error } = await db
     .from('followed_artists')
     .select('artist_name')
-    .eq('user_id', userId);
+    .eq('user_id', userId)
+    .eq('country', SITE_COUNTRY);
   if (error) throw error;
 
   const rawNames = (followedRows ?? []) as Array<{ artist_name: string | null }>;

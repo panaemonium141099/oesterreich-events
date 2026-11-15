@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,7 @@ export async function GET(request: NextRequest) {
       .from('followed_artists')
       .select('id, artist_name, artist_name_normalized, spotify_artist_id, spotify_image_url, source, created_at', { count: 'exact' })
       .eq('user_id', user.id)
+      .eq('country', SITE_COUNTRY)
       .order('created_at', { ascending: false })
       .limit(limit);
 
