@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 import { fetchArtistAppearances } from '@/lib/artists/appearances';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +23,8 @@ export async function GET() {
     const { count: followedCount } = await auth
       .from('followed_artists')
       .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
+      .eq('country', SITE_COUNTRY);
 
     if (!followedCount || followedCount === 0) {
       return NextResponse.json({ appearances: [], has_followed_artists: false });
@@ -36,7 +38,7 @@ export async function GET() {
       process.env.SUPABASE_SERVICE_ROLE_KEY,
     );
 
-    const appearances = await fetchArtistAppearances(svc, user.id);
+    const appearances = await fetchArtistAppearances(svc, user.id, SITE_COUNTRY);
 
     return NextResponse.json({ appearances, has_followed_artists: true });
   } catch (err) {

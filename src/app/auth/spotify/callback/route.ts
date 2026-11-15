@@ -14,6 +14,7 @@ import {
   createGroupedNotifications,
   type MatchResult,
 } from '@/lib/artist-matching';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 /**
  * Spotify OAuth callback.
@@ -135,8 +136,9 @@ export async function GET(request: Request) {
                 spotify_artist_id: artist.id,
                 spotify_image_url: artist.images?.[0]?.url || null,
                 source: 'spotify',
+                country: SITE_COUNTRY,
               },
-              { onConflict: 'user_id,artist_name_normalized' }
+              { onConflict: 'user_id,artist_name_normalized,country' }
             );
         }
 
@@ -154,15 +156,15 @@ export async function GET(request: Request) {
             let titleMatches: Array<{ event_id: string; event_title: string; matched_name: string; score: number }> = [];
 
             if (tier === 'exact') {
-              titleMatches = await matchExactNames(supabase, [normalized], since);
+              titleMatches = await matchExactNames(supabase, [normalized], since, SITE_COUNTRY);
             } else {
-              titleMatches = await matchFuzzyNames(supabase, [normalized], since);
+              titleMatches = await matchFuzzyNames(supabase, [normalized], since, SITE_COUNTRY);
             }
 
             let descMatches: typeof titleMatches = [];
             if (qualifiesForDescriptionMatch(normalized)) {
               const titleEventIds = new Set(titleMatches.map(m => m.event_id));
-              descMatches = await matchDescriptionNames(supabase, [normalized], since, titleEventIds);
+              descMatches = await matchDescriptionNames(supabase, [normalized], since, titleEventIds, SITE_COUNTRY);
             }
 
             // Filter out false positives (cover bands, tribute shows, repertoire refs)

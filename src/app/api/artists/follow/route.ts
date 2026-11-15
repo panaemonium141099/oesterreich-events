@@ -15,6 +15,7 @@ import {
   type MatchResult,
   type FollowedArtist,
 } from '@/lib/artist-matching';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,8 +45,9 @@ async function matchSingleArtist(
     user_id: userId,
     artist_name: artistName,
     artist_name_normalized: normalized,
+    country: SITE_COUNTRY,
   };
-  const lineupResults = await matchLineupArtists(supabase, [fakeFollowed], since);
+  const lineupResults = await matchLineupArtists(supabase, [fakeFollowed], since, SITE_COUNTRY);
   for (const lr of lineupResults) {
     allMatches.push({
       user_id: userId,
@@ -63,16 +65,16 @@ async function matchSingleArtist(
   let titleMatches: Array<{ event_id: string; event_title: string; matched_name: string; score: number }> = [];
 
   if (tier === 'exact') {
-    titleMatches = await matchExactNames(supabase, [normalized], since);
+    titleMatches = await matchExactNames(supabase, [normalized], since, SITE_COUNTRY);
   } else {
-    titleMatches = await matchFuzzyNames(supabase, [normalized], since);
+    titleMatches = await matchFuzzyNames(supabase, [normalized], since, SITE_COUNTRY);
   }
 
   // Step 3: Secondary description matching for 6+ char names
   let descMatches: typeof titleMatches = [];
   if (qualifiesForDescriptionMatch(normalized)) {
     const titleEventIds = new Set(titleMatches.map(m => m.event_id));
-    descMatches = await matchDescriptionNames(supabase, [normalized], since, titleEventIds);
+    descMatches = await matchDescriptionNames(supabase, [normalized], since, titleEventIds, SITE_COUNTRY);
   }
 
   // Filter out false positives (cover bands, tribute shows, substring matches)
@@ -152,8 +154,11 @@ export async function POST(request: NextRequest) {
           spotify_artist_id: spotify_artist_id || null,
           spotify_image_url: spotify_image_url || null,
           source: validSource,
+          // Land der Seite, auf der gefolgt wird (fn-31.17): die Erkennung
+          // meldet nur Termine in diesem Land.
+          country: SITE_COUNTRY,
         },
-        { onConflict: 'user_id,artist_name_normalized' }
+        { onConflict: 'user_id,artist_name_normalized,country' }
       )
       .select()
       .single();
@@ -210,7 +215,8 @@ export async function DELETE(request: NextRequest) {
     let query = supabase
       .from('followed_artists')
       .delete()
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
+      .eq('country', SITE_COUNTRY);
 
     if (id) {
       query = query.eq('id', id);

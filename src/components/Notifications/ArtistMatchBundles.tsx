@@ -166,7 +166,8 @@ export function ArtistMatchBundles() {
           supabase
             .from('followed_artists')
             .select('artist_name, spotify_image_url')
-            .eq('user_id', user.id),
+            .eq('user_id', user.id)
+            .eq('country', SITE_COUNTRY),
         ]);
 
         if (cancelled) return;

@@ -37,6 +37,7 @@ import {
 } from '@/lib/artists/directory';
 import { ArtistSheet } from './ArtistSheet';
 import { ArtistAvatar, ArtistCard, ArtistRow, FollowButton, LOGIN_HREF, dayLabel } from './artist-ui';
+import { hasFeature } from '@/lib/site/features';
 import { TOAST_CLASS, useFollowed, type FollowedArtist } from './use-followed';
 
 interface SpotifyArtist {
@@ -170,9 +171,9 @@ export function ArtistsWall({ artists, today }: { artists: DirectoryArtist[]; to
                         </div>
                       )}
                     </>
-                  ) : (
+                  ) : hasFeature('account') ? (
                     <Link href={LOGIN_HREF} className="mt-1.5 inline-block text-[13px] font-bold text-[var(--v4-ink)]">{t('searchSignIn')}</Link>
-                  )}
+                  ) : null}
                 </div>
               )}
             </div>

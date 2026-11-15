@@ -100,10 +100,9 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
     contact: { office: 'office@lasstreffen.at', support: 'support@lasstreffen.at' },
     tagline: 'Konzerte, Dorffeste und Märkte in ganz Deutschland auf einer Karte.',
     // Startseite wie lasstreffen.at. Nicht gestellt werden nur die Abfragen
-    // abgeschalteter Säulen: bezahlter Tipp (Veranstalter-Pakete), Künstler-
-    // Kachel, Festivals, Aktivitäten. Die Künstler-Abfrage lief für
-    // Deutschland zudem in die Zeitgrenze (3 s, 14.11.2026).
-    landingSkip: ['featured', 'artists', 'artistPrimaries', 'festivals', 'festivalActs', 'activities'],
+    // abgeschalteter Säulen: bezahlter Tipp (Veranstalter-Pakete), Festivals,
+    // Aktivitäten.
+    landingSkip: ['featured', 'festivals', 'festivalActs', 'activities'],
     weatherPlace: { name: 'Berlin', lat: 52.52, lng: 13.405 },
     // Die acht einwohnerstärksten Gemeinden laut Stammdatei (Destatis,
     // Gebietsstand 30.09.2026), Slug aus Amts-PLZ und Name. Wächter in
@@ -125,7 +124,7 @@ export const SITES: Record<SiteCountry, SiteConfig> = {
     // Inhalte (Blog, Festivals, Aktivitäten, Studenten, Themen, Venues) oder
     // warten auf eine Entscheidung (Login, Veranstalter-Pakete, Künstler).
     features: {
-      blog: false, festivals: false, activities: false, artists: false, students: false,
+      blog: false, festivals: false, activities: false, artists: true, students: false,
       themes: false, venues: false, heatmap: false, business: false, account: false,
       social: false, newsletter: false, admin: false, llms: false,
     },

@@ -22,6 +22,8 @@ interface FollowedArtist {
   user_id: string;
   artist_name: string;
   artist_name_normalized: string;
+  /** Land der Seite, auf der gefolgt wurde (fn-31.17); ohne Angabe Österreich. */
+  country?: string | null;
 }
 
 interface MatchResult {
@@ -262,7 +264,7 @@ async function fetchAllFollowedArtists(
   while (true) {
     const { data, error } = await supabase
       .from("followed_artists")
-      .select("id, user_id, artist_name, artist_name_normalized")
+      .select("id, user_id, artist_name, artist_name_normalized, country")
       .range(from, from + BATCH_SIZE - 1);
 
     if (error) {
@@ -337,7 +339,8 @@ function groupArtistsByTier(artists: FollowedArtist[]): {
 async function matchExactNames(
   supabase: SupabaseClient,
   names: string[],
-  sinceTimestamp: string
+  sinceTimestamp: string,
+  country: string
 ): Promise<
   Array<{
     event_id: string;
@@ -360,6 +363,7 @@ async function matchExactNames(
     const { data, error } = await supabase.rpc("match_exact_artist_title", {
       p_regex: regex,
       p_since: sinceTimestamp,
+      p_country: country,
     });
 
     if (error) {
@@ -385,7 +389,8 @@ async function matchExactNames(
 async function matchFuzzyNames(
   supabase: SupabaseClient,
   names: string[],
-  sinceTimestamp: string
+  sinceTimestamp: string,
+  country: string
 ): Promise<
   Array<{
     event_id: string;
@@ -400,6 +405,7 @@ async function matchFuzzyNames(
     p_artist_names: names,
     p_threshold: WORD_SIMILARITY_THRESHOLD,
     p_since: sinceTimestamp,
+    p_country: country,
   });
 
   if (error) {
@@ -427,7 +433,8 @@ async function matchFuzzyNames(
 async function matchExactNamesBatch(
   supabase: SupabaseClient,
   names: string[],
-  sinceTimestamp: string
+  sinceTimestamp: string,
+  country: string
 ): Promise<
   Array<{
     event_id: string;
@@ -441,6 +448,7 @@ async function matchExactNamesBatch(
   const { data, error } = await supabase.rpc("match_exact_artist_titles_batch", {
     p_artist_names: names,
     p_since: sinceTimestamp,
+    p_country: country,
   });
 
   if (error) {
@@ -463,7 +471,8 @@ async function matchExactNamesBatch(
 async function matchBlocklistedNames(
   supabase: SupabaseClient,
   names: string[],
-  sinceTimestamp: string
+  sinceTimestamp: string,
+  country: string
 ): Promise<
   Array<{
     event_id: string;
@@ -477,6 +486,7 @@ async function matchBlocklistedNames(
   const { data, error } = await supabase.rpc("match_exact_artist_titles_music_only", {
     p_artist_names: names,
     p_since: sinceTimestamp,
+    p_country: country,
   });
 
   if (error) {
@@ -500,7 +510,8 @@ async function matchDescriptionNames(
   supabase: SupabaseClient,
   names: string[],
   sinceTimestamp: string,
-  excludeEventIds: Set<string>
+  excludeEventIds: Set<string>,
+  country: string
 ): Promise<
   Array<{
     event_id: string;
@@ -518,6 +529,7 @@ async function matchDescriptionNames(
   const { data, error } = await supabase.rpc("match_artist_descriptions", {
     p_artist_names: qualifiedNames,
     p_since: sinceTimestamp,
+    p_country: country,
   });
 
   if (error) {
@@ -847,40 +859,33 @@ async function scheduleReminders(
 
 // ── Main pipeline ────────────────────────────────────────────────────────────
 
-async function runMatchingPipeline(
-  supabase: SupabaseClient
-): Promise<MatchingStats> {
-  const startTime = Date.now();
-  const stats: MatchingStats = {
-    events_processed: 0,
-    matches_found: 0,
-    notifications_created: 0,
-    reminders_scheduled: 0,
-    artists_checked: 0,
-    skipped_short_names: 0,
-    duration_ms: 0,
-  };
-
-  // Step 1: Fetch cursor
-  const lastProcessedAt = await getMatchingCursor(supabase);
-  console.log(`Matching cursor: last_processed_at = ${lastProcessedAt}`);
-
-  // Step 2: Fetch all followed artists
-  const allArtists = await fetchAllFollowedArtists(supabase);
-  stats.artists_checked = allArtists.length;
-  console.log(
-    `Found ${allArtists.length} followed artists across all users`
-  );
-
-  if (allArtists.length === 0) {
-    console.log("No followed artists found. Nothing to match.");
-    stats.duration_ms = Date.now() - startTime;
-    return stats;
+/** Follows nach dem Land der Seite, auf der gefolgt wurde; ohne Angabe Österreich. */
+function groupFollowsByCountry(follows: FollowedArtist[]): Map<string, FollowedArtist[]> {
+  const out = new Map<string, FollowedArtist[]>();
+  for (const f of follows) {
+    const country = f.country || "AT";
+    const list = out.get(country) ?? [];
+    list.push(f);
+    out.set(country, list);
   }
+  return out;
+}
 
+/**
+ * Schritte 3 bis 6 für die Follows EINES Landes (fn-31.17): ein Follow
+ * meldet nur Termine im Land der Seite, auf der gefolgt wurde. Die RPCs
+ * filtern die Events auf `country`.
+ */
+async function matchFollowsOfCountry(
+  supabase: SupabaseClient,
+  follows: FollowedArtist[],
+  since: string,
+  country: string,
+  stats: MatchingStats
+): Promise<MatchResult[]> {
   // Step 3: Group by tier
-  const { exact, exactShort, blocklisted, fuzzy, skipped } = groupArtistsByTier(allArtists);
-  stats.skipped_short_names = skipped.length;
+  const { exact, exactShort, blocklisted, fuzzy, skipped } = groupArtistsByTier(follows);
+  stats.skipped_short_names += skipped.length;
   console.log(
     `Tiers: ${exact.size} exact (3-char), ${exactShort.size} exact-short (4-7), ${blocklisted.size} blocklisted, ${fuzzy.size} fuzzy (8+), ${skipped.length} skipped (<3)`
   );
@@ -893,7 +898,8 @@ async function runMatchingPipeline(
   const exactMatches = await matchExactNames(
     supabase,
     exactNames,
-    lastProcessedAt
+    since,
+    country
   );
   console.log(`Exact matches (3-char, title): ${exactMatches.length}`);
 
@@ -902,7 +908,8 @@ async function runMatchingPipeline(
   const exactShortMatches = await matchExactNamesBatch(
     supabase,
     exactShortNames,
-    lastProcessedAt
+    since,
+    country
   );
   console.log(`Exact-short matches (4-7 char, title): ${exactShortMatches.length}`);
 
@@ -911,7 +918,8 @@ async function runMatchingPipeline(
   const blocklistedMatches = await matchBlocklistedNames(
     supabase,
     blocklistedNames,
-    lastProcessedAt
+    since,
+    country
   );
   console.log(`Blocklisted matches (music-only, title): ${blocklistedMatches.length}`);
 
@@ -920,7 +928,8 @@ async function runMatchingPipeline(
   const fuzzyMatches = await matchFuzzyNames(
     supabase,
     fuzzyNames,
-    lastProcessedAt
+    since,
+    country
   );
   console.log(`Fuzzy matches (8+ char, title): ${fuzzyMatches.length}`);
 
@@ -935,8 +944,9 @@ async function runMatchingPipeline(
   const descriptionMatches = await matchDescriptionNames(
     supabase,
     allNames,
-    lastProcessedAt,
-    titleMatchedEventIds
+    since,
+    titleMatchedEventIds,
+    country
   );
   console.log(`Description matches (secondary): ${descriptionMatches.length}`);
 
@@ -1008,6 +1018,49 @@ async function runMatchingPipeline(
         match_source: "description",
       });
     }
+  }
+
+  return allMatches;
+}
+
+async function runMatchingPipeline(
+  supabase: SupabaseClient
+): Promise<MatchingStats> {
+  const startTime = Date.now();
+  const stats: MatchingStats = {
+    events_processed: 0,
+    matches_found: 0,
+    notifications_created: 0,
+    reminders_scheduled: 0,
+    artists_checked: 0,
+    skipped_short_names: 0,
+    duration_ms: 0,
+  };
+
+  // Step 1: Fetch cursor
+  const lastProcessedAt = await getMatchingCursor(supabase);
+  console.log(`Matching cursor: last_processed_at = ${lastProcessedAt}`);
+
+  // Step 2: Fetch all followed artists
+  const allArtists = await fetchAllFollowedArtists(supabase);
+  stats.artists_checked = allArtists.length;
+  console.log(
+    `Found ${allArtists.length} followed artists across all users`
+  );
+
+  if (allArtists.length === 0) {
+    console.log("No followed artists found. Nothing to match.");
+    stats.duration_ms = Date.now() - startTime;
+    return stats;
+  }
+
+  // Schritte 3 bis 6 je Land des Follows (fn-31.17).
+  const allMatches: MatchResult[] = [];
+  for (const [country, follows] of groupFollowsByCountry(allArtists)) {
+    console.log(`Land ${country}: ${follows.length} Follows`);
+    allMatches.push(
+      ...(await matchFollowsOfCountry(supabase, follows, lastProcessedAt, country, stats))
+    );
   }
 
   stats.matches_found = allMatches.length;

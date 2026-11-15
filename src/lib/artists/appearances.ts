@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 /**
  * Ein Künstler-Auftritt: EIN Eintrag pro (gefolgter Künstler × Festival)
@@ -22,15 +23,18 @@ export interface ArtistAppearance {
 
 /**
  * Holt die sauberen Künstler-Auftritte eines Nutzers via RPC. `svc` muss ein
- * Service-Role-Client sein (die RPC ist nur an service_role granted).
+ * Service-Role-Client sein (die RPC ist nur an service_role granted). Nur
+ * Follows und Termine des Landes (Vorgabe: das Land der Seite).
  */
 export async function fetchArtistAppearances(
   svc: SupabaseClient,
   userId: string,
+  country: string = SITE_COUNTRY,
 ): Promise<ArtistAppearance[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (svc.rpc as any)('get_artist_appearances', {
     p_user_id: userId,
+    p_country: country,
   });
   if (error) {
     console.error('[appearances] rpc get_artist_appearances failed:', error);

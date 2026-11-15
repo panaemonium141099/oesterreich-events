@@ -112,6 +112,7 @@ describe('Navigation und Sitemap fragen die Matrix', () => {
     const hrefs = [...src.matchAll(/href: '([^']+)'/g)].map(m => m[1]);
     expect(hrefs.length).toBeGreaterThan(5);
     const sichtbarAufDe = [...new Set(hrefs.filter(h => isPathEnabled(h, DE)))].sort();
-    expect(sichtbarAufDe).toEqual(['/entdecken', '/map']);
+    // Künstler seit fn-31.17 (Termine in Deutschland aus event_artists).
+    expect(sichtbarAufDe).toEqual(['/artists', '/entdecken', '/map']);
   });
 });
