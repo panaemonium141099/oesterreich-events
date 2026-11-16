@@ -41,6 +41,9 @@ import {
 import { getSite } from '@/lib/site';
 import { everythingEnabled, isPathEnabled } from '@/lib/site/features';
 
+/** Ab so vielen eigenen kommenden Events steht eine deutsche Gemeinde in der Sitemap. */
+const DE_HUB_SITEMAP_MIN = 5;
+
 export const dynamic = 'force-dynamic';
 export const revalidate = 300;
 
@@ -205,10 +208,8 @@ export async function GET(): Promise<NextResponse> {
   try {
     const { ALL_GEMEINDEN } = await import('@/lib/gemeinden/data');
     const { isCityHub } = await import('@/lib/hubs/city-hubs');
-    // fn-31.11: nur lasstreffen.at listet seine Gemeinde-Seiten. Für
-    // Deutschland (rund 10.700 Gemeinden) kommen sie erst in die Sitemap,
-    // wenn feststeht, ab wie vielen Events eine Seite indexiert wird; bis
-    // dahin findet Google sie nicht über die Sitemap.
+    // fn-31.11: hier nur lasstreffen.at (alle Gemeinden). lasstreffen.de
+    // listet seine Gemeinden weiter unten nach Eventzahl (5c).
     for (const g of getSite().country === 'AT' ? ALL_GEMEINDEN : []) {
       // The 5 major-city hubs (Linz/Graz/Salzburg/Innsbruck/Klagenfurt) carry
       // the retired /stadt URLs' priority (0.8); villages stay at 0.5.
@@ -238,6 +239,30 @@ export async function GET(): Promise<NextResponse> {
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // ─── 5c. Gemeinde-Seiten von lasstreffen.de (fn-31.11) ──────────────────
+  // Rund 10.700 Gemeinden, die meisten ohne Termine: gelistet wird nur, wer
+  // mindestens DE_HUB_SITEMAP_MIN eigene kommende Events hat. Die Seite selbst
+  // ist ab drei Events im Umkreis indexierbar; die höhere Grenze hält Seiten
+  // aus der Sitemap, die an der Schwelle kippen. Fällt die Zählung aus,
+  // bleibt die Sitemap ohne Gemeinden statt mit 500 (Google findet sie dann
+  // über die internen Links).
+  if (getSite().country === 'DE') {
+    try {
+      const { data, error } = await supabase.rpc('gemeinde_keys_with_events', {
+        p_key_length: 8,
+        p_min: DE_HUB_SITEMAP_MIN,
+      });
+      if (error) throw new Error(error.message);
+      const { siteGemeindeSlugByKey } = await import('@/lib/site/gemeinden');
+      for (const key of (data ?? []) as string[]) {
+        const slug = siteGemeindeSlugByKey(key);
+        if (slug) entries.push({ loc: `${BASE_URL}/gemeinde/${slug}`, lastmod: toISO(now), changefreq: 'daily', priority: 0.5 });
+      }
+    } catch (err) {
+      console.error('[sitemap-core] Gemeinde-Seiten ausgelassen:', err);
+    }
+  }
 
   // Venue pages — unique venue_ids that have upcoming published events.
   // Nur österreichische Events zählen, sonst landen Venues mit reinen

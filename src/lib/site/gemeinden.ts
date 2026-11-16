@@ -30,6 +30,8 @@ const IS_AT = getSite().country === 'AT';
 
 let deList: SiteGemeinde[] | null = null;
 let deBySlug: Map<string, SiteGemeinde> | null = null;
+/** AGS → Slug, gefüllt von `buildGemeindenDe` (die Sitemap kommt vom Schlüssel). */
+let deSlugByKey: Map<string, string> = new Map();
 
 /**
  * Deutsche Gemeinden mit eindeutigem Slug. Gleicher Name unter derselben
@@ -40,6 +42,7 @@ let deBySlug: Map<string, SiteGemeinde> | null = null;
 export function buildGemeindenDe(): SiteGemeinde[] {
   const taken = new Set<string>();
   const out: SiteGemeinde[] = [];
+  const byKey = new Map<string, string>();
   const sorted = [...loadGemeindenDe()]
     .filter(g => g.lat !== 0 || g.lng !== 0)
     .sort((a, b) => b.einwohner - a.einwohner || a.ags.localeCompare(b.ags));
@@ -47,6 +50,7 @@ export function buildGemeindenDe(): SiteGemeinde[] {
     const base = `${g.plz}-${gemeindeSlug(g.name)}`;
     const slug = taken.has(base) ? `${base}-${g.ags}` : base;
     taken.add(slug);
+    byKey.set(g.ags, slug);
     out.push({
       name: g.name,
       plz: g.plz,
@@ -57,6 +61,7 @@ export function buildGemeindenDe(): SiteGemeinde[] {
       slug,
     });
   }
+  deSlugByKey = byKey;
   return out;
 }
 
@@ -93,4 +98,15 @@ export function siteNeighbourGemeinden(g: SiteGemeinde, limit = 6): SiteGemeinde
     .sort((a, b) => a.d - b.d)
     .slice(0, limit)
     .map(x => x.g);
+}
+
+/**
+ * Slug der Gemeinde-Seite zu einem Gemeindeschlüssel aus `events.gemeinde_key`
+ * (nur lasstreffen.de: AGS, 8 Stellen). null für unbekannte Schlüssel und für
+ * Gemeinden ohne Mittelpunkt (sie haben keine Seite).
+ */
+export function siteGemeindeSlugByKey(key: string): string | null {
+  if (IS_AT) return null;
+  de();
+  return deSlugByKey.get(key) ?? null;
 }
