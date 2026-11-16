@@ -9,6 +9,16 @@
 #   docker save lasstreffen-app:latest | gzip | ssh … 'gunzip -c | /opt/app/deploy-image.sh <commit>'
 #   /opt/app/deploy-image.sh --rollback      voriges Image wieder starten
 #
+# Zweite Seite (fn-31, lasstreffen.de): `--site de` als ERSTES Argument, sonst
+# gleich. Eigenes Image (lasstreffen-app-de), eigener Dienst (`nextjs-de`,
+# Container nextjs-app-de, Port 3001), dieselbe Sperre: nie zwei Deploys
+# zugleich, auch nicht für verschiedene Seiten. Für .de bleibt kein
+# :previous-Image liegen (Platte bei 86 %, 16.11.2026; ein Image belegt
+# rund 1,9 GB): scheitert der Start, bleibt .de unten, bis ein Deploy gelingt.
+# Rückweg dort: den vorigen Commit neu deployen.
+#   … | ssh … 'gunzip -c | /opt/app/deploy-image.sh --site de <commit>'
+#   /opt/app/deploy-image.sh --site de --rollback
+#
 # Abgeglichen mit /opt/app/deploy.sh (Stand 2026-09-10, gelesen 2026-11-14):
 # dieselbe Sperre, dasselbe Aufräumen, derselbe Dienst (`nextjs`, Image
 # lasstreffen-app:latest, Container nextjs-app), derselbe Health-Check mit
@@ -21,8 +31,6 @@ LOCK_WAIT=1500
 HEALTH_TRIES=45                   # 45 x 2 s = 90 s auf /api/health warten
 PRUNE_AT_PCT=70
 MIN_FREE_GB=4                     # das Image braucht entpackt rund 2 GB
-IMAGE=lasstreffen-app:latest
-PREVIOUS=lasstreffen-app:previous
 
 # ── 1) Sperre: nur ein Deploy gleichzeitig (stdin bleibt über exec erhalten) ──
 if [ -z "${LT_DEPLOY_LOCK_HELD:-}" ]; then
@@ -34,11 +42,23 @@ if [ -z "${LT_DEPLOY_LOCK_HELD:-}" ]; then
   exec flock --wait "$LOCK_WAIT" "$LOCK" "$SELF" "$@"
 fi
 
+# ── Seite wählen (nach der Sperre: exec reicht die Argumente unverändert durch) ──
+SITE=at
+if [ "${1:-}" = "--site" ]; then
+  SITE=${2:?--site braucht at oder de}
+  shift 2
+fi
+case "$SITE" in
+  at) SERVICE=nextjs;    CONTAINER=nextjs-app;    PORT=3000; IMAGE=lasstreffen-app:latest;    PREVIOUS=lasstreffen-app:previous;       KEEP_PREVIOUS=1 ;;
+  de) SERVICE=nextjs-de; CONTAINER=nextjs-app-de; PORT=3001; IMAGE=lasstreffen-app-de:latest; PREVIOUS=lasstreffen-app-de:previous; KEEP_PREVIOUS=0 ;;
+  *) echo "Unbekannte Seite: $SITE (at oder de)" >&2; exit 2 ;;
+esac
+
 health() {
   i=0
   code=000
   while [ "$i" -lt "$HEALTH_TRIES" ]; do
-    code=$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/api/health || echo 000)
+    code=$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:$PORT/api/health || echo 000)
     [ "$code" = "200" ] && return 0
     i=$((i + 1))
     sleep 2
@@ -53,7 +73,7 @@ cd /opt/app
 if [ "${1:-}" = "--rollback" ]; then
   docker image inspect "$PREVIOUS" >/dev/null
   docker tag "$PREVIOUS" "$IMAGE"
-  docker compose up -d --no-build --force-recreate nextjs
+  docker compose up -d --no-build --force-recreate "$SERVICE"
   health
   echo "ROLLBACK OK: $PREVIOUS bedient wieder Traffic."
   exit 0
@@ -74,9 +94,9 @@ prune_disk() {
 trap prune_disk EXIT
 
 # ── 3) Liegengebliebene Recreate-Backups entfernen (wie deploy.sh) ───────
-live_id=$(docker ps -q --filter 'name=^nextjs-app$' | head -1)
+live_id=$(docker ps -q --filter "name=^${CONTAINER}\$" | head -1)
 docker ps -a --format '{{.ID}} {{.Names}} {{.State}}' \
-  | grep -E ' [0-9a-f]{8,64}_nextjs-app ' \
+  | grep -E " [0-9a-f]{8,64}_${CONTAINER} " \
   | while read -r cid cname cstate; do
       if [ "$cid" = "$live_id" ] || [ "$cstate" = "running" ]; then
         echo "WARNUNG: $cname laeuft noch — nicht geloescht (bedient evtl. Traffic)."
@@ -102,23 +122,23 @@ git -C /opt/app/src reset -q --hard origin/master
 
 # ── 6) Laufendes Image als Rückfallebene sichern, dann das neue laden ────
 rollback_ready=0
-if docker image inspect "$IMAGE" >/dev/null 2>&1; then
+if [ "$KEEP_PREVIOUS" = "1" ] && docker image inspect "$IMAGE" >/dev/null 2>&1; then
   if docker tag "$IMAGE" "$PREVIOUS" 2>/dev/null; then
     rollback_ready=1
   fi
 fi
 
 docker load
-docker compose up -d --no-build --force-recreate nextjs
+docker compose up -d --no-build --force-recreate "$SERVICE"
 
 # ── 7) Erst ein antwortender Container ist ein Deploy ────────────────────
 if ! health; then
-  docker ps -a --filter 'name=nextjs-app' >&2
-  docker logs --tail 50 nextjs-app >&2 || true
+  docker ps -a --filter "name=${CONTAINER}" >&2
+  docker logs --tail 50 "$CONTAINER" >&2 || true
   if [ "$rollback_ready" = "1" ]; then
     echo "Rolle zurueck auf $PREVIOUS ..." >&2
     if docker tag "$PREVIOUS" "$IMAGE" 2>&1; then
-      docker compose up -d --no-build --force-recreate nextjs >&2 || true
+      docker compose up -d --no-build --force-recreate "$SERVICE" >&2 || true
     else
       echo "Konnte :previous nicht auf :latest zuruecktaggen." >&2
     fi
@@ -134,4 +154,4 @@ if ! health; then
   exit 1
 fi
 
-echo "Deploy fertig: $commit ($(git -C /opt/app/src log --oneline -1))"
+echo "Deploy fertig ($SITE): $commit ($(git -C /opt/app/src log --oneline -1))"

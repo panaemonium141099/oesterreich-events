@@ -115,3 +115,51 @@ jobs:
               echo "$path: $(printf "%s" "$html" | grep -o "season-pick-title" | wc -l) Saison-Picks, $(printf "%s" "$html" | grep -o "landing_tip_click" | wc -l) Tipp"
             done
           '
+
+  # ── lasstreffen.de (fn-31): dasselbe Repo, zweites Image ───────────────
+  # Läuft NACH dem AT-Deploy (nie zwei Builds und Starts zugleich) und nur,
+  # wenn die Repo-Variable DEPLOY_DE=on steht. Ein roter DE-Deploy lässt den
+  # AT-Deploy grün; die Seite .de bleibt dann auf dem vorigen Image.
+  deploy-de:
+    needs: deploy
+    if: ${{ vars.DEPLOY_DE == 'on' && vars.DEPLOY_BUILD == 'runner' && !inputs.build_only }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: SSH-Schlüssel
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo 'StrictHostKeyChecking accept-new' >> ~/.ssh/config
+
+      - uses: actions/checkout@v4
+
+      - name: Image im Runner bauen (SITE_COUNTRY=DE)
+        env:
+          SITE_COUNTRY: DE
+        run: |
+          umask 077
+          scp -q "$SERVER:/opt/app/.env.master" "$RUNNER_TEMP/buildenv"
+          bash scripts/deploy/build-image.sh "$RUNNER_TEMP/buildenv" lasstreffen-app-de:latest
+          rm -f "$RUNNER_TEMP/buildenv"
+
+      - name: Image an den Server schicken und starten
+        run: |
+          docker save lasstreffen-app-de:latest | gzip -1 \
+            | ssh "$SERVER" "gunzip -c | /opt/app/deploy-image.sh --site de '${GITHUB_SHA::7}'"
+
+      - name: Startseite nach dem Build neu rendern
+        run: |
+          ssh "$SERVER" '
+            set -eu
+            secret=$(sed -n "s/^CRON_SECRET=//p" /opt/app/.env.master | tr -d "\r\"\047")
+            curl -fsS -H "Authorization: Bearer $secret" http://127.0.0.1:3001/api/cron/revalidate-landing
+            echo
+            for i in 1 2; do
+              html=$(curl -sS -H "Host: lasstreffen.de" -H "User-Agent: lt-deploy-warm" "http://127.0.0.1:3001/")
+            done
+            echo "/: $(printf "%s" "$html" | grep -o "season-pick-title" | wc -l) Saison-Picks"
+          '

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import type { Session } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
+import { hasFeature } from '@/lib/site/features';
 
 /**
  * V4TopNavAuth — auth-aware right-hand cluster of the v4 top nav.
@@ -114,6 +115,8 @@ export function V4TopNavAuth() {
   }, [menuOpen]);
 
   if (!session) {
+    // Ohne Konten auf der Seite (lasstreffen.de zum Start) kein Link ins Leere.
+    if (!hasFeature('account')) return null;
     return (
       <Link
         href="/auth/login"

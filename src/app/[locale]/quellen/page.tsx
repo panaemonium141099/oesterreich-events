@@ -1,13 +1,18 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { deOnlyAlternates } from '@/lib/seo/canonical';
+import { getSite } from '@/lib/site';
+import { SOURCE_CATEGORIES_DE, type SourceCategory } from '@/lib/site/quellen-de';
+
+const site = getSite();
+const IS_DE = site.country === 'DE';
 
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: 'Datenquellen & Lizenzen — LassTreffen.at',
+  title: `Datenquellen & Lizenzen — ${site.brand}`,
   description:
-    'Transparente Übersicht aller Datenquellen, Lizenzen und Attributionen der LassTreffen.at-Plattform.',
+    `Transparente Übersicht aller Datenquellen, Lizenzen und Attributionen der ${site.brand}-Plattform.`,
   alternates: deOnlyAlternates('/quellen'),
 };
 
@@ -15,19 +20,6 @@ export const metadata: Metadata = {
 /*  Source category definitions                                        */
 /* ------------------------------------------------------------------ */
 
-interface SourceEntry {
-  name: string;
-  url?: string;
-  license?: string;
-  licenseUrl?: string;
-  description: string;
-}
-
-interface SourceCategory {
-  title: string;
-  icon: string;
-  sources: SourceEntry[];
-}
 
 const SOURCE_CATEGORIES: SourceCategory[] = [
   {
@@ -372,6 +364,7 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
 /* ------------------------------------------------------------------ */
 
 export default function QuellenPage() {
+  const categories = IS_DE ? SOURCE_CATEGORIES_DE : SOURCE_CATEGORIES;
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="max-w-4xl mx-auto px-6 py-16 md:py-24">
@@ -400,15 +393,15 @@ export default function QuellenPage() {
           Datenquellen & Lizenzen
         </h1>
         <p className="text-white/50 leading-relaxed mb-12 max-w-2xl">
-          LassTreffen.at aggregiert öffentlich zugängliche Veranstaltungsdaten
-          aus ganz Österreich. Wir legen Wert auf Transparenz und die
+          {site.brand} aggregiert öffentlich zugängliche Veranstaltungsdaten
+          aus ganz {site.countryName.de}. Wir legen Wert auf Transparenz und die
           Einhaltung aller Lizenzbedingungen. Nachfolgend eine Übersicht
           aller genutzten Datenquellen.
         </p>
 
         {/* Source categories */}
         <div className="space-y-12">
-          {SOURCE_CATEGORIES.map((category) => (
+          {categories.map((category) => (
             <section key={category.title}>
               <h2 className="text-xl font-semibold text-white mb-5 flex items-center gap-3">
                 <span className="text-2xl">{category.icon}</span>
@@ -485,6 +478,7 @@ export default function QuellenPage() {
                 die jeweiligen Lizenzbedingungen eingehalten, insbesondere die
                 Namensnennung der Datenbereitsteller.
               </p>
+              {!IS_DE && (
               <p>
                 <strong className="text-white/70">OpenStreetMap (ODbL 1.0):</strong>{' '}
                 Kartendaten ©{' '}
@@ -512,10 +506,11 @@ export default function QuellenPage() {
                 unsere eigenen Event-, Aktivitäts- und Venue-Daten sind damit
                 keine abgeleitete Datenbank im Sinne der ODbL-Share-Alike-Klausel.
               </p>
+              )}
               <p>
-                Bilder werden — sofern nicht anders angegeben — direkt von den
-                jeweiligen Veranstaltern oder aus freien Quellen (Wikimedia Commons,
-                Unsplash) bezogen und unterliegen den dort genannten Lizenzvorgaben.
+                {IS_DE
+                  ? 'Bilder stammen, sofern nicht anders angegeben, von den jeweiligen Veranstaltern und Ticketanbietern.'
+                  : 'Bilder werden — sofern nicht anders angegeben — direkt von den jeweiligen Veranstaltern oder aus freien Quellen (Wikimedia Commons, Unsplash) bezogen und unterliegen den dort genannten Lizenzvorgaben.'}
               </p>
             </div>
           </section>
@@ -540,7 +535,7 @@ export default function QuellenPage() {
           </section>
 
           <p className="text-white/30 text-sm pt-4 border-t border-white/[0.06]">
-            Zuletzt aktualisiert: April 2026
+            Zuletzt aktualisiert: {IS_DE ? 'November 2026' : 'April 2026'}
           </p>
         </div>
       </div>

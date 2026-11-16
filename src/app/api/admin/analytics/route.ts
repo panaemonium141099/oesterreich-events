@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 import { fetchAllRows } from '@/lib/db/fetch-all';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 /** Shape of event_data JSON stored in analytics_events rows */
 interface AnalyticsEventData {
@@ -106,6 +107,7 @@ export async function GET(request: NextRequest) {
       allEvents = await fetchAllRows<AnalyticsRow>((from, to) => supabase
         .from('analytics_events')
         .select('event_type, event_data, page, referrer, session_id, user_id, created_at')
+        .eq('site', SITE_COUNTRY)
         .gte('created_at', sinceISO)
         .order('created_at', { ascending: true })
         .order('id', { ascending: true })
