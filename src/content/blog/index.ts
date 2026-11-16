@@ -257,6 +257,8 @@ import { post as stFlorianerBrucknertageSilvesterkonzert2026 } from './posts/st-
 import { post as adventkonzertInAltenmarkt2026 } from './posts/adventkonzert-in-altenmarkt-2026';
 import { post as burgtheaterGuidedTourEnglish2026 } from './posts/burgtheater-guided-tour-english-2026';
 import { post as wienerJohannStraussKonzertGala2027 } from './posts/wiener-johann-strauss-konzert-gala-2027';
+import { post as lichterweltenSchwarzlsee2026 } from './posts/lichterwelten-schwarzlsee-2026';
+import { post as musicalstarsInDerVotivkirche2026 } from './posts/musicalstars-in-der-votivkirche-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -526,6 +528,8 @@ export const ALL_POSTS: FestivalPost[] = [
   adventkonzertInAltenmarkt2026,
   burgtheaterGuidedTourEnglish2026,
   wienerJohannStraussKonzertGala2027,
+  lichterweltenSchwarzlsee2026,
+  musicalstarsInDerVotivkirche2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
