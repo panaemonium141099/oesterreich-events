@@ -39,6 +39,8 @@ site_country=${SITE_COUNTRY:-AT}
 build_args+=(--build-arg "SITE_COUNTRY=${site_country}")
 if [ "$site_country" != "AT" ]; then
   build_args+=(--build-arg "NEXT_PUBLIC_SITE_URL=")
+  # AdSense ist für lasstreffen.at freigegeben, nicht für eine zweite Domain.
+  build_args+=(--build-arg "NEXT_PUBLIC_ADS_ENABLED=")
 fi
 echo "Land der Seite: ${site_country}"
 

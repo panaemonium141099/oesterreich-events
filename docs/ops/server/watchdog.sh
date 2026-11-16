@@ -33,6 +33,11 @@ ISSUES=()
 # Fehlalarm in jeder Mail.
 code=$(curl -s -m 15 -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/api/health || echo 000)
 [ "$code" = "200" ] || ISSUES+=("Health-Endpoint der App (127.0.0.1:3000/api/health) liefert HTTP $code")
+# lasstreffen.de (fn-31): zweiter Container, nur geprüft, wenn es ihn gibt.
+if docker ps -a --format '{{.Names}}' | grep -qx nextjs-app-de; then
+  code_de=$(curl -s -m 15 -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/api/health || echo 000)
+  [ "$code_de" = "200" ] || ISSUES+=("Health-Endpoint von lasstreffen.de (127.0.0.1:3001/api/health) liefert HTTP $code_de")
+fi
 
 # ── 2) Container ─────────────────────────────────────────────────────────
 unhealthy=$(docker ps --filter health=unhealthy --format '{{.Names}}' | tr '\n' ' ')

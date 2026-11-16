@@ -1,26 +1,36 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getSite } from '@/lib/site';
+import { UeberUnsDe } from './UeberUnsDe';
+
+const site = getSite();
+const IS_DE = site.country === 'DE';
 
 export const revalidate = 86400;
 
+const AT_DESCRIPTION =
+  'LassTreffen.at ist die unabhängige Event-Discovery-Plattform für Österreich. Wer wir sind, wie wir Veranstaltungen sammeln und kuratieren, und warum wir diese Plattform gebaut haben.';
+const DE_DESCRIPTION =
+  `${site.brand} sammelt Veranstaltungen aus ganz Deutschland: wer dahinter steht, woher die Termine kommen und wie sie geprüft werden.`;
+
 export const metadata: Metadata = {
-  title: { absolute: 'Über uns — LassTreffen.at' },
-  description:
-    'LassTreffen.at ist die unabhängige Event-Discovery-Plattform für Österreich. Wer wir sind, wie wir Veranstaltungen sammeln und kuratieren, und warum wir diese Plattform gebaut haben.',
+  title: { absolute: `Über uns — ${site.brand}` },
+  description: IS_DE ? DE_DESCRIPTION : AT_DESCRIPTION,
   alternates: {
-    canonical: `${getSite().url}/ueber-uns`,
+    canonical: `${site.url}/ueber-uns`,
   },
   openGraph: {
-    title: 'Über LassTreffen.at',
-    description:
-      'Eine unabhängige, von einem Studenten entwickelte Plattform, die österreichische Veranstaltungen auf einer interaktiven Karte bündelt.',
+    title: `Über ${site.brand}`,
+    description: IS_DE
+      ? 'Veranstaltungen aus ganz Deutschland an einem Ort, vom Dorffest bis zum Konzert.'
+      : 'Eine unabhängige, von einem Studenten entwickelte Plattform, die österreichische Veranstaltungen auf einer interaktiven Karte bündelt.',
     type: 'website',
-    url: `${getSite().url}/ueber-uns`,
+    url: `${site.url}/ueber-uns`,
   },
 };
 
 export default function UeberUnsPage() {
+  if (IS_DE) return <UeberUnsDe />;
   return (
     <main className="min-h-screen bg-black text-white">
       <article className="max-w-3xl mx-auto px-6 py-16 md:py-24">

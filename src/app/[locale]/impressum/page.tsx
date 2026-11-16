@@ -3,12 +3,15 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { deOnlyAlternates } from '@/lib/seo/canonical';
+import { getSite } from '@/lib/site';
+
+const site = getSite();
 
 export const revalidate = 86400; // ISR: revalidate every 24 hours
 
 export const metadata: Metadata = {
-  title: 'Impressum — LassTreffen.at',
-  description: 'Impressum und rechtliche Angaben zu LassTreffen.at.',
+  title: `Impressum — ${site.brand}`,
+  description: `Impressum und rechtliche Angaben zu ${site.brand}.`,
   alternates: deOnlyAlternates('/impressum'),
 };
 
@@ -102,9 +105,9 @@ export default function ImpressumPage() {
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">Datenquellen & Lizenzen</h2>
             <p>
-              Veranstaltungsdaten werden aus über 140 öffentlich zugänglichen Quellen aggregiert,
-              darunter Open Data (CC BY 4.0), offizielle Tourismus-APIs und öffentliche
-              Veranstaltungskalender. Eine vollständige Übersicht finden Sie auf unserer{' '}
+              {site.country === 'DE'
+                ? 'Veranstaltungsdaten stammen aus öffentlichen Veranstaltungskalendern deutscher Gemeinden und von Ticketanbietern. Eine vollständige Übersicht finden Sie auf unserer'
+                : 'Veranstaltungsdaten werden aus über 140 öffentlich zugänglichen Quellen aggregiert, darunter Open Data (CC BY 4.0), offizielle Tourismus-APIs und öffentliche Veranstaltungskalender. Eine vollständige Übersicht finden Sie auf unserer'}{' '}
               <Link
                 href="/quellen"
                 className="text-white/90 underline underline-offset-2 hover:text-white transition-colors"

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createHash } from 'crypto';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 // Simple in-memory rate limiting (per session per minute)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -60,6 +61,8 @@ export async function POST(request: NextRequest) {
       session_id: sessionId,
       event_type: type,
       event_data: data || {},
+      // Land der Seite (fn-31.15): trennt lasstreffen.at und lasstreffen.de.
+      site: SITE_COUNTRY,
       page: page || null,
       referrer: referrer || null,
       user_agent: userAgent || null,

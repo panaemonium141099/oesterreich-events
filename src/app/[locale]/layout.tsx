@@ -60,6 +60,18 @@ import { V4TopNav, V4TabBar } from '@/components/Layout/v4';
 
 // Deutsche Keywords bleiben hardcoded — sie zielen auf den DE-Suchmarkt.
 // EN bekommt eigene Keywords; alles andere Textliche kommt aus messages/.
+/** lasstreffen.de (nur Deutsch). */
+const KEYWORDS_DE = [
+  'Events Deutschland',
+  'Veranstaltungen Berlin',
+  'Konzerte Hamburg',
+  'Feste München',
+  'Veranstaltungen Köln',
+  'Weihnachtsmarkt',
+  'Events heute',
+  'Events Wochenende',
+];
+
 const KEYWORDS: Record<AppLocale, string[]> = {
   de: [
     'Events Österreich',
@@ -133,7 +145,7 @@ export async function generateMetadata({
     },
     description: siteDescription,
     applicationName: site.brand,
-    keywords: KEYWORDS[locale],
+    keywords: site.country === 'DE' ? KEYWORDS_DE : KEYWORDS[locale],
     authors: [{ name: site.brand }],
     creator: site.brand,
     publisher: site.brand,

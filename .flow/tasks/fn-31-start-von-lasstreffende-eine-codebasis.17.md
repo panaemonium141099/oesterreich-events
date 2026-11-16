@@ -29,9 +29,9 @@ Spalte `country` an `followed_artists`, gesetzt von der Seite, auf der gefolgt w
 - [ ] Für AT-Follows entstehen dieselben Treffer wie vorher (Vergleich der RPC-Ergebnisse vor und nach der Migration)
 - [ ] Rechte der neuen Funktionen ausdrücklich, Wächter `security-definer-grants` grün
 ## Done summary
-TBD
-
+Künstler-Säule auf lasstreffen.de an (Wand, Blatt, Kachel, Sitemap; 204 Künstler mit Termin in Deutschland). Follows tragen das Land der Seite (followed_artists.country, Bestand AT, eindeutig mit Land); Erkennung je Land in artist-matching.ts und der Edge Function, RPCs mit p_country. Beide Migrationen in Prod, Edge Function ausgerollt (Sicherung /root/match-artists-index.ts.vor-fn-31-17). AT: sieben Funktionen vor und nach der Migration gleich (Zeilenzahl, md5); SEO-Vergleich vor und nach dem Deploy: 9 Seiten, nur Zahlen.
+Offen: Login auf .de (Säule account, Task 15), bis dahin entsteht dort kein Follow; Kachel-Abfrage liest für beide Länder 37.344 Blöcke (0,2 s warm, 2,3 s kalt bei 3 s Grenze); Anmelden-Link und Meta-Keywords auf .de noch österreichisch; 14 Alt-Benachrichtigungen zu DE-Terminen aus AT-Follows.
 ## Evidence
 - Commits:
-- Tests:
-- PRs:
+- Tests: src/__tests__/lib/artist-matching-je-land.test.ts
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/488
