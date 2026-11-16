@@ -76,3 +76,29 @@ describe('Präfix dieser Seite', () => {
     }
   });
 });
+
+describe('Postleitzahl und Ort in den strukturierten Daten (fn-31.16)', () => {
+  it('die Form der PLZ ist die der Seite', async () => {
+    const { isSitePlz } = await import('@/lib/utils/slugify');
+    const { getSite } = await import('@/lib/site');
+    const de = getSite().country === 'DE';
+    expect(isSitePlz('97286')).toBe(de);
+    expect(isSitePlz('1010')).toBe(!de);
+    expect(isSitePlz(' 97286 ')).toBe(de);
+    expect(isSitePlz(null)).toBe(false);
+  });
+
+  it('der Ort aus der Adresse trägt keine PLZ, vier- wie fünfstellig', async () => {
+    const { extractCity } = await import('@/lib/utils/city');
+    expect(extractCity({ address: 'Hauptstraße 5, 97286 Sommerhausen' } as never)).toBe('Sommerhausen');
+    expect(extractCity({ address: 'Hauptstraße 5, 1010 Wien' } as never)).toBe('Wien');
+    expect(extractCity({ address: 'Markt 1, 04109 Leipzig, Deutschland' } as never)).toBe('Leipzig');
+  });
+
+  it('Event-Sitemap nennt /en nur, wo die Seite Englisch ausspielt', async () => {
+    const { readFileSync } = await import('node:fs');
+    const src = readFileSync('src/lib/seo/sitemap-events-shard.ts', 'utf8');
+    expect(src).toContain("const HAS_EN = (getSite().locales as readonly string[]).includes('en');");
+    expect(src).toContain('if (event.title_en && HAS_EN) {');
+  });
+});

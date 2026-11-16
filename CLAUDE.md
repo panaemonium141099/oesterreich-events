@@ -261,6 +261,29 @@ node / next.js
   Fehlschlag Resend, jeder Fehlschlag mit Grund im Log (`[notify-operator]`).
   `sendGenericEmail` wirft nicht, sein Ergebnis immer prüfen. Bis 12.11.2026
   gingen diese Mails an `dev@glatzdev.com`, Fehlschläge standen in keinem Log.
+- **Zwei Seiten aus einer Codebasis (fn-31, 2026-11):** lasstreffen.at und
+  lasstreffen.de sind zwei Images desselben Repos; Land und Domain stehen im
+  Build fest (`SITE_COUNTRY`, alles Seitenabhängige in `src/lib/site/`:
+  `sites.ts` Konfiguration und Feature-Matrix, `regions.ts`, `gemeinden.ts`,
+  `region-filter.ts`, Texte als Überlagerung `messages/de.DE.json`). Eine
+  abgeschaltete Säule antwortet 404 (`src/middleware.ts`). .de spielt Events,
+  Karte, Suche, Länder- und Gemeinde-Seiten und Künstler aus, ohne Konten,
+  ohne Englisch, ohne Werbung. Jede Änderung muss für .at wertgleich
+  bleiben: `npx tsx src/scripts/seo-vergleich.ts --base https://lasstreffen.at
+  --save/--compare` vor und nach dem Deploy. `tests.yml` lässt die
+  Site-Wächter zusätzlich mit `SITE_COUNTRY=DE` laufen. Regionen: AT filtert
+  über `bundesland`, DE über `events.region_id` (dazu `kreis_key`,
+  `gemeinde_key`, geschrieben von `regionKeys`). DB-Objekte je Land:
+  `event_map_points`, `event_stats_cache`, Künstler-RPCs (`p_country`),
+  `followed_artists.country`, `analytics_events.site`. Betrieb: Dienst
+  `nextjs-de` (Container `nextjs-app-de`, Port 3001), Job `deploy-de` nach
+  dem AT-Deploy (Variable `DEPLOY_DE=on`), `deploy-image.sh --site de`,
+  eigener ISR-Wächter und Mitternachts-Timer, Caddy-Baustein `(lt_site)` für
+  beide Seiten. Vorschau `deutschland.lasstreffen.at` (noindex), bis die
+  Domain umgezogen ist. Anleitung und Rückwege:
+  `docs/ops/de-start-2026-11.md`. Postleitzahlen haben auf .de fünf Stellen:
+  nie `\d{4}` fest verdrahten, sondern `isSitePlz` (`src/lib/utils/slugify.ts`);
+  so fehlte bis 16.11. jedem DE-Event die Adresse in den strukturierten Daten.
 - **pg_cron in Supabase:** MV-Refreshes (event_stats_cache 30 min,
   event_map_points stündlich), match-artists stündlich.
 

@@ -16,7 +16,7 @@
 import { locationOutputs } from '@/lib/location/gating';
 import type { Event } from '@/types/events';
 import { extractCity } from '@/lib/utils/city';
-import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { buildEventUrlV2, isSitePlz } from '@/lib/utils/slugify';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
 import { getSite } from '@/lib/site';
 import {
@@ -162,7 +162,9 @@ export function buildJsonLd(event: Event, opts: BuildJsonLdOptions = {}): string
   // kommt aus Venue-/Adress-Parsing, NICHT aus dem Bundesland-Hauptstadt-
   // Fallback der URL-Slugs (der waere fuer eine Adresse schlicht falsch).
   const plz = (event.postal_code ?? '').trim();
-  const plzValid = /^\d{4}$/.test(plz);
+  // Form der PLZ dieser Seite: bis 2026-11-16 fest vier Stellen, damit
+  // bekam auf lasstreffen.de kein Event mit fünfstelliger PLZ eine Adresse.
+  const plzValid = isSitePlz(plz);
   const city = extractCity(event);
   if (event.address || plzValid || city) {
     location.address = {
