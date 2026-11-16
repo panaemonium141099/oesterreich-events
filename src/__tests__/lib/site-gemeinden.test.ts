@@ -77,3 +77,20 @@ describe('Gemeinden dieser Seite', () => {
     expect(n.some(o => o.slug === g.slug)).toBe(false);
   });
 });
+
+describe('Gemeinde-Seite zum Gemeindeschlüssel (Sitemap von lasstreffen.de)', () => {
+  it('lasstreffen.de: der AGS führt zum Slug der Gemeinde-Seite; lasstreffen.at kennt den Weg nicht', async () => {
+    const { siteGemeindeSlugByKey } = await import('@/lib/site/gemeinden');
+    if (getSite().country === 'AT') {
+      expect(siteGemeindeSlugByKey('11000000')).toBe(null);
+      return;
+    }
+    // Berlin (AGS 11000000) ist eine der Städte der Startseite.
+    expect(siteGemeindeSlugByKey('11000000')).toBe('10178-berlin');
+    expect(siteGemeindeBySlug(siteGemeindeSlugByKey('11000000')!)?.name).toBe('Berlin');
+    expect(siteGemeindeSlugByKey('00000000')).toBe(null);
+    // Jede Gemeinde mit Seite ist über ihren Schlüssel erreichbar.
+    const mitSeite = loadGemeindenDe().filter(g => g.lat !== 0 || g.lng !== 0);
+    expect(mitSeite.filter(g => !siteGemeindeSlugByKey(g.ags))).toEqual([]);
+  });
+});
