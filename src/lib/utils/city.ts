@@ -90,13 +90,16 @@ function extractCityFromPart(part: string): string | null {
     lower === 'oesterreich' ||
     lower === 'österreich' ||
     lower === 'austria' ||
-    lower === 'at'
+    lower === 'at' ||
+    lower === 'deutschland' ||
+    lower === 'germany' ||
+    lower === 'de'
   ) {
     return null;
   }
 
-  // Strip leading postal code (Austrian PLZ: 4 digits)
-  const stripped = part.replace(/^\d{4}\s+/, '').trim();
+  // Strip leading postal code (AT 4 Stellen, DE 5)
+  const stripped = part.replace(/^\d{4,5}\s+/, '').trim();
   if (!stripped || stripped.length < 2) return null;
 
   // Reject if the result is still just digits

@@ -743,6 +743,31 @@ Push-Nachrichten und die Alarm-Mails des Wächters (`ALERT_EMAIL`).
 **Offen:** kein Spamfilter; `/var/vmail` ist in keinem Backup; der Wächter
 (`lt-watchdog`) prüft die Maildienste nicht.
 
+### 3.17 lasstreffen.de: zweite Seite aus derselben Codebasis (fn-31, 2026-11-16)
+
+Stand 16.11.2026: Die deutsche Seite läuft als zweiter Container auf demselben
+Server und ist unter der Vorschau-Adresse `deutschland.lasstreffen.at`
+erreichbar (noindex). Öffentlich wird sie, sobald die Domain `lasstreffen.de`
+auf den Server zeigt (Nameserver beim Registrar, Zone in Cloudflare).
+
+- **Umfang:** Events, Karte, Suche, 16 Länder-Seiten, Gemeinde-Seiten,
+  Künstler. Ohne Konten, Englisch, Blog, Festivals, Aktivitäten, Werbung.
+- **Bestand (Prod, 14.11.):** 227.976 DE-Events, 177.613 kommend und sichtbar.
+  Sitemap: 8 Event-Teile, Gemeinden ab fünf eigenen kommenden Events (2.917
+  am 16.11.), 207 Künstlerseiten.
+- **Für .at wertgleich:** jede Änderung mit dem Vergleichsskript belegt
+  (Canonical, hreflang, OG, Robots, Sitemaps gleich; JSON-LD weicht nur in
+  Eventzahlen und Listen ab). Wortlaut der Rechtsseiten von .at unverändert.
+- **Offen:** Domain umziehen und Search Console (braucht den Betreiber);
+  rechtliche Prüfung der Rechtsseiten für Deutschland; Login auf .de (bis
+  dahin kein Folgen von Künstlern); Eventim-Vergütung für eventim.de klären.
+- **Platte:** 88 % nach dem zweiten Image. Am 16.11. erreichte sie 90 % und
+  der ISR-Wächter erzeugte den AT-Container neu. Der Build-Cache (13,7 GB aus
+  der Zeit, als der Server selbst baute) lässt sich nicht leeren. Vor
+  weiterem Wachstum braucht der Server mehr Platz.
+
+Betrieb, Deploy und Rückwege: `docs/ops/de-start-2026-11.md`.
+
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
 1. **Affiliate-ID `J70` ist korrekt** und gehört uns (bestätigt). Eventim-Links im Feed

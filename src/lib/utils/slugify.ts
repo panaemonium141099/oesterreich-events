@@ -33,6 +33,11 @@ import { getSite } from '@/lib/site';
 const SITE_IS_AT = getSite().country === 'AT';
 const PLZ_PATTERN = SITE_IS_AT ? /^\d{4}$/ : /^\d{5}$/;
 const ADDRESS_PLZ_PREFIX = SITE_IS_AT ? /^\d{4}\s+/ : /^\d{5}\s+/;
+
+/** Hat der Wert die Form einer Postleitzahl dieser Seite (AT 4 Stellen, DE 5)? */
+export function isSitePlz(value: string | null | undefined): boolean {
+  return PLZ_PATTERN.test((value ?? '').trim());
+}
 const COUNTRY_WORDS = SITE_IS_AT
   ? ['oesterreich', 'österreich', 'austria', 'at']
   : ['deutschland', 'germany', 'de'];

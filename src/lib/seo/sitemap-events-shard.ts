@@ -40,6 +40,8 @@ import {
 } from '@/lib/seo/sitemap-xml';
 import { getSite } from '@/lib/site';
 
+const HAS_EN = (getSite().locales as readonly string[]).includes('en');
+
 /** Anzahl der Event-Sitemap-Dateien. 8 Achtel a ~10,3k Zeilen (Stand
  *  2026-08-26 bei 82,6k Events) lassen Headroom bis ~200k future events,
  *  bevor ein Shard Googles 50k-URL-Grenze beruehrt (uebersetzte Events
@@ -131,7 +133,9 @@ export async function buildEventsShardResponse(shard: number): Promise<NextRespo
         // fn-17 Slice 3: Events mit gecachter EN-Übersetzung (title_en)
         // bekommen die /en-URL als eigenen Eintrag + hreflang-Verknüpfung.
         // Unübersetzte Events bleiben DE-only (kein Duplicate-Content).
-        if (event.title_en) {
+        // Nur wo die Seite Englisch ausspielt: lasstreffen.de hat kein /en
+        // (404), bis 2026-11-16 standen dort rund 800 /en-URLs je Teil.
+        if (event.title_en && HAS_EN) {
           const alternates = [
             { hreflang: getSite().hreflang, href: `${BASE_URL}${path}` },
             { hreflang: 'en', href: `${BASE_URL}/en${path}` },
