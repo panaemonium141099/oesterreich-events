@@ -10,6 +10,10 @@ import { HubSearchCTA } from '@/components/Hub/HubSearchCTA';
 import { HubSmartCTA } from '@/components/Hub/HubSmartCTA';
 import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { routing, type AppLocale } from '@/i18n/routing';
+import { Link as LocaleLink } from '@/i18n/navigation';
+import { hasFeature } from '@/lib/site/features';
+import { resolveWasTunPlace, wasTunHref } from '@/lib/was-tun/places';
+import { wasTunQuestion } from '@/lib/was-tun/content';
 
 export const revalidate = 3600;
 
@@ -75,6 +79,7 @@ export default async function BundeslandPage({
 
   const t = await getTranslations({ locale, namespace: 'HubLanding' });
   const blName = bundeslandDisplayName(bundesland, locale);
+  const wasTunPlace = hasFeature('activities') ? resolveWasTunPlace(bundesland) : null;
   return (
     <LandingPageShell
       {...data}
@@ -89,6 +94,15 @@ export default async function BundeslandPage({
             surface="bundesland-hub"
             query={t('smartCta', { name: blName })}
           />
+          {/* Events, Aktivitäten und Ausflugsziele gemischt: /was-tun/{bundesland}. */}
+          {wasTunPlace && (
+            <LocaleLink
+              href={wasTunHref(wasTunPlace.slug)}
+              className="text-[13.5px] font-semibold text-[var(--v4-ink-70)] underline underline-offset-4 hover:text-[var(--v4-ink)]"
+            >
+              {wasTunQuestion(wasTunPlace)}
+            </LocaleLink>
+          )}
         </div>
       }
     />

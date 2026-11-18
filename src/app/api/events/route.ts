@@ -6,6 +6,7 @@ import { resolveCategoryParam } from '@/lib/category-classifier/taxonomy';
 import { computeStudentScore, isFreeEvent, MIN_STUDENT_SCORE } from '@/lib/utils/student-score';
 import { SITE_COUNTRY } from '@/lib/site-country';
 import { REGION_COLUMN } from '@/lib/site/region-filter';
+import { splitRegionFromSearch } from '@/lib/search/region-in-search';
 
 // Edge-cached: s-maxage in der Response bestimmt die TTL pro URL.
 // Route bleibt automatisch dynamic wegen request.nextUrl.searchParams.
@@ -148,8 +149,16 @@ export async function GET(request: NextRequest) {
   const priceMax = searchParams.get('priceMax');
   if (priceMax) filters.priceMax = parseFloat(priceMax);
 
+  // Nennt die Suche eine Region („Steiermark", „konzert steiermark"), wird
+  // daraus der Regionsfilter; nur der Rest bleibt Suchtext. Sonst fände die
+  // Textsuche nur Events, die das Wort im Titel oder in der Adresse tragen.
   const search = searchParams.get('search');
-  if (search) filters.search = search;
+  const regionInSearch = search ? splitRegionFromSearch(search) : { regionId: null, rest: '' };
+  const searchRegionId = regionInSearch.regionId;
+  if (search) {
+    const text = searchRegionId ? regionInSearch.rest : search;
+    if (text) filters.search = text;
+  }
 
   // Place-scope filter — set by gemeinde-suggestion clicks. Behaves like
   // "all events for THIS city/village" instead of substring search.
@@ -283,7 +292,7 @@ export async function GET(request: NextRequest) {
       (filters.bundeslands && filters.bundeslands.some(b => b !== 'all')) ||
       (filters.bundesland && filters.bundesland !== 'all');
     const hasCategoryFilter = !!filters.category || (filters.categories && filters.categories.length > 0);
-    const needsCount = !filters.cursor && (filters.limit <= 10000) && (hasBundeslandFilter || !!filters.search || hasCategoryFilter);
+    const needsCount = !filters.cursor && (filters.limit <= 10000) && (hasBundeslandFilter || !!searchRegionId || !!filters.search || hasCategoryFilter);
     // Slim select for the map/list view — every field the cached
      // CachedEvent type lists, plus slug for routing. NO description, no
      // enrichment arrays (audience/vibe/etc.) — those are fetched on
@@ -351,6 +360,9 @@ export async function GET(request: NextRequest) {
     } else if (filters.bundesland && filters.bundesland !== 'all') {
       query = query.eq(REGION_COLUMN, filters.bundesland);
     }
+    // Region aus dem Suchtext: zusätzlich zum gewählten Filter (nennt beides
+    // verschiedene Regionen, gibt es zu Recht keine Treffer).
+    if (searchRegionId) query = query.eq(REGION_COLUMN, searchRegionId);
 
     if (filters.districts && filters.districts.length > 0) {
       // Lowercase here because the DB column is canonical lowercase but the
@@ -851,6 +863,7 @@ export async function GET(request: NextRequest) {
       } else if (filters.bundesland && filters.bundesland !== 'all') {
         unmappedQuery = unmappedQuery.eq(REGION_COLUMN, filters.bundesland);
       }
+      if (searchRegionId) unmappedQuery = unmappedQuery.eq(REGION_COLUMN, searchRegionId);
       if (filters.categories && filters.categories.length > 0) {
         unmappedQuery = unmappedQuery.in('category', filters.categories);
       } else if (filters.category) {

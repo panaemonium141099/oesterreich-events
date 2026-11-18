@@ -443,6 +443,25 @@ node / next.js
 - `src/app/sitemap.xml` ist ein `<sitemapindex>` auf `sitemap-core.xml`,
   `sitemap-events.xml`, `sitemap-activities.xml` (nicht mehr EINE Sitemap) —
   Builder in `src/lib/seo/sitemap-xml.ts`.
+- **„Was kann man in X machen?" (2026-11):** `src/app/[locale]/was-tun/[slug]/page.tsx`,
+  eine Seite je Bundesland, Tourismusregion und Gemeinde (Wien nur als
+  Bundesland), Einstieg `/was-tun`. Anlass: Search Console 08 bis 11/2026,
+  158 von 2,29 Mio. Impressionen bei dieser Frage; die Event-Hubs bleiben
+  unverändert. Aufbau wie /entdecken: Antworttext, Regale (`HubShelves`,
+  Ausflugsziele als eigenes Regal), dann alle Veranstaltungen und alle
+  Ausflugsziele mit Gesamtzahl und Nachladen. Orte in
+  `src/lib/was-tun/places.ts`; Regionen (`regions.ts`) haben keine eigenen
+  Koordinaten, sie hängen an einer Gemeinde der Stammdaten plus Umkreis.
+  Texte, FAQ, JSON-LD pur in `content.ts` (nur Deutsch, /en kanonisiert auf
+  die deutsche URL). `loaders.ts` filtert und sortiert exakt wie
+  `/api/events` und `/api/activities` (Ort als `bundesland` oder `bbox`),
+  sonst meinen erste Seite und Nachladen verschiedene Mengen. OSM bleibt
+  eigene Sektion. Säule `activities` (auf .de 404), unter drei Einträgen
+  noindex. Wächter `src/__tests__/lib/was-tun/`.
+- **Region im Suchtext (2026-11-18):** `/api/events?search=` löst einen
+  Regionsnamen heraus (`src/lib/search/region-in-search.ts`) und setzt den
+  Regionsfilter; nur der Rest bleibt Text. Vorher lieferte „Steiermark" 250
+  Events, der Filter 9.317.
 - `src/app/[locale]/quellen/page.tsx` — Datenquellen & Lizenzen
   (Attributions-Pflichtseite: Deskline-POIs, OpenStreetMap/ODbL, …)
 - `src/app/[bundesland]/…`, `src/app/gemeinde/[slug]`, `src/app/thema/[slug]`,
@@ -591,6 +610,14 @@ npm run import:festivals     # data/festivals-upcoming.json → festivals + fest
   (Pipelines) sind GETRENNTE Speicher — Änderungen in beiden pflegen.
 
 ## Bekannte Issues
+- Zahlen zum selben Ort stimmen nicht überall überein (Befund 2026-11-18,
+  Steiermark): die Textsuche kappt bei 250 Treffern (`SEARCH_MAX_IDS`, die
+  IDs reisen in der URL; „konzert" zeigt 250, egal wie viele es gibt), der
+  Bundesland-Hub zählt geschätzt und mit Qualitätsschwelle (8.542), die
+  Liste von /entdecken und /was-tun exakt und nur mit Koordinaten (9.317),
+  der Gemeinde-Hub zeigt höchstens 60 und nennt diese Zahl. Behoben ist nur
+  der Regionsname im Suchtext. Für die Kappe braucht es eine RPC, die Events
+  samt Zählung liefert statt IDs (Kommentar in `api/events/route.ts`).
 - Supabase Micro: `count(*) exact`/breite Scans auf `events` (~280k rows)
   laufen in Statement-Timeouts — `count: 'planned'`, MVs oder indexierte
   Pfade nutzen (MASTERPLAN §10.1/§10.4).
