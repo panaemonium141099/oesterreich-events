@@ -16,7 +16,8 @@ import type { SiteConfig, SiteFeature } from './sites';
 export const FEATURE_PATHS: Record<SiteFeature, readonly string[]> = {
   blog: ['/blog'],
   festivals: ['/festivals'],
-  activities: ['/aktivitaeten', '/aktivitaet', '/api/activities', '/sitemap-activities.xml'],
+  // /was-tun mischt Events mit Aktivitäten und kennt nur österreichische Regionen.
+  activities: ['/aktivitaeten', '/aktivitaet', '/was-tun', '/api/activities', '/sitemap-activities.xml'],
   artists: ['/artists', '/kuenstler', '/spotify-matches', '/api/artists', '/api/spotify'],
   students: ['/studenten'],
   themes: ['/thema'],

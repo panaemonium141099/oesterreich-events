@@ -223,6 +223,27 @@ export async function GET(): Promise<NextResponse> {
     return new NextResponse('sitemap temporarily unavailable', { status: 500 });
   }
 
+  // ─── 5d. „Was kann man in X machen?" (2026-11) ──────────────────────────
+  // Eine Seite je Bundesland, Tourismusregion und Gemeinde, nur Deutsch
+  // (/en kanonisiert auf die deutsche URL). Dünne Seiten setzen selbst
+  // noindex; auf Seiten ohne die Säule filtert isPathEnabled sie unten weg.
+  try {
+    const { allWasTunSlugs, wasTunHref, WAS_TUN_BASE } = await import('@/lib/was-tun/places');
+    entries.push({ loc: `${BASE_URL}${WAS_TUN_BASE}`, lastmod: toISO(now), changefreq: 'weekly', priority: 0.6 });
+    for (const slug of getSite().country === 'AT' ? allWasTunSlugs() : []) {
+      entries.push({
+        loc: `${BASE_URL}${wasTunHref(slug)}`,
+        lastmod: toISO(now),
+        changefreq: 'daily',
+        // Bundesländer und Regionen (Slug ohne PLZ) vor den Gemeinden.
+        priority: /^\d/.test(slug) ? 0.5 : 0.7,
+      });
+    }
+  } catch (err) {
+    console.error('[sitemap-core] was-tun import failed:', err);
+    return new NextResponse('sitemap temporarily unavailable', { status: 500 });
+  }
+
   // ─── 6. Venue pages (require Supabase) ──────────────────────────────────
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

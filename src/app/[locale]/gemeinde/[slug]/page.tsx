@@ -77,6 +77,9 @@ import { bilingualAlternates } from '@/lib/seo/canonical';
 import { bundeslandDisplayName, placeDisplayName } from '@/lib/i18n/bundesland-names';
 import { dateLocaleFor } from '@/lib/i18n/date-locale';
 import { SITE_COUNTRY } from '@/lib/site-country';
+import { Link as LocaleLink } from '@/i18n/navigation';
+import { resolveWasTunPlace, wasTunHref, wasTunRedirectSlug } from '@/lib/was-tun/places';
+import { wasTunQuestion } from '@/lib/was-tun/content';
 
 function resolveLocale(raw: string): AppLocale {
   return hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
@@ -348,6 +351,10 @@ export default async function GemeindeHubPage({
     : null;
 
   const cityHub = getCityHub(g.slug);
+  // Wien hat keine Gemeinde-Fassung der Seite: der Slug leitet aufs Bundesland um.
+  const wasTunPlace = hasFeature('activities')
+    ? resolveWasTunPlace(wasTunRedirectSlug(g.slug) ?? g.slug)
+    : null;
   const entdeckenScope = {
     bundesland: slugifyBundesland(g.bundesland),
     placeName: g.name,
@@ -463,6 +470,15 @@ export default async function GemeindeHubPage({
               surface="gemeinde-hub"
               query={t('smartCta', { name: placeName })}
             />
+            {/* Events, Aktivitäten und Ausflugsziele gemischt: /was-tun/{slug}. */}
+            {wasTunPlace && (
+              <LocaleLink
+                href={wasTunHref(wasTunPlace.slug)}
+                className="text-[13.5px] font-semibold text-[var(--v4-ink-70)] underline underline-offset-4 hover:text-[var(--v4-ink)]"
+              >
+                {wasTunQuestion(wasTunPlace)}
+              </LocaleLink>
+            )}
           </div>
 
           {/* Regale wie auf /entdecken, darunter alle Events als Poster-Raster.

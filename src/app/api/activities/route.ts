@@ -114,6 +114,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const bundesland = params.get('bundesland')?.toLowerCase() ?? null;
   if (bundesland) query = query.eq('bundesland', bundesland);
 
+  // Rechteck „süd,west,nord,ost" (wie /api/events): die Seiten /was-tun
+  // einer Gemeinde oder Region laden so ihren Umkreis seitenweise nach.
+  const bbox = (params.get('bbox') ?? '').split(',').map(Number);
+  if (bbox.length === 4 && bbox.every(Number.isFinite)) {
+    const [south, west, north, east] = bbox;
+    query = query.gte('lat', south).lte('lat', north).gte('lng', west).lte('lng', east);
+  }
+
   const bezirke = parseBezirkParam(params.get('bezirk'), bundesland);
   if (bezirke.length > 0) query = query.in('bezirk', bezirke);
 

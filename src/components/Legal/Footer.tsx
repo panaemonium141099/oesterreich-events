@@ -80,6 +80,12 @@ export function Footer({ notice }: { notice?: ReactNode } = {}) {
               {t('activities')}
             </Link>
           )}
+          {/* Einstieg der Seiten „Was kann man in X machen?" (nur Deutsch). */}
+          {isPathEnabled('/was-tun') && (
+            <Link href="/was-tun" className={NAV_LINK}>
+              Was tun?
+            </Link>
+          )}
           {isPathEnabled('/wo-ist-was-los') && (
             <Link href="/wo-ist-was-los" className={NAV_LINK}>
               Heatmap
