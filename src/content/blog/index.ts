@@ -261,6 +261,8 @@ import { post as lichterweltenSchwarzlsee2026 } from './posts/lichterwelten-schw
 import { post as musicalstarsInDerVotivkirche2026 } from './posts/musicalstars-in-der-votivkirche-2026';
 import { post as mozartDinnerConcertSalzburg20262026 } from './posts/mozart-dinner-concert-salzburg-2026-2026';
 import { post as lipglossLamettaDasNeueMusikkabarettVonGraziaPatricia2026 } from './posts/lipgloss-lametta-das-neue-musikkabarett-von-grazia-patricia-2026';
+import { post as baronVonMuenchhausen2026 } from './posts/baron-von-muenchhausen-2026';
+import { post as dieSchoeneUndDasBiest2027 } from './posts/die-schoene-und-das-biest-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -534,6 +536,8 @@ export const ALL_POSTS: FestivalPost[] = [
   musicalstarsInDerVotivkirche2026,
   mozartDinnerConcertSalzburg20262026,
   lipglossLamettaDasNeueMusikkabarettVonGraziaPatricia2026,
+  baronVonMuenchhausen2026,
+  dieSchoeneUndDasBiest2027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
