@@ -263,6 +263,8 @@ import { post as mozartDinnerConcertSalzburg20262026 } from './posts/mozart-dinn
 import { post as lipglossLamettaDasNeueMusikkabarettVonGraziaPatricia2026 } from './posts/lipgloss-lametta-das-neue-musikkabarett-von-grazia-patricia-2026';
 import { post as baronVonMuenchhausen2026 } from './posts/baron-von-muenchhausen-2026';
 import { post as dieSchoeneUndDasBiest2027 } from './posts/die-schoene-und-das-biest-2027';
+import { post as tonkuenstlerNeujahrskonzert2027 } from './posts/tonkuenstler-neujahrskonzert-2027';
+import { post as kakaozeremonieYogaInInnsbruck2027 } from './posts/kakaozeremonie-yoga-in-innsbruck-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -538,6 +540,8 @@ export const ALL_POSTS: FestivalPost[] = [
   lipglossLamettaDasNeueMusikkabarettVonGraziaPatricia2026,
   baronVonMuenchhausen2026,
   dieSchoeneUndDasBiest2027,
+  tonkuenstlerNeujahrskonzert2027,
+  kakaozeremonieYogaInInnsbruck2027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
