@@ -9,8 +9,13 @@
  *
  * Seitenweise über `cursor` (aus `nextCursor` der vorigen Antwort).
  * `countOnly=true` liefert nur `{ total }` für die Vorschau im Filter.
+ *
+ * `ids=<Kurz-ID,…>` (1 bis 48 Kurz-IDs aus dem Karten-Snapshot, je 12 Hex)
+ * liefert stattdessen genau diese Events als Karten, in der Reihenfolge der
+ * IDs: die Karte der App füllt damit einen angetippten Punkt oder Cluster.
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { createTranslator } from 'next-intl';
 import { GET as eventsGET } from '@/app/api/events/route';
 import { toAppEventCard, type AppTranslate } from '@/lib/app-api/landing';
@@ -29,8 +34,53 @@ const ALLOWED = [
 const DEFAULT_LIMIT = 30;
 const MAX_LIMIT = 60;
 
+const SHORT_ID = /^[0-9a-f]{12}$/;
+/** Obergrenze der Details-RPC je Aufruf (wie /api/events/details). */
+const MAX_IDS = 48;
+
+async function cardContext() {
+  const messages = await loadMessages('de', getSite());
+  const t = createTranslator({ locale: 'de', messages }) as unknown as AppTranslate;
+  return { t, locale: 'de' as const, origin: SITE_ORIGIN, mapboxToken: null };
+}
+
+/** Karten zu Kurz-IDs des Karten-Snapshots (RPC `get_event_details_by_short_ids`). */
+async function eventsByShortIds(raw: string) {
+  const ids = raw.toLowerCase().split(',').map(id => id.trim()).filter(Boolean);
+  if (ids.length === 0 || ids.length > MAX_IDS || ids.some(id => !SHORT_ID.test(id))) {
+    return NextResponse.json({ error: `ids: 1 bis ${MAX_IDS} Kurz-IDs (12 Hex) erwartet` }, { status: 400 });
+  }
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { persistSession: false } },
+  );
+  const { data, error } = await supabase.rpc('get_event_details_by_short_ids', { short_ids: ids });
+  if (error) {
+    console.error('[app-api] events by ids:', error.message);
+    return NextResponse.json(
+      { error: 'Die Events sind gerade nicht verfügbar.' },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+  const ctx = await cardContext();
+  const shortId = (id: string) => id.replace(/-/g, '').slice(0, 12).toLowerCase();
+  const byShortId = new Map(((data ?? []) as Event[]).map(event => [shortId(event.id), event]));
+  const events = ids.flatMap(id => {
+    const event = byShortId.get(id);
+    return event?.title ? [toAppEventCard(event, ctx)] : [];
+  });
+  return NextResponse.json(
+    { events, total: events.length, nextCursor: null, hasMore: false },
+    { headers: { 'Cache-Control': 'public, max-age=60, s-maxage=900, stale-while-revalidate=86400' } },
+  );
+}
+
 export async function GET(request: NextRequest) {
   const source = request.nextUrl.searchParams;
+  const ids = source.get('ids');
+  if (ids !== null) return eventsByShortIds(ids);
+
   const params = new URLSearchParams();
   for (const key of ALLOWED) {
     const value = source.get(key);
@@ -61,9 +111,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ total: body.total ?? 0 }, { headers: { 'Cache-Control': cacheControl } });
   }
 
-  const messages = await loadMessages('de', getSite());
-  const t = createTranslator({ locale: 'de', messages }) as unknown as AppTranslate;
-  const ctx = { t, locale: 'de' as const, origin: SITE_ORIGIN, mapboxToken: null };
+  const ctx = await cardContext();
 
   return NextResponse.json(
     {
