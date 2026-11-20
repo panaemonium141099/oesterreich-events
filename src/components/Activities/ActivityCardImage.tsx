@@ -12,28 +12,7 @@
  */
 
 import { useState } from 'react';
-
-interface PickedImage {
-  url: string;
-  credit: string | null;
-}
-
-/** Erstes brauchbares Bild + dedupliziertes Credit (Muster ActivityHero). */
-function pickImage(images: unknown): PickedImage | null {
-  if (!Array.isArray(images)) return null;
-  for (const img of images) {
-    if (img == null || typeof img !== 'object') continue;
-    const cand = img as { urls?: unknown; copyright?: unknown; author?: unknown };
-    if (!Array.isArray(cand.urls)) continue;
-    const url = cand.urls.find((u): u is string => typeof u === 'string' && u.trim() !== '');
-    if (!url) continue;
-    const creditParts = [cand.copyright, cand.author]
-      .filter((v): v is string => typeof v === 'string' && v.trim() !== '')
-      .map((v) => v.trim());
-    return { url, credit: [...new Set(creditParts)].join(' · ') || null };
-  }
-  return null;
-}
+import { pickActivityImage } from '@/lib/activities/card-image';
 
 interface ActivityCardImageProps {
   /** Roh-jsonb der Aktivitaet (PublicActivityImage[] — nie validiert). */
@@ -56,7 +35,7 @@ export function ActivityCardImage({
 }: ActivityCardImageProps) {
   const [imageFailed, setImageFailed] = useState(false);
 
-  const image = pickImage(images);
+  const image = pickActivityImage(images);
   const showImage = image != null && !imageFailed;
 
   return (
