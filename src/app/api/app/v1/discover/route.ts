@@ -13,6 +13,7 @@
  */
 import { NextResponse } from 'next/server';
 import { unstable_cache } from 'next/cache';
+import { resilient } from '@/lib/app-api/resilient';
 import { createClient } from '@supabase/supabase-js';
 import { createTranslator } from 'next-intl';
 import { planShelves } from '@/components/Discover/v4/shelves-select';
@@ -68,17 +69,25 @@ const getAppDiscoverCached = unstable_cache(buildAppDiscover, ['app-discover-v1'
   revalidate: REVALIDATE_SECONDS,
 });
 
+// Gleichzeitige Anfragen teilen einen Lauf; nach einem Fehlschlag eine Minute
+// Pause und so lange die letzte gelungene Antwort (siehe resilient.ts).
+const get = resilient(() => getAppDiscoverCached());
+
 export async function GET() {
   try {
-    const discover = await getAppDiscoverCached();
-    return NextResponse.json(discover, {
-      headers: { 'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=3600' },
+    const { value, stale } = await get();
+    return NextResponse.json(value, {
+      headers: {
+        // Eine alte Antwort soll kein Zwischenspeicher weiterreichen.
+        'Cache-Control': stale ? 'no-store' : 'public, max-age=60, s-maxage=300, stale-while-revalidate=3600',
+        ...(stale ? { 'X-LT-Stale': '1' } : {}),
+      },
     });
   } catch (err) {
     console.error('[app-api] discover:', err instanceof Error ? err.message : err);
     return NextResponse.json(
       { error: 'Die Übersicht ist gerade nicht verfügbar.' },
-      { status: 503, headers: { 'Retry-After': '30', 'Cache-Control': 'no-store' } },
+      { status: 503, headers: { 'Retry-After': '60', 'Cache-Control': 'no-store' } },
     );
   }
 }
