@@ -20,7 +20,7 @@ import type { Event, EventFilters } from '@/types/events';
 import { MAP_FLAG_APPROXIMATE } from '@/lib/location/gating';
 import { SITE_COUNTRY } from '@/lib/site-country';
 
-interface MapPointsPayload {
+export interface MapPointsPayload {
   v: number;
   n: number;
   generatedAt?: string;
@@ -77,7 +77,8 @@ export function pointsEligible(filters: EventFilters): boolean {
  *  sie daran und laden das volle Event nach. */
 export type PointEvent = Event;
 
-function decode(p: MapPointsPayload): PointEvent[] {
+/** Auch von der App-API genutzt (src/lib/app-api/discover-data.ts), die den Snapshot serverseitig liest. */
+export function decodeMapPoints(p: MapPointsPayload): PointEvent[] {
   const out = new Array<PointEvent>(p.n);
   for (let i = 0; i < p.n; i++) {
     const flags = p.flags[i] ?? 0;
@@ -141,7 +142,7 @@ export async function fetchMapPointEvents(): Promise<PointEvent[] | null> {
       if (!payload || payload.v !== 2 || !payload.n || !Array.isArray(payload.ids)) {
         return null;
       }
-      const events = decode(payload);
+      const events = decodeMapPoints(payload);
       cache = { at: Date.now(), events };
       return events;
     } catch {
