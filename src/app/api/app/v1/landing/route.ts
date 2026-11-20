@@ -13,6 +13,7 @@
  */
 import { NextResponse } from 'next/server';
 import { unstable_cache } from 'next/cache';
+import { resilient } from '@/lib/app-api/resilient';
 import { createTranslator } from 'next-intl';
 import { getLandingData } from '@/lib/v4/get-landing-data';
 import { toAppLanding, type AppLanding, type AppTranslate } from '@/lib/app-api/landing';
@@ -36,17 +37,25 @@ const getAppLandingCached = unstable_cache(buildAppLanding, ['app-landing-v1'], 
   revalidate: REVALIDATE_SECONDS,
 });
 
+// Gleichzeitige Anfragen teilen einen Lauf; nach einem Fehlschlag eine Minute
+// Pause und so lange die letzte gelungene Antwort (siehe resilient.ts).
+const get = resilient(() => getAppLandingCached());
+
 export async function GET() {
   try {
-    const landing = await getAppLandingCached();
-    return NextResponse.json(landing, {
-      headers: { 'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=3600' },
+    const { value, stale } = await get();
+    return NextResponse.json(value, {
+      headers: {
+        // Eine alte Antwort soll kein Zwischenspeicher weiterreichen.
+        'Cache-Control': stale ? 'no-store' : 'public, max-age=60, s-maxage=300, stale-while-revalidate=3600',
+        ...(stale ? { 'X-LT-Stale': '1' } : {}),
+      },
     });
   } catch (err) {
     console.error('[app-api] landing:', err instanceof Error ? err.message : err);
     return NextResponse.json(
       { error: 'Die Startseite ist gerade nicht verfügbar.' },
-      { status: 503, headers: { 'Retry-After': '30', 'Cache-Control': 'no-store' } },
+      { status: 503, headers: { 'Retry-After': '60', 'Cache-Control': 'no-store' } },
     );
   }
 }
