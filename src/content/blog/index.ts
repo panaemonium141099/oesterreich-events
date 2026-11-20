@@ -267,6 +267,7 @@ import { post as tonkuenstlerNeujahrskonzert2027 } from './posts/tonkuenstler-ne
 import { post as kakaozeremonieYogaInInnsbruck2027 } from './posts/kakaozeremonie-yoga-in-innsbruck-2027';
 import { post as whiskydenkerSSwingDongDingWeihnachtskonzert2026 } from './posts/whiskydenker-s-swing-dong-ding-weihnachtskonzert-2026';
 import { post as masterBootRecordFulci2026 } from './posts/master-boot-record-fulci-2026';
+import { post as schubertiade2027 } from './posts/schubertiade-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -546,6 +547,7 @@ export const ALL_POSTS: FestivalPost[] = [
   kakaozeremonieYogaInInnsbruck2027,
   whiskydenkerSSwingDongDingWeihnachtskonzert2026,
   masterBootRecordFulci2026,
+  schubertiade2027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
