@@ -229,6 +229,7 @@ export async function GET(): Promise<NextResponse> {
   // noindex; auf Seiten ohne die Säule filtert isPathEnabled sie unten weg.
   try {
     const { allWasTunSlugs, wasTunHref, WAS_TUN_BASE } = await import('@/lib/was-tun/places');
+    const { WAS_TUN_THEMES } = await import('@/lib/was-tun/themes');
     entries.push({ loc: `${BASE_URL}${WAS_TUN_BASE}`, lastmod: toISO(now), changefreq: 'weekly', priority: 0.6 });
     for (const slug of getSite().country === 'AT' ? allWasTunSlugs() : []) {
       entries.push({
@@ -238,6 +239,20 @@ export async function GET(): Promise<NextResponse> {
         // Bundesländer und Regionen (Slug ohne PLZ) vor den Gemeinden.
         priority: /^\d/.test(slug) ? 0.5 : 0.7,
       });
+      // Themenseiten („bei Regen", „mit Kindern") nur für Bundesländer und
+      // Regionen: dort trägt jedes Thema Bestand. Die Themenseiten der
+      // Gemeinden sind von ihrer Grundseite verlinkt und setzen ohne Bestand
+      // noindex; in der Sitemap stünden sonst rund 12.500 teils leere URLs.
+      if (!/^\d/.test(slug)) {
+        for (const theme of WAS_TUN_THEMES) {
+          entries.push({
+            loc: `${BASE_URL}${wasTunHref(slug, theme.slug)}`,
+            lastmod: toISO(now),
+            changefreq: 'daily',
+            priority: 0.5,
+          });
+        }
+      }
     }
   } catch (err) {
     console.error('[sitemap-core] was-tun import failed:', err);

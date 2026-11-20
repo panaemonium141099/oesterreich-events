@@ -1,7 +1,8 @@
 /**
  * `/was-tun` — Einstieg der Seiten „Was kann man in X machen?": alle
- * Bundesländer und Tourismusregionen als Links. Rein statisch (keine
- * Abfrage); die Gemeinden hängen an ihren Bundesland-Seiten.
+ * Bundesländer, Tourismusregionen und Gemeinden als Links. Rein statisch
+ * (keine Abfrage). Bis 2026-11-20 fehlten hier die Gemeinden: es gab ihre
+ * Seiten, aber von der Übersicht führte kein Link dorthin.
  */
 
 import type { Metadata } from 'next';
@@ -11,7 +12,14 @@ import { routing } from '@/i18n/routing';
 import { Link as LocaleLink } from '@/i18n/navigation';
 import { deOnlyAlternates } from '@/lib/seo/canonical';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
-import { bundeslandLinks, regionLinks, WAS_TUN_BASE, type WasTunLink } from '@/lib/was-tun/places';
+import {
+  bundeslandLinks,
+  regionLinks,
+  relatedPlaces,
+  resolveWasTunPlace,
+  WAS_TUN_BASE,
+  type WasTunLink,
+} from '@/lib/was-tun/places';
 
 export const revalidate = 86400;
 
@@ -65,8 +73,8 @@ export default async function WasTunIndexPage({ params }: { params: Promise<{ lo
             Was kann man in Österreich machen?
           </h1>
           <p className="mt-4 mb-0 text-[var(--v4-ink-70)] leading-relaxed max-w-2xl">
-            Wähle ein Bundesland oder eine Region. Jede Seite zeigt Veranstaltungen, Ausflugsziele und
-            Freizeitaktivitäten gemischt in einer Liste, die Gemeinden findest du auf der Seite ihres Bundeslands.
+            Wähle ein Bundesland, eine Region oder deine Gemeinde. Jede Seite zeigt alle Veranstaltungen,
+            Ausflugsziele und Freizeitaktivitäten des Orts, auch nach Themen wie bei Regen, mit Kindern oder am Wochenende.
           </p>
         </header>
 
@@ -85,6 +93,23 @@ export default async function WasTunIndexPage({ params }: { params: Promise<{ lo
                 <h3 className="m-0 mb-3 text-[15px] font-bold text-[var(--v4-ink-70)]">{b.name}</h3>
                 <Chips links={links} />
               </div>
+            );
+          })}
+        </section>
+
+        <section className="mt-12">
+          <h2 className={H2}>Gemeinden</h2>
+          {bundeslaender.map((b) => {
+            const place = resolveWasTunPlace(b.id);
+            const links = place ? relatedPlaces(place).gemeinden : [];
+            if (links.length === 0) return null;
+            return (
+              <details key={b.id} className="mb-4">
+                <summary className="cursor-pointer text-[15px] font-bold text-[var(--v4-ink-70)]">
+                  {b.name} ({links.length})
+                </summary>
+                <div className="mt-4"><Chips links={links} /></div>
+              </details>
             );
           })}
         </section>

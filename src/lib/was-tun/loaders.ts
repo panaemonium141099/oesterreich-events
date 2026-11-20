@@ -12,6 +12,8 @@
  *
  * Der Ort ist entweder die Bundesland-Spalte oder ein Rechteck um den
  * Mittelpunkt (`scopeParams`: derselbe Parameter geht an die API).
+ * Ein Thema (themes.ts) kommt als weitere API-Parameter dazu; hier wirken
+ * genau die, die `applyEventParams` und `applyActivityParams` kennen.
  *
  * Fehler degradieren zu leeren Listen: die Seite fällt dann unter die
  * Index-Schwelle statt mit 500 zu antworten.
@@ -25,6 +27,7 @@ import { loadNearbyOsmPoisCached, type NearbyOsmPoi } from '@/lib/osm/nearby-poi
 import { SITE_COUNTRY } from '@/lib/site-country';
 import type { WasTunActivity, WasTunEvent } from './content';
 import type { WasTunPlace } from './places';
+import { themeFilters, type WasTunTheme } from './themes';
 
 /** Größe der ersten Seite je Art. */
 export const EVENTS_FIRST_PAGE = 40;
@@ -69,19 +72,31 @@ function eventsInScope(scopeKey: string, select: string, count: boolean) {
     .eq('country', SITE_COUNTRY)
     .not('latitude', 'is', null)
     .not('longitude', 'is', null);
-  const [kind, value] = scopeKey.split('=');
-  if (kind === 'bundesland') {
-    query = query.eq('bundesland', value);
-  } else {
-    const [south, west, north, east] = value.split(',').map(Number);
+  const params = new URLSearchParams(scopeKey);
+  const bundesland = params.get('bundesland');
+  const bbox = params.get('bbox');
+  if (bundesland) {
+    query = query.eq('bundesland', bundesland);
+  } else if (bbox) {
+    const [south, west, north, east] = bbox.split(',').map(Number);
     query = query.gte('latitude', south).lte('latitude', north).gte('longitude', west).lte('longitude', east);
   }
+  // Themenfilter, Zeile für Zeile wie in /api/events.
+  const categories = params.get('categories');
+  if (categories) query = query.in('category', categories.split(',').map((c) => c.trim()).filter(Boolean));
+  const dateFrom = params.get('dateFrom');
+  if (dateFrom) query = query.gte('start_date', dateFrom);
+  const dateTo = params.get('dateTo');
+  if (dateTo) query = query.lte('start_date', `${dateTo}T23:59:59`);
+  const priceTier = params.get('priceTier');
+  if (priceTier) query = query.eq('price_tier', priceTier);
   return query;
 }
 
-function scopeKeyOf(place: WasTunPlace): string {
-  const p = scopeParams(place);
-  return p.bundesland ? `bundesland=${p.bundesland}` : `bbox=${p.bbox}`;
+/** Parameter in fester Reihenfolge: Cache-Schlüssel und API-Aufruf zugleich. */
+function toKey(params: Record<string, string>): string {
+  const sorted = Object.keys(params).sort().map((k) => [k, params[k]] as [string, string]);
+  return new URLSearchParams(sorted).toString();
 }
 
 const loadEventsCached = unstable_cache(
@@ -104,7 +119,7 @@ const loadEventsCached = unstable_cache(
       pool: pool.error || !pool.data ? [] : (pool.data as unknown as WasTunEvent[]),
     };
   },
-  ['was-tun-events-v2'],
+  ['was-tun-events-v3'],
   { revalidate: 3600, tags: ['event'] },
 );
 
@@ -117,13 +132,18 @@ const loadActivitiesCached = unstable_cache(
       .select(ACTIVITY_COLUMNS, { count: 'exact' })
       .eq('visible', true)
       .eq('is_closed', false);
-    const [kind, value] = scopeKey.split('=');
-    if (kind === 'bundesland') {
-      query = query.eq('bundesland', value);
-    } else {
-      const [south, west, north, east] = value.split(',').map(Number);
+    const params = new URLSearchParams(scopeKey);
+    const bundesland = params.get('bundesland');
+    const bbox = params.get('bbox');
+    if (bundesland) {
+      query = query.eq('bundesland', bundesland);
+    } else if (bbox) {
+      const [south, west, north, east] = bbox.split(',').map(Number);
       query = query.gte('lat', south).lte('lat', north).gte('lng', west).lte('lng', east);
     }
+    // Themenfilter wie in /api/activities.
+    const setting = params.get('setting');
+    if (setting) query = query.eq('setting', setting);
     const { data, error, count } = await query
       .order('quality_score', { ascending: false })
       .order('id', { ascending: true })
@@ -140,7 +160,7 @@ const loadActivitiesCached = unstable_cache(
       nextCursor: hasMore && last ? encodeActivityCursor({ q: last.quality_score, id: last.id }) : null,
     };
   },
-  ['was-tun-activities-v2'],
+  ['was-tun-activities-v3'],
   { revalidate: 3600, tags: ['activity'] },
 );
 
@@ -156,18 +176,28 @@ export interface WasTunData {
   activityCursor: string | null;
   /** OSM-Ziele: eigene Sektion mit eigener Attribution, nie gemischt (ODbL). */
   osmPois: NearbyOsmPoi[];
+  /** Parameter fürs Nachladen (Ort plus Thema); null, wenn das Thema die Art nicht zeigt. */
+  eventApiParams: Record<string, string> | null;
+  activityApiParams: Record<string, string> | null;
 }
 
 /**
  * Alles, was die Seite zeigt. generateMetadata und die Seite rufen mit
  * denselben Argumenten auf und treffen dieselben Cache-Einträge.
  */
-export async function loadWasTunData(place: WasTunPlace): Promise<WasTunData> {
-  const key = scopeKeyOf(place);
+export async function loadWasTunData(place: WasTunPlace, theme: WasTunTheme | null = null): Promise<WasTunData> {
+  const scope = scopeParams(place);
+  const filters = themeFilters(theme);
+  const eventApiParams = filters.events ? { ...scope, ...filters.events } : null;
+  const activityApiParams = filters.activities ? { ...scope, ...filters.activities } : null;
+
+  const noEvents = { events: [] as WasTunEvent[], total: 0, pool: [] as WasTunEvent[] };
+  const noActivities = { activities: [] as WasTunActivity[], total: 0, nextCursor: null as string | null };
   const [ev, act, osmPois] = await Promise.all([
-    loadEventsCached(key),
-    loadActivitiesCached(key),
-    place.center
+    eventApiParams ? loadEventsCached(toKey(eventApiParams)) : Promise.resolve(noEvents),
+    activityApiParams ? loadActivitiesCached(toKey(activityApiParams)) : Promise.resolve(noActivities),
+    // OSM-Ziele nur auf der Grundseite: sie tragen keine Themen-Kennzeichen.
+    place.center && !theme
       ? loadNearbyOsmPoisCached(place.center.lat, place.center.lng, place.center.radiusKm)
       : Promise.resolve([] as NearbyOsmPoi[]),
   ]);
@@ -179,5 +209,7 @@ export async function loadWasTunData(place: WasTunPlace): Promise<WasTunData> {
     activityTotal: act.total,
     activityCursor: act.nextCursor,
     osmPois,
+    eventApiParams,
+    activityApiParams,
   };
 }
