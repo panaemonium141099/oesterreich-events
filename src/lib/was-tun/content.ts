@@ -17,6 +17,7 @@ import { activityCanonicalUrl } from '@/lib/activities/indexability';
 import { getSite } from '@/lib/site';
 import { DE_LOCALE } from '@/lib/site/intl';
 import { WAS_TUN_BASE, type WasTunPlace } from './places';
+import type { WasTunTheme } from './themes';
 
 export interface WasTunEvent extends EventForUrl {
   id: string;
@@ -100,8 +101,13 @@ export function viennaDayMonth(iso: string): string {
   }).format(d);
 }
 
-export function wasTunQuestion(place: WasTunPlace): string {
-  return `Was kann man ${place.where} machen?`;
+/** Ortsangabe samt Thema: „in Lofer bei Regen". */
+function whereOf(place: WasTunPlace, theme: WasTunTheme | null): string {
+  return theme ? `${place.where} ${theme.phrase}` : place.where;
+}
+
+export function wasTunQuestion(place: WasTunPlace, theme: WasTunTheme | null = null): string {
+  return `Was kann man ${whereOf(place, theme)} machen?`;
 }
 
 function countParts(totals: WasTunTotals): string[] {
@@ -113,16 +119,20 @@ function countParts(totals: WasTunTotals): string[] {
 
 const TITLE_MAX = 60;
 
-export function buildWasTunMeta(place: WasTunPlace, totals: WasTunTotals): { title: string; description: string } {
-  const question = wasTunQuestion(place);
+export function buildWasTunMeta(
+  place: WasTunPlace,
+  totals: WasTunTotals,
+  theme: WasTunTheme | null = null,
+): { title: string; description: string } {
+  const question = wasTunQuestion(place, theme);
   const long = `${question} Events & Ausflugsziele`;
   const title = long.length <= TITLE_MAX ? long : question;
 
   const brand = getSite().brand;
   const parts = countParts(totals);
   const description = parts.length > 0
-    ? `${capitalize(place.where)}: ${parts.join(' und ')} auf einen Blick. Mit Terminen, Karte und Infos auf ${brand}.`
-    : `Veranstaltungen, Ausflugsziele und Freizeitaktivitäten ${place.where} auf ${brand}.`;
+    ? `${capitalize(whereOf(place, theme))}: ${parts.join(' und ')} auf einen Blick. Mit Terminen, Karte und Infos auf ${brand}.`
+    : `Veranstaltungen, Ausflugsziele und Freizeitaktivitäten ${whereOf(place, theme)} auf ${brand}.`;
   return { title, description };
 }
 
@@ -137,13 +147,22 @@ export function scopeSentence(place: WasTunPlace): string | null {
  * Die Antwort auf die Frage der Seite, aus den Daten gebaut. Steht als
  * Einleitung unter der Überschrift und als erste FAQ-Antwort.
  */
-export function buildAnswer(place: WasTunPlace, totals: WasTunTotals, activities: WasTunActivity[]): string {
+export function buildAnswer(
+  place: WasTunPlace,
+  totals: WasTunTotals,
+  activities: WasTunActivity[],
+  theme: WasTunTheme | null = null,
+): string {
   const where = capitalize(place.where);
   const parts = countParts(totals);
   if (parts.length === 0) {
-    return `${where} sind aktuell keine Veranstaltungen und Ausflugsziele eingetragen.`;
+    return theme
+      ? `${where} ist ${theme.phrase} aktuell nichts eingetragen. ${theme.note}`
+      : `${where} sind aktuell keine Veranstaltungen und Ausflugsziele eingetragen.`;
   }
-  let text = `${where} findest du aktuell ${parts.join(' und ')}.`;
+  let text = theme
+    ? `${where} gibt es ${theme.phrase} ${parts.join(' und ')}. ${theme.note}`
+    : `${where} findest du aktuell ${parts.join(' und ')}.`;
   const top = distinctNames(activities.map((a) => a.name), 3);
   if (top.length > 0) text += ` Zu den Ausflugszielen gehören ${joinNames(top)}.`;
   return text;
@@ -158,10 +177,12 @@ export function buildWasTunFaq(
   totals: WasTunTotals,
   events: WasTunEvent[],
   activities: WasTunActivity[],
+  theme: WasTunTheme | null = null,
 ): FAQEntry[] {
   if (totals.events === 0 && totals.activities === 0) return [];
+  const where = whereOf(place, theme);
   const entries: FAQEntry[] = [
-    { question: wasTunQuestion(place), answer: buildAnswer(place, totals, activities) },
+    { question: wasTunQuestion(place, theme), answer: buildAnswer(place, totals, activities, theme) },
   ];
 
   // Je Titel der nächste Termin: eine tägliche Serie füllt nicht alle drei Plätze.
@@ -174,7 +195,7 @@ export function buildWasTunFaq(
       return day ? `${title} (${day})` : title;
     });
     entries.push({
-      question: `Welche Veranstaltungen gibt es demnächst ${place.where}?`,
+      question: theme ? `Welche Veranstaltungen gibt es ${where}?` : `Welche Veranstaltungen gibt es demnächst ${where}?`,
       answer: `Die nächsten Termine: ${joinNames(list)}. Alle weiteren Veranstaltungen stehen in der Liste auf dieser Seite.`,
     });
   }
@@ -182,8 +203,8 @@ export function buildWasTunFaq(
   const names = distinctNames(activities.map((a) => a.name), 5);
   if (names.length > 0) {
     entries.push({
-      question: `Welche Ausflugsziele gibt es ${place.where}?`,
-      answer: `Zu den Ausflugszielen und Freizeitaktivitäten ${place.where} gehören ${joinNames(names)}.`,
+      question: `Welche Ausflugsziele gibt es ${where}?`,
+      answer: `Zu den Ausflugszielen und Freizeitaktivitäten ${where} gehören ${joinNames(names)}.`,
     });
   }
   return entries;
@@ -195,8 +216,8 @@ export function buildWasTunFaq(
 
 const ITEM_LIST_LIMIT = 10;
 
-export function wasTunCanonicalUrl(slug: string): string {
-  return `${getSite().url}${WAS_TUN_BASE}/${slug}`;
+export function wasTunCanonicalUrl(slug: string, theme: WasTunTheme | null = null): string {
+  return `${getSite().url}${WAS_TUN_BASE}/${slug}${theme ? `/${theme.slug}` : ''}`;
 }
 
 export function buildWasTunJsonLd(
@@ -204,9 +225,11 @@ export function buildWasTunJsonLd(
   totals: WasTunTotals,
   events: WasTunEvent[],
   activities: WasTunActivity[],
+  theme: WasTunTheme | null = null,
 ): string {
   const site = getSite().url;
-  const url = wasTunCanonicalUrl(place.slug);
+  const url = wasTunCanonicalUrl(place.slug, theme);
+  const where = whereOf(place, theme);
 
   const crumbs = [
     { name: 'Home', item: site },
@@ -214,7 +237,8 @@ export function buildWasTunJsonLd(
     ...(place.kind === 'bundesland'
       ? []
       : [{ name: place.bundeslandName, item: `${site}${WAS_TUN_BASE}/${place.bundeslandId}` }]),
-    { name: place.name, item: url },
+    { name: place.name, item: wasTunCanonicalUrl(place.slug) },
+    ...(theme ? [{ name: theme.label, item: url }] : []),
   ];
 
   const graph: unknown[] = [
@@ -231,7 +255,7 @@ export function buildWasTunJsonLd(
     graph.push({
       '@type': 'ItemList',
       '@id': `${url}#events`,
-      name: `Veranstaltungen ${place.where}`,
+      name: `Veranstaltungen ${where}`,
       numberOfItems: totals.events,
       itemListElement: eventItems.map((e, idx) => ({
         '@type': 'ListItem', position: idx + 1, url: `${site}${buildEventUrlV2(e)}`, name: e.title,
@@ -243,7 +267,7 @@ export function buildWasTunJsonLd(
     graph.push({
       '@type': 'ItemList',
       '@id': `${url}#activities`,
-      name: `Ausflugsziele und Freizeitaktivitäten ${place.where}`,
+      name: `Ausflugsziele und Freizeitaktivitäten ${where}`,
       numberOfItems: totals.activities,
       itemListElement: activityItems.map((a, idx) => ({
         '@type': 'ListItem', position: idx + 1, url: activityCanonicalUrl(a.slug), name: a.name,
@@ -252,7 +276,7 @@ export function buildWasTunJsonLd(
   }
 
   // Erst ab drei Fragen (Regel von buildFAQPageSchema).
-  const faqPage = buildFAQPageSchema(buildWasTunFaq(place, totals, events, activities));
+  const faqPage = buildFAQPageSchema(buildWasTunFaq(place, totals, events, activities, theme));
   if (faqPage) graph.push(faqPage);
 
   return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/<\/script>/gi, '<\\/script>');

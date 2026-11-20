@@ -127,8 +127,8 @@ export function resolveWasTunPlace(slug: string): WasTunPlace | null {
   return null;
 }
 
-export function wasTunHref(slug: string): string {
-  return `${WAS_TUN_BASE}/${slug}`;
+export function wasTunHref(slug: string, themeSlug?: string): string {
+  return `${WAS_TUN_BASE}/${slug}${themeSlug ? `/${themeSlug}` : ''}`;
 }
 
 export interface WasTunLink {

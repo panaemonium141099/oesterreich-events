@@ -458,6 +458,17 @@ node / next.js
   sonst meinen erste Seite und Nachladen verschiedene Mengen. OSM bleibt
   eigene Sektion. Säule `activities` (auf .de 404), unter drei Einträgen
   noindex. Wächter `src/__tests__/lib/was-tun/`.
+  **Themen** (`/was-tun/[slug]/[thema]`, seit 2026-11-20): heute, am
+  Wochenende, bei Regen, draußen, mit Kindern, kostenlos. Ein Thema ist EINE
+  Zeile in `src/lib/was-tun/themes.ts` und gilt dann für jeden Ort; es
+  besteht nur aus Parametern, die `/api/events` und `/api/activities`
+  verstehen, und `loaders.ts` wendet dieselben an. Neuer Parameter = an
+  beiden Stellen nachziehen (Wächter `themes.test.ts`). Gemessen, was trägt:
+  `events.setting` ist nur bei 4 % gefüllt (taugt nicht), `price_tier =
+  'gratis'` bei rund 6 %, Aktivitäten tragen `setting` fast vollständig,
+  aber kein Familien-Kennzeichen; jede Themenseite sagt deshalb in einem
+  Satz, woran sie die Auswahl festmacht. Sitemap führt Themenseiten nur für
+  Bundesländer und Regionen. Ansicht beider Routen: `WasTunView.tsx`.
 - **Region im Suchtext (2026-11-18):** `/api/events?search=` löst einen
   Regionsnamen heraus (`src/lib/search/region-in-search.ts`) und setzt den
   Regionsfilter; nur der Rest bleibt Text. Vorher lieferte „Steiermark" 250
