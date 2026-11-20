@@ -15,7 +15,7 @@
 
 import { useTranslations } from 'next-intl';
 
-interface PriceItem {
+export interface PriceItem {
   label: string;
   value: string;
 }
@@ -74,19 +74,29 @@ function parsePriceText(raw: string, defaultLabel: string): PriceItem[] {
   return items;
 }
 
-export function V4PriceBlock({ priceText, priceMin, priceMax, priceTier }: V4PriceBlockProps) {
+/**
+ * Preiszeilen der Box als reine Daten: aufgeschlüsselter Preistext, sonst
+ * die Spanne oder der Ab-Preis aus den Zahlen. Leer bei Gratis-Events (das
+ * sagt schon das Badge) und ohne Preisangabe. Geteilt mit der App-API
+ * (src/lib/app-api/event-detail.ts), damit die App dieselben Zeilen zeigt.
+ */
+export function priceBlockItems(
+  { priceText, priceMin, priceMax, priceTier }: V4PriceBlockProps,
+  labels: { admission: string; from: string },
+): PriceItem[] {
+  if (priceTier === 'gratis') return [];
+
+  const items = priceText ? parsePriceText(priceText, labels.admission) : [];
+  if (items.length > 0 || priceMin == null) return items;
+
+  return priceMax != null && priceMax > priceMin
+    ? [{ label: labels.admission, value: `€ ${priceMin} – € ${priceMax}` }]
+    : [{ label: labels.from, value: `€ ${priceMin}` }];
+}
+
+export function V4PriceBlock(props: V4PriceBlockProps) {
   const t = useTranslations('EventDetail');
-  if (priceTier === 'gratis') return null;
-
-  let items: PriceItem[] = priceText ? parsePriceText(priceText, t('admission')) : [];
-
-  if (items.length === 0 && priceMin != null) {
-    if (priceMax != null && priceMax > priceMin) {
-      items = [{ label: t('admission'), value: `€ ${priceMin} – € ${priceMax}` }];
-    } else {
-      items = [{ label: t('from'), value: `€ ${priceMin}` }];
-    }
-  }
+  const items = priceBlockItems(props, { admission: t('admission'), from: t('from') });
 
   if (items.length === 0) return null;
 

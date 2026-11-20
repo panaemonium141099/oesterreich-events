@@ -44,7 +44,7 @@ import { DE_LOCALE } from '@/lib/site/intl';
  * deutsche 10115 würde sonst zu 'wien', eine Schweizer 8001 zu
  * 'steiermark' (im Test gefangen, bevor es live ging).
  */
-function effectiveBundesland(
+export function effectiveBundesland(
   event: Pick<Event, 'bundesland' | 'postal_code' | 'country'>,
 ): string | null {
   if (event.bundesland) return event.bundesland;
@@ -156,7 +156,7 @@ export function dedupe(rows: RelatedRow[]): RelatedRow[] {
 const RELATED_COLS =
   'id, slug, title, start_date, location_name, postal_code, address, bundesland, category, image_url, image_width';
 
-async function fetchRelated(event: Event): Promise<RelatedRow[]> {
+export async function fetchRelated(event: Event): Promise<RelatedRow[]> {
   // Die Sektion muss auf JEDER Detailseite erscheinen (User-Vorgabe
   // 2026-07-15). Ohne ableitbares Bundesland (~900 Events ohne bl+PLZ)
   // wird direkt österreichweit gefüllt; auch die bl-Pfade fallen bei
