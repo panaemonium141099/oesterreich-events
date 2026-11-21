@@ -1,5 +1,5 @@
 /**
- * GET /api/app/v1/plan-draft?event=<UUID> — Vorbelegung des Plan-Assistenten
+ * GET /api/app/v1/plan-draft?event=<UUID> (oder ?festival=<Slug>) — Vorbelegung des Plan-Assistenten
  * der nativen App für ein Event: Karte, Ticketlink, Ziel der Anreise,
  * ÖBB-Routenplaner und die Standardwerte eines neuen Plans.
  *
@@ -12,8 +12,10 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { unstable_cache } from 'next/cache';
 import { createTranslator } from 'next-intl';
 import type { AppTranslate } from '@/lib/app-api/landing';
+import { toAppFestivalPlanDraft } from '@/lib/app-api/festivals';
 import { defaultPlanState, toAppPlanDraft, type AppPlanDraft } from '@/lib/app-api/plans';
 import { getEventByShortId, resolveDuplicatePrimary } from '@/lib/events/event-detail-loaders';
+import { loadFestivalDetail } from '@/lib/festivals/public';
 import { loadMessages } from '@/i18n/messages';
 import { plzReference } from '@/lib/location/plz-reference';
 import { getSite, SITE_ORIGIN } from '@/lib/site';
@@ -42,6 +44,9 @@ async function buildDraft(id: string): Promise<AppPlanDraft | null> {
 const getDraftCached = unstable_cache(buildDraft, ['app-plan-draft-v1'], { revalidate: REVALIDATE_SECONDS });
 
 export async function GET(request: NextRequest) {
+  const festivalSlug = request.nextUrl.searchParams.get('festival');
+  if (festivalSlug) return festivalDraft(festivalSlug);
+
   const id = request.nextUrl.searchParams.get('event') ?? '';
   if (!UUID.test(id)) {
     return NextResponse.json({ error: 'Ungültige Event-ID.' }, { status: 400 });
@@ -56,6 +61,36 @@ export async function GET(request: NextRequest) {
     });
   } catch (err) {
     console.error('[app-api] plan draft:', err instanceof Error ? err.message : err);
+    return NextResponse.json(
+      { error: 'Der Plan kann gerade nicht vorbereitet werden.' },
+      { status: 503, headers: { 'Retry-After': '30', 'Cache-Control': 'no-store' } },
+    );
+  }
+}
+
+/**
+ * Entwurf für ein Festival (`?festival=<Slug>`): hat es ein Haupt-Event in
+ * der Event-Datenbank, gilt dessen Entwurf; sonst Name, Tag und Stadt des
+ * Festivals ohne Event, wie der Assistent der Website bei Festivals.
+ */
+async function festivalDraft(slug: string) {
+  if (slug.length > 160) {
+    return NextResponse.json({ error: 'Ungültiges Festival.' }, { status: 400 });
+  }
+  try {
+    const data = await loadFestivalDetail(slug);
+    if (!data) {
+      return NextResponse.json({ error: 'Dieses Festival gibt es nicht (mehr).' }, { status: 404 });
+    }
+    const viaEvent = data.parentEvent ? await getDraftCached(data.parentEvent.id.toLowerCase()) : null;
+    if (viaEvent) return NextResponse.json(viaEvent, { headers: { 'Cache-Control': 'public, max-age=60' } });
+
+    const messages = await loadMessages('de', getSite());
+    const t = createTranslator({ locale: 'de', messages }) as unknown as AppTranslate;
+    const draft = toAppFestivalPlanDraft(data, { t, locale: 'de', origin: SITE_ORIGIN }, new Date());
+    return NextResponse.json(draft, { headers: { 'Cache-Control': 'public, max-age=60' } });
+  } catch (err) {
+    console.error('[app-api] plan draft (festival):', err instanceof Error ? err.message : err);
     return NextResponse.json(
       { error: 'Der Plan kann gerade nicht vorbereitet werden.' },
       { status: 503, headers: { 'Retry-After': '30', 'Cache-Control': 'no-store' } },

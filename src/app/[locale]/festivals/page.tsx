@@ -2,15 +2,9 @@ import type { Metadata } from 'next';
 import { bilingualAlternates } from '@/lib/seo/canonical';
 import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
-import type { Festival } from '@/types/festivals';
 import { V4FestivalCard } from '@/components/Events/v4';
-import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { loadUpcomingFestivals } from '@/lib/festivals/public';
 import { routing, type AppLocale } from '@/i18n/routing';
-import overridesJson from '../../../../data/festival-overrides.json';
-import { SITE_COUNTRY } from '@/lib/site-country';
-
-const OVERRIDES = overridesJson as Record<string, { imageUrl?: string | null }>;
 
 function resolveLocale(raw: string): AppLocale {
   return hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
@@ -31,28 +25,6 @@ export async function generateMetadata({
   };
 }
 
-const FESTIVAL_FALLBACK_COUNT = 30;
-function festivalCategoryFallback(festivalId: string): string {
-  let h = 0;
-  for (let i = 0; i < festivalId.length; i++) {
-    h = (h * 31 + festivalId.charCodeAt(i)) | 0;
-  }
-  const idx = (Math.abs(h) % FESTIVAL_FALLBACK_COUNT) + 1;
-  return `/images/categories/musik-${idx}.jpg`;
-}
-
-type ParentEventRow = {
-  id: string;
-  slug: string | null;
-  start_date: string | null;
-  postal_code: string | null;
-  address: string | null;
-  bundesland: string | null;
-  location_name: string | null;
-  image_url: string | null;
-};
-type FestivalRow = Festival & { parent_event: ParentEventRow | ParentEventRow[] | null };
-
 export default async function FestivalsPage({
   params,
 }: {
@@ -62,43 +34,7 @@ export default async function FestivalsPage({
   const locale = resolveLocale(rawLocale);
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'FestivalsPage' });
-  const supabase = await createServerSupabaseClient();
-  const today = new Date().toISOString().split('T')[0];
-
-  const { data } = await supabase
-    .from('festivals')
-    .select('*, parent_event:events!parent_event_id(id, slug, start_date, postal_code, address, bundesland, location_name, image_url)')
-    .gte('ends_at', today)
-    // Nicht-inner-Einbettung: ein ausländisches Haupt-Event kommt als null.
-    .eq('parent_event.country', SITE_COUNTRY)
-    .order('starts_at', { ascending: true });
-
-  const festivals = ((data ?? []) as unknown as FestivalRow[]).map(f => {
-    const parentEvent = Array.isArray(f.parent_event) ? f.parent_event[0] : f.parent_event;
-    const { parent_event: _omit, ...rest } = f;
-    void _omit;
-    const href = parentEvent && parentEvent.slug && parentEvent.start_date
-      ? buildEventUrlV2({
-          id: parentEvent.id,
-          slug: parentEvent.slug,
-          start_date: parentEvent.start_date,
-          postal_code: parentEvent.postal_code,
-          address: parentEvent.address,
-          bundesland: parentEvent.bundesland,
-          location_name: parentEvent.location_name,
-        })
-      : `/festivals/${f.slug}`;
-    const override = OVERRIDES[f.slug];
-    return {
-      ...(rest as Festival),
-      image_url:
-        parentEvent?.image_url
-        ?? f.image_url
-        ?? (override?.imageUrl ?? null)
-        ?? festivalCategoryFallback(f.id),
-      href,
-    };
-  });
+  const festivals = await loadUpcomingFestivals();
 
   return (
     <div className="min-h-screen bg-[var(--v4-surface)] text-[var(--v4-ink)]">
