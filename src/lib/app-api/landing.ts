@@ -144,19 +144,51 @@ export interface AppLanding {
     /** „Guide · 30. Okt. 2026" */
     meta: string;
   }>;
-  activities: Array<{
-    id: string;
-    slug: string;
-    name: string;
-    image: string | null;
-    /** Bildnachweis; steht sichtbar am Bild, solange es zu sehen ist. */
-    credit: string | null;
-    /** Kategorie-Badge aus dem ersten Tag; null ohne Tag. */
-    tagLabel: string | null;
-    /** Text der Kachel ohne Bild. */
-    fallbackLabel: string;
-    place: string;
-  }>;
+  activities: AppActivityCard[];
+}
+
+/** Ausflugsziel als Karte (Startseite, Smart-Suche). */
+export interface AppActivityCard {
+  id: string;
+  slug: string;
+  name: string;
+  image: string | null;
+  /** Bildnachweis; steht sichtbar am Bild, solange es zu sehen ist. */
+  credit: string | null;
+  /** Kategorie-Badge aus dem ersten Tag; null ohne Tag. */
+  tagLabel: string | null;
+  /** Text der Kachel ohne Bild. */
+  fallbackLabel: string;
+  place: string;
+}
+
+type ActivityCardSource = {
+  id: string;
+  slug: string;
+  name: string;
+  tags?: string[] | null;
+  town?: string | null;
+  bundesland?: string | null;
+  images?: unknown;
+};
+
+export function toAppActivityCard(a: ActivityCardSource, ctx: Pick<AppLandingContext, 't' | 'locale' | 'origin'>): AppActivityCard {
+  const picked = pickActivityImage(a.images);
+  const tag = a.tags?.[0];
+  const label = tag ? activityTagLabel(tag, ctx.locale) : null;
+  return {
+    id: a.id,
+    slug: a.slug,
+    name: a.name,
+    image: picked ? absoluteUrl(picked.url, ctx.origin) : null,
+    // Quellen liefern den Nachweis teils HTML-kodiert ("Gsund &amp; fesch").
+    credit: picked?.credit ? decodeEntities(picked.credit) : null,
+    tagLabel: label,
+    fallbackLabel: label ?? ctx.t('Landing.Activities.cardFallback'),
+    place: [a.town, a.bundesland ? bundeslandDisplayName(a.bundesland, ctx.locale) : null]
+      .filter(Boolean)
+      .join(' · '),
+  };
 }
 
 /** Logische Größe des Kartenbilds der App (wird als @2x geholt). */
@@ -328,23 +360,6 @@ export function toAppLanding(data: LandingData, ctx: AppLandingContext): AppLand
       image: absoluteUrl(p.image, ctx.origin),
       meta: [p.category, shortDateWithYear(p.publishDate, ctx.locale)].filter(Boolean).join(' · '),
     })),
-    activities: data.activities.map(a => {
-      const picked = pickActivityImage(a.images);
-      const tag = a.tags?.[0];
-      const label = tag ? activityTagLabel(tag, ctx.locale) : null;
-      return {
-        id: a.id,
-        slug: a.slug,
-        name: a.name,
-        image: picked ? absoluteUrl(picked.url, ctx.origin) : null,
-        // Quellen liefern den Nachweis teils HTML-kodiert ("Gsund &amp; fesch").
-        credit: picked?.credit ? decodeEntities(picked.credit) : null,
-        tagLabel: label,
-        fallbackLabel: label ?? ctx.t('Landing.Activities.cardFallback'),
-        place: [a.town, a.bundesland ? bundeslandDisplayName(a.bundesland, ctx.locale) : null]
-          .filter(Boolean)
-          .join(' · '),
-      };
-    }),
+    activities: data.activities.map(a => toAppActivityCard(a, ctx)),
   };
 }
