@@ -39,10 +39,11 @@ export async function POST(request: Request) {
   }
 
   // Pull profile to check status + greet them by first name
+  // Eigene Zeile über get_my_profile(): email und welcome_email_sent_at darf
+  // authenticated aus profiles nicht mehr lesen (Migration 20261121120100).
   const { data: profile, error: profileErr } = await supabase
-    .from('profiles')
+    .rpc('get_my_profile')
     .select('email, first_name, welcome_email_sent_at')
-    .eq('id', user.id)
     .single();
 
   if (profileErr || !profile) {

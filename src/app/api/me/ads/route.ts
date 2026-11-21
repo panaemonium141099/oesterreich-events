@@ -28,10 +28,11 @@ export async function GET() {
     return NextResponse.json({ signedIn: false, adsDisabled: false }, { status: 401, headers: NO_STORE });
   }
 
+  // Eigene Zeile über get_my_profile(): ads_disabled darf authenticated aus
+  // profiles nicht mehr lesen (Migration 20261121120100).
   const { data: profile, error } = await supabase
-    .from('profiles')
+    .rpc('get_my_profile')
     .select('ads_disabled')
-    .eq('id', user.id)
     .maybeSingle();
 
   if (error) {

@@ -34,10 +34,8 @@ export default function UsersPage() {
   const router = useRouter();
   // Auth gate — mirrors the pattern used by admin/overview/page.tsx and
   // admin/sources/page.tsx. Without this, anyone who knew the /admin/users
-  // URL could read every profile + change roles + attempt deletes. RLS
-  // would block most of the mutations, but listing all profiles is
-  // allowed by the `profiles` SELECT policy (`qual = true`), so the
-  // page itself needs its own guard regardless of what the backend does.
+  // URL would see the page shell. The list itself comes from
+  // /api/admin/users, which checks the role on the server.
   const { user, profile, loading: authLoading } = useAuth();
 
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -68,22 +66,21 @@ export default function UsersPage() {
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
-    let query = supabase
-      .from('profiles')
-      .select('id, first_name, last_name, email, role, avatar_url, created_at, ads_disabled')
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    if (userSearch.trim()) {
-      query = query.or(
-        `first_name.ilike.%${userSearch}%,last_name.ilike.%${userSearch}%,email.ilike.%${userSearch}%`
-      );
+    // Ueber die Server-Route (Rollenpruefung + service_role): E-Mail,
+    // Anlagedatum und Werbefrei-Schalter sind fuer authenticated nicht mehr
+    // aus profiles lesbar (Migration 20261121120100).
+    try {
+      const res = await fetch(`/api/admin/users?search=${encodeURIComponent(userSearch.trim())}`);
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+      setUsers((body.users as UserRow[]) || []);
+    } catch (err) {
+      console.error('[admin/users] list failed:', err);
+      toast.error('Nutzerliste konnte nicht geladen werden');
+    } finally {
+      setLoading(false);
     }
-
-    const { data } = await query;
-    setUsers((data as UserRow[]) || []);
-    setLoading(false);
-  }, [supabase, userSearch]);
+  }, [userSearch]);
 
   useEffect(() => {
     // Only run the fetch for actual admins — prevents a flash of
