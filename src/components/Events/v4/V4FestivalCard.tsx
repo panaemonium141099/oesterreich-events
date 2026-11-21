@@ -18,7 +18,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Festival } from '@/types/festivals';
 import { V4Badge } from './V4Badge';
-import { festivalCardDateRange } from '@/lib/festivals/public';
+import { festivalCardDateRange } from '@/lib/festivals/display';
 
 interface V4FestivalCardProps {
   /** Festival-Row plus pre-built `href` (siehe LandingFestival type). */

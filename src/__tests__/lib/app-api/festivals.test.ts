@@ -8,12 +8,8 @@ import {
 } from '@/lib/app-api/festivals';
 import type { AppTranslate } from '@/lib/app-api/landing';
 import type { FestivalEnrichment } from '@/lib/festivals/enrich';
-import type { FestivalDetailData, ParentEventRow, UpcomingFestival } from '@/lib/festivals/public';
+import type { FestivalDetailData, ParentEventRow, UpcomingFestival } from '@/lib/festivals/display';
 import type { Festival, FestivalArtist } from '@/types/festivals';
-
-// Die Lader in public.ts brauchen den Server-Client; hier zählen nur die puren Ableitungen.
-vi.mock('@/lib/supabase/server', () => ({ createServerSupabaseClient: vi.fn() }));
-vi.mock('@/lib/festivals/enrich', () => ({ getFestivalEnrichment: vi.fn() }));
 
 // setup.ts ersetzt next-intl durch eine Attrappe; hier zählen die echten Texte.
 const { createTranslator } = await vi.importActual<typeof import('next-intl')>('next-intl');

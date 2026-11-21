@@ -11,7 +11,7 @@ import {
   ticketProviderOf,
   type FestivalDetailData,
   type UpcomingFestival,
-} from '@/lib/festivals/public';
+} from '@/lib/festivals/display';
 import { buildOebbScottyUrl } from '@/lib/plans/deep-links';
 import { decodeEntities } from '@/lib/utils/decode-entities';
 import { viennaToday } from '@/lib/utils/event-time';

@@ -4,14 +4,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { V4BackButton } from '@/components/Events/v4/V4BackButton';
 import { V4FestivalActions } from '@/components/Festivals/V4FestivalActions';
-import {
-  BILLING_LABEL,
-  deriveFestivalView,
-  fetchFestivalRow,
-  formatFestivalDateRange,
-  loadFestivalDetail,
-  ticketProviderOf,
-} from '@/lib/festivals/public';
+import { BILLING_LABEL, deriveFestivalView, formatFestivalDateRange, ticketProviderOf } from '@/lib/festivals/display';
+import { fetchFestivalRow, loadFestivalDetail } from '@/lib/festivals/public';
 
 // Dynamic — slug params with non-ASCII (umlauts) were getting served
 // stale 404 responses under Next's default revalidation. Forcing the
