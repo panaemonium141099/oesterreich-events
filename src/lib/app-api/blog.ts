@@ -116,7 +116,7 @@ export const APP_BLOG_TABS: AppBlogList['tabs'] = [
 ];
 
 const AFFILIATE_NOTE =
-  'Affiliate-Link: Buchst du über diesen Link, erhält LassTreffen.at eine Provision von Booking.com. Am Preis ändert sich für dich nichts.';
+  'Affiliate-Link: Buchst du über diesen Link, erhalten wir eine Provision von Booking.com. Am Preis ändert sich für dich nichts.';
 
 export function toAppBlogCard(post: FestivalPost, ctx: AppBlogContext): AppBlogCard {
   return {
