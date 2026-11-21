@@ -15,6 +15,7 @@ import type { AppTranslate } from '@/lib/app-api/landing';
 import { defaultPlanState, toAppPlanDraft, type AppPlanDraft } from '@/lib/app-api/plans';
 import { getEventByShortId, resolveDuplicatePrimary } from '@/lib/events/event-detail-loaders';
 import { loadMessages } from '@/i18n/messages';
+import { plzReference } from '@/lib/location/plz-reference';
 import { getSite, SITE_ORIGIN } from '@/lib/site';
 
 const REVALIDATE_SECONDS = 600;
@@ -28,7 +29,9 @@ async function buildDraft(id: string): Promise<AppPlanDraft | null> {
   }
   const messages = await loadMessages('de', getSite());
   const t = createTranslator({ locale: 'de', messages }) as unknown as AppTranslate;
-  return toAppPlanDraft(event, defaultPlanState(event, new Date()), {
+  // Stadt des Plans: der Post-Ort der PLZ, nicht der Name des Saals.
+  const postOrt = event.postal_code ? (plzReference(event.postal_code)?.orte[0] ?? null) : null;
+  return toAppPlanDraft(event, defaultPlanState(event, new Date(), postOrt), {
     t,
     locale: 'de',
     origin: SITE_ORIGIN,

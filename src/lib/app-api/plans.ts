@@ -252,9 +252,14 @@ function priceLabelOf(event: Event): string | null {
   return event.price_min ? `ab ${event.price_min} €` : null;
 }
 
-/** Standardwerte eines neuen Plans rund um ein Event (wie `defaultState` des Assistenten). */
-export function defaultPlanState(event: Event, now: Date): AppPlanState {
-  const city = deriveAccommodationCity([event]);
+/**
+ * Standardwerte eines neuen Plans rund um ein Event (wie `defaultState` des
+ * Assistenten). `postOrt` ist der Post-Ort der PLZ des Events; ohne ihn gilt
+ * die Ableitung der Website aus dem Namen des Veranstaltungsorts, die bei
+ * „Veranstaltungszentrum Ottendorf" den Saal statt der Stadt liefert.
+ */
+export function defaultPlanState(event: Event, now: Date, postOrt: string | null = null): AppPlanState {
+  const city = postOrt?.trim() || deriveAccommodationCity([event]);
   return {
     name: city ? `Abend in ${city}` : `Plan rund um ${decodeEntities(event.title ?? '')}`,
     plan_date: (event.start_date || '').slice(0, 10) || viennaToday(now),

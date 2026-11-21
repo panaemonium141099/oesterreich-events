@@ -154,6 +154,12 @@ describe('defaultPlanState und toAppPlanDraft', () => {
     });
   });
 
+  it('nimmt den Post-Ort der PLZ vor dem Namen des Saals', () => {
+    const state = defaultPlanState(event({ location_name: 'Veranstaltungszentrum Ottendorf' }), NOW, 'Ottendorf an der Rittschein');
+    expect(state.name).toBe('Abend in Ottendorf an der Rittschein');
+    expect(state.accommodation_city).toBe('Ottendorf an der Rittschein');
+  });
+
   it('nennt den Plan nach dem Event, wenn kein Ort bekannt ist', () => {
     const state = defaultPlanState(event({ location_name: null, bundesland: null }), NOW);
     expect(state.name).toBe('Plan rund um Konzert im Orpheum');
