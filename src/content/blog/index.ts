@@ -268,6 +268,8 @@ import { post as kakaozeremonieYogaInInnsbruck2027 } from './posts/kakaozeremoni
 import { post as whiskydenkerSSwingDongDingWeihnachtskonzert2026 } from './posts/whiskydenker-s-swing-dong-ding-weihnachtskonzert-2026';
 import { post as masterBootRecordFulci2026 } from './posts/master-boot-record-fulci-2026';
 import { post as schubertiade2027 } from './posts/schubertiade-2027';
+import { post as benefizveranstaltungSoroptimistClubLeobenNeujahrskonzert2027 } from './posts/benefizveranstaltung-soroptimist-club-leoben-neujahrskonzert-2027';
+import { post as neujahrskonzert26EnsEnsembleNeueStreicherGSchichtenA2027 } from './posts/neujahrskonzert-26-ens-ensemble-neue-streicher-g-schichten-a-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -548,6 +550,8 @@ export const ALL_POSTS: FestivalPost[] = [
   whiskydenkerSSwingDongDingWeihnachtskonzert2026,
   masterBootRecordFulci2026,
   schubertiade2027,
+  benefizveranstaltungSoroptimistClubLeobenNeujahrskonzert2027,
+  neujahrskonzert26EnsEnsembleNeueStreicherGSchichtenA2027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
