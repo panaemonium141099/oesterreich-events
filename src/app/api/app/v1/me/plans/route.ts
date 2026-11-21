@@ -18,6 +18,8 @@ export const dynamic = 'force-dynamic';
 /** PostgREST trägt `.in()` in der Adresse: Listen in Stücken. */
 const IN_CHUNK = 100;
 
+type PlanEventRow = { title: string | null; start_date: string | null };
+
 export async function GET() {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -42,7 +44,7 @@ export async function GET() {
     const ids = plans.slice(i, i + IN_CHUNK).map(p => p.id);
     const { data: items, error: itemsError } = await supabase
       .from('plan_items')
-      .select('plan_id, position, event:events!inner(title, country)')
+      .select('plan_id, position, event:events!inner(title, country, start_date)')
       .in('plan_id', ids)
       .eq('event.country', SITE_COUNTRY)
       .order('position', { ascending: true });
@@ -52,13 +54,16 @@ export async function GET() {
     }
     const rows = (items ?? []) as unknown as Array<{
       plan_id: string;
-      event: { title: string | null } | Array<{ title: string | null }> | null;
+      event: PlanEventRow | PlanEventRow[] | null;
     }>;
     for (const row of rows) {
       const event = Array.isArray(row.event) ? row.event[0] : row.event;
       if (!event) continue;
-      const entry = (meta[row.plan_id] ??= { count: 0, firstTitle: null });
-      if (entry.count === 0) entry.firstTitle = event.title;
+      const entry = (meta[row.plan_id] ??= { count: 0, firstTitle: null, firstStart: null });
+      if (entry.count === 0) {
+        entry.firstTitle = event.title;
+        entry.firstStart = event.start_date;
+      }
       entry.count += 1;
     }
   }

@@ -31,6 +31,13 @@ export interface AppPlanBadge {
   label: string;
 }
 
+export interface AppPlanReminder {
+  key: '7d' | '1d' | '3h';
+  /** Zeitpunkt der Erinnerung (UTC). */
+  at: string;
+  label: string;
+}
+
 export interface AppPlanSummary {
   id: string;
   name: string;
@@ -39,6 +46,8 @@ export interface AppPlanSummary {
   /** „2 Events · Titel des ersten". */
   eventsLabel: string;
   badges: AppPlanBadge[];
+  /** Aktive Erinnerungen mit Zeitpunkt: die App plant daraus ihre Mitteilungen. */
+  reminders: AppPlanReminder[];
 }
 
 export interface AppPlanStat {
@@ -115,7 +124,7 @@ export interface AppPlanDetail {
   /** Ziel des Countdowns: Beginn des ersten Events, sonst 19 Uhr am Plantag. */
   target: string;
   /** Aktive Erinnerungen mit Zeitpunkt, früheste zuerst. */
-  reminders: Array<{ key: '7d' | '1d' | '3h'; at: string; label: string }>;
+  reminders: AppPlanReminder[];
   modules: AppPlanModule[];
   events: AppEventCard[];
   note: string | null;
@@ -177,8 +186,25 @@ function summaryBadges(plan: Plan): AppPlanBadge[] {
   return badges;
 }
 
-/** Je Plan: Zahl der Events und Titel des ersten. */
-export type AppPlanMeta = Record<string, { count: number; firstTitle: string | null }>;
+/** Ziel des Countdowns: Beginn des ersten Events, sonst 19 Uhr Wiener Zeit am Plantag. */
+export function planTarget(planDate: string, firstStart: string | null): Date {
+  const start = firstStart ? new Date(firstStart) : null;
+  return start && !Number.isNaN(start.getTime())
+    ? start
+    : new Date(viennaDayStart(planDate).getTime() + 19 * HOUR_MS);
+}
+
+/** Aktive Erinnerungen eines Plans mit Zeitpunkt, früheste zuerst. */
+export function planReminders(plan: Plan, target: Date): AppPlanReminder[] {
+  const reminders: AppPlanReminder[] = [];
+  if (plan.reminder_7d) reminders.push({ key: '7d', at: new Date(target.getTime() - 7 * DAY_MS).toISOString(), label: 'Wetter und Anfahrt prüfen' });
+  if (plan.reminder_1d) reminders.push({ key: '1d', at: new Date(target.getTime() - DAY_MS).toISOString(), label: 'Letzter Check: alles da?' });
+  if (plan.reminder_3h) reminders.push({ key: '3h', at: new Date(target.getTime() - 3 * HOUR_MS).toISOString(), label: 'Aufbrechen und Route öffnen' });
+  return reminders;
+}
+
+/** Je Plan: Zahl der Events, Titel und Beginn des ersten. */
+export type AppPlanMeta = Record<string, { count: number; firstTitle: string | null; firstStart?: string | null }>;
 
 export function toAppPlanSummary(plan: Plan, meta: AppPlanMeta[string] | undefined): AppPlanSummary {
   const d = planDay(plan.plan_date);
@@ -193,6 +219,7 @@ export function toAppPlanSummary(plan: Plan, meta: AppPlanMeta[string] | undefin
     dateBox: { dow: part({ weekday: 'short' }), day: part({ day: 'numeric' }), mon: part({ month: 'short' }) },
     eventsLabel: `${count} ${count === 1 ? 'Event' : 'Events'}${first ? ` · ${first}` : ''}`,
     badges: summaryBadges(plan),
+    reminders: planReminders(plan, planTarget(plan.plan_date, meta?.firstStart ?? null)),
   };
 }
 
@@ -400,16 +427,8 @@ export function toAppPlanDetail(plan: PlanWithEvents, ctx: AppLandingContext, no
   const firstCard = first ? toAppEventCard(first, ctx) : null;
   const days = viennaDayDiff(viennaToday(now), plan.plan_date);
 
-  const startOfFirst = first?.start_date ? new Date(first.start_date) : null;
-  const target =
-    startOfFirst && !Number.isNaN(startOfFirst.getTime())
-      ? startOfFirst
-      : new Date(viennaDayStart(plan.plan_date).getTime() + 19 * HOUR_MS);
-
-  const reminders: AppPlanDetail['reminders'] = [];
-  if (plan.reminder_7d) reminders.push({ key: '7d', at: new Date(target.getTime() - 7 * DAY_MS).toISOString(), label: 'Wetter und Anfahrt prüfen' });
-  if (plan.reminder_1d) reminders.push({ key: '1d', at: new Date(target.getTime() - DAY_MS).toISOString(), label: 'Letzter Check: alles da?' });
-  if (plan.reminder_3h) reminders.push({ key: '3h', at: new Date(target.getTime() - 3 * HOUR_MS).toISOString(), label: 'Aufbrechen und Route öffnen' });
+  const target = planTarget(plan.plan_date, first?.start_date ?? null);
+  const reminders = planReminders(plan, target);
 
   return {
     version: APP_PLANS_VERSION,

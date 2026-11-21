@@ -9,31 +9,18 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 /** E.164 phone number format: +<country code><number>, 7-15 digits total */
 const E164_REGEX = /^\+[1-9]\d{6,14}$/;
 
+/**
+ * Angemeldeter Nutzer: Website über die Sitzungs-Cookies, native App über
+ * ihr Zugangstoken im Authorization-Header (beides in
+ * `createServerSupabaseClient`).
+ */
 async function getAuthUser() {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options);
-          });
-        },
-      },
-    }
-  );
-
+  const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
