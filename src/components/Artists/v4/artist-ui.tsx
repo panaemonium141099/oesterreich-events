@@ -13,46 +13,18 @@
 
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { genreLabel } from '@/lib/artists/genre-labels';
-import type { DirectoryArtist, DirectoryEvent } from '@/lib/artists/directory';
-import { EVENT_TZ, addViennaDays, toViennaDate, viennaToday } from '@/lib/utils/event-time';
-import { DE_LOCALE } from '@/lib/site/intl';
+import type { DirectoryArtist } from '@/lib/artists/directory';
+import { dayLabel, placeLabel, venueLabel } from '@/lib/artists/labels';
 import { hasFeature } from '@/lib/site/features';
 
 export const LOGIN_HREF = '/auth/login?redirect=/artists';
 
 export type Translate = (key: string, values?: Record<string, string | number>) => string;
 
-/** „Di 3. Nov.“ (de) bzw. „Tue 3 Nov“ (en); heute und morgen in Worten. */
-export function dayLabel(iso: string, locale: string, t: Translate, now: Date = new Date()): string {
-  const d = new Date(iso);
-  const day = toViennaDate(d);
-  const today = viennaToday(now);
-  if (day === today) return t('today');
-  if (day === addViennaDays(today, 1)) return t('tomorrow');
-  const fmt = locale === 'de' ? DE_LOCALE : 'en-GB';
-  const parts = new Intl.DateTimeFormat(fmt, { weekday: 'short', day: 'numeric', month: 'short', timeZone: EVENT_TZ }).formatToParts(d);
-  const get = (type: string) => parts.find(p => p.type === type)?.value ?? '';
-  const weekday = get('weekday').replace(/\.$/, '');
-  return locale === 'de' ? `${weekday} ${get('day')}. ${get('month')}` : `${weekday} ${get('day')} ${get('month')}`;
-}
-
-/** Ort einer Karte: Post-Ort, sonst Bundesland, sonst Saal. */
-export function placeLabel(e: DirectoryEvent, locale: string): string {
-  if (e.city) return e.city;
-  if (e.bundesland) return bundeslandDisplayName(e.bundesland, locale);
-  return e.location_name ?? '';
-}
-
-/** Saal und Ort fürs Blatt: „Orpheum Wien, Wien“ wird „Orpheum Wien“. */
-export function venueLabel(e: DirectoryEvent, locale: string): string {
-  const venue = (e.location_name ?? '').trim();
-  const place = placeLabel(e, locale);
-  if (!venue) return place;
-  if (!place || venue.toLowerCase().includes(place.toLowerCase())) return venue;
-  return `${venue}, ${place}`;
-}
+// Beschriftungen (Tag, Ort, Saal) stehen pur in src/lib/artists/labels.ts, damit auch
+// die App-API sie nutzt; hier nur weitergereicht.
+export { dayLabel, placeLabel, venueLabel };
 
 export function ArtistAvatar({ artist, size, className = '' }: { artist: Pick<DirectoryArtist, 'name' | 'image'>; size: number; className?: string }) {
   const style = { width: size, height: size };
