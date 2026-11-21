@@ -18,33 +18,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Festival } from '@/types/festivals';
 import { V4Badge } from './V4Badge';
-import { EVENT_TZ, viennaFields } from '@/lib/utils/event-time';
-import { DE_LOCALE } from '@/lib/site/intl';
+import { festivalCardDateRange } from '@/lib/festivals/display';
 
 interface V4FestivalCardProps {
   /** Festival-Row plus pre-built `href` (siehe LandingFestival type). */
   festival: Festival & { image_url?: string | null; href?: string | null };
   /** If true, shows a "Artist im Line-up" gold badge. Phase 2 always derives this on the server. */
   lineupMatch?: boolean;
-}
-
-function dateRange(startIso: string | null, endIso?: string | null): string {
-  if (!startIso) return '';
-  const start = new Date(startIso);
-  const end = endIso ? new Date(endIso) : null;
-  const startStr = start.toLocaleDateString(DE_LOCALE, { day: 'numeric', month: 'short', timeZone: EVENT_TZ });
-  const s = viennaFields(start);
-  const e = end ? viennaFields(end) : null;
-  if (!end || !e || (e.year === s.year && e.month === s.month && e.day === s.day)) return startStr;
-  const sameMonth = s.month === e.month;
-  const startDay = s.day;
-  const endDay = e.day;
-  if (sameMonth) {
-    const month = start.toLocaleDateString(DE_LOCALE, { month: 'short', timeZone: EVENT_TZ });
-    return `${startDay}.–${endDay}. ${month}`;
-  }
-  const endStr = end.toLocaleDateString(DE_LOCALE, { day: 'numeric', month: 'short', timeZone: EVENT_TZ });
-  return `${startStr} – ${endStr}`;
 }
 
 export function V4FestivalCard({ festival, lineupMatch = false }: V4FestivalCardProps) {
@@ -83,7 +63,7 @@ export function V4FestivalCard({ festival, lineupMatch = false }: V4FestivalCard
         </h3>
         <p className="text-[11.5px] text-[var(--v4-ink-50)]">
           {festival.date_status === 'expected' ? 'vorauss. ' : ''}
-          {dateRange(festival.starts_at, festival.ends_at)}
+          {festivalCardDateRange(festival.starts_at, festival.ends_at)}
           {festival.city ? ` · ${festival.city}` : ''}
         </p>
         {festival.price_text && (

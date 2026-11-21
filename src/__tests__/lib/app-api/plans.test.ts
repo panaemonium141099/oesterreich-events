@@ -128,6 +128,18 @@ describe('toAppPlanList', () => {
     ]);
   });
 
+  it('gibt jeder Karte die Zeitpunkte ihrer aktiven Erinnerungen mit', () => {
+    const id = 'bbbbbbbb-0000-4000-8000-000000000001';
+    const [withEvent] = toAppPlanList([plan()], { [id]: { count: 1, firstTitle: 'A', firstStart: '2026-11-07T19:00:00+00:00' } }, NOW).upcoming;
+    expect(withEvent.reminders.map(r => [r.key, r.at])).toEqual([
+      ['7d', '2026-10-31T19:00:00.000Z'],
+      ['1d', '2026-11-06T19:00:00.000Z'],
+    ]);
+    // Ohne Event: 19 Uhr Wiener Zeit am Plantag.
+    const [noEvent] = toAppPlanList([plan({ reminder_7d: false, reminder_1d: false, reminder_3h: true })], {}, NOW).upcoming;
+    expect(noEvent.reminders).toEqual([{ key: '3h', at: '2026-11-07T15:00:00.000Z', label: 'Aufbrechen und Route öffnen' }]);
+  });
+
   it('nennt ein einzelnes Event in der Einzahl und lässt das Hotel ohne Stadt weg', () => {
     const [card] = toAppPlanList(
       [plan({ reminder_7d: false, reminder_1d: false })],
@@ -152,6 +164,12 @@ describe('defaultPlanState und toAppPlanDraft', () => {
       reminder_1d: true,
       reminder_3h: true,
     });
+  });
+
+  it('nimmt den Post-Ort der PLZ vor dem Namen des Saals', () => {
+    const state = defaultPlanState(event({ location_name: 'Veranstaltungszentrum Ottendorf' }), NOW, 'Ottendorf an der Rittschein');
+    expect(state.name).toBe('Abend in Ottendorf an der Rittschein');
+    expect(state.accommodation_city).toBe('Ottendorf an der Rittschein');
   });
 
   it('nennt den Plan nach dem Event, wenn kein Ort bekannt ist', () => {
