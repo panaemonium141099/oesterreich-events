@@ -27,7 +27,7 @@ import { formatTime } from '@/lib/utils/date';
 import { SITE_COUNTRY } from '@/lib/site-country';
 import { DE_LOCALE } from '@/lib/site/intl';
 
-interface TicketEvent {
+export interface TicketEvent {
   id: string;
   slug: string | null;
   title: string;
@@ -57,21 +57,21 @@ export function deriveSearchTerms(postTitle: string): string[] {
     .slice(0, 2);
 }
 
-function formatDate(iso: string): string {
+export function formatDate(iso: string): string {
   const d = new Date(iso);
   const date = d.toLocaleDateString(DE_LOCALE, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: EVENT_TZ });
   const time = formatTime(iso);
   return time ? `${date}, ${time}` : date;
 }
 
-function formatPrice(e: TicketEvent): string | null {
+export function formatPrice(e: Pick<TicketEvent, 'price_min' | 'price_text'>): string | null {
   if (e.price_min != null && e.price_min > 0) {
     return `ab ${e.price_min.toLocaleString(DE_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
   }
   return e.price_text ?? null;
 }
 
-async function fetchTicketEvents(postTitle: string): Promise<TicketEvent[]> {
+export async function fetchTicketEvents(postTitle: string): Promise<TicketEvent[]> {
   const terms = deriveSearchTerms(postTitle);
   if (terms.length === 0) return [];
 
