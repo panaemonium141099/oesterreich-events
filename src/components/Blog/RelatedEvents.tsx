@@ -47,7 +47,7 @@ const MAX_PER_DAY = 2;
 /** Wie weit nach vorn geschaut wird, wenn der Post kein Fenster vorgibt. */
 const DEFAULT_WINDOW_DAYS = 120;
 
-interface RelatedEvent {
+export interface RelatedEvent {
   id: string;
   slug: string | null;
   title: string;
@@ -83,7 +83,7 @@ function anonClient() {
   );
 }
 
-function formatDate(iso: string): string {
+export function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(DE_LOCALE, {
     weekday: 'short',
     day: 'numeric',
@@ -93,7 +93,7 @@ function formatDate(iso: string): string {
   });
 }
 
-function formatPrice(e: RelatedEvent): string | null {
+export function formatPrice(e: RelatedEvent): string | null {
   if (e.price_min != null && e.price_min > 0) {
     return `ab ${e.price_min.toLocaleString(DE_LOCALE, { maximumFractionDigits: 0 })} €`;
   }
@@ -171,7 +171,7 @@ function pickSpread(pool: RelatedEvent[], take: number, seen: Set<string>): Rela
   return out;
 }
 
-async function fetchRelatedEvents(
+export async function fetchRelatedEvents(
   postTitle: string,
   keywords: string[],
   category: string,
