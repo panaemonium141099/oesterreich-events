@@ -270,6 +270,8 @@ import { post as masterBootRecordFulci2026 } from './posts/master-boot-record-fu
 import { post as schubertiade2027 } from './posts/schubertiade-2027';
 import { post as benefizveranstaltungSoroptimistClubLeobenNeujahrskonzert2027 } from './posts/benefizveranstaltung-soroptimist-club-leoben-neujahrskonzert-2027';
 import { post as neujahrskonzert26EnsEnsembleNeueStreicherGSchichtenA2027 } from './posts/neujahrskonzert-26-ens-ensemble-neue-streicher-g-schichten-a-2027';
+import { post as diePeterAlexanderRevueDieShowMitSeinenBestenMelodie2026 } from './posts/die-peter-alexander-revue-die-show-mit-seinen-besten-melodie-2026';
+import { post as derKleinePrinz2026 } from './posts/der-kleine-prinz-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -552,6 +554,8 @@ export const ALL_POSTS: FestivalPost[] = [
   schubertiade2027,
   benefizveranstaltungSoroptimistClubLeobenNeujahrskonzert2027,
   neujahrskonzert26EnsEnsembleNeueStreicherGSchichtenA2027,
+  diePeterAlexanderRevueDieShowMitSeinenBestenMelodie2026,
+  derKleinePrinz2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
