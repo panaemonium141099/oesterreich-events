@@ -86,7 +86,6 @@ interface Member {
     first_name: string;
     last_name: string;
     avatar_url: string | null;
-    email: string;
   };
 }
 
@@ -200,7 +199,7 @@ export function GroupDetailPageClient() {
 
     const { data: mems } = await supabase
       .from('group_members')
-      .select('id, user_id, role, rsvp, rsvp_at, profile:profiles(id, first_name, last_name, avatar_url, email)')
+      .select('id, user_id, role, rsvp, rsvp_at, profile:profiles(id, first_name, last_name, avatar_url)')
       .eq('group_id', groupId);
     if (mems) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -397,7 +396,7 @@ export function GroupDetailPageClient() {
       setMyMembership(prev => prev ? { ...prev, rsvp: status, rsvp_at: new Date().toISOString() } : prev);
       const { data: mems } = await supabase
         .from('group_members')
-        .select('id, user_id, role, rsvp, rsvp_at, profile:profiles(id, first_name, last_name, avatar_url, email)')
+        .select('id, user_id, role, rsvp, rsvp_at, profile:profiles(id, first_name, last_name, avatar_url)')
         .eq('group_id', groupId);
       if (mems) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

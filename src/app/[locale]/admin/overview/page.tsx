@@ -69,31 +69,26 @@ export default function AdminOverviewPage() {
   const fetchStats = useCallback(async () => {
     setLoadingStats(true);
 
+    // Nutzerzahlen ueber die Server-Route: created_at ist fuer authenticated
+    // nicht mehr aus profiles lesbar (Migration 20261121120100).
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const userStats = fetch(`/api/admin/users?stats=1&today=${encodeURIComponent(today.toISOString())}`)
+      .then(res => (res.ok ? res.json() : null))
+      .catch(() => null) as Promise<{ total: number; today: number; week: number } | null>;
+
     const [
-      { count: totalUsers },
+      users,
       { count: totalEvents },
       { count: totalGroups },
     ] = await Promise.all([
-      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      userStats,
       supabase.from('events').select('*', { count: 'exact', head: true }),
       supabase.from('groups').select('*', { count: 'exact', head: true }),
     ]);
-
-    // New users today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const { count: newUsersToday } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', today.toISOString());
-
-    // New users this week
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    const { count: newUsersWeek } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', weekAgo.toISOString());
+    const totalUsers = users?.total ?? 0;
+    const newUsersToday = users?.today ?? 0;
+    const newUsersWeek = users?.week ?? 0;
 
     // Venue match count (events with venue_id)
     const { count: venueMatchCount } = await supabase

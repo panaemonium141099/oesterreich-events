@@ -715,6 +715,22 @@ npm run import:festivals     # data/festivals-upcoming.json → festivals + fest
   nur service_role (Import); nach dem Ausführen `NOTIFY pgrst, 'reload
   schema'`, sonst kennt PostgREST weder die Tabelle noch den FK für
   `events!inner`.
+- `profiles` ist spaltenweise gesperrt (2026-11-21, Migrationen
+  `20261121120000` Funktionen, `20261121120100` Sperre; Reihenfolge:
+  Schritt 1, Deploy, Schritt 2, als `supabase_admin`): anon liest keine
+  Zeile, authenticated von jeder Zeile nur `id, first_name, last_name,
+  avatar_url, role`. Jede andere Spalte und `select('*')` enden mit 42501,
+  auch auf der eigenen Zeile und auch als Filter oder Sortierung. Eigenes
+  Profil: `rpc('get_my_profile')`; Personensuche: `rpc('search_profiles',
+  { p_query })` (Name als Teilwort, E-Mail nur exakt, gibt nie eine Adresse
+  zurück); Admin-Listen: `/api/admin/users` mit Service-Key. `role` bleibt
+  lesbar, weil 14 Policies anderer Tabellen sie mit den Rechten des Aufrufers
+  prüfen. Neue Spalten sind von selbst gesperrt. Vorher waren mit dem
+  Anon-Key 99 Profile samt E-Mail lesbar. Die SELECT-Policies von
+  `memories`, `memory_participants`, `memory_photos` laufen über
+  `is_memory_member(memory_id)`: Policies, die sich gegenseitig abfragen,
+  enden für jede Rolle mit 42P17. Wächter `profiles-memories-rls.test.ts`
+  (Migrationen und jede `profiles`-Abfrage im Code).
 - Viator-Monetarisierung (fn-18.5) ist gebaut, aber erst scharf, wenn das
   Partner-Konto steht: `VIATOR_API_KEY` muss in BEIDE Stores (GitHub-Actions
   UND Vercel-Env). Ohne Key liefert `/api/activities/[id]/booking` nichts und

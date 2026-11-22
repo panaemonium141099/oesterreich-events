@@ -55,10 +55,11 @@ export async function GET(request: Request) {
       // Check if profile is complete before redirecting
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        // Eigene Zeile über get_my_profile(): birth_date darf authenticated
+        // aus profiles nicht mehr lesen (Migration 20261121120100).
         const { data: profile, error: profileError } = await supabase
-          .from('profiles')
+          .rpc('get_my_profile')
           .select('first_name, last_name, birth_date')
-          .eq('id', user.id)
           // maybeSingle statt single: "keine Zeile" (echter Neu-User) ist
           // KEIN Fehler -> data null -> Formular. Nur echte Fehler
           // (Timeout, Uhr-Drift) ueberspringen den Redirect.

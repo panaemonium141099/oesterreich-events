@@ -93,13 +93,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [supabase] = useState(() => createClient());
 
-  const fetchProfile = useCallback(async (userId: string) => {
+  const fetchProfile = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      // Eigenes Profil über die Funktion: authenticated darf von profiles
+      // nur noch fünf Spalten lesen (Migration 20261121120100), `select('*')`
+      // scheitert auch auf der eigenen Zeile.
+      const { data, error } = await supabase.rpc('get_my_profile').single();
 
       if (error) {
         if (process.env.NODE_ENV === 'development') console.warn('Profile fetch error:', error.message);
@@ -113,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   const refreshProfile = useCallback(async () => {
-    if (user) await fetchProfile(user.id);
+    if (user) await fetchProfile();
   }, [user, fetchProfile]);
 
   useEffect(() => {
@@ -153,9 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // network = reload, reload runs the same flaky network call,
         // forever. The user sees a white-screen + reload loop.
         const { data: profileRow, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
+          .rpc('get_my_profile')
           .maybeSingle();
 
         if (!mounted) return;
@@ -198,7 +195,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          fetchProfile(session.user.id); // non-blocking
+          fetchProfile(); // non-blocking
           // Passive IP-geo detection: lets the server persist Vercel-Edge
           // geo headers for users who never filled in postal_code/city
           // manually. Debounced to once-per-7-days via localStorage so we

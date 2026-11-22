@@ -12,7 +12,6 @@ interface ProfileResult {
   first_name: string;
   last_name: string;
   avatar_url: string | null;
-  email: string;
 }
 
 interface Friendship {
@@ -56,19 +55,19 @@ export function FriendsPageClient() {
     try {
       const { data: accepted } = await supabase
         .from('friendships')
-        .select('id, requester_id, addressee_id, status, created_at, requester:profiles!friendships_requester_id_fkey(id, first_name, last_name, avatar_url, email), addressee:profiles!friendships_addressee_id_fkey(id, first_name, last_name, avatar_url, email)')
+        .select('id, requester_id, addressee_id, status, created_at, requester:profiles!friendships_requester_id_fkey(id, first_name, last_name, avatar_url), addressee:profiles!friendships_addressee_id_fkey(id, first_name, last_name, avatar_url)')
         .eq('status', 'accepted')
         .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
 
       const { data: pendingIn } = await supabase
         .from('friendships')
-        .select('id, requester_id, addressee_id, status, created_at, requester:profiles!friendships_requester_id_fkey(id, first_name, last_name, avatar_url, email), addressee:profiles!friendships_addressee_id_fkey(id, first_name, last_name, avatar_url, email)')
+        .select('id, requester_id, addressee_id, status, created_at, requester:profiles!friendships_requester_id_fkey(id, first_name, last_name, avatar_url), addressee:profiles!friendships_addressee_id_fkey(id, first_name, last_name, avatar_url)')
         .eq('status', 'pending')
         .eq('addressee_id', user.id);
 
       const { data: pendingOut } = await supabase
         .from('friendships')
-        .select('id, requester_id, addressee_id, status, created_at, requester:profiles!friendships_requester_id_fkey(id, first_name, last_name, avatar_url, email), addressee:profiles!friendships_addressee_id_fkey(id, first_name, last_name, avatar_url, email)')
+        .select('id, requester_id, addressee_id, status, created_at, requester:profiles!friendships_requester_id_fkey(id, first_name, last_name, avatar_url), addressee:profiles!friendships_addressee_id_fkey(id, first_name, last_name, avatar_url)')
         .eq('status', 'pending')
         .eq('requester_id', user.id);
 
@@ -94,12 +93,9 @@ export function FriendsPageClient() {
       return;
     }
     setSearching(true);
-    const { data } = await supabase
-      .from('profiles')
-      .select('id, first_name, last_name, avatar_url, email')
-      .neq('id', user.id)
-      .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%`)
-      .limit(10);
+    // Namen als Teilwort, E-Mail nur als exakter Treffer; die Funktion gibt
+    // id, Namen und Bild zurück, nie die Adresse (Migration 20261121120000).
+    const { data } = await supabase.rpc('search_profiles', { p_query: query, p_limit: 10 });
 
     setSearchResults((data as ProfileResult[]) || []);
     setSearching(false);
@@ -260,7 +256,7 @@ export function FriendsPageClient() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Freunde suchen (Name oder E-Mail)..."
+            placeholder="Freunde suchen (Name oder vollständige E-Mail)..."
             className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
           />
           {searching && (
@@ -280,7 +276,6 @@ export function FriendsPageClient() {
                   <Avatar profile={p} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{p.first_name} {p.last_name}</p>
-                    <p className="text-xs text-white/30 truncate">{p.email}</p>
                   </div>
                 </Link>
                 {isAlreadyFriendOrPending(p.id) ? (
@@ -364,7 +359,6 @@ export function FriendsPageClient() {
                           <Avatar profile={friend} />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{friend.first_name} {friend.last_name}</p>
-                            <p className="text-xs text-white/30 truncate">{friend.email}</p>
                           </div>
                         </Link>
                         <div className="flex items-center gap-2">
@@ -410,7 +404,6 @@ export function FriendsPageClient() {
                           <Avatar profile={requester} />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{requester.first_name} {requester.last_name}</p>
-                            <p className="text-xs text-white/30 truncate">{requester.email}</p>
                           </div>
                         </Link>
                         <div className="flex items-center gap-2">
@@ -457,7 +450,6 @@ export function FriendsPageClient() {
                           <Avatar profile={addressee} />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{addressee.first_name} {addressee.last_name}</p>
-                            <p className="text-xs text-white/30 truncate">{addressee.email}</p>
                           </div>
                         </Link>
                         <button
