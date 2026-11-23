@@ -273,6 +273,8 @@ import { post as neujahrskonzert26EnsEnsembleNeueStreicherGSchichtenA2027 } from
 import { post as diePeterAlexanderRevueDieShowMitSeinenBestenMelodie2026 } from './posts/die-peter-alexander-revue-die-show-mit-seinen-besten-melodie-2026';
 import { post as derKleinePrinz2026 } from './posts/der-kleine-prinz-2026';
 import { post as noppenAir2027 } from './posts/noppen-air-2027';
+import { post as ellenBabic2026 } from './posts/ellen-babic-2026';
+import { post as theChristmasGospel20262026 } from './posts/the-christmas-gospel-2026-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -558,6 +560,8 @@ export const ALL_POSTS: FestivalPost[] = [
   diePeterAlexanderRevueDieShowMitSeinenBestenMelodie2026,
   derKleinePrinz2026,
   noppenAir2027,
+  ellenBabic2026,
+  theChristmasGospel20262026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
