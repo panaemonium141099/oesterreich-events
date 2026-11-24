@@ -7,133 +7,131 @@ export const post: FestivalPost = {
   "subtitle": "Silvesterpfade, Bälle und Bergfeuer — so feiert Österreich ins neue Jahr",
   "heroImage": "/images/categories/rave-1.jpg",
   "publishDate": "2026-11-03",
-  "updatedDate": "2026-11-04",
+  "updatedDate": "2026-11-24",
   "factSources": {
-    "checkedAt": "2026-11-04",
+    "checkedAt": "2026-11-24",
     "urls": [
-      "https://www.oeticket.com/noapp/event/die-schoene-helena-komoedie-von-monika-schmatzberger-theater-center-forum-21945713/?affiliate=J70",
-      "https://www.oeticket.com/noapp/event/neujahrskonzert-2027-grosses-festspielhaus-salzburg-salzburg-grosses-festspielhaus-22173487/?affiliate=J70",
-      "https://www.oeticket.com/noapp/event/neuebuehnevillach-oh-mein-gott-neuebuehnevillach-21901479/?affiliate=J70",
-      "https://www.oeticket.com/noapp/event/st-florianer-brucknertage-silvesterkonzert-stift-st-florian-22342126/?affiliate=J70",
-      "https://www.oeticket.com/noapp/event/martin-frank-gruesse-aus-allegro-sued-messe-wieselburg-21693558/?affiliate=J70",
-      "https://www.oeticket.com/noapp/event/kufsteiner-kulturprogramm-neujahrskonzert-2027-tiroler-symphonieorchester-innsbruck-arena-kufstein-21986055/?affiliate=J70",
-      "https://www.oeticket.com/noapp/event/michael-grossschaedl-silvestercocktail-orpheum-graz-22044471/?affiliate=J70",
-      "https://www.oeticket.com/noapp/event/silvesterparty-nils-am-see-x-atelier7121-atelier-7121-22283115/?affiliate=J70",
-      "http://www.alberschwende.at/Silvester_-_Alberschwende_startet_ins_Jubilaeumsjahr_2027",
-      "http://www.linztermine.at/event/723202",
-      "https://www.oeticket.com/noapp/event/konzerte-in-der-minoritenkirche-minoritenkirche-21734486/?affiliate=J70",
-      "https://www.oeticket.com/noapp/event/edi-jaeger-silvesterkabarett-die-bachschmiede-20982983/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/silvester-mit-stefan-haider-supplierstunde-2-0-congress-center-baden-21936935/?affiliate=J70",
       "https://www.oeticket.com/noapp/event/nockis-live-stadtsaal-feldkirchen-21352993/?affiliate=J70",
-      "https://geinberg.riskommunal.net/Silvester-Clubbing_in_der_Therme",
-      "https://www.oeticket.com/noapp/event/neujahrskonzert-2027-eventcenter-leobersdorf-22311643/?affiliate=J70",
-      "https://www.oeticket.com/noapp/event/silvester-beats-bergsilvester-clubbing-congress-innsbruck-22311584/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/michael-niavarani-homo-idioticus-2-0-der-trottel-ist-zurueck-globe-wien-marx-halle-22108109/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/17-club-17-neujahrskonzert-2027-mit-der-markus-linder-band-kurhaus-hall-22354551/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/michael-grossschaedl-silvestercocktail-orpheum-graz-22044471/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/edi-jaeger-silvesterkabarett-die-bachschmiede-20982983/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/st-florianer-brucknertage-silvesterkonzert-stift-st-florian-22297765/?affiliate=J70",
+      "http://www.frööd.at",
+      "https://www.oeticket.com/noapp/event/silvesterparty-nils-am-see-x-atelier7121-atelier-7121-22283115/?affiliate=J70",
+      "http://www.linztermine.at/event/723202",
+      "https://www.oeticket.com/noapp/event/buehne-baden-neujahrskonzert-stadttheater-baden-stadttheater-buehne-baden-21012772/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/neuebuehnevillach-oh-mein-gott-neuebuehnevillach-21901479/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/ausser-kontrolle-farce-von-ray-cooney-theater-center-forum-21945674/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/kufsteiner-kulturprogramm-neujahrskonzert-2027-tiroler-symphonieorchester-innsbruck-arena-kufstein-21986055/?affiliate=J70",
       "https://www.oeticket.com/noapp/event/silvesterkonzert-ein-walzer-muss-es-sein-kulturhaus-knittelfeld-20724073/?affiliate=J70",
-      "http://www.hotel-wende.at",
-      "https://www.trachtenkapelle-fontanella.at/",
-      "https://www.oeticket.com/noapp/event/konzerte-in-der-minoritenkirche-minoritenkirche-21734485/?affiliate=J70",
       "https://www.oeticket.com/noapp/event/silvestergala-oper-im-berg-festival-universitaet-salzburg-21346457/?affiliate=J70",
-      "http://www.musikverein.biz",
-      "https://www.oeticket.com/noapp/event/das-kleinegrosse-silvesterkonzert-brucknerhaus-brucknerhaus-21490026/?affiliate=J70",
-      "https://www.oeticket.com/noapp/event/silvester-mit-stefan-haider-supplierstunde-2-0-congress-center-baden-21936995/?affiliate=J70",
-      "https://www.oeticket.com/noapp/event/silvester-2026-soelden-panorama-alm-soelden-21672112/?affiliate=J70",
-      "https://www.oeticket.com/noapp/event/altstadt-rundgaenge-2026-graztourismus-22261642/?affiliate=J70",
-      "https://www.dasrobitza.at",
-      "https://ntry.at/cordoba78monaidapresilvesterparty/performances/27444?l=de",
-      "https://www.oeticket.com/noapp/event/konzerte-in-der-minoritenkirche-minoritenkirche-21734484/?affiliate=J70",
-      "http://www.stefflschuetzen.at",
-      "http://krumpendorf.gv.at",
       "https://www.dilly.at/de/golf/golfrestaurant/72-0.html",
-      "https://www.oeticket.com/noapp/event/neujahrskonzert-2027-musica-spontana-kulturzentrum-k4-22178820/?affiliate=J70",
-      "https://www.kappl-see.com/de/bergbahnen-ks",
-      "https://www.oeticket.com/noapp/event/altstadt-rundgaenge-2026-graztourismus-22261641/?affiliate=J70",
-      "https://www.neusiedlersee.com/datacycle-detailseite/detail/Veranstaltung/a-dance-upon-midnight-silvester-in-der-orangerie"
+      "http://www.langen.at/Gasthaus_Adler_Silvesterbuffet_4",
+      "https://www.freistadt-rust.at",
+      "https://www.oeticket.com/noapp/event/martin-frank-gruesse-aus-allegro-sued-messe-wieselburg-21693558/?affiliate=J70",
+      "http://www.musikverein.biz",
+      "https://www.oeticket.com/noapp/event/konzerte-in-der-minoritenkirche-minoritenkirche-21734485/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/silvester-2026-soelden-panorama-alm-soelden-21672112/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/neujahrskonzert-2027-junge-philharmonie-wien-apotheose-des-tanzes-greimhalle-22402401/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/neujahrskonzert-2027-grosses-festspielhaus-salzburg-salzburg-grosses-festspielhaus-22173487/?affiliate=J70",
+      "https://www.360alpenland.com/oesterreich-poi/detail/430018944/tourismusinformati",
+      "https://www.eichenberg.at/system/web/veranstaltung.aspx?detailonr=225479056-2235&menuonr=221314709&sprache=1",
+      "http://www.hotel-wende.at",
+      "https://www.oeticket.com/noapp/event/neujahrskonzert-2026-johann-poelz-halle-21428952/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/neujahrskonzerte-2027-kultursaal-k3-22390208/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/science-busters-bauernsilvester-2026-stadtsaal-wien-21525023/?affiliate=J70",
+      "https://www.oeticket.com/noapp/event/silvester-beats-bergsilvester-clubbing-congress-innsbruck-22311584/?affiliate=J70",
+      "https://www.grundlsee.mondihotels.com/de/kulinarik/gasthaus-seeblick/",
+      "https://www.saalbach.com/de/events/silvester-auf-der-walleggalm_e_386846",
+      "https://www.oeticket.com/noapp/event/das-kleinegrosse-silvesterkonzert-brucknerhaus-brucknerhaus-21490026/?affiliate=J70",
+      "http://www.alberschwende.at/Silvester_-_Alberschwende_startet_ins_Jubilaeumsjahr_2027"
     ]
   },
-  "readingTime": 8,
-  "excerpt": "Vom Kabarett in Wieselburg über das Bergsilvester in Kappl bis zum Neujahrskonzert im Großen Festspielhaus Salzburg: Hier findest du für jedes der neun Bundesländer konkrete Tipps für den Jahreswechsel 2026/27. Mit Terminen, Preisen und ehrlichen Hinweisen dazu, was noch nicht feststeht.",
+  "readingTime": 9,
+  "excerpt": "Vom Wiener Silvesterpfad über das Altstadtsilvester in Salzburg bis zum Bergsilvester in Innsbruck: Hier findest du für alle neun Bundesländer konkrete Tipps für den Jahreswechsel 2026/27. Mit Kabarett-Specials, Silvesterbällen, Galadinnern und den Neujahrskonzerten, für die es noch Karten gibt.",
   "category": "Kultur & Tradition",
   "categoryColor": "bg-indigo-800 text-white",
   "keyFacts": {
     "dates": "30. Dezember 2026 bis 2. Jänner 2027",
     "location": "Ganz Österreich, alle neun Bundesländer",
-    "address": "Verschiedene Veranstaltungsorte, siehe die einzelnen Tipps im Guide",
-    "genre": "Silvesterpfade, Silvesterbälle, Silvesterkonzerte, Kabarett, Galadinner, Bergsilvester, Neujahrskonzerte",
-    "price": "Eintritt frei bis 200,80 € (je nach Veranstaltung)",
+    "address": "Verschiedene Orte, u. a. Stephansplatz und Rathausplatz (Wien), Kapitelplatz (Salzburg), Hauptplatz (Graz)",
+    "genre": "Silvesterpfad, Straßenfest, Kabarett, Silvesterball, Galadinner, Silvester- und Neujahrskonzert",
+    "price": "Von Eintritt frei (Wiener Silvesterpfad, Grazer Silvesterspektakel) bis 290 € (Silvester auf der Walleggalm)",
     "website": "lasstreffen.at"
   },
-  "intro": "Es ist kurz vor Mitternacht, irgendwo zwischen Graben und Stephansplatz wird noch schnell ein Walzerschritt geübt, in Kappl schaut eine Gondel voller Leute ins dunkle Paznauntal, und in Niedernsill liegt Pulverdampf über dem Dorf. Silvester sieht in Österreich überall ein bisschen anders aus. Du kannst den Jahreswechsel mit Operette im Theater verbringen, mit Kabarett, im Ballkleid oder in Skischuhen auf der Alm. Und am Neujahrstag geht es mit Walzer weiter, nicht nur in Wien, sondern auch in Salzburg, Kufstein, Leobersdorf oder am Klopeiner See. In diesem Guide findest du für jedes Bundesland konkrete Veranstaltungen zwischen 30. Dezember 2026 und 2. Jänner 2027, damit du jetzt schon planen und Karten sichern kannst.",
-  "historyTitle": "Pummerin, Donauwalzer und Pulverdampf: ein bisschen Hintergrund",
-  "history": "Österreichs Silvester lebt von ein paar Ritualen, die fast jede und jeder kennt: Um Mitternacht läutet im Radio und Fernsehen die Pummerin vom Stephansdom, danach wird zum Donauwalzer getanzt, egal ob im Ballsaal oder im Wohnzimmer. Am Neujahrstag spielen die Wiener Philharmoniker im Musikverein ihr Neujahrskonzert, das in die ganze Welt übertragen wird. 2027 steht dort erstmals Tugan Sokhiev am Pult. Daneben halten sich regionale Bräuche: Im Salzburger Land wird mit Böllern das alte Jahr hinausgeschossen, in Oberösterreich gibt es das Neujahrsschnalzen mit der Peitsche, und im Burgenland wird laut Brauchtumsquellen noch das Neujahrsgeigen gepflegt, bei dem Musikanten von Haus zu Haus ziehen und Glück wünschen. Bauernsilvester, also ein Fest schon vor dem eigentlichen Jahreswechsel, ist vor allem in Kärnten und Oberösterreich ein fixer Termin im Jahreskalender.",
-  "whatToExpectTitle": "Was du zu Silvester und Neujahr 2026/27 unternehmen kannst, nach Bundesland",
-  "whatToExpect": "**Wien:** Der Wiener Silvesterpfad zieht sich jedes Jahr mit mehreren Stationen durch die Innere Stadt, vom Rathausplatz über Freyung, Am Hof und Graben bis zum Stephansplatz, zur Kärntner Straße, zum Neuen Markt und zum Wintermarkt am Riesenradplatz. Der Eintritt ist traditionell frei. Das Bühnenprogramm für 2026 ist laut Recherche noch nicht offiziell veröffentlicht, Infos sollen auf wienersilvesterpfad.at erscheinen. Wenn du lieber sitzt als drängelst: Das Theater Center Forum spielt am 31. Dezember 2026 „Die schöne Helena\" als Silvestervorstellung, Karten um 58,10 €. In der Minoritenkirche gibt es am 31. Dezember ein Silvesterkonzert und am 1. und 2. Jänner 2027 jeweils ein Neujahrskonzert, Karten von 26,50 bis 82,00 €. Das ist auch deine realistischste Chance auf ein Neujahrskonzert in Wien, denn die Karten für das Konzert der Wiener Philharmoniker werden per Verlosung vergeben. Ein Klassiker ist außerdem „Die Fledermaus\" in der Staatsoper rund um den Jahreswechsel.\n\n**Niederösterreich:** Kabarett-Fans haben hier die Wahl. Martin Frank bringt am 31. Dezember 2026 sein Silvesterspezial „Grüße aus Allegro Süd\" in die Messe Wieselburg (25,50 bis 51,00 €), Stefan Haider feiert im Congress Center Baden mit „Supplierstunde 2.0\" (112,80 €). Am 2. Jänner 2027 kannst du zwischen zwei Neujahrskonzerten wählen: im eventCenter Leobersdorf (44,40 bis 53,60 €) oder mit Musica Spontana im Kulturzentrum K4 (26,50 bis 33,00 €).\n\n**Burgenland:** Hier wird es entspannt und ein bisschen unkonventionell. Bei „WeihSilvester Daydrinking\" im Robitza startest du schon tagsüber am 31. Dezember. Die Silvesterparty „Nils am See x Atelier7121\" im Atelier 7121 kostet gerade einmal 9,00 €. Wer es festlich mag, geht zum Silvesterball im Hotel Wende oder zu „A Dance upon Midnight\" in der Orangerie im Schlosspark.\n\n**Steiermark:** In Graz ist das Silvester-Spektakel am Hauptplatz jedes Jahr der Treffpunkt der Stadt, die Details zu Bühnen und Acts für 2026 sind laut Recherche noch nicht veröffentlicht. Vorher lohnt sich der Altstadt-Rundgang zu Silvester von GrazTourismus am 31. Dezember, auf Deutsch oder als Visita Guidata auf Italienisch, je 24,50 €. Zum Lachen geht es ins Orpheum Graz zu Michael Großschädls „Silvestercocktail\" (37,90 bis 42,90 €), zum Walzern ins Kulturhaus Knittelfeld: „Ein Walzer muss es sein\" heißt das Silvesterkonzert dort (33,00 bis 36,00 €).\n\n**Kärnten:** Hier beginnt Silvester früher. Am 30. Dezember 2026 laden die Nockis im Stadtsaal Feldkirchen zu „Prosit 2027\" (44,00 bis 61,00 €), am selben Tag lädt der Bezirksbauernbund Klagenfurt zum Bauernsilvester in den Festsaal Krumpendorf, Eintritt frei. Am 31. Dezember spielt die neuebuehnevillach ihre Silvestergala „Oh mein Gott\" (61,00 €). In Villach und Klagenfurt gibt es außerdem traditionell Silvestermärkte. Und am 1. Jänner 2027 spielt der Musikverein Möchling sein Neujahrskonzert im Kultursaal K3 am Klopeiner See, Karten gibt es bei den Musikerinnen und Musikern um 21,00 € (Schüler und Studierende 16,00 €).\n\n**Oberösterreich:** Klassik am Jahresende findest du im Stift St. Florian beim Silvesterkonzert der St. Florianer Brucknertage (41,00 bis 52,00 €) und im Mittleren Saal des Linzer Brucknerhauses beim „Kleinen Silvesterkonzert\" (39,20 bis 48,00 €). Ganz anders feierst du im Therme Spa Resort Geinberg beim Silvester-Clubbing in der Therme (69 €). Schon am 30. Dezember gibt es das Bauern-Silvester im Salettl am Golfplatz des Golfclubs Dilly, 75 € pro Person.\n\n**Salzburg:** Der Altstadtsilvester am Kapitelplatz und das Feuerwerk über der Festung gehören jedes Jahr zur Salzburger Silvesternacht, Sperren und Sonderfahrpläne werden erst im Dezember bekanntgegeben. Am 30. Dezember 2026 findet die Silvestergala in der Großen Aula der Universität Salzburg statt (68,00 bis 82,00 €), am 31. Dezember steht Edi Jäger mit seinem Silvesterkabarett in der Bachschmiede auf der Bühne (29,30 bis 33,30 €). In Niedernsill kannst du beim Silvesterschießen einen alten Brauch erleben, Eintritt frei. Am 1. Jänner 2027 folgt das Neujahrskonzert im Großen Festspielhaus (40,20 bis 200,80 €).\n\n**Tirol:** Tirol ist das Land für Bergsilvester. In Kappl fährst du bei „Silvester am Berg\" mit der Bahn hinauf, das Bahnticket kostet 21,00 € für Erwachsene und 15,00 € für Kinder von 8 bis 16 Jahren. Achtung: Skipässe gelten an diesem Abend nicht. In Sölden feierst du auf der Panorama Alm (74,30 €), in Innsbruck bei „Silvester Beats\", Bergsilvester-Clubbing im Saal Dogana des CONGRESS (24,39 bis 89,52 €). Das Innsbrucker Bergsilvester mit Bergfeuerwerk an der Nordkette ist eine feste Tradition, das Programm für 2026/27 soll laut Tirol-Portal erst im Spätherbst erscheinen. In der Innsbrucker Altstadt setzt man statt auf Feuerwerk auf die Lichtershow „INNSzenierung\". Musikalisch ins neue Jahr geht es am 2. Jänner 2027 mit dem Tiroler Symphonieorchester Innsbruck in der Kufstein Arena (40,00 bis 48,00 €).\n\n**Vorarlberg:** Schon am 30. Dezember 2026 feiern Cordoba78 und Stereo Ida ihre Presilvesterparty (29,33 €). Am 31. Dezember startet Alberschwende mit einem Silvesterfest ins Jubiläumsjahr 2027, und in Fontanella gibt es im Dorfzentrum das Silvesterblasen, Blasmusik statt Böllerlärm.",
+  "intro": "Um Mitternacht schwingt halb Österreich gleichzeitig im Dreivierteltakt: Auf dem Wiener Stephansplatz drehen sich Paare zum Donauwalzer, auf dem Salzburger Kapitelplatz leuchtet das Feuerwerk über der Festung, in Graz tanzen Wasser, Licht und Laser über dem Hauptplatz. Und wer es ruhiger mag, sitzt in einer Vorarlberger Bergstube beim Viergangmenü oder lacht sich im Kabarett ins neue Jahr. Dieser Guide zeigt dir, was du zwischen 30. Dezember 2026 und 2. Jänner 2027 unternehmen kannst, Bundesland für Bundesland, mit Terminen und Preisen, soweit sie feststehen.",
+  "historyTitle": "Walzer, Glücksschwein und Neujahrskonzert: Woher Österreichs Silvesterbräuche kommen",
+  "history": "Seinen Namen hat der 31. Dezember von Papst Silvester I., dessen Gedenktag auf den letzten Tag des Jahres fällt. In Österreich ist der Jahreswechsel eng mit Musik verbunden: Der Donauwalzer um Mitternacht gehört so selbstverständlich dazu wie das Neujahrskonzert der Wiener Philharmoniker am Vormittag danach, das jedes Jahr aus dem Musikverein in die ganze Welt übertragen wird. Dazu kommen regionale Bräuche wie das Neujahrsschießen der Schützen in Salzburg, das Aperschnalzen mit der Peitsche oder der Bauernsilvester am 30. Dezember, an dem man auf dem Land früher feierte, weil der 31. noch Arbeitstag war. Glücksbringer wie Rauchfangkehrer, Marzipanschweinchen und Kleeblatt wechseln ihre Besitzer, und statt Blei wird heute Wachs gegossen. Weil private Raketen in vielen Innenstädten verboten sind, setzen Städte wie Graz inzwischen auf Licht- und Wassershows.",
+  "whatToExpectTitle": "Silvester in allen neun Bundesländern: Das kannst du unternehmen",
+  "whatToExpect": "**Wien:** Der Wiener Silvesterpfad zieht sich am 31.12.2026 von 14 bis 2 Uhr durch die Innenstadt, die Gastronomiestände öffnen schon um 11 Uhr, der Eintritt ist frei. Stationen sind unter anderem Stephansplatz, Graben, Freyung, Rathausplatz und der Riesenradplatz im Prater. Um Mitternacht erklingt der Donauwalzer. Das Bühnenprogramm für 2026/27 ist laut Recherche noch nicht veröffentlicht. Wichtig: Raketen und Böller sind in Wien verboten. Wenn du lieber sitzt und lachst, hast du die Wahl: Michael Niavarani spielt „Homo Idioticus 2.0“ als Silvesterspecial in der Globe Wien Marx Halle (31.12., 62 bis 137 €), das Theater Center Forum zeigt die Farce „Außer Kontrolle“ von Ray Cooney (31.12., 58,10 €), und schon am 30.12. feiern die Science Busters ihren „Bauernsilvester“ im Stadtsaal (29,50 bis 35,10 €). Klassisch wird es mit der „Fledermaus“ an der Staatsoper zwischen 31.12. und 6.1., mit dem Silvester Dinner im Palais Coburg oder einer Silvesterfahrt mit der DDSG Blue Danube auf der Donau. Auch der Hofburg-Silvesterball gehört traditionell zum Wiener Jahreswechsel, eine offizielle Termin- und Ticketseite für 2026 war bei Redaktionsschluss aber nicht zu finden.\n\n**Niederösterreich:** In Grafenegg spielt das Tonkünstler-Orchester am 31.12.2026 sein Silvesterkonzert unter Sascha Goetzel, mit der Sopranistin Sophie Mitterhuber. Kabarettfans fahren nach Baden zu Stefan Haider und seiner „Supplierstunde 2.0“ im Congress Center (31.12., 112,80 €) oder nach Wieselburg, wo Martin Frank sein Silvesterspezial „Grüße aus Allegro Süd“ in der Messe zeigt (31.12., 25,50 bis 51 €). Für den Start ins neue Jahr gibt es am 2.1.2027 gleich zwei Neujahrskonzerte: im Stadttheater Baden (32,20 bis 98,20 €) und in der Johann-Pölz-Halle (47,70 bis 66,80 €). Den Stadtsilvester in St. Pölten gibt es laut Tourismus wieder, das Programm für 2026 ist aber noch nicht veröffentlicht.\n\n**Burgenland:** Am Neusiedler See wird es locker: Die Silvesterparty „Nils am See x Atelier7121“ im Atelier 7121 kostet 9 € Eintritt. Wer es festlicher mag, geht zum Silvesterball im Hotel Wende. Und für einen ungewöhnlichen Programmpunkt sorgt das Silvesterfischen der Hecht'nstutzer an der Seepromenade beim Alten Stadttor am 31.12. In Eisenstadt gibt es laut Tourismusangabe eine Silvesterparty vor Schloss Esterházy ab 20 Uhr mit DJ und Feuerwerk um Mitternacht. Die Neujahrskonzerte des Haydnorchesters sind angekündigt, ihre Termine für 2027 aber noch nicht bestätigt.\n\n**Steiermark:** Graz feiert am 31.12.2026 mit dem Silvesterspektakel auf dem Hauptplatz, einer Wasser-, Feuer-, Laser- und Lichtshow statt Raketen. Es gibt fünf Shows zu je 20 Minuten um 17:30, 19:30, 21:00, 22:30 und 0:00 Uhr, der Eintritt ist frei. Davor kannst du im Orpheum Michael Großschädls „Silvestercocktail“ erleben (37,90 bis 42,90 €). Walzerseligkeit gibt es in Knittelfeld beim Silvesterkonzert „Ein Walzer muss es sein“ im Kulturhaus (33 bis 36 €) und beim Silvesterkonzert „Graz im Dreivierteltakt“ im Stefaniensaal, dort bitte die Beginnzeit vorher prüfen. Genießer buchen das Silvesterbuffet im Gasthaus Seeblick (115 €, Kinder 57,50 €). Am 2.1.2027 spielt die Junge Philharmonie Wien ihr Neujahrskonzert „Apotheose des Tanzes“ in der Greimhalle (42,10 €).\n\n**Kärnten:** Die Nockis laden schon am 30.12.2026 zu „Prosit 2027“ in den Stadtsaal Feldkirchen (44 bis 61 €). Am 31.12. lädt die neuebuehnevillach zur Silvestergala „Oh mein Gott“ (61 €). Und am Neujahrstag spielt der Musikverein Möchling sein Neujahrskonzert im Kultursaal K3 am Klopeiner See, Karten gibt es direkt bei den Musikern (Erwachsene 21 €, Schüler und Studierende 16 €).\n\n**Oberösterreich:** Das Brucknerhaus Linz feiert doppelt: „Das kleine Silvesterkonzert“ im Mittleren Saal laut Ankündigung um 16 Uhr (39,20 bis 48 €), das große Silvesterkonzert mit Musik der Strauss-Familie um 19:30 Uhr. Im Stift St. Florian gibt es das Silvesterkonzert der St. Florianer Brucknertage (31.12., 41 bis 52 €). Einen besonderen Abend erlebst du beim Nachtwächter Silvester Dine-around ab der Orangerie im Schlosspark: 125 € inklusive Laterne, Nachtwächtern, mittelalterlicher Musik, Viergangmenü und Mitternachtssekt, gebucht wird über die Tourismusinformation Steyr. Bodenständig wird es am 30.12. beim Bauern-Silvester im Salettl am Golfplatz des Golfclubs Dilly (75 € pro Person). Am 1.1.2027 knallen am Linzer Landhaus die Peitschen beim Aperschnalzen.\n\n**Salzburg:** Das Altstadtsilvester auf dem Kapitelplatz beginnt am 31.12.2026 um 14 Uhr und dauert bis 1 Uhr. Um 15:45 Uhr gibt es ein Kinderfeuerwerk, um 16 Uhr das Neujahrsschießen der Festungsprangerstutzenschützen, um 17 Uhr den Festgottesdienst im Dom und um 18 Uhr das Glockengeläut. Um Mitternacht folgt ein Feuerwerk mit Musik. Am 1.1. geht es von 11 bis 18 Uhr weiter, mit dem Neujahrswalzer um 11 Uhr. Auf dem Platz selbst gibt es keine Gastronomiestände. Lachen kannst du mit Edi Jäger beim Silvesterkabarett in der Bachschmiede (29,30 bis 33,30 €), tanzen bei der Silvestergala in der Großen Aula der Universität am 30.12. (68 bis 82 €). Oben auf der Festung Hohensalzburg spielt das Mozart Kammerorchester sein Silvesterkonzert, die Festungsbahn ist inklusive. Wer hoch hinaus will, feiert auf der Walleggalm in Hinterglemm (290 €). Am Neujahrstag gibt es das Neujahrskonzert im Großen Festspielhaus (40,20 bis 200,80 €).\n\n**Tirol:** Innsbruck feiert Bergsilvester: am 30.12. mit einem Kindersilvester, am 31.12. mit Partymeile, Livemusik, DJs, Lichtprojektionen und einem Feuerwerk an der Nordkette. Drinnen geht es bei „Silvester Beats“ im Congress, Saal Dogana, weiter (24,39 bis 89,52 €). In Sölden feierst du auf der Panorama Alm (74,30 €). Am 1.1.2027 spielt Club 17 im Kurhaus Hall sein Neujahrskonzert „Best of New Orleans“ (37,50 €), am 2.1. gastiert das Tiroler Symphonieorchester Innsbruck mit seinem Neujahrskonzert in der Kufstein Arena (40 bis 48 €).\n\n**Vorarlberg:** Im Restaurant Frööd bekommst du um 94 € Aperitif, Viergangmenü, eine Flasche Grand Cuvée Sekt als Geschenk sowie Berg- und Talfahrt (vegan 86 €, Kindermenü für 6 bis 13 Jahre 54 €). Günstiger ist das Silvesterbuffet im Gasthaus Adler in Langen (49 €), festlicher der Silvester Gala Abend mit Livemusik im Hotel Schönblick (140 €). Alberschwende feiert am 31.12. den Start in sein Jubiläumsjahr 2027.",
   "whatToExpectList": [
-    "Wien: „Die schöne Helena\" als Silvestervorstellung im Theater Center Forum am 31.12.2026 (58,10 €) und Neujahrskonzerte in der Minoritenkirche am 1. und 2.1.2027",
-    "Niederösterreich: Martin Franks Silvesterspezial in der Messe Wieselburg und Stefan Haider im Congress Center Baden",
-    "Burgenland: Silvesterparty „Nils am See x Atelier7121\" um 9 € oder „A Dance upon Midnight\" in der Orangerie im Schlosspark",
-    "Steiermark: Altstadt-Rundgang zu Silvester mit GrazTourismus und Michael Großschädls „Silvestercocktail\" im Orpheum Graz",
-    "Kärnten: Nockis „Prosit 2027\" in Feldkirchen und Silvestergala „Oh mein Gott\" an der neuebuehnevillach",
-    "Oberösterreich: Silvesterkonzert der St. Florianer Brucknertage und Silvester-Clubbing in der Therme Geinberg",
-    "Salzburg: Silvesterschießen in Niedernsill und Neujahrskonzert 2027 im Großen Festspielhaus",
-    "Tirol: „Silvester am Berg\" in Kappl und Neujahrskonzert des Tiroler Symphonieorchesters in der Kufstein Arena",
-    "Vorarlberg: Silvesterblasen in Fontanella und Silvester in Alberschwende zum Start ins Jubiläumsjahr"
+    "Wiener Silvesterpfad am 31.12.2026 von 14 bis 2 Uhr, Eintritt frei, Donauwalzer um Mitternacht",
+    "Silvesterspektakel auf dem Grazer Hauptplatz: Licht-, Wasser- und Lasershow statt Feuerwerk, fünf Shows bis Mitternacht",
+    "Altstadtsilvester am Salzburger Kapitelplatz mit Neujahrsschießen, Kinderfeuerwerk und Mitternachtsfeuerwerk",
+    "Bergsilvester Innsbruck mit Partymeile und Feuerwerk an der Nordkette",
+    "Michael Niavarani mit „Homo Idioticus 2.0“ als Silvesterspecial in der Globe Wien Marx Halle (62 bis 137 €)",
+    "Nachtwächter Silvester Dine-around ab der Orangerie im Schlosspark, Buchung über die Tourismusinformation Steyr (125 €)",
+    "Neujahrskonzert 2027 im Großen Festspielhaus Salzburg am 1. Jänner (40,20 bis 200,80 €)"
   ],
   "practicalInfoTitle": "Gut zu wissen für deine Silvesterplanung",
   "practicalInfo": [
     {
       "icon": "📅",
       "label": "Termine",
-      "text": "Die Saison beginnt schon am 30. Dezember mit Bauernsilvester, Presilvesterpartys und der Silvestergala in Salzburg und reicht bis zu den Neujahrskonzerten am 2. Jänner. Programme für Silvesterpfad Wien, Grazer Silvester-Spektakel und Innsbrucker Bergsilvester werden erst kurzfristig veröffentlicht, schau also im Dezember noch einmal nach."
+      "text": "Gefeiert wird schon ab 30.12. (Bauernsilvester, Nockis in Feldkirchen, Silvestergala Uni Salzburg, Kindersilvester Innsbruck). Der Großteil der Events läuft am 31.12., Neujahrskonzerte gibt es am 1. und 2. Jänner 2027."
     },
     {
       "icon": "🎟️",
-      "label": "Karten & Preise",
-      "text": "Die Spanne reicht von Eintritt frei (Silvesterschießen Niedernsill, Bauernsilvester Krumpendorf) über 9 € für die Party im Atelier 7121 bis 200,80 € für die besten Plätze beim Neujahrskonzert im Großen Festspielhaus Salzburg. Kabarett und Galas sind oft früh ausgebucht, reservier also rechtzeitig."
-    },
-    {
-      "icon": "🎻",
       "label": "Neujahrskonzert Karten",
-      "text": "Für das Neujahrskonzert der Wiener Philharmoniker gibt es Karten nur über eine Verlosung auf deren Website. Gut erreichbare Alternativen sind die Neujahrskonzerte in der Minoritenkirche Wien, in Salzburg, Kufstein, Leobersdorf, im K4 oder am Klopeiner See."
-    },
-    {
-      "icon": "🚇",
-      "label": "Anreise",
-      "text": "In der Silvesternacht sind Innenstädte teils gesperrt. Die Wiener Linien veröffentlichen ihren Silvesterfahrplan laut Recherche erst im Dezember, auch in Salzburg werden Sperren und Sonderfahrplan erst dann bekanntgegeben. Plane öffentlich, das Auto bleibt besser daheim."
+      "text": "Karten für das Konzert der Wiener Philharmoniker (1.1.2027, 11:15 Uhr, Musikverein, Dirigent Tugan Sokhiev) werden verlost, die Anmeldung lief laut Recherche im Februar 2026. Gratis siehst du es auf den Großleinwänden am Stephansplatz und am Riesenradplatz. Karten gibt es noch für die Neujahrskonzerte in der Minoritenkirche Wien (26,50 bis 82 €), im Festspielhaus Salzburg, in Baden, Hall, Kufstein oder am Klopeiner See."
     },
     {
       "icon": "🎆",
-      "label": "Feuerwerk & Alternativen",
-      "text": "Private Feuerwerkskörper der Kategorie F2 sind im Ortsgebiet verboten. Schöne Alternativen: das Bergfeuerwerk an der Nordkette, die Lichtershow „INNSzenierung\" in Innsbruck oder das Silvesterblasen in Fontanella. Bei „Silvester am Berg\" in Kappl gelten Skipässe nicht, du brauchst ein eigenes Bahnticket."
+      "label": "Feuerwerk",
+      "text": "In Wien sind Raketen und Böller verboten, auch in der Salzburger Altstadt waren private Feuerwerke zuletzt untersagt. Schau dir stattdessen die offiziellen Shows an: Mitternachtsfeuerwerk am Kapitelplatz, an der Nordkette in Innsbruck, vor Schloss Esterházy oder die Lichtshow in Graz."
+    },
+    {
+      "icon": "🚋",
+      "label": "Anreise",
+      "text": "Zu Silvesterpfad und Altstadtfesten fährst du am besten öffentlich, rund um die Festmeilen ist kaum Platz zum Parken. Für Bergsilvester wie im Frööd ist die Berg- und Talfahrt teilweise im Preis enthalten."
+    },
+    {
+      "icon": "💡",
+      "label": "Tipp",
+      "text": "Galadinner und Kabarett-Specials sind zu Silvester früh ausgebucht. Plane bequeme Schuhe und warme Kleidung ein, wenn du draußen feierst, für das Nachtwächter Dine-around in Steyr ist bequemes Schuhwerk ausdrücklich erforderlich."
     }
   ],
   "lineup": [],
   "gallery": [],
   "ctaText": "Silvester-Events in ganz Österreich entdecken",
   "ctaLink": "/entdecken",
-  "seoTitle": "Silvester in Österreich 2026: Pfade, Bälle & Konzerte",
-  "seoDescription": "Silvester 2026 in Österreich: Silvesterpfad Wien, Bälle, Bergsilvester, Kabarett und Neujahrskonzert 2027. Konkrete Tipps für alle neun Bundesländer.",
+  "seoTitle": "Silvester in Österreich 2026: Pfade, Bälle & Bergfeuer",
+  "seoDescription": "Silvester 2026 in Österreich: Wiener Silvesterpfad, Bergsilvester, Kabarett, Galadinner und Neujahrskonzerte aus allen Bundesländern, mit Terminen und Preisen.",
   "keywords": [
     "silvester wien",
     "silvester österreich",
     "silvesterpfad",
     "neujahrskonzert karten",
-    "bergsilvester tirol"
+    "bergsilvester"
   ],
   "faqs": [
     {
       "question": "Was ist zu Silvester in Wien los?",
-      "answer": "Der Wiener Silvesterpfad verbindet jedes Jahr mehrere Plätze in der Innenstadt, von Rathausplatz bis Riesenradplatz, der Eintritt ist traditionell frei. Das Bühnenprogramm 2026 ist noch nicht veröffentlicht. Fix sind etwa „Die schöne Helena\" im Theater Center Forum (58,10 €) und das Silvesterkonzert in der Minoritenkirche (26,50 bis 82,00 €) am 31. Dezember 2026."
+      "answer": "Am 31.12.2026 läuft der Wiener Silvesterpfad von 14 bis 2 Uhr bei freiem Eintritt, mit Stationen wie Stephansplatz, Graben, Freyung, Rathausplatz und Riesenradplatz. Dazu kommen Kabarett-Specials wie Michael Niavarani in der Globe Wien Marx Halle, Theater im Theater Center Forum, die „Fledermaus“ an der Staatsoper und Silvesterfahrten auf der Donau."
     },
     {
-      "question": "Wo kann man in Österreich außerhalb von Wien Silvester feiern?",
-      "answer": "In jedem Bundesland: zum Beispiel Bergsilvester in Kappl oder Sölden, Kabarett in Wieselburg, Graz oder Salzburg, Silvesterkonzerte in St. Florian, Linz und Knittelfeld, Bälle im Burgenland oder das Silvesterblasen in Fontanella. Die Details pro Bundesland findest du oben im Guide."
+      "question": "Wie bekomme ich Karten für das Neujahrskonzert?",
+      "answer": "Die Karten für das Neujahrskonzert der Wiener Philharmoniker werden verlost, die Anmeldung für 2027 ist laut Recherche schon vorbei. Live erleben kannst du Neujahrskonzerte aber in allen Bundesländern, etwa in der Minoritenkirche Wien, im Großen Festspielhaus Salzburg, im Stadttheater Baden, im Kurhaus Hall oder in der Kufstein Arena. Das Wiener Konzert läuft außerdem gratis auf Großleinwänden am Stephansplatz und Riesenradplatz."
     },
     {
-      "question": "Was ist ein Silvesterpfad?",
-      "answer": "Ein Silvesterpfad ist ein Straßenfest, das sich über mehrere Plätze einer Innenstadt zieht, mit Bühnen, Musik und Gastronomie. Der bekannteste ist der Wiener Silvesterpfad. Auch Graz mit dem Silvester-Spektakel am Hauptplatz und Salzburg mit dem Altstadtsilvester am Kapitelplatz feiern so ins neue Jahr."
+      "question": "Gibt es Silvesterpfade auch außerhalb von Wien?",
+      "answer": "Ja. Salzburg feiert das Altstadtsilvester auf dem Kapitelplatz mit Neujahrsschießen und Mitternachtsfeuerwerk, Graz das Silvesterspektakel auf dem Hauptplatz mit Licht- und Wassershows, Innsbruck den Bergsilvester mit Partymeile und Feuerwerk an der Nordkette. In Eisenstadt gibt es eine Party vor Schloss Esterházy."
     },
     {
-      "question": "Wie bekomme ich Karten für ein Neujahrskonzert?",
-      "answer": "Für das Konzert der Wiener Philharmoniker im Musikverein, 2027 erstmals unter Tugan Sokhiev, werden die Karten verlost. Direkt buchen kannst du etwa das Neujahrskonzert im Großen Festspielhaus Salzburg am 1. Jänner 2027 (40,20 bis 200,80 €), die Neujahrskonzerte in der Minoritenkirche Wien oder das Konzert des Tiroler Symphonieorchesters in der Kufstein Arena am 2. Jänner 2027 (40,00 bis 48,00 €)."
+      "question": "Wo kann ich in Österreich ohne Feuerwerkslärm feiern?",
+      "answer": "Zum Beispiel bei einem Silvesterkonzert im Stift St. Florian oder im Brucknerhaus Linz, beim Galadinner im Hotel Schönblick, beim Silvesterbuffet im Gasthaus Adler in Langen oder beim Nachtwächter Dine-around in Steyr. In Graz ersetzt eine Licht-, Wasser- und Lasershow das klassische Feuerwerk."
     }
   ]
 };
