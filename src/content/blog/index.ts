@@ -277,6 +277,8 @@ import { post as ellenBabic2026 } from './posts/ellen-babic-2026';
 import { post as theChristmasGospel20262026 } from './posts/the-christmas-gospel-2026-2026';
 import { post as konzertreiheViiiAdventkonzertMitDerPostwirtmusi2026 } from './posts/konzertreihe-viii-adventkonzert-mit-der-postwirtmusi-2026';
 import { post as oDuStilleZeitWeihnachtskonzertStellaVorarlberg2026 } from './posts/o-du-stille-zeit-weihnachtskonzert-stella-vorarlberg-2026';
+import { post as bloezingerErich2026 } from './posts/bloezinger-erich-2026';
+import { post as walterKammerhoferAmoiOis2027 } from './posts/walter-kammerhofer-amoi-ois-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -566,6 +568,8 @@ export const ALL_POSTS: FestivalPost[] = [
   theChristmasGospel20262026,
   konzertreiheViiiAdventkonzertMitDerPostwirtmusi2026,
   oDuStilleZeitWeihnachtskonzertStellaVorarlberg2026,
+  bloezingerErich2026,
+  walterKammerhoferAmoiOis2027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
