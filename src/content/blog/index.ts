@@ -281,6 +281,8 @@ import { post as bloezingerErich2026 } from './posts/bloezinger-erich-2026';
 import { post as walterKammerhoferAmoiOis2027 } from './posts/walter-kammerhofer-amoi-ois-2027';
 import { post as dasGrosseSilvesterkonzert2026 } from './posts/das-grosse-silvesterkonzert-2026';
 import { post as insiemeDasNeujahrskonzert2027 } from './posts/insieme-das-neujahrskonzert-2027';
+import { post as akiStreeterSMadMultiverseFestival2027 } from './posts/aki-streeter-s-mad-multiverse-festival-2027';
+import { post as dreikoenigSchlagerDasPartykonzertZumJahresstart2027 } from './posts/dreikoenig-schlager-das-partykonzert-zum-jahresstart-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -574,6 +576,8 @@ export const ALL_POSTS: FestivalPost[] = [
   walterKammerhoferAmoiOis2027,
   dasGrosseSilvesterkonzert2026,
   insiemeDasNeujahrskonzert2027,
+  akiStreeterSMadMultiverseFestival2027,
+  dreikoenigSchlagerDasPartykonzertZumJahresstart2027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
