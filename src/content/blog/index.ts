@@ -283,6 +283,8 @@ import { post as dasGrosseSilvesterkonzert2026 } from './posts/das-grosse-silves
 import { post as insiemeDasNeujahrskonzert2027 } from './posts/insieme-das-neujahrskonzert-2027';
 import { post as akiStreeterSMadMultiverseFestival2027 } from './posts/aki-streeter-s-mad-multiverse-festival-2027';
 import { post as dreikoenigSchlagerDasPartykonzertZumJahresstart2027 } from './posts/dreikoenig-schlager-das-partykonzert-zum-jahresstart-2027';
+import { post as oneOrchestraWienAbschlusskonzertDieKunstDesZusammensp2027 } from './posts/one-orchestra-wien-abschlusskonzert-die-kunst-des-zusammensp-2027';
+import { post as theaterOhMeinGott2027 } from './posts/theater-oh-mein-gott-2027';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -578,6 +580,8 @@ export const ALL_POSTS: FestivalPost[] = [
   insiemeDasNeujahrskonzert2027,
   akiStreeterSMadMultiverseFestival2027,
   dreikoenigSchlagerDasPartykonzertZumJahresstart2027,
+  oneOrchestraWienAbschlusskonzertDieKunstDesZusammensp2027,
+  theaterOhMeinGott2027,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
